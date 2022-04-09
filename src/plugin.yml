@@ -1,0 +1,16 @@
+name: AranarthCore
+version: 1.0
+authors: [Aearost]
+main: com.aearost.aranarthcore.AranarthCore
+api-version: 1.18
+description: A core plugin to incorporate any features we desire into our Minecraft world
+commands:
+   homepad:
+      description: Allows for adding a homepad to the list
+   ping:
+      description: Obtains the ping of the player specified
+   nickname:
+      description: Adds a nickname to you or the player specified
+      aliases: [nick]
+   prefix:
+      description: Adds a prefix to you or the player specified
