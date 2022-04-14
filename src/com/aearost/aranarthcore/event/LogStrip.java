@@ -25,7 +25,7 @@ public class LogStrip implements Listener {
 	 * @param e
 	 */
 	@EventHandler
-	public void onCauldronClick(final PlayerInteractEvent e) {
+	public void onLogStrip(final PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (isHoldingAxe(e.getPlayer())) {
 				if (getMaterialIfWood(e.getClickedBlock()) != null) {

@@ -25,7 +25,7 @@ public class HomePadDestroy implements Listener {
 	 * @param e
 	 */
 	@EventHandler
-	public void onHomePadPlace(final BlockBreakEvent e) {
+	public void onHomePadDestroy(final BlockBreakEvent e) {
 		
 		Location location = e.getBlock().getLocation();
 		if (Objects.nonNull(AranarthUtils.getHomePad(location))) {

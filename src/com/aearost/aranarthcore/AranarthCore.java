@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.commands.CommandPing;
 import com.aearost.aranarthcore.commands.CommandPrefix;
+import com.aearost.aranarthcore.event.BuddingAmethystDestroy;
 import com.aearost.aranarthcore.event.CompressedCobblestonePlaceCancel;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
@@ -48,6 +49,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerChat(this);
 		new EndermanPickupCancel(this);
 		new EntityEggPickupCancel(this);
+		new BuddingAmethystDestroy(this);
 		
 		// Initialize Recipes
 		new RecipeHomePad(this);
