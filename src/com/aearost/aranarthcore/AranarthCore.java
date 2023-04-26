@@ -17,6 +17,7 @@ import com.aearost.aranarthcore.event.GuiClick;
 import com.aearost.aranarthcore.event.HomePadDestroy;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
+import com.aearost.aranarthcore.event.HorseSpawn;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
@@ -25,6 +26,8 @@ import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
 import com.aearost.aranarthcore.recipes.RecipeCompressedCobblestoneA;
 import com.aearost.aranarthcore.recipes.RecipeCompressedCobblestoneB;
+import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
+import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
 import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
@@ -50,6 +53,7 @@ public class AranarthCore extends JavaPlugin {
 		new EndermanPickupCancel(this);
 		new EntityEggPickupCancel(this);
 		new BuddingAmethystDestroy(this);
+		new HorseSpawn(this);
 		
 		// Initialize Recipes
 		new RecipeHomePad(this);
@@ -59,6 +63,8 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeSaddleA(this);
 		new RecipeSaddleB(this);
 		new RecipeAmethystUncraft(this);
+		new RecipeDeepslateA(this);
+		new RecipeDeepslateB(this);
 		
 		// Initialize Commands
 		getCommand("homepad").setExecutor(new CommandHomePad());

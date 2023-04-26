@@ -137,6 +137,7 @@ public class PersistenceUtils {
 					writer.write("    \"homes\": {\n");
 
 					int homeCounter = 0;
+					System.out.println("Home names to be saved:");
 					for (Home home : homes) {
 						writer.write("        \"homeName\": \"" + home.getHomeName() + "\",\n");
 						writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
