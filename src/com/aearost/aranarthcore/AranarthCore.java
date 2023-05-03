@@ -29,6 +29,10 @@ import com.aearost.aranarthcore.recipes.RecipeCompressedCobblestoneB;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
 import com.aearost.aranarthcore.recipes.RecipeHomePad;
+import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
+import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
+import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
+import com.aearost.aranarthcore.recipes.RecipeHorseArmourLeather;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -65,6 +69,10 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeAmethystUncraft(this);
 		new RecipeDeepslateA(this);
 		new RecipeDeepslateB(this);
+		new RecipeHorseArmourLeather(this);
+		new RecipeHorseArmourIron(this);
+		new RecipeHorseArmourGolden(this);
+		new RecipeHorseArmourDiamond(this);
 		
 		// Initialize Commands
 		getCommand("homepad").setExecutor(new CommandHomePad());
