@@ -21,6 +21,17 @@ public class ChatUtils {
 	public static String chatMessage(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r" + msg);
 	}
+	
+	/**
+	 * Allows the formatting of messages to contain Minecraft colors, and begin with
+	 * the AranarthCore prefix, specifically for errors
+	 * 
+	 * @param msg
+	 * @return
+	 */
+	public static String chatMessageError(String msg) {
+		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r&c" + msg);
+	}
 
 	/**
 	 * Allows the formatting of messages to contain Minecraft colors

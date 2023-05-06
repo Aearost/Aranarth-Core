@@ -4,6 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.aearost.aranarthcore.commands.CommandHomePad;
+import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.commands.CommandPing;
 import com.aearost.aranarthcore.commands.CommandPrefix;
@@ -35,12 +36,16 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourLeather;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
+import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
 public class AranarthCore extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		
+		// Initialize Utils
+		new ItemUtils();
 
 		// Initialize Events
 		new HomePadStep(this);
@@ -76,6 +81,7 @@ public class AranarthCore extends JavaPlugin {
 		
 		// Initialize Commands
 		getCommand("homepad").setExecutor(new CommandHomePad());
+		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
 		getCommand("ping").setExecutor(new CommandPing());
 		getCommand("nickname").setExecutor(new CommandNickname());
 		getCommand("prefix").setExecutor(new CommandPrefix());

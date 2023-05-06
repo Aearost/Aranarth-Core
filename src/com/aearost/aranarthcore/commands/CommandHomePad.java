@@ -2,13 +2,16 @@ package com.aearost.aranarthcore.commands;
 
 import java.util.Objects;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ItemUtils;
 
 public class CommandHomePad implements CommandExecutor {
 
@@ -17,45 +20,63 @@ public class CommandHomePad implements CommandExecutor {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
-			
-			if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
-				
-				if (args.length == 0) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a home name!"));
-					return false;
-				}
-				
-				if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("NEW")) {
-					String homeName = "";
-					for (int i = 0; i < args.length; i++) {
-						if (i == args.length - 1) {
-							homeName += args[i];
-						} else {
-							homeName += args[i] + " ";
+
+			if (args.length == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou must enter parameters!"));
+				return false;
+			} else {
+				if (args[0].equals("give")) {
+					if (args.length > 1) {
+						Player playerInArg = null;
+						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+							if (onlinePlayer.getName().toLowerCase().equals(args[1].toLowerCase())) {
+								playerInArg = onlinePlayer;
+							}
 						}
-					}
-					if (homeName.matches("[a-zA-Z0-9& ]+")) {
-						AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()));
-						player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
-						return true;
+						if (playerInArg != null) {
+							ItemStack homepadIS = ItemUtils.getItem("homepad");
+							ItemUtils.giveItem(homepadIS, playerInArg, sender);
+						} else {
+							player.sendMessage(ChatUtils.chatMessageError(args[1] + " is not a valid player name!"));
+						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou must use alphanumeric characters!"));
+						player.sendMessage(ChatUtils.chatMessageError("You must enter a player name!"));
+					}
+				} else if (args[0].equals("create")) {
+					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
+						if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("Unnamed")) {
+							String homeName = "";
+							for (int i = 0; i < args.length; i++) {
+								if (i == args.length - 1) {
+									homeName += args[i];
+								} else {
+									homeName += args[i] + " ";
+								}
+							}
+							// Ensures the name is alpha-numeric
+							if (homeName.matches("[a-zA-Z0-9& ]+")) {
+								AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()));
+								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
+								return true;
+							} else {
+								player.sendMessage(ChatUtils.chatMessageError("You must use alphanumeric characters!"));
+								return false;
+							}
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
 						return false;
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot rename a home pad"));
+					player.sendMessage(ChatUtils.chatMessageError("That is not a valid parameter!"));
 					return false;
 				}
-				
-			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must be standing on a Home Pad to use this command!"));
-				return true;
 			}
-			
+
 		} else {
-			sender.sendMessage("This must be executed in-game!");
+			sender.sendMessage(ChatUtils.chatMessageError("This must be executed in-game!"));
 		}
-		
+
 		return true;
 	}
 
