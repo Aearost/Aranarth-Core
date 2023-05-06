@@ -81,7 +81,7 @@ public class AranarthUtils {
 	}
 
 	public static void addHome(Location location) {
-		homes.add(new Home("NEW", location));
+		homes.add(new Home("Unnamed", location));
 	}
 
 	public static void setHomeName(String homeName, Home home) {

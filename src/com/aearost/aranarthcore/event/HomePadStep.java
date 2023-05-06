@@ -38,7 +38,7 @@ public class HomePadStep implements Listener {
 			if (!isStandingOnHomePad) {
 				// If the current location is a home pad
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getTo()))) {
-					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("NEW")) {
+					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("Unnamed")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(1);
 						AranarthUtils.setPlayer(player, aranarthPlayer);
