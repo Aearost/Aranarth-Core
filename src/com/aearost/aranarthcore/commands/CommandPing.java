@@ -23,17 +23,15 @@ public class CommandPing implements CommandExecutor {
 				return false;
 			}
 		} else {
-			Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-			Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-
-			for (Player p : onlinePlayers) {
-				// If the player is online
-				if (p.getName().toLowerCase().equals(args[0].toLowerCase())) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + p.getName() +"'s &7ping is &e" + p.getPing() + "ms"));
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				// If the user is running the command on their own name
+				if (onlinePlayer.getName().toLowerCase().equals(sender.getName().toLowerCase())) {
+					sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + onlinePlayer.getPing() + "ms"));
+				}
+				// If the user is running the command on another user's name
+				else if (onlinePlayer.getName().toLowerCase().equals(args[0].toLowerCase())) {
+					sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + onlinePlayer.getPing() + "ms"));
 					return true;
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
-					return false;
 				}
 			}
 		}
