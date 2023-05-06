@@ -40,10 +40,13 @@ public class GuiClick implements Listener {
 
 			int slot = e.getSlot();
 
-			// If they click Previous
+			// If they click Previous, bring them back to the previous page
 			if (slot == 27) {
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
+				System.out.println("currentPage: " + currentPage);
 				if (currentPage > 1) {
+					System.out.println("in");
+					aranarthPlayer.setCurrentGuiPageNum(currentPage - 1);
 					TeleportGui gui = new TeleportGui(player, currentPage - 1);
 					gui.openGui();
 				}
@@ -68,6 +71,7 @@ public class GuiClick implements Listener {
 				}
 				
 				if (currentPage < maxPages) {
+					aranarthPlayer.setCurrentGuiPageNum(currentPage + 1);
 					TeleportGui gui = new TeleportGui(player, currentPage + 1);
 					gui.openGui();
 				}
