@@ -47,11 +47,6 @@ public class CommandHomePad implements CommandExecutor {
 					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
 						if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("Unnamed")) {
 							String homeName = "";
-							//homepad create Bob Hello
-							// args.length == 3
-							// args[0] = create
-							// args[1] = Bob
-							// args[2] = Hello
 							// Get everything after the create parameter and space-separated
 							for (int i = 1; i < args.length; i++) {
 								if (i == args.length - 1) {
