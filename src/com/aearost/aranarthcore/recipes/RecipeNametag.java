@@ -22,11 +22,10 @@ public class RecipeNametag {
 		NamespacedKey nk = new NamespacedKey(plugin, "NAMETAG");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.NAME_TAG, 1));
 
-		recipe.shape(" SS", "ISP", "IIP");
+		recipe.shape(" SS", "IIS", "II ");
 
 		recipe.setIngredient('S', Material.STRING);
-		recipe.setIngredient('I', Material.INK_SAC);
-		recipe.setIngredient('P', Material.PAPER);
+		recipe.setIngredient('I', Material.IRON_INGOT);
 		
 		Bukkit.addRecipe(recipe);
 	}
