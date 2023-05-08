@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,9 +44,7 @@ public class GuiClick implements Listener {
 			// If they click Previous, bring them back to the previous page
 			if (slot == 27) {
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
-				System.out.println("currentPage: " + currentPage);
 				if (currentPage > 1) {
-					System.out.println("in");
 					aranarthPlayer.setCurrentGuiPageNum(currentPage - 1);
 					TeleportGui gui = new TeleportGui(player, currentPage - 1);
 					gui.openGui();
@@ -84,11 +83,23 @@ public class GuiClick implements Listener {
 					
 					List<Home> homes = AranarthUtils.getHomes();
 					Home home = homes.get((aranarthPlayer.getCurrentGuiPageNum() - 1) * 27 + slot);
-					
 					if (!player.getLocation().equals(home.getLocation())) {
-						player.teleport(home.getLocation());
-						player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-						player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
+						Horse horse = null;
+						if (player.isInsideVehicle()) {
+							if (player.getVehicle() instanceof Horse) {
+								horse = (Horse) player.getVehicle();
+								player.leaveVehicle();
+								horse.teleport(home.getLocation());
+								player.teleport(home.getLocation());
+								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+								player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
+								horse.addPassenger(player);
+							}
+						} else {
+							player.teleport(home.getLocation());
+							player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+							player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
+						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to where you are!"));
 					}

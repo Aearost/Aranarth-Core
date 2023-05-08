@@ -30,6 +30,7 @@ import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
+import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
 import com.aearost.aranarthcore.utils.ItemUtils;
@@ -40,10 +41,30 @@ public class AranarthCore extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		
-		// Initialize Utils
+		initializeUtils();
+		initializeEvents();
+		initializeRecipes();
+		initializeCommands();
+		
+		// Update the files every 30 minutes to protect from loss of data
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				PersistenceUtils.saveHomes();
+				PersistenceUtils.saveAranarthPlayers();
+				Bukkit.getLogger().info("Homes and aranarth players have been saved");
+			}
+		}, 36000, 36000);
+		
+	}
+	
+	private void initializeUtils() {
+		PersistenceUtils.loadHomes();
+		PersistenceUtils.loadAranarthPlayers();
 		new ItemUtils();
-
-		// Initialize Events
+	}
+	
+	private void initializeEvents() {
 		new HomePadStep(this);
 		new HomePadPlace(this);
 		new HomePadDestroy(this);
@@ -58,8 +79,9 @@ public class AranarthCore extends JavaPlugin {
 		new EntityEggPickupCancel(this);
 		new BuddingAmethystDestroy(this);
 		new HorseSpawn(this);
-		
-		// Initialize Recipes
+	}
+	
+	private void initializeRecipes() {
 		new RecipeHomePad(this);
 		new RecipeChorusDiamond(this);
 		new RecipeSaddleA(this);
@@ -70,28 +92,15 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeHorseArmourIron(this);
 		new RecipeHorseArmourGolden(this);
 		new RecipeHorseArmourDiamond(this);
-		
-		// Initialize Commands
+		new RecipeNametag(this);
+	}
+	
+	private void initializeCommands() {
 		getCommand("homepad").setExecutor(new CommandHomePad());
 		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
 		getCommand("ping").setExecutor(new CommandPing());
 		getCommand("nickname").setExecutor(new CommandNickname());
 		getCommand("prefix").setExecutor(new CommandPrefix());
-		
-		PersistenceUtils.loadHomes();
-		PersistenceUtils.loadAranarthPlayers();
-		
-		
-		// Update the files every 30 minutes to protect from loss of data
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			@Override
-			public void run() {
-				PersistenceUtils.saveHomes();
-				PersistenceUtils.saveAranarthPlayers();
-				Bukkit.getLogger().info("Homes and aranarth players have been saved");
-			}
-		}, 36000, 36000);
-		
 	}
 	
 	@Override
