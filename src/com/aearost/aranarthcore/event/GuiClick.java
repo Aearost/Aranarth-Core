@@ -101,7 +101,7 @@ public class GuiClick implements Listener {
 							player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to where you are!"));
+						player.sendMessage(ChatUtils.chatMessageError("You cannot teleport to where you are!"));
 					}
 					player.closeInventory();
 				}

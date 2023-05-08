@@ -111,7 +111,7 @@ public class ItemUtils {
 				}
 				// If none of the ItemStack was added
 				else {
-					target.sendMessage(ChatUtils.chatMessage("&cYou do not have enough space for that!"));
+					target.sendMessage(ChatUtils.chatMessageError("You do not have enough space for that!"));
 					return false;
 				}
 			}

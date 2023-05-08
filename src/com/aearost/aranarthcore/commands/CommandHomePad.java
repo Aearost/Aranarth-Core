@@ -22,7 +22,7 @@ public class CommandHomePad implements CommandExecutor {
 			Player player = (Player) sender;
 
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must enter parameters!"));
+				player.sendMessage(ChatUtils.chatMessageError("You must enter parameters!"));
 				return false;
 			} else {
 				if (args[0].equals("give")) {

@@ -18,7 +18,7 @@ public class CommandPing implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + player.getPing() + "ms"));
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ping <player>"));
+				sender.sendMessage(ChatUtils.chatMessageError("You must specify a player's ping! /ping <player>"));
 				return false;
 			}
 		} else {

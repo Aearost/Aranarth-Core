@@ -37,44 +37,19 @@ public class CraftingOverrides implements Listener {
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
+						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Chorus Diamond to craft this!"));
 						return;
 					}
 				} else {
 					if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou must use a Chorus Diamond to craft this!"));
+						player.sendMessage(ChatUtils.chatMessageError("You must use a Chorus Diamond to craft this!"));
 						return;
 					}
 				}
 				
 				
-			} else if (is.getType() == Material.COBBLESTONE) {
-				
-				boolean isHasLore = is.getItemMeta().hasLore();
-				
-				// If the ingredient is compressed cobblestone
-				if (isHasLore) {
-					if (e.getRecipe().getResult().getType() == Material.COBBLESTONE) {
-						// If trying to craft more compressed cobblestone
-						if (e.getRecipe().getResult().getAmount() == 1) {
-							e.setCancelled(true);
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use compressed cobblestone to craft this!"));
-							return;
-						}
-					} else {
-						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use compressed cobblestone to craft this!"));
-						return;
-					}
-				} else {
-					// If trying to uncraft cobblestone for more cobblestone
-					if (e.getRecipe().getResult().getAmount() == 9) {
-						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou must use compressed cobblestone to uncraft this!"));
-						return;
-					}
-				}
 			}
 		}
-}}
+	}
+}

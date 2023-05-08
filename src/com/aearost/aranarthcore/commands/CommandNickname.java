@@ -16,7 +16,7 @@ public class CommandNickname implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /nickname [player] <nickname>"));
+			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /nickname [player] <nickname>"));
 			return false;
 		} else {
 			if (args.length == 1) {
@@ -35,7 +35,7 @@ public class CommandNickname implements CommandExecutor {
 					sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + args[0]));
 					return true;
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /nickname [player] <nickname>"));
+					sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /nickname [player] <nickname>"));
 					return false;
 				}
 			} else {
@@ -84,7 +84,7 @@ public class CommandNickname implements CommandExecutor {
 					return true;
 				}
 				
-				sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+				sender.sendMessage(ChatUtils.chatMessageError("That player is not online!"));
 				return false;
 				
 				
