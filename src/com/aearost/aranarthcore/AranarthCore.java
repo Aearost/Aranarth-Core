@@ -23,6 +23,7 @@ import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
+import com.aearost.aranarthcore.recipes.RecipeBell;
 import com.aearost.aranarthcore.recipes.RecipeCharcoalToCoal;
 import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
@@ -95,6 +96,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeHorseArmourDiamond(this);
 		new RecipeNametag(this);
 		new RecipeCharcoalToCoal(this);
+		new RecipeBell(this);
 	}
 	
 	private void initializeCommands() {

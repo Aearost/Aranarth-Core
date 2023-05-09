@@ -19,7 +19,7 @@ public class RecipeSaddleB {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "SADDLE_B");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_RECIPE_SADDLE_B");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.SADDLE, 1));
 
 		recipe.shape("   ", "LLL", "I I");

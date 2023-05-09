@@ -19,7 +19,7 @@ public class RecipeAmethystUncraft {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "AMETHYST_UNCRAFT");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_AMETHYST_UNCRAFT");
 		ShapelessRecipe recipe = new ShapelessRecipe(nk, new ItemStack(Material.AMETHYST_SHARD, 4));
 		
 		recipe.addIngredient(1, Material.AMETHYST_BLOCK);

@@ -7,25 +7,26 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
 
-public class RecipeHorseArmourGolden {
+public class RecipeBell {
 
-	public RecipeHorseArmourGolden(Plugin plugin) {
+	public RecipeBell(Plugin plugin) {
 		createRecipe(plugin);
 	}
 	
 	/**
-	 * Creates the recipe for getting a golden horse armour
+	 * Creates the recipe for getting a Bell
 	 * 
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "AC_GOLDEN_HORSE_ARMOUR");
-		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.GOLDEN_HORSE_ARMOR, 1));
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_BELL");
+		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.BELL, 1));
 
-		recipe.shape("  G", "GSG", "GGG");
+		recipe.shape("CGC", "GGG", "GIG");
 
-		recipe.setIngredient('S', Material.SADDLE);
+		recipe.setIngredient('C', Material.CHAIN);
 		recipe.setIngredient('G', Material.GOLD_INGOT);
+		recipe.setIngredient('I', Material.IRON_NUGGET);
 		
 		Bukkit.addRecipe(recipe);
 	}

@@ -19,7 +19,7 @@ public class RecipeCharcoalToCoal {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "COAL_FROM_CHARCOAL");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_COAL_FROM_CHARCOAL");
 		ShapelessRecipe recipe = new ShapelessRecipe(nk, new ItemStack(Material.COAL, 1));
 		
 		recipe.addIngredient(1, Material.CHARCOAL);

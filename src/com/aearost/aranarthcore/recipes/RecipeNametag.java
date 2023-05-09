@@ -19,7 +19,7 @@ public class RecipeNametag {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "NAMETAG");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_NAMETAG");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.NAME_TAG, 1));
 
 		recipe.shape(" SS", "IIS", "II ");

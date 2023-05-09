@@ -19,7 +19,7 @@ public class RecipeDeepslateB {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "DEEPSLATE_B");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_DEEPSLATE_B");
 		ShapelessRecipe recipe = new ShapelessRecipe(nk, new ItemStack(Material.COBBLESTONE, 2));
 		
 		recipe.addIngredient(1, Material.COBBLED_DEEPSLATE);

@@ -19,7 +19,7 @@ public class RecipeHorseArmourDiamond {
 	 * @param plugin
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "DIAMOND_HORSE_ARMOUR");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_DIAMOND_HORSE_ARMOUR");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.DIAMOND_HORSE_ARMOR, 1));
 
 		recipe.shape("  D", "DSD", "DDD");
