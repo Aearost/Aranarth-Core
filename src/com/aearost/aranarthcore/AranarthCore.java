@@ -18,6 +18,7 @@ import com.aearost.aranarthcore.event.HomePadDestroy;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSpawn;
+import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
@@ -42,12 +43,12 @@ public class AranarthCore extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		
+
 		initializeUtils();
 		initializeEvents();
 		initializeRecipes();
 		initializeCommands();
-		
+
 		// Update the files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -57,15 +58,18 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Homes and aranarth players have been saved");
 			}
 		}, 36000, 36000);
-		
+
 	}
+
 	
+
+
 	private void initializeUtils() {
 		PersistenceUtils.loadHomes();
 		PersistenceUtils.loadAranarthPlayers();
 		new ItemUtils();
 	}
-	
+
 	private void initializeEvents() {
 		new HomePadStep(this);
 		new HomePadPlace(this);
@@ -81,8 +85,9 @@ public class AranarthCore extends JavaPlugin {
 		new EntityEggPickupCancel(this);
 		new BuddingAmethystDestroy(this);
 		new HorseSpawn(this);
+		new HorseSwim(this);
 	}
-	
+
 	private void initializeRecipes() {
 		new RecipeHomePad(this);
 		new RecipeChorusDiamond(this);
@@ -98,7 +103,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCharcoalToCoal(this);
 		new RecipeBell(this);
 	}
-	
+
 	private void initializeCommands() {
 		getCommand("homepad").setExecutor(new CommandHomePad());
 		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
@@ -106,7 +111,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("nickname").setExecutor(new CommandNickname());
 		getCommand("prefix").setExecutor(new CommandPrefix());
 	}
-	
+
 	@Override
 	public void onDisable() {
 		PersistenceUtils.saveHomes();

@@ -7,6 +7,7 @@ public class AranarthPlayer {
 	private int currentGuiPageNum;
 	private String nickname;
 	private String prefix;
+	private boolean isHorseSwimEnabled;
 	
 
 	public AranarthPlayer(String username) {
@@ -15,6 +16,7 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 1;
 		this.nickname = "";
 		this.prefix = "";
+		this.isHorseSwimEnabled = false;
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix) {
@@ -23,6 +25,7 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 1;
 		this.nickname = nickname;
 		this.prefix = prefix;
+		this.isHorseSwimEnabled = false;
 	}
 	
 	public String getUsername() {
@@ -63,6 +66,14 @@ public class AranarthPlayer {
 
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
+	}
+	
+	public boolean getIsHorseSwimEnabled() {
+		return isHorseSwimEnabled;
+	}
+	
+	public void setIsHorseSwimEnabled(boolean isHorseSwimEnabled) {
+		this.isHorseSwimEnabled = isHorseSwimEnabled;
 	}
 	
 }
