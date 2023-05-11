@@ -4,7 +4,10 @@ authors: [Aearost]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 1.18
 description: A core plugin to incorporate any features we desire into our Minecraft world
+loadbefore: [mcMMO]
 commands:
+   ac:
+      description: All underlying commands regarding the plugin
    homepad:
       description: Allows for adding a homepad to the list
    ping:

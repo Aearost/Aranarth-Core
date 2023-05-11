@@ -3,6 +3,8 @@ package com.aearost.aranarthcore;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.aearost.aranarthcore.commands.CommandAC;
+import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
@@ -19,6 +21,7 @@ import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSpawn;
 import com.aearost.aranarthcore.event.HorseSwim;
+import com.aearost.aranarthcore.event.HorseSwimToggle;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
@@ -86,6 +89,7 @@ public class AranarthCore extends JavaPlugin {
 		new BuddingAmethystDestroy(this);
 		new HorseSpawn(this);
 		new HorseSwim(this);
+		
 	}
 
 	private void initializeRecipes() {
@@ -105,6 +109,8 @@ public class AranarthCore extends JavaPlugin {
 	}
 
 	private void initializeCommands() {
+		getCommand("ac").setExecutor(new CommandAC());
+		getCommand("ac").setTabCompleter(new CommandACCompleter());
 		getCommand("homepad").setExecutor(new CommandHomePad());
 		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
 		getCommand("ping").setExecutor(new CommandPing());

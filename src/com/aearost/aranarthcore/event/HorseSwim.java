@@ -8,9 +8,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -35,46 +33,37 @@ public class HorseSwim implements Listener {
 	@EventHandler
 	public void onHorseSwim(final PlayerInteractEvent e) {
 
-		if (e.getHand() == EquipmentSlot.HAND && (
-				e.getAction() == Action.LEFT_CLICK_AIR || e.getAction() == Action.LEFT_CLICK_BLOCK)) {
-			Player player = e.getPlayer();
-			if (player.isInsideVehicle() && player.getVehicle() instanceof Horse) {
-				
-				// Code based on https://www.spigotmc.org/resources/swimminghorses.72920/
-				
-				// Try to figure out how to stop this when isHorseSwimEnabled is set to false
-				// Need to figure out how to stop the schedule task
-				// https://www.spigotmc.org/threads/stopping-schedulesyncrepeatingtask.181073/
-				Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
-					@Override
-					public void run() {
-						Player p = e.getPlayer();
-						Horse horse = (Horse) p.getVehicle();
+		Player player = e.getPlayer();
+		if (player.isInsideVehicle() && player.getVehicle() instanceof Horse) {
 
+			// Code based on https://www.spigotmc.org/resources/swimminghorses.72920/
+
+			// Try to figure out how to stop this when isHorseSwimEnabled is set to false
+			// Need to figure out how to stop the schedule task
+			// Must be careful with creating separate threads by accident
+			// https://www.spigotmc.org/threads/stopping-schedulesyncrepeatingtask.181073/
+			Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+				@Override
+				public void run() {
+					Player p = e.getPlayer();
+					Horse horse = (Horse) p.getVehicle();
+					
+					if (isInLiquid(horse)) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (isInLiquid(horse)) {
-							aranarthPlayer.setIsHorseSwimEnabled(true);
-							AranarthUtils.setPlayer(player, aranarthPlayer);
-							
+						if (aranarthPlayer.getIsHorseSwimEnabled()) {
 							// Try to find the way to make this speed relative to the speed of the horse
 							horse.setVelocity(horse.getLocation().getDirection().multiply(0.5));
-
-							if (hasLand(horse)) {
-								jump(horse);
-							} else {
-								swim(horse);
-							}
+						}
+						// Must be called in order to float regardless if the value is enabled
+						if (hasLand(horse)) {
+							jump(horse);
 						} else {
-							aranarthPlayer.setIsHorseSwimEnabled(false);
-							AranarthUtils.setPlayer(player, aranarthPlayer);
+							swim(horse);
 						}
 					}
-				}, 0L, 0L);
-			}
+				}
+			}, 0L, 0L);
 		}
-
-		
-
 	}
 
 	// Controls how high the horse will be brought up when the timer runs
