@@ -17,24 +17,23 @@ public class CommandAC implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		sender.sendMessage("IN");
 		if (args.length == 0) {
 			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac <sub-command>"));
 			return false;
 		} else {
 			boolean commandResult = false;
 			if (args[0].toLowerCase().equals("homepad")) {
-				
+				//commandResult = _________________.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("swimtoggle")) {
 				commandResult = CommandHorseSwimToggle.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("nick")) {
-				
+				//commandResult = _________________.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("ping")) {
-				
+				commandResult = CommandPing.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("prefix")) {
-				
+				commandResult = CommandPrefix.onCommand(sender, cmd, label, args);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError(""));
+				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
 			}
 			return commandResult;
 		}

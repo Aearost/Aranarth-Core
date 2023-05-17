@@ -8,8 +8,6 @@ import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
-import com.aearost.aranarthcore.commands.CommandPing;
-import com.aearost.aranarthcore.commands.CommandPrefix;
 import com.aearost.aranarthcore.event.BuddingAmethystDestroy;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
@@ -21,17 +19,24 @@ import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSpawn;
 import com.aearost.aranarthcore.event.HorseSwim;
-import com.aearost.aranarthcore.event.HorseSwimToggle;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBell;
+import com.aearost.aranarthcore.recipes.RecipeChainmailBootsA;
+import com.aearost.aranarthcore.recipes.RecipeChainmailBootsB;
+import com.aearost.aranarthcore.recipes.RecipeChainmailChestplate;
+import com.aearost.aranarthcore.recipes.RecipeChainmailHelmetA;
+import com.aearost.aranarthcore.recipes.RecipeChainmailHelmetB;
+import com.aearost.aranarthcore.recipes.RecipeChainmailLeggings;
 import com.aearost.aranarthcore.recipes.RecipeCharcoalToCoal;
 import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
+import com.aearost.aranarthcore.recipes.RecipeCobweb;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
+import com.aearost.aranarthcore.recipes.RecipeGlowInkSac;
 import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
@@ -39,6 +44,7 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
+import com.aearost.aranarthcore.recipes.RecipeWoolToString;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
@@ -106,6 +112,15 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeNametag(this);
 		new RecipeCharcoalToCoal(this);
 		new RecipeBell(this);
+		new RecipeGlowInkSac(this);
+		new RecipeChainmailHelmetA(this);
+		new RecipeChainmailHelmetB(this);
+		new RecipeChainmailChestplate(this);
+		new RecipeChainmailLeggings(this);
+		new RecipeChainmailBootsA(this);
+		new RecipeChainmailBootsB(this);
+		new RecipeCobweb(this);
+		new RecipeWoolToString(this);
 	}
 
 	private void initializeCommands() {
@@ -113,9 +128,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("ac").setTabCompleter(new CommandACCompleter());
 		getCommand("homepad").setExecutor(new CommandHomePad());
 		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
-		getCommand("ping").setExecutor(new CommandPing());
 		getCommand("nickname").setExecutor(new CommandNickname());
-		getCommand("prefix").setExecutor(new CommandPrefix());
 	}
 
 	@Override

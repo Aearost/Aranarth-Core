@@ -37,28 +37,25 @@ public class HorseSwim implements Listener {
 		if (player.isInsideVehicle() && player.getVehicle() instanceof Horse) {
 
 			// Code based on https://www.spigotmc.org/resources/swimminghorses.72920/
-
-			// Try to figure out how to stop this when isHorseSwimEnabled is set to false
-			// Need to figure out how to stop the schedule task
-			// Must be careful with creating separate threads by accident
-			// https://www.spigotmc.org/threads/stopping-schedulesyncrepeatingtask.181073/
 			Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
 				@Override
 				public void run() {
 					Player p = e.getPlayer();
-					Horse horse = (Horse) p.getVehicle();
-					
-					if (isInLiquid(horse)) {
-						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (aranarthPlayer.getIsHorseSwimEnabled()) {
-							// Try to find the way to make this speed relative to the speed of the horse
-							horse.setVelocity(horse.getLocation().getDirection().multiply(0.5));
-						}
-						// Must be called in order to float regardless if the value is enabled
-						if (hasLand(horse)) {
-							jump(horse);
-						} else {
-							swim(horse);
+					if (p.getVehicle() instanceof Horse) {
+						Horse horse = (Horse) p.getVehicle();
+						
+						if (horse != null && isInLiquid(horse)) {
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							if (aranarthPlayer.getIsHorseSwimEnabled()) {
+								// Try to find the way to make this speed relative to the speed of the horse
+								horse.setVelocity(horse.getLocation().getDirection().multiply(0.5));
+							}
+							// Must be called in order to float regardless if the value is enabled
+							if (hasLand(horse)) {
+								jump(horse);
+							} else {
+								swim(horse);
+							}
 						}
 					}
 				}
