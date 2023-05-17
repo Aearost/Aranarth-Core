@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -13,6 +14,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.gmail.nossr50.datatypes.player.McMMOPlayer;
+import com.gmail.nossr50.skills.herbalism.HerbalismManager;
+import com.gmail.nossr50.util.EventUtils;
 
 public class CropHarvest implements Listener {
 
@@ -52,11 +56,18 @@ public class CropHarvest implements Listener {
 						}
 					}
 					block.getWorld().playSound(block.getLocation(), Sound.BLOCK_CROP_BREAK, 1.3F, 2.0F);
-					
+					// This allows the crop to be set to the seed level
 					Ageable crop = (Ageable) block.getBlockData();
 					crop.setAge(0);
+					
 					// mcMMO Herbalism XP gain is lost because of this
-					// Without this call, there's no way for the plant to be re-planted
+					McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+					HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
+					HashSet<Block> brokenBlocks = new HashSet<Block>();
+					brokenBlocks.add(block);
+					herbalismManager.awardXPForPlantBlocks(brokenBlocks);
+					
+					// Without this call, there's no way for the crop to actually be re-planted
 					block.setBlockData(crop);
 				}
 			}
