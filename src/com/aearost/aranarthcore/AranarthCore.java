@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.BuddingAmethystDestroy;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
+import com.aearost.aranarthcore.event.CropHarvest;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiClick;
@@ -95,7 +96,7 @@ public class AranarthCore extends JavaPlugin {
 		new BuddingAmethystDestroy(this);
 		new HorseSpawn(this);
 		new HorseSwim(this);
-		
+		new CropHarvest(this);
 	}
 
 	private void initializeRecipes() {

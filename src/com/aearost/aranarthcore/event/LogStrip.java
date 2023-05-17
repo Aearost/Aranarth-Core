@@ -42,7 +42,8 @@ public class LogStrip implements Listener {
 		if (block.getType() == Material.OAK_LOG || block.getType() == Material.BIRCH_LOG
 				|| block.getType() == Material.SPRUCE_LOG || block.getType() == Material.JUNGLE_LOG
 				|| block.getType() == Material.DARK_OAK_LOG || block.getType() == Material.ACACIA_LOG
-				|| block.getType() == Material.CRIMSON_STEM || block.getType() == Material.WARPED_STEM) {
+				|| block.getType() == Material.CRIMSON_STEM || block.getType() == Material.WARPED_STEM
+				|| block.getType() == Material.MANGROVE_LOG) {
 			return block.getType();
 		} else {
 			return null;
