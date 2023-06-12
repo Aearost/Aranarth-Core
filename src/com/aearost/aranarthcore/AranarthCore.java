@@ -26,6 +26,7 @@ import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBell;
+import com.aearost.aranarthcore.recipes.RecipeCalcite;
 import com.aearost.aranarthcore.recipes.RecipeChainmailBootsA;
 import com.aearost.aranarthcore.recipes.RecipeChainmailBootsB;
 import com.aearost.aranarthcore.recipes.RecipeChainmailChestplate;
@@ -122,6 +123,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeChainmailBootsB(this);
 		new RecipeCobweb(this);
 		new RecipeWoolToString(this);
+		new RecipeCalcite(this);
 	}
 
 	private void initializeCommands() {

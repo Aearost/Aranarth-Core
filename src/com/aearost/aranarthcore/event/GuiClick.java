@@ -38,7 +38,6 @@ public class GuiClick implements Listener {
 
 			Player player = (Player) e.getWhoClicked();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
 			int slot = e.getSlot();
 
 			// If they click Previous, bring them back to the previous page
@@ -82,7 +81,8 @@ public class GuiClick implements Listener {
 					player.closeInventory();
 					
 					List<Home> homes = AranarthUtils.getHomes();
-					Home home = homes.get((aranarthPlayer.getCurrentGuiPageNum() - 1) * 27 + slot);
+					
+					Home home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
 					if (!player.getLocation().equals(home.getLocation())) {
 						Horse horse = null;
 						if (player.isInsideVehicle()) {
@@ -103,12 +103,12 @@ public class GuiClick implements Listener {
 					} else {
 						player.sendMessage(ChatUtils.chatMessageError("You cannot teleport to where you are!"));
 					}
-					player.closeInventory();
 				}
 			} catch (NullPointerException ex) {
 				// Ignore if caught
+				System.out.println("NullPointerException caught when teleporting!");
 			}
-			
+			player.closeInventory();
 		}
 	}
 

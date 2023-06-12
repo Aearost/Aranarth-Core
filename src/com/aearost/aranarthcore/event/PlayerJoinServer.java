@@ -32,4 +32,5 @@ public class PlayerJoinServer implements Listener {
 			AranarthUtils.setUsername(player);
 		}
 	}
+	
 }

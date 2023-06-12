@@ -40,7 +40,7 @@ public class HomePadStep implements Listener {
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getTo()))) {
 					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("Unnamed")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
-						aranarthPlayer.setCurrentGuiPageNum(1);
+						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player, aranarthPlayer);
 						TeleportGui gui = new TeleportGui(player);
 						gui.openGui();

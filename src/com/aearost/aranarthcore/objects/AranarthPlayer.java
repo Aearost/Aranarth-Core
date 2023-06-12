@@ -13,7 +13,7 @@ public class AranarthPlayer {
 	public AranarthPlayer(String username) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
-		this.currentGuiPageNum = 1;
+		this.currentGuiPageNum = 0;
 		this.nickname = "";
 		this.prefix = "";
 		this.isHorseSwimEnabled = false;
@@ -22,7 +22,7 @@ public class AranarthPlayer {
 	public AranarthPlayer(String username, String nickname, String prefix) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
-		this.currentGuiPageNum = 1;
+		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
 		this.prefix = prefix;
 		this.isHorseSwimEnabled = false;
