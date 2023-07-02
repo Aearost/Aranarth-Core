@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
 import com.aearost.aranarthcore.recipes.RecipeCobweb;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
+import com.aearost.aranarthcore.recipes.RecipeDripstone;
 import com.aearost.aranarthcore.recipes.RecipeGlowInkSac;
 import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
@@ -126,6 +127,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeWoolToString(this);
 		new RecipeCalcite(this);
 		new RecipeBundle(this);
+		new RecipeDripstone(this);
 	}
 
 	private void initializeCommands() {
