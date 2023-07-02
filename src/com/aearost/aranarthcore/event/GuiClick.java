@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -77,13 +78,12 @@ public class GuiClick implements Listener {
 			}
 
 			try {
-				if (e.getCurrentItem().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
-					player.closeInventory();
-					
+				if (Objects.nonNull(e.getCurrentItem())
+						&& e.getCurrentItem().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 					List<Home> homes = AranarthUtils.getHomes();
-					
 					Home home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
-					if (!player.getLocation().equals(home.getLocation())) {
+					// Only proceed if the slot they click is actually a homepad
+					if (!Objects.isNull(home)) {
 						Horse horse = null;
 						if (player.isInsideVehicle()) {
 							if (player.getVehicle() instanceof Horse) {
@@ -100,15 +100,14 @@ public class GuiClick implements Listener {
 							player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
 							player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
 						}
-					} else {
-						player.sendMessage(ChatUtils.chatMessageError("You cannot teleport to where you are!"));
+						player.closeInventory();
 					}
 				}
 			} catch (NullPointerException ex) {
 				// Ignore if caught
 				System.out.println("NullPointerException caught when teleporting!");
+				ex.printStackTrace();
 			}
-			player.closeInventory();
 		}
 	}
 
