@@ -25,7 +25,10 @@ import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
+import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
+import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
+import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
 import com.aearost.aranarthcore.recipes.RecipeBell;
 import com.aearost.aranarthcore.recipes.RecipeBundle;
 import com.aearost.aranarthcore.recipes.RecipeCalcite;
@@ -49,6 +52,8 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
+import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockCraft;
+import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeWoolToString;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -102,6 +107,7 @@ public class AranarthCore extends JavaPlugin {
 		new HorseSwim(this);
 		new CropHarvest(this);
 		new RespawnCancel(this);
+		new SugarcaneBlockPlace(this);
 	}
 
 	private void initializeRecipes() {
@@ -130,6 +136,10 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCalcite(this);
 		new RecipeBundle(this);
 		new RecipeDripstone(this);
+		new RecipeSugarcaneBlockCraft(this);
+		new RecipeSugarcaneBlockUncraft(this);
+		new RecipeBambooBlockUncraft(this);
+		new RecipeBambooPlanks(this);
 	}
 
 	private void initializeCommands() {

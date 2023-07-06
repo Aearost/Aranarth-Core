@@ -32,6 +32,8 @@ public class CommandAC implements CommandExecutor {
 				commandResult = CommandPing.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("prefix")) {
 				commandResult = CommandPrefix.onCommand(sender, cmd, label, args);
+			} else if (args[0].toLowerCase().equals("arena")) {
+				commandResult = CommandArena.onCommand(sender, cmd, label, args);
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
 			}
