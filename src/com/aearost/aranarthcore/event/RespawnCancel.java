@@ -16,17 +16,21 @@ public class RespawnCancel implements Listener {
 	}
 
 	/**
-	 * Deals with manually teleporting a user to the world spawn.
+	 * Deals with manually teleporting a user to the world spawn so they
+	 * don't respawn in the approximate area (the exact block).
 	 * 
 	 * @author Aearost
 	 *
 	 */
 	@EventHandler
-	public void onEggPickupCancel(PlayerRespawnEvent e) {
+	public void onPlayerRespawn(PlayerRespawnEvent e) {
 		World respawnWorld = e.getRespawnLocation().getWorld();
-		double x = e.getRespawnLocation().getX();
-		double z = e.getRespawnLocation().getZ();
-		e.setRespawnLocation(new Location(respawnWorld, x, 120, z, 180, 0));
+		double x = e.getRespawnLocation().getBlockX();
+		double z = e.getRespawnLocation().getBlockZ();
+		// Only place the user here if they don't have a bed to respawn at
+		if (respawnWorld.getName().equals("world") && x == 0 && z == 3) {
+			e.setRespawnLocation(new Location(respawnWorld, x, 120, z, 180, 0));
+		}
 	}
 
 }
