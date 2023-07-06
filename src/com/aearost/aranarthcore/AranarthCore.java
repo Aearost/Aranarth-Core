@@ -23,6 +23,7 @@ import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
+import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBell;
@@ -100,6 +101,7 @@ public class AranarthCore extends JavaPlugin {
 		new HorseSpawn(this);
 		new HorseSwim(this);
 		new CropHarvest(this);
+		new RespawnCancel(this);
 	}
 
 	private void initializeRecipes() {
