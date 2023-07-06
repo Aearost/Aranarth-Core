@@ -13,7 +13,6 @@ public class CommandPing {
 		if (args.length == 1) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
-				sender.sendMessage("up");
 				player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + player.getPing() + "ms"));
 				return true;
 			} else {
@@ -24,17 +23,14 @@ public class CommandPing {
 			boolean isPlayerFound = false;
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				// If the user is running the command on another user's name
-				sender.sendMessage(onlinePlayer.getName() + " | " + args[1]);
-				if (onlinePlayer.getName().toLowerCase().equals(args[1].toLowerCase())) {
-					sender.sendMessage("lower");
-					sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + onlinePlayer.getPing() + "ms"));
+				if (sender.getName().toLowerCase().equals(args[1].toLowerCase())) {
+					sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + onlinePlayer.getPing() + "ms"));
 					isPlayerFound = true;
 					return true;
 				}
 				// If the user is running the command on their own name
-				else if (sender.getName().toLowerCase().equals(args[1].toLowerCase())) {
-					sender.sendMessage("down");
-					sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + onlinePlayer.getPing() + "ms"));
+				else if (onlinePlayer.getName().toLowerCase().equals(args[1].toLowerCase())) {
+					sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + onlinePlayer.getPing() + "ms"));
 					isPlayerFound = true;
 					return true;
 				}

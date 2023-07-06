@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.aearost.aranarthcore.commands.CommandAC;
@@ -67,6 +70,7 @@ public class AranarthCore extends JavaPlugin {
 		initializeEvents();
 		initializeRecipes();
 		initializeCommands();
+		initializeWorlds();
 
 		// Update the files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -148,6 +152,16 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("homepad").setExecutor(new CommandHomePad());
 		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
 		getCommand("nickname").setExecutor(new CommandNickname());
+	}
+	
+	private void initializeWorlds() {
+		// Loads the world if it isn't yet loaded
+		if (Bukkit.getWorld("arena") == null) {
+			WorldCreator wc = new WorldCreator("arena");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.FLAT);
+			wc.createWorld();
+		}
 	}
 
 	@Override

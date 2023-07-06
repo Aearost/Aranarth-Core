@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class CommandArena {
+public class CommandSurvival {
 
 	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (args.length == 1) {
@@ -16,7 +16,7 @@ public class CommandArena {
 				Player player = (Player) sender;
 				
 				// Teleports you to the arena world aligning directly with the Enter Arena sign
-				player.teleport(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
+				player.teleport(new Location(Bukkit.getWorld("survival"), 0.5, 120, 3, 180, 0));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
