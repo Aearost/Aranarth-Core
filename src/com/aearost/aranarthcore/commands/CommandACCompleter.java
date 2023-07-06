@@ -44,31 +44,33 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		}
 		
-		// This will need to be modified as /homepad will become /ac homepad instead
-		if (args[0].equals("give") || args[0].equals("ping")) {
-			Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-			Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-			for (int i = 0; i < onlinePlayers.length; i++) {
-				// Only display the name if it aligns with one that is currently online
-				if (onlinePlayers[i].getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-					displayedOptions.add(onlinePlayers[i].getName());
-				} else if (args[1].equals("")) {
-					displayedOptions.add(onlinePlayers[i].getName());
+		if (args.length > 1) {
+			// This will need to be modified as /homepad will become /ac homepad instead
+			if (args[0].equals("give")) {
+				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
+				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+				for (int i = 0; i < onlinePlayers.length; i++) {
+					// Only display the name if it aligns with one that is currently online
+					if (onlinePlayers[i].getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+						displayedOptions.add(onlinePlayers[i].getName());
+					} else if (args[1].equals("")) {
+						displayedOptions.add(onlinePlayers[i].getName());
+					}
 				}
-			}
-		} else if (args[0].equals("create")) {
-			if (args[1].equals("")) {
-				displayedOptions.add("name");
-			}
-		} else if (args[0].equals("ping")) {
-			Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-			Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-			for (int i = 0; i < onlinePlayers.length; i++) {
-				// Only display the name if it aligns with one that is currently online
-				if (onlinePlayers[i].getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-					displayedOptions.add(onlinePlayers[i].getName());
-				} else if (args[1].equals("")) {
-					displayedOptions.add(onlinePlayers[i].getName());
+			} else if (args[0].equals("create")) {
+				if (args[1].equals("")) {
+					displayedOptions.add("name");
+				}
+			} else if (args[0].equals("ping")) {
+				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
+				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+				for (int i = 0; i < onlinePlayers.length; i++) {
+					// Only display the name if it aligns with one that is currently online
+					if (onlinePlayers[i].getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+						displayedOptions.add(onlinePlayers[i].getName());
+					} else if (args[1].equals("")) {
+						displayedOptions.add(onlinePlayers[i].getName());
+					}
 				}
 			}
 		}
