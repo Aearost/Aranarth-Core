@@ -17,17 +17,17 @@ public class CommandArena {
 		if (args.length == 1) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
-				// If a new world needs to be created, uncomment below
-				/*
-				WorldCreator wc = new WorldCreator("arena");
-				wc.environment(World.Environment.NORMAL);
-				wc.type(WorldType.FLAT);
-				wc.createWorld();
-				*/
-				for (World world : Bukkit.getWorlds()) {
-					System.out.println(world.getName());
+				
+				// Loads the world if it isn't yet loaded
+				if (Bukkit.getWorld("arena") == null) {
+					WorldCreator wc = new WorldCreator("arena");
+					wc.environment(World.Environment.NORMAL);
+					wc.type(WorldType.FLAT);
+					wc.createWorld();
 				}
-				player.teleport(new Location(Bukkit.getWorld("arena"), 0, 105, 0, 180, 0));
+				
+				// Teleports you to the arena world aligning directly with the Enter Arena sign
+				player.teleport(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));

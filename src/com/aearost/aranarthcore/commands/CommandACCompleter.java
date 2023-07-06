@@ -29,12 +29,15 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("ping");
 			} else if (!args[0].equals("") && "prefix".startsWith(args[0])) {
 				displayedOptions.add("prefix");
+			} else if (!args[0].equals("") && "arena".startsWith(args[0])) {
+				displayedOptions.add("arena");
 			} else {
 				displayedOptions.add("homepad");
 				displayedOptions.add("swimtoggle");
 				displayedOptions.add("nick");
 				displayedOptions.add("ping");
 				displayedOptions.add("prefix");
+				displayedOptions.add("arena");
 			}
 		} else if (args.length == 2) {
 			// Only display the name if it aligns with one that is currently online
