@@ -54,6 +54,8 @@ public class PersistenceUtils {
 			int x = 0;
 			int y = 0;
 			int z = 0;
+			float yaw = 0;
+			float pitch = 0;
 
 			Bukkit.getLogger().info("Attempting to read the homes file...");
 
@@ -84,13 +86,19 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("z")) {
 					z = Integer.parseInt(fieldValue);
 					fieldCount++;
+				} else if (fieldName.equals("yaw")) {
+					yaw = Float.parseFloat(fieldValue);
+					fieldCount++;
+				} else if (fieldName.equals("pitch")) {
+					pitch = Float.parseFloat(fieldValue);
+					fieldCount++;
 				}
 
-				if (fieldCount == 5) {
-					Location location = new Location(world, x, y, z);
+				if (fieldCount == 7) {
+					Location location = new Location(world, x, y, z, yaw, pitch);
 					AranarthUtils.addHome(location);
 					if (!homeName.equals("NEW")) {
-						AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(location));
+						AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(location), AranarthUtils.getHomePad(location).getLocation());
 					}
 					fieldCount = 0;
 				}
@@ -142,7 +150,9 @@ public class PersistenceUtils {
 						writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
 						writer.write("        \"x\": \"" + home.getLocation().getBlockX() + "\",\n");
 						writer.write("        \"y\": \"" + home.getLocation().getBlockY() + "\",\n");
-						writer.write("        \"z\": \"" + home.getLocation().getBlockZ() + "\"\n");
+						writer.write("        \"z\": \"" + home.getLocation().getBlockZ() + "\",\n");
+						writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
+						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\"\n");
 
 						if (homeCounter + 1 == homes.size()) {
 							writer.write("    }\n");
@@ -292,15 +302,15 @@ public class PersistenceUtils {
 	}
 	
 	/**
-	 * Determines if the input String can be parsed to an int.
+	 * Determines if the input String can be parsed to a float.
 	 * 
 	 * @param part
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	public static boolean isRegularNumber(String part) {
 		try {
-			@SuppressWarnings("unused")
-			int partAsNumber = Integer.parseInt(part);
+			float partAsFloat = Float.parseFloat(part);
 			return true;
 		} catch (NumberFormatException e) {
 			return false;

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,13 +58,17 @@ public class CommandHomePad implements CommandExecutor {
 							}
 							// Ensures the name is alpha-numeric
 							if (homeName.matches("[a-zA-Z0-9& ]+")) {
-								AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()));
+								Location locationDirection = player.getLocation();
+								AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()), locationDirection);
 								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
 								return true;
 							} else {
 								player.sendMessage(ChatUtils.chatMessageError("You must use alphanumeric characters!"));
 								return false;
 							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessageError("You cannot rename a homepad!"));
+							return false;
 						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));

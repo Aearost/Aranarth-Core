@@ -84,10 +84,10 @@ public class AranarthUtils {
 		homes.add(new Home("Unnamed", location));
 	}
 
-	public static void setHomeName(String homeName, Home home) {
+	public static void setHomeName(String homeName, Home home, Location direction) {
 		for (int i = 0; i < homes.size(); i++) {
 			if (homes.get(i).equals(home)) {
-				homes.set(i, new Home(homeName, home.getLocation()));
+				homes.set(i, new Home(homeName, direction));
 			}
 		}
 	}

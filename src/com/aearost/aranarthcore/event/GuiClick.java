@@ -105,7 +105,7 @@ public class GuiClick implements Listener {
 				}
 			} catch (NullPointerException ex) {
 				// Ignore if caught
-				System.out.println("NullPointerException caught when teleporting!");
+				Bukkit.getLogger().severe("NullPointerException caught when teleporting!");
 				ex.printStackTrace();
 			}
 		}

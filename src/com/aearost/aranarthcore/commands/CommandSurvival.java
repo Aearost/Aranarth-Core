@@ -15,8 +15,8 @@ public class CommandSurvival {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				
-				// Teleports you to the arena world aligning directly with the Enter Arena sign
-				player.teleport(new Location(Bukkit.getWorld("survival"), 0.5, 120, 3, 180, 0));
+				// Teleports you to the survival world spawn
+				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
