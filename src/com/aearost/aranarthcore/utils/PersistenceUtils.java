@@ -51,9 +51,9 @@ public class PersistenceUtils {
 
 			String homeName = null;
 			World world = null;
-			int x = 0;
-			int y = 0;
-			int z = 0;
+			double x = 0;
+			double y = 0;
+			double z = 0;
 			float yaw = 0;
 			float pitch = 0;
 
@@ -78,13 +78,13 @@ public class PersistenceUtils {
 					world = Bukkit.getWorld(fieldValue);
 					fieldCount++;
 				} else if (fieldName.equals("x")) {
-					x = Integer.parseInt(fieldValue);
+					x = Double.parseDouble(fieldValue);
 					fieldCount++;
 				} else if (fieldName.equals("y")) {
-					y = Integer.parseInt(fieldValue);
+					y = Double.parseDouble(fieldValue);
 					fieldCount++;
 				} else if (fieldName.equals("z")) {
-					z = Integer.parseInt(fieldValue);
+					z = Double.parseDouble(fieldValue);
 					fieldCount++;
 				} else if (fieldName.equals("yaw")) {
 					yaw = Float.parseFloat(fieldValue);
@@ -148,9 +148,9 @@ public class PersistenceUtils {
 					for (Home home : homes) {
 						writer.write("        \"homeName\": \"" + home.getHomeName() + "\",\n");
 						writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
-						writer.write("        \"x\": \"" + home.getLocation().getBlockX() + "\",\n");
-						writer.write("        \"y\": \"" + home.getLocation().getBlockY() + "\",\n");
-						writer.write("        \"z\": \"" + home.getLocation().getBlockZ() + "\",\n");
+						writer.write("        \"x\": \"" + home.getLocation().getX() + "\",\n");
+						writer.write("        \"y\": \"" + home.getLocation().getY() + "\",\n");
+						writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
 						writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
 						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\"\n");
 

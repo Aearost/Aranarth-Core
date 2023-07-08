@@ -59,6 +59,8 @@ public class CommandHomePad implements CommandExecutor {
 							// Ensures the name is alpha-numeric
 							if (homeName.matches("[a-zA-Z0-9& ]+")) {
 								Location locationDirection = player.getLocation();
+								locationDirection.setX(locationDirection.getBlockX() + 0.5);
+								locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
 								AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()), locationDirection);
 								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
 								return true;
