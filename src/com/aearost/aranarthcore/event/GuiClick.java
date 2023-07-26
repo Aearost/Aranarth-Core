@@ -6,8 +6,12 @@ import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.entity.Camel;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Strider;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -61,14 +65,14 @@ public class GuiClick implements Listener {
 				int homeNum = AranarthUtils.getHomes().size();
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 				int maxPages = 0;
-				
+
 				// If the amount is a multiple of 27
 				if (homeNum % 27 == 0) {
 					maxPages = homeNum / 27;
 				} else {
 					maxPages = (int) Math.floor(homeNum / 27) + 1;
 				}
-				
+
 				if (currentPage < maxPages) {
 					aranarthPlayer.setCurrentGuiPageNum(currentPage + 1);
 					TeleportGui gui = new TeleportGui(player, currentPage + 1);
@@ -84,20 +88,22 @@ public class GuiClick implements Listener {
 					Home home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
 					// Only proceed if the slot they click is actually a homepad
 					if (!Objects.isNull(home)) {
-						Horse horse = null;
 						if (player.isInsideVehicle()) {
-							if (player.getVehicle() instanceof Horse) {
-								horse = (Horse) player.getVehicle();
+							Entity mount = player.getVehicle();
+							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel
+									|| player.getVehicle() instanceof Pig || player.getVehicle() instanceof Strider) {
 								player.leaveVehicle();
-								horse.teleport(home.getLocation());
+								mount.teleport(home.getLocation());
 								player.teleport(home.getLocation());
-								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+								player.sendMessage(ChatUtils
+										.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
 								player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
-								horse.addPassenger(player);
+								mount.addPassenger(player);
 							}
 						} else {
 							player.teleport(home.getLocation());
-							player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+							player.sendMessage(ChatUtils
+									.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
 							player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
 						}
 						player.closeInventory();
