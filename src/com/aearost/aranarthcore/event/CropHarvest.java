@@ -2,12 +2,14 @@ package com.aearost.aranarthcore.event;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -31,7 +33,7 @@ public class CropHarvest implements Listener {
 	 * @param e
 	 */
 	@EventHandler
-	public void onLogStrip(final BlockBreakEvent e) {
+	public void onCropHarvest(final BlockBreakEvent e) {
 		if (e.getPlayer().isSneaking()) {
 			Block block = e.getBlock();
 			if (getIsBlockCrop(block)) {
@@ -52,6 +54,14 @@ public class CropHarvest implements Listener {
 					}
 					for (ItemStack drop : drops) {
 						if (drop != null && drop.getAmount() > 0) {
+							// Adds support to increase yield of wheat per crop if using fortune
+							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
+								ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+								if (heldItem.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)) {
+									int level = heldItem.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+									drop.setAmount(wheatBeetrootDropCalculation(level));
+								}
+							}
 							block.getWorld().dropItemNaturally(block.getLocation(), drop);
 						}
 					}
@@ -91,5 +101,43 @@ public class CropHarvest implements Listener {
 			}
 		}
 		return false;
+	}
+	
+	private int wheatBeetrootDropCalculation(int level) {
+		// This uses the same formula as regular wheat seeds dropping
+		Random r = new Random();
+		final int bracket = r.nextInt(10) + 1;
+		int amountToDrop = 1;
+		// 70% chance of getting 1 wheat
+		// 30% chance of getting 2 wheat
+		if (level == 1) {
+			if (bracket < 8) {
+				amountToDrop = 1;
+			} else {
+				amountToDrop = 2;
+			}
+		}
+		// 30% chance of getting 1 wheat
+		// 70% chance of getting 2 wheat
+		else if (level == 2) {
+			if (bracket < 4) {
+				amountToDrop = 1;
+			} else {
+				amountToDrop = 2;
+			}
+		}
+		// 20% chance of getting 1 wheat
+		// 60% chance of getting 2 wheat
+		// 20% chance of getting 3 wheat
+		else if (level == 3) {
+			if (bracket < 3) {
+				amountToDrop = 1;
+			} else if (bracket < 7) {
+				amountToDrop = 2;
+			} else {
+				amountToDrop = 3;
+			}
+		}
+		return amountToDrop;
 	}
 }

@@ -33,8 +33,8 @@ public class TorchflowerGrow implements Listener {
 			// If it's a fully grown torchflower
 			if (!(e.getNewState().getBlockData() instanceof Ageable)) {
 				Random r = new Random();
-				// Will randomly select 0, 1, or 2 seeds
-				int amountOfSeeds = r.nextInt(2);
+				// Will randomly select 0, 1, 2, or 3 seeds
+				int amountOfSeeds = r.nextInt(3);
 				if (amountOfSeeds > 0) {
 					location.getWorld().dropItemNaturally(location, new ItemStack(Material.TORCHFLOWER_SEEDS, amountOfSeeds));
 				}
