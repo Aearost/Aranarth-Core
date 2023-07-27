@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
 
-public class BuddingAmethystDestroy implements Listener {
+public class BuddingAmethystBreak implements Listener {
 
-	public BuddingAmethystDestroy(AranarthCore plugin) {
+	public BuddingAmethystBreak(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 

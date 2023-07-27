@@ -11,24 +11,26 @@ import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
-import com.aearost.aranarthcore.event.BuddingAmethystDestroy;
+import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiClick;
-import com.aearost.aranarthcore.event.HomePadDestroy;
+import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
-import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
+import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
+import com.aearost.aranarthcore.event.TorchflowerBreak;
+import com.aearost.aranarthcore.event.TorchflowerPlace;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
@@ -96,7 +98,7 @@ public class AranarthCore extends JavaPlugin {
 	private void initializeEvents() {
 		new HomePadStep(this);
 		new HomePadPlace(this);
-		new HomePadDestroy(this);
+		new HomePadBreak(this);
 		new PlayerJoinServer(this);
 		new GuiClick(this);
 		new CreeperExplodeDeny(this);
@@ -106,12 +108,14 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerChat(this);
 		new EndermanPickupCancel(this);
 		new EntityEggPickupCancel(this);
-		new BuddingAmethystDestroy(this);
+		new BuddingAmethystBreak(this);
 		new MountSpawn(this);
 		new HorseSwim(this);
 		new CropHarvest(this);
 		new RespawnCancel(this);
 		new SugarcaneBlockPlace(this);
+		new TorchflowerPlace(this);
+		new TorchflowerBreak(this);
 	}
 
 	private void initializeRecipes() {

@@ -14,9 +14,9 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.HomePad;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 
-public class HomePadDestroy implements Listener {
+public class HomePadBreak implements Listener {
 
-	public HomePadDestroy(AranarthCore plugin) {
+	public HomePadBreak(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -26,7 +26,7 @@ public class HomePadDestroy implements Listener {
 	 * @param e
 	 */
 	@EventHandler
-	public void onHomePadDestroy(final BlockBreakEvent e) {
+	public void onHomePadBreak(final BlockBreakEvent e) {
 		
 		Location location = e.getBlock().getLocation();
 		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
