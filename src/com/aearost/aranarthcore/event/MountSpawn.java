@@ -148,8 +148,8 @@ public class MountSpawn implements Listener {
 			camel.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(speedValue);
 			
 			// For testing only!!! Remove before final compile
-			 camel.setAdult();
-			 camel.setTamed(true);
+			// camel.setAdult();
+			// camel.setTamed(true);
 		}
 		
 	}
