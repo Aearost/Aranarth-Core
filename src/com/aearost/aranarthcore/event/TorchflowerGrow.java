@@ -8,34 +8,37 @@ import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockGrowEvent;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
 
-public class PitcherPlantBreak implements Listener {
+public class TorchflowerGrow implements Listener {
 
-	public PitcherPlantBreak(AranarthCore plugin) {
+	public TorchflowerGrow(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Drops the pitcher plant pods when the plant is harvested.
+	 * Drops the torchflower seeds when the plant grows to be fully matured.
 	 * 
 	 * @param e
 	 */
 	@EventHandler
-	public void onPitcherPlantBreak(final BlockBreakEvent e) {
+	public void onTorchflowerGrow(final BlockGrowEvent e) {
+		
 		Location location = e.getBlock().getLocation();
-		if (location.getBlock().getType() == Material.PITCHER_CROP) {
-			Ageable pitcherPlant = (Ageable) location.getBlock().getBlockData();
-			if (pitcherPlant.getAge() == pitcherPlant.getMaximumAge()) {
+		
+		if (location.getBlock().getType() == Material.TORCHFLOWER_CROP) {
+			// If it's a fully grown torchflower
+			if (!(e.getNewState().getBlockData() instanceof Ageable)) {
 				Random r = new Random();
 				// Will randomly select 0, 1, or 2 seeds
 				int amountOfSeeds = r.nextInt(2);
 				if (amountOfSeeds > 0) {
-					location.getWorld().dropItemNaturally(location, new ItemStack(Material.PITCHER_POD, amountOfSeeds));
+					location.getWorld().dropItemNaturally(location, new ItemStack(Material.TORCHFLOWER_SEEDS, amountOfSeeds));
 				}
+				
 			}
 		}
 	}

@@ -31,6 +31,7 @@ import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
+import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
@@ -117,6 +118,7 @@ public class AranarthCore extends JavaPlugin {
 		new SugarcaneBlockPlace(this);
 		new TorchflowerPlace(this);
 		new TorchflowerBreak(this);
+		new TorchflowerGrow(this);
 		new PitcherPlantBreak(this);
 	}
 
