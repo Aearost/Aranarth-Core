@@ -24,6 +24,7 @@ import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.MountSpawn;
+import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
 import com.aearost.aranarthcore.event.RespawnCancel;
@@ -116,6 +117,7 @@ public class AranarthCore extends JavaPlugin {
 		new SugarcaneBlockPlace(this);
 		new TorchflowerPlace(this);
 		new TorchflowerBreak(this);
+		new PitcherPlantBreak(this);
 	}
 
 	private void initializeRecipes() {
