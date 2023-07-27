@@ -21,7 +21,7 @@ import com.aearost.aranarthcore.event.GuiClick;
 import com.aearost.aranarthcore.event.HomePadDestroy;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
-import com.aearost.aranarthcore.event.HorseSpawn;
+import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.PlayerChat;
@@ -107,7 +107,7 @@ public class AranarthCore extends JavaPlugin {
 		new EndermanPickupCancel(this);
 		new EntityEggPickupCancel(this);
 		new BuddingAmethystDestroy(this);
-		new HorseSpawn(this);
+		new MountSpawn(this);
 		new HorseSwim(this);
 		new CropHarvest(this);
 		new RespawnCancel(this);
