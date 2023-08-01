@@ -24,6 +24,7 @@ import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.LogStrip;
 import com.aearost.aranarthcore.event.MountSpawn;
+import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerJoinServer;
@@ -120,6 +121,7 @@ public class AranarthCore extends JavaPlugin {
 		new TorchflowerBreak(this);
 		new TorchflowerGrow(this);
 		new PitcherPlantBreak(this);
+		new PillagerOutpostSpawnCancel(this);
 	}
 
 	private void initializeRecipes() {

@@ -57,7 +57,7 @@ public class CommandHomePad implements CommandExecutor {
 								}
 							}
 							// Ensures the name is alpha-numeric
-							if (homeName.matches("[a-zA-Z0-9& ]+")) {
+							if (homeName.matches("[a-zA-Z0-9& -]+")) {
 								Location locationDirection = player.getLocation();
 								locationDirection.setX(locationDirection.getBlockX() + 0.5);
 								locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
