@@ -165,7 +165,7 @@ public class ItemUtils {
 				// iteration
 				if (is.getItemMeta().getDisplayName().equals(itemToAdd.getItemMeta().getDisplayName())) {
 					while (amount > 0) {
-						if (is.getAmount() < is.getMaxStackSize()) {
+						if (is.getAmount() < 64) {
 							is.setAmount(is.getAmount() + 1);
 							amount--;
 						} else {
@@ -181,11 +181,11 @@ public class ItemUtils {
 		while (amount > 0) {
 			// When there is inventory space
 			if (player.getInventory().firstEmpty() != -1) {
-				if (amount > is.getMaxStackSize()) {
+				if (amount > 64) {
 					is = itemToAdd.clone();
-					is.setAmount(is.getMaxStackSize());
+					is.setAmount(64);
 					player.getInventory().addItem(is);
-					amount = amount - is.getMaxStackSize();
+					amount = amount - 64;
 				} else {
 					is = itemToAdd.clone();
 					is.setAmount(amount);
