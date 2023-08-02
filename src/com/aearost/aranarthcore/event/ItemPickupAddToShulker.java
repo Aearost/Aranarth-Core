@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.event;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
@@ -19,7 +21,7 @@ public class ItemPickupAddToShulker implements Listener {
 
 	/**
 	 * Automatically places picked up items that have incomplete stacks in a shulker
-	 * box into that stack.
+	 * box into that stack. This only works when you have at least 1 free inventory slot.
 	 * 
 	 * @param e
 	 */
@@ -28,43 +30,68 @@ public class ItemPickupAddToShulker implements Listener {
 		if (e.getEntity() instanceof Player) {
 			Player player = (Player) e.getEntity();
 			ItemStack pickupItem = e.getItem().getItemStack();
+			int amountRemaining = pickupItem.getAmount();
 
-			// Disregard if the item is a shulker box
-//			if (e.getItem().getItemStack().getItemMeta() instanceof BlockStateMeta) {
-//				BlockStateMeta meta = (BlockStateMeta) e.getItem().getItemStack().getItemMeta();
-//				if (meta.getBlockState() instanceof ShulkerBox) {
-//					return;
-//				}
-//			}
-			
+			// Skip the logic if the item being picked up is a shulker box
+			if (pickupItem.getItemMeta() instanceof BlockStateMeta) {
+				BlockStateMeta im = (BlockStateMeta) pickupItem.getItemMeta();
+				if (im.getBlockState() instanceof ShulkerBox) {
+					return;
+				}
+			}
+
 			ItemStack[] inventory = player.getInventory().getStorageContents();
+			boolean wasAdded = false;
 			for (ItemStack is : inventory) {
 				// Skip the slot if it's empty
-				if (is == null) {
-					continue;
-				}				
-				
-				if (is.getItemMeta() instanceof BlockStateMeta) {
-					BlockStateMeta im = (BlockStateMeta) is.getItemMeta();
-					if (im.getBlockState() instanceof ShulkerBox) {
-						ShulkerBox shulker = (ShulkerBox) im.getBlockState();
-						for (ItemStack shulkerStack : shulker.getInventory().getContents()) {
-							// Skips the slot in the shulker box if it's empty
-							if (shulkerStack == null) {
-								continue;
-							} else {
-								if (shulkerStack.isSimilar(pickupItem)) {
-									// Logic to add to the shulker box stack
-									
-									return;
+				if (is != null) {
+
+					if (is.getItemMeta() instanceof BlockStateMeta) {
+						BlockStateMeta im = (BlockStateMeta) is.getItemMeta();
+						if (im.getBlockState() instanceof ShulkerBox) {
+							ShulkerBox shulker = (ShulkerBox) im.getBlockState();
+							Inventory shulkerInventory = shulker.getInventory();
+
+							// Cycle through all slots in slots that are shulker boxes
+							for (int shulkerSlot = 0; shulkerSlot < shulkerInventory
+									.getContents().length; shulkerSlot++) {
+								ItemStack shulkerStack = shulkerInventory.getContents()[shulkerSlot];
+								// Skips the slot in the shulker box if it's empty
+								if (shulkerStack != null) {
+									if (shulkerStack.isSimilar(pickupItem)) {
+										// Logic to add to the shulker box stack
+										while (amountRemaining > 0) {
+											// Fill up an empty stack until it's full while removing one amount each
+											// iteration
+											if (shulkerStack.getAmount() < shulkerStack.getMaxStackSize()) {
+												shulkerStack.setAmount(shulkerStack.getAmount() + 1);
+												amountRemaining--;
+												e.getItem().getItemStack().setAmount(pickupItem.getAmount() - 1);
+											} else {
+												break;
+											}
+										}
+										// Prevents the default behaviour and 
+										e.setCancelled(true);
+										e.getItem().remove();
+										shulkerInventory.setItem(shulkerSlot, shulkerStack);
+										im.setBlockState(shulker);
+										is.setItemMeta(im);
+										wasAdded = true;
+									}
 								}
 							}
 						}
 					}
 				}
 			}
-
+			if (wasAdded) {
+				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1F, 1F);
+			}
+			
+			// If the item cannot go into any shulker box
+			pickupItem.setAmount(amountRemaining);
+			player.getInventory().addItem(pickupItem);
 		}
 	}
-
 }
