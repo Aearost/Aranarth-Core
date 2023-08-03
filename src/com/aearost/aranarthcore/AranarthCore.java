@@ -35,6 +35,7 @@ import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
 import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
+import com.aearost.aranarthcore.event.ZombieHorseSpawn;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
@@ -124,6 +125,7 @@ public class AranarthCore extends JavaPlugin {
 		new PitcherPlantBreak(this);
 		new PillagerOutpostSpawnCancel(this);
 		new ItemPickupAddToShulker(this);
+		new ZombieHorseSpawn(this);
 	}
 
 	private void initializeRecipes() {
