@@ -41,7 +41,6 @@ public class ItemPickupAddToShulker implements Listener {
 			}
 
 			ItemStack[] inventory = player.getInventory().getStorageContents();
-			boolean wasAdded = false;
 			for (ItemStack is : inventory) {
 				// Skip the slot if it's empty
 				if (is != null) {
@@ -71,13 +70,12 @@ public class ItemPickupAddToShulker implements Listener {
 												break;
 											}
 										}
-										// Prevents the default behaviour and 
+										// Prevents the default pickup behaviour and 
 										e.setCancelled(true);
 										e.getItem().remove();
 										shulkerInventory.setItem(shulkerSlot, shulkerStack);
 										im.setBlockState(shulker);
 										is.setItemMeta(im);
-										wasAdded = true;
 									}
 								}
 							}
@@ -85,13 +83,13 @@ public class ItemPickupAddToShulker implements Listener {
 					}
 				}
 			}
-			if (wasAdded) {
-				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
-			}
 			
-			// If the item cannot go into any shulker box
-			pickupItem.setAmount(amountRemaining);
-			player.getInventory().addItem(pickupItem);
+			// If there was quantity put in a shulker box and quantity remains
+			if (e.isCancelled()) {
+				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
+				pickupItem.setAmount(amountRemaining);
+				player.getInventory().addItem(pickupItem);
+			}
 		}
 	}
 }
