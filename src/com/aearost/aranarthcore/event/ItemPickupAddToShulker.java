@@ -86,7 +86,7 @@ public class ItemPickupAddToShulker implements Listener {
 				}
 			}
 			if (wasAdded) {
-				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1F, 1F);
+				player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
 			}
 			
 			// If the item cannot go into any shulker box

@@ -4,8 +4,11 @@ import java.util.Random;
 
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.Horse;
+import org.bukkit.entity.SkeletonHorse;
+import org.bukkit.entity.ZombieHorse;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -28,8 +31,19 @@ public class MountSpawn implements Listener {
 	@EventHandler
 	public void onHorseSpawn(final CreatureSpawnEvent e) {
 
-		if (e.getEntity() instanceof Horse) {
-			Horse horse = (Horse) e.getEntity();
+		if (e.getEntity() instanceof AbstractHorse) {
+			AbstractHorse horse = null;
+			if (e.getEntity() instanceof Horse) {
+				horse = (Horse) e.getEntity();
+			} else if (e.getEntity() instanceof SkeletonHorse) {
+				horse = (SkeletonHorse) e.getEntity();
+			} else if (e.getEntity() instanceof ZombieHorse) {
+				horse = (ZombieHorse) e.getEntity();
+			} else {
+				// Donkeys, Mules, Llamas, etc
+				return;
+			}
+			
 			Random r = new Random();
 			
 			// A maximum limit of 30 hearts (60 half-hearts) --> 60
@@ -85,6 +99,13 @@ public class MountSpawn implements Listener {
 			}
 			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
 			horse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(speedValue);
+			
+			// Without this, skeleton horses and zombie horses will not be rideable
+			// and will spawn with very low health
+			if (horse instanceof SkeletonHorse || horse instanceof ZombieHorse) {
+				horse.setTamed(true);
+				horse.setHealth(horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+			}
 			
 			// For testing only!!! Remove before final compile
 			// horse.setAdult();
