@@ -11,6 +11,8 @@ import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
+import com.aearost.aranarthcore.event.ArenaBlockBreak;
+import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
@@ -126,6 +128,8 @@ public class AranarthCore extends JavaPlugin {
 		new PillagerOutpostSpawnCancel(this);
 		new ItemPickupAddToShulker(this);
 		new ZombieHorseSpawn(this);
+		new ArenaBlockBreak(this);
+		new ArenaItemDrops(this);
 	}
 
 	private void initializeRecipes() {
