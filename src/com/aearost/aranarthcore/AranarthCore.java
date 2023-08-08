@@ -12,7 +12,9 @@ import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.ArenaBlockBreak;
+import com.aearost.aranarthcore.event.ArenaGrowPrevent;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
+import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CraftingOverrides;
@@ -131,6 +133,8 @@ public class AranarthCore extends JavaPlugin {
 		new ZombieHorseSpawn(this);
 		new ArenaBlockBreak(this);
 		new ArenaItemDrops(this);
+		new ArenaMeltPrevent(this);
+		new ArenaGrowPrevent(this);
 		new ConcretePowderGravityPrevent(this);
 	}
 
