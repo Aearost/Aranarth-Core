@@ -14,6 +14,7 @@ import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.ArenaBlockBreak;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
+import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
@@ -130,6 +131,7 @@ public class AranarthCore extends JavaPlugin {
 		new ZombieHorseSpawn(this);
 		new ArenaBlockBreak(this);
 		new ArenaItemDrops(this);
+		new ConcretePowderGravityPrevent(this);
 	}
 
 	private void initializeRecipes() {
