@@ -13,14 +13,14 @@ import org.bukkit.inventory.EquipmentSlot;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class LogStrip implements Listener {
+public class LogWoodStripPrevent implements Listener {
 
-	public LogStrip(AranarthCore plugin) {
+	public LogWoodStripPrevent(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Prevents stripping a log if the player is not sneaking
+	 * Prevents stripping a log or wood block if the player is not sneaking
 	 * 
 	 * @param e
 	 */
@@ -28,7 +28,7 @@ public class LogStrip implements Listener {
 	public void onLogStrip(final PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (isHoldingAxe(e.getPlayer())) {
-				if (getMaterialIfWood(e.getClickedBlock()) != null) {
+				if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
 					if (!e.getPlayer().isSneaking()) {
 						e.setCancelled(true);
 						e.getPlayer().sendMessage(ChatUtils.chatMessageError("You must be sneaking to strip logs!"));
@@ -38,12 +38,17 @@ public class LogStrip implements Listener {
 		}
 	}
 
-	private Material getMaterialIfWood(Block block) {
+	private Material getMaterialIfLogOrWood(Block block) {
 		if (block.getType() == Material.OAK_LOG || block.getType() == Material.BIRCH_LOG
 				|| block.getType() == Material.SPRUCE_LOG || block.getType() == Material.JUNGLE_LOG
 				|| block.getType() == Material.DARK_OAK_LOG || block.getType() == Material.ACACIA_LOG
 				|| block.getType() == Material.CRIMSON_STEM || block.getType() == Material.WARPED_STEM
-				|| block.getType() == Material.MANGROVE_LOG) {
+				|| block.getType() == Material.MANGROVE_LOG || block.getType() == Material.CHERRY_LOG
+				|| block.getType() == Material.OAK_WOOD || block.getType() == Material.BIRCH_WOOD
+				|| block.getType() == Material.SPRUCE_WOOD || block.getType() == Material.JUNGLE_WOOD
+				|| block.getType() == Material.DARK_OAK_WOOD || block.getType() == Material.ACACIA_WOOD
+				|| block.getType() == Material.CRIMSON_HYPHAE || block.getType() == Material.WARPED_HYPHAE
+				|| block.getType() == Material.MANGROVE_WOOD || block.getType() == Material.CHERRY_WOOD) {
 			return block.getType();
 		} else {
 			return null;
