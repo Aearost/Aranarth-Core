@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.ArenaBlockBreak;
 import com.aearost.aranarthcore.event.ArenaGrowPrevent;
+import com.aearost.aranarthcore.event.ArenaInventoryItemDropPrevent;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
@@ -135,6 +136,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArenaItemDrops(this);
 		new ArenaMeltPrevent(this);
 		new ArenaGrowPrevent(this);
+		new ArenaInventoryItemDropPrevent(this);
 		new ConcretePowderGravityPrevent(this);
 	}
 
