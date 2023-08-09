@@ -29,7 +29,7 @@ import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.HorseSwim;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
-import com.aearost.aranarthcore.event.LogStrip;
+import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
@@ -115,7 +115,7 @@ public class AranarthCore extends JavaPlugin {
 		new CreeperExplodeDeny(this);
 		new SoilTrampleCancel(this);
 		new CraftingOverrides(this);
-		new LogStrip(this);
+		new LogWoodStripPrevent(this);
 		new PlayerChat(this);
 		new EndermanPickupCancel(this);
 		new EntityEggPickupCancel(this);
