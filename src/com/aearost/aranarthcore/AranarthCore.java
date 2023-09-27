@@ -12,10 +12,13 @@ import com.aearost.aranarthcore.commands.CommandHomePad;
 import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
 import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.ArenaBlockBreak;
+import com.aearost.aranarthcore.event.ArenaDurabilityPrevent;
 import com.aearost.aranarthcore.event.ArenaGrowPrevent;
+import com.aearost.aranarthcore.event.ArenaHungerLossPrevent;
 import com.aearost.aranarthcore.event.ArenaInventoryItemDropPrevent;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.ArenaMeltPrevent;
+import com.aearost.aranarthcore.event.ArenaPlayerDeath;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CraftingOverrides;
@@ -138,6 +141,9 @@ public class AranarthCore extends JavaPlugin {
 		new ArenaMeltPrevent(this);
 		new ArenaGrowPrevent(this);
 		new ArenaInventoryItemDropPrevent(this);
+		new ArenaPlayerDeath(this);
+		new ArenaDurabilityPrevent(this);
+		new ArenaHungerLossPrevent(this);
 		new ConcretePowderGravityPrevent(this);
 	}
 
