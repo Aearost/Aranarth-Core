@@ -48,9 +48,11 @@ public class GuiClick implements Listener {
 			// If they click Previous, bring them back to the previous page
 			if (slot == 27) {
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
-				if (currentPage > 1) {
-					aranarthPlayer.setCurrentGuiPageNum(currentPage - 1);
-					TeleportGui gui = new TeleportGui(player, currentPage - 1);
+				System.out.println("currentPage: " + currentPage);
+				if (currentPage > 0) {
+					currentPage--;
+					aranarthPlayer.setCurrentGuiPageNum(currentPage);
+					TeleportGui gui = new TeleportGui(player, currentPage);
 					gui.openGui();
 				}
 				return;
@@ -62,20 +64,21 @@ public class GuiClick implements Listener {
 			}
 			// If they click Next
 			else if (slot == 35) {
-				int homeNum = AranarthUtils.getHomes().size();
+				int numOfHomes = AranarthUtils.getHomes().size();
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
-				int maxPages = 0;
-
+				int maxPages;
+				
 				// If the amount is a multiple of 27
-				if (homeNum % 27 == 0) {
-					maxPages = homeNum / 27;
+				if (numOfHomes % 27 == 0) {
+					maxPages = numOfHomes / 27;
 				} else {
-					maxPages = (int) Math.floor(homeNum / 27) + 1;
+					maxPages = (int) Math.floor(numOfHomes / 27) + 1;
 				}
-
+				
 				if (currentPage < maxPages) {
-					aranarthPlayer.setCurrentGuiPageNum(currentPage + 1);
-					TeleportGui gui = new TeleportGui(player, currentPage + 1);
+					currentPage++;
+					aranarthPlayer.setCurrentGuiPageNum(currentPage);
+					TeleportGui gui = new TeleportGui(player, currentPage);
 					gui.openGui();
 				}
 				return;
