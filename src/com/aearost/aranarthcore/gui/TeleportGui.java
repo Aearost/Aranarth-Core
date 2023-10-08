@@ -22,8 +22,8 @@ public class TeleportGui {
 
 	public TeleportGui(Player player) {
 		this.player = player;
-		this.pageNum = 1;
-		this.initializedGui = initializeGui(player, 1);
+		this.pageNum = 0;
+		this.initializedGui = initializeGui(player, 0);
 	}
 	
 	public TeleportGui(Player player, int pageNum) {
@@ -53,7 +53,11 @@ public class TeleportGui {
 		List<Home> homes = AranarthUtils.getHomes();
 		int totalHomes = homes.size();
 		
-		int homeNumber = pageNum * 27 - 27;
+		int homeNumber = pageNum * 27;
+		
+		System.out.println("pageNum: " + pageNum);
+		System.out.println("totalHomes: " + totalHomes);
+		System.out.println("homeNumber: " + homeNumber);
 		
 		Inventory gui = Bukkit.getServer().createInventory(player, 36, "Teleport");
 		
