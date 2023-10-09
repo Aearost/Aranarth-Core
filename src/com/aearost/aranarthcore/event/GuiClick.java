@@ -68,14 +68,24 @@ public class GuiClick implements Listener {
 				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 				int maxPages;
 				
+				System.out.println("numOfHomes: " + numOfHomes);
+				System.out.println("currentPage: " + currentPage);
+				
+				
 				// If the amount is a multiple of 27
 				if (numOfHomes % 27 == 0) {
+					System.out.println("A");
 					maxPages = numOfHomes / 27;
 				} else {
+					System.out.println("B");
 					maxPages = (int) Math.floor(numOfHomes / 27) + 1;
 				}
+				System.out.println("maxPages: " + maxPages);
 				
-				if (currentPage < maxPages) {
+				System.out.println("currentPage: " + currentPage);
+				System.out.println("maxPages: " + maxPages);
+				
+				if (currentPage + 1 < maxPages) {
 					currentPage++;
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
 					TeleportGui gui = new TeleportGui(player, currentPage);
