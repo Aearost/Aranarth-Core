@@ -55,10 +55,6 @@ public class TeleportGui {
 		
 		int homeNumber = pageNum * 27;
 		
-		System.out.println("pageNum: " + pageNum);
-		System.out.println("totalHomes: " + totalHomes);
-		System.out.println("homeNumber: " + homeNumber);
-		
 		Inventory gui = Bukkit.getServer().createInventory(player, 36, "Teleport");
 		
 
