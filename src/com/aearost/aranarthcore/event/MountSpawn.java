@@ -31,7 +31,7 @@ public class MountSpawn implements Listener {
 	@EventHandler
 	public void onHorseSpawn(final CreatureSpawnEvent e) {
 
-		if (e.getEntity() instanceof AbstractHorse) {
+		if (e.getEntity() instanceof AbstractHorse && !(e.getEntity() instanceof Camel)) {
 			AbstractHorse horse = null;
 			if (e.getEntity() instanceof Horse) {
 				horse = (Horse) e.getEntity();

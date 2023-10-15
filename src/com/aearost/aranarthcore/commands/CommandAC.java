@@ -25,7 +25,7 @@ public class CommandAC implements CommandExecutor {
 			if (args[0].toLowerCase().equals("homepad")) {
 				//commandResult = _________________.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("swimtoggle")) {
-				commandResult = CommandHorseSwimToggle.onCommand(sender, cmd, label, args);
+				commandResult = CommandMountSwimToggle.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("nick")) {
 				//commandResult = _________________.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("ping")) {

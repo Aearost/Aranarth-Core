@@ -7,7 +7,7 @@ public class AranarthPlayer {
 	private int currentGuiPageNum;
 	private String nickname;
 	private String prefix;
-	private boolean isHorseSwimEnabled;
+	private boolean isMountSwimEnabled;
 	
 
 	public AranarthPlayer(String username) {
@@ -16,7 +16,7 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 0;
 		this.nickname = "";
 		this.prefix = "";
-		this.isHorseSwimEnabled = false;
+		this.isMountSwimEnabled = false;
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix) {
@@ -25,7 +25,7 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
 		this.prefix = prefix;
-		this.isHorseSwimEnabled = false;
+		this.isMountSwimEnabled = false;
 	}
 	
 	public String getUsername() {
@@ -68,12 +68,12 @@ public class AranarthPlayer {
 		this.prefix = prefix;
 	}
 	
-	public boolean getIsHorseSwimEnabled() {
-		return isHorseSwimEnabled;
+	public boolean getIsMountSwimEnabled() {
+		return isMountSwimEnabled;
 	}
 	
-	public void setIsHorseSwimEnabled(boolean isHorseSwimEnabled) {
-		this.isHorseSwimEnabled = isHorseSwimEnabled;
+	public void setIsMountSwimEnabled(boolean isMountSwimEnabled) {
+		this.isMountSwimEnabled = isMountSwimEnabled;
 	}
 	
 }

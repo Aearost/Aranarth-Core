@@ -30,7 +30,7 @@ import com.aearost.aranarthcore.event.GuiClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
-import com.aearost.aranarthcore.event.HorseSwim;
+import com.aearost.aranarthcore.event.MountSwim;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
@@ -125,7 +125,7 @@ public class AranarthCore extends JavaPlugin {
 		new EntityEggPickupCancel(this);
 		new BuddingAmethystBreak(this);
 		new MountSpawn(this);
-		new HorseSwim(this);
+		new MountSwim(this);
 		new CropHarvest(this);
 		new RespawnCancel(this);
 		new SugarcaneBlockPlace(this);
