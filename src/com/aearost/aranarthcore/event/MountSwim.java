@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.event;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.AbstractHorse;
+import org.bukkit.entity.Camel;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -14,47 +16,47 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 
-public class HorseSwim implements Listener {
+public class MountSwim implements Listener {
 
 	private AranarthCore plugin;
 
-	public HorseSwim(AranarthCore plugin) {
+	public MountSwim(AranarthCore plugin) {
 		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Allows horses to swim in water and staying on the surface
+	 * Allows mounts to swim in water and staying on the surface
 	 * Also makes their swim speed relative to their movement speed
 	 * 
 	 * @author Aearost
 	 *
 	 */
 	@EventHandler
-	public void onHorseSwim(final PlayerInteractEvent e) {
+	public void onMountSwim(final PlayerInteractEvent e) {
 
 		Player player = e.getPlayer();
-		if (player.isInsideVehicle() && player.getVehicle() instanceof Horse) {
+		if (player.isInsideVehicle() && (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)) {
 
 			// Code based on https://www.spigotmc.org/resources/swimminghorses.72920/
 			Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
 				@Override
 				public void run() {
 					Player p = e.getPlayer();
-					if (p.getVehicle() instanceof Horse) {
-						Horse horse = (Horse) p.getVehicle();
+					if (p.getVehicle() instanceof AbstractHorse) {
+						AbstractHorse mount = (AbstractHorse) p.getVehicle();
 						
-						if (horse != null && isInLiquid(horse)) {
+						if (mount != null && isInLiquid(mount)) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							if (aranarthPlayer.getIsHorseSwimEnabled()) {
-								// Try to find the way to make this speed relative to the speed of the horse
-								horse.setVelocity(horse.getLocation().getDirection().multiply(0.5));
+							if (aranarthPlayer.getIsMountSwimEnabled()) {
+								// Try to find the way to make this speed relative to the speed of the mount
+								mount.setVelocity(mount.getLocation().getDirection().multiply(0.5));
 							}
 							// Must be called in order to float regardless if the value is enabled
-							if (hasLand(horse)) {
-								jump(horse);
+							if (hasLand(mount)) {
+								jump(mount);
 							} else {
-								swim(horse);
+								swim(mount);
 							}
 						}
 					}
@@ -63,14 +65,14 @@ public class HorseSwim implements Listener {
 		}
 	}
 
-	// Controls how high the horse will be brought up when the timer runs
+	// Controls how high the mount will be brought up when the timer runs
 	// We want this very low so that it refreshes more often
 	private void jump(LivingEntity livingEntity) {
 		livingEntity.setVelocity(livingEntity.getVelocity().setY(0.01));
 		//livingEntity.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 10, 100));
 	}
 
-	// Called whenever the horse goes underwater, this way it will send it back above
+	// Called whenever the mount goes underwater, this way it will send it back above
 	private void swim(LivingEntity livingEntity) {
 		livingEntity.setVelocity(livingEntity.getVelocity().setY(0.01));
 		//livingEntity.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 10, 100));

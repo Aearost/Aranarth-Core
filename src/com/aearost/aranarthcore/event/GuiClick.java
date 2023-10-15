@@ -9,9 +9,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
-import org.bukkit.entity.Pig;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Strider;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -91,8 +89,7 @@ public class GuiClick implements Listener {
 					if (!Objects.isNull(home)) {
 						if (player.isInsideVehicle()) {
 							Entity mount = player.getVehicle();
-							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel
-									|| player.getVehicle() instanceof Pig || player.getVehicle() instanceof Strider) {
+							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
 								player.leaveVehicle();
 								mount.teleport(home.getLocation());
 								player.teleport(home.getLocation());
