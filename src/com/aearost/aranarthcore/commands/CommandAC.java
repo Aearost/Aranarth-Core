@@ -23,11 +23,11 @@ public class CommandAC implements CommandExecutor {
 		} else {
 			boolean commandResult = false;
 			if (args[0].toLowerCase().equals("homepad")) {
-				//commandResult = _________________.onCommand(sender, cmd, label, args);
+				commandResult = CommandHomePad.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("swimtoggle")) {
 				commandResult = CommandMountSwimToggle.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("nick")) {
-				//commandResult = _________________.onCommand(sender, cmd, label, args);
+				commandResult = CommandNickname.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("ping")) {
 				commandResult = CommandPing.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("prefix")) {

@@ -8,9 +8,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.aearost.aranarthcore.commands.CommandAC;
 import com.aearost.aranarthcore.commands.CommandACCompleter;
-import com.aearost.aranarthcore.commands.CommandHomePad;
-import com.aearost.aranarthcore.commands.CommandHomePadCompleter;
-import com.aearost.aranarthcore.commands.CommandNickname;
 import com.aearost.aranarthcore.event.ArenaBlockBreak;
 import com.aearost.aranarthcore.event.ArenaDurabilityPrevent;
 import com.aearost.aranarthcore.event.ArenaGrowPrevent;
@@ -30,20 +27,23 @@ import com.aearost.aranarthcore.event.GuiClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
-import com.aearost.aranarthcore.event.MountSwim;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
+import com.aearost.aranarthcore.event.MountSwim;
 import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
+import com.aearost.aranarthcore.event.PitcherPlantPlace;
 import com.aearost.aranarthcore.event.PlayerChat;
-import com.aearost.aranarthcore.event.PlayerJoinServer;
+import com.aearost.aranarthcore.event.PlayerServerJoin;
+import com.aearost.aranarthcore.event.PlayerServerLeave;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
 import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
+import com.aearost.aranarthcore.event.VillagerTradeOverrides;
 import com.aearost.aranarthcore.event.ZombieHorseSpawn;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
@@ -114,7 +114,8 @@ public class AranarthCore extends JavaPlugin {
 		new HomePadStep(this);
 		new HomePadPlace(this);
 		new HomePadBreak(this);
-		new PlayerJoinServer(this);
+		new PlayerServerJoin(this);
+		new PlayerServerLeave(this);
 		new GuiClick(this);
 		new CreeperExplodeDeny(this);
 		new SoilTrampleCancel(this);
@@ -132,6 +133,7 @@ public class AranarthCore extends JavaPlugin {
 		new TorchflowerPlace(this);
 		new TorchflowerBreak(this);
 		new TorchflowerGrow(this);
+		new PitcherPlantPlace(this);
 		new PitcherPlantBreak(this);
 		new PillagerOutpostSpawnCancel(this);
 		new ItemPickupAddToShulker(this);
@@ -145,6 +147,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArenaDurabilityPrevent(this);
 		new ArenaHungerLossPrevent(this);
 		new ConcretePowderGravityPrevent(this);
+		new VillagerTradeOverrides(this);
 	}
 
 	private void initializeRecipes() {
@@ -183,9 +186,6 @@ public class AranarthCore extends JavaPlugin {
 	private void initializeCommands() {
 		getCommand("ac").setExecutor(new CommandAC());
 		getCommand("ac").setTabCompleter(new CommandACCompleter());
-		getCommand("homepad").setExecutor(new CommandHomePad());
-		getCommand("homepad").setTabCompleter(new CommandHomePadCompleter());
-		getCommand("nickname").setExecutor(new CommandNickname());
 	}
 	
 	private void initializeWorlds() {

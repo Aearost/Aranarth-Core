@@ -26,6 +26,7 @@ public class PitcherPlantBreak implements Listener {
 	 */
 	@EventHandler
 	public void onPitcherPlantBreak(final BlockBreakEvent e) {
+		// For breaking the pitcher plant crop
 		Location location = e.getBlock().getLocation();
 		if (location.getBlock().getType() == Material.PITCHER_CROP) {
 			Ageable pitcherPlant = (Ageable) location.getBlock().getBlockData();
@@ -36,6 +37,26 @@ public class PitcherPlantBreak implements Listener {
 				if (amountOfSeeds > 0) {
 					location.getWorld().dropItemNaturally(location, new ItemStack(Material.PITCHER_POD, amountOfSeeds));
 				}
+			}
+		}
+		
+		// For breaking a manually planted pitcher plant
+		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+		Location locationTwoAbove = new Location(location.getWorld(), location.getX(), location.getY() + 2, location.getZ());
+		
+		// Breaking top half of plant
+		if (locationAbove.getBlock().getType() == Material.LIGHT) {
+			locationAbove.getBlock().setType(Material.AIR);
+		}
+		// Breaking bottom half of plant
+		else if (locationTwoAbove.getBlock().getType() == Material.LIGHT) {
+				locationTwoAbove.getBlock().setType(Material.AIR);
+		}
+		// Breaking the block under the plant
+		 else if (locationAbove.getBlock().getType() == Material.PITCHER_PLANT) {
+			Location locationAbovePitcherPlant = new Location(location.getWorld(), location.getX(), location.getY() + 3, location.getZ());
+			if (locationAbovePitcherPlant.getBlock().getType() == Material.LIGHT) {
+				locationAbovePitcherPlant.getBlock().setType(Material.AIR);
 			}
 		}
 	}
