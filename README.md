@@ -10,6 +10,7 @@ The plugin contains many diverse features such as:
 - Improved horse stats and abilities
 - Reduced mob griefing
 - Many custom recipes for items that previously were uncraftable
+- Items are automatially picked up into shulker boxes that contain them
 - Much more!
 
 The plugin has been developed specifically for how we would like to use it, therefore there are multiple values that have been hardcoded in.
