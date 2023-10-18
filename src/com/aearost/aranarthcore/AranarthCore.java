@@ -18,6 +18,7 @@ import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.ArenaPlayerDeath;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
+import com.aearost.aranarthcore.event.CoralDry;
 import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
@@ -148,6 +149,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArenaHungerLossPrevent(this);
 		new ConcretePowderGravityPrevent(this);
 		new VillagerTradeOverrides(this);
+		new CoralDry(this);
 	}
 
 	private void initializeRecipes() {
