@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,23 +13,22 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 
-public class CommandHomePad implements CommandExecutor {
+public class CommandHomePad {
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 
-			if (args.length == 0) {
+			if (args.length == 1) {
 				player.sendMessage(ChatUtils.chatMessageError("You must enter parameters!"));
 				return false;
 			} else {
-				if (args[0].equals("give")) {
-					if (args.length > 1) {
+				if (args[1].equals("give")) {
+					if (args.length > 2) {
 						Player playerInArg = null;
 						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							if (onlinePlayer.getName().toLowerCase().equals(args[1].toLowerCase())) {
+							if (onlinePlayer.getName().toLowerCase().equals(args[2].toLowerCase())) {
 								playerInArg = onlinePlayer;
 							}
 						}
@@ -43,13 +41,13 @@ public class CommandHomePad implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessageError("You must enter a player name!"));
 					}
-				} else if (args[0].equals("create")) {
+				} else if (args[1].equals("create")) {
 					// Must be on a valid homepad
 					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
 						if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("Unnamed")) {
 							String homeName = "";
 							// Get everything after the create parameter and space-separated
-							for (int i = 1; i < args.length; i++) {
+							for (int i = 2; i < args.length; i++) {
 								if (i == args.length - 1) {
 									homeName += args[i];
 								} else {

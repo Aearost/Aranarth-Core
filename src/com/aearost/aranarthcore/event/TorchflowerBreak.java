@@ -25,7 +25,7 @@ public class TorchflowerBreak implements Listener {
 		Location location = e.getBlock().getLocation();
 		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
 		
-		if (location.getBlock().getType() == Material.TORCHFLOWER) {
+		if (location.getBlock().getType() == Material.TORCHFLOWER && locationAbove.getBlock().getType() == Material.LIGHT) {
 			locationAbove.getBlock().setType(Material.AIR);
 		} else if (locationAbove.getBlock().getType() == Material.TORCHFLOWER) {
 			Location locationAboveTorchflower = new Location(locationAbove.getWorld(), locationAbove.getX(), locationAbove.getY() + 1, locationAbove.getZ());

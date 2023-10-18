@@ -9,15 +9,17 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class PlayerJoinServer implements Listener {
+public class PlayerServerJoin implements Listener {
 
-	public PlayerJoinServer(AranarthCore plugin) {
+	public PlayerServerJoin(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
 	 * Adds a new entry to the players HashMap if the player is not being tracked.
+	 * Additionally customizes the join/leave server message format.
 	 * 
 	 * @param e
 	 */
@@ -31,6 +33,7 @@ public class PlayerJoinServer implements Listener {
 		else if (!AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
 		}
+		e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + AranarthUtils.getUsername(player)));
 	}
 	
 }
