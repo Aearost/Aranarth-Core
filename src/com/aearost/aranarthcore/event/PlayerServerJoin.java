@@ -33,7 +33,13 @@ public class PlayerServerJoin implements Listener {
 		else if (!AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
 		}
-		e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + AranarthUtils.getUsername(player)));
+		
+		if (!AranarthUtils.getNickname(player).equals("")) {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] " + AranarthUtils.getNickname(player)));
+		} else {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + AranarthUtils.getUsername(player)));
+		}
+		
 	}
 	
 }
