@@ -21,8 +21,6 @@ public class CommandACCompleter implements TabCompleter {
 		if (args.length == 1) {
 			if (!args[0].equals("") && "homepad".startsWith(args[0])) {
 				displayedOptions.add("homepad");
-			} else if (!args[0].equals("") && "swimtoggle".startsWith(args[0])) {
-				displayedOptions.add("swimtoggle");
 			} else if (!args[0].equals("") && "nick".startsWith(args[0])) {
 				displayedOptions.add("nick");
 			} else if (!args[0].equals("") && "ping".startsWith(args[0])) {
@@ -31,8 +29,17 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("prefix");
 			} else if (!args[0].equals("") && "arena".startsWith(args[0])) {
 				displayedOptions.add("arena");
-			} else if (!args[0].equals("") && "survival".startsWith(args[0])) {
-				displayedOptions.add("survival");
+			} else if (!args[0].equals("") && args[0].startsWith("s")) {
+				if (args[0].equals("s")) {
+					displayedOptions.add("survival");
+					displayedOptions.add("swimtoggle");
+				} else if (!args[0].equals("") && "swimtoggle".startsWith(args[0])) {
+					displayedOptions.add("swimtoggle");
+				} else if (!args[0].equals("") && "survival".startsWith(args[0])) {
+					displayedOptions.add("survival");
+				} else {
+					// Uncaught potential here!!!
+				}
 			}
 			// Show all sub-commands of /ac
 			else {

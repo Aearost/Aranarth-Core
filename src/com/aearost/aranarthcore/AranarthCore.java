@@ -71,6 +71,7 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
+import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
 import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockCraft;
@@ -183,6 +184,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeBambooBlockUncraft(this);
 		new RecipeBambooPlanks(this);
 		new RecipeGildedBlackstone(this);
+		new RecipeRootedDirt(this);
 	}
 
 	private void initializeCommands() {
