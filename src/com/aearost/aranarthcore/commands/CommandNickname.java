@@ -31,6 +31,7 @@ public class CommandNickname {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 				aranarthPlayer.setNickname(args[1]);
+				AranarthUtils.setPlayer(player, aranarthPlayer);
 				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + args[1]));
 				return true;
 			}

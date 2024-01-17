@@ -79,6 +79,10 @@ public class AranarthUtils {
 	public static String getUsername(OfflinePlayer player) {
 		return players.get(player.getUniqueId()).getUsername();
 	}
+	
+	public static String getNickname(OfflinePlayer player) {
+		return players.get(player.getUniqueId()).getNickname();
+	}
 
 	public static void addHome(Location location) {
 		homes.add(new Home("Unnamed", location));
