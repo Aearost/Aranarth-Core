@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -44,7 +45,7 @@ public class CommandHomePad {
 				} else if (args[1].equals("create")) {
 					// Must be on a valid homepad
 					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
-						if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("Unnamed")) {
+						if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("NEW")) {
 							String homeName = "";
 							// Get everything after the create parameter and space-separated
 							for (int i = 2; i < args.length; i++) {
@@ -59,7 +60,7 @@ public class CommandHomePad {
 								Location locationDirection = player.getLocation();
 								locationDirection.setX(locationDirection.getBlockX() + 0.5);
 								locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
-								AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(player.getLocation()), locationDirection);
+								AranarthUtils.setHomeNameAndDirection(homeName, locationDirection, Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
 								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
 								return true;
 							} else {

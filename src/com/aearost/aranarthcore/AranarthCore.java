@@ -30,6 +30,7 @@ import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
+import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.MountSwim;
 import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
@@ -151,6 +152,7 @@ public class AranarthCore extends JavaPlugin {
 		new ConcretePowderGravityPrevent(this);
 		new VillagerTradeOverrides(this);
 		new CoralDry(this);
+		new MobDestroyDoorPrevent(this);
 	}
 
 	private void initializeRecipes() {

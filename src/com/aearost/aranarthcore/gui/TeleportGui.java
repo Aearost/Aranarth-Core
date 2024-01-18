@@ -90,7 +90,7 @@ public class TeleportGui {
 			}
 			Home home = homes.get(homeNumber);
 			
-			ItemStack homePad = new ItemStack(Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
+			ItemStack homePad = new ItemStack(home.getIcon());
 			ItemMeta homeMeta = homePad.getItemMeta();
 			homeMeta.setDisplayName(ChatUtils.translateToColor(home.getHomeName()));
 			List<String> lore = new ArrayList<>();

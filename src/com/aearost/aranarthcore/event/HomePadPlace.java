@@ -28,7 +28,7 @@ public class HomePadPlace implements Listener {
 		ItemStack item = e.getItemInHand();
 		if (item.isSimilar((HomePad.getHomePad()))) {
 			Location location = e.getBlockPlaced().getLocation();
-			AranarthUtils.addHome(location);
+			AranarthUtils.addNewHome(location);
 		}
 		
 	}

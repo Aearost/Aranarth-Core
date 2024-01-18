@@ -33,12 +33,13 @@ public class HomePadStep implements Listener {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		boolean isStandingOnHomePad = aranarthPlayer.getIsStandingOnHomePad();
 
+		// When they step on the homepad
 		if (e.getTo().getBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 			// If they are not on one of the pressure plates
 			if (!isStandingOnHomePad) {
 				// If the current location is a home pad
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getTo()))) {
-					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("Unnamed")) {
+					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("NEW")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player, aranarthPlayer);
@@ -47,7 +48,9 @@ public class HomePadStep implements Listener {
 					}
 				}
 			}
-		} else if (e.getTo().getBlock().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+		}
+		// When they step off the homepad
+		else if (e.getTo().getBlock().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 			if (isStandingOnHomePad) {
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getFrom()))) {
 					aranarthPlayer.setIsStandingOnHomePad(false);
