@@ -24,7 +24,7 @@ import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
-import com.aearost.aranarthcore.event.GuiClick;
+import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
@@ -119,7 +119,7 @@ public class AranarthCore extends JavaPlugin {
 		new HomePadBreak(this);
 		new PlayerServerJoin(this);
 		new PlayerServerLeave(this);
-		new GuiClick(this);
+		new GuiTeleportClick(this);
 		new CreeperExplodeDeny(this);
 		new SoilTrampleCancel(this);
 		new CraftingOverrides(this);

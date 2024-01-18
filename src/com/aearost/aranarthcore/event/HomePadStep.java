@@ -10,7 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.gui.TeleportGui;
+import com.aearost.aranarthcore.gui.GuiTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 
@@ -43,7 +43,7 @@ public class HomePadStep implements Listener {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player, aranarthPlayer);
-						TeleportGui gui = new TeleportGui(player);
+						GuiTeleport gui = new GuiTeleport(player);
 						gui.openGui();
 					}
 				}

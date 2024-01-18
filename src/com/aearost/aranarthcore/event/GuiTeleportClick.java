@@ -15,15 +15,15 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.gui.TeleportGui;
+import com.aearost.aranarthcore.gui.GuiTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class GuiClick implements Listener {
+public class GuiTeleportClick implements Listener {
 
-	public GuiClick(AranarthCore plugin) {
+	public GuiTeleportClick(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -49,7 +49,7 @@ public class GuiClick implements Listener {
 				if (currentPage > 0) {
 					currentPage--;
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
-					TeleportGui gui = new TeleportGui(player, currentPage);
+					GuiTeleport gui = new GuiTeleport(player, currentPage);
 					gui.openGui();
 				}
 				return;
@@ -74,7 +74,7 @@ public class GuiClick implements Listener {
 				if (currentPage + 1 < maxPages) {
 					currentPage++;
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
-					TeleportGui gui = new TeleportGui(player, currentPage);
+					GuiTeleport gui = new GuiTeleport(player, currentPage);
 					gui.openGui();
 				}
 				return;
