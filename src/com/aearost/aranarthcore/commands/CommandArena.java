@@ -17,6 +17,7 @@ public class CommandArena {
 				
 				// Teleports you to the arena world aligning directly with the Enter Arena sign
 				player.teleport(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena!"));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));

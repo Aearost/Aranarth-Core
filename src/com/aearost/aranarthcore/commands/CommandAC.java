@@ -36,6 +36,8 @@ public class CommandAC implements CommandExecutor {
 				commandResult = CommandArena.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("survival")) {
 				commandResult = CommandSurvival.onCommand(sender, cmd, label, args);
+			} else if (args[0].toLowerCase().equals("creative")) {
+				commandResult = CommandCreative.onCommand(sender, cmd, label, args);
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
 			}

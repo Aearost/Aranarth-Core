@@ -8,16 +8,16 @@ import org.bukkit.entity.Player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class CommandSurvival {
+public class CommandCreative {
 
 	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player) {
 				Player player = (Player) sender;
 				
-				// Teleports you to the survival world spawn
-				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
+				// Teleports you to the creative world
+				player.teleport(new Location(Bukkit.getWorld("creative"), 0.5, -60, 0.5, 0, 2));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
