@@ -29,6 +29,8 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("prefix");
 			} else if (!args[0].equals("") && "arena".startsWith(args[0])) {
 				displayedOptions.add("arena");
+			} else if (!args[0].equals("") && "creative".startsWith(args[0])) {
+				displayedOptions.add("creative");
 			} else if (!args[0].equals("") && args[0].startsWith("s")) {
 				if (args[0].equals("s")) {
 					displayedOptions.add("survival");
@@ -50,6 +52,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("prefix");
 				displayedOptions.add("arena");
 				displayedOptions.add("survival");
+				displayedOptions.add("creative");
 			}
 		}
 

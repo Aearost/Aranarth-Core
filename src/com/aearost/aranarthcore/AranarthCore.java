@@ -202,6 +202,13 @@ public class AranarthCore extends JavaPlugin {
 			wc.type(WorldType.FLAT);
 			wc.createWorld();
 		}
+		
+		if (Bukkit.getWorld("creative") == null) {
+			WorldCreator wc = new WorldCreator("creative");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.FLAT);
+			wc.createWorld();
+		}
 	}
 
 	@Override
