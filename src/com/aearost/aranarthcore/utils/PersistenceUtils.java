@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -44,7 +45,6 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			// UUID must not be reset each time
 			int fieldCount = 0;
 			String fieldName = null;
 			String fieldValue = null;
@@ -56,6 +56,7 @@ public class PersistenceUtils {
 			double z = 0;
 			float yaw = 0;
 			float pitch = 0;
+			Material icon = null;
 
 			Bukkit.getLogger().info("Attempting to read the homes file...");
 
@@ -63,7 +64,10 @@ public class PersistenceUtils {
 				String line = reader.nextLine();
 				String[] parts = line.split("\"");
 
-				if (parts[parts.length - 1].equals(",") || isRegularNumber(parts[parts.length - 1])) {
+				// If it's a field and not a parenthesis
+				// Make sure to replace "icon" with the last field in the list
+				if (parts[parts.length - 1].equals(",")
+						|| (parts.length > 1 && parts[1].equals("icon"))) {
 					fieldName = parts[1];
 					fieldValue = parts[3];
 				} else {
@@ -92,13 +96,16 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("pitch")) {
 					pitch = Float.parseFloat(fieldValue);
 					fieldCount++;
+				} else if (fieldName.equals("icon")) {
+					icon = Material.valueOf(fieldValue);
+					fieldCount++;
 				}
 
-				if (fieldCount == 7) {
+				if (fieldCount == 8) {
 					Location location = new Location(world, x, y, z, yaw, pitch);
-					AranarthUtils.addHome(location);
+					AranarthUtils.addNewHome(location);
 					if (!homeName.equals("NEW")) {
-						AranarthUtils.setHomeName(homeName, AranarthUtils.getHomePad(location), AranarthUtils.getHomePad(location).getLocation());
+						AranarthUtils.setHomeNameAndDirection(homeName, location, icon);
 					}
 					fieldCount = 0;
 				}
@@ -152,7 +159,8 @@ public class PersistenceUtils {
 						writer.write("        \"y\": \"" + home.getLocation().getY() + "\",\n");
 						writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
 						writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
-						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\"\n");
+						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\",\n");
+						writer.write("        \"icon\": \"" + Material.GOLDEN_APPLE.name() + "\"\n");
 
 						if (homeCounter + 1 == homes.size()) {
 							writer.write("    }\n");

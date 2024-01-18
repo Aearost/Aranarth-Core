@@ -24,7 +24,6 @@ public class CoralDry implements Listener {
 		if (e.getBlock().getWorld().getName().toLowerCase().equals("world")) {
 			if (isCoral(e.getBlock().getType())) {
 				e.setCancelled(true);
-				System.out.println("CANCELLED!");
 			}
 		}
 	}

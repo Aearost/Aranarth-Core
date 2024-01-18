@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -84,14 +85,18 @@ public class AranarthUtils {
 		return players.get(player.getUniqueId()).getNickname();
 	}
 
-	public static void addHome(Location location) {
-		homes.add(new Home("Unnamed", location));
+	//
+	public static void addNewHome(Location location) {
+		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
 	}
-
-	public static void setHomeName(String homeName, Home home, Location direction) {
+	
+	public static void setHomeNameAndDirection(String homeName, Location direction, Material icon) {
 		for (int i = 0; i < homes.size(); i++) {
-			if (homes.get(i).equals(home)) {
-				homes.set(i, new Home(homeName, direction));
+			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
+					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
+					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+				Home updatedHome = new Home(homeName, direction, icon);
+				homes.set(i, updatedHome);
 			}
 		}
 	}
