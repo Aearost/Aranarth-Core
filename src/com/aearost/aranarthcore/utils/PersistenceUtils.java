@@ -160,7 +160,7 @@ public class PersistenceUtils {
 						writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
 						writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
 						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\",\n");
-						writer.write("        \"icon\": \"" + Material.GOLDEN_APPLE.name() + "\"\n");
+						writer.write("        \"icon\": \"" + home.getIcon().name() + "\"\n");
 
 						if (homeCounter + 1 == homes.size()) {
 							writer.write("    }\n");

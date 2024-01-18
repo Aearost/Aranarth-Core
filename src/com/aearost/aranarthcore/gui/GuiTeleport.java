@@ -14,19 +14,19 @@ import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class TeleportGui {
+public class GuiTeleport {
 
 	private Player player;
 	private Inventory initializedGui;
 	private int pageNum;
 
-	public TeleportGui(Player player) {
+	public GuiTeleport(Player player) {
 		this.player = player;
 		this.pageNum = 0;
 		this.initializedGui = initializeGui(player, 0);
 	}
 	
-	public TeleportGui(Player player, int pageNum) {
+	public GuiTeleport(Player player, int pageNum) {
 		this.player = player;
 		this.pageNum = pageNum;
 		this.initializedGui = initializeGui(player, pageNum);
