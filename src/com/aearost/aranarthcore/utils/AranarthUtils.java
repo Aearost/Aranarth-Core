@@ -90,7 +90,7 @@ public class AranarthUtils {
 		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
 	}
 	
-	public static void setHomeNameAndDirection(String homeName, Location direction, Material icon) {
+	public static void updateHome(String homeName, Location direction, Material icon) {
 		for (int i = 0; i < homes.size(); i++) {
 			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
@@ -127,7 +127,7 @@ public class AranarthUtils {
 		}
 		homes.remove(toRemove);
 	}
-
+	
 	public static boolean locationsMatch(Location location1, Location location2) {
 		if (location1.getBlockX() == location2.getBlockX() && location1.getBlockY() == location2.getBlockY()
 				&& location1.getBlockZ() == location2.getBlockZ()

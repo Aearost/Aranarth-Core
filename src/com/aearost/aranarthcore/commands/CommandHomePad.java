@@ -60,7 +60,7 @@ public class CommandHomePad {
 								Location locationDirection = player.getLocation();
 								locationDirection.setX(locationDirection.getBlockX() + 0.5);
 								locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
-								AranarthUtils.setHomeNameAndDirection(homeName, locationDirection, Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
+								AranarthUtils.updateHome(homeName, locationDirection, Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
 								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
 								return true;
 							} else {

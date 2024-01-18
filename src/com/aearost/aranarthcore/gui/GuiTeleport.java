@@ -51,8 +51,7 @@ public class GuiTeleport {
 
 	private Inventory initializeGui(Player player, int pageNum) {
 		List<Home> homes = AranarthUtils.getHomes();
-		int totalHomes = homes.size();
-		
+		int totalHomesOnPage = homes.size();
 		int homeNumber = pageNum * 27;
 		
 		Inventory gui = Bukkit.getServer().createInventory(player, 36, "Teleport");
@@ -62,6 +61,7 @@ public class GuiTeleport {
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
 		ItemStack barrier = new ItemStack(Material.BARRIER);
 		ItemStack next = new ItemStack(Material.LIME_WOOL);
+		ItemStack blank = new ItemStack(Material.LIGHT_GRAY_STAINED_GLASS_PANE);
 
 		// Previous
 		ItemMeta previousMeta = previous.getItemMeta();
@@ -77,16 +77,28 @@ public class GuiTeleport {
 		ItemMeta nextMeta = next.getItemMeta();
 		nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
 		next.setItemMeta(nextMeta);
+		
+		// Blank
+		ItemMeta blankMeta = blank.getItemMeta();
+		blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+		blank.setItemMeta(blankMeta);
 
 		// Initialize GUI
 		gui.setItem(27, previous);
+		gui.setItem(28, blank);
+		gui.setItem(29, blank);
+		gui.setItem(30, blank);
 		gui.setItem(31, barrier);
+		gui.setItem(32, blank);
+		gui.setItem(33, blank);
+		gui.setItem(34, blank);
 		gui.setItem(35, next);
 
 		for (int i = 0; i < 27; i++) {
 			// If the current home being iterated is the last home in the list (none come after)
-			if (totalHomes <= homeNumber) {
-				break;
+			if (totalHomesOnPage <= homeNumber) {
+				gui.setItem(i, blank);
+				continue;
 			}
 			Home home = homes.get(homeNumber);
 			

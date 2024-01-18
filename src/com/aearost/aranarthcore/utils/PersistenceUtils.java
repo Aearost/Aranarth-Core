@@ -105,7 +105,7 @@ public class PersistenceUtils {
 					Location location = new Location(world, x, y, z, yaw, pitch);
 					AranarthUtils.addNewHome(location);
 					if (!homeName.equals("NEW")) {
-						AranarthUtils.setHomeNameAndDirection(homeName, location, icon);
+						AranarthUtils.updateHome(homeName, location, icon);
 					}
 					fieldCount = 0;
 				}
