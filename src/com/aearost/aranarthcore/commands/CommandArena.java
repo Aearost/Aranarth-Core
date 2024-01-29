@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class CommandArena {
@@ -16,6 +17,7 @@ public class CommandArena {
 				Player player = (Player) sender;
 				
 				// Teleports you to the arena world aligning directly with the Enter Arena sign
+				AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "arena");
 				player.teleport(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena!"));
 				return true;

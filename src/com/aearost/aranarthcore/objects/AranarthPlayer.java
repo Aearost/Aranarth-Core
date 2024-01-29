@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.inventory.Inventory;
+
 public class AranarthPlayer {
 
 	private String username;
@@ -8,7 +10,8 @@ public class AranarthPlayer {
 	private String nickname;
 	private String prefix;
 	private boolean isMountSwimEnabled;
-	
+	private Inventory survivalInventory;
+	private Inventory creativeInventory;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -17,6 +20,8 @@ public class AranarthPlayer {
 		this.nickname = "";
 		this.prefix = "";
 		this.isMountSwimEnabled = false;
+		this.survivalInventory = null;
+		this.creativeInventory = null;
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix) {
@@ -26,6 +31,19 @@ public class AranarthPlayer {
 		this.nickname = nickname;
 		this.prefix = prefix;
 		this.isMountSwimEnabled = false;
+		this.survivalInventory = null;
+		this.creativeInventory = null;
+	}
+	
+	public AranarthPlayer(String username, String nickname, String prefix, Inventory survivalInventory, Inventory creativeInventory) {
+		this.username = username;
+		this.isStandingOnHomePad = false;
+		this.currentGuiPageNum = 0;
+		this.nickname = nickname;
+		this.prefix = prefix;
+		this.isMountSwimEnabled = false;
+		this.survivalInventory = survivalInventory;
+		this.creativeInventory = creativeInventory;
 	}
 	
 	public String getUsername() {
@@ -74,6 +92,22 @@ public class AranarthPlayer {
 	
 	public void setIsMountSwimEnabled(boolean isMountSwimEnabled) {
 		this.isMountSwimEnabled = isMountSwimEnabled;
+	}
+	
+	public Inventory getSurvivalInventory() {
+		return survivalInventory;
+	}
+	
+	public void setSurvivalInventory(Inventory survivalInventory) {
+		this.survivalInventory = survivalInventory;
+	}
+	
+	public Inventory getCreativeInventory() {
+		return creativeInventory;
+	}
+	
+	public void setCreativeInventory(Inventory creativeInventory) {
+		this.creativeInventory = creativeInventory;
 	}
 	
 }

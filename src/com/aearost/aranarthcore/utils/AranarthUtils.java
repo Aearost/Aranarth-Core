@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -58,8 +59,8 @@ public class AranarthUtils {
 		return players.get(uuid);
 	}
 
-	public static void setPlayer(Player player, AranarthPlayer aranarthPlayer) {
-		players.put(player.getUniqueId(), aranarthPlayer);
+	public static void setPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
+		players.put(uuid, aranarthPlayer);
 	}
 
 	/**
@@ -136,6 +137,38 @@ public class AranarthUtils {
 		} else {
 			return false;
 		}
+	}
+	
+	public static void switchInventory(Player player, String currentWorld, String destinationWorld) {
+		System.out.println("A");
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (currentWorld.equals("world") || currentWorld.equals("arena")) {
+			System.out.println("B");
+			// Do not change inventory unless heading to Creative
+			if (destinationWorld.equals("creative")) {
+				System.out.println("C");
+				aranarthPlayer.setSurvivalInventory(player.getInventory());
+				player.getInventory().setContents(aranarthPlayer.getCreativeInventory().getContents());
+				System.out.println("D");
+			}
+		} else if (currentWorld.equals("creative")) {
+			System.out.println("E");
+			if (destinationWorld.equals("world") || destinationWorld.equals("arena")) {
+				System.out.println("F");
+				// Do not change inventory unless heading to Survival or Arena
+				aranarthPlayer.setCreativeInventory(player.getInventory());
+				player.getInventory().setContents(aranarthPlayer.getSurvivalInventory().getContents());
+				System.out.println("G");
+			}
+		} else {
+			System.out.println("UH OH!!!");
+			System.out.println("currentWorld: " + currentWorld);
+			System.out.println("destinationWorld: " + destinationWorld);
+			Bukkit.getLogger().info("Something went wrong with the current world name!");
+		}
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+		player.updateInventory();
+		System.out.println("H");
 	}
 
 }

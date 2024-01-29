@@ -14,6 +14,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.inventory.Inventory;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
@@ -208,6 +209,8 @@ public class PersistenceUtils {
 			UUID uuid = null;
 			String nickname = null;
 			String prefix = null;
+			Inventory survivalInventory = null;
+			Inventory creativeInventory = null;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -215,7 +218,10 @@ public class PersistenceUtils {
 				String line = reader.nextLine();
 				String[] parts = line.split("\"");
 
-				if (parts[parts.length - 1].equals(",") || isRegularNumber(parts[parts.length - 1])) {
+				// If it's a field and not a parenthesis
+				// Make sure to replace "icon" with the last field in the list
+				if (parts[parts.length - 1].equals(",")
+						|| (parts.length > 1 && parts[1].equals("icon"))) {
 					fieldName = parts[1];
 					fieldValue = parts[3];
 				} else {
@@ -232,10 +238,29 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("prefix")) {
 					prefix = fieldValue;
 					fieldCount++;
+				} else if (fieldName.equals("survivalInventory")) {
+					if (!fieldValue.equals("")) {
+						try {
+							System.out.println("Value:\n");
+							survivalInventory = ItemUtils.fromBase64(fieldValue);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					fieldCount++;
+				} else if (fieldName.equals("creativeInventory")) {
+					if (!fieldValue.equals("")) {
+						try {
+							creativeInventory = ItemUtils.fromBase64(fieldValue);
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+					fieldCount++;
 				}
 
-				if (fieldCount == 3) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix));
+				if (fieldCount == 5) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory));
 					fieldCount = 0;
 				}
 			}
@@ -309,21 +334,4 @@ public class PersistenceUtils {
 		}
 	}
 	
-	/**
-	 * Determines if the input String can be parsed to a float.
-	 * 
-	 * @param part
-	 * @return
-	 */
-	@SuppressWarnings("unused")
-	public static boolean isRegularNumber(String part) {
-		try {
-			float partAsFloat = Float.parseFloat(part);
-			return true;
-		} catch (NumberFormatException e) {
-			return false;
-		}
-	}
-
-
 }

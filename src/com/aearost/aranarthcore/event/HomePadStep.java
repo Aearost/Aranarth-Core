@@ -42,7 +42,7 @@ public class HomePadStep implements Listener {
 					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("NEW")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
-						AranarthUtils.setPlayer(player, aranarthPlayer);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						GuiTeleport gui = new GuiTeleport(player);
 						gui.openGui();
 					}
@@ -55,7 +55,7 @@ public class HomePadStep implements Listener {
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getFrom()))) {
 					aranarthPlayer.setIsStandingOnHomePad(false);
 					aranarthPlayer.setCurrentGuiPageNum(0);
-					AranarthUtils.setPlayer(player, aranarthPlayer);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				}
 			}
 		}
