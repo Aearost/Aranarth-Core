@@ -24,7 +24,7 @@ public class CommandMountSwimToggle {
 					player.sendMessage(ChatUtils.chatMessage("&aYour mount will now swim!"));
 					aranarthPlayer.setIsMountSwimEnabled(true);
 				}
-				AranarthUtils.setPlayer(player, aranarthPlayer);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {
 				player.sendMessage(ChatUtils.chatMessageError("You must be on a mount to run this command!"));

@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class CommandSurvival {
@@ -16,6 +17,7 @@ public class CommandSurvival {
 				Player player = (Player) sender;
 				
 				// Teleports you to the survival world spawn
+				AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
 				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				return true;

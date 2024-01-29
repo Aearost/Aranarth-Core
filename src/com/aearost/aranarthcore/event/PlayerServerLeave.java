@@ -23,7 +23,7 @@ public class PlayerServerLeave implements Listener {
 	 * @param e
 	 */
 	@EventHandler
-	public void onPlayerJoin(final PlayerQuitEvent e) {
+	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
 		if (!AranarthUtils.getNickname(player).equals("")) {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] " + AranarthUtils.getNickname(player)));
