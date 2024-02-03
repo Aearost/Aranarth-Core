@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import java.io.IOException;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -28,6 +29,8 @@ public class CommandCreative {
 				}
 				player.teleport(new Location(Bukkit.getWorld("creative"), 0.5, -60, 0.5, 0, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
+				player.setGameMode(GameMode.CREATIVE);
+				player.setOp(true);
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));

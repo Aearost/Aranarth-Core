@@ -366,9 +366,7 @@ public class ItemUtils {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
             System.out.println("2");
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-            System.out.println("3");
             ItemStack[] items = new ItemStack[dataInput.readInt()];
-            System.out.println("4");
     
             // Read the serialized inventory
             for (int i = 0; i < items.length; i++) {
