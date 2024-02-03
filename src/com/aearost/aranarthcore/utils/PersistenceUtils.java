@@ -14,7 +14,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.inventory.Inventory;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
@@ -209,8 +208,8 @@ public class PersistenceUtils {
 			UUID uuid = null;
 			String nickname = null;
 			String prefix = null;
-			Inventory survivalInventory = null;
-			Inventory creativeInventory = null;
+			String survivalInventory = null;
+			String creativeInventory = null;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -239,23 +238,10 @@ public class PersistenceUtils {
 					prefix = fieldValue;
 					fieldCount++;
 				} else if (fieldName.equals("survivalInventory")) {
-					if (!fieldValue.equals("")) {
-						try {
-							System.out.println("Value:\n");
-							survivalInventory = ItemUtils.fromBase64(fieldValue);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
+					survivalInventory = fieldValue;
 					fieldCount++;
 				} else if (fieldName.equals("creativeInventory")) {
-					if (!fieldValue.equals("")) {
-						try {
-							creativeInventory = ItemUtils.fromBase64(fieldValue);
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-					}
+					creativeInventory = fieldValue;
 					fieldCount++;
 				}
 
@@ -314,6 +300,8 @@ public class PersistenceUtils {
 						writer.write("        \"uuid\": \"" + uuid.toString() + "\",\n");
 						writer.write("        \"nickname\": \"" + aranarthPlayer.getNickname() + "\",\n");
 						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
+						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
+						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");
@@ -322,6 +310,7 @@ public class PersistenceUtils {
 							writer.write("    {\n");
 							aranarthPlayerCounter++;
 						}
+						
 					}
 
 					writer.write("}\n");

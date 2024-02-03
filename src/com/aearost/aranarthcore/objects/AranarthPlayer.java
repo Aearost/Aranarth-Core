@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.objects;
 
-import org.bukkit.inventory.Inventory;
-
 public class AranarthPlayer {
 
 	private String username;
@@ -10,8 +8,8 @@ public class AranarthPlayer {
 	private String nickname;
 	private String prefix;
 	private boolean isMountSwimEnabled;
-	private Inventory survivalInventory;
-	private Inventory creativeInventory;
+	private String survivalInventory;
+	private String creativeInventory;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -20,8 +18,8 @@ public class AranarthPlayer {
 		this.nickname = "";
 		this.prefix = "";
 		this.isMountSwimEnabled = false;
-		this.survivalInventory = null;
-		this.creativeInventory = null;
+		this.survivalInventory = "";
+		this.creativeInventory = "";
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix) {
@@ -31,11 +29,11 @@ public class AranarthPlayer {
 		this.nickname = nickname;
 		this.prefix = prefix;
 		this.isMountSwimEnabled = false;
-		this.survivalInventory = null;
-		this.creativeInventory = null;
+		this.survivalInventory = "";
+		this.creativeInventory = "";
 	}
 	
-	public AranarthPlayer(String username, String nickname, String prefix, Inventory survivalInventory, Inventory creativeInventory) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -94,19 +92,19 @@ public class AranarthPlayer {
 		this.isMountSwimEnabled = isMountSwimEnabled;
 	}
 	
-	public Inventory getSurvivalInventory() {
+	public String getSurvivalInventory() {
 		return survivalInventory;
 	}
 	
-	public void setSurvivalInventory(Inventory survivalInventory) {
+	public void setSurvivalInventory(String survivalInventory) {
 		this.survivalInventory = survivalInventory;
 	}
 	
-	public Inventory getCreativeInventory() {
+	public String getCreativeInventory() {
 		return creativeInventory;
 	}
 	
-	public void setCreativeInventory(Inventory creativeInventory) {
+	public void setCreativeInventory(String creativeInventory) {
 		this.creativeInventory = creativeInventory;
 	}
 	
