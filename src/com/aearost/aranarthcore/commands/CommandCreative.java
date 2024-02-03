@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
+import java.io.IOException;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -17,7 +19,13 @@ public class CommandCreative {
 				Player player = (Player) sender;
 				
 				// Teleports you to the creative world spawn
-				AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
+				try {
+					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
+				} catch (IOException e) {
+					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
+					e.printStackTrace();
+					return false;
+				}
 				player.teleport(new Location(Bukkit.getWorld("creative"), 0.5, -60, 0.5, 0, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
 				return true;

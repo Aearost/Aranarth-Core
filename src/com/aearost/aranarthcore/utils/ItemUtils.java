@@ -10,7 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
@@ -220,13 +219,13 @@ public class ItemUtils {
      * @return Array of strings: [ main content, armor content ]
      * @throws IllegalStateException
      */
-    public static String[] playerInventoryToBase64(PlayerInventory playerInventory) throws IllegalStateException {
+    /*public static String[] playerInventoryToBase64(PlayerInventory playerInventory) throws IllegalStateException {
     	//get the main content part, this doesn't return the armor
     	String content = toBase64(playerInventory);
     	String armor = itemStackArrayToBase64(playerInventory.getArmorContents());
     	
     	return new String[] { content, armor };
-    }
+    }*/
     
     /**
      * 
@@ -256,7 +255,12 @@ public class ItemUtils {
             
             // Serialize that array
             dataOutput.close();
-            return Base64Coder.encodeLines(outputStream.toByteArray());
+            
+            String encodedInventory = Base64Coder.encodeLines(outputStream.toByteArray());
+            String noNewlineT = encodedInventory.replaceAll("\t","dEfG1hIjK2LmN3o");
+            String noNewlineN = noNewlineT.replaceAll("\n","9bYnTpRqWs1x2zC");
+            String noNewlineR = noNewlineN.replaceAll("\r","8hUjIkLo7pYt6rS");
+            return noNewlineR;
         } catch (Exception e) {
             throw new IllegalStateException("Unable to save item stacks.", e);
         }
@@ -292,7 +296,11 @@ public class ItemUtils {
             
             // Serialize that array
             dataOutput.close();
-            return Base64Coder.encodeLines(outputStream.toByteArray());
+            String encodedInventory = Base64Coder.encodeLines(outputStream.toByteArray());
+            String noNewlineT = encodedInventory.replaceAll("\t","dEfG1hIjK2LmN3o");
+            String noNewlineN = noNewlineT.replaceAll("\n","9bYnTpRqWs1x2zC");
+            String noNewlineR = noNewlineN.replaceAll("\r","8hUjIkLo7pYt6rS");
+            return noNewlineR;
         } catch (Exception e) {
             throw new IllegalStateException("Unable to save item stacks.", e);
         }
@@ -315,8 +323,13 @@ public class ItemUtils {
      * @throws IOException
      */
     public static Inventory fromBase64(String data) throws IOException {
+    	
+        String noNewlineT = data.replaceAll("dEfG1hIjK2LmN3o","\t");
+        String noNewlineN = noNewlineT.replaceAll("9bYnTpRqWs1x2zC","\n");
+        String noNewlines = noNewlineN.replaceAll("8hUjIkLo7pYt6rS","\r");
+    	
         try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
             Inventory inventory = Bukkit.getServer().createInventory(null, dataInput.readInt());
     
@@ -344,10 +357,18 @@ public class ItemUtils {
      * @throws IOException
      */
     public static ItemStack[] itemStackArrayFromBase64(String data) throws IOException {
+    	String noNewlineT = data.replaceAll("dEfG1hIjK2LmN3o","\t");
+        String noNewlineN = noNewlineT.replaceAll("9bYnTpRqWs1x2zC","\n");
+        String noNewlines = noNewlineN.replaceAll("8hUjIkLo7pYt6rS","\r");
+        
     	try {
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(data));
+    		System.out.println("noNewlines: " + noNewlines);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
+            System.out.println("2");
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+            System.out.println("3");
             ItemStack[] items = new ItemStack[dataInput.readInt()];
+            System.out.println("4");
     
             // Read the serialized inventory
             for (int i = 0; i < items.length; i++) {

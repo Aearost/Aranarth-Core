@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,26 +140,30 @@ public class AranarthUtils {
 		}
 	}
 	
-	public static void switchInventory(Player player, String currentWorld, String destinationWorld) {
-		System.out.println("A");
+	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		if (currentWorld.equals("world") || currentWorld.equals("arena")) {
-			System.out.println("B");
 			// Do not change inventory unless heading to Creative
 			if (destinationWorld.equals("creative")) {
+				aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+				if (!aranarthPlayer.getCreativeInventory().equals("")) {
+					System.out.println("A");
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+					System.out.println("B");
+				} else {
+					player.getInventory().clear();
+				}
 				System.out.println("C");
-				aranarthPlayer.setSurvivalInventory(player.getInventory());
-				player.getInventory().setContents(aranarthPlayer.getCreativeInventory().getContents());
-				System.out.println("D");
 			}
 		} else if (currentWorld.equals("creative")) {
-			System.out.println("E");
 			if (destinationWorld.equals("world") || destinationWorld.equals("arena")) {
-				System.out.println("F");
 				// Do not change inventory unless heading to Survival or Arena
-				aranarthPlayer.setCreativeInventory(player.getInventory());
-				player.getInventory().setContents(aranarthPlayer.getSurvivalInventory().getContents());
-				System.out.println("G");
+				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
+				if (!aranarthPlayer.getSurvivalInventory().equals("")) {
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+				} else {
+					player.getInventory().clear();
+				}
 			}
 		} else {
 			System.out.println("UH OH!!!");
@@ -166,9 +171,10 @@ public class AranarthUtils {
 			System.out.println("destinationWorld: " + destinationWorld);
 			Bukkit.getLogger().info("Something went wrong with the current world name!");
 		}
+		System.out.println("D");
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+		System.out.println("E");
 		player.updateInventory();
-		System.out.println("H");
 	}
 
 }
