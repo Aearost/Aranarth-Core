@@ -42,6 +42,8 @@ public class CommandACCompleter implements TabCompleter {
 				} else {
 					// Uncaught potential here!!!
 				}
+			} else if (!args[0].equals("") && "blacklist".startsWith(args[0])) {
+				displayedOptions.add("blacklist");
 			}
 			// Show all sub-commands of /ac
 			else {
@@ -53,6 +55,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("arena");
 				displayedOptions.add("survival");
 				displayedOptions.add("creative");
+				displayedOptions.add("blacklist");
 			}
 		}
 

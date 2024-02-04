@@ -25,6 +25,7 @@ public class AranarthUtils {
 
 	private static HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
+	private static HashMap<UUID, List<ItemStack>> blacklistedItems = new HashMap<>();
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -93,7 +94,6 @@ public class AranarthUtils {
 		return players.get(player.getUniqueId()).getNickname();
 	}
 
-	//
 	public static void addNewHome(Location location) {
 		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
 	}
@@ -111,6 +111,10 @@ public class AranarthUtils {
 
 	public static List<Home> getHomes() {
 		return homes;
+	}
+	
+	public static List<ItemStack> getBlacklistedItems(UUID uuid) {
+		return blacklistedItems.get(uuid);
 	}
 	
 	public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
