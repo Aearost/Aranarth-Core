@@ -13,6 +13,10 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
@@ -179,7 +183,17 @@ public class AranarthUtils {
 				ItemStack[] armor = player.getInventory().getArmorContents();
 				for (ItemStack is : armor) {
 					if (Objects.nonNull(is)) {
-//						System.out.println(is.getType().name());
+						ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
+						if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
+							player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 320, 2));
+						} else if (armorMeta.getTrim().getPattern() == TrimPattern.SILENCE) {
+							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+						}  else if (armorMeta.getTrim().getPattern() == TrimPattern.SHAPER) {
+							// There is no amplifier to this effect
+							player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+						}  else if (armorMeta.getTrim().getPattern() == TrimPattern.EYE) {
+							// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
+						} 
 					}
 				}
 			}
