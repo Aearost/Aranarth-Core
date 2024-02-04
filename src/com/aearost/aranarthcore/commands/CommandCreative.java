@@ -27,7 +27,7 @@ public class CommandCreative {
 					e.printStackTrace();
 					return false;
 				}
-				player.teleport(new Location(Bukkit.getWorld("creative"), 0.5, -60, 0.5, 0, 2));
+				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
 				player.setGameMode(GameMode.CREATIVE);
 				player.setOp(true);
