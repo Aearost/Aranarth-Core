@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.event.PitcherPlantPlace;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerLeave;
+import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
@@ -153,6 +154,7 @@ public class AranarthCore extends JavaPlugin {
 		new VillagerTradeOverrides(this);
 		new CoralDry(this);
 		new MobDestroyDoorPrevent(this);
+		new PlayerTeleportBetweenWorlds(this);
 	}
 
 	private void initializeRecipes() {
