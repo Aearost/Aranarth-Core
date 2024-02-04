@@ -117,6 +117,10 @@ public class AranarthUtils {
 		return blacklistedItems.get(uuid);
 	}
 	
+	public static void updateBlacklistedItems(UUID uuid, List<ItemStack> newBlacklistedItems) {
+		blacklistedItems.put(uuid, newBlacklistedItems);
+	}
+	
 	public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
 		return players;
 	}

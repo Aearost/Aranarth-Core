@@ -57,4 +57,27 @@ public class ChatUtils {
 		return colorStripped;
 	}
 	
+	public static String getFormattedItemName(String nameToFormat) {
+		String[] words = nameToFormat.toLowerCase().split("_");
+		String fullItemName = "";
+		for (int i = 0; i < words.length; i++) {
+			String word = words[i];
+			String formattedWord = "";
+			// If it shouldn't be capitalized
+			if (word.equals("the") || word.equals("of") || word.equals("and") || word.equals("a") || word.equals("on")) {
+				formattedWord = word;
+			} else {
+				formattedWord = Character.toUpperCase(word.charAt(0)) + word.substring(1);
+			}
+			
+			if (i == words.length - 1) {
+				fullItemName += formattedWord;
+				break;
+			} else {
+				fullItemName += formattedWord + " ";
+			}
+		}
+		return fullItemName;
+	}
+	
 }

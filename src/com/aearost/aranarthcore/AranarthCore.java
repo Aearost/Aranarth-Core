@@ -25,6 +25,7 @@ import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
+import com.aearost.aranarthcore.event.GuiBlacklistClick;
 import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
@@ -166,6 +167,7 @@ public class AranarthCore extends JavaPlugin {
 		new MobDestroyDoorPrevent(this);
 		new PlayerTeleportBetweenWorlds(this);
 		new CreativeExpChangePrevent(this);
+		new GuiBlacklistClick(this);
 	}
 
 	private void initializeRecipes() {
