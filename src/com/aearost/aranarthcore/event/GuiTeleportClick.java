@@ -114,7 +114,7 @@ public class GuiTeleportClick implements Listener {
 									player.sendMessage(ChatUtils.chatMessageError("This homepad already uses that icon!"));
 								} else {
 									AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
-									player.sendMessage(ChatUtils.chatMessage("&7You have updated the icon of " + home.getHomeName() + "&7 to &e" + getFormattedItemName(heldItem.name())));
+									player.sendMessage(ChatUtils.chatMessage("&7You have updated the icon of " + home.getHomeName() + "&7 to &e" + ChatUtils.getFormattedItemName(heldItem.name())));
 								}
 							} else {
 								if (player.isInsideVehicle()) {
@@ -144,28 +144,5 @@ public class GuiTeleportClick implements Listener {
 				}
 			}
 		}
-	
-	private String getFormattedItemName(String nameToFormat) {
-		String[] words = nameToFormat.toLowerCase().split("_");
-		String fullItemName = "";
-		for (int i = 0; i < words.length; i++) {
-			String word = words[i];
-			String formattedWord = "";
-			// If it shouldn't be capitalized
-			if (word.equals("the") || word.equals("of") || word.equals("and") || word.equals("a") || word.equals("on")) {
-				formattedWord = word;
-			} else {
-				formattedWord = Character.toUpperCase(word.charAt(0)) + word.substring(1);
-			}
-			
-			if (i == words.length - 1) {
-				fullItemName += formattedWord;
-				break;
-			} else {
-				fullItemName += formattedWord + " ";
-			}
-		}
-		return fullItemName;
-	}
 
 }
