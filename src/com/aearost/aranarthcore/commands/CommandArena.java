@@ -31,7 +31,7 @@ public class CommandArena {
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena!"));
 				player.setGameMode(GameMode.SURVIVAL);
 				// To affect non-op players
-				if (!(player.getName().toLowerCase().equals("Aearost") || player.getName().toLowerCase().equals("Aearxst"))) {
+				if (!(player.getName().equals("Aearost") || player.getName().equals("Aearxst"))) {
 					player.setOp(false);
 				}
 				return true;

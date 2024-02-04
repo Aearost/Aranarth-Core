@@ -20,6 +20,7 @@ import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CoralDry;
 import com.aearost.aranarthcore.event.CraftingOverrides;
+import com.aearost.aranarthcore.event.CreativeExpChangePrevent;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
@@ -155,6 +156,7 @@ public class AranarthCore extends JavaPlugin {
 		new CoralDry(this);
 		new MobDestroyDoorPrevent(this);
 		new PlayerTeleportBetweenWorlds(this);
+		new CreativeExpChangePrevent(this);
 	}
 
 	private void initializeRecipes() {
