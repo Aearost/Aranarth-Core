@@ -362,9 +362,7 @@ public class ItemUtils {
         String noNewlines = noNewlineN.replaceAll("8hUjIkLo7pYt6rS","\r");
         
     	try {
-    		System.out.println("noNewlines: " + noNewlines);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(Base64Coder.decodeLines(noNewlines));
-            System.out.println("2");
             BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
             ItemStack[] items = new ItemStack[dataInput.readInt()];
     

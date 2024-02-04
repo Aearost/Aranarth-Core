@@ -147,13 +147,10 @@ public class AranarthUtils {
 			if (destinationWorld.equals("creative")) {
 				aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getCreativeInventory().equals("")) {
-					System.out.println("A");
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-					System.out.println("B");
 				} else {
 					player.getInventory().clear();
 				}
-				System.out.println("C");
 			}
 		} else if (currentWorld.equals("creative")) {
 			if (destinationWorld.equals("world") || destinationWorld.equals("arena")) {
@@ -166,14 +163,10 @@ public class AranarthUtils {
 				}
 			}
 		} else {
-			System.out.println("UH OH!!!");
-			System.out.println("currentWorld: " + currentWorld);
-			System.out.println("destinationWorld: " + destinationWorld);
 			Bukkit.getLogger().info("Something went wrong with the current world name!");
+			return;
 		}
-		System.out.println("D");
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-		System.out.println("E");
 		player.updateInventory();
 	}
 
