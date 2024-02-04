@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -11,6 +12,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
@@ -170,4 +172,18 @@ public class AranarthUtils {
 		player.updateInventory();
 	}
 
+	public static void updateArmourTrimEffects() {
+		for (AranarthPlayer aranarthPlayer : players.values()) {
+			Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
+			if (Objects.nonNull(player)) {
+				ItemStack[] armor = player.getInventory().getArmorContents();
+				for (ItemStack is : armor) {
+					if (Objects.nonNull(is)) {
+//						System.out.println(is.getType().name());
+					}
+				}
+			}
+		}
+	}
+	
 }

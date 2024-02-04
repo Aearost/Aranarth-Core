@@ -80,6 +80,7 @@ import com.aearost.aranarthcore.recipes.RecipeSaddleB;
 import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockCraft;
 import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeWoolToString;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
@@ -103,6 +104,14 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Homes and aranarth players have been saved");
 			}
 		}, 36000, 36000);
+		
+		// Check every 5 seconds to update armour trim effects
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				AranarthUtils.updateArmourTrimEffects();
+			}
+		}, 100, 100);
 
 	}
 
