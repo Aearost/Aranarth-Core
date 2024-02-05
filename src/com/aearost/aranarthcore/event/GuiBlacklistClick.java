@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +29,6 @@ public class GuiBlacklistClick implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-
 		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Blacklist")) {
 			e.setCancelled(true);
 			Player player = (Player) e.getWhoClicked();
@@ -37,25 +37,39 @@ public class GuiBlacklistClick implements Listener {
 			if (e.getClickedInventory() == null) {
 				return;
 			}
+			if (Objects.isNull(blacklistedItems)) {
+				blacklistedItems = new ArrayList<ItemStack>();
+			}
+			
+			// If adding a new item to the blacklist
 			if (e.getClickedInventory().getSize() == 41) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				if (blacklistedItems.size() == 9) {
 					player.sendMessage(ChatUtils.chatMessageError("You have already blacklisted 9 items!"));
 				} else {
-					blacklistedItems.add(clickedItem);
+					for (ItemStack itemStack : blacklistedItems) {
+						if (clickedItem.getType() == itemStack.getType()) {
+							player.sendMessage(ChatUtils.chatMessageError("This item is already blacklisted!"));
+							e.getWhoClicked().closeInventory();
+							return;
+						}
+					}
+					blacklistedItems.add(new ItemStack(clickedItem.getType(), 1));
+					player.getInventory().setItem(e.getSlot(), clickedItem);
 					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
-					player.sendMessage(ChatUtils.chatMessage("&7You have added " + ChatUtils.getFormattedItemName(clickedItem.getItemMeta().getDisplayName() + " &7 to the blacklisted items")));
+					player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + ChatUtils.getFormattedItemName(clickedItem.getType().name() + " &7to the blacklisted items")));
 				}
 			}
 			// If removing a blacklisted item
 			else {
 				ItemStack blacklistedItem = blacklistedItems.get(e.getSlot());
 				if (Objects.nonNull(blacklistedItem)) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have removed " + ChatUtils.getFormattedItemName(blacklistedItem.getItemMeta().getDisplayName()) + " &7from the blacklisted items"));
+					player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) + " &7is no longer blacklisted"));
 					blacklistedItems.remove(e.getSlot());
 					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
 				}
 			}
+			e.getWhoClicked().closeInventory();
 		}
 	}
 	
