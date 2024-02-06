@@ -121,6 +121,10 @@ public class AranarthUtils {
 		blacklistedItems.put(uuid, newBlacklistedItems);
 	}
 	
+	public static boolean hasBlacklistedItems(UUID uuid) {
+		return blacklistedItems.get(uuid).size() > 0;
+	}
+	
 	public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
 		return players;
 	}

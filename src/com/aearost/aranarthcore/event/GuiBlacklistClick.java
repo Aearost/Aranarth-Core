@@ -44,7 +44,7 @@ public class GuiBlacklistClick implements Listener {
 			// If adding a new item to the blacklist
 			if (e.getClickedInventory().getSize() == 41) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-				if (blacklistedItems.size() == 9) {
+				if (blacklistedItems.size() == 9 && clickedItem != null) {
 					player.sendMessage(ChatUtils.chatMessageError("You have already blacklisted 9 items!"));
 				} else {
 					for (ItemStack itemStack : blacklistedItems) {
