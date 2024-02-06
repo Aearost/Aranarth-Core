@@ -16,6 +16,7 @@ import com.aearost.aranarthcore.event.ArenaInventoryItemDropPrevent;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.ArenaPlayerDeath;
+import com.aearost.aranarthcore.event.BlacklistItemPickupPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CoralDry;
@@ -168,6 +169,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerTeleportBetweenWorlds(this);
 		new CreativeExpChangePrevent(this);
 		new GuiBlacklistClick(this);
+		new BlacklistItemPickupPrevent(this);
 	}
 
 	private void initializeRecipes() {
