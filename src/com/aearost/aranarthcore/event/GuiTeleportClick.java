@@ -59,6 +59,7 @@ public class GuiTeleportClick implements Listener {
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
 					GuiTeleport gui = new GuiTeleport(player, currentPage);
 					gui.openGui();
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 				return;
 			}
@@ -66,6 +67,7 @@ public class GuiTeleportClick implements Listener {
 			else if (isClickedHomepadGui && slot == 31 && heldItem == Material.AIR) {
 				e.setCancelled(true);
 				player.closeInventory();
+				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				return;
 			}
 			// If they click Next
@@ -86,6 +88,7 @@ public class GuiTeleportClick implements Listener {
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
 					GuiTeleport gui = new GuiTeleport(player, currentPage);
 					gui.openGui();
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 				return;
 			} else {

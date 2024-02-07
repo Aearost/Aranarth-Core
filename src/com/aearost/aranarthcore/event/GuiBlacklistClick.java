@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,6 +45,9 @@ public class GuiBlacklistClick implements Listener {
 			// If adding a new item to the blacklist
 			if (e.getClickedInventory().getSize() == 41) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
+				if (Objects.isNull(clickedItem)) {
+					return;
+				}
 				if (blacklistedItems.size() == 9 && clickedItem != null) {
 					player.sendMessage(ChatUtils.chatMessageError("You have already blacklisted 9 items!"));
 				} else {
@@ -58,13 +62,19 @@ public class GuiBlacklistClick implements Listener {
 					player.getInventory().setItem(e.getSlot(), clickedItem);
 					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
 					player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + ChatUtils.getFormattedItemName(clickedItem.getType().name() + " &7to the blacklisted items")));
+					player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
 				}
 			}
 			// If removing a blacklisted item
 			else {
+				// Clicking on a null slot
+				if (e.getSlot() >= blacklistedItems.size()) {
+					return;
+				}
 				ItemStack blacklistedItem = blacklistedItems.get(e.getSlot());
 				if (Objects.nonNull(blacklistedItem)) {
 					player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) + " &7is no longer blacklisted"));
+					player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
 					blacklistedItems.remove(e.getSlot());
 					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
 				}
