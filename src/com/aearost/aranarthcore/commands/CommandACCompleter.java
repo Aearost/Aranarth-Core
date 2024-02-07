@@ -97,6 +97,15 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions.add(onlinePlayers[i].getName());
 					}
 				}
+			} else if (args[0].equals("blacklist")) {
+				if (!args[1].equals("") && "ignore".startsWith(args[1])) {
+					displayedOptions.add("ignore");
+				} else if (!args[1].equals("") && "trash".startsWith(args[1])) {
+					displayedOptions.add("trash");
+				} else {
+					displayedOptions.add("ignore");
+					displayedOptions.add("trash");
+				}
 			}
 		}
 

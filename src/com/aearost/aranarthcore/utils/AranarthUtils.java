@@ -215,4 +215,8 @@ public class AranarthUtils {
 		}
 	}
 	
+	public static void toggleBlacklistIgnoreOrDelete(UUID uuid, boolean isDeletingBlacklistedItems) {
+		players.get(uuid).setIsDeletingBlacklistedItems(isDeletingBlacklistedItems);
+	}
+	
 }

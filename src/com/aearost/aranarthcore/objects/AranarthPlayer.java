@@ -10,6 +10,7 @@ public class AranarthPlayer {
 	private boolean isMountSwimEnabled;
 	private String survivalInventory;
 	private String creativeInventory;
+	private boolean isDeletingBlacklistedItems;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -20,6 +21,7 @@ public class AranarthPlayer {
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
 		this.creativeInventory = "";
+		this.isDeletingBlacklistedItems = false;
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix) {
@@ -31,6 +33,7 @@ public class AranarthPlayer {
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
 		this.creativeInventory = "";
+		this.isDeletingBlacklistedItems = false;
 	}
 	
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory) {
@@ -42,6 +45,7 @@ public class AranarthPlayer {
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
 		this.creativeInventory = creativeInventory;
+		this.isDeletingBlacklistedItems = false;
 	}
 	
 	public String getUsername() {
@@ -106,6 +110,14 @@ public class AranarthPlayer {
 	
 	public void setCreativeInventory(String creativeInventory) {
 		this.creativeInventory = creativeInventory;
+	}
+	
+	public boolean getIsDeletingBlacklistedItems() {
+		return isDeletingBlacklistedItems;
+	}
+	
+	public void setIsDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
+		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
 	}
 	
 }

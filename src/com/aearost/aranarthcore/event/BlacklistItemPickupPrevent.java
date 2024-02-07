@@ -32,6 +32,10 @@ public class BlacklistItemPickupPrevent implements Listener {
 				for (ItemStack is : blacklistedItems) {
 					if (is.isSimilar(e.getItem().getItemStack())) {
 						e.setCancelled(true);
+						if (AranarthUtils.getPlayer(player.getUniqueId()).getIsDeletingBlacklistedItems()) {
+							// Trash the items
+							e.getItem().remove();
+						}
 					}
 				}
 			}
