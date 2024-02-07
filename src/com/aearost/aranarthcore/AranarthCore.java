@@ -41,6 +41,7 @@ import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PitcherPlantPlace;
 import com.aearost.aranarthcore.event.PlayerChat;
+import com.aearost.aranarthcore.event.VillagerCamelDismount;
 import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerLeave;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
@@ -50,6 +51,7 @@ import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
 import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
+import com.aearost.aranarthcore.event.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.VillagerTradeOverrides;
 import com.aearost.aranarthcore.event.ZombieHorseSpawn;
@@ -174,6 +176,8 @@ public class AranarthCore extends JavaPlugin {
 		new BlacklistItemPickupPrevent(this);
 		new GuiVillagerClick(this);
 		new VillagerInventoryViewClick(this);
+		new VillagerCamelPickup(this);
+		new VillagerCamelDismount(this);
 	}
 
 	private void initializeRecipes() {
