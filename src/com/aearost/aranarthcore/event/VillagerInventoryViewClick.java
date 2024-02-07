@@ -23,9 +23,11 @@ public class VillagerInventoryViewClick implements Listener {
 	@EventHandler
 	public void onVillagerClick(final PlayerInteractEntityEvent e) {
 		if (e.getRightClicked() instanceof Villager) {
-			Villager villager = (Villager) e.getRightClicked();
-			GuiVillager gui = new GuiVillager(e.getPlayer(), villager);
-			gui.openGui();
+			if (e.getPlayer().isSneaking()) {
+				Villager villager = (Villager) e.getRightClicked();
+				GuiVillager gui = new GuiVillager(e.getPlayer(), villager);
+				gui.openGui();
+			}
 		}
 	}
 }
