@@ -28,6 +28,7 @@ import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
 import com.aearost.aranarthcore.event.GuiTeleportClick;
+import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
@@ -49,6 +50,7 @@ import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
 import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
+import com.aearost.aranarthcore.event.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.VillagerTradeOverrides;
 import com.aearost.aranarthcore.event.ZombieHorseSpawn;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
@@ -170,6 +172,8 @@ public class AranarthCore extends JavaPlugin {
 		new CreativeExpChangePrevent(this);
 		new GuiBlacklistClick(this);
 		new BlacklistItemPickupPrevent(this);
+		new GuiVillagerClick(this);
+		new VillagerInventoryViewClick(this);
 	}
 
 	private void initializeRecipes() {

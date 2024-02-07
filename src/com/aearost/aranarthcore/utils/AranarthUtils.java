@@ -122,7 +122,10 @@ public class AranarthUtils {
 	}
 	
 	public static boolean hasBlacklistedItems(UUID uuid) {
-		return blacklistedItems.get(uuid).size() > 0;
+		if (Objects.nonNull(blacklistedItems.get(uuid))) {
+			return blacklistedItems.get(uuid).size() > 0;
+		}
+		return false;
 	}
 	
 	public static HashMap<UUID, AranarthPlayer> getAranarthPlayers() {
