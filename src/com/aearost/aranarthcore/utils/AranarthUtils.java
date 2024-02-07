@@ -198,6 +198,10 @@ public class AranarthUtils {
 				ItemStack[] armor = player.getInventory().getArmorContents();
 				for (ItemStack is : armor) {
 					if (Objects.nonNull(is)) {
+						// Elytras cannot have trims thus must be ignored
+						if (is.getType() == Material.ELYTRA) {
+							continue;
+						}
 						ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
 						if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
 							player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 320, 2));
