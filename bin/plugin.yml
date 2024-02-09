@@ -9,12 +9,3 @@ loadbefore: [mcMMO]
 commands:
    ac:
       description: All underlying commands regarding the plugin
-   homepad:
-      description: Allows for adding a homepad to the list
-   ping:
-      description: Obtains the ping of the player specified
-   nickname:
-      description: Adds a nickname to you or the player specified
-      aliases: [nick]
-   prefix:
-      description: Adds a prefix to you or the player specified
