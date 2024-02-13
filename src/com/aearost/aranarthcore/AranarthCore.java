@@ -41,7 +41,6 @@ import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PitcherPlantPlace;
 import com.aearost.aranarthcore.event.PlayerChat;
-import com.aearost.aranarthcore.event.VillagerCamelDismount;
 import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerLeave;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
@@ -51,6 +50,7 @@ import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
 import com.aearost.aranarthcore.event.TorchflowerBreak;
 import com.aearost.aranarthcore.event.TorchflowerGrow;
 import com.aearost.aranarthcore.event.TorchflowerPlace;
+import com.aearost.aranarthcore.event.VillagerCamelDismount;
 import com.aearost.aranarthcore.event.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.VillagerTradeOverrides;
@@ -85,6 +85,8 @@ import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
 import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockCraft;
 import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockUncraft;
+import com.aearost.aranarthcore.recipes.RecipeTuffA;
+import com.aearost.aranarthcore.recipes.RecipeTuffB;
 import com.aearost.aranarthcore.recipes.RecipeWoolToString;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
@@ -212,6 +214,8 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeBambooPlanks(this);
 		new RecipeGildedBlackstone(this);
 		new RecipeRootedDirt(this);
+		new RecipeTuffA(this);
+		new RecipeTuffB(this);
 	}
 
 	private void initializeCommands() {

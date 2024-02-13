@@ -203,16 +203,18 @@ public class AranarthUtils {
 							continue;
 						}
 						ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
-						if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
-							player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 320, 2));
-						} else if (armorMeta.getTrim().getPattern() == TrimPattern.SILENCE) {
-							player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-						}  else if (armorMeta.getTrim().getPattern() == TrimPattern.SHAPER) {
-							// There is no amplifier to this effect
-							player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-						}  else if (armorMeta.getTrim().getPattern() == TrimPattern.EYE) {
-							// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
-						} 
+						if (armorMeta.hasTrim()) {
+							if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
+								player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 320, 2));
+							} else if (armorMeta.getTrim().getPattern() == TrimPattern.SILENCE) {
+								player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+							}  else if (armorMeta.getTrim().getPattern() == TrimPattern.SHAPER) {
+								// There is no amplifier to this effect
+								player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+							}  else if (armorMeta.getTrim().getPattern() == TrimPattern.EYE) {
+								// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
+							} 
+						}
 					}
 				}
 			}
