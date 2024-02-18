@@ -42,7 +42,7 @@ import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PitcherPlantPlace;
 import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerServerJoin;
-import com.aearost.aranarthcore.event.PlayerServerLeave;
+import com.aearost.aranarthcore.event.PlayerServerQuit;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
@@ -137,7 +137,7 @@ public class AranarthCore extends JavaPlugin {
 		new HomePadPlace(this);
 		new HomePadBreak(this);
 		new PlayerServerJoin(this);
-		new PlayerServerLeave(this);
+		new PlayerServerQuit(this);
 		new GuiTeleportClick(this);
 		new CreeperExplodeDeny(this);
 		new SoilTrampleCancel(this);
