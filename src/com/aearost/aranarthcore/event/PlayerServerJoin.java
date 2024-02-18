@@ -7,9 +7,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 
 public class PlayerServerJoin implements Listener {
 
@@ -33,11 +35,25 @@ public class PlayerServerJoin implements Listener {
 		else if (!AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
 		}
+		DateUtils dateUtils = new DateUtils();
+		String nameToDiplay = "";
 		
 		if (!AranarthUtils.getNickname(player).equals("")) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] " + AranarthUtils.getNickname(player)));
+			nameToDiplay = AranarthUtils.getNickname(player);
 		} else {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + AranarthUtils.getUsername(player)));
+			nameToDiplay = AranarthUtils.getUsername(player);
+		}
+		
+		if (dateUtils.isValentinesDay()) {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.VALENTINES)));
+		} else if (dateUtils.isEaster()) {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.EASTER)));
+		} else if (dateUtils.isHalloween()) {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.HALLOWEEN)));
+		} else if (dateUtils.isChristmas()) {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.CHRISTMAS)));
+		} else {
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDiplay));
 		}
 		
 	}
