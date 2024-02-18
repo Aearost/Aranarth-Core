@@ -47,7 +47,6 @@ public class PlayerServerQuit implements Listener {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDiplay));
 		}
 		
-		
 	}
 	
 }

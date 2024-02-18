@@ -28,7 +28,7 @@ public class DateUtils {
 	
 	public boolean isValentinesDay() {
 		if (this.month == 2) {
-			if (this.day >= 4 && this.day <= 18) {
+			if (this.day >= 4 && this.day <= 14) {
 				return true;
 			}
 		}
