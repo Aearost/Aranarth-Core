@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import org.bukkit.ChatColor;
 
+import com.aearost.aranarthcore.enums.SpecialDay;
+
 /**
  * Provides utility methods to facilitate the formatting of all chat related
  * content.
@@ -80,12 +82,16 @@ public class ChatUtils {
 		return fullItemName;
 	}
 	
-	public static String getSpecialJoinMessage(String username) {
-		return username + " has joined!";
+	public static String getSpecialJoinMessage(String displayName, SpecialDay specialDay) {
+		if (specialDay == SpecialDay.VALENTINES) {
+			return displayName + " has joined!";
+		} else {
+			return displayName;
+		}
 	}
 	
-	public static String getSpecialQuitMessage(String username) {
-		return username + " has quit!";
+	public static String getSpecialQuitMessage(String displayName, SpecialDay specialDay) {
+		return displayName + " has quit!";
 	}
 	
 }

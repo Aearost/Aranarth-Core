@@ -7,6 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
@@ -35,13 +36,13 @@ public class PlayerServerQuit implements Listener {
 		}
 		
 		if (dateUtils.isValentinesDay()) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay)));
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay, SpecialDay.VALENTINES)));
 		} else if (dateUtils.isEaster()) {
-			
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay, SpecialDay.EASTER)));
 		} else if (dateUtils.isHalloween()) {
-			
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay, SpecialDay.HALLOWEEN)));
 		} else if (dateUtils.isChristmas()) {
-			
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay, SpecialDay.CHRISTMAS)));
 		} else {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDiplay));
 		}
