@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.event;
 
-import java.time.LocalDate;
-
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -27,11 +25,6 @@ public class PlayerServerQuit implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
-		
-		int month = LocalDate.now().getMonthValue();
-		int day = LocalDate.now().getDayOfMonth();
-		System.out.println("Month: " + month);
-		System.out.println("Day: " + day);
 		
 		if (!AranarthUtils.getNickname(player).equals("")) {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] " + AranarthUtils.getNickname(player)));
