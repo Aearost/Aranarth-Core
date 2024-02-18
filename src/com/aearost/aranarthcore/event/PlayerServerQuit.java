@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 
 public class PlayerServerQuit implements Listener {
 
@@ -25,12 +26,27 @@ public class PlayerServerQuit implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
-		
+		DateUtils dateUtils = new DateUtils();
+		String nameToDiplay = "";
 		if (!AranarthUtils.getNickname(player).equals("")) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] " + AranarthUtils.getNickname(player)));
+			nameToDiplay = AranarthUtils.getNickname(player);
 		} else {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + AranarthUtils.getUsername(player)));
+			nameToDiplay = AranarthUtils.getUsername(player);
 		}
+		
+		if (dateUtils.isValentinesDay()) {
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDiplay)));
+		} else if (dateUtils.isEaster()) {
+			
+		} else if (dateUtils.isHalloween()) {
+			
+		} else if (dateUtils.isChristmas()) {
+			
+		} else {
+			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDiplay));
+		}
+		
+		
 	}
 	
 }

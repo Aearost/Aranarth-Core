@@ -80,4 +80,12 @@ public class ChatUtils {
 		return fullItemName;
 	}
 	
+	public static String getSpecialJoinMessage(String username) {
+		return username + " has joined!";
+	}
+	
+	public static String getSpecialQuitMessage(String username) {
+		return username + " has quit!";
+	}
+	
 }
