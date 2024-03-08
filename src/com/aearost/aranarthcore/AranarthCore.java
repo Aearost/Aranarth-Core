@@ -72,6 +72,7 @@ import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
 import com.aearost.aranarthcore.recipes.RecipeCobweb;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
 import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
+import com.aearost.aranarthcore.recipes.RecipeDiamondOre;
 import com.aearost.aranarthcore.recipes.RecipeDripstone;
 import com.aearost.aranarthcore.recipes.RecipeGildedBlackstone;
 import com.aearost.aranarthcore.recipes.RecipeGlowInkSac;
@@ -216,6 +217,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeRootedDirt(this);
 		new RecipeTuffA(this);
 		new RecipeTuffB(this);
+		new RecipeDiamondOre(this);
 	}
 
 	private void initializeCommands() {
