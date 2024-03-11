@@ -40,6 +40,8 @@ public class CommandAC implements CommandExecutor {
 				commandResult = CommandCreative.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("blacklist")) {
 				commandResult = CommandBlacklist.onCommand(sender, cmd, label, args);
+			} else if (args[0].toLowerCase().equals("invview")) {
+				commandResult = CommandInvView.onCommand(sender, cmd, label, args);
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
 			}

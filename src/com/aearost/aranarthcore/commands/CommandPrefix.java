@@ -14,7 +14,7 @@ public class CommandPrefix {
 	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /prefix [player] <prefix>"));
+			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac prefix [player] <prefix>"));
 			return false;
 		} else {
 			if (args.length == 2) {
