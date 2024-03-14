@@ -31,7 +31,7 @@ public class GuiBlacklist {
 	
 	private Inventory initializeGui(Player player) {
 		
-		Inventory gui = Bukkit.getServer().createInventory(player, 9, "Blacklist");
+		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Blacklist");
 		List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
 		if (Objects.nonNull(blacklistedItems)) {
 			for (int i = 0; i < blacklistedItems.size(); i++) {
