@@ -5,7 +5,7 @@ import org.bukkit.entity.Camel;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.spigotmc.event.entity.EntityDismountEvent;
+import org.bukkit.event.entity.EntityDismountEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
