@@ -44,6 +44,7 @@ public class PlayerChat implements Listener {
         	chatMessage += event.getPlayer().getName();
         }
         chatMessage += "⊱ " + ChatUtils.translateToColor(event.getMessage() + "&r");
+        chatMessage = chatMessage.replaceAll("%", "%%");
         
         event.setFormat(chatMessage);
     }

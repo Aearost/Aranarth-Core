@@ -1,4 +1,4 @@
-AranarthCore v. 1.2
+AranarthCore v. 1.3
 
 Features
 [+] Added a recipe for diamond ore
@@ -9,3 +9,4 @@ Features
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
+- Messages in chat with the % symbol will no longer cause formatting errors
