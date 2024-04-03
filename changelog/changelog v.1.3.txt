@@ -1,0 +1,11 @@
+AranarthCore v. 1.2
+
+Features
+[+] Added a recipe for diamond ore
+[+] Added a command to view a player's inventory
+[~] There are now 27 slots available in /ac blacklist
+[+] Added special join/quit messages for holidays
+[+] Players receive warning messages as their gear's durability decreases
+
+Bug Fixes
+- You can now view a villager's inventory even after they have a profession

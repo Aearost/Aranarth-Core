@@ -24,6 +24,7 @@ import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreativeExpChangePrevent;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
+import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
@@ -181,6 +182,7 @@ public class AranarthCore extends JavaPlugin {
 		new VillagerInventoryViewClick(this);
 		new VillagerCamelPickup(this);
 		new VillagerCamelDismount(this);
+		new DurabilityDecreaseWarning(this);
 	}
 
 	private void initializeRecipes() {
