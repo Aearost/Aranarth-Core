@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.MountSwim;
 import com.aearost.aranarthcore.event.ParrotJumpCancelDismount;
+import com.aearost.aranarthcore.event.PetHurtPrevent;
 import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PitcherPlantPlace;
@@ -185,6 +186,7 @@ public class AranarthCore extends JavaPlugin {
 		new VillagerCamelDismount(this);
 		new DurabilityDecreaseWarning(this);
 		new ParrotJumpCancelDismount(this);
+		new PetHurtPrevent(this);
 	}
 
 	private void initializeRecipes() {

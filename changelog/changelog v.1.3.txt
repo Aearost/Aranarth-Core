@@ -6,6 +6,7 @@ Features
 [~] There are now 27 slots available in /ac blacklist
 [+] Added special join/quit messages for holidays
 [+] Players receive warning messages as their gear's durability decreases
+[+] Parrots do not dismount from your shoulder unless you hold sneak
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
