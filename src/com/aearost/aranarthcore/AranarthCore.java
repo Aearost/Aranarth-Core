@@ -38,6 +38,7 @@ import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.MountSwim;
+import com.aearost.aranarthcore.event.ParrotJumpCancelDismount;
 import com.aearost.aranarthcore.event.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.PitcherPlantBreak;
 import com.aearost.aranarthcore.event.PitcherPlantPlace;
@@ -183,6 +184,7 @@ public class AranarthCore extends JavaPlugin {
 		new VillagerCamelPickup(this);
 		new VillagerCamelDismount(this);
 		new DurabilityDecreaseWarning(this);
+		new ParrotJumpCancelDismount(this);
 	}
 
 	private void initializeRecipes() {
