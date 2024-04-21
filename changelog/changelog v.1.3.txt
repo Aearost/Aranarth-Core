@@ -7,6 +7,8 @@ Features
 [+] Added special join/quit messages for holidays
 [+] Players receive warning messages as their gear's durability decreases
 [+] Parrots do not dismount from your shoulder unless you hold sneak
+[+] You can no longer hurt pets, whether they are your own or another player's
+[~] Updated message when changing a homepad's icon
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
