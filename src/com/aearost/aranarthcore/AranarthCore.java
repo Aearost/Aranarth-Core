@@ -83,6 +83,7 @@ import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
+import com.aearost.aranarthcore.recipes.RecipeLodestone;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
@@ -126,9 +127,6 @@ public class AranarthCore extends JavaPlugin {
 		}, 0, 100);
 
 	}
-
-	
-
 
 	private void initializeUtils() {
 		PersistenceUtils.loadHomes();
@@ -224,6 +222,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeTuffA(this);
 		new RecipeTuffB(this);
 		new RecipeDiamondOre(this);
+		new RecipeLodestone(this);
 	}
 
 	private void initializeCommands() {
