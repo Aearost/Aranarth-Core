@@ -9,6 +9,7 @@ Features
 [+] Parrots do not dismount from your shoulder unless you hold sneak
 [+] You can no longer hurt pets, whether they are your own or another player's
 [~] Updated message when changing a homepad's icon
+[+] Added an alternate and more affordable recipe for lodestones
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
