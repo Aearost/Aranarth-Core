@@ -117,7 +117,7 @@ public class GuiTeleportClick implements Listener {
 									player.sendMessage(ChatUtils.chatMessageError("This homepad already uses that icon!"));
 								} else {
 									AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
-									player.sendMessage(ChatUtils.chatMessage("&7You have updated the icon of " + home.getHomeName() + "&7 to &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+									player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
 								}
 							} else {
 								if (player.isInsideVehicle()) {

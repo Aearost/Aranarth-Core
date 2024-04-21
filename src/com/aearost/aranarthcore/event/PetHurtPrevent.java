@@ -41,10 +41,10 @@ public class PetHurtPrevent implements Listener {
 							
 							if (owner.getUniqueId().equals(attacker.getUniqueId())) {
 								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt your own &7"
-										+ ChatUtils.getFormattedItemName(pet.getType().name())));
+										+ ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
 							} else {
 								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt &e" + owner.getDisplayName() + "'s &7"
-										+ ChatUtils.getFormattedItemName(pet.getType().name())));
+										+ ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
 							}
 						}
 					}
