@@ -125,7 +125,6 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.updateArmourTrimEffects();
 			}
 		}, 0, 100);
-
 	}
 
 	private void initializeUtils() {
