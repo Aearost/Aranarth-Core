@@ -33,6 +33,7 @@ import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
+import com.aearost.aranarthcore.event.InvisibleItemFramePlace;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
@@ -58,6 +59,7 @@ import com.aearost.aranarthcore.event.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.VillagerTradeOverrides;
 import com.aearost.aranarthcore.event.ZombieHorseSpawn;
+import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
@@ -83,6 +85,7 @@ import com.aearost.aranarthcore.recipes.RecipeHomePad;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
+import com.aearost.aranarthcore.recipes.RecipeInvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.RecipeLodestone;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
@@ -107,6 +110,7 @@ public class AranarthCore extends JavaPlugin {
 		initializeRecipes();
 		initializeCommands();
 		initializeWorlds();
+		initializeItems();
 
 		// Update the files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -184,6 +188,7 @@ public class AranarthCore extends JavaPlugin {
 		new DurabilityDecreaseWarning(this);
 		new ParrotJumpCancelDismount(this);
 		new PetHurtPrevent(this);
+		new InvisibleItemFramePlace(this);
 	}
 
 	private void initializeRecipes() {
@@ -222,6 +227,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeTuffB(this);
 		new RecipeDiamondOre(this);
 		new RecipeLodestone(this);
+		new RecipeInvisibleItemFrame(this);
 	}
 
 	private void initializeCommands() {
@@ -246,6 +252,11 @@ public class AranarthCore extends JavaPlugin {
 		}
 	}
 
+	private void initializeItems() {
+		new InvisibleItemFrame(this);
+		
+	}
+	
 	@Override
 	public void onDisable() {
 		PersistenceUtils.saveHomes();
