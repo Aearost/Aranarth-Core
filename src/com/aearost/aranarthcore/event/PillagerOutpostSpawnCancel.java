@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event;
 
 import org.bukkit.Bukkit;
-import org.bukkit.block.Biome;
 import org.bukkit.entity.Pillager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,14 +24,13 @@ public class PillagerOutpostSpawnCancel implements Listener {
 	public void onPillagerSpawn(final CreatureSpawnEvent e) {
 
 		if (e.getEntity() instanceof Pillager) {
-			if (e.getLocation().getBlock().getBiome() == Biome.DESERT) {
-				int x = e.getLocation().getBlockX();
-				int z = e.getLocation().getBlockZ();
-				
-				if (x >= 20630 && x <= 20810 && z >= -17920 && z <= -17760) {
-					e.setCancelled(true);
-				}
-				
+			int x = e.getLocation().getBlockX();
+			int z = e.getLocation().getBlockZ();
+			
+			if (x >= 20630 && x <= 20810 && z >= -17920 && z <= -17760) {
+				e.setCancelled(true);
+			} else if (x >= -692350 && x <= 692800 && z >= 700140 && z <= 700740) {
+				e.setCancelled(true);
 			}
 		}
 	}
