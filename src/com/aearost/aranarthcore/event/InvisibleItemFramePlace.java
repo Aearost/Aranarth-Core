@@ -10,6 +10,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -17,8 +18,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.ItemFrameUpdateRunnable;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
 
 /**
  * Inspired by tiffany352
@@ -37,7 +38,7 @@ public class InvisibleItemFramePlace implements Listener {
      * Handles placing an Item Frame and determining if it is invisible or not.
      */
     @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
+    public void onPlayerItemFrameInteract(PlayerInteractEvent event) {
         ItemStack is = event.getItem();
         if (is != null) {
         	if (is.getType() == Material.ITEM_FRAME) {
@@ -74,17 +75,33 @@ public class InvisibleItemFramePlace implements Listener {
 	}
 	
 	/**
-     * Updates the visibility of an item frame.
+     * Updates the visibility of an item frame when interacted.
+     * This gets called when the item frame is placed.
+     * 
+     * @param e
      */
     @EventHandler
-    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
-        Entity entity = event.getRightClicked();
+    public void onPlayerItemFrameEntityInteract(final PlayerInteractEntityEvent e) {
+        Entity entity = e.getRightClicked();
         if (InvisibleItemFrame.isInvisibleItemFrame(entity)) {
         	ItemFrame itemFrame = (ItemFrame) entity;
-
             new ItemFrameUpdateRunnable(itemFrame).runTask(InvisibleItemFrame.PLUGIN);
         }
     }
 	
+    /**
+     * Updates the visibility of an item frame when interacted.
+     * This gets called when the item frame is destroyed.
+     * 
+     * @param e
+     */
+    @EventHandler
+    public void onPlayerInteractEntity(final EntityDamageByEntityEvent e) {
+    	Entity entity = e.getEntity();
+        if (InvisibleItemFrame.isInvisibleItemFrame(entity)) {
+        	ItemFrame itemFrame = (ItemFrame) e.getEntity();
+        	new ItemFrameUpdateRunnable(itemFrame).runTask(InvisibleItemFrame.PLUGIN);
+        }
+    }
 	
 }
