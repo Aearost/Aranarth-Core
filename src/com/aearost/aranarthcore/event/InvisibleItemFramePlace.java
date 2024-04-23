@@ -11,6 +11,8 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -29,13 +31,14 @@ public class InvisibleItemFramePlace implements Listener {
 	
 	private Location locationToPlace = null;
 	private BlockFace faceToPlace = null;
+	private boolean isInvisibleItemFrameDestroyed = false;
 
 	public InvisibleItemFramePlace(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**
-     * Handles placing an Item Frame and determining if it is invisible or not.
+     * Handles placing an Invisible Item Frame.
      */
     @EventHandler
     public void onPlayerItemFrameInteract(PlayerInteractEvent event) {
@@ -56,7 +59,7 @@ public class InvisibleItemFramePlace implements Listener {
     }
 
 	/**
-	 * Sets the placed item frame to be invisible if it is an Invisible Item Frame.
+	 * Sets the item in the item frame which is not yet hidden.
 	 * 
 	 * @param e
 	 */
@@ -75,8 +78,7 @@ public class InvisibleItemFramePlace implements Listener {
 	}
 	
 	/**
-     * Updates the visibility of an item frame when interacted.
-     * This gets called when the item frame is placed.
+     * Adds the item to the invisible item frame and makes the frame invisible.
      * 
      * @param e
      */
@@ -90,8 +92,7 @@ public class InvisibleItemFramePlace implements Listener {
     }
 	
     /**
-     * Updates the visibility of an item frame when interacted.
-     * This gets called when the item frame is destroyed.
+     * Removes the item from the invisible item frame and makes the frame visible again.
      * 
      * @param e
      */
@@ -102,6 +103,35 @@ public class InvisibleItemFramePlace implements Listener {
         	ItemFrame itemFrame = (ItemFrame) e.getEntity();
         	new ItemFrameUpdateRunnable(itemFrame).runTask(InvisibleItemFrame.PLUGIN);
         }
+    }
+    
+    /**
+     * Trigger update to the item frame when it is destroyed.
+     * 
+     * @param e
+     */
+    @EventHandler
+    public void onPlayerItemFrameEntityInteract(final HangingBreakByEntityEvent e) {
+        Entity entity = e.getEntity();
+        if (InvisibleItemFrame.isInvisibleItemFrame(entity)) {
+        	ItemFrame itemFrame = (ItemFrame) entity;
+            new ItemFrameUpdateRunnable(itemFrame).runTask(InvisibleItemFrame.PLUGIN);
+            this.isInvisibleItemFrameDestroyed = true;
+        }
+    }
+    
+    /**
+     * Drops an invisible item frame if it is destroyed.
+     * 
+     * @param e
+     */
+    @EventHandler
+    public void onItemFrameDrop(final ItemSpawnEvent e) {
+    	if (e.getEntity().getItemStack().getType() == Material.ITEM_FRAME) {
+    		if (this.isInvisibleItemFrameDestroyed) {
+    			e.getEntity().setItemStack(InvisibleItemFrame.getInvisibleItemFrame());
+    		}
+    	}
     }
 	
 }
