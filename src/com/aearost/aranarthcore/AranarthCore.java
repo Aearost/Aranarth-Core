@@ -33,7 +33,7 @@ import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
 import com.aearost.aranarthcore.event.HomePadStep;
-import com.aearost.aranarthcore.event.InvisibleItemFramePlace;
+import com.aearost.aranarthcore.event.InvisibleItemFrameInteract;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
 import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
@@ -188,7 +188,7 @@ public class AranarthCore extends JavaPlugin {
 		new DurabilityDecreaseWarning(this);
 		new ParrotJumpCancelDismount(this);
 		new PetHurtPrevent(this);
-		new InvisibleItemFramePlace(this);
+		new InvisibleItemFrameInteract(this);
 	}
 
 	private void initializeRecipes() {

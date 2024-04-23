@@ -27,13 +27,13 @@ import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
  * Inspired by tiffany352
  * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/PluginListener.java
  */
-public class InvisibleItemFramePlace implements Listener {
+public class InvisibleItemFrameInteract implements Listener {
 	
 	private Location locationToPlace = null;
 	private BlockFace faceToPlace = null;
 	private boolean isInvisibleItemFrameDestroyed = false;
 
-	public InvisibleItemFramePlace(AranarthCore plugin) {
+	public InvisibleItemFrameInteract(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	

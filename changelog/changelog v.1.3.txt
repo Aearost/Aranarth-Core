@@ -1,6 +1,7 @@
 AranarthCore v. 1.3
 
 Features
+[+] Added invisible item frames
 [+] Added a recipe for diamond ore
 [+] Added a command to view a player's inventory
 [~] There are now 27 slots available in /ac blacklist
@@ -9,7 +10,7 @@ Features
 [+] Parrots do not dismount from your shoulder unless you hold sneak
 [+] You can no longer hurt pets, whether they are your own or another player's
 [~] Updated message when changing a homepad's icon
-[+] Added an alternate and more affordable recipe for lodestones
+[+] Added an alternative and more affordable recipe for lodestones
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
