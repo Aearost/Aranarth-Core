@@ -13,6 +13,10 @@ import org.bukkit.plugin.Plugin;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Inspired by tiffany352
+ * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/InvisibleItemFrames.java
+ */
 public class InvisibleItemFrame {
 
 	public static Plugin PLUGIN = null;

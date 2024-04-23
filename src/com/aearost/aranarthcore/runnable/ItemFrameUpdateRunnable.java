@@ -1,10 +1,14 @@
-package com.aearost.aranarthcore;
+package com.aearost.aranarthcore.runnable;
 
 import org.bukkit.Material;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+/**
+ * Inspired by tiffany352
+ * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/ItemFrameUpdateRunnable.java
+ */
 public class ItemFrameUpdateRunnable extends BukkitRunnable {
     public ItemFrame itemFrame;
 
