@@ -27,8 +27,8 @@ public class HoneyGlazedHamEat implements Listener {
 			int newAmount = e.getItem().getAmount() - 1;
 			e.getItem().setAmount(newAmount);
 			Player player = e.getPlayer();
-			int newHunger = player.getFoodLevel() + 16;
-			float newSaturation = player.getSaturation() + 16.0F;
+			int newHunger = player.getFoodLevel() + 10;
+			float newSaturation = player.getSaturation() + 15.0F;
 			if (newHunger > 20) {
 				newHunger = 20;
 			}
