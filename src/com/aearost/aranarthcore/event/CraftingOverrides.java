@@ -57,7 +57,7 @@ public class CraftingOverrides implements Listener {
 			// Chorus Diamond
 			if (is.getType() == Material.DIAMOND) {
 				
-				// If it's used in a recipe that it shouldn't be used in
+				// If a Chorus Diamond is used in place of a regular Diamond
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
@@ -65,7 +65,7 @@ public class CraftingOverrides implements Listener {
 						return;
 					}
 				}
-				// If the vanilla item is used instead of the custom item
+				// If a regular Diamond is used in place of a Chorus Diamond
 				else {
 					if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
@@ -73,21 +73,21 @@ public class CraftingOverrides implements Listener {
 						return;
 					}
 				}
-				
-				
 			}
 			// Sugarcane Block
 			else if (is.getType() == Material.BAMBOO_BLOCK) {
 				
 				if (isHasLore) {
-					// Must verify the result is not bamboo either as the two recipes overload each other
+					// If a Sugarcane Block is used in place of a regular Sugarcane or Bamboo
 					if (e.getRecipe().getResult().getType() != Material.SUGAR_CANE &&
 							e.getRecipe().getResult().getType() != Material.BAMBOO) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Sugarcane Block to craft this!"));
 						return;
 					}
-				} else {
+				}
+				// If a Sugarcane or Bamboo is used in place of a Sugarcane Block
+				else {
 					if (e.getRecipe().getResult().getType() == Material.SUGAR_CANE) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessageError("You must use a Sugarcane Block to craft this!"));
@@ -96,19 +96,21 @@ public class CraftingOverrides implements Listener {
 				}
 			}
 			// Honey Glazed Ham
-			else if (is.getType() == Material.PORKCHOP) {
+			else if (is.getType() == Material.COOKED_PORKCHOP) {
 				
+				// If a Honey Glazed Ham is used in place of a regular Cooked Porkchop
 				if (isHasLore) {
-					// Must verify the result is not bamboo either as the two recipes overload each other
 					if (e.getRecipe().getResult().getType() == Material.COOKED_PORKCHOP) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Honey Glazed Ham to craft this!"));
+						player.sendMessage(ChatUtils.chatMessageError("You cannot use Honey Glazed Ham to craft this!"));
 						return;
 					}
-				} else {
+				}
+				// If a Cooked Porkchop is used in place of a Honey Glazed Ham
+				else {
 					if (e.getRecipe().getResult().getType() != Material.COOKED_PORKCHOP) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You must use a regular Porkchop to craft this!"));
+						player.sendMessage(ChatUtils.chatMessageError("You must use a regular Cooked Porkchop to craft this!"));
 						return;
 					}
 				}
