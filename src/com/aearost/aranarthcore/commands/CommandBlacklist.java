@@ -21,9 +21,11 @@ public class CommandBlacklist {
 				if (args[1].equals("ignore")) {
 					AranarthUtils.toggleBlacklistIgnoreOrDelete(player.getUniqueId(), false);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
+					return true;
 				} else if (args[1].equals("trash")) {
 					AranarthUtils.toggleBlacklistIgnoreOrDelete(player.getUniqueId(), true);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
+					return true;
 				} else {
 					player.sendMessage(ChatUtils.chatMessageError("Please enter a valid blacklist sub-command!"));
 				}

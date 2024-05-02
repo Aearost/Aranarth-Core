@@ -28,6 +28,8 @@ import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
+import com.aearost.aranarthcore.event.GuiPotionPreventNonPotionAdd;
+import com.aearost.aranarthcore.event.GuiPotionClose;
 import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
@@ -192,6 +194,8 @@ public class AranarthCore extends JavaPlugin {
 		new PetHurtPrevent(this);
 		new InvisibleItemFrameInteract(this);
 		new HoneyGlazedHamEat(this);
+		new GuiPotionClose(this);
+		new GuiPotionPreventNonPotionAdd(this);
 	}
 
 	private void initializeRecipes() {
