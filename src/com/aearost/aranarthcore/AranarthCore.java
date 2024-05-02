@@ -82,6 +82,7 @@ import com.aearost.aranarthcore.recipes.RecipeDripstone;
 import com.aearost.aranarthcore.recipes.RecipeGildedBlackstone;
 import com.aearost.aranarthcore.recipes.RecipeGlowInkSac;
 import com.aearost.aranarthcore.recipes.RecipeHomePad;
+import com.aearost.aranarthcore.recipes.RecipeHoneyGlazedHam;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourDiamond;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
@@ -228,6 +229,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeDiamondOre(this);
 		new RecipeLodestone(this);
 		new RecipeInvisibleItemFrame(this);
+		new RecipeHoneyGlazedHam(this);
 	}
 
 	private void initializeCommands() {
