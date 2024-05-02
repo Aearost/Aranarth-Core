@@ -29,20 +29,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.potions = null;
 	}
-	
-//	public AranarthPlayer(String username, String nickname, String prefix, String bob) {
-//		this.username = username;
-//		this.isStandingOnHomePad = false;
-//		this.currentGuiPageNum = 0;
-//		this.nickname = nickname;
-//		this.prefix = prefix;
-//		this.isMountSwimEnabled = false;
-//		this.survivalInventory = "";
-//		this.creativeInventory = "";
-//		this.isDeletingBlacklistedItems = false;
-//		this.potions = null;
-//	}
-	
+
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory, List<ItemStack> potions) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
