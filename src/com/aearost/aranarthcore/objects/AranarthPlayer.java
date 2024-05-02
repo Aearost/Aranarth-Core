@@ -1,5 +1,9 @@
 package com.aearost.aranarthcore.objects;
 
+import java.util.List;
+
+import org.bukkit.inventory.ItemStack;
+
 public class AranarthPlayer {
 
 	private String username;
@@ -11,6 +15,7 @@ public class AranarthPlayer {
 	private String survivalInventory;
 	private String creativeInventory;
 	private boolean isDeletingBlacklistedItems;
+	private List<ItemStack> potions;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -22,21 +27,23 @@ public class AranarthPlayer {
 		this.survivalInventory = "";
 		this.creativeInventory = "";
 		this.isDeletingBlacklistedItems = false;
+		this.potions = null;
 	}
 	
-	public AranarthPlayer(String username, String nickname, String prefix) {
-		this.username = username;
-		this.isStandingOnHomePad = false;
-		this.currentGuiPageNum = 0;
-		this.nickname = nickname;
-		this.prefix = prefix;
-		this.isMountSwimEnabled = false;
-		this.survivalInventory = "";
-		this.creativeInventory = "";
-		this.isDeletingBlacklistedItems = false;
-	}
+//	public AranarthPlayer(String username, String nickname, String prefix, String bob) {
+//		this.username = username;
+//		this.isStandingOnHomePad = false;
+//		this.currentGuiPageNum = 0;
+//		this.nickname = nickname;
+//		this.prefix = prefix;
+//		this.isMountSwimEnabled = false;
+//		this.survivalInventory = "";
+//		this.creativeInventory = "";
+//		this.isDeletingBlacklistedItems = false;
+//		this.potions = null;
+//	}
 	
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory, List<ItemStack> potions) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -46,6 +53,7 @@ public class AranarthPlayer {
 		this.survivalInventory = survivalInventory;
 		this.creativeInventory = creativeInventory;
 		this.isDeletingBlacklistedItems = false;
+		this.potions = potions;
 	}
 	
 	public String getUsername() {
@@ -118,6 +126,14 @@ public class AranarthPlayer {
 	
 	public void setIsDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
 		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+	}
+	
+	public List<ItemStack> getPotions() {
+		return potions;
+	}
+	
+	public void setPotions(List<ItemStack> potions) {
+		this.potions = potions;
 	}
 	
 }

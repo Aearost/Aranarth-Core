@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
@@ -210,6 +212,7 @@ public class PersistenceUtils {
 			String prefix = null;
 			String survivalInventory = null;
 			String creativeInventory = null;
+			List<ItemStack> potions = null;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -243,10 +246,22 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("creativeInventory")) {
 					creativeInventory = fieldValue;
 					fieldCount++;
+				} else if (fieldName.equals("potions")) {
+					ItemStack[] potionsAsItemStackArray;
+					try {
+						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+					} catch (IOException e) {
+						Bukkit.getLogger().info("There was an issue loading potions!");
+						e.printStackTrace();
+						reader.close();
+						return;
+					}
+					potions = Arrays.asList(potionsAsItemStackArray);
+					fieldCount++;
 				}
 
-				if (fieldCount == 5) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory));
+				if (fieldCount == 6) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions));
 					fieldCount = 0;
 				}
 			}
@@ -302,6 +317,8 @@ public class PersistenceUtils {
 						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
 						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
 						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
+						ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
+						writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");
