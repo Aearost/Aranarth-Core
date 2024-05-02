@@ -11,6 +11,7 @@ Features
 [+] You can no longer hurt pets, whether they are your own or another player's
 [~] Updated message when changing a homepad's icon
 [+] Added an alternative and more affordable recipe for lodestones
+[+] Added a honey glazed ham recipe
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
