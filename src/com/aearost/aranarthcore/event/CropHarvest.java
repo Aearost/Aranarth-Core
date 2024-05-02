@@ -57,8 +57,8 @@ public class CropHarvest implements Listener {
 							// Adds support to increase yield of wheat per crop if using fortune
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
 								ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-								if (heldItem.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)) {
-									int level = heldItem.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS);
+								if (heldItem.containsEnchantment(Enchantment.LOOTING)) {
+									int level = heldItem.getEnchantmentLevel(Enchantment.LOOTING);
 									drop.setAmount(wheatBeetrootDropCalculation(level));
 								}
 							}

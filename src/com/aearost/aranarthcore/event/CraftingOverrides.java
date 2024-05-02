@@ -54,6 +54,7 @@ public class CraftingOverrides implements Listener {
 			
 			boolean isHasLore = is.getItemMeta().hasLore();
 			
+			// Chorus Diamond
 			if (is.getType() == Material.DIAMOND) {
 				
 				// If it's used in a recipe that it shouldn't be used in
@@ -74,7 +75,9 @@ public class CraftingOverrides implements Listener {
 				}
 				
 				
-			} else if (is.getType() == Material.BAMBOO_BLOCK) {
+			}
+			// Sugarcane Block
+			else if (is.getType() == Material.BAMBOO_BLOCK) {
 				
 				if (isHasLore) {
 					// Must verify the result is not bamboo either as the two recipes overload each other
@@ -88,6 +91,24 @@ public class CraftingOverrides implements Listener {
 					if (e.getRecipe().getResult().getType() == Material.SUGAR_CANE) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessageError("You must use a Sugarcane Block to craft this!"));
+						return;
+					}
+				}
+			}
+			// Honey Glazed Ham
+			else if (is.getType() == Material.PORKCHOP) {
+				
+				if (isHasLore) {
+					// Must verify the result is not bamboo either as the two recipes overload each other
+					if (e.getRecipe().getResult().getType() == Material.COOKED_PORKCHOP) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Honey Glazed Ham to craft this!"));
+						return;
+					}
+				} else {
+					if (e.getRecipe().getResult().getType() != Material.COOKED_PORKCHOP) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessageError("You must use a regular Porkchop to craft this!"));
 						return;
 					}
 				}

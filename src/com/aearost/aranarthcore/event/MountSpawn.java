@@ -80,7 +80,7 @@ public class MountSpawn implements Listener {
 				jumpMax = 1.28;
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
-			horse.getAttribute(Attribute.HORSE_JUMP_STRENGTH).setBaseValue(jumpValue);
+			horse.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(jumpValue);
 			
 			// A maximum limit of 25 m/s --> 0.592417062
 			// A minimum limit of 8 m/s --> 0.19
@@ -148,7 +148,7 @@ public class MountSpawn implements Listener {
 				jumpMax = 0.909;
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
-			camel.getAttribute(Attribute.HORSE_JUMP_STRENGTH).setBaseValue(jumpValue);
+			camel.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(jumpValue);
 			
 			// A maximum limit of 18 m/s --> 0.428
 			// A minimum limit of 8 m/s --> 0.19

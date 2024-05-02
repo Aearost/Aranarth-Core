@@ -205,7 +205,7 @@ public class AranarthUtils {
 						ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
 						if (armorMeta.hasTrim()) {
 							if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
-								player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 320, 2));
+								player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 2));
 							} else if (armorMeta.getTrim().getPattern() == TrimPattern.SILENCE) {
 								player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 							}  else if (armorMeta.getTrim().getPattern() == TrimPattern.SHAPER) {

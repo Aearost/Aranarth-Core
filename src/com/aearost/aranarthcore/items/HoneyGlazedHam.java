@@ -15,8 +15,8 @@ public class HoneyGlazedHam {
 	 * 
 	 * @return
 	 */
-	public static ItemStack getSugarcaneBlock() {
-		ItemStack honeyGlazeHam = new ItemStack(Material.PORKCHOP, 1);
+	public static ItemStack getHoneyGlazedHam() {
+		ItemStack honeyGlazeHam = new ItemStack(Material.COOKED_PORKCHOP, 1);
 		ItemMeta meta = honeyGlazeHam.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 		
