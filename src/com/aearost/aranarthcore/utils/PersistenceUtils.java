@@ -246,21 +246,22 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("creativeInventory")) {
 					creativeInventory = fieldValue;
 					fieldCount++;
-				} else if (fieldName.equals("potions")) {
-					ItemStack[] potionsAsItemStackArray;
-					try {
-						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading potions!");
-						e.printStackTrace();
-						reader.close();
-						return;
-					}
-					potions = Arrays.asList(potionsAsItemStackArray);
-					fieldCount++;
 				}
-
-				if (fieldCount == 6) {
+//				else if (fieldName.equals("potions")) {
+//					ItemStack[] potionsAsItemStackArray;
+//					try {
+//						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+//					} catch (IOException e) {
+//						Bukkit.getLogger().info("There was an issue loading potions!");
+//						e.printStackTrace();
+//						reader.close();
+//						return;
+//					}
+//					potions = Arrays.asList(potionsAsItemStackArray);
+//					fieldCount++;
+//				}
+				if (fieldCount == 5) {
+//				if (fieldCount == 6) {
 					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions));
 					fieldCount = 0;
 				}
@@ -317,8 +318,8 @@ public class PersistenceUtils {
 						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
 						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
 						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
-						ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
-						writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
+//						ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
+//						writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");

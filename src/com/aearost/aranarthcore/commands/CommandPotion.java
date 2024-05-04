@@ -17,10 +17,19 @@ public class CommandPotion {
 				if (args.length == 1) {
 					player.sendMessage(ChatUtils.chatMessageError("You must specify a sub-command! /ac potion <sub-command>"));
 					return false;
-				} else {
+				}
+				
+				// MUST FIGURE OUT WHY IT IS NOT ENTERING THIS ELSE
+				// MIGHT NEED TO REMOVE THE ELSE BLOCK AND JUST GO INTO THE CODE FROM THERE
+				// IS IT JUST BECAUSE THERE ARE NO POTIONS THAT I HAVE?????
+				// MIGHT NEED TO JUST MAKE SURE I OPEN INVENTORY EVEN IF THERE ARE NONE
+				
+				else {
+					System.out.println("args[1]: " + args[1]);
 					if (args[1].equals("view")) {
 						// Output chat messages recapping each potion, their strength/duration, and quantity of them
 					} else if (args[1].equals("add")) {
+						System.out.println("???");
 						GuiPotions gui = new GuiPotions(player);
 						gui.openGui();
 					} else if (args[1].equals("remove")) {
@@ -32,7 +41,6 @@ public class CommandPotion {
 						player.sendMessage(ChatUtils.chatMessageError("Please enter a valid potion sub-command!"));
 					}
 				}
-				return false;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
 			}

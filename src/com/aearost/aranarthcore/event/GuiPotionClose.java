@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class GuiPotionClose implements Listener {
 
@@ -27,16 +28,18 @@ public class GuiPotionClose implements Listener {
 	 */
 	@EventHandler
 	public void onPotionInventoryClose(final InventoryCloseEvent e) {
-		Inventory inventory = e.getInventory();
-		if (inventory.getContents().length > 0) {
-			Player player = (Player) e.getPlayer();
-			
-			List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
-			List<ItemStack> inventoryPotions = Arrays.asList(inventory.getContents());
-			for (ItemStack inventoryPotion : inventoryPotions) {
-				potions.add(inventoryPotion);
+		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions")) {
+			Inventory inventory = e.getInventory();
+			if (inventory.getContents().length > 0) {
+				Player player = (Player) e.getPlayer();
+				
+				List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
+				List<ItemStack> inventoryPotions = Arrays.asList(inventory.getContents());
+				for (ItemStack inventoryPotion : inventoryPotions) {
+					potions.add(inventoryPotion);
+				}
+				AranarthUtils.updatePotions(player.getUniqueId(), inventoryPotions);
 			}
-			AranarthUtils.updatePotions(player.getUniqueId(), inventoryPotions);
 		}
 		
 	}
