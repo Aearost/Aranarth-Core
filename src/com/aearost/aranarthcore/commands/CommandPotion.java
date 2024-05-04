@@ -29,7 +29,6 @@ public class CommandPotion {
 						ChatUtils.chatMessageError("You must specify a sub-command! /ac potion <sub-command>"));
 				return false;
 			} else {
-				System.out.println("args[1]: " + args[1]);
 				if (args[1].equals("view")) {
 					
 					if (AranarthUtils.hasPotions(player.getUniqueId())) {
