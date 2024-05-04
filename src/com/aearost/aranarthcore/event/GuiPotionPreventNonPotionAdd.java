@@ -26,18 +26,14 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		System.out.println("A");
 		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions")) {
-			System.out.println("B");
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
-				System.out.println("C");
 				return;
 			}
 			
 			// If adding a new item to the blacklist
 			if (e.getClickedInventory().getSize() == 41) {
-				System.out.println("D");
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
 				if (Objects.isNull(clickedItem)) {
@@ -45,7 +41,6 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 					if (Objects.nonNull(e.getCursor())) {
 						return;
 					}
-					System.out.println("E");
 					e.setCancelled(true);
 					return;
 				}
@@ -53,12 +48,10 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 				if (clickedItem.getType() != Material.POTION
 						&& clickedItem.getType() != Material.SPLASH_POTION
 						&& clickedItem.getType() != Material.LINGERING_POTION) {
-					System.out.println("F");
 					e.setCancelled(true);
 					return;
 				}
 			}
-			System.out.println("G");
 		}
 	}
 	

@@ -31,16 +31,6 @@ public class GuiPotions {
 	
 	private Inventory initializeGui(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 54, "Potions");
-		
-		List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
-		
-		if (Objects.nonNull(potions)) {
-			for (int i = 0; i < potions.size(); i++) {
-				ItemStack potion = potions.get(i);
-				gui.setItem(i, potion);
-			}
-		}
-
 		return gui;
 	}
 
