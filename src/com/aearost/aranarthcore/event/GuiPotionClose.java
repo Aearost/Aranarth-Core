@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -35,6 +36,11 @@ public class GuiPotionClose implements Listener {
 				
 				List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
 				List<ItemStack> inventoryPotions = Arrays.asList(inventory.getContents());
+				
+				if (Objects.isNull(potions)) {
+					return;
+				}
+				
 				for (ItemStack inventoryPotion : inventoryPotions) {
 					potions.add(inventoryPotion);
 				}
