@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -37,14 +38,23 @@ public class GuiPotionClose implements Listener {
 				List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
 				List<ItemStack> inventoryPotions = Arrays.asList(inventory.getContents());
 				
-				if (Objects.isNull(potions)) {
-					return;
+				if (Objects.nonNull(inventoryPotions)) {
+					if (Objects.isNull(potions)) {
+						potions = new ArrayList<ItemStack>();
+					}
+					
+					int potionAmountAdded = 0;
+					for (ItemStack inventoryPotion : inventoryPotions) {
+						if (Objects.nonNull(inventoryPotion)) {
+							potions.add(inventoryPotion);
+							potionAmountAdded++;
+						}
+					}
+					AranarthUtils.updatePotions(player.getUniqueId(), potions);
+					if (potionAmountAdded > 0) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + potionAmountAdded + " &7potions!"));
+					}
 				}
-				
-				for (ItemStack inventoryPotion : inventoryPotions) {
-					potions.add(inventoryPotion);
-				}
-				AranarthUtils.updatePotions(player.getUniqueId(), inventoryPotions);
 			}
 		}
 		
