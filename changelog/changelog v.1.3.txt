@@ -1,6 +1,7 @@
 AranarthCore v. 1.3
 
 Features
+[+] Added a potion inventory to store and auto-refill potions
 [+] Added invisible item frames
 [+] Added a recipe for diamond ore
 [+] Added a command to view a player's inventory
