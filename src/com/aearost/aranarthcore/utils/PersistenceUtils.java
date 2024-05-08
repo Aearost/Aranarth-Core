@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -318,8 +319,12 @@ public class PersistenceUtils {
 						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
 						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
 						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
-//						ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
-//						writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
+//						if (Objects.nonNull(aranarthPlayer.getPotions())) {
+//							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
+//							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
+//						} else {
+//							writer.write("        \"potions\": \"\"\n");
+//						}
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");

@@ -24,12 +24,13 @@ import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreativeExpChangePrevent;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
+import com.aearost.aranarthcore.event.DragonHeadClick;
 import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
-import com.aearost.aranarthcore.event.GuiPotionPreventNonPotionAdd;
 import com.aearost.aranarthcore.event.GuiPotionClose;
+import com.aearost.aranarthcore.event.GuiPotionPreventNonPotionAdd;
 import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
@@ -196,6 +197,7 @@ public class AranarthCore extends JavaPlugin {
 		new HoneyGlazedHamEat(this);
 		new GuiPotionClose(this);
 		new GuiPotionPreventNonPotionAdd(this);
+		new DragonHeadClick(this);
 	}
 
 	private void initializeRecipes() {
