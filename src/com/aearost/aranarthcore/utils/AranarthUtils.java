@@ -18,6 +18,7 @@ import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import com.aearost.aranarthcore.objects.AranarthCoordinate;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 
@@ -27,6 +28,7 @@ public class AranarthUtils {
 	private static List<Home> homes = new ArrayList<>();
 	private static HashMap<UUID, List<ItemStack>> blacklistedItems = new HashMap<>();
 	private static HashMap<UUID, List<ItemStack>> potions = new HashMap<>();
+	private static HashMap<Location, Integer> dragonHeads = new HashMap<>();
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -239,6 +241,34 @@ public class AranarthUtils {
 	
 	public static void toggleBlacklistIgnoreOrDelete(UUID uuid, boolean isDeletingBlacklistedItems) {
 		players.get(uuid).setIsDeletingBlacklistedItems(isDeletingBlacklistedItems);
+	}
+	
+	public static void updateDragonHead(Location location) {
+		// If no dragon heads have been running since the server was started
+		if (dragonHeads.size() == 0) {
+			dragonHeads.put(location, Integer.valueOf(4));
+		} else {
+			for (Location locationInMap : dragonHeads.keySet()) {
+				// If the coordinate is already added
+				if (location.getX() == locationInMap.getX()
+						&& location.getY() == locationInMap.getY()
+						&& location.getZ() == locationInMap.getZ()) {
+					Integer newAmount = Integer.valueOf(dragonHeads.get(location).intValue() + 4);
+					dragonHeads.put(location, newAmount);
+				} else {
+					dragonHeads.put(location, Integer.valueOf(4));
+				}
+			}
+		}
+	}
+	
+	public static int getDragonHeadFuelAmount(Location location) {
+		return dragonHeads.get(location).intValue();
+	}
+	
+	public static void decrementDragonHeadFuelAmount(Location location) {
+		Integer newAmount = Integer.valueOf(dragonHeads.get(location).intValue() - 1);
+		dragonHeads.put(location, newAmount);
 	}
 	
 }
