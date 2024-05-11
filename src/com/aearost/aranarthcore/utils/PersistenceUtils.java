@@ -251,7 +251,6 @@ public class PersistenceUtils {
 				}
 				else if (fieldName.equals("potions")) {
 					ItemStack[] potionsAsItemStackArray;
-					System.out.println("fieldValue: " + fieldValue);
 					if (!fieldValue.equals("")) {
 						try {
 							potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
@@ -262,7 +261,6 @@ public class PersistenceUtils {
 							return;
 						}
 						potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
-						System.out.println("Are there potions?: " + potions.size());
 					}
 					fieldCount++;
 				}
@@ -328,7 +326,6 @@ public class PersistenceUtils {
 							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
 							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						} else {
-							System.out.println("NOT IN");
 							writer.write("        \"potions\": \"\",\n");
 						}
 						
