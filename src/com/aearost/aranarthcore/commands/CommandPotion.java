@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -32,36 +33,42 @@ public class CommandPotion {
 				if (args[1].equals("view")) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					
-					if (aranarthPlayer.getPotions().size() > 0) {
-						List<ItemStack> potions = aranarthPlayer.getPotions();
-						
-						// Sorts all potions alphabetically
-						PotionEffectComparable comparable = new PotionEffectComparable();
-						Collections.sort(potions, comparable);
-						
-						// Counts how many of each potion there is
-						HashMap<String, Integer> amountOfPotions = new HashMap<>();
-						for (ItemStack potionToCount : potions) {
-							PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
-							String potionName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name());
-							String finalizedName = addPotionConsumptionMethodToName(potionToCount, potionName);
+					if (Objects.nonNull(aranarthPlayer.getPotions())) {
+						if (aranarthPlayer.getPotions().size() > 0) {
+							List<ItemStack> potions = aranarthPlayer.getPotions();
 							
-							if (amountOfPotions.containsKey(finalizedName)) {
-								Integer newAmount = Integer.valueOf(amountOfPotions.get(finalizedName).intValue() + 1);
-								amountOfPotions.put(finalizedName, newAmount);
-							} else {
-								amountOfPotions.put(finalizedName, 1);
+							// Sorts all potions alphabetically
+							PotionEffectComparable comparable = new PotionEffectComparable();
+							Collections.sort(potions, comparable);
+							
+							
+							
+							// Counts how many of each potion there is
+							HashMap<String, Integer> amountOfPotions = new HashMap<>();
+							for (ItemStack potionToCount : potions) {
+								PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
+								String potionName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name());
+								System.out.println("Potion Name: " + potionName);
+								String finalizedName = addPotionConsumptionMethodToName(potionToCount, potionName);
+								System.out.println("Finalized Potion Name:" + finalizedName);
+								
+								if (amountOfPotions.containsKey(finalizedName)) {
+									Integer newAmount = Integer.valueOf(amountOfPotions.get(finalizedName).intValue() + 1);
+									amountOfPotions.put(finalizedName, newAmount);
+								} else {
+									amountOfPotions.put(finalizedName, 1);
+								}
 							}
+							
+							// Displays the potions
+							player.sendMessage(ChatUtils.chatMessage("&7Below are the potions you have stored:"));
+							
+							for (String potionName : amountOfPotions.keySet()) {
+								player.sendMessage(ChatUtils.chatMessage("&e" + potionName + " x" + amountOfPotions.get(potionName)));
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
 						}
-						
-						// Displays the potions
-						player.sendMessage(ChatUtils.chatMessage("&7Below are the potions you have stored:"));
-						
-						for (String potionName : amountOfPotions.keySet()) {
-							player.sendMessage(ChatUtils.chatMessage("&e" + potionName + " x" + amountOfPotions.get(potionName)));
-						}
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
 					}
 					
 				} else if (args[1].equals("add")) {
