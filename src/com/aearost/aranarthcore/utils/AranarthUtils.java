@@ -26,7 +26,6 @@ public class AranarthUtils {
 	private static HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
 	private static HashMap<UUID, List<ItemStack>> blacklistedItems = new HashMap<>();
-	private static HashMap<UUID, List<ItemStack>> potions = new HashMap<>();
 	private static HashMap<Location, Integer> dragonHeads = new HashMap<>();
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -126,21 +125,6 @@ public class AranarthUtils {
 	public static boolean hasBlacklistedItems(UUID uuid) {
 		if (Objects.nonNull(blacklistedItems.get(uuid))) {
 			return blacklistedItems.get(uuid).size() > 0;
-		}
-		return false;
-	}
-	
-	public static List<ItemStack> getPotions(UUID uuid) {
-		return potions.get(uuid);
-	}
-	
-	public static void updatePotions(UUID uuid, List<ItemStack> newPotions) {
-		potions.put(uuid, newPotions);
-	}
-	
-	public static boolean hasPotions(UUID uuid) {
-		if (Objects.nonNull(potions.get(uuid))) {
-			return potions.get(uuid).size() > 0;
 		}
 		return false;
 	}
