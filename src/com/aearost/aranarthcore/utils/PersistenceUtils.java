@@ -251,15 +251,19 @@ public class PersistenceUtils {
 				}
 				else if (fieldName.equals("potions")) {
 					ItemStack[] potionsAsItemStackArray;
-					try {
-						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading potions!");
-						e.printStackTrace();
-						reader.close();
-						return;
+					System.out.println("fieldValue: " + fieldValue);
+					if (!fieldValue.equals("")) {
+						try {
+							potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+						} catch (IOException e) {
+							Bukkit.getLogger().info("There was an issue loading potions!");
+							e.printStackTrace();
+							reader.close();
+							return;
+						}
+						potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
+						System.out.println("Are there potions?: " + potions.size());
 					}
-					potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
 					fieldCount++;
 				}
 				
@@ -325,7 +329,7 @@ public class PersistenceUtils {
 							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						} else {
 							System.out.println("NOT IN");
-							writer.write("        \"potions\": \"\"\n");
+							writer.write("        \"potions\": \"\",\n");
 						}
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
