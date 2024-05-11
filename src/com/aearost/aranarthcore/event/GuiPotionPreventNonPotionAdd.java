@@ -8,6 +8,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -42,14 +44,21 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 						return;
 					}
 					e.setCancelled(true);
-					return;
 				}
 				
 				if (clickedItem.getType() != Material.POTION
 						&& clickedItem.getType() != Material.SPLASH_POTION
 						&& clickedItem.getType() != Material.LINGERING_POTION) {
 					e.setCancelled(true);
-					return;
+				} else {
+					PotionMeta meta = (PotionMeta) clickedItem.getItemMeta();
+					// Prevent potions without effects from being added
+					if (meta.getBasePotionType() == PotionType.AWKWARD || 
+							meta.getBasePotionType() == PotionType.MUNDANE || 
+							meta.getBasePotionType() == PotionType.THICK || 
+							meta.getBasePotionType() == PotionType.WATER) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
