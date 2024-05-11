@@ -52,6 +52,7 @@ import com.aearost.aranarthcore.event.PlayerChat;
 import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerQuit;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
+import com.aearost.aranarthcore.event.PotionConsume;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
@@ -198,6 +199,7 @@ public class AranarthCore extends JavaPlugin {
 		new GuiPotionClose(this);
 		new GuiPotionPreventNonPotionAdd(this);
 		new DragonHeadClick(this);
+		new PotionConsume(this);
 	}
 
 	private void initializeRecipes() {

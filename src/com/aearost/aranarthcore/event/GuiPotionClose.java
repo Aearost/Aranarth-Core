@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -14,6 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
@@ -34,9 +36,10 @@ public class GuiPotionClose implements Listener {
 			Inventory inventory = e.getInventory();
 			if (inventory.getContents().length > 0) {
 				Player player = (Player) e.getPlayer();
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				
-				List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
-				List<ItemStack> inventoryPotions = Arrays.asList(inventory.getContents());
+				List<ItemStack> potions = aranarthPlayer.getPotions();
+				List<ItemStack> inventoryPotions = new LinkedList<ItemStack>(Arrays.asList(inventory.getContents()));
 				
 				if (Objects.nonNull(inventoryPotions)) {
 					if (Objects.isNull(potions)) {
@@ -50,7 +53,10 @@ public class GuiPotionClose implements Listener {
 							potionAmountAdded++;
 						}
 					}
-					AranarthUtils.updatePotions(player.getUniqueId(), potions);
+					
+					aranarthPlayer.setPotions(potions);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					
 					if (potionAmountAdded > 0) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + potionAmountAdded + " &7potions!"));
 					}

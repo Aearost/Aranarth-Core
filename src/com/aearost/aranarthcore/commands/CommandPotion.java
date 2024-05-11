@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.commands;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -13,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
 import com.aearost.aranarthcore.gui.GuiPotions;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PotionEffectComparable;
@@ -30,9 +30,10 @@ public class CommandPotion {
 				return false;
 			} else {
 				if (args[1].equals("view")) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					
-					if (AranarthUtils.hasPotions(player.getUniqueId())) {
-						List<ItemStack> potions = AranarthUtils.getPotions(player.getUniqueId());
+					if (aranarthPlayer.getPotions().size() > 0) {
+						List<ItemStack> potions = aranarthPlayer.getPotions();
 						
 						// Sorts all potions alphabetically
 						PotionEffectComparable comparable = new PotionEffectComparable();
