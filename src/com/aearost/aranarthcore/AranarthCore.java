@@ -31,6 +31,8 @@ import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
 import com.aearost.aranarthcore.event.GuiPotionClose;
 import com.aearost.aranarthcore.event.GuiPotionPreventNonPotionAdd;
+import com.aearost.aranarthcore.event.GuiQuiverClose;
+import com.aearost.aranarthcore.event.GuiQuiverPreventNonArrowAdd;
 import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
@@ -53,6 +55,7 @@ import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerQuit;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
 import com.aearost.aranarthcore.event.PotionConsume;
+import com.aearost.aranarthcore.event.QuiverClick;
 import com.aearost.aranarthcore.event.QuiverPreventAddToBundle;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
@@ -203,6 +206,9 @@ public class AranarthCore extends JavaPlugin {
 		new DragonHeadClick(this);
 		new PotionConsume(this);
 		new QuiverPreventAddToBundle(this);
+		new QuiverClick(this);
+		new GuiQuiverClose(this);
+		new GuiQuiverPreventNonArrowAdd(this);
 	}
 
 	private void initializeRecipes() {
