@@ -53,6 +53,7 @@ import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerQuit;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
 import com.aearost.aranarthcore.event.PotionConsume;
+import com.aearost.aranarthcore.event.QuiverPreventAddToBundle;
 import com.aearost.aranarthcore.event.RespawnCancel;
 import com.aearost.aranarthcore.event.SoilTrampleCancel;
 import com.aearost.aranarthcore.event.SugarcaneBlockPlace;
@@ -94,6 +95,7 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeInvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.RecipeLodestone;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
+import com.aearost.aranarthcore.recipes.RecipeQuiver;
 import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
 import com.aearost.aranarthcore.recipes.RecipeSaddleA;
 import com.aearost.aranarthcore.recipes.RecipeSaddleB;
@@ -200,6 +202,7 @@ public class AranarthCore extends JavaPlugin {
 		new GuiPotionPreventNonPotionAdd(this);
 		new DragonHeadClick(this);
 		new PotionConsume(this);
+		new QuiverPreventAddToBundle(this);
 	}
 
 	private void initializeRecipes() {
@@ -240,6 +243,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeLodestone(this);
 		new RecipeInvisibleItemFrame(this);
 		new RecipeHoneyGlazedHam(this);
+		new RecipeQuiver(this);
 	}
 
 	private void initializeCommands() {

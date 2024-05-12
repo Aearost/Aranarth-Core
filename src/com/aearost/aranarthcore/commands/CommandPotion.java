@@ -35,6 +35,11 @@ public class CommandPotion {
 
 					if (Objects.nonNull(aranarthPlayer.getPotions())) {
 						List<ItemStack> potions = aranarthPlayer.getPotions();
+						
+						if (potions.size() == 0) {
+							player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
+							return false;
+						}
 
 						// Counts how many of each potion there is
 						HashMap<String, Integer> amountOfPotions = new HashMap<>();

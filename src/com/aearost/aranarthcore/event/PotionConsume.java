@@ -67,52 +67,51 @@ public class PotionConsume implements Listener {
 	}
 	
 	private void replacePotion(Player player, ItemStack consumedPotion, boolean isUsedFromMainHand) {
-		
 		if (player.getGameMode() != GameMode.SURVIVAL) {
 			return;
 		}
-		
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		
-		
 		List<ItemStack> potions = aranarthPlayer.getPotions();
-		for (ItemStack potion : potions) {
-			PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
-			if (consumedPotion.getType() == potion.getType()) {
-				PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
-				if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
-					// This might not include potions thrown from off-hand
-					int slot = 0;
-					if (isUsedFromMainHand) {
-						slot = player.getInventory().getHeldItemSlot();
-					} else {
-						// This is the slot number for the off-hand
-						slot = 40;
-					}
-					
-					if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
-						potion.setAmount(2);
-						player.getInventory().setItem(slot, potion);
-						potions.remove(potion);
-						aranarthPlayer.setPotions(potions);
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					} else {
-						potions.remove(potion);
-						aranarthPlayer.setPotions(potions);
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-						final int finalSlot = slot;
+		if (Objects.nonNull(potions)) {
+			for (ItemStack potion : potions) {
+				PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
+				if (consumedPotion.getType() == potion.getType()) {
+					PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
+					if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
+						// This might not include potions thrown from off-hand
+						int slot = 0;
+						if (isUsedFromMainHand) {
+							slot = player.getInventory().getHeldItemSlot();
+						} else {
+							// This is the slot number for the off-hand
+							slot = 40;
+						}
 						
-						// Required to add potion to inventory after consumption
-						Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, new Runnable() {
-			                public void run() {
-			                    player.getInventory().setItem(finalSlot, consumedPotion);
-			                }
-			            }, 1L);
+						if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
+							potion.setAmount(2);
+							player.getInventory().setItem(slot, potion);
+							potions.remove(potion);
+							aranarthPlayer.setPotions(potions);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						} else {
+							potions.remove(potion);
+							aranarthPlayer.setPotions(potions);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							final int finalSlot = slot;
+							
+							// Required to add potion to inventory after consumption
+							Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, new Runnable() {
+				                public void run() {
+				                    player.getInventory().setItem(finalSlot, consumedPotion);
+				                }
+				            }, 1L);
+							
+							player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE, 1));
+						}
 						
-						player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE, 1));
+						return;
 					}
-					
-					return;
 				}
 			}
 		}
