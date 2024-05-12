@@ -32,11 +32,35 @@ public class PotionConsume implements Listener {
 	 */
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
-		System.out.println("A");
+		Player player = e.getPlayer();
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		
+		// Can remove duplicate code by putting call to method as it is the same in both
+		// Just test to make sure it works
+		
+		ItemStack consumedPotion = e.getItem();
+		PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
+		List<ItemStack> potions = aranarthPlayer.getPotions();
+		for (ItemStack potion : potions) {
+			PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
+			if (consumedPotion.getType() == potion.getType()) {
+				if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
+					
+					// It depends if the potion is consumed at the time of the event or not
+					e.setCancelled(true);
+					// Might cause exception due to it being deleted even though it's being iterated
+					potions.remove(potion);
+					aranarthPlayer.setPotions(potions);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					
+					return; // Must prevent other quantities from being consumed
+				}
+			}
+		}
 	}
 
 	/**
-	 * Handles the auto-refill functionality when throwing splash potions.
+	 * Handles the auto-refill functionality when throwing splash and lingering potions.
 	 * 
 	 * @author Aearost
 	 *
@@ -57,9 +81,12 @@ public class PotionConsume implements Listener {
 						if (thrownPotion.getType() == potion.getType()) {
 							if (thrownPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
 								
-								
-								
-								
+								// It depends if the potion is consumed at the time of the event or not
+								e.setCancelled(true);
+								// Might cause exception due to it being deleted even though it's being iterated
+								potions.remove(potion);
+								aranarthPlayer.setPotions(potions);
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								
 								return; // Must prevent other quantities from being consumed
 							}
