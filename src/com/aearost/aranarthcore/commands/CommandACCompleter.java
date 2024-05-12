@@ -23,10 +23,6 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("homepad");
 			} else if (!args[0].equals("") && "nick".startsWith(args[0])) {
 				displayedOptions.add("nick");
-			} else if (!args[0].equals("") && "ping".startsWith(args[0])) {
-				displayedOptions.add("ping");
-			} else if (!args[0].equals("") && "prefix".startsWith(args[0])) {
-				displayedOptions.add("prefix");
 			} else if (!args[0].equals("") && "arena".startsWith(args[0])) {
 				displayedOptions.add("arena");
 			} else if (!args[0].equals("") && "creative".startsWith(args[0])) {
@@ -39,11 +35,21 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("swimtoggle");
 				} else if (!args[0].equals("") && "survival".startsWith(args[0])) {
 					displayedOptions.add("survival");
-				} else {
-					// Uncaught potential here!!!
 				}
 			} else if (!args[0].equals("") && "blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
+			} else if (!args[0].equals("") && args[0].startsWith("p")) {
+				if (args[0].equals("p")) {
+					displayedOptions.add("ping");
+					displayedOptions.add("potions");
+					displayedOptions.add("prefix");
+				} else if (!args[0].equals("") && "ping".startsWith(args[0])) {
+					displayedOptions.add("ping");
+				} else if (!args[0].equals("") && "potions".startsWith(args[0])) {
+					displayedOptions.add("potions");
+				} else if (!args[0].equals("") && "prefix".startsWith(args[0])) {
+					displayedOptions.add("prefix");
+				}
 			}
 			// Show all sub-commands of /ac
 			else {
@@ -56,9 +62,11 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("survival");
 				displayedOptions.add("creative");
 				displayedOptions.add("blacklist");
+				displayedOptions.add("potions");
 			}
 		}
 
+		// For all commands that have sub-commands
 		if (args.length > 1) {
 			if (args[0].equals("homepad")) {
 				if (args.length == 2) {
@@ -105,6 +113,15 @@ public class CommandACCompleter implements TabCompleter {
 				} else {
 					displayedOptions.add("ignore");
 					displayedOptions.add("trash");
+				}
+			} else if (args[0].equals("potions")) {
+				if (!args[1].equals("") && "add".startsWith(args[1])) {
+					displayedOptions.add("add");
+				} else if (!args[1].equals("") && "list".startsWith(args[1])) {
+					displayedOptions.add("list");
+				} else {
+					displayedOptions.add("add");
+					displayedOptions.add("list");
 				}
 			}
 		}
