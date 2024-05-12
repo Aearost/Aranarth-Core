@@ -215,6 +215,7 @@ public class PersistenceUtils {
 			String survivalInventory = null;
 			String creativeInventory = null;
 			List<ItemStack> potions = null;
+			List<ItemStack> arrows = null;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -248,8 +249,7 @@ public class PersistenceUtils {
 				} else if (fieldName.equals("creativeInventory")) {
 					creativeInventory = fieldValue;
 					fieldCount++;
-				}
-				else if (fieldName.equals("potions")) {
+				} else if (fieldName.equals("potions")) {
 					ItemStack[] potionsAsItemStackArray;
 					if (!fieldValue.equals("")) {
 						try {
@@ -263,10 +263,24 @@ public class PersistenceUtils {
 						potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
 					}
 					fieldCount++;
+				} else if (fieldName.equals("arrows")) {
+					ItemStack[] arrowsAsItemStackArray;
+					if (!fieldValue.equals("")) {
+						try {
+							arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+						} catch (IOException e) {
+							Bukkit.getLogger().info("There was an issue loading arrows!");
+							e.printStackTrace();
+							reader.close();
+							return;
+						}
+						arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
+					}
+					fieldCount++;
 				}
 				
-				if (fieldCount == 6) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions));
+				if (fieldCount == 7) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions, arrows));
 					fieldCount = 0;
 				}
 			}
@@ -327,6 +341,12 @@ public class PersistenceUtils {
 							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						} else {
 							writer.write("        \"potions\": \"\",\n");
+						}
+						if (Objects.nonNull(aranarthPlayer.getArrows())) {
+							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[aranarthPlayer.getArrows().size()]);
+							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
+						} else {
+							writer.write("        \"arrows\": \"\",\n");
 						}
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {

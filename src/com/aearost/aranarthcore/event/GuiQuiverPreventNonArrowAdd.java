@@ -14,27 +14,27 @@ import org.bukkit.potion.PotionType;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class GuiPotionPreventNonPotionAdd implements Listener {
+public class GuiQuiverPreventNonArrowAdd implements Listener {
 
-	public GuiPotionPreventNonPotionAdd(AranarthCore plugin) {
+	public GuiQuiverPreventNonArrowAdd(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Prevents players from adding non-potion items to the potion inventory
+	 * Prevents players from adding non-arrow items to the arrows inventory
 	 * 
 	 * @author Aearost
 	 *
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions")) {
+		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Quiver")) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
 			}
 			
-			// If adding a new item to the potions inventory
+			// If adding a new item to the arrows inventory
 			if (e.getClickedInventory().getSize() == 41) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
@@ -46,22 +46,28 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 					e.setCancelled(true);
 				}
 				
-				if (clickedItem.getType() != Material.POTION
-						&& clickedItem.getType() != Material.SPLASH_POTION
-						&& clickedItem.getType() != Material.LINGERING_POTION) {
+				if (!isItemArrow(clickedItem)) {
 					e.setCancelled(true);
-				} else {
-					PotionMeta meta = (PotionMeta) clickedItem.getItemMeta();
-					// Prevent potions without effects from being added
-					if (meta.getBasePotionType() == PotionType.AWKWARD || 
-							meta.getBasePotionType() == PotionType.MUNDANE || 
-							meta.getBasePotionType() == PotionType.THICK || 
-							meta.getBasePotionType() == PotionType.WATER) {
-						e.setCancelled(true);
-					}
 				}
 			}
 		}
+	}
+	
+	private boolean isItemArrow(ItemStack item) {
+		if (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW
+				|| item.getType() == Material.SPECTRAL_ARROW) {
+			if (item.getType() == Material.TIPPED_ARROW) {
+				PotionMeta meta = (PotionMeta) item.getItemMeta();
+				if (meta.getBasePotionType() == PotionType.WATER
+						|| meta.getBasePotionType() == PotionType.AWKWARD
+						|| meta.getBasePotionType() == PotionType.MUNDANE
+						|| meta.getBasePotionType() == PotionType.THICK) {
+					return false;
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 	
 }

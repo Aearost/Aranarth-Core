@@ -16,6 +16,7 @@ public class AranarthPlayer {
 	private String creativeInventory;
 	private boolean isDeletingBlacklistedItems;
 	private List<ItemStack> potions;
+	private List<ItemStack> arrows;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -28,9 +29,10 @@ public class AranarthPlayer {
 		this.creativeInventory = "";
 		this.isDeletingBlacklistedItems = false;
 		this.potions = null;
+		this.arrows = null;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory, List<ItemStack> potions) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -41,6 +43,7 @@ public class AranarthPlayer {
 		this.creativeInventory = creativeInventory;
 		this.isDeletingBlacklistedItems = false;
 		this.potions = potions;
+		this.arrows = arrows;
 	}
 	
 	public String getUsername() {
@@ -121,6 +124,14 @@ public class AranarthPlayer {
 	
 	public void setPotions(List<ItemStack> potions) {
 		this.potions = potions;
+	}
+	
+	public List<ItemStack> getArrows() {
+		return arrows;
+	}
+	
+	public void setArrows(List<ItemStack> arrows) {
+		this.arrows = arrows;
 	}
 	
 }
