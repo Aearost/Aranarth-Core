@@ -30,7 +30,7 @@ public class CommandPotion {
 						ChatUtils.chatMessageError("You must specify a sub-command! /ac potion <sub-command>"));
 				return false;
 			} else {
-				if (args[1].equals("view")) {
+				if (args[1].equals("list")) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 					if (Objects.nonNull(aranarthPlayer.getPotions())) {
