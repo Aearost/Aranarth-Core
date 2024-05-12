@@ -21,8 +21,11 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class PotionConsume implements Listener {
+	
+	private AranarthCore plugin;
 
 	public PotionConsume(AranarthCore plugin) {
+		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -39,7 +42,6 @@ public class PotionConsume implements Listener {
 		} else {
 			replacePotion(e.getPlayer(), e.getItem(), false);
 		}
-		
 	}
 
 	/**
@@ -71,12 +73,13 @@ public class PotionConsume implements Listener {
 		}
 		
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
+		
 		
 		List<ItemStack> potions = aranarthPlayer.getPotions();
 		for (ItemStack potion : potions) {
 			PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 			if (consumedPotion.getType() == potion.getType()) {
+				PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
 				if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
 					// This might not include potions thrown from off-hand
 					int slot = 0;
@@ -87,11 +90,28 @@ public class PotionConsume implements Listener {
 						slot = 40;
 					}
 					
-					potion.setAmount(2);
-					player.getInventory().setItem(slot, potion);
-					potions.remove(potion);
-					aranarthPlayer.setPotions(potions);
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
+						potion.setAmount(2);
+						player.getInventory().setItem(slot, potion);
+						potions.remove(potion);
+						aranarthPlayer.setPotions(potions);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					} else {
+						potions.remove(potion);
+						aranarthPlayer.setPotions(potions);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						final int finalSlot = slot;
+						
+						// Required to add potion to inventory after consumption
+						Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, new Runnable() {
+			                public void run() {
+			                    player.getInventory().setItem(finalSlot, consumedPotion);
+			                }
+			            }, 1L);
+						
+						player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE, 1));
+					}
+					
 					return;
 				}
 			}
