@@ -27,7 +27,7 @@ public class RecipeQuiver {
 
 		recipe.setIngredient('S', Material.STRING);
 		recipe.setIngredient('L', Material.LEATHER);
-		recipe.setIngredient('A', Material.ARROW);
+		recipe.setIngredient('A', Material.SPECTRAL_ARROW);
 		
 		Bukkit.addRecipe(recipe);
 	}
