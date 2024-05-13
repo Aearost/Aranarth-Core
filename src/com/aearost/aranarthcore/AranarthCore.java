@@ -16,6 +16,7 @@ import com.aearost.aranarthcore.event.ArenaInventoryItemDropPrevent;
 import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.ArenaPlayerDeath;
+import com.aearost.aranarthcore.event.ArrowConsume;
 import com.aearost.aranarthcore.event.BlacklistItemPickupPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
@@ -209,6 +210,7 @@ public class AranarthCore extends JavaPlugin {
 		new QuiverClick(this);
 		new GuiQuiverClose(this);
 		new GuiQuiverPreventNonArrowAdd(this);
+		new ArrowConsume(this);
 	}
 
 	private void initializeRecipes() {
