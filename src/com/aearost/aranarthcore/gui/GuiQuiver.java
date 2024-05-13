@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,10 +36,20 @@ public class GuiQuiver {
 		
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		List<ItemStack> arrows = aranarthPlayer.getArrows();
+		List<ItemStack> initializedArrows = new ArrayList<>();
+		
 		if (Objects.nonNull(arrows)) {
 			for (int i = 0; i < arrows.size(); i++) {
 				ItemStack arrow = arrows.get(i);
-				gui.setItem(i, arrow);
+				if (Objects.isNull(arrow)) {
+					continue;
+				} else {
+					initializedArrows.add(arrow);
+				}
+			}
+			
+			for (int i = 0; i < initializedArrows.size(); i++) {
+				gui.addItem(initializedArrows.get(i));
 			}
 		}
 		
