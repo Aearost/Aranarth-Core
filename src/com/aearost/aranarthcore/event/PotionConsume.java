@@ -77,8 +77,25 @@ public class PotionConsume implements Listener {
 			for (ItemStack potion : potions) {
 				PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 				if (consumedPotion.getType() == potion.getType()) {
+					
+//					// If it is an mcMMO potion
+//					if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
+//						potionName = potionToCount.getItemMeta().getItemName();
+//					} else {
+//						PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
+//						potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+//					}
+					
 					PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
+					// Ensures that the potion is the same
 					if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
+						// If it's an mcMMO potion, ensure that it is the exact same potion
+						if (consumedPotionMeta.hasItemName()) {
+							if (!consumedPotionMeta.getItemName().equals(potionMeta.getItemName())) {
+								continue;
+							}
+						}
+						
 						// This might not include potions thrown from off-hand
 						int slot = 0;
 						if (isUsedFromMainHand) {
