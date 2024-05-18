@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiTeleport;
@@ -36,7 +37,7 @@ public class GuiTeleportClick implements Listener {
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
 
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Teleport")) {
+		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Teleport") && e.getView().getType() == InventoryType.CHEST) {
 
 			Player player = (Player) e.getWhoClicked();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

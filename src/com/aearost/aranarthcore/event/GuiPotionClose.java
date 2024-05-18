@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -32,7 +33,7 @@ public class GuiPotionClose implements Listener {
 	 */
 	@EventHandler
 	public void onPotionInventoryClose(final InventoryCloseEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions")) {
+		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions") && e.getView().getType() == InventoryType.CHEST) {
 			Inventory inventory = e.getInventory();
 			if (inventory.getContents().length > 0) {
 				Player player = (Player) e.getPlayer();
