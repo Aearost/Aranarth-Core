@@ -57,7 +57,10 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 							meta.getBasePotionType() == PotionType.MUNDANE || 
 							meta.getBasePotionType() == PotionType.THICK || 
 							meta.getBasePotionType() == PotionType.WATER) {
-						e.setCancelled(true);
+						// Allows mcMMO potions to be placed in the inventory
+						if (meta.getCustomEffects().size() == 0) {
+							e.setCancelled(true);
+						}
 					}
 				}
 			}
