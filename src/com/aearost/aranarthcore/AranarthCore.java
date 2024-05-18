@@ -17,6 +17,7 @@ import com.aearost.aranarthcore.event.ArenaItemDrops;
 import com.aearost.aranarthcore.event.ArenaMeltPrevent;
 import com.aearost.aranarthcore.event.ArenaPlayerDeath;
 import com.aearost.aranarthcore.event.ArrowConsume;
+import com.aearost.aranarthcore.event.BewitchedMinecartPlace;
 import com.aearost.aranarthcore.event.BlacklistItemPickupPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
@@ -68,12 +69,14 @@ import com.aearost.aranarthcore.event.VillagerCamelDismount;
 import com.aearost.aranarthcore.event.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.VillagerTradeOverrides;
+import com.aearost.aranarthcore.event.WanderingTraderSpawnAnnounce;
 import com.aearost.aranarthcore.event.ZombieHorseSpawn;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
 import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
 import com.aearost.aranarthcore.recipes.RecipeBell;
+import com.aearost.aranarthcore.recipes.RecipeBewitchedMinecart;
 import com.aearost.aranarthcore.recipes.RecipeBundle;
 import com.aearost.aranarthcore.recipes.RecipeCalcite;
 import com.aearost.aranarthcore.recipes.RecipeChainmailBootsA;
@@ -211,6 +214,8 @@ public class AranarthCore extends JavaPlugin {
 		new GuiQuiverClose(this);
 		new GuiQuiverPreventNonArrowAdd(this);
 		new ArrowConsume(this);
+		new BewitchedMinecartPlace(this);
+		new WanderingTraderSpawnAnnounce(this);
 	}
 
 	private void initializeRecipes() {
@@ -252,6 +257,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeInvisibleItemFrame(this);
 		new RecipeHoneyGlazedHam(this);
 		new RecipeQuiver(this);
+		new RecipeBewitchedMinecart(this);
 	}
 
 	private void initializeCommands() {
