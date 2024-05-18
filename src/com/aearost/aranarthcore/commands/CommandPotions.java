@@ -54,7 +54,6 @@ public class CommandPotions {
 								potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
 							}
 							
-
 							if (amountOfPotions.containsKey(potionName)) {
 								Integer newAmount = Integer.valueOf(amountOfPotions.get(potionName).intValue() + 1);
 								amountOfPotions.put(potionName, newAmount);
@@ -101,21 +100,14 @@ public class CommandPotions {
 	private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
 		String[] partsOfName = potionName.split(" ");
 		String finalName = "";
+		
 		if (potionName.startsWith("Long")) {
 			if (potion.getType() == Material.POTION) {
-				finalName = "Long Potion of ";
+				finalName = "Extended Potion of ";
 			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = "Long Splash Potion of ";
+				finalName = "Extended Splash Potion of ";
 			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = "Long Lingering Potion of ";
-			}
-		} else if (potionName.startsWith("Strong")) {
-			if (potion.getType() == Material.POTION) {
-				finalName = "Strong Potion of ";
-			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = "Strong Splash Potion of ";
-			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = "Strong Lingering Potion of ";
+				finalName = "Extended Lingering Potion of ";
 			}
 		} else {
 			if (potion.getType() == Material.POTION) {
@@ -129,7 +121,7 @@ public class CommandPotions {
 		
 		// Handles formatting the actual potion name
 		for (int i = 0; i < partsOfName.length; i++) {
-			if (partsOfName[i].equals("Long") || partsOfName[0].equals("Strong")) {
+			if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
 				continue;
 			} else {
 				if (i == partsOfName.length - 1) {
@@ -138,8 +130,12 @@ public class CommandPotions {
 					finalName += partsOfName[i] + " ";
 				}
 			}
-			
 		}
+		
+		if (potionName.startsWith("Strong")) {
+			finalName += " II";
+		}
+		
 		return finalName;
 	}
 
