@@ -18,7 +18,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class CommandPotion {
+public class CommandPotions {
 
 	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
@@ -44,15 +44,22 @@ public class CommandPotion {
 						// Counts how many of each potion there is
 						HashMap<String, Integer> amountOfPotions = new HashMap<>();
 						for (ItemStack potionToCount : potions) {
-							PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
-							String potionName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name());
-							String finalizedName = addPotionConsumptionMethodToName(potionToCount, potionName);
-
-							if (amountOfPotions.containsKey(finalizedName)) {
-								Integer newAmount = Integer.valueOf(amountOfPotions.get(finalizedName).intValue() + 1);
-								amountOfPotions.put(finalizedName, newAmount);
+							String potionName = null;
+							
+							// If it is an mcMMO potion
+							if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
+								potionName = potionToCount.getItemMeta().getItemName();
 							} else {
-								amountOfPotions.put(finalizedName, 1);
+								PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
+								potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+							}
+							
+
+							if (amountOfPotions.containsKey(potionName)) {
+								Integer newAmount = Integer.valueOf(amountOfPotions.get(potionName).intValue() + 1);
+								amountOfPotions.put(potionName, newAmount);
+							} else {
+								amountOfPotions.put(potionName, 1);
 							}
 						}
 						
