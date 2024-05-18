@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
@@ -30,7 +31,7 @@ public class GuiBlacklistClick implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Blacklist")) {
+		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Blacklist") && e.getView().getType() == InventoryType.CHEST) {
 			e.setCancelled(true);
 			Player player = (Player) e.getWhoClicked();
 			List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
