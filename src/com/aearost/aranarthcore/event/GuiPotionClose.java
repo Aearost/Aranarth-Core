@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,6 +51,10 @@ public class GuiPotionClose implements Listener {
 					int potionAmountAdded = 0;
 					for (ItemStack inventoryPotion : inventoryPotions) {
 						if (Objects.nonNull(inventoryPotion)) {
+							// Rare chance that inventory glitches and stores air
+							if (inventoryPotion.getType() == Material.AIR) {
+								continue;
+							}
 							potions.add(inventoryPotion);
 							potionAmountAdded++;
 						}
