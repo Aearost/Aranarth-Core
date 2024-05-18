@@ -44,7 +44,13 @@ public class CommandPotions {
 						// Counts how many of each potion there is
 						HashMap<String, Integer> amountOfPotions = new HashMap<>();
 						for (ItemStack potionToCount : potions) {
+							
 							String potionName = null;
+							
+							if (potionToCount.getType() == Material.AIR) {
+								potions.remove(potionToCount);
+								continue;
+							}
 							
 							// If it is an mcMMO potion
 							if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
@@ -61,6 +67,8 @@ public class CommandPotions {
 								amountOfPotions.put(potionName, 1);
 							}
 						}
+						aranarthPlayer.setPotions(potions);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						
 						// Sorts all potion names alphabetically
 						SortedSet<String> sortedMap = new TreeSet<String>(amountOfPotions.keySet());
