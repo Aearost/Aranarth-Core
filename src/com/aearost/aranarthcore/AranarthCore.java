@@ -19,6 +19,7 @@ import com.aearost.aranarthcore.event.ArenaPlayerDeath;
 import com.aearost.aranarthcore.event.ArrowConsume;
 import com.aearost.aranarthcore.event.AxolotlPreventFishDamage;
 import com.aearost.aranarthcore.event.BewitchedMinecartPlace;
+import com.aearost.aranarthcore.event.BewitchedMoveSpeedTest;
 import com.aearost.aranarthcore.event.BlacklistItemPickupPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
@@ -218,6 +219,7 @@ public class AranarthCore extends JavaPlugin {
 		new BewitchedMinecartPlace(this);
 		new WanderingTraderSpawnAnnounce(this);
 		new AxolotlPreventFishDamage(this);
+		new BewitchedMoveSpeedTest(this);
 	}
 
 	private void initializeRecipes() {

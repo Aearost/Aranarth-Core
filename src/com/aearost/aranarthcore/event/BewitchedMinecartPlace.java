@@ -49,7 +49,7 @@ public class BewitchedMinecartPlace implements Listener {
 					e.setCancelled(true);
 					Minecart minecart = (Minecart) Bukkit.getWorld(
 							player.getWorld().getName()).spawnEntity(e.getClickedBlock().getLocation(), EntityType.MINECART);
-					minecart.setMaxSpeed(10000);
+					minecart.setMaxSpeed(3.5);
 					
 //			        minecart.setMetadata("Bewitched", METADATA_VALUE_GOES_HERE);
 				}
