@@ -9,6 +9,7 @@ import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -41,7 +42,7 @@ public class BewitchedMinecartPlace implements Listener {
 			return;
 		}
 		
-		if (Objects.nonNull(e.getClickedBlock())) {
+		if (Objects.nonNull(e.getClickedBlock()) && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (e.getClickedBlock().getType() == Material.RAIL || e.getClickedBlock().getType() == Material.ACTIVATOR_RAIL
 					|| e.getClickedBlock().getType() == Material.DETECTOR_RAIL
 					|| e.getClickedBlock().getType() == Material.POWERED_RAIL) {
@@ -51,6 +52,7 @@ public class BewitchedMinecartPlace implements Listener {
 							player.getWorld().getName()).spawnEntity(e.getClickedBlock().getLocation(), EntityType.MINECART);
 					minecart.setMaxSpeed(3.5);
 					
+					// To add support that the carts will drop as bewitched as well
 //			        minecart.setMetadata("Bewitched", METADATA_VALUE_GOES_HERE);
 				}
 			}
