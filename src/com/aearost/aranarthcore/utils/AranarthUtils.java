@@ -230,7 +230,7 @@ public class AranarthUtils {
 		players.get(uuid).setIsDeletingBlacklistedItems(isDeletingBlacklistedItems);
 	}
 	
-	public static void updateDragonHead(Location location) {
+	public static void updateDragonHead(Location location, boolean isPoweredByRedstone) {
 		// If no dragon heads have been running since the server was started
 		if (dragonHeads.size() == 0) {
 			dragonHeads.put(location, Integer.valueOf(4));
@@ -240,7 +240,11 @@ public class AranarthUtils {
 				if (location.getX() == locationInMap.getX()
 						&& location.getY() == locationInMap.getY()
 						&& location.getZ() == locationInMap.getZ()) {
-					Integer newAmount = Integer.valueOf(dragonHeads.get(location).intValue() + 4);
+					int amount = 4;
+					if (isPoweredByRedstone) {
+						amount = amount * 2;
+					}
+					Integer newAmount = Integer.valueOf(dragonHeads.get(location).intValue() + amount);
 					dragonHeads.put(location, newAmount);
 				} else {
 					dragonHeads.put(location, Integer.valueOf(4));
@@ -250,7 +254,12 @@ public class AranarthUtils {
 	}
 	
 	public static int getDragonHeadFuelAmount(Location location) {
-		return dragonHeads.get(location).intValue();
+		if (Objects.isNull(dragonHeads.get(location))) {
+			return -1;
+		} else {
+			return dragonHeads.get(location).intValue();
+		}
+		
 	}
 	
 	public static void decrementDragonHeadFuelAmount(Location location) {
