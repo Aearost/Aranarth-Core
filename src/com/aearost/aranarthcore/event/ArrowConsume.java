@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.event;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.SpectralArrow;
@@ -35,12 +37,23 @@ public class ArrowConsume implements Listener {
 	@EventHandler
 	public void onArrowUse(final EntityShootBowEvent e) {
 		if (e.getEntity() instanceof Player) {
-			if (e.getProjectile() instanceof Arrow || e.getProjectile() instanceof SpectralArrow) {
-				Player player = (Player) e.getEntity();
-				if (e.getHand() == EquipmentSlot.HAND) {
-					replaceArrow(player, e.getConsumable(), true);
-				} else {
-					replaceArrow(player, e.getConsumable(), false);
+			ItemStack bow = e.getBow();
+			Map<Enchantment, Integer> enchantments = bow.getEnchantments();
+			boolean hasInfinity = false;
+			for (Enchantment enchantment : enchantments.keySet()) {
+				if (enchantment == Enchantment.INFINITY) {
+					hasInfinity = true;
+				}
+			}
+			
+			if (!hasInfinity) {
+				if (e.getProjectile() instanceof Arrow || e.getProjectile() instanceof SpectralArrow) {
+					Player player = (Player) e.getEntity();
+					if (e.getHand() == EquipmentSlot.HAND) {
+						replaceArrow(player, e.getConsumable(), true);
+					} else {
+						replaceArrow(player, e.getConsumable(), false);
+					}
 				}
 			}
 		}
