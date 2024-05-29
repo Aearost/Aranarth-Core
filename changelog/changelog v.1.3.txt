@@ -3,7 +3,7 @@ AranarthCore v. 1.3
 Features
 [+] Added a potion inventory to store and auto-refill potions
 [+] Added a quiver item and inventory to store and auto-refill arrows
-[+] Dragon heads powered by redstone and fueled by chorus diamonds provide dragon's breath when right-clicked
+[+] Dragon heads fueled by chorus diamonds provide dragon's breath when right-clicked
 [+] Added invisible item frames
 [+] Added a recipe for diamond ore
 [+] Added a command to view a player's inventory
@@ -16,6 +16,7 @@ Features
 [+] Added an alternative and more affordable recipe for lodestones
 [+] Added a honey glazed ham recipe
 [+] Announces in chat when a wandering trader spawns, and nearby which player
+[+] Added a speedy minecart known as the Bewitched Minecart
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
