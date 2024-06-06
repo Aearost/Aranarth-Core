@@ -79,6 +79,12 @@ public class VillagerTradeOverrides implements Listener {
 						newTrade.setExperienceReward(true);
 						newTrade.setVillagerExperience(trade.getVillagerExperience());
 						trades.set(i, newTrade);
+					} else if (trade.getResult().getType() == Material.QUARTZ) {
+						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ, 32), trade.getMaxUses());
+						newTrade.addIngredient(new ItemStack(Material.EMERALD, 2));
+						newTrade.setExperienceReward(true);
+						newTrade.setVillagerExperience(trade.getVillagerExperience());
+						trades.set(i, newTrade);
 					}
 				}
 			}
