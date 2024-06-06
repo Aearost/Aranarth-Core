@@ -15,7 +15,7 @@ public class BewitchedMoveSpeedTest implements Listener {
 	}
 	
 	/**
-	 * Deals with displaying a chat message when a wandering trader spawns nearby a player.
+	 * Used to detect if the Bewitched Minecart is slowing down or not.
 	 * 
 	 * @author Aearost
 	 *
@@ -23,7 +23,7 @@ public class BewitchedMoveSpeedTest implements Listener {
 	@EventHandler
 	public void onMinecartMove(final VehicleMoveEvent e) {
 		if (e.getVehicle() instanceof Minecart) {
-			Minecart minecart = (Minecart) e.getVehicle();
+//			Minecart minecart = (Minecart) e.getVehicle();
 //			System.out.println(minecart.getVelocity().length());
 		} else {
 //			System.out.println("???");
