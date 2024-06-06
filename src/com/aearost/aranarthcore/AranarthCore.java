@@ -33,11 +33,11 @@ import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
+import com.aearost.aranarthcore.event.GuiHomepadClick;
 import com.aearost.aranarthcore.event.GuiPotionClose;
 import com.aearost.aranarthcore.event.GuiPotionPreventNonPotionAdd;
 import com.aearost.aranarthcore.event.GuiQuiverClose;
 import com.aearost.aranarthcore.event.GuiQuiverPreventNonArrowAdd;
-import com.aearost.aranarthcore.event.GuiTeleportClick;
 import com.aearost.aranarthcore.event.GuiVillagerClick;
 import com.aearost.aranarthcore.event.HomePadBreak;
 import com.aearost.aranarthcore.event.HomePadPlace;
@@ -103,6 +103,11 @@ import com.aearost.aranarthcore.recipes.RecipeHorseArmourGolden;
 import com.aearost.aranarthcore.recipes.RecipeHorseArmourIron;
 import com.aearost.aranarthcore.recipes.RecipeInvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.RecipeLodestone;
+import com.aearost.aranarthcore.recipes.RecipeMushroomBlockBrown;
+import com.aearost.aranarthcore.recipes.RecipeMushroomBlockBrownUncraft;
+import com.aearost.aranarthcore.recipes.RecipeMushroomBlockRed;
+import com.aearost.aranarthcore.recipes.RecipeMushroomBlockRedUncraft;
+import com.aearost.aranarthcore.recipes.RecipeMushroomStem;
 import com.aearost.aranarthcore.recipes.RecipeNametag;
 import com.aearost.aranarthcore.recipes.RecipeQuiver;
 import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
@@ -160,7 +165,7 @@ public class AranarthCore extends JavaPlugin {
 		new HomePadBreak(this);
 		new PlayerServerJoin(this);
 		new PlayerServerQuit(this);
-		new GuiTeleportClick(this);
+		new GuiHomepadClick(this);
 		new CreeperExplodeDeny(this);
 		new SoilTrampleCancel(this);
 		new CraftingOverrides(this);
@@ -262,6 +267,11 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeHoneyGlazedHam(this);
 		new RecipeQuiver(this);
 		new RecipeBewitchedMinecart(this);
+		new RecipeMushroomBlockBrown(this);
+		new RecipeMushroomBlockBrownUncraft(this);
+		new RecipeMushroomBlockRed(this);
+		new RecipeMushroomBlockRedUncraft(this);
+		new RecipeMushroomStem(this);
 	}
 
 	private void initializeCommands() {

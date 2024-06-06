@@ -17,6 +17,9 @@ Features
 [+] Added a honey glazed ham recipe
 [+] Announces in chat when a wandering trader spawns, and nearby which player
 [+] Added a speedy minecart known as the Bewitched Minecart
+[~] Added log message for when players teleport to a homepad
+[+] Recipes for red mushroom block, brown mushroom block, and mushroom stems
+[+] Recipes to uncraft red mushroom blocks and brown mushroom blocks
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
