@@ -22,9 +22,9 @@ import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
-public class GuiTeleportClick implements Listener {
+public class GuiHomepadClick implements Listener {
 
-	public GuiTeleportClick(AranarthCore plugin) {
+	public GuiHomepadClick(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -127,6 +127,7 @@ public class GuiTeleportClick implements Listener {
 										player.leaveVehicle();
 										mount.teleport(home.getLocation());
 										player.teleport(home.getLocation());
+										Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
 										player.sendMessage(ChatUtils
 												.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
 										player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
@@ -134,6 +135,7 @@ public class GuiTeleportClick implements Listener {
 									}
 								} else {
 									player.teleport(home.getLocation());
+									Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
 									player.sendMessage(ChatUtils
 											.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
 									player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
