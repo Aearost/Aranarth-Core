@@ -197,33 +197,43 @@ public class AranarthUtils {
 			if (Objects.nonNull(aranarthPlayer.getUsername())) {
 				Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
 				if (Objects.nonNull(player)) {
-					ItemStack[] armor = player.getInventory().getArmorContents();
-					for (ItemStack is : armor) {
-						if (Objects.nonNull(is)) {
-							// Elytras cannot have trims thus must be ignored
-							if (is.getType() == Material.ELYTRA) {
-								continue;
-							}
-							if (is.getItemMeta() instanceof ArmorMeta) {
-								ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
-								if (armorMeta.hasTrim()) {
-									if (armorMeta.getTrim().getPattern() == TrimPattern.RAISER) {
-										player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 2));
-									} else if (armorMeta.getTrim().getPattern() == TrimPattern.SILENCE) {
-										player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-									}  else if (armorMeta.getTrim().getPattern() == TrimPattern.SHAPER) {
-										// There is no amplifier to this effect
-										player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-									}  else if (armorMeta.getTrim().getPattern() == TrimPattern.EYE) {
-										// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
-									} 
-								}
-							}
-						}
+					if (verifyPlayerHasArmorTrim(player, TrimPattern.RAISER)) {
+						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 2));
+					}
+					if (verifyPlayerHasArmorTrim(player, TrimPattern.SILENCE)) {
+						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+					}
+					if (verifyPlayerHasArmorTrim(player, TrimPattern.SHAPER)) {
+						// There is no amplifier to this effect
+						player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+					}
+					if (verifyPlayerHasArmorTrim(player, TrimPattern.EYE)) {
+						// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
+					} 
+				}
+			}
+		}
+	}
+	
+	public static boolean verifyPlayerHasArmorTrim(Player player, TrimPattern trimPattern) {
+		ItemStack[] armor = player.getInventory().getArmorContents();
+		for (ItemStack is : armor) {
+			if (Objects.nonNull(is)) {
+				// Elytras cannot have trims thus must be ignored
+				if (is.getType() == Material.ELYTRA) {
+					continue;
+				}
+				if (is.getItemMeta() instanceof ArmorMeta) {
+					ArmorMeta armorMeta = (ArmorMeta) is.getItemMeta();
+					if (armorMeta.hasTrim()) {
+						if (armorMeta.getTrim().getPattern() == trimPattern) {
+							return true;
+						} 
 					}
 				}
 			}
 		}
+		return false;
 	}
 	
 	public static void toggleBlacklistIgnoreOrDelete(UUID uuid, boolean isDeletingBlacklistedItems) {
