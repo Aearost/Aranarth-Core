@@ -59,6 +59,7 @@ import com.aearost.aranarthcore.event.PlayerServerJoin;
 import com.aearost.aranarthcore.event.PlayerServerQuit;
 import com.aearost.aranarthcore.event.PlayerTeleportBetweenWorlds;
 import com.aearost.aranarthcore.event.PotionConsume;
+import com.aearost.aranarthcore.event.PotionEffectStack;
 import com.aearost.aranarthcore.event.QuiverClick;
 import com.aearost.aranarthcore.event.QuiverPreventAddToBundle;
 import com.aearost.aranarthcore.event.RespawnCancel;
@@ -225,6 +226,7 @@ public class AranarthCore extends JavaPlugin {
 		new WanderingTraderSpawnAnnounce(this);
 		new AxolotlPreventFishDamage(this);
 		new BewitchedMoveSpeedTest(this);
+		new PotionEffectStack(this);
 	}
 
 	private void initializeRecipes() {
