@@ -48,7 +48,7 @@ public class AranarthUtils {
 
 	/**
 	 * Sets the username of a player. This is used to update a player's username
-	 * value in the case that they changed it.
+	 * value in the case that they chansged it.
 	 * 
 	 * @param player
 	 */
@@ -92,7 +92,8 @@ public class AranarthUtils {
 	}
 	
 	public static String getNickname(OfflinePlayer player) {
-		return players.get(player.getUniqueId()).getNickname();
+		String nickname = players.get(player.getUniqueId()).getNickname();
+		return nickname.equals("") ? getUsername(player) : nickname;
 	}
 
 	public static void addNewHome(Location location) {
