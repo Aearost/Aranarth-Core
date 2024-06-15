@@ -64,10 +64,10 @@ public class DragonHeadClick implements Listener {
 						ItemMeta meta = (ItemMeta) e.getItem().getItemMeta();
 						if (meta.hasLore()) {
 							boolean isPoweredByRedstone = head.isBlockPowered() || head.isBlockIndirectlyPowered();
-							AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
+							int fuelAmountAdded = AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
 							int newAmount = e.getItem().getAmount() - 1;
 							e.getItem().setAmount(newAmount);
-							player.sendMessage(ChatUtils.chatMessage("&7You have added fuel to the head!"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have added " + fuelAmountAdded + " fuel to the head!"));
 						}
 					}
 				}
