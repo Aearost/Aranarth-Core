@@ -7,6 +7,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -60,8 +61,11 @@ public class PotionEffectStack implements Listener {
 					stackedAmplifier = oldEffect.getAmplifier() + newEffect.getAmplifier() + 1;
 				}
 				
-				// Do not apply armor trim effects numerous times
-				if (newEffect.getAmplifier() == 2) {
+				// Do not apply armor trim or beacon effects if player already has the effect
+				// Potential way to accomplish would be by adding a HashMap<PotionEffectType, boolean>
+				// in AranarthPlayer which tracks if that player has the effect from a beacon
+				// It would take extra validation to enable/disable
+				if (e.getCause() == Cause.PLUGIN || e.getCause() == Cause.BEACON) {
 					return;
 				}
 				
