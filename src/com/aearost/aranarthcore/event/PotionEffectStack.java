@@ -7,6 +7,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
+import org.bukkit.event.entity.EntityPotionEffectEvent.Action;
 import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -26,7 +27,9 @@ public class PotionEffectStack implements Listener {
 	 */
 	@EventHandler
 	public void onPotionAdd(final EntityPotionEffectEvent e) {
-		
+//		System.out.println("Action is " + e.getAction().name());
+//		System.out.println("Cause is " + e.getCause().name());
+//		
 //		if (Objects.isNull(e.getOldEffect())) {
 //			System.out.println("Old is null");
 //		} else {
@@ -42,6 +45,11 @@ public class PotionEffectStack implements Listener {
 //			System.out.println("New Duration: " + e.getNewEffect().getDuration());
 //			System.out.println("New Amplifier: " + e.getNewEffect().getAmplifier());
 //		}
+		
+		// Prevents recursive call from calling recursively again
+		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN) {
+			return;
+		}
 		
 		if (e.getEntity() instanceof LivingEntity) {
 			LivingEntity entity = (LivingEntity) e.getEntity();
@@ -75,7 +83,7 @@ public class PotionEffectStack implements Listener {
 						stackedAmplifier = 9;
 					}
 				}
-				entity.removePotionEffect(newEffect.getType());
+				// This will call the event recursively
 				entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
 			}
 		}
