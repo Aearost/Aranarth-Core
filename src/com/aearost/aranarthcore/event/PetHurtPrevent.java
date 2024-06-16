@@ -57,7 +57,6 @@ public class PetHurtPrevent implements Listener {
 	}
 	
 	private boolean isPlayerCausedDamage(DamageCause cause) {
-		System.out.println("Cause is: " + cause.name());
 		return (cause == DamageCause.ENTITY_ATTACK) || (cause == DamageCause.ENTITY_SWEEP_ATTACK)
 				|| (cause == DamageCause.PROJECTILE);
 	}

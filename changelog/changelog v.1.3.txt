@@ -27,3 +27,4 @@ Bug Fixes
 - You can now view a villager's inventory even after they have a profession
 - Messages in chat with the % symbol will no longer cause formatting errors
 - Named shulker box inventories are no longer mistaken for GUI inventories
+- Players that are offline no longer have their pets able to be attacked by players
