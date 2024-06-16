@@ -77,16 +77,59 @@ public class PotionEffectStack implements Listener {
 					return;
 				}
 				
-				// Adding restrictions based on each potion effect
-				if (newEffect.getType() == PotionEffectType.SPEED) {
-					if (stackedAmplifier >= 10) {
-						stackedAmplifier = 9;
-					}
-				}
+				// Adds amplifier restrictions based on the potion's type
+				stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
+				
 				// This will call the event recursively
 				entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
 			}
 		}
+	}
+	
+	/**
+	 * Limits the amplifier level of each effect based on certain potion types.
+	 * All types inevitably will be restricted to an amplifier of 10.
+	 * 
+	 * @param calculatedAmplifier
+	 * @param type
+	 * @return
+	 */
+	private int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
+		 if (type == PotionEffectType.HEALTH_BOOST) {
+				if (calculatedAmplifier >= 5) {
+					calculatedAmplifier = 4;
+				}
+		} else if (type == PotionEffectType.REGENERATION) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
+		} else if (type == PotionEffectType.SLOWNESS) {
+			if (calculatedAmplifier >= 5) {
+				calculatedAmplifier = 4;
+			}
+		} else if (type == PotionEffectType.STRENGTH) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
+		} else if (type == PotionEffectType.WEAKNESS) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
+		} else if (type == PotionEffectType.LEVITATION) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
+		} else if (type == PotionEffectType.WITHER) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
+		} else {
+			if (calculatedAmplifier >= 10) {
+				calculatedAmplifier = 9;
+			}
+		}
+		
+		return calculatedAmplifier;
 	}
 	
 }
