@@ -21,7 +21,8 @@ public class CoralDry implements Listener {
 	 */
 	@EventHandler
 	public void onCoralDry(final BlockFadeEvent e) {
-		if (e.getBlock().getWorld().getName().toLowerCase().equals("world")) {
+		if (e.getBlock().getWorld().getName().toLowerCase().equals("world") ||
+				e.getBlock().getWorld().getName().toLowerCase().equals("creative")) {
 			if (isCoral(e.getBlock().getType())) {
 				e.setCancelled(true);
 			}
