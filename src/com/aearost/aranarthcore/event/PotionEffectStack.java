@@ -69,7 +69,7 @@ public class PotionEffectStack implements Listener {
 	
 	/**
 	 * Limits the amplifier level of each effect based on certain potion types.
-	 * All types inevitably will be restricted to a6n amplifier of 10.
+	 * All types inevitably will be restricted to an amplifier of 10.
 	 * 
 	 * @param calculatedAmplifier
 	 * @param type
