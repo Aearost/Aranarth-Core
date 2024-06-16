@@ -27,25 +27,6 @@ public class PotionEffectStack implements Listener {
 	 */
 	@EventHandler
 	public void onPotionAdd(final EntityPotionEffectEvent e) {
-//		System.out.println("Action is " + e.getAction().name());
-//		System.out.println("Cause is " + e.getCause().name());
-//		
-//		if (Objects.isNull(e.getOldEffect())) {
-//			System.out.println("Old is null");
-//		} else {
-//			System.out.println("Old Type: " + e.getOldEffect().getType().getKey().toString());
-//			System.out.println("Old Duration: " + e.getOldEffect().getDuration());
-//			System.out.println("Old Amplifier: " + e.getOldEffect().getAmplifier());
-//		}
-//		
-//		if (Objects.isNull(e.getNewEffect())) {
-//			System.out.println("New is null");
-//		} else {
-//			System.out.println("New Type: " + e.getNewEffect().getType().getKey().toString());
-//			System.out.println("New Duration: " + e.getNewEffect().getDuration());
-//			System.out.println("New Amplifier: " + e.getNewEffect().getAmplifier());
-//		}
-		
 		// Prevents recursive call from calling recursively again
 		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN) {
 			return;
@@ -88,20 +69,32 @@ public class PotionEffectStack implements Listener {
 	
 	/**
 	 * Limits the amplifier level of each effect based on certain potion types.
-	 * All types inevitably will be restricted to an amplifier of 10.
+	 * All types inevitably will be restricted to a6n amplifier of 10.
 	 * 
 	 * @param calculatedAmplifier
 	 * @param type
 	 * @return
 	 */
 	private int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
-		 if (type == PotionEffectType.HEALTH_BOOST) {
+		 if (type == PotionEffectType.ABSORPTION) {
 				if (calculatedAmplifier >= 5) {
 					calculatedAmplifier = 4;
 				}
+		} else if (type == PotionEffectType.HEALTH_BOOST) {
+			if (calculatedAmplifier >= 5) {
+				calculatedAmplifier = 4;
+			}
+		} else if (type == PotionEffectType.LEVITATION) {
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
+			}
 		} else if (type == PotionEffectType.REGENERATION) {
 			if (calculatedAmplifier >= 3) {
 				calculatedAmplifier = 2;
+			}
+		} else if (type == PotionEffectType.RESISTANCE) {
+			if (calculatedAmplifier >= 5) {
+				calculatedAmplifier = 4;
 			}
 		} else if (type == PotionEffectType.SLOWNESS) {
 			if (calculatedAmplifier >= 5) {
@@ -112,10 +105,6 @@ public class PotionEffectStack implements Listener {
 				calculatedAmplifier = 2;
 			}
 		} else if (type == PotionEffectType.WEAKNESS) {
-			if (calculatedAmplifier >= 3) {
-				calculatedAmplifier = 2;
-			}
-		} else if (type == PotionEffectType.LEVITATION) {
 			if (calculatedAmplifier >= 3) {
 				calculatedAmplifier = 2;
 			}
