@@ -7,7 +7,6 @@ Features
 [+] Dragon heads fueled by chorus diamonds provide dragon's breath when right-clicked
 [+] Added invisible item frames
 [+] Added a recipe for diamond ore
-[+] Added a command to view a player's inventory
 [~] There are now 27 slots available in /ac blacklist
 [+] Added special join/quit messages for holidays
 [+] Players receive warning messages as their gear's durability decreases
@@ -22,9 +21,11 @@ Features
 [+] Recipes for red mushroom block, brown mushroom block, and mushroom stems
 [+] Recipes to uncraft red mushroom blocks and brown mushroom blocks
 [+] Mason villagers will now sell 32 quartz for 2 emeralds, instead of 12 quartz for 1 emerald
+[+] Coral no longer dries in the creative world either
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
 - Messages in chat with the % symbol will no longer cause formatting errors
 - Named shulker box inventories are no longer mistaken for GUI inventories
 - Players that are offline no longer have their pets able to be attacked by players
+- Survival inventory is no longer corrupted when dying in the creative world
