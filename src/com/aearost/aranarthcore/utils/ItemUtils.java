@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.utils;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -14,40 +13,7 @@ import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder;
 
-import com.aearost.aranarthcore.enums.Item;
-import com.aearost.aranarthcore.items.HomePad;
-
 public class ItemUtils {
-
-	private final static HashMap<String, ItemStack> itemsToItemStack = new HashMap<String, ItemStack>();
-
-	public ItemUtils() {
-		initializeItemsToItemStack();
-	}
-
-	/**
-	 * Initializes all items into ItemStacks to the itemsToItemStack HashMap.
-	 */
-	private void initializeItemsToItemStack() {
-		// Basic Items
-		itemsToItemStack.put(Item.HOMEPAD.name(), HomePad.getHomePad());
-	}
-
-	public static ItemStack getItem(String itemName) {
-		Item i = Item.valueOf(itemName.toUpperCase());
-		return itemsToItemStack.get(i.name());
-	}
-
-	// Might need tweaking when used as it was translated to work for Teas
-	public static String getItemName(ItemStack is) {
-		String itemName = is.getItemMeta().getDisplayName();
-		if (itemName.startsWith("&")) {
-			itemName = itemName.substring(2);
-		}
-		itemName = itemName.toUpperCase();
-		itemName = itemName.replace(" ", "_");
-		return itemName;
-	}
 	
 	/**
 	 * Handles giving the target an item.
