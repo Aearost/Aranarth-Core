@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import com.aearost.aranarthcore.items.HomePad;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
@@ -34,8 +35,8 @@ public class CommandHomePad {
 							}
 						}
 						if (playerInArg != null) {
-							ItemStack homepadIS = ItemUtils.getItem("homepad");
-							ItemUtils.giveItem(homepadIS, playerInArg, sender);
+							ItemStack homepadItem = HomePad.getHomePad();
+							ItemUtils.giveItem(homepadItem, playerInArg, sender);
 						} else {
 							player.sendMessage(ChatUtils.chatMessageError(args[1] + " is not a valid player name!"));
 						}
