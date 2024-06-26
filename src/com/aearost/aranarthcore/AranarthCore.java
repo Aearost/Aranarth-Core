@@ -46,6 +46,7 @@ import com.aearost.aranarthcore.event.HoneyGlazedHamEat;
 import com.aearost.aranarthcore.event.InvisibleItemFrameInteract;
 import com.aearost.aranarthcore.event.ItemPickupAddToShulker;
 import com.aearost.aranarthcore.event.LogWoodStripPrevent;
+import com.aearost.aranarthcore.event.MangroveRootShear;
 import com.aearost.aranarthcore.event.MobDestroyDoorPrevent;
 import com.aearost.aranarthcore.event.MountSpawn;
 import com.aearost.aranarthcore.event.MountSwim;
@@ -227,6 +228,7 @@ public class AranarthCore extends JavaPlugin {
 		new AxolotlPreventFishDamage(this);
 		new BewitchedMoveSpeedTest(this);
 		new PotionEffectStack(this);
+		new MangroveRootShear(this);
 	}
 
 	private void initializeRecipes() {
