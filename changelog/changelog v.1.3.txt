@@ -23,6 +23,7 @@ Features
 [+] Mason villagers will now sell 32 quartz for 2 emeralds, instead of 12 quartz for 1 emerald
 [+] Coral no longer dries in the creative world either
 [+] Homepad pages can be cycled by clicking previous or next on first or last page
+[+] Muddy Mangrove Roots can now be sheared to drop Hanging Roots
 
 Bug Fixes
 - You can now view a villager's inventory even after they have a profession
