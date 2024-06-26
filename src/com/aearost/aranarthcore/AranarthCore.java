@@ -22,6 +22,7 @@ import com.aearost.aranarthcore.event.BewitchedMinecartPlace;
 import com.aearost.aranarthcore.event.BewitchedMoveSpeedTest;
 import com.aearost.aranarthcore.event.BlacklistItemPickupPrevent;
 import com.aearost.aranarthcore.event.BuddingAmethystBreak;
+import com.aearost.aranarthcore.event.ChestSort;
 import com.aearost.aranarthcore.event.ConcretePowderGravityPrevent;
 import com.aearost.aranarthcore.event.CoralDry;
 import com.aearost.aranarthcore.event.CraftingOverrides;
@@ -229,6 +230,7 @@ public class AranarthCore extends JavaPlugin {
 		new BewitchedMoveSpeedTest(this);
 		new PotionEffectStack(this);
 		new MangroveRootShear(this);
+		new ChestSort(this);
 	}
 
 	private void initializeRecipes() {
