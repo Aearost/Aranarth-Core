@@ -61,6 +61,21 @@ public class GuiHomepadClick implements Listener {
 					GuiTeleport gui = new GuiTeleport(player, currentPage);
 					gui.openGui();
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+				} else if (currentPage == 0) {
+					int numOfHomes = AranarthUtils.getHomes().size();
+					int maxPages;
+					// If the amount is a multiple of 27
+					if (numOfHomes % 27 == 0) {
+						maxPages = numOfHomes / 27;
+					} else {
+						maxPages = (int) Math.floor(numOfHomes / 27) + 1;
+					}
+					if (maxPages > 1) {
+						aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
+						GuiTeleport gui = new GuiTeleport(player, maxPages - 1);
+						gui.openGui();
+						player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+					}
 				}
 				return;
 			}
@@ -88,6 +103,11 @@ public class GuiHomepadClick implements Listener {
 					currentPage++;
 					aranarthPlayer.setCurrentGuiPageNum(currentPage);
 					GuiTeleport gui = new GuiTeleport(player, currentPage);
+					gui.openGui();
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+				} else {
+					aranarthPlayer.setCurrentGuiPageNum(0);
+					GuiTeleport gui = new GuiTeleport(player, 0);
 					gui.openGui();
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}

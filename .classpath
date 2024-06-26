@@ -7,6 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="C:/Users/Liam/Desktop/Folders/Minecraft/Test Server/plugins/mcMMO.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Liam/Desktop/Folders/Minecraft/BuildTools/Spigot/Spigot-API/target/spigot-api-1.20.6-R0.1-SNAPSHOT-shaded.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Liam/Desktop/Folders/Minecraft/BuildTools/Spigot/Spigot-API/target/spigot-api-1.21-R0.1-SNAPSHOT-shaded.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
