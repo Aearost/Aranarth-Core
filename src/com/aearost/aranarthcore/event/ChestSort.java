@@ -1,5 +1,10 @@
 package com.aearost.aranarthcore.event;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -13,6 +18,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.ChestItemComparator;
 
 public class ChestSort implements Listener {
 
@@ -35,13 +41,53 @@ public class ChestSort implements Listener {
 					BlockState state = e.getClickedBlock().getState();
 					Container container = (Container) state;
 					
-					for (ItemStack item : container.getInventory().getContents()) {
-						if (item != null) {
-							System.out.println(item.getType().name());
+					ItemStack[] itemsStacked = stackItemsInContainer(container.getInventory().getContents());
+					List<ItemStack> sortedList = new ArrayList<ItemStack>();
+					for (ItemStack stackedItem : itemsStacked) {
+						if (Objects.nonNull(stackedItem)) {
+							if (stackedItem.getType() != Material.AIR) {
+								sortedList.add(stackedItem);
+							}
+						}
+					}
+					
+					ChestItemComparator comparator = new ChestItemComparator();
+					Collections.sort(sortedList, comparator);
+					
+					ItemStack[] sortedArray = new ItemStack[sortedList.size()];
+					for (int i = 0; i < sortedList.size(); i++) {
+						sortedArray[i] = sortedList.get(i);
+					}
+					container.getInventory().setContents(sortedArray);
+				}
+			}
+		}
+	}
+	
+	private ItemStack[] stackItemsInContainer(ItemStack[] chestInventory) {
+		// Handles filling up all slots to the maximum amount
+		for (int i = 0; i < chestInventory.length; i++) {
+			ItemStack iterated = chestInventory[i];
+			if (iterated != null) {
+				// If it is not a full stack, check for other slots for the same item
+				if (iterated.getMaxStackSize() > iterated.getAmount()) {
+					for (int j = i + 1; j < chestInventory.length; j++) {
+						ItemStack nextIterated = chestInventory[j];
+						if (nextIterated != null) {
+							if (nextIterated.isSimilar(iterated)) {
+								// Handle adjusting the inventory
+								int newAmount = iterated.getAmount() + nextIterated.getAmount();
+								if (newAmount > iterated.getMaxStackSize()) {
+									newAmount = iterated.getMaxStackSize();
+								}
+								chestInventory[j].setAmount(nextIterated.getAmount() - (newAmount - iterated.getAmount()));
+								chestInventory[i].setAmount(newAmount);
+							}
 						}
 					}
 				}
 			}
 		}
+		return chestInventory;
 	}
 }
