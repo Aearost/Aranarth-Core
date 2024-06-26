@@ -6,6 +6,8 @@ This repository is used to track the development of the AranarthCore plugin, use
 
 The plugin contains many diverse features such as:
 - Homepads that allow teleportation across the world and dimensions
+- Enhanced potion functionality
+- Quiver to store various types of arrows
 - Automatic crop replanting
 - Improved horse stats and abilities
 - Reduced mob griefing
