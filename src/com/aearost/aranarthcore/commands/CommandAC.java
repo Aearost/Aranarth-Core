@@ -42,6 +42,8 @@ public class CommandAC implements CommandExecutor {
 				commandResult = CommandBlacklist.onCommand(sender, cmd, label, args);
 			} else if (args[0].toLowerCase().equals("potions")) {
 				commandResult = CommandPotions.onCommand(sender, cmd, label, args);
+			} else if (args[0].toLowerCase().equals("whereis")) {
+				commandResult = CommandWhereIs.onCommand(sender, cmd, label, args);
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
 			}
