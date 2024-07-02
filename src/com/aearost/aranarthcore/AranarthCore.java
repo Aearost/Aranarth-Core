@@ -33,6 +33,7 @@ import com.aearost.aranarthcore.event.DragonHeadClick;
 import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
 import com.aearost.aranarthcore.event.EntityEggPickupCancel;
+import com.aearost.aranarthcore.event.GoatDeath;
 import com.aearost.aranarthcore.event.GuiBlacklistClick;
 import com.aearost.aranarthcore.event.GuiHomepadClick;
 import com.aearost.aranarthcore.event.GuiPotionClose;
@@ -231,6 +232,7 @@ public class AranarthCore extends JavaPlugin {
 		new PotionEffectStack(this);
 		new MangroveRootShear(this);
 		new ChestSort(this);
+		new GoatDeath(this);
 	}
 
 	private void initializeRecipes() {
