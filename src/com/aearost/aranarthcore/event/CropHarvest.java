@@ -37,8 +37,8 @@ public class CropHarvest implements Listener {
 		if (e.getPlayer().isSneaking()) {
 			Block block = e.getBlock();
 			if (getIsBlockCrop(block)) {
+				e.setCancelled(true);
 				if (getIsMature(block)) {
-					e.setCancelled(true);
 					// Prevents the block from actually being broken
 					ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
 					if (drops.size() > 1) {

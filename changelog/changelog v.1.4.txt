@@ -1,7 +1,9 @@
 AranarthCore v. 1.4
 
 Features
-[+] 
+[+] Chests can now be sorted by holding sneak and left clicking them
+[+] Goats drop mutton when killed, similarly to sheep
+[~] Crop Harvest functionality now will only actually break the crop if it is fully matured
 
 Bug Fixes
 - 
