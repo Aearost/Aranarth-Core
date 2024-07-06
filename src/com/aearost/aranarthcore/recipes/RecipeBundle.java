@@ -25,7 +25,7 @@ public class RecipeBundle {
 		recipe.shape("SLS", "L L", "LLL");
 
 		recipe.setIngredient('S', Material.STRING);
-		recipe.setIngredient('L', Material.LEATHER);
+		recipe.setIngredient('L', Material.RABBIT_HIDE);
 		
 		Bukkit.addRecipe(recipe);
 	}
