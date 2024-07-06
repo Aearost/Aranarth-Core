@@ -115,6 +115,10 @@ public class AranarthUtils {
 		return homes;
 	}
 	
+	public static void setHomes(List<Home> newHomes) {
+		homes = newHomes;
+	}
+	
 	public static List<ItemStack> getBlacklistedItems(UUID uuid) {
 		return blacklistedItems.get(uuid);
 	}
