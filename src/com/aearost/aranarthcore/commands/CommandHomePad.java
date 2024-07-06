@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import org.bukkit.Bukkit;
@@ -11,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.items.HomePad;
+import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
@@ -78,18 +81,40 @@ public class CommandHomePad {
 						return false;
 					}
 				} else if (args[1].equals("reorder")) {
-					// Must be on a valid homepad
-					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
-						if (args.length >= 4) {
-							try {
-								int homeNumber = Integer.parseInt(args[2]);
-								int newNumber = Integer.parseInt(args[3]);
-								
+					if (args.length >= 4) {
+						try {
+							final int homeNumber = Integer.parseInt(args[2]);
+							final int newNumber = Integer.parseInt(args[3]);
+							List<Home> homes = AranarthUtils.getHomes();
+							ArrayList<Home> newHomes = new ArrayList<Home>();
+							if (Objects.isNull(homes) || homes.size() == 0) {
+								sender.sendMessage(ChatUtils.chatMessageError("There are no homes!"));
+								return false;
 							}
+//					/ac homepad reorder 5 0
+//							0 1 2 3 4 5
+//							A B C D E F
+//							  B A C D
+//							  0 1 2 3
+							for (int i = 0; i < homes.size(); i++) {
+								if (i == homeNumber) {
+									System.out.println("A: " + homes.get(i).getHomeName());
+									continue;
+								} else {
+									System.out.println("B: " + homes.get(i).getHomeName());
+									newHomes.add(homes.get(i));
+									if (i == newNumber) {
+										System.out.println("C: " + homes.get(i).getHomeName());
+										newHomes.add(homes.get(homeNumber));
+									}
+								}
+							}
+							AranarthUtils.setHomes(newHomes);
+							sender.sendMessage(ChatUtils.chatMessage("&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
+						} catch (NumberFormatException e) {
+							sender.sendMessage(ChatUtils.chatMessageError("A home could not be updated!"));
+							return false;
 						}
-					} else {
-						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
-						return false;
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessageError("That is not a valid parameter!"));
