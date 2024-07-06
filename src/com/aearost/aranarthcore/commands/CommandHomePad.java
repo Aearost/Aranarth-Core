@@ -77,6 +77,20 @@ public class CommandHomePad {
 						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
 						return false;
 					}
+				} else if (args[1].equals("reorder")) {
+					// Must be on a valid homepad
+					if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
+						if (args.length >= 4) {
+							try {
+								int homeNumber = Integer.parseInt(args[2]);
+								int newNumber = Integer.parseInt(args[3]);
+								
+							}
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
+						return false;
+					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessageError("That is not a valid parameter!"));
 					return false;

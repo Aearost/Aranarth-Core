@@ -4,6 +4,7 @@ Features
 [+] Chests can now be sorted by holding sneak and left clicking them
 [+] Goats drop mutton when killed, similarly to sheep
 [~] Crop Harvest functionality now will only actually break the crop if it is fully matured
+[~] Changed the Bundle recipe to be made with Rabbit Hide instead of Leather
 
 Bug Fixes
 - 
