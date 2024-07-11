@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event;
 
+import java.util.Objects;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -12,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class ItemPickupAddToShulker implements Listener {
 
@@ -30,6 +33,15 @@ public class ItemPickupAddToShulker implements Listener {
 		if (e.getEntity() instanceof Player) {
 			Player player = (Player) e.getEntity();
 			ItemStack pickupItem = e.getItem().getItemStack();
+			
+			if (Objects.nonNull(AranarthUtils.getBlacklistedItems(player.getUniqueId()))) {
+				for (ItemStack blacklistedItem : AranarthUtils.getBlacklistedItems(player.getUniqueId())) {
+					if (pickupItem.getType() == blacklistedItem.getType()) {
+						return;
+					}
+				}
+			}
+			
 			int amountRemaining = pickupItem.getAmount();
 
 			// Skip the logic if the item being picked up is a shulker box
