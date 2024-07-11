@@ -65,8 +65,10 @@ public class CommandHomePad {
 								Location locationDirection = player.getLocation();
 								locationDirection.setX(locationDirection.getBlockX() + 0.5);
 								locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
-								AranarthUtils.updateHome(homeName, locationDirection, Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
-								player.sendMessage(ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
+								AranarthUtils.updateHome(homeName, locationDirection,
+										Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
+								player.sendMessage(
+										ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
 								return true;
 							} else {
 								player.sendMessage(ChatUtils.chatMessageError("You cannot use the \" character!"));
@@ -77,7 +79,8 @@ public class CommandHomePad {
 							return false;
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
+						player.sendMessage(
+								ChatUtils.chatMessageError("You must be standing on a Home Pad to use this command!"));
 						return false;
 					}
 				} else if (args[1].equals("reorder")) {
@@ -85,29 +88,44 @@ public class CommandHomePad {
 						try {
 							final int homeNumber = Integer.parseInt(args[2]);
 							final int newNumber = Integer.parseInt(args[3]);
+							if (newNumber == homeNumber){
+								sender.sendMessage( ChatUtils.chatMessageError("Please enter a different number to reorder!"));
+								return false;
+							}
+							
 							List<Home> homes = AranarthUtils.getHomes();
 							ArrayList<Home> newHomes = new ArrayList<Home>();
 							if (Objects.isNull(homes) || homes.size() == 0) {
 								sender.sendMessage(ChatUtils.chatMessageError("There are no homes!"));
 								return false;
 							}
-//					/ac homepad reorder 5 0
-//							0 1 2 3 4 5
-//							F B C D A F
-//							  B A C D
-//							  0 1 2 3
+							
+							// 0 2
+							// 2 0
+
+//						0 1 2 3 4
+//						1 2 0 3 4
+//						0 1 2 3 4	
 							for (int i = 0; i < homes.size(); i++) {
 								if (i == homeNumber) {
 									continue;
-								} else {
-									newHomes.add(homes.get(i));
-									if (i == newNumber) {
-										newHomes.add(homes.get(homeNumber));
-									}
 								}
+
+								if (i == newNumber && homeNumber < newNumber) {
+									newHomes.add(homes.get(i));
+									newHomes.add(homes.get(homeNumber));
+									continue;
+								}
+								if (i == newNumber && homeNumber > newNumber) {
+									newHomes.add(homes.get(homeNumber));
+									newHomes.add(homes.get(i));
+									continue;
+								}
+								newHomes.add(homes.get(i));
 							}
 							AranarthUtils.setHomes(newHomes);
-							sender.sendMessage(ChatUtils.chatMessage("&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
+							sender.sendMessage(ChatUtils.chatMessage(
+									"&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
 						} catch (NumberFormatException e) {
 							sender.sendMessage(ChatUtils.chatMessageError("A home could not be updated!"));
 							return false;
