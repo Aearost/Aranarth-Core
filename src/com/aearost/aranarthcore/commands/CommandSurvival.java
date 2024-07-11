@@ -8,6 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -26,6 +27,9 @@ public class CommandSurvival {
 					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
 					e.printStackTrace();
 					return false;
+				}
+				for (PotionEffect effect : player.getActivePotionEffects()) {
+					player.removePotionEffect(effect.getType());
 				}
 				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));

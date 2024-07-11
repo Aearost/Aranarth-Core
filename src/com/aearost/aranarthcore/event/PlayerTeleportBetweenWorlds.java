@@ -3,11 +3,13 @@ package com.aearost.aranarthcore.event;
 import java.io.IOException;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.potion.PotionEffect;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -31,8 +33,16 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 			String currentWorld = e.getFrom().getWorld().getName();
 			String destinationWorld = e.getTo().getWorld().getName();
 			if (!currentWorld.equals(destinationWorld)) {
+				GameMode newMode = GameMode.SURVIVAL;
+				if (destinationWorld.toLowerCase().equals("creative")) {
+					newMode = GameMode.CREATIVE;
+				}
 				try {
 					AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
+					player.setGameMode(newMode);
+					for (PotionEffect effect : player.getActivePotionEffects()) {
+						player.removePotionEffect(effect.getType());
+					}
 				} catch (IOException exception) {
 					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
 					exception.printStackTrace();
