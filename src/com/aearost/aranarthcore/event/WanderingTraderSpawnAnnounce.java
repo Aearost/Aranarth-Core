@@ -24,7 +24,7 @@ public class WanderingTraderSpawnAnnounce implements Listener {
 	 *
 	 */
 	@EventHandler
-	public void onHorseDeath(final EntitySpawnEvent e) {
+	public void onTraderSpawn(final EntitySpawnEvent e) {
 		if (e.getEntityType() == EntityType.WANDERING_TRADER) {
 			WanderingTrader wanderingTrader = (WanderingTrader) e.getEntity();
 			for (Player player : Bukkit.getOnlinePlayers()) {

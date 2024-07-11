@@ -7,4 +7,5 @@ Features
 [~] Changed the Bundle recipe to be made with Rabbit Hide instead of Leather
 
 Bug Fixes
-- 
+- Changed the method name of the WanderingTraderSpawnAnnounce event
+- Potion effects no longer transfer between worlds

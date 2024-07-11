@@ -93,18 +93,15 @@ public class CommandHomePad {
 							}
 //					/ac homepad reorder 5 0
 //							0 1 2 3 4 5
-//							A B C D E F
+//							F B C D A F
 //							  B A C D
 //							  0 1 2 3
 							for (int i = 0; i < homes.size(); i++) {
 								if (i == homeNumber) {
-									System.out.println("A: " + homes.get(i).getHomeName());
 									continue;
 								} else {
-									System.out.println("B: " + homes.get(i).getHomeName());
 									newHomes.add(homes.get(i));
 									if (i == newNumber) {
-										System.out.println("C: " + homes.get(i).getHomeName());
 										newHomes.add(homes.get(homeNumber));
 									}
 								}
