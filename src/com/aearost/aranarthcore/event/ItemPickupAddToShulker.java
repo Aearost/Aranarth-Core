@@ -56,7 +56,6 @@ public class ItemPickupAddToShulker implements Listener {
 			for (ItemStack is : inventory) {
 				// Skip the slot if it's empty
 				if (is != null) {
-
 					if (is.getItemMeta() instanceof BlockStateMeta) {
 						BlockStateMeta im = (BlockStateMeta) is.getItemMeta();
 						if (im.getBlockState() instanceof ShulkerBox) {
