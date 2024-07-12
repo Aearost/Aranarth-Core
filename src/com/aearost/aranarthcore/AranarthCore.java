@@ -29,6 +29,7 @@ import com.aearost.aranarthcore.event.CraftingOverrides;
 import com.aearost.aranarthcore.event.CreativeExpChangePrevent;
 import com.aearost.aranarthcore.event.CreeperExplodeDeny;
 import com.aearost.aranarthcore.event.CropHarvest;
+import com.aearost.aranarthcore.event.DoorDoubleOpen;
 import com.aearost.aranarthcore.event.DragonHeadClick;
 import com.aearost.aranarthcore.event.DurabilityDecreaseWarning;
 import com.aearost.aranarthcore.event.EndermanPickupCancel;
@@ -233,6 +234,7 @@ public class AranarthCore extends JavaPlugin {
 		new MangroveRootShear(this);
 		new ChestSort(this);
 		new GoatDeath(this);
+		new DoorDoubleOpen(this);
 	}
 
 	private void initializeRecipes() {
