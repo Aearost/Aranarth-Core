@@ -1,0 +1,25 @@
+AranarthCore v. 1.2
+
+Features
+[+] Added a creative world that has a separate inventory from Survival
+[+] Players have OP permissions in Creative so it functions as a true sandbox
+[+] Added blacklist command to prevent items from being picked up if they are blacklisted
+[+] Certain armor trims now give special status effects when equipped
+	- Raiser --> Jump Boost
+	- Shaper --> Dolphin's Grace
+	- Silence --> Speed
+[+] Homepad icons can be changed by right-clicking on them in the GUI while holding an item
+[+] Players can pick up villagers by right-clicking on them when riding a camel. Villagers are dismounted when players do
+[+] Players can view a villager's inventory by holding sneak and right-clicking
+[+] Recipe for Rooted Dirt
+[+] Recipe for Tuff
+[+] Zombies and Husks can no longer destroy doors
+[~] Customized the server join/leave messages
+[+] Seasonal holiday join/leave messages for Valentine's Day, Easter, Halloween, and Christmas
+[~] Added sound effects when GUI elements are clicked in AranarthCore GUIs
+	
+
+Bug Fixes
+- Both survival and swimtoggle sub-commands display in command completer when entering /ac s
+- Uncrafting sugarcane block in inventory no longer yields bamboo
+- Inventory is saved between worlds when using the /tp command

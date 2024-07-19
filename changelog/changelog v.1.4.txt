@@ -1,0 +1,14 @@
+AranarthCore v. 1.4
+
+Features
+[+] Chests can now be sorted by holding sneak and left clicking them
+[+] Goats drop mutton when killed, similarly to sheep
+[+] Homepads can now be reordered in-game
+[~] Crop Harvest functionality now will only actually break the crop if it is fully matured
+[~] Changed the Bundle recipe to be made with Rabbit Hide instead of Leather
+[+] Double doors will now open and close together
+
+Bug Fixes
+- Changed the method name of the WanderingTraderSpawnAnnounce event
+- Potion effects no longer transfer between worlds
+- Blacklisted items are no longer picked up if they are in a shulker box
