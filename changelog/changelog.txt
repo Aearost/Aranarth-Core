@@ -1,0 +1,51 @@
+AranarthCore v. 1.0
+
+Commands
+- /ac arena - Allows players to teleport to the arena world
+- /ac nick - Allows users to have a nickname
+- /ac ping - Allows users to see a user's ping
+- /ac prefix - Allows users to modify their prefix
+- /ac survival - Allows players to teleport to the spawn of the survival world
+- /ac swimtoggle - Allows horses to swim in water
+
+Features
+- Budding Amethyst is harvestable with the Silk Touch enchantment
+- Creepers do not explode blocks when exploding
+- Crops are automatically replanted when harvested while sneaking
+- Endermen do not pick up blocks
+- Zombies and Zombie Villagers will not pick up eggs (prevents despawning)
+- Homepads can be crafted and used to teleport across the world
+- Horses do not sink but rather they swim
+- Logs are only stripped of their bark when holding sneak
+- Custom health, jump, and speed stats for horses and camels
+- Pitcher plant crops drop pods when harvested
+- Custom chat formatting
+- Spawn override for all players
+- Farmland cannot be trampled by players
+- Torchflowers automatically drop seeds when they fully mature
+- Torchflowers emit light if the block above them is air
+
+Recipes
+- Amethyst [Uncrafting]
+- Bamboo Block [Uncrafting]
+- Bamboo Planks [Modified]
+- Bell
+- Bundle
+- Calcite
+- Chainmail Armor
+- Charcoal to Coal
+- Chorus Diamond [Custom]
+- Cobblestone to Deepslate
+- Cobweb
+- Deepslate to Cobblestone
+- Dripstone Block [Uncrafting]
+- Glow Ink Sac
+- Homepad [Custom]
+- Diamond Horse Armour
+- Golden Horse Armour
+- Iron Horse Armour
+- Nametag
+- Saddle
+- Sugarcane Block [Custom]
+- Sugarcane Block [Uncrafting]
+- Wool to String [Uncrafting]

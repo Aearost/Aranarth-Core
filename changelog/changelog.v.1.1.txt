@@ -1,0 +1,22 @@
+AranarthCore v. 1.1
+
+Features
+[~] Homepad names can now contain dash characters
+[+] Items that are picked up get added to shulker boxes if they have incomplete stacks, as long as there is at least 1 slot in the player's inventory it can be added to
+[+] Zombie horses spawn when a horse is killed while under the Weakness effect
+[+] Concrete powder is no longer affected by gravity
+[+] Custom functionality in arena world to prevent items dropping, ice melting, vines growing, etc
+[~] Cherry logs are no longer stripped unless you are shifting
+[~] You must now be shifting to strip the wood blocks (6-sided logs) similar to how you must be shifting to strip logs
+[+] Camels can now swim
+[~] All AranarthCore commands are centralized under /ac
+[~] Changed the syntax to remove a nickname to just be /ac nick (no "off" keyword)
+[+] Custom server join and leave message format in chat
+[+] Pitcher pods now emit a minor amount of light as well similar to a Soul Torch/Lantern
+[+] Coral no longer dries when placed in the overworld (survival)
+
+Bug Fixes
+- Camels can now spawn and be bred as babies
+- Fixed audio volume of shulker box item pickup
+- Homepad pages now have proper support when shifting back and forth between pages
+- You can only change your own nickname
