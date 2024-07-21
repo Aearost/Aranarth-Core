@@ -7,63 +7,63 @@ import org.bukkit.ChatColor;
 import com.aearost.aranarthcore.enums.SpecialDay;
 
 /**
- * Provides utility methods to facilitate the formatting of all chat related
- * content.
- * 
- * @author Aearost
- *
+ * Provides utility methods to facilitate the formatting of all chat related content.
  */
 public class ChatUtils {
 
 	/**
-	 * Allows the formatting of messages to contain Minecraft colors, and begin with
-	 * the AranarthCore prefix.
+	 * Allows messages to contain color codes and begin with the AranarthCore prefix.
 	 * 
-	 * @param msg
-	 * @return
+	 * @param msg The message to be formatted.
+	 * @return The formatted chat message.
 	 */
 	public static String chatMessage(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r" + msg);
 	}
 	
 	/**
-	 * Allows the formatting of messages to contain Minecraft colors, and begin with
-	 * the AranarthCore prefix, specifically for errors
+	 * Allows error messages to be written in red and begin with the AranarthCore prefix.
 	 * 
-	 * @param msg
-	 * @return
+	 * @param msg The message to be formatted.
+	 * @return The formatted chat message.
 	 */
 	public static String chatMessageError(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r&c" + msg);
 	}
 
 	/**
-	 * Allows the formatting of messages to contain Minecraft colors
+	 * Allows messages to contain color codes.
 	 * 
-	 * @param msg
-	 * @return
+	 * @param msg The message to be formatted.
+	 * @return The formatted chat message.
 	 */
 	public static String translateToColor(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 
 	/**
-	 * Removes the styling from Strings.
+	 * Removes the formatting from messages.
 	 * 
-	 * @param msg
-	 * @return
+	 * @param msg The message to remove formatting.
+	 * @return The message without the formatting.
 	 */
-	public static String stripColor(String msg) {
+	public static String stripColorFormatting(String msg) {
 		String colorStripped = ChatColor.stripColor(msg);
 		while (colorStripped.startsWith("&")) {
 			colorStripped = colorStripped.substring(2);
 		}
 		return colorStripped;
 	}
-	
+
+	/**
+	 * Formats material names to properly capitalized strings.
+	 *
+	 * @param nameToFormat The item name to be formatted.
+	 * @return The formatted item name.
+	 */
 	public static String getFormattedItemName(String nameToFormat) {
 		String[] words = nameToFormat.toLowerCase().split("_");
-		String fullItemName = "";
+		StringBuilder fullItemName = new StringBuilder();
 		for (int i = 0; i < words.length; i++) {
 			String word = words[i];
 			String formattedWord = "";
@@ -75,15 +75,22 @@ public class ChatUtils {
 			}
 			
 			if (i == words.length - 1) {
-				fullItemName += formattedWord;
+				fullItemName.append(formattedWord);
 				break;
 			} else {
-				fullItemName += formattedWord + " ";
+				fullItemName.append(formattedWord).append(" ");
 			}
 		}
-		return fullItemName;
+		return fullItemName.toString();
 	}
-	
+
+	/**
+	 * Fetches a custom holiday server join message based on the current date.
+	 *
+	 * @param displayName The player's displayed name.
+	 * @param specialDay The date that the message should be reflective of.
+	 * @return The randomly selected and formatted custom join message.
+	 */
 	public static String getSpecialJoinMessage(String displayName, SpecialDay specialDay) {
 		Random random = new Random();
 		int randomInt = random.nextInt(4);
@@ -114,7 +121,14 @@ public class ChatUtils {
 		}
 		return messages[randomInt];
 	}
-	
+
+	/**
+	 * Fetches a custom holiday server quit message based on the current date.
+	 *
+	 * @param displayName The player's displayed name.
+	 * @param specialDay The date that the message should be reflective of.
+	 * @return The randomly selected and formatted custom quit message.
+	 */
 	public static String getSpecialQuitMessage(String displayName, SpecialDay specialDay) {
 		Random random = new Random();
 		int randomInt = random.nextInt(4);
@@ -145,5 +159,4 @@ public class ChatUtils {
 		}
 		return messages[randomInt];
 	}
-	
 }

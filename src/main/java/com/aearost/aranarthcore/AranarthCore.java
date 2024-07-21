@@ -127,11 +127,16 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
+import java.util.Objects;
+
 public class AranarthCore extends JavaPlugin {
 
+	/**
+	 * Called when the plugin is first enabled on server startup.
+	 * Responsible for initializing all functionality of AranarthCore.
+	 */
 	@Override
 	public void onEnable() {
-
 		initializeUtils();
 		initializeEvents();
 		initializeRecipes();
@@ -139,7 +144,7 @@ public class AranarthCore extends JavaPlugin {
 		initializeWorlds();
 		initializeItems();
 
-		// Update the files every 30 minutes to protect from loss of data
+		// Update the persistence files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
@@ -153,17 +158,22 @@ public class AranarthCore extends JavaPlugin {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
-				AranarthUtils.updateArmourTrimEffects();
+				AranarthUtils.updateArmorTrimEffects();
 			}
 		}, 0, 100);
 	}
 
+	/**
+	 * Initializes necessary Utilities functionality needed on server startup.
+	 */
 	private void initializeUtils() {
 		PersistenceUtils.loadHomes();
 		PersistenceUtils.loadAranarthPlayers();
-		new ItemUtils();
 	}
 
+	/**
+	 * Initializes all AranarthCore events.
+	 */
 	private void initializeEvents() {
 		new HomePadStep(this);
 		new HomePadPlace(this);
@@ -237,6 +247,9 @@ public class AranarthCore extends JavaPlugin {
 		new DoorDoubleOpen(this);
 	}
 
+	/**
+	 * Initializes all AranarthCore recipes.
+	 */
 	private void initializeRecipes() {
 		new RecipeHomePad(this);
 		new RecipeChorusDiamond(this);
@@ -284,11 +297,17 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeMushroomStem(this);
 	}
 
+	/**
+	 * Initializes the AranarthCore command and tab completion.
+	 */
 	private void initializeCommands() {
-		getCommand("ac").setExecutor(new CommandAC());
-		getCommand("ac").setTabCompleter(new CommandACCompleter());
+		Objects.requireNonNull(getCommand("ac")).setExecutor(new CommandAC());
+		Objects.requireNonNull(getCommand("ac")).setTabCompleter(new CommandACCompleter());
 	}
-	
+
+	/**
+	 * Initializes the AranarthCore worlds.
+	 */
 	private void initializeWorlds() {
 		// Loads the world if it isn't yet loaded
 		if (Bukkit.getWorld("arena") == null) {
@@ -306,11 +325,16 @@ public class AranarthCore extends JavaPlugin {
 		}
 	}
 
+	/**
+	 * Initializes the AranarthCore custom items needing namespace keys.
+	 */
 	private void initializeItems() {
 		new InvisibleItemFrame(this);
-		
 	}
-	
+
+	/**
+	 * Called when the plugin is disabled on server shut down.
+	 */
 	@Override
 	public void onDisable() {
 		PersistenceUtils.saveHomes();

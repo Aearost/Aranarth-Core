@@ -78,38 +78,49 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				if (fieldName.equals("homeName")) {
-					homeName = fieldValue;
-					fieldCount++;
-				}
-				else if (fieldName.equals("worldName")) {
-					world = Bukkit.getWorld(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("x")) {
-					x = Double.parseDouble(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("y")) {
-					y = Double.parseDouble(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("z")) {
-					z = Double.parseDouble(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("yaw")) {
-					yaw = Float.parseFloat(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("pitch")) {
-					pitch = Float.parseFloat(fieldValue);
-					fieldCount++;
-				} else if (fieldName.equals("icon")) {
-					icon = Material.valueOf(fieldValue);
-					fieldCount++;
-				}
+                switch (fieldName) {
+                    case "homeName" -> {
+                        homeName = fieldValue;
+                        fieldCount++;
+                    }
+                    case "worldName" -> {
+                        world = Bukkit.getWorld(fieldValue);
+                        fieldCount++;
+                    }
+                    case "x" -> {
+                        x = Double.parseDouble(fieldValue);
+                        fieldCount++;
+                    }
+                    case "y" -> {
+                        y = Double.parseDouble(fieldValue);
+                        fieldCount++;
+                    }
+                    case "z" -> {
+                        z = Double.parseDouble(fieldValue);
+                        fieldCount++;
+                    }
+                    case "yaw" -> {
+                        yaw = Float.parseFloat(fieldValue);
+                        fieldCount++;
+                    }
+                    case "pitch" -> {
+                        pitch = Float.parseFloat(fieldValue);
+                        fieldCount++;
+                    }
+                    case "icon" -> {
+                        icon = Material.valueOf(fieldValue);
+                        fieldCount++;
+                    }
+                }
 
 				if (fieldCount == 8) {
 					Location location = new Location(world, x, y, z, yaw, pitch);
 					AranarthUtils.addNewHome(location);
-					if (!homeName.equals("NEW")) {
-						AranarthUtils.updateHome(homeName, location, icon);
+
+					if (Objects.nonNull(homeName)) {
+						if (!homeName.equals("NEW")) {
+							AranarthUtils.updateHome(homeName, location, icon);
+						}
 					}
 					fieldCount = 0;
 				}
@@ -118,7 +129,6 @@ public class PersistenceUtils {
 			reader.close();
 		} catch (FileNotFoundException e) {
 			Bukkit.getLogger().info("Something went wrong with loading the homes!");
-			e.printStackTrace();
 		}
 	}
 
@@ -127,7 +137,7 @@ public class PersistenceUtils {
 	 */
 	public static void saveHomes() {
 		List<Home> homes = AranarthUtils.getHomes();
-		if (homes.size() > 0) {
+		if (!homes.isEmpty()) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
 					+ File.separator + "homes.json";
@@ -147,7 +157,6 @@ public class PersistenceUtils {
 					}
 				} catch (IOException e) {
 					Bukkit.getLogger().info("An error occured in the creation of homes.json");
-					e.printStackTrace();
 				}
 
 				try {
@@ -157,14 +166,19 @@ public class PersistenceUtils {
 
 					int homeCounter = 0;
 					for (Home home : homes) {
-						writer.write("        \"homeName\": \"" + home.getHomeName() + "\",\n");
-						writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
-						writer.write("        \"x\": \"" + home.getLocation().getX() + "\",\n");
-						writer.write("        \"y\": \"" + home.getLocation().getY() + "\",\n");
-						writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
-						writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
-						writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\",\n");
-						writer.write("        \"icon\": \"" + home.getIcon().name() + "\"\n");
+						if (Objects.nonNull(home.getLocation().getWorld())) {
+							writer.write("        \"homeName\": \"" + home.getHomeName() + "\",\n");
+							writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
+							writer.write("        \"x\": \"" + home.getLocation().getX() + "\",\n");
+							writer.write("        \"y\": \"" + home.getLocation().getY() + "\",\n");
+							writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
+							writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
+							writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\",\n");
+							writer.write("        \"icon\": \"" + home.getIcon().name() + "\"\n");
+						} else {
+							Bukkit.getLogger().info("The world name is null and the home has been skipped!");
+							return;
+						}
 
 						if (homeCounter + 1 == homes.size()) {
 							writer.write("    }\n");
@@ -179,7 +193,6 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the homes");
-					e.printStackTrace();
 				}
 			}
 		}
@@ -233,54 +246,63 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				if (fieldName.equals("uuid")) {
-					uuid = UUID.fromString(fieldValue);
-					fieldCount++;
-				}
-				else if (fieldName.equals("nickname")) {
-					nickname = fieldValue;
-					fieldCount++;
-				} else if (fieldName.equals("prefix")) {
-					prefix = fieldValue;
-					fieldCount++;
-				} else if (fieldName.equals("survivalInventory")) {
-					survivalInventory = fieldValue;
-					fieldCount++;
-				} else if (fieldName.equals("creativeInventory")) {
-					creativeInventory = fieldValue;
-					fieldCount++;
-				} else if (fieldName.equals("potions")) {
-					ItemStack[] potionsAsItemStackArray;
-					if (!fieldValue.equals("")) {
-						try {
-							potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-						} catch (IOException e) {
-							Bukkit.getLogger().info("There was an issue loading potions!");
-							e.printStackTrace();
-							reader.close();
-							return;
-						}
-						potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
-					}
-					fieldCount++;
-				} else if (fieldName.equals("arrows")) {
-					ItemStack[] arrowsAsItemStackArray;
-					if (!fieldValue.equals("")) {
-						try {
-							arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-						} catch (IOException e) {
-							Bukkit.getLogger().info("There was an issue loading arrows!");
-							e.printStackTrace();
-							reader.close();
-							return;
-						}
-						arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
-					}
-					fieldCount++;
-				}
+                switch (fieldName) {
+                    case "uuid" -> {
+                        uuid = UUID.fromString(fieldValue);
+                        fieldCount++;
+                    }
+                    case "nickname" -> {
+                        nickname = fieldValue;
+                        fieldCount++;
+                    }
+                    case "prefix" -> {
+                        prefix = fieldValue;
+                        fieldCount++;
+                    }
+                    case "survivalInventory" -> {
+                        survivalInventory = fieldValue;
+                        fieldCount++;
+                    }
+                    case "creativeInventory" -> {
+                        creativeInventory = fieldValue;
+                        fieldCount++;
+                    }
+                    case "potions" -> {
+                        ItemStack[] potionsAsItemStackArray;
+                        if (!fieldValue.isEmpty()) {
+                            try {
+                                potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+                            } catch (IOException e) {
+                                Bukkit.getLogger().info("There was an issue loading potions!");
+                                reader.close();
+                                return;
+                            }
+                            potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
+                        }
+                        fieldCount++;
+                    }
+                    case "arrows" -> {
+                        ItemStack[] arrowsAsItemStackArray;
+                        if (!fieldValue.isEmpty()) {
+                            try {
+                                arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+                            } catch (IOException e) {
+                                Bukkit.getLogger().info("There was an issue loading arrows!");
+                                reader.close();
+                                return;
+                            }
+                            arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
+                        }
+                        fieldCount++;
+                    }
+                }
 				
 				if (fieldCount == 7) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions, arrows));
+					if (Objects.nonNull(uuid)) {
+						AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions, arrows));
+					} else {
+						Bukkit.getLogger().info("The UUID is null!");
+					}
 					fieldCount = 0;
 				}
 			}
@@ -288,7 +310,6 @@ public class PersistenceUtils {
 			reader.close();
 		} catch (FileNotFoundException e) {
 			Bukkit.getLogger().info("Something went wrong with loading the aranarth players!");
-			e.printStackTrace();
 		}
 	}
 
@@ -297,7 +318,7 @@ public class PersistenceUtils {
 	 */
 	public static void saveAranarthPlayers() {
 		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
-		if (aranarthPlayers.size() > 0) {
+		if (!aranarthPlayers.isEmpty()) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
 					+ File.separator + "aranarth_players.json";
@@ -316,8 +337,7 @@ public class PersistenceUtils {
 						Bukkit.getLogger().info("A new aranarth_players.json file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occured in the creation of aranarth_players.json");
-					e.printStackTrace();
+					Bukkit.getLogger().info("An error occurred in the creation of aranarth_players.json");
 				}
 
 				try {
@@ -337,13 +357,13 @@ public class PersistenceUtils {
 						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
 						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
 						if (Objects.nonNull(aranarthPlayer.getPotions())) {
-							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[aranarthPlayer.getPotions().size()]);
+							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[0]);
 							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
 						} else {
 							writer.write("        \"potions\": \"\",\n");
 						}
 						if (Objects.nonNull(aranarthPlayer.getArrows())) {
-							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[aranarthPlayer.getArrows().size()]);
+							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[0]);
 							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
 						} else {
 							writer.write("        \"arrows\": \"\",\n");
@@ -363,7 +383,6 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the aranarth players!");
-					e.printStackTrace();
 				}
 			}
 		}

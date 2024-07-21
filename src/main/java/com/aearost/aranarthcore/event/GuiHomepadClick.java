@@ -37,7 +37,7 @@ public class GuiHomepadClick implements Listener {
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
 
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Teleport") && e.getView().getType() == InventoryType.CHEST) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport") && e.getView().getType() == InventoryType.CHEST) {
 
 			Player player = (Player) e.getWhoClicked();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

@@ -29,7 +29,7 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Potions") && e.getView().getType() == InventoryType.CHEST) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions") && e.getView().getType() == InventoryType.CHEST) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
