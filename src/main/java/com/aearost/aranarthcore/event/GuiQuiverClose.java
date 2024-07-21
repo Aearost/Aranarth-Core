@@ -33,7 +33,7 @@ public class GuiQuiverClose implements Listener {
 	 */
 	@EventHandler
 	public void onQuiverInventoryClose(final InventoryCloseEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Quiver") && e.getView().getType() == InventoryType.CHEST) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver") && e.getView().getType() == InventoryType.CHEST) {
 			Inventory inventory = e.getInventory();
 			if (inventory.getContents().length > 0) {
 				Player player = (Player) e.getPlayer();

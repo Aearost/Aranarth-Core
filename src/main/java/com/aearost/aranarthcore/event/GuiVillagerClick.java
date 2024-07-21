@@ -25,7 +25,7 @@ public class GuiVillagerClick implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Villager") && e.getView().getType() == InventoryType.CHEST) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager") && e.getView().getType() == InventoryType.CHEST) {
 			e.setCancelled(true);
 			
 			if (e.getSlot() == 8) {

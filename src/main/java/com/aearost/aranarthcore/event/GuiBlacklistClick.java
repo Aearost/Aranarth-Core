@@ -31,7 +31,7 @@ public class GuiBlacklistClick implements Listener {
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColor(e.getView().getTitle()).equals("Blacklist") && e.getView().getType() == InventoryType.CHEST) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist") && e.getView().getType() == InventoryType.CHEST) {
 			e.setCancelled(true);
 			Player player = (Player) e.getWhoClicked();
 			List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
