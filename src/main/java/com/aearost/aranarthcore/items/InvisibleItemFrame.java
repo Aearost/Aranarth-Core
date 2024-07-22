@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.items;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,8 +15,9 @@ import org.bukkit.plugin.Plugin;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
 /**
+ * Provides the necessary components of an Invisible Item Frame.
  * Inspired by tiffany352
- * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/InvisibleItemFrames.java
+ * Source: <a href="https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/InvisibleItemFrames.java">tiffany352 GitHub</a>
  */
 public class InvisibleItemFrame {
 
@@ -30,23 +32,27 @@ public class InvisibleItemFrame {
 	}
 	
 	/**
-	 * Returns an ItemStack of a single Invisible Item Frame
-	 * 
-	 * @return
+	 * @return The Invisible Item Frame.
 	 */
 	public static ItemStack getInvisibleItemFrame() {
 		ItemStack invisibleItemFrame = new ItemStack(Material.ITEM_FRAME, 1);
 		ItemMeta meta = invisibleItemFrame.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
-		
-		meta.setDisplayName(ChatUtils.translateToColor(getName()));
-	    lore.add(ChatUtils.translateToColor(getLore()));
-	    meta.setLore(lore);
-	    invisibleItemFrame.setItemMeta(meta);
-	    
+
+		if (Objects.nonNull(meta)) {
+			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			lore.add(ChatUtils.translateToColor(getLore()));
+			meta.setLore(lore);
+			invisibleItemFrame.setItemMeta(meta);
+		}
 	    return invisibleItemFrame;
 	}
-	
+
+	/**
+	 * Determines whether the input entity is an Invisible Item Frame.
+	 * @param entity The entity to be verified.
+	 * @return Confirmation of whether the entity is an Invisible Item Frame.
+	 */
 	public static boolean isInvisibleItemFrame(Entity entity) {
 		if (entity != null) {
 			if (entity.getType() == EntityType.ITEM_FRAME) {

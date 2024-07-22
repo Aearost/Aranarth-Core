@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.items;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,23 +9,23 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+
 public class HomePad {
 
 	/**
-	 * Returns an ItemStack of a single Home Pad
-	 * 
-	 * @return
+	 * @return The HomePad.
 	 */
 	public static ItemStack getHomePad() {
 		ItemStack homePad = new ItemStack(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, 1);
 		ItemMeta meta = homePad.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
-		
-		meta.setDisplayName(ChatUtils.translateToColor(getName()));
-	    lore.add(ChatUtils.translateToColor(getLore()));
-	    meta.setLore(lore);
-	    homePad.setItemMeta(meta);
-	    
+
+		if (Objects.nonNull(meta)) {
+			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			lore.add(ChatUtils.translateToColor(getLore()));
+			meta.setLore(lore);
+			homePad.setItemMeta(meta);
+		}
 	    return homePad;
 	}
 	
