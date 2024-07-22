@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -9,20 +8,27 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Allows a player to add a prefix to themselves.
+ */
 public class CommandPrefix {
 
-	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	/**
+	 * @param sender The user that entered the command.
+	 * @param args The arguments of the command.
+	 * @return Confirmation of whether the command was a success or not.
+	 */
+	public static boolean onCommand(CommandSender sender, String[] args) {
 
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac prefix [player] <prefix>"));
 			return false;
 		} else {
 			if (args.length == 2) {
-				if (sender instanceof Player) {
-					Player player = (Player) sender;
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (sender instanceof Player player) {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					
-					if (args[1].toLowerCase().equals("off")) {
+					if (args[1].equalsIgnoreCase("off")) {
 						aranarthPlayer.setPrefix("");
 						player.sendMessage(ChatUtils.chatMessage("&7Your prefix has been removed!"));
 						return true;
@@ -41,42 +47,40 @@ public class CommandPrefix {
 				
 				for (Player p : onlinePlayers) {
 					// If the player is online
-					if (p.getName().toLowerCase().equals(args[1].toLowerCase())) {
+					if (p.getName().equalsIgnoreCase(args[1])) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(p.getUniqueId());
 						
-						if (args[2].toLowerCase().equals("off")) {
+						if (args[2].equalsIgnoreCase("off")) {
 							aranarthPlayer.setPrefix("");
 							sender.sendMessage(ChatUtils.chatMessage("&e" + p.getName() + "'s &7prefix has been removed!"));
-							return true;
-						} else {
-							String prefix = "";
+                        } else {
+							StringBuilder prefix = new StringBuilder();
 							for (int i = 2; i < args.length; i++) {
 								if (i < args.length - 1) {
-									prefix += args[i] + " ";
+									prefix.append(args[i]).append(" ");
 								} else {
-									prefix += args[i];
+									prefix.append(args[i]);
 								}
 							}
-							aranarthPlayer.setPrefix(prefix);
+							aranarthPlayer.setPrefix(prefix.toString());
 							sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + "'s &7prefix has been set to " + prefix));
-							return true;
-						}
-					}
+                        }
+                        return true;
+                    }
 				}
 				
-				if (sender instanceof Player) {
+				if (sender instanceof Player player) {
 					// If the player is using a multi-word prefix
-					Player player = (Player) sender;
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					String prefix = "";
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					StringBuilder prefix = new StringBuilder();
 					for (int i = 1; i < args.length; i++) {
 						if (i < args.length - 1) {
-							prefix += args[i] + " ";
+							prefix.append(args[i]).append(" ");
 						} else {
-							prefix += args[i];
+							prefix.append(args[i]);
 						}
 					}
-					aranarthPlayer.setPrefix(prefix);
+					aranarthPlayer.setPrefix(prefix.toString());
 					sender.sendMessage(ChatUtils.chatMessage("&7Your prefix has been set to " + prefix));
 					return true;
 				}

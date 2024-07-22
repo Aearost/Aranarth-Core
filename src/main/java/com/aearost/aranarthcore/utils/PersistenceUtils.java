@@ -25,9 +25,6 @@ import com.aearost.aranarthcore.objects.Home;
 /**
  * Provides utility methods to facilitate the reading and writing of json and
  * txt files stored in the AranarthCore plugin folder.
- * 
- * @author Aearost
- *
  */
 public class PersistenceUtils {
 

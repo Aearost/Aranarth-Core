@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands;
 
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.Horse;
@@ -10,12 +9,18 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Allows horses and camels to swim and float in water.
+ */
 public class CommandMountSwimToggle {
 
-	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			if (player.isInsideVehicle() && (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)) {
+	/**
+	 * @param sender The user that entered the command.
+	 * @return Confirmation of whether the command was a success or not.
+	 */
+	public static boolean onCommand(CommandSender sender) {
+		if (sender instanceof Player player) {
+            if (player.isInsideVehicle() && (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (aranarthPlayer.getIsMountSwimEnabled()) {
 					player.sendMessage(ChatUtils.chatMessage("&7Your mount will no longer swim."));

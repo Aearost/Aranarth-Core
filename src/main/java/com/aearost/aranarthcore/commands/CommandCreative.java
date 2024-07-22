@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -13,19 +14,26 @@ import org.bukkit.potion.PotionEffect;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Teleports the player to the creative world, using the creative inventory.
+ */
 public class CommandCreative {
 
-	public static boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+	/**
+	 * @param sender The user that entered the command.
+	 * @param args The arguments of the command.
+	 * @return Confirmation of whether the command was a success or not.
+	 */
+	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			if (sender instanceof Player) {
-				Player player = (Player) sender;
-				
-				// Teleports you to the creative world spawn
+			if (sender instanceof Player player) {
+                // Teleports you to the creative world spawn
 				try {
-					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
+					if (Objects.nonNull(player.getLocation().getWorld())) {
+						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
+					}
 				} catch (IOException e) {
 					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
-					e.printStackTrace();
 					return false;
 				}
 				for (PotionEffect effect : player.getActivePotionEffects()) {
