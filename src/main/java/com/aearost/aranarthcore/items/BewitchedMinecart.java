@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.items;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,23 +9,25 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Provides the necessary components of a Bewitched Minecart item.
+ */
 public class BewitchedMinecart {
 
 	/**
-	 * Returns an ItemStack of a single Honey Glazed Ham
-	 * 
-	 * @return
+	 * @return The Bewitched Minecart.
 	 */
 	public static ItemStack getBewitchedMinecart() {
 		ItemStack bewitchedMinecart = new ItemStack(Material.MINECART, 1);
 		ItemMeta meta = bewitchedMinecart.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
-		
-		meta.setDisplayName(ChatUtils.translateToColor(getName()));
-		lore.add(ChatUtils.translateToColor(getLore()));
-	    meta.setLore(lore);
-	    bewitchedMinecart.setItemMeta(meta);
-	    
+
+		if (Objects.nonNull(meta)) {
+			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			lore.add(ChatUtils.translateToColor(getLore()));
+			meta.setLore(lore);
+			bewitchedMinecart.setItemMeta(meta);
+		}
 	    return bewitchedMinecart;
 	}
 	

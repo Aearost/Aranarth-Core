@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.items;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,23 +9,25 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Provides the necessary components of a Sugarcane Block item.
+ */
 public class SugarcaneBlock {
 
 	/**
-	 * Returns an ItemStack of a single Bamboo Block
-	 * 
-	 * @return
+	 * @return The Sugarcane Block.
 	 */
 	public static ItemStack getSugarcaneBlock() {
 		ItemStack sugarcaneBlock = new ItemStack(Material.BAMBOO_BLOCK, 1);
 		ItemMeta meta = sugarcaneBlock.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
-		
-		meta.setDisplayName(ChatUtils.translateToColor(getName()));
-		lore.add(ChatUtils.translateToColor(getLore()));
-	    meta.setLore(lore);
-	    sugarcaneBlock.setItemMeta(meta);
-	    
+
+		if (Objects.nonNull(meta)) {
+			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			lore.add(ChatUtils.translateToColor(getLore()));
+			meta.setLore(lore);
+			sugarcaneBlock.setItemMeta(meta);
+		}
 	    return sugarcaneBlock;
 	}
 	

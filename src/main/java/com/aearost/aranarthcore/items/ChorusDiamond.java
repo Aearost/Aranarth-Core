@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.items;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,23 +9,25 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+/**
+ * Provides the necessary components of a Chorus Diamond item.
+ */
 public class ChorusDiamond {
 
 	/**
-	 * Returns an ItemStack of a single Chorus Diamond
-	 * 
-	 * @return
+	 * @return The Chorus Diamond.
 	 */
 	public static ItemStack getChorusDiamond() {
 		ItemStack chorusDiamond = new ItemStack(Material.DIAMOND, 1);
 		ItemMeta meta = chorusDiamond.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
-		
-		meta.setDisplayName(ChatUtils.translateToColor(getName()));
-	    lore.add(ChatUtils.translateToColor(getLore()));
-	    meta.setLore(lore);
-	    chorusDiamond.setItemMeta(meta);
-	    
+
+		if (Objects.nonNull(meta)) {
+			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			lore.add(ChatUtils.translateToColor(getLore()));
+			meta.setLore(lore);
+			chorusDiamond.setItemMeta(meta);
+		}
 	    return chorusDiamond;
 	}
 	
