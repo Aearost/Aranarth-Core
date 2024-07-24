@@ -10,18 +10,16 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+import java.util.Objects;
+
 public class GuiVillager {
 
-	private Player player;
-	private Inventory initializedGui;
+	private final Player player;
+	private final Inventory initializedGui;
 
 	public GuiVillager(Player player, Villager villager) {
 		this.player = player;
 		this.initializedGui = initializeGui(player, villager);
-	}
-	
-	public Inventory getInitializedGui() {
-		return initializedGui;
 	}
 
 	public void openGui() {
@@ -35,7 +33,9 @@ public class GuiVillager {
 		
 		ItemStack barrier = new ItemStack(Material.BARRIER);
 		ItemMeta barrierMeta = barrier.getItemMeta();
-		barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+		if (Objects.nonNull(barrierMeta)) {
+			barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+		}
 		barrier.setItemMeta(barrierMeta);
 		gui.setItem(8, barrier);
 		
