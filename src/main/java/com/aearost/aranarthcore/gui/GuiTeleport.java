@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -16,37 +17,22 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class GuiTeleport {
 
-	private Player player;
-	private Inventory initializedGui;
-	private int pageNum;
+	private final Player player;
+	private final Inventory initializedGui;
 
 	public GuiTeleport(Player player) {
 		this.player = player;
-		this.pageNum = 0;
 		this.initializedGui = initializeGui(player, 0);
 	}
 	
 	public GuiTeleport(Player player, int pageNum) {
 		this.player = player;
-		this.pageNum = pageNum;
 		this.initializedGui = initializeGui(player, pageNum);
-	}
-	
-	public Inventory getInitializedGui() {
-		return initializedGui;
 	}
 
 	public void openGui() {
 		player.closeInventory();
 		player.openInventory(initializedGui);
-	}
-
-	public int getPageNum() {
-		return pageNum;
-	}
-	
-	public void setPageNum(int pageNum) {
-		this.pageNum = pageNum;
 	}
 
 	private Inventory initializeGui(Player player, int pageNum) {
@@ -55,7 +41,6 @@ public class GuiTeleport {
 		int homeNumber = pageNum * 27;
 		
 		Inventory gui = Bukkit.getServer().createInventory(player, 36, "Teleport");
-		
 
 		// Initialize Items
 		ItemStack previous = new ItemStack(Material.RED_WOOL);
@@ -65,23 +50,31 @@ public class GuiTeleport {
 
 		// Previous
 		ItemMeta previousMeta = previous.getItemMeta();
-		previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
-		previous.setItemMeta(previousMeta);
-		
+		if (Objects.nonNull(previousMeta)) {
+			previousMeta.setDisplayName(ChatUtils.translateToColor("&c&lPrevious"));
+			previous.setItemMeta(previousMeta);
+		}
+
 		// Barrier
 		ItemMeta barrierMeta = barrier.getItemMeta();
-		barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
-		barrier.setItemMeta(barrierMeta);
-		
+		if (Objects.nonNull(barrierMeta)) {
+			barrierMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
+			barrier.setItemMeta(barrierMeta);
+		}
+
 		// Next
 		ItemMeta nextMeta = next.getItemMeta();
-		nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
-		next.setItemMeta(nextMeta);
+		if (Objects.nonNull(nextMeta)) {
+			nextMeta.setDisplayName(ChatUtils.translateToColor("&a&lNext"));
+			next.setItemMeta(nextMeta);
+		}
 		
 		// Blank
 		ItemMeta blankMeta = blank.getItemMeta();
-		blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
-		blank.setItemMeta(blankMeta);
+		if (Objects.nonNull(blankMeta)) {
+			blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+			blank.setItemMeta(blankMeta);
+		}
 
 		// Initialize GUI
 		gui.setItem(27, previous);
@@ -104,16 +97,22 @@ public class GuiTeleport {
 			
 			ItemStack homePad = new ItemStack(home.getIcon());
 			ItemMeta homeMeta = homePad.getItemMeta();
-			homeMeta.setDisplayName(ChatUtils.translateToColor(home.getHomeName()));
+
 			List<String> lore = new ArrayList<>();
-			lore.add(ChatUtils.translateToColor("&6world: &7" + home.getLocation().getWorld().getName()));
+			if (Objects.nonNull(home.getLocation().getWorld())) {
+				lore.add(ChatUtils.translateToColor("&6world: &7" + home.getLocation().getWorld().getName()));
+			}
+
 			lore.add(ChatUtils.translateToColor("&6x: &7" + home.getLocation().getBlockX()));
 			lore.add(ChatUtils.translateToColor("&6y: &7" + home.getLocation().getBlockY()));
 			lore.add(ChatUtils.translateToColor("&6z: &7" + home.getLocation().getBlockZ()));
-			homeMeta.setLore(lore);
+
+			if (Objects.nonNull(homeMeta)) {
+				homeMeta.setDisplayName(ChatUtils.translateToColor(home.getHomeName()));
+				homeMeta.setLore(lore);
+			}
 			homePad.setItemMeta(homeMeta);
 			gui.setItem(i, homePad);
-			
 			homeNumber++;
 		}
 

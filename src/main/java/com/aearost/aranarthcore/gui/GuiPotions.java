@@ -6,16 +6,12 @@ import org.bukkit.inventory.Inventory;
 
 public class GuiPotions {
 
-	private Player player;
-	private Inventory initializedGui;
+	private final Player player;
+	private final Inventory initializedGui;
 
 	public GuiPotions(Player player) {
 		this.player = player;
 		this.initializedGui = initializeGui(player);
-	}
-	
-	public Inventory getInitializedGui() {
-		return initializedGui;
 	}
 
 	public void openGui() {
@@ -24,8 +20,7 @@ public class GuiPotions {
 	}
 	
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 54, "Potions");
-		return gui;
+		return Bukkit.getServer().createInventory(player, 54, "Potions");
 	}
 
 }

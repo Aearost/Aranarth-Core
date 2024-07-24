@@ -14,16 +14,12 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class GuiQuiver {
 
-	private Player player;
-	private Inventory initializedGui;
+	private final Player player;
+	private final Inventory initializedGui;
 
 	public GuiQuiver(Player player) {
 		this.player = player;
 		this.initializedGui = initializeGui(player);
-	}
-	
-	public Inventory getInitializedGui() {
-		return initializedGui;
 	}
 
 	public void openGui() {
@@ -39,18 +35,15 @@ public class GuiQuiver {
 		List<ItemStack> initializedArrows = new ArrayList<>();
 		
 		if (Objects.nonNull(arrows)) {
-			for (int i = 0; i < arrows.size(); i++) {
-				ItemStack arrow = arrows.get(i);
-				if (Objects.isNull(arrow)) {
-					continue;
-				} else {
+            for (ItemStack arrow : arrows) {
+                if (Objects.nonNull(arrow)) {
 					initializedArrows.add(arrow);
-				}
-			}
-			
-			for (int i = 0; i < initializedArrows.size(); i++) {
-				gui.addItem(initializedArrows.get(i));
-			}
+                }
+            }
+
+            for (ItemStack initializedArrow : initializedArrows) {
+                gui.addItem(initializedArrow);
+            }
 		}
 		
 		return gui;
