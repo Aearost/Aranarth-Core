@@ -7,8 +7,17 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
+/**
+ * A comparator that is used to sort the inventory in chests.
+ */
 public class ChestItemComparator implements Comparator<ItemStack> {
 
+    /**
+     * Used to sort the two input items.
+     * @param a the first item to be compared.
+     * @param b the second item to be compared.
+     * @return A value representing which item is to be first.
+     */
 	@Override
 	public int compare(ItemStack a, ItemStack b) {
 		
@@ -25,7 +34,13 @@ public class ChestItemComparator implements Comparator<ItemStack> {
             return compareItems(a, b);
         }
 	}
-	
+
+    /**
+     * Used to sort the order of items prioritizing a specific order of blocks.
+     * @param a the first item to be compared.
+     * @param b the second item to be compared.
+     * @return A value representing which item is to be first.
+     */
 	private int compareBlocks(ItemStack a, ItemStack b) {
 		
 		List<Material> order = Arrays.asList(
@@ -131,6 +146,12 @@ public class ChestItemComparator implements Comparator<ItemStack> {
         return Integer.compare(indexA, indexB);
     }
 
+    /**
+     * Used to sort the order of items prioritizing a specific order of items.
+     * @param a the first item to be compared.
+     * @param b the second item to be compared.
+     * @return A value representing which item is to be first.
+     */
     private int compareItems(ItemStack a, ItemStack b) {
     	List<Material> order = Arrays.asList(
     			Material.GRASS_BLOCK,

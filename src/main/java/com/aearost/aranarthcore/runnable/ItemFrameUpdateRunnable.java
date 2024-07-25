@@ -7,7 +7,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Inspired by tiffany352
- * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/ItemFrameUpdateRunnable.java
+ * Source: <a href="https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/ItemFrameUpdateRunnable.java">tiffany352 GitHub</a>
  */
 public class ItemFrameUpdateRunnable extends BukkitRunnable {
     public ItemFrame itemFrame;
