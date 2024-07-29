@@ -8,7 +8,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * Handles the auto complete functionality while using the /ac command.
@@ -23,7 +22,7 @@ public class CommandACCompleter implements TabCompleter {
 	 * @return Confirmation of whether the command was a success or not.
 	 */
 	@Override
-	public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> displayedOptions = new ArrayList<>();
 
 		if (args.length == 1) {
