@@ -12,11 +12,10 @@ public class RecipeGlowInkSac {
 	public RecipeGlowInkSac(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a Glow Ink Sac
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Glow Ink Sack.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_GLOW_INK_SAC");

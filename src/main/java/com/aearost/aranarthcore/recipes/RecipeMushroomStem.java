@@ -12,11 +12,10 @@ public class RecipeMushroomStem {
 	public RecipeMushroomStem(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
 	 * Creates the recipe for getting a Mushroom Stem.
-	 * 
-	 * @param plugin
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_MUSHROOM_STEM");

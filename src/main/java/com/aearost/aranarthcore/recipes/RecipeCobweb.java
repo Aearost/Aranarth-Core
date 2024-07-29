@@ -12,11 +12,10 @@ public class RecipeCobweb {
 	public RecipeCobweb(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a cobweb
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Cobweb.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_COBWEB");

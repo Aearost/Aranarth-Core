@@ -7,19 +7,18 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
 
-public class RecipeHorseArmourDiamond {
+public class RecipeHorseArmorDiamond {
 
-	public RecipeHorseArmourDiamond(Plugin plugin) {
+	public RecipeHorseArmorDiamond(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a diamond horse armour
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Diamond Horse Armor.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "AC_DIAMOND_HORSE_ARMOUR");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_DIAMOND_HORSE_ARMOR");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.DIAMOND_HORSE_ARMOR, 1));
 
 		recipe.shape("  D", "DSD", "DDD");

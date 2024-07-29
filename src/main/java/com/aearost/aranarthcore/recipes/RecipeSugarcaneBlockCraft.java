@@ -13,11 +13,10 @@ public class RecipeSugarcaneBlockCraft {
 	public RecipeSugarcaneBlockCraft(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a sugarcane block
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Sugarcane Block.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_SUGARCANE_BLOCK_FROM_SUGARCANE");

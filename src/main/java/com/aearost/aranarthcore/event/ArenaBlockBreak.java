@@ -21,16 +21,13 @@ public class ArenaBlockBreak implements Listener {
 	 */
 	@EventHandler
 	public void onArenaBlockBreak(final BlockBreakEvent e) {
-		if (e.getPlayer().isSneaking()) {
-			int x = e.getBlock().getX();
-			int y = e.getBlock().getY();
-			int z = e.getBlock().getZ();
-			
-			if ((x >= -4 && x <= 4) && (y >= 100 && y <= 111) && (z >= -4 && z <=4)) {
-				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessageError("You cannot break this!"));
-			}
-			
+		int x = e.getBlock().getX();
+		int y = e.getBlock().getY();
+		int z = e.getBlock().getZ();
+
+		if ((x >= -4 && x <= 4) && (y >= 100 && y <= 111) && (z >= -4 && z <=4)) {
+			e.setCancelled(true);
+			e.getPlayer().sendMessage(ChatUtils.chatMessageError("You cannot break this!"));
 		}
 	}
 }

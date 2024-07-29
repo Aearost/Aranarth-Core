@@ -12,11 +12,10 @@ public class RecipeBambooPlanks {
 	public RecipeBambooPlanks(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting bamboo planks from bamboo blocks
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Bamboo Planks.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_BAMBOO_PLANKS");

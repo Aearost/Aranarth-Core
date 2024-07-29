@@ -13,11 +13,10 @@ public class RecipeChorusDiamond {
 	public RecipeChorusDiamond(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a Chorus Diamond
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Chorus Diamond.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_CHORUS_DIAMOND");

@@ -11,16 +11,15 @@ import org.bukkit.inventory.RecipeChoice.MaterialChoice;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 
-public class RecipeWoolToString {
+public class RecipeWoolUncraft {
 
-	public RecipeWoolToString(Plugin plugin) {
+	public RecipeWoolUncraft(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting string from wool
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a String.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_STRING_FROM_WOOL");

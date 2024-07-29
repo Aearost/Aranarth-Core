@@ -12,11 +12,10 @@ public class RecipeChainmailLeggings {
 	public RecipeChainmailLeggings(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting chainmail leggings
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Chainmail Leggings.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_CHAINMAIL_LEGGINGS");

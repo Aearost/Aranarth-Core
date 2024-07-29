@@ -13,11 +13,10 @@ public class RecipeQuiver {
 	public RecipeQuiver(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting one Quiver
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Quiver.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_QUIVER");

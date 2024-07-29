@@ -14,9 +14,8 @@ public class RecipeAmethystUncraft {
 	}
 	
 	/**
-	 * Creates the recipe for getting amethyst shards from amethyst blocks
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Amethyst Shards.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_AMETHYST_UNCRAFT");

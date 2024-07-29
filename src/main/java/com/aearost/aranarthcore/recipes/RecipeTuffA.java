@@ -12,11 +12,10 @@ public class RecipeTuffA {
 	public RecipeTuffA(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the first recipe for getting four Tuff.
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Tuff.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_TUFF_A");

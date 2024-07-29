@@ -12,11 +12,10 @@ public class RecipeSaddleB {
 	public RecipeSaddleB(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a saddle
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Saddle.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_RECIPE_SADDLE_B");

@@ -12,11 +12,10 @@ public class RecipeGildedBlackstone {
 	public RecipeGildedBlackstone(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a gilded blackstone
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Gilded Blackstone.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_GILDED_BLACKSTONE");

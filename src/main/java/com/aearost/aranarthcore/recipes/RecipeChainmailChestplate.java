@@ -12,11 +12,10 @@ public class RecipeChainmailChestplate {
 	public RecipeChainmailChestplate(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a chainmail chestplate
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Chainmail Chestplate.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_CHAINMAIL_CHESTPLATE");
