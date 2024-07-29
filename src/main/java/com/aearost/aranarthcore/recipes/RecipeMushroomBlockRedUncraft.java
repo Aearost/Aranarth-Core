@@ -12,11 +12,10 @@ public class RecipeMushroomBlockRedUncraft {
 	public RecipeMushroomBlockRedUncraft(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting Red Mushrooms from their Block form.
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Red Mushrooms.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_MUSHROOM_BLOCK_RED_UNCRAFT");

@@ -13,11 +13,10 @@ public class RecipeInvisibleItemFrame {
 	public RecipeInvisibleItemFrame(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
 	 * Creates the recipe for getting an Invisible Item Frame.
-	 * 
-	 * @param plugin
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_INVISIBLE_ITEM_FRAME");

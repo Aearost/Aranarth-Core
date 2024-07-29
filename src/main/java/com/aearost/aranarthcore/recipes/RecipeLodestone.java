@@ -12,11 +12,10 @@ public class RecipeLodestone {
 	public RecipeLodestone(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a lodestone.
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Lodestone.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_LODESTONE");

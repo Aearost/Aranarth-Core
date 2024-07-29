@@ -13,11 +13,10 @@ public class RecipeHoneyGlazedHam {
 	public RecipeHoneyGlazedHam(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a Honey Glazed Ham
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Honey Glazed Ham.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HONEY_GLAZED_HAM");

@@ -12,11 +12,10 @@ public class RecipeCalcite {
 	public RecipeCalcite(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting three Calcite
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Calcite.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_CALCITE");

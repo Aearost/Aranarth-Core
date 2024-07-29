@@ -12,11 +12,10 @@ public class RecipeBundle {
 	public RecipeBundle(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a Bundle
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Bundle.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_BUNDLE");

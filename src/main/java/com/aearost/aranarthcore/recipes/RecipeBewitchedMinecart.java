@@ -13,11 +13,10 @@ public class RecipeBewitchedMinecart {
 	public RecipeBewitchedMinecart(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a saddle
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Bewitched Minecart.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_BEWITCHED_MINECART");

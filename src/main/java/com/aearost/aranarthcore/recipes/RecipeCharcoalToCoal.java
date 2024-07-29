@@ -12,11 +12,10 @@ public class RecipeCharcoalToCoal {
 	public RecipeCharcoalToCoal(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting Coal from Charcoal
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting Coal.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_COAL_FROM_CHARCOAL");

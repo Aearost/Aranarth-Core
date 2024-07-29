@@ -12,11 +12,10 @@ public class RecipeDeepslateB {
 	public RecipeDeepslateB(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting Cobblestone from Deepslate
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Deepslate.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_DEEPSLATE_B");

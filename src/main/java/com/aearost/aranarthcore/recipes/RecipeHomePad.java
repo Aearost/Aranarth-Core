@@ -13,11 +13,10 @@ public class RecipeHomePad {
 	public RecipeHomePad(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a home pad
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Homepad.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HOME_PAD");

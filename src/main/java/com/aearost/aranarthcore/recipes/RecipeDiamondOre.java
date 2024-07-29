@@ -12,11 +12,10 @@ public class RecipeDiamondOre {
 	public RecipeDiamondOre(Plugin plugin) {
 		createRecipe(plugin);
 	}
-	
+
 	/**
-	 * Creates the recipe for getting a diamond ore
-	 * 
-	 * @param plugin
+	 * Creates the recipe for getting a Diamond Ore.
+	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_DIAMOND_ORE");
