@@ -5,7 +5,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This is the master command for all commands related to AranarthCore.
@@ -21,7 +20,7 @@ public class CommandAC implements CommandExecutor {
 	 * @return Confirmation of whether the command was a success or not.
 	 */
 	@Override
-	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
 			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac <sub-command>"));
 			return false;

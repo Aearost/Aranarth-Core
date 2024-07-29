@@ -2,7 +2,7 @@ name: AranarthCore
 version: 1.0
 authors: [Aearost]
 main: com.aearost.aranarthcore.AranarthCore
-api-version: 1.20
+api-version: 1.21
 depend: [mcMMO]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [mcMMO]
