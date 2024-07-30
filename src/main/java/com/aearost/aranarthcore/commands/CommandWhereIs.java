@@ -7,6 +7,8 @@ import org.bukkit.entity.Player;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+import java.util.Objects;
+
 /**
  * Allows players to view the current location of another player.
  */
@@ -26,7 +28,7 @@ public class CommandWhereIs {
 				if (args[1].equalsIgnoreCase(onlinePlayer.getName())) {
 					Location location = onlinePlayer.getLocation();
 					sender.sendMessage(ChatUtils.chatMessage(onlinePlayer.getDisplayName()
-							+ " &7is at &ex: " + location.getBlockX() + " | y: " + location.getBlockY() +
+							+ " &7is in &e" + Objects.requireNonNull(location.getWorld()).getName() + " &7at &ex: " + location.getBlockX() + " | y: " + location.getBlockY() +
 							" | z: " + location.getBlockZ()));
 					return true;
 				}
