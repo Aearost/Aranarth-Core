@@ -3,12 +3,13 @@ package com.aearost.aranarthcore.commands;
 import java.io.IOException;
 import java.util.Objects;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -44,7 +45,10 @@ public class CommandCreative {
 				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
 				player.setGameMode(GameMode.CREATIVE);
-				player.setOp(true);
+
+				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+				perms.setPermission("worldedit.*", true);
+
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
