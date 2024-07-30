@@ -15,7 +15,7 @@ public class ArenaBlockBreak implements Listener {
 	}
 
 	/**
-	 * Prevents blocks in the arena spawn world from being destroyed.
+	 * Prevents blocks in the arena world's spawn from being destroyed.
 	 * 
 	 * @param e
 	 */
