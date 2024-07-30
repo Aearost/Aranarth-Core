@@ -37,6 +37,7 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 				if (destinationWorld.toLowerCase().equals("creative")) {
 					newMode = GameMode.CREATIVE;
 				}
+
 				try {
 					AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
 					player.setGameMode(newMode);

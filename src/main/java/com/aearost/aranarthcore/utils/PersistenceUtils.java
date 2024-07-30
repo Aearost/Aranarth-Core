@@ -223,6 +223,7 @@ public class PersistenceUtils {
 			String nickname = null;
 			String prefix = null;
 			String survivalInventory = null;
+			String arenaInventory = null;
 			String creativeInventory = null;
 			List<ItemStack> potions = null;
 			List<ItemStack> arrows = null;
@@ -256,10 +257,14 @@ public class PersistenceUtils {
                         prefix = fieldValue;
                         fieldCount++;
                     }
-                    case "survivalInventory" -> {
-                        survivalInventory = fieldValue;
-                        fieldCount++;
-                    }
+					case "survivalInventory" -> {
+						survivalInventory = fieldValue;
+						fieldCount++;
+					}
+					case "arenaInventory" -> {
+						arenaInventory = fieldValue;
+						fieldCount++;
+					}
                     case "creativeInventory" -> {
                         creativeInventory = fieldValue;
                         fieldCount++;
@@ -294,9 +299,9 @@ public class PersistenceUtils {
                     }
                 }
 				
-				if (fieldCount == 7) {
+				if (fieldCount == 8) {
 					if (Objects.nonNull(uuid)) {
-						AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, creativeInventory, potions, arrows));
+						AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows));
 					} else {
 						Bukkit.getLogger().info("The UUID is null!");
 					}
@@ -352,6 +357,7 @@ public class PersistenceUtils {
 						writer.write("        \"nickname\": \"" + aranarthPlayer.getNickname() + "\",\n");
 						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
 						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
+						writer.write("        \"arenaInventory\": \"" + aranarthPlayer.getArenaInventory() + "\",\n");
 						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
 						if (Objects.nonNull(aranarthPlayer.getPotions())) {
 							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[0]);

@@ -256,28 +256,57 @@ public class AranarthUtils {
 	 */
 	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (currentWorld.equals("world") || currentWorld.equals("arena")) {
-			// Do not change inventory unless heading to Creative
-			if (destinationWorld.equals("creative")) {
-				aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+
+		if (currentWorld.equals(destinationWorld)) {
+			return;
+		}
+
+		if (currentWorld.startsWith("world")) {
+			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+			if (destinationWorld.startsWith("arena")) {
+				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+					return;
+				}
+			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-				} else {
-					player.getInventory().clear();
+					return;
 				}
 			}
-		} else if (currentWorld.equals("creative")) {
-			if (destinationWorld.equals("world") || destinationWorld.equals("arena")) {
-				// Do not change inventory unless heading to Survival or Arena
+			player.getInventory().clear();
+		} else if (currentWorld.startsWith("arena")) {
+			if (destinationWorld.startsWith("world")) {
+				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
+				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+					return;
+				}
+			} else if (destinationWorld.startsWith("creative")) {
+				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
+				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+					return;
+				}
+			}
+			player.getInventory().clear();
+		} else if (currentWorld.startsWith("creative")) {
+			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-				} else {
-					player.getInventory().clear();
+					return;
+				}
+			} else if (destinationWorld.startsWith("arena")) {
+				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
+				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
+					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+					return;
 				}
 			}
+			player.getInventory().clear();
 		} else {
-			Bukkit.getLogger().info("Something went wrong with the current world name!");
+			Bukkit.getLogger().info("Something went wrong with the current world name \"" + currentWorld + "\"!");
 			return;
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
