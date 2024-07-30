@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -257,7 +258,8 @@ public class AranarthUtils {
 	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-		if (currentWorld.equals(destinationWorld)) {
+		if (currentWorld.equals(destinationWorld)
+				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))) {
 			return;
 		}
 
@@ -432,4 +434,12 @@ public class AranarthUtils {
 		Integer newAmount = dragonHeads.get(location) - 1;
 		dragonHeads.put(location, newAmount);
 	}
+
+//	public static PermissionAttachment getPermissions(UUID uuid) {
+//		return permissions.get(uuid);
+//	}
+//
+//	public static void setPermissions(UUID uuid, PermissionAttachment newPermissions) {
+//		permissions.put(uuid, newPermissions);
+//	}
 }

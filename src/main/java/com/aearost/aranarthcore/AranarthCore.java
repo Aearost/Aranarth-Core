@@ -61,6 +61,8 @@ import java.util.Objects;
 
 public class AranarthCore extends JavaPlugin {
 
+	private static AranarthCore plugin;
+
 	/**
 	 * Called when the plugin is first enabled on server startup.
 	 * Responsible for initializing all functionality of AranarthCore.
@@ -73,6 +75,8 @@ public class AranarthCore extends JavaPlugin {
 		initializeCommands();
 		initializeWorlds();
 		initializeItems();
+
+		plugin = this;
 
 		// Update the persistence files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -91,6 +95,10 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.updateArmorTrimEffects();
 			}
 		}, 0, 100);
+	}
+
+	public static AranarthCore getInstance() {
+		return plugin;
 	}
 
 	/**
