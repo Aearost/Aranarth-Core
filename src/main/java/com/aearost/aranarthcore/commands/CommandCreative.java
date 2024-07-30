@@ -26,7 +26,7 @@ public class CommandCreative {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		sender.sendMessage(ChatUtils.chatMessage("&c&lThe creative world is temporarily disabled!"));
-		/*
+
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
                 // Teleports you to the creative world spawn
@@ -49,7 +49,7 @@ public class CommandCreative {
 			} else {
 				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
 			}
-		}*/
+		}
 		return false;
 	}
 

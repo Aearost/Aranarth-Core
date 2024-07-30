@@ -17,6 +17,7 @@ public class AranarthPlayer {
 	private String prefix;
 	private boolean isMountSwimEnabled;
 	private String survivalInventory;
+	private String arenaInventory;
 	private String creativeInventory;
 	private boolean isDeletingBlacklistedItems;
 	private List<ItemStack> potions;
@@ -30,13 +31,14 @@ public class AranarthPlayer {
 		this.prefix = "";
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
+		this.arenaInventory = "";
 		this.creativeInventory = "";
 		this.isDeletingBlacklistedItems = false;
 		this.potions = null;
 		this.arrows = null;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -44,6 +46,7 @@ public class AranarthPlayer {
 		this.prefix = prefix;
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
+		this.arenaInventory = "";
 		this.creativeInventory = creativeInventory;
 		this.isDeletingBlacklistedItems = false;
 		this.potions = potions;
@@ -160,6 +163,22 @@ public class AranarthPlayer {
 	 */
 	public void setSurvivalInventory(String survivalInventory) {
 		this.survivalInventory = survivalInventory;
+	}
+
+	/**
+	 * Provides the player's current Arena inventory.
+	 * @return The player's current Arena inventory.
+	 */
+	public String getArenaInventory() {
+		return arenaInventory;
+	}
+
+	/**
+	 * Updates the player's Arena inventory.
+	 * @param arenaInventory The new Arena inventory.
+	 */
+	public void setArenaInventory(String arenaInventory) {
+		this.arenaInventory = arenaInventory;
 	}
 
 	/**
