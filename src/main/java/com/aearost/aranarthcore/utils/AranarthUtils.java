@@ -249,6 +249,7 @@ public class AranarthUtils {
 
 	/**
 	 * Handles switching the player's inventory dependent on the world they are teleporting to.
+	 * If the player is teleporting to the arena world, the player will be given iron armor.
 	 *
 	 * @param player The player whose inventory is being altered.
 	 * @param currentWorld The world the player is teleporting from.
@@ -270,6 +271,13 @@ public class AranarthUtils {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					return;
 				}
+				player.getInventory().clear();
+				player.getInventory().setArmorContents(new ItemStack[] {
+						new ItemStack(Material.IRON_BOOTS, 1),
+						new ItemStack(Material.IRON_LEGGINGS, 1),
+						new ItemStack(Material.IRON_CHESTPLATE, 1),
+						new ItemStack(Material.IRON_HELMET, 1)});
+				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
@@ -305,6 +313,13 @@ public class AranarthUtils {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					return;
 				}
+				player.getInventory().clear();
+				player.getInventory().setArmorContents(new ItemStack[] {
+						new ItemStack(Material.IRON_BOOTS, 1),
+						new ItemStack(Material.IRON_LEGGINGS, 1),
+						new ItemStack(Material.IRON_CHESTPLATE, 1),
+						new ItemStack(Material.IRON_HELMET, 1)});
+				return;
 			}
 			player.getInventory().clear();
 		} else {

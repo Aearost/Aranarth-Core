@@ -141,11 +141,9 @@ public class AranarthCore extends JavaPlugin {
 		new ItemPickupAddToShulker(this);
 		new ZombieHorseSpawn(this);
 		new ArenaBlockBreak(this);
-		new ArenaBlockPlace(this);
 		new ArenaItemDrops(this);
 		new ArenaMeltPrevent(this);
 		new ArenaGrowPrevent(this);
-		new ArenaInventoryItemDropPrevent(this);
 		new ArenaPlayerDeath(this);
 		new ArenaDurabilityPrevent(this);
 		new ArenaHungerLossPrevent(this);

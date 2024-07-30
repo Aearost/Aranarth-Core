@@ -38,6 +38,10 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 					newMode = GameMode.CREATIVE;
 				}
 
+				if (currentWorld.equals("arena") && destinationWorld.equals("world")) {
+					Bukkit.getLogger().info("CAUSE: " + e.getCause().name());
+				}
+
 				try {
 					AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
 					player.setGameMode(newMode);
