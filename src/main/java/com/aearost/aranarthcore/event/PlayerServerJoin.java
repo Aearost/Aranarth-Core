@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import org.bukkit.permissions.PermissionAttachment;
 
 public class PlayerServerJoin implements Listener {
 
@@ -55,7 +56,9 @@ public class PlayerServerJoin implements Listener {
 		} else {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDiplay));
 		}
-		
+
+		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		perms.setPermission("bending.command.rechoose", true);
 	}
 	
 }
