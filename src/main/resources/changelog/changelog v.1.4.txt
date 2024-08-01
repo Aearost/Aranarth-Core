@@ -1,7 +1,11 @@
 AranarthCore v. 1.4
 
 Features
-[+] Chests can now be sorted by holding sneak and left clicking them
+[+] Added ProjectKorra bending to the survival world as well
+[+] Iron armor now auto-equips when teleporting to and dying in the arena world
+[-] Removed OP from creative
+[+] The arena world now has a separate inventory from survival
+[+] Chests can now be sorted by holding sneak and left-clicking them
 [+] Goats drop mutton when killed, similarly to sheep
 [+] Homepads can now be reordered in-game
 [~] Crop Harvest functionality now will only actually break the crop if it is fully matured
