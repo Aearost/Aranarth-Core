@@ -38,7 +38,16 @@ public class TorchflowerGrow implements Listener {
 				if (amountOfSeeds > 0) {
 					location.getWorld().dropItemNaturally(location, new ItemStack(Material.TORCHFLOWER_SEEDS, amountOfSeeds));
 				}
-				
+
+				Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
+				if (locationAbove.getBlock().getType() == Material.AIR) {
+					locationAbove.getBlock().setType(Material.LIGHT);
+				}
+			}
+		} else if (location.getBlock().getType() == Material.PITCHER_CROP) {
+			Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 2, location.getZ());
+			if (locationAbove.getBlock().getType() == Material.AIR) {
+				locationAbove.getBlock().setType(Material.LIGHT);
 			}
 		}
 	}
