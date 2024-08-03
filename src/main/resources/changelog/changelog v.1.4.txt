@@ -11,6 +11,9 @@ Features
 [~] Crop Harvest functionality now will only actually break the crop if it is fully matured
 [~] Changed the Bundle recipe to be made with Rabbit Hide instead of Leather
 [+] Double doors will now open and close together
+[+] Pitcher Plants and Torchflowers now spawn light above when fully grown
+[+] Auto-switching armor with armor stands by shift right-clicking
+[+] New recipe to uncraft glowstone blocks
 
 Bug Fixes
 - Converted the plugin to be in Maven using IntelliJ in place of Eclipse
@@ -21,3 +24,4 @@ Bug Fixes
 - The error message relating to world_the_nether and world_end no longer appear when teleporting
 - Arena spawn blocks are no longer breakable
 - Added world name to whereis command
+- Potions inventory is now limited to survival worlds

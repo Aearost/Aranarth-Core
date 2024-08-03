@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.event.*;
+import com.aearost.aranarthcore.recipes.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -10,50 +11,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.aearost.aranarthcore.commands.CommandAC;
 import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
-import com.aearost.aranarthcore.recipes.RecipeAmethystUncraft;
-import com.aearost.aranarthcore.recipes.RecipeBambooBlockUncraft;
-import com.aearost.aranarthcore.recipes.RecipeBambooPlanks;
-import com.aearost.aranarthcore.recipes.RecipeBell;
-import com.aearost.aranarthcore.recipes.RecipeBewitchedMinecart;
-import com.aearost.aranarthcore.recipes.RecipeBundle;
-import com.aearost.aranarthcore.recipes.RecipeCalcite;
-import com.aearost.aranarthcore.recipes.RecipeChainmailBootsA;
-import com.aearost.aranarthcore.recipes.RecipeChainmailBootsB;
-import com.aearost.aranarthcore.recipes.RecipeChainmailChestplate;
-import com.aearost.aranarthcore.recipes.RecipeChainmailHelmetA;
-import com.aearost.aranarthcore.recipes.RecipeChainmailHelmetB;
-import com.aearost.aranarthcore.recipes.RecipeChainmailLeggings;
-import com.aearost.aranarthcore.recipes.RecipeCharcoalToCoal;
-import com.aearost.aranarthcore.recipes.RecipeChorusDiamond;
-import com.aearost.aranarthcore.recipes.RecipeCobweb;
-import com.aearost.aranarthcore.recipes.RecipeDeepslateA;
-import com.aearost.aranarthcore.recipes.RecipeDeepslateB;
-import com.aearost.aranarthcore.recipes.RecipeDiamondOre;
-import com.aearost.aranarthcore.recipes.RecipeDripstone;
-import com.aearost.aranarthcore.recipes.RecipeGildedBlackstone;
-import com.aearost.aranarthcore.recipes.RecipeGlowInkSac;
-import com.aearost.aranarthcore.recipes.RecipeHomePad;
-import com.aearost.aranarthcore.recipes.RecipeHoneyGlazedHam;
-import com.aearost.aranarthcore.recipes.RecipeHorseArmorDiamond;
-import com.aearost.aranarthcore.recipes.RecipeHorseArmorGolden;
-import com.aearost.aranarthcore.recipes.RecipeHorseArmorIron;
-import com.aearost.aranarthcore.recipes.RecipeInvisibleItemFrame;
-import com.aearost.aranarthcore.recipes.RecipeLodestone;
-import com.aearost.aranarthcore.recipes.RecipeMushroomBlockBrown;
-import com.aearost.aranarthcore.recipes.RecipeMushroomBlockBrownUncraft;
-import com.aearost.aranarthcore.recipes.RecipeMushroomBlockRed;
-import com.aearost.aranarthcore.recipes.RecipeMushroomBlockRedUncraft;
-import com.aearost.aranarthcore.recipes.RecipeMushroomStem;
-import com.aearost.aranarthcore.recipes.RecipeNametag;
-import com.aearost.aranarthcore.recipes.RecipeQuiver;
-import com.aearost.aranarthcore.recipes.RecipeRootedDirt;
-import com.aearost.aranarthcore.recipes.RecipeSaddleA;
-import com.aearost.aranarthcore.recipes.RecipeSaddleB;
-import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockCraft;
-import com.aearost.aranarthcore.recipes.RecipeSugarcaneBlockUncraft;
-import com.aearost.aranarthcore.recipes.RecipeTuffA;
-import com.aearost.aranarthcore.recipes.RecipeTuffB;
-import com.aearost.aranarthcore.recipes.RecipeWoolUncraft;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
@@ -182,6 +139,7 @@ public class AranarthCore extends JavaPlugin {
 		new ChestSort(this);
 		new GoatDeath(this);
 		new DoorDoubleOpen(this);
+		new ArmorStandSwitch(this);
 	}
 
 	/**
@@ -232,6 +190,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeMushroomBlockRed(this);
 		new RecipeMushroomBlockRedUncraft(this);
 		new RecipeMushroomStem(this);
+		new RecipeGlowstoneUncraft(this);
 	}
 
 	/**

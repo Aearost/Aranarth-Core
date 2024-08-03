@@ -37,10 +37,12 @@ public class PotionConsume implements Listener {
 	 */
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
-		if (e.getHand() == EquipmentSlot.HAND) {
-			replacePotion(e.getPlayer(), e.getItem(), true);
-		} else {
-			replacePotion(e.getPlayer(), e.getItem(), false);
+		if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
+			if (e.getHand() == EquipmentSlot.HAND) {
+				replacePotion(e.getPlayer(), e.getItem(), true);
+			} else {
+				replacePotion(e.getPlayer(), e.getItem(), false);
+			}
 		}
 	}
 
