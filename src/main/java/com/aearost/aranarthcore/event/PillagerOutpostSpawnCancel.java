@@ -15,14 +15,11 @@ public class PillagerOutpostSpawnCancel implements Listener {
 	}
 
 	/**
-	 * Deals with preventing pillagers from spawning in Dren al-Sahra
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with preventing pillagers from spawning by their outpost locations.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPillagerSpawn(final CreatureSpawnEvent e) {
-
 		if (e.getEntity() instanceof Pillager) {
 			int x = e.getLocation().getBlockX();
 			int z = e.getLocation().getBlockZ();

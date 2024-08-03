@@ -16,9 +16,8 @@ public class VillagerInventoryViewClick implements Listener {
 	}
 
 	/**
-	 * Opens a GUI to view a villager's inventory when right clicked while sneaking.
-	 * 
-	 * @param e
+	 * Opens a GUI to view a villager's inventory when right-clicked while sneaking.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onVillagerClick(final PlayerInteractEntityEvent e) {

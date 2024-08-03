@@ -24,8 +24,7 @@ public class PetHurtPrevent implements Listener {
 
 	/**
 	 * Prevents players from hurting pets (tamed animals).
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPetHurt(final EntityDamageEvent e) {
@@ -36,12 +35,11 @@ public class PetHurtPrevent implements Listener {
 				if (Objects.nonNull(pet.getOwner())) {
 					if (pet.getOwner() instanceof OfflinePlayer) {
 						if (Objects.nonNull(e.getDamageSource().getCausingEntity())
-								&& e.getDamageSource().getCausingEntity() instanceof Player) {
+								&& e.getDamageSource().getCausingEntity() instanceof Player attacker) {
 							e.setCancelled(true);
 							OfflinePlayer owner = (OfflinePlayer) pet.getOwner();
-							Player attacker = (Player) e.getDamageSource().getCausingEntity();
-							
-							if (owner.getUniqueId().equals(attacker.getUniqueId())) {
+
+                            if (owner.getUniqueId().equals(attacker.getUniqueId())) {
 								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt your own &7"
 										+ ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
 							} else {

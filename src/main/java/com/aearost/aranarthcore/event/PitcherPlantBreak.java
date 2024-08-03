@@ -21,8 +21,7 @@ public class PitcherPlantBreak implements Listener {
 
 	/**
 	 * Drops the pitcher plant pods when the plant is harvested.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPitcherPlantBreak(final BlockBreakEvent e) {

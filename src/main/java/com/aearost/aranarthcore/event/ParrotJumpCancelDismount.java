@@ -18,17 +18,15 @@ public class ParrotJumpCancelDismount implements Listener {
 
 	/**
 	 * Prevents parrots from being removed when jumping unless the player is sneaking.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPlayerJump(final CreatureSpawnEvent e) {
 		if (e.getEntity() instanceof Parrot) {
 			if (e.getSpawnReason() == SpawnReason.SHOULDER_ENTITY) {
 				Parrot parrot = (Parrot) e.getEntity();
-				if (parrot.getOwner() instanceof Player) {
-					Player player = (Player) parrot.getOwner();
-					// Only prevent removal if the player is sneaking
+				if (parrot.getOwner() instanceof Player player) {
+                    // Only prevent removal if the player is sneaking
 					if (!player.isSneaking()) {
 						e.setCancelled(true);
 					}

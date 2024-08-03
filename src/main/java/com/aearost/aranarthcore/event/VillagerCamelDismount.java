@@ -17,14 +17,12 @@ public class VillagerCamelDismount implements Listener {
 
 	/**
 	 * Removes a villager that is riding a camel when the player dismounts.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onDismount(final EntityDismountEvent e) {
-		if (e.getDismounted() instanceof Camel) {
-			Camel camel = (Camel) e.getDismounted();
-			for (Entity entity : camel.getPassengers()) {
+		if (e.getDismounted() instanceof Camel camel) {
+            for (Entity entity : camel.getPassengers()) {
 				camel.removePassenger(entity);
 			}
 		}

@@ -29,16 +29,12 @@ public class GuiHomepadClick implements Listener {
 	}
 
 	/**
-	 * Deals with all clicks of the GUI elements.
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with all clicks of the homepad GUI elements.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
-
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport") && e.getView().getType() == InventoryType.CHEST) {
-
 			Player player = (Player) e.getWhoClicked();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			int slot = e.getSlot();
@@ -49,7 +45,7 @@ public class GuiHomepadClick implements Listener {
 			}
 
 			boolean isClickedHomepadGui = e.getClickedInventory().getSize() == 36;
-			Material heldItem = e.getCursor().getType();
+			Material heldItem = Objects.requireNonNull(e.getCursor()).getType();
 			
 			// If they click Previous, bring them back to the previous page
 			if (isClickedHomepadGui && slot == 27 && heldItem == Material.AIR) {
@@ -68,7 +64,7 @@ public class GuiHomepadClick implements Listener {
 					if (numOfHomes % 27 == 0) {
 						maxPages = numOfHomes / 27;
 					} else {
-						maxPages = (int) Math.floor(numOfHomes / 27) + 1;
+						maxPages = (int) (double) (numOfHomes / 27) + 1;
 					}
 					if (maxPages > 1) {
 						aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
@@ -77,14 +73,12 @@ public class GuiHomepadClick implements Listener {
 						player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 					}
 				}
-				return;
 			}
 			// If they click Exit
 			else if (isClickedHomepadGui && slot == 31 && heldItem == Material.AIR) {
 				e.setCancelled(true);
 				player.closeInventory();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
-				return;
 			}
 			// If they click Next
 			else if (isClickedHomepadGui && slot == 35 && heldItem == Material.AIR) {
@@ -97,7 +91,7 @@ public class GuiHomepadClick implements Listener {
 				if (numOfHomes % 27 == 0) {
 					maxPages = numOfHomes / 27;
 				} else {
-					maxPages = (int) Math.floor(numOfHomes / 27) + 1;
+					maxPages = (int) (double) (numOfHomes / 27) + 1;
 				}
 				if (currentPage + 1 < maxPages) {
 					currentPage++;
@@ -111,7 +105,6 @@ public class GuiHomepadClick implements Listener {
 					gui.openGui();
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
-				return;
 			} else {
 					if (isClickedHomepadGui) {
 						// If clicking a slot in the last row
@@ -145,7 +138,7 @@ public class GuiHomepadClick implements Listener {
 									Entity mount = player.getVehicle();
 									if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
 										player.leaveVehicle();
-										mount.teleport(home.getLocation());
+										Objects.requireNonNull(mount).teleport(home.getLocation());
 										player.teleport(home.getLocation());
 										Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
 										player.sendMessage(ChatUtils

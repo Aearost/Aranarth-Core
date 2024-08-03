@@ -19,14 +19,12 @@ public class BlacklistItemPickupPrevent implements Listener {
 	}
 
 	/**
-	 * Prevents players from picking up blacklisted items
-	 * 
-	 * @param e
+	 * Prevents players from picking up blacklisted items.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPlayerPickupItem(final EntityPickupItemEvent e) {
-		if (e.getEntity() instanceof Player) {
-			Player player = (Player) e.getEntity();
+		if (e.getEntity() instanceof Player player) {
 			if (AranarthUtils.hasBlacklistedItems(player.getUniqueId())) {
 				List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
 				for (ItemStack is : blacklistedItems) {

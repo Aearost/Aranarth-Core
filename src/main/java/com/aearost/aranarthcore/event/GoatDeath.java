@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event;
 
+import java.util.Objects;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -20,9 +21,7 @@ public class GoatDeath implements Listener {
 	
 	/**
 	 * Deals with dropping mutton if a Goat is killed.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGoatDeath(final EntityDeathEvent e) {
@@ -30,10 +29,10 @@ public class GoatDeath implements Listener {
 			Random r = new Random();
 			int dropCount = r.nextInt(3) + 1;
 			if (e.getEntity().isVisualFire()) {
-				e.getEntity().getLocation().getWorld().dropItemNaturally(
+				Objects.requireNonNull(e.getEntity().getLocation().getWorld()).dropItemNaturally(
 						e.getEntity().getLocation(), new ItemStack(Material.COOKED_MUTTON, dropCount));
 			} else {
-				e.getEntity().getLocation().getWorld().dropItemNaturally(
+				Objects.requireNonNull(e.getEntity().getLocation().getWorld()).dropItemNaturally(
 						e.getEntity().getLocation(), new ItemStack(Material.MUTTON, dropCount));
 			}
 		}

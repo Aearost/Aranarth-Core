@@ -7,6 +7,8 @@ import org.bukkit.event.player.PlayerExpChangeEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class CreativeExpChangePrevent implements Listener {
 
 	public CreativeExpChangePrevent(AranarthCore plugin) {
@@ -14,13 +16,12 @@ public class CreativeExpChangePrevent implements Listener {
 	}
 
 	/**
-	 * Prevents EXP from being dropped in the arena world
-	 * 
-	 * @param e
+	 * Prevents EXP from being dropped in the creative world.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onArenaItemDrop(final PlayerExpChangeEvent e) {
-		if (e.getPlayer().getLocation().getWorld().getName().toLowerCase().equals("creative")) {
+	public void onCreativeExpDrop(final PlayerExpChangeEvent e) {
+		if (Objects.requireNonNull(e.getPlayer().getLocation().getWorld()).getName().equalsIgnoreCase("creative")) {
 			e.setAmount(0);
 		}
 	}

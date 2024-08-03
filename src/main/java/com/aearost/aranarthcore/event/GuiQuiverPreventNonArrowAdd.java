@@ -22,10 +22,8 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 	}
 
 	/**
-	 * Prevents players from adding non-arrow items to the arrows inventory
-	 * 
-	 * @author Aearost
-	 *
+	 * Prevents players from adding non-arrow items to the arrows inventory.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
@@ -47,7 +45,7 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 					e.setCancelled(true);
 				}
 				
-				if (!isItemArrow(clickedItem)) {
+				if (!isItemArrow(Objects.requireNonNull(clickedItem))) {
 					e.setCancelled(true);
 				}
 			}
@@ -59,12 +57,15 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 				|| item.getType() == Material.SPECTRAL_ARROW) {
 			if (item.getType() == Material.TIPPED_ARROW) {
 				PotionMeta meta = (PotionMeta) item.getItemMeta();
-				if (meta.getBasePotionType() == PotionType.WATER
-						|| meta.getBasePotionType() == PotionType.AWKWARD
-						|| meta.getBasePotionType() == PotionType.MUNDANE
-						|| meta.getBasePotionType() == PotionType.THICK) {
+				if (Objects.nonNull(meta)) {
+					return meta.getBasePotionType() != PotionType.WATER
+							&& meta.getBasePotionType() != PotionType.AWKWARD
+							&& meta.getBasePotionType() != PotionType.MUNDANE
+							&& meta.getBasePotionType() != PotionType.THICK;
+				} else {
 					return false;
 				}
+
 			}
 			return true;
 		}

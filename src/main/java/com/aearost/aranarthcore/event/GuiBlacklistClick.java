@@ -24,10 +24,8 @@ public class GuiBlacklistClick implements Listener {
 	}
 
 	/**
-	 * Deals with all clicks of the GUI elements.
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with all clicks of the blacklist GUI elements.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
@@ -49,7 +47,7 @@ public class GuiBlacklistClick implements Listener {
 				if (Objects.isNull(clickedItem)) {
 					return;
 				}
-				if (blacklistedItems.size() == 27 && clickedItem != null) {
+				if (blacklistedItems.size() == 27) {
 					player.sendMessage(ChatUtils.chatMessageError("You have already blacklisted 27 items!"));
 				} else {
 					for (ItemStack itemStack : blacklistedItems) {

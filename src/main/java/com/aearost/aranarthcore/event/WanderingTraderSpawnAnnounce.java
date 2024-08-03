@@ -19,9 +19,7 @@ public class WanderingTraderSpawnAnnounce implements Listener {
 	
 	/**
 	 * Deals with displaying a chat message when a wandering trader spawns nearby a player.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onTraderSpawn(final EntitySpawnEvent e) {

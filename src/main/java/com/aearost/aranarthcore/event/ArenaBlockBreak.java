@@ -16,8 +16,7 @@ public class ArenaBlockBreak implements Listener {
 
 	/**
 	 * Prevents blocks in the arena world's spawn from being destroyed.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArenaBlockBreak(final BlockBreakEvent e) {

@@ -19,15 +19,14 @@ public class ConcretePowderGravityPrevent implements Listener {
 
 	/**
 	 * Prevents concrete powder from being affected by gravity.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onConcretePowderFall(final EntityChangeBlockEvent e) {
 		Entity entity = e.getEntity();
 		
 		if (entity instanceof FallingBlock) {
-			Block block = (Block) e.getBlock();
+			Block block = e.getBlock();
 			if (e.getTo() == Material.AIR && isConcretePowder(block.getType())) {
 				e.setCancelled(true);
 			}

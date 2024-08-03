@@ -25,15 +25,12 @@ public class VillagerTradeOverrides implements Listener {
 
 	/**
 	 * Deals with overriding villager trade functionality to yield custom results.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onVillagerTrade(PlayerInteractAtEntityEvent e) {
-		if (e.getRightClicked() instanceof Villager) {
-			Villager villager = (Villager) e.getRightClicked();
-			List<MerchantRecipe> trades = Lists.newArrayList(villager.getRecipes());
+	public void onVillagerTrade(final PlayerInteractAtEntityEvent e) {
+		if (e.getRightClicked() instanceof Villager villager) {
+            List<MerchantRecipe> trades = Lists.newArrayList(villager.getRecipes());
 			for (int i = 0; i < trades.size(); i++) {
 				MerchantRecipe trade = trades.get(i);
 				

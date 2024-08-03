@@ -17,13 +17,11 @@ public class EntityEggPickupCancel implements Listener {
 
 	/**
 	 * Deals with cancelling zombies, baby zombies, and zombie villagers from
-	 * picking up eggs.
-	 * 
-	 * @author Aearost
-	 *
+	 * picking up eggs which prevented despawning.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onEggPickupCancel(EntityPickupItemEvent e) {
+	public void onEggPickupCancel(final EntityPickupItemEvent e) {
 		if (e.getItem().getItemStack().getType() == Material.EGG) {
 			if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.ZOMBIE_VILLAGER) {
 				e.setCancelled(true);

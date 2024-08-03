@@ -11,6 +11,8 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class VillagerCamelPickup implements Listener {
 
 	public VillagerCamelPickup(AranarthCore plugin) {
@@ -18,9 +20,8 @@ public class VillagerCamelPickup implements Listener {
 	}
 
 	/**
-	 * Opens a GUI to view a villager's inventory when right clicked while sneaking.
-	 * 
-	 * @param e
+	 * Opens a GUI to view a villager's inventory when right-clicked while sneaking.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onVillagerClick(final PlayerInteractEntityEvent e) {
@@ -30,7 +31,7 @@ public class VillagerCamelPickup implements Listener {
 			if (player.isInsideVehicle()) {
 				Entity mount = player.getVehicle();
 				if (player.getVehicle() instanceof Camel) {
-					mount.addPassenger(e.getRightClicked());
+					Objects.requireNonNull(mount).addPassenger(e.getRightClicked());
 				}
 			}
 		}

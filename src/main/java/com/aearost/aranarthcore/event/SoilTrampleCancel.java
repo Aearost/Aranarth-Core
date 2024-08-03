@@ -11,6 +11,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class SoilTrampleCancel implements Listener {
 
 	public SoilTrampleCancel(AranarthCore plugin) {
@@ -19,16 +21,14 @@ public class SoilTrampleCancel implements Listener {
 
 	
 	/**
-	 * Prevents crops from being trampled by a player
-	 * 
-	 * @author Aearost
-	 *
+	 * Prevents crops from being trampled by a player.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onTrample(PlayerInteractEvent e) {
+	public void onTrample(final PlayerInteractEvent e) {
 		Block block = e.getClickedBlock();
 		
-		if (e.getAction() == Action.PHYSICAL && block.getType() == Material.FARMLAND) {
+		if (e.getAction() == Action.PHYSICAL && Objects.requireNonNull(block).getType() == Material.FARMLAND) {
 			e.setCancelled(true);
 		}
 			

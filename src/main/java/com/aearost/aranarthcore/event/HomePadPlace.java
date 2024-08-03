@@ -18,19 +18,15 @@ public class HomePadPlace implements Listener {
 	}
 
 	/**
-	 * Adds a new entry to the homes HashMap when a homepad is placed
-	 * 
-	 * @param e
+	 * Adds a new entry to the homes HashMap when a homepad is placed.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onHomePadPlace(final BlockPlaceEvent e) {
-		
 		ItemStack item = e.getItemInHand();
 		if (item.isSimilar((HomePad.getHomePad()))) {
 			Location location = e.getBlockPlaced().getLocation();
 			AranarthUtils.addNewHome(location);
 		}
-		
 	}
-
 }

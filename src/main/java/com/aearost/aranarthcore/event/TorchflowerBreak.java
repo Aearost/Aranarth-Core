@@ -16,9 +16,8 @@ public class TorchflowerBreak implements Listener {
 	}
 
 	/**
-	 * Removes the light block above the torchflower
-	 * 
-	 * @param e
+	 * Removes the light block above the torchflower.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onTorchflowerBreak(final BlockBreakEvent e) {

@@ -8,6 +8,8 @@ import org.bukkit.event.block.BlockFadeEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class ArenaMeltPrevent implements Listener {
 
 	public ArenaMeltPrevent(AranarthCore plugin) {
@@ -16,12 +18,11 @@ public class ArenaMeltPrevent implements Listener {
 
 	/**
 	 * Prevents blocks in the arena world from melting.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArenaBlockMelt(final BlockFadeEvent e) {
-		if (e.getBlock().getLocation().getWorld().getName().toLowerCase().equals("arena")) {
+		if (Objects.requireNonNull(e.getBlock().getLocation().getWorld()).getName().equalsIgnoreCase("arena")) {
 			Material material = e.getBlock().getType();
 			if (material == Material.ICE || material == Material.PACKED_ICE || material == Material.BLUE_ICE ||
 					material == Material.SNOW || material == Material.SNOW_BLOCK) {

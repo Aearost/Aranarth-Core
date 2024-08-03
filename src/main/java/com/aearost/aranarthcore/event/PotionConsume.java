@@ -21,28 +21,19 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class PotionConsume implements Listener {
-	
-	private AranarthCore plugin;
 
 	public PotionConsume(AranarthCore plugin) {
-		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
 	 * Handles the auto-refill functionality when consuming of regular potions.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
-		if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
-			if (e.getHand() == EquipmentSlot.HAND) {
-				replacePotion(e.getPlayer(), e.getItem(), true);
-			} else {
-				replacePotion(e.getPlayer(), e.getItem(), false);
-			}
+		if (Objects.requireNonNull(e.getPlayer().getLocation().getWorld()).getName().startsWith("world")) {
+            replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
 		}
 	}
 
@@ -58,11 +49,7 @@ public class PotionConsume implements Listener {
 			if (Objects.nonNull(e.getItem())) {
 				if (e.getItem().getType() == Material.SPLASH_POTION
 						|| e.getItem().getType() == Material.LINGERING_POTION) {
-					if (e.getHand() == EquipmentSlot.HAND) {
-						replacePotion(e.getPlayer(), e.getItem(), true);
-					} else {
-						replacePotion(e.getPlayer(), e.getItem(), false);
-					}
+                    replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
 				}
 			}
 		}
@@ -80,17 +67,9 @@ public class PotionConsume implements Listener {
 				PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 				if (consumedPotion.getType() == potion.getType()) {
 					
-//					// If it is an mcMMO potion
-//					if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
-//						potionName = potionToCount.getItemMeta().getItemName();
-//					} else {
-//						PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
-//						potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
-//					}
-					
 					PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
 					// Ensures that the potion is the same
-					if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
+					if (Objects.requireNonNull(consumedPotionMeta).getBasePotionType() == Objects.requireNonNull(potionMeta).getBasePotionType()) {
 						// If it's an mcMMO potion, ensure that it is the exact same potion
 						if (consumedPotionMeta.hasItemName()) {
 							if (!consumedPotionMeta.getItemName().equals(potionMeta.getItemName())) {
@@ -99,7 +78,7 @@ public class PotionConsume implements Listener {
 						}
 						
 						// This might not include potions thrown from off-hand
-						int slot = 0;
+						int slot;
 						if (isUsedFromMainHand) {
 							slot = player.getInventory().getHeldItemSlot();
 						} else {
@@ -120,7 +99,7 @@ public class PotionConsume implements Listener {
 							final int finalSlot = slot;
 							
 							// Required to add potion to inventory after consumption
-							Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(this.plugin, new Runnable() {
+							Bukkit.getServer().getScheduler().runTaskLaterAsynchronously(AranarthCore.getInstance(), new Runnable() {
 				                public void run() {
 				                    player.getInventory().setItem(finalSlot, consumedPotion);
 				                }

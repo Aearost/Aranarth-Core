@@ -16,17 +16,12 @@ public class MobDestroyDoorPrevent implements Listener {
 
 	/**
 	 * Deals with preventing non-player entities from destroying doors.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onDoorDestroy(final EntityBreakDoorEvent e) {
-
 		if (!(e.getEntity() instanceof Player)) {
 			e.setCancelled(true);
 		}
-		
 	}
-
 }

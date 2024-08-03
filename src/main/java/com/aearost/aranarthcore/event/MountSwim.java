@@ -18,19 +18,14 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class MountSwim implements Listener {
 
-	private AranarthCore plugin;
-
 	public MountSwim(AranarthCore plugin) {
-		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Allows mounts to swim in water and staying on the surface
-	 * Also makes their swim speed relative to their movement speed
-	 * 
-	 * @author Aearost
-	 *
+	 * Allows mounts to swim in water and staying on the surface.
+	 * Also makes their swim speed relative to their movement speed.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onMountSwim(final PlayerInteractEvent e) {
@@ -39,14 +34,12 @@ public class MountSwim implements Listener {
 		if (player.isInsideVehicle() && (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)) {
 
 			// Code based on https://www.spigotmc.org/resources/swimminghorses.72920/
-			Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, new Runnable() {
+			Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
 				@Override
 				public void run() {
 					Player p = e.getPlayer();
-					if (p.getVehicle() instanceof AbstractHorse) {
-						AbstractHorse mount = (AbstractHorse) p.getVehicle();
-						
-						if (mount != null && isInLiquid(mount)) {
+					if (p.getVehicle() instanceof AbstractHorse mount) {
+                        if (isInLiquid(mount)) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							if (aranarthPlayer.getIsMountSwimEnabled()) {
 								// Try to find the way to make this speed relative to the speed of the mount
@@ -69,14 +62,12 @@ public class MountSwim implements Listener {
 	// We want this very low so that it refreshes more often
 	private void jump(LivingEntity livingEntity) {
 		livingEntity.setVelocity(livingEntity.getVelocity().setY(0.01));
-		//livingEntity.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 10, 100));
-	}
+		}
 
 	// Called whenever the mount goes underwater, this way it will send it back above
 	private void swim(LivingEntity livingEntity) {
 		livingEntity.setVelocity(livingEntity.getVelocity().setY(0.01));
-		//livingEntity.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 10, 100));
-	}
+		}
 
 	private boolean hasLand(LivingEntity livingEntity) {
 		return livingEntity.getEyeLocation().add(livingEntity.getLocation().getDirection())

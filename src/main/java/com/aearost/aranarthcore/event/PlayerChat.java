@@ -18,14 +18,17 @@ public class PlayerChat implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
-
-	// Via https://www.spigotmc.org/threads/editing-message-to-player-from-asyncplayerchatevent.362198/
+    /**
+     * Handles formatting chat messages.
+     * Based on <a href="https://www.spigotmc.org/threads/editing-message-to-player-from-asyncplayerchatevent.362198/">Spigot URL</a>
+     * @param event The event.
+     */
 	@EventHandler
-    public void chatEvent(AsyncPlayerChatEvent event) {
+    public void chatEvent(final AsyncPlayerChatEvent event) {
         String message = event.getMessage();
 
         for (Player p : event.getRecipients()) {
-            if (message.contains(p.getDisplayName()) && event.getPlayer().getDisplayName() != p.getDisplayName()) {
+            if (message.contains(p.getDisplayName()) && !event.getPlayer().getDisplayName().equals(p.getDisplayName())) {
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
@@ -35,10 +38,10 @@ public class PlayerChat implements Listener {
         String nickname = aranarthPlayer.getNickname();
         
         String chatMessage = "⊰";
-        if (!prefix.equals("")) {
+        if (!prefix.isEmpty()) {
         	chatMessage += ChatUtils.translateToColor(prefix + "&r") + " ";
         }
-        if (!nickname.equals("")) {
+        if (!nickname.isEmpty()) {
         	chatMessage += ChatUtils.translateToColor(nickname + "&r");
         } else {
         	chatMessage += event.getPlayer().getName();

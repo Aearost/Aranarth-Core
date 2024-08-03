@@ -18,16 +18,13 @@ public class GuiVillagerClick implements Listener {
 	}
 
 	/**
-	 * Deals with all clicks of the GUI elements.
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with all clicks of the villager GUI elements.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager") && e.getView().getType() == InventoryType.CHEST) {
 			e.setCancelled(true);
-			
 			if (e.getSlot() == 8) {
 				Player player = (Player) e.getWhoClicked();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);

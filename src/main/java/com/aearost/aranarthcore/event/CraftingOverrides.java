@@ -12,14 +12,20 @@ import org.bukkit.inventory.ItemStack;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+import java.util.Objects;
+
 public class CraftingOverrides implements Listener {
 
 	public CraftingOverrides(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
-	
+
+	/**
+	 * Handles all overrides of default vanilla recipes to cater to custom recipes.
+	 * @param e The event.
+	 */
 	@EventHandler
-	public void preCraftitem(final PrepareItemCraftEvent e) {
+	public void preCraftItem(final PrepareItemCraftEvent e) {
 		int nullCounter = 0;
 		int sugarcaneBlockCounter = 0;
 		for (ItemStack is : e.getInventory().getMatrix()) {
@@ -29,19 +35,19 @@ public class CraftingOverrides implements Listener {
 				continue;
 			}
 			
-			if (is.getType() == Material.BAMBOO_BLOCK && is.getItemMeta().hasLore()) {
+			if (is.getType() == Material.BAMBOO_BLOCK && Objects.nonNull(is.getItemMeta()) && is.getItemMeta().hasLore()) {
 				sugarcaneBlockCounter++;
 			}
 		}
+
 		if (nullCounter == 8 && sugarcaneBlockCounter == 1) {
 			e.getInventory().setResult(new ItemStack(Material.SUGAR_CANE, 9));
 		}
 	}
 
 	/**
-	 * Handles cancelling improper crafting recipes
-	 * 
-	 * @param e
+	 * Handles cancelling improper crafting recipes.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onCraftItem(final CraftItemEvent e) {
@@ -51,12 +57,13 @@ public class CraftingOverrides implements Listener {
 			if (is == null) {
 				continue;
 			}
-			
+			if (Objects.isNull(is.getItemMeta())) {
+				return;
+			}
 			boolean isHasLore = is.getItemMeta().hasLore();
 			
 			// Chorus Diamond
 			if (is.getType() == Material.DIAMOND) {
-				
 				// If a Chorus Diamond is used in place of a regular Diamond
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
@@ -76,7 +83,6 @@ public class CraftingOverrides implements Listener {
 			}
 			// Sugarcane Block
 			else if (is.getType() == Material.BAMBOO_BLOCK) {
-				
 				if (isHasLore) {
 					// If a Sugarcane Block is used in place of a regular Sugarcane or Bamboo
 					if (e.getRecipe().getResult().getType() != Material.SUGAR_CANE &&

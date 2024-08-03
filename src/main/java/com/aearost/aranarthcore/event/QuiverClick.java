@@ -21,16 +21,15 @@ public class QuiverClick implements Listener {
 	}
 
 	/**
-	 * Prevents stripping a log or wood block if the player is not sneaking
-	 * 
-	 * @param e
+	 * Prevents stripping a log or wood block if the player is not sneaking.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onQuiverClick(final PlayerInteractEvent e) {
 		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (Objects.nonNull(e.getItem())) {
 				if (e.getItem().getType() == Material.BUNDLE) {
-					if (e.getItem().getItemMeta().hasLore()) {
+					if (Objects.nonNull(e.getItem().getItemMeta()) && e.getItem().getItemMeta().hasLore()) {
 						if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
 							GuiQuiver gui = new GuiQuiver(e.getPlayer());
 							gui.openGui();

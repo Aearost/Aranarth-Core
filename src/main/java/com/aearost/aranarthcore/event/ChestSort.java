@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,13 +27,12 @@ public class ChestSort implements Listener {
 
 	/**
 	 * Handles sorting the content of a container.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onContainerSort(final PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (e.getClickedBlock().getType() == Material.CHEST
+			if (Objects.requireNonNull(e.getClickedBlock()).getType() == Material.CHEST
 					|| e.getClickedBlock().getType() == Material.TRAPPED_CHEST
 					|| e.getClickedBlock().getType() == Material.BARREL) {
 				if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
@@ -52,7 +50,7 @@ public class ChestSort implements Listener {
 					}
 					
 					ChestItemComparator comparator = new ChestItemComparator();
-					Collections.sort(sortedList, comparator);
+					sortedList.sort(comparator);
 					
 					ItemStack[] sortedArray = new ItemStack[sortedList.size()];
 					for (int i = 0; i < sortedList.size(); i++) {

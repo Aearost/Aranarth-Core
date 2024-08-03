@@ -20,12 +20,11 @@ public class ArenaPlayerDeath implements Listener {
 	/**
 	 * Forces the player to respawn in the arena world when they die in it.
 	 * It will also auto-equip iron armor upon death.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArenaDeath(final PlayerRespawnEvent e) {
-		if (e.getPlayer().getWorld().getName().toLowerCase().equals("arena")) {
+		if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
 			e.setRespawnLocation(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
 
 			Player player = e.getPlayer();

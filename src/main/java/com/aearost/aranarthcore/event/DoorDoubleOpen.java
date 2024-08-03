@@ -12,6 +12,8 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class DoorDoubleOpen implements Listener {
 
 	public DoorDoubleOpen(AranarthCore plugin) {
@@ -20,14 +22,13 @@ public class DoorDoubleOpen implements Listener {
 
 	/**
 	 * Results in both doors opening at the same time if they are side by side.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onDoorOpen(final PlayerInteractEvent e) {
 		if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			Block block = e.getClickedBlock();
-			if (block.getBlockData() instanceof Door) {
+			if (Objects.requireNonNull(block).getBlockData() instanceof Door) {
 				
 				Door door = (Door) block.getBlockData();
 				Block sideBlock = null;

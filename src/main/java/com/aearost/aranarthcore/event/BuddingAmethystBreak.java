@@ -18,9 +18,8 @@ public class BuddingAmethystBreak implements Listener {
 	}
 
 	/**
-	 * If harvested with a silk touch pickaxe, the Budding Amethyst block will drop
-	 * 
-	 * @param e
+	 * If harvested with a silk touch pickaxe, the Budding Amethyst block will drop.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onBuddingAmethystBreak(final BlockBreakEvent e) {
