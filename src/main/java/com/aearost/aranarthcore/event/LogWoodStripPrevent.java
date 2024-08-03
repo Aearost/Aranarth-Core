@@ -13,6 +13,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+import java.util.Objects;
+
 public class LogWoodStripPrevent implements Listener {
 
 	public LogWoodStripPrevent(AranarthCore plugin) {
@@ -20,15 +22,14 @@ public class LogWoodStripPrevent implements Listener {
 	}
 
 	/**
-	 * Prevents stripping a log or wood block if the player is not sneaking
-	 * 
-	 * @param e
+	 * Prevents stripping a log or wood block if the player is not sneaking.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onLogStrip(final PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND && e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			if (isHoldingAxe(e.getPlayer())) {
-				if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
+				if (getMaterialIfLogOrWood(Objects.requireNonNull(e.getClickedBlock())) != null) {
 					if (!e.getPlayer().isSneaking()) {
 						e.setCancelled(true);
 						e.getPlayer().sendMessage(ChatUtils.chatMessageError("You must be sneaking to strip logs!"));
@@ -38,6 +39,11 @@ public class LogWoodStripPrevent implements Listener {
 		}
 	}
 
+	/**
+	 * Determines if the input block is a log/wood block or not.
+	 * @param block The block.
+	 * @return Confirmation whether the block is a log/wood or not.
+	 */
 	private Material getMaterialIfLogOrWood(Block block) {
 		if (block.getType() == Material.OAK_LOG || block.getType() == Material.BIRCH_LOG
 				|| block.getType() == Material.SPRUCE_LOG || block.getType() == Material.JUNGLE_LOG
@@ -55,13 +61,14 @@ public class LogWoodStripPrevent implements Listener {
 		}
 	}
 
+	/**
+	 * Determines if the player is holding an axe or not.
+	 * @param player The player.
+	 * @return Confirmation whether the player is holding an axe or not.
+	 */
 	private boolean isHoldingAxe(Player player) {
 		Material item = player.getInventory().getItemInMainHand().getType();
-		if (item == Material.WOODEN_AXE || item == Material.STONE_AXE || item == Material.IRON_AXE
-				|| item == Material.GOLDEN_AXE || item == Material.DIAMOND_AXE || item == Material.NETHERITE_AXE) {
-			return true;
-		} else {
-			return false;
-		}
+        return item == Material.WOODEN_AXE || item == Material.STONE_AXE || item == Material.IRON_AXE
+                || item == Material.GOLDEN_AXE || item == Material.DIAMOND_AXE || item == Material.NETHERITE_AXE;
 	}
 }

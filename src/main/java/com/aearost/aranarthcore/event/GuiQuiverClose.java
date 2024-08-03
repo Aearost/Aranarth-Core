@@ -28,8 +28,7 @@ public class GuiQuiverClose implements Listener {
 
 	/**
 	 * Adds the input arrows to the player's quiver inventory.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onQuiverInventoryClose(final InventoryCloseEvent e) {
@@ -41,21 +40,19 @@ public class GuiQuiverClose implements Listener {
 				
 				List<ItemStack> arrows = aranarthPlayer.getArrows();
 				List<ItemStack> inventoryArrows = new LinkedList<ItemStack>(Arrays.asList(inventory.getContents()));
-				
-				if (Objects.nonNull(inventoryArrows)) {
-					if (Objects.isNull(arrows)) {
-						arrows = new ArrayList<ItemStack>();
-					}
-					
-					for (ItemStack inventoryArrow : inventoryArrows) {
-						if (Objects.nonNull(inventoryArrow)) {
-							arrows.add(inventoryArrow);
-						}
-					}
-					aranarthPlayer.setArrows(inventoryArrows);
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				}
-			}
+
+                if (Objects.isNull(arrows)) {
+                    arrows = new ArrayList<ItemStack>();
+                }
+
+                for (ItemStack inventoryArrow : inventoryArrows) {
+                    if (Objects.nonNull(inventoryArrow)) {
+                        arrows.add(inventoryArrow);
+                    }
+                }
+                aranarthPlayer.setArrows(inventoryArrows);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
 		}
 	}
 }

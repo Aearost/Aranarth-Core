@@ -76,7 +76,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerServerJoin(this);
 		new PlayerServerQuit(this);
 		new GuiHomepadClick(this);
-		new CreeperExplodeDeny(this);
+		new ExplosionPrevent(this);
 		new SoilTrampleCancel(this);
 		new CraftingOverrides(this);
 		new LogWoodStripPrevent(this);
@@ -132,8 +132,6 @@ public class AranarthCore extends JavaPlugin {
 		new ArrowConsume(this);
 		new BewitchedMinecartPlace(this);
 		new WanderingTraderSpawnAnnounce(this);
-		new AxolotlPreventFishDamage(this);
-		new BewitchedMoveSpeedTest(this);
 		new PotionEffectStack(this);
 		new MangroveRootShear(this);
 		new ChestSort(this);

@@ -19,12 +19,10 @@ public class PitcherPlantPlace implements Listener {
 
 	/**
 	 * Adds a light block above the pitcher plant when placed so the plant emits light.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPitcherPlantPlace(final BlockPlaceEvent e) {
-		
 		ItemStack item = e.getItemInHand();
 		if (item.getType() == Material.PITCHER_PLANT) {
 			Location location = e.getBlockPlaced().getLocation();

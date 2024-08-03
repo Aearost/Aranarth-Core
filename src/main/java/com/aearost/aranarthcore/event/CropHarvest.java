@@ -27,10 +27,9 @@ public class CropHarvest implements Listener {
 	}
 
 	/**
-	 * Allows for the full harvest of a crop and automatic re-plant
-	 * This can be done by left clicking on the crop while sneaking
-	 * 
-	 * @param e
+	 * Allows for the full harvest of a crop and automatic re-plant.
+	 * This can be done by left-clicking on the crop while sneaking.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onCropHarvest(final BlockBreakEvent e) {
@@ -41,18 +40,18 @@ public class CropHarvest implements Listener {
 				if (getIsMature(block)) {
 					// Prevents the block from actually being broken
 					ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
-					if (drops.size() > 1) {
+                    final ItemStack seed;
+                    if (drops.size() > 1) {
 						// The first index (0) is always 1 of the crop (wheat, beetroot, carrot, potato)
 						// The second index (1) is always the seed (wheat seeds, beetroot seeds, carrot, potato)
-						final ItemStack seed = drops.get(1);
-						seed.setAmount(seed.getAmount() - 1);
-					}
+                        seed = drops.get(1);
+                    }
 					// Only applies for nether wart
 					else {
-						final ItemStack seed = drops.get(0);
-						seed.setAmount(seed.getAmount() - 1);
-					}
-					for (ItemStack drop : drops) {
+                        seed = drops.getFirst();
+                    }
+                    seed.setAmount(seed.getAmount() - 1);
+                    for (ItemStack drop : drops) {
 						if (drop != null && drop.getAmount() > 0) {
 							// Adds support to increase yield of wheat per crop if using fortune
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
@@ -84,25 +83,34 @@ public class CropHarvest implements Listener {
 		}
 	}
 
+	/**
+	 * Confirms if the input block is indeed a crop.
+	 * @param block The block.
+	 * @return Confirmation of whether the block is a crop or not.
+	 */
 	private boolean getIsBlockCrop(Block block) {
-		if (block.getType() == Material.WHEAT || block.getType() == Material.CARROTS
-				|| block.getType() == Material.POTATOES || block.getType() == Material.BEETROOTS
-				|| block.getType() == Material.NETHER_WART) {
-			return true;
+        return block.getType() == Material.WHEAT || block.getType() == Material.CARROTS
+                || block.getType() == Material.POTATOES || block.getType() == Material.BEETROOTS
+                || block.getType() == Material.NETHER_WART;
+    }
+
+	/**
+	 * Confirms if the input block is at its full maturity.
+	 * @param block The block.
+	 * @return Confirmation of whether the block is fully matured or not.
+	 */
+	private boolean getIsMature(Block block) {
+		if (block.getBlockData() instanceof Ageable crop) {
+            return crop.getMaximumAge() == crop.getAge();
 		}
 		return false;
 	}
 
-	private boolean getIsMature(Block block) {
-		if (block.getBlockData() instanceof Ageable) {
-			Ageable crop = (Ageable) block.getBlockData();
-			if (crop.getMaximumAge() == crop.getAge()) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
+	/**
+	 * Determines how much wheat or beetroot to be dropped based on Fortune.
+	 * @param level The fortune level of the tool.
+	 * @return The number of the crop to be dropped.
+	 */
 	private int wheatBeetrootDropCalculation(int level) {
 		// This uses the same formula as regular wheat seeds dropping
 		Random r = new Random();
@@ -111,18 +119,14 @@ public class CropHarvest implements Listener {
 		// 70% chance of getting 1 wheat
 		// 30% chance of getting 2 wheat
 		if (level == 1) {
-			if (bracket < 8) {
-				amountToDrop = 1;
-			} else {
+			if (bracket >= 8) {
 				amountToDrop = 2;
 			}
 		}
 		// 30% chance of getting 1 wheat
 		// 70% chance of getting 2 wheat
 		else if (level == 2) {
-			if (bracket < 4) {
-				amountToDrop = 1;
-			} else {
+			if (bracket >= 4) {
 				amountToDrop = 2;
 			}
 		}
@@ -130,11 +134,9 @@ public class CropHarvest implements Listener {
 		// 60% chance of getting 2 wheat
 		// 20% chance of getting 3 wheat
 		else if (level == 3) {
-			if (bracket < 3) {
-				amountToDrop = 1;
-			} else if (bracket < 7) {
+			if (bracket >= 3 && bracket < 7) {
 				amountToDrop = 2;
-			} else {
+			} else if (bracket >= 7){
 				amountToDrop = 3;
 			}
 		}

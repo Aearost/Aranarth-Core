@@ -20,16 +20,15 @@ public class PlayerServerQuit implements Listener {
 
 	/**
 	 * Adds a new entry to the players HashMap if the player is not being tracked.
-	 * Additionally customizes the join/leave server message format.
-	 * 
-	 * @param e
+	 * Additionally, customizes the join/leave server message format.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
 		DateUtils dateUtils = new DateUtils();
 		String nameToDiplay = "";
-		if (!AranarthUtils.getNickname(player).equals("")) {
+		if (!AranarthUtils.getNickname(player).isEmpty()) {
 			nameToDiplay = AranarthUtils.getNickname(player);
 		} else {
 			nameToDiplay = AranarthUtils.getUsername(player);

@@ -22,10 +22,8 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 	}
 
 	/**
-	 * Prevents players from adding non-potion items to the potion inventory
-	 * 
-	 * @author Aearost
-	 *
+	 * Prevents players from adding non-potion items to the potion inventory.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
@@ -47,19 +45,19 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 					e.setCancelled(true);
 				}
 				
-				if (clickedItem.getType() != Material.POTION
+				if (Objects.requireNonNull(clickedItem).getType() != Material.POTION
 						&& clickedItem.getType() != Material.SPLASH_POTION
 						&& clickedItem.getType() != Material.LINGERING_POTION) {
 					e.setCancelled(true);
 				} else {
 					PotionMeta meta = (PotionMeta) clickedItem.getItemMeta();
 					// Prevent potions without effects from being added
-					if (meta.getBasePotionType() == PotionType.AWKWARD || 
+					if (Objects.requireNonNull(meta).getBasePotionType() == PotionType.AWKWARD ||
 							meta.getBasePotionType() == PotionType.MUNDANE || 
 							meta.getBasePotionType() == PotionType.THICK || 
 							meta.getBasePotionType() == PotionType.WATER) {
 						// Allows mcMMO potions to be placed in the inventory
-						if (meta.getCustomEffects().size() == 0) {
+						if (meta.getCustomEffects().isEmpty()) {
 							e.setCancelled(true);
 						}
 					}

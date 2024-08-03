@@ -25,14 +25,12 @@ public class ItemPickupAddToShulker implements Listener {
 	/**
 	 * Automatically places picked up items that have incomplete stacks in a shulker
 	 * box into that stack. This only works when you have at least 1 free inventory slot.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onItemPickup(final EntityPickupItemEvent e) {
-		if (e.getEntity() instanceof Player) {
-			Player player = (Player) e.getEntity();
-			ItemStack pickupItem = e.getItem().getItemStack();
+		if (e.getEntity() instanceof Player player) {
+            ItemStack pickupItem = e.getItem().getItemStack();
 			
 			if (Objects.nonNull(AranarthUtils.getBlacklistedItems(player.getUniqueId()))) {
 				for (ItemStack blacklistedItem : AranarthUtils.getBlacklistedItems(player.getUniqueId())) {
@@ -45,9 +43,8 @@ public class ItemPickupAddToShulker implements Listener {
 			int amountRemaining = pickupItem.getAmount();
 
 			// Skip the logic if the item being picked up is a shulker box
-			if (pickupItem.getItemMeta() instanceof BlockStateMeta) {
-				BlockStateMeta im = (BlockStateMeta) pickupItem.getItemMeta();
-				if (im.getBlockState() instanceof ShulkerBox) {
+			if (pickupItem.getItemMeta() instanceof BlockStateMeta im) {
+                if (im.getBlockState() instanceof ShulkerBox) {
 					return;
 				}
 			}
@@ -56,11 +53,9 @@ public class ItemPickupAddToShulker implements Listener {
 			for (ItemStack is : inventory) {
 				// Skip the slot if it's empty
 				if (is != null) {
-					if (is.getItemMeta() instanceof BlockStateMeta) {
-						BlockStateMeta im = (BlockStateMeta) is.getItemMeta();
-						if (im.getBlockState() instanceof ShulkerBox) {
-							ShulkerBox shulker = (ShulkerBox) im.getBlockState();
-							Inventory shulkerInventory = shulker.getInventory();
+					if (is.getItemMeta() instanceof BlockStateMeta im) {
+                        if (im.getBlockState() instanceof ShulkerBox shulker) {
+                            Inventory shulkerInventory = shulker.getInventory();
 
 							// Cycle through all slots in slots that are shulker boxes
 							for (int shulkerSlot = 0; shulkerSlot < shulkerInventory

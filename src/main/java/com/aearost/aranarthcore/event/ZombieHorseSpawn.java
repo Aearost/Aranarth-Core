@@ -20,9 +20,7 @@ public class ZombieHorseSpawn implements Listener {
 	/**
 	 * Deals with spawning a zombie horse when a horse dies as it is
 	 * killed with the Weakness potion effect.
-	 * 
-	 * @author Aearost
-	 *
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onHorseDeath(final EntityDeathEvent e) {

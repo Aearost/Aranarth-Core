@@ -10,6 +10,8 @@ import org.bukkit.inventory.ItemStack;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 
+import java.util.Objects;
+
 public class SugarcaneBlockPlace implements Listener {
 
 	public SugarcaneBlockPlace(AranarthCore plugin) {
@@ -17,15 +19,13 @@ public class SugarcaneBlockPlace implements Listener {
 	}
 
 	/**
-	 * Prevents the placement of Sugarcane Blocks
-	 * 
-	 * @param e
+	 * Prevents the placement of Sugarcane Blocks.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onSugarcaneBlockPlace(final BlockPlaceEvent e) {
-		
 		ItemStack item = e.getItemInHand();
-		if (item.getType() == Material.BAMBOO_BLOCK && item.getItemMeta().hasLore()) {
+		if (item.getType() == Material.BAMBOO_BLOCK && Objects.requireNonNull(item.getItemMeta()).hasLore()) {
 			e.setCancelled(true);
 			e.getPlayer().sendMessage(ChatUtils.chatMessageError("You cannot place a Block of Sugarcane!"));
 		}

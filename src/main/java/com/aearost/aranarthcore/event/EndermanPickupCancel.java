@@ -15,10 +15,8 @@ public class EndermanPickupCancel implements Listener {
 	}
 	
 	/**
-	 * Deals with cancelling endermen picking up blocks
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with preventing endermen from picking up blocks.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onEndermanPickupBlock(final EntityChangeBlockEvent e) {

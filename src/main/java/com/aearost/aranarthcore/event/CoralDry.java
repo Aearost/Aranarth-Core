@@ -16,13 +16,12 @@ public class CoralDry implements Listener {
 
 	/**
 	 * Prevents coral blocks from drying out in the survival world.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onCoralDry(final BlockFadeEvent e) {
-		if (e.getBlock().getWorld().getName().toLowerCase().equals("world") ||
-				e.getBlock().getWorld().getName().toLowerCase().equals("creative")) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world") ||
+				e.getBlock().getWorld().getName().equalsIgnoreCase("creative")) {
 			if (isCoral(e.getBlock().getType())) {
 				e.setCancelled(true);
 			}
@@ -30,7 +29,7 @@ public class CoralDry implements Listener {
 	}
 	
 	private boolean isCoral(Material block) {
-		return block == Material.BRAIN_CORAL_BLOCK || block == Material.BRAIN_CORAL_BLOCK ||
+		return block == Material.BRAIN_CORAL|| block == Material.BRAIN_CORAL_BLOCK ||
 				block == Material.BRAIN_CORAL_FAN || block == Material.BRAIN_CORAL_WALL_FAN ||
 				block == Material.BUBBLE_CORAL || block == Material.BUBBLE_CORAL_BLOCK ||
 				block == Material.BUBBLE_CORAL_FAN || block == Material.BUBBLE_CORAL_WALL_FAN ||

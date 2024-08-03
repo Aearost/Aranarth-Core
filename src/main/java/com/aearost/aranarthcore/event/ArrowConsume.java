@@ -14,7 +14,6 @@ import org.bukkit.entity.SpectralArrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
@@ -29,37 +28,34 @@ public class ArrowConsume implements Listener {
 	}
 
 	/**
-	 * Handles the auto-refill functionality when consuming of arrows
-	 * 
-	 * @author Aearost
-	 *
+	 * Handles the auto-refill functionality when consuming of arrows.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArrowUse(final EntityShootBowEvent e) {
 		if (e.getEntity() instanceof Player) {
 			ItemStack bow = e.getBow();
-			Map<Enchantment, Integer> enchantments = bow.getEnchantments();
-			boolean hasInfinity = false;
-			for (Enchantment enchantment : enchantments.keySet()) {
-				if (enchantment == Enchantment.INFINITY) {
-					hasInfinity = true;
+			if (Objects.nonNull(bow)) {
+				Map<Enchantment, Integer> enchantments = bow.getEnchantments();
+				boolean hasInfinity = false;
+				for (Enchantment enchantment : enchantments.keySet()) {
+					if (enchantment == Enchantment.INFINITY) {
+						hasInfinity = true;
+						break;
+					}
 				}
-			}
-			
-			if (!hasInfinity) {
-				if (e.getProjectile() instanceof Arrow || e.getProjectile() instanceof SpectralArrow) {
-					Player player = (Player) e.getEntity();
-					if (e.getHand() == EquipmentSlot.HAND) {
-						replaceArrow(player, e.getConsumable(), true);
-					} else {
-						replaceArrow(player, e.getConsumable(), false);
+
+				if (!hasInfinity) {
+					if (e.getProjectile() instanceof Arrow || e.getProjectile() instanceof SpectralArrow) {
+						Player player = (Player) e.getEntity();
+                        replaceArrow(player, e.getConsumable());
 					}
 				}
 			}
 		}
 	}
 
-	private void replaceArrow(Player player, ItemStack launchedArrow, boolean isUsedFromMainHand) {
+	private void replaceArrow(Player player, ItemStack launchedArrow) {
 		if (player.getGameMode() != GameMode.SURVIVAL) {
 			return;
 		}
@@ -83,9 +79,7 @@ public class ArrowConsume implements Listener {
 			if (Objects.nonNull(arrows)) {
 				for (ItemStack arrow : arrows) {
 					if (Objects.nonNull(arrow)) {
-						// If it is a normal or spectral arrow
 						if (launchedArrow.getType() == arrow.getType()) {
-							
 							if (launchedArrow.getType() == Material.ARROW) {
 								player.getInventory().addItem(new ItemStack(Material.ARROW, 1));
 							} else if (launchedArrow.getType() == Material.SPECTRAL_ARROW) {
@@ -93,12 +87,14 @@ public class ArrowConsume implements Listener {
 							} else {
 								PotionMeta launchedArrowMeta = (PotionMeta) launchedArrow.getItemMeta();
 								PotionMeta arrowMeta = (PotionMeta) arrow.getItemMeta();
-								if (launchedArrowMeta.getBasePotionType() != arrowMeta.getBasePotionType()) {
-									return;
-								} else {
-									ItemStack arrowToAdd = new ItemStack(Material.TIPPED_ARROW, 1);
-									arrowToAdd.setItemMeta(launchedArrowMeta);
-									player.getInventory().addItem(arrowToAdd);
+								if (Objects.nonNull(launchedArrowMeta) && Objects.nonNull(arrowMeta)) {
+									if (launchedArrowMeta.getBasePotionType() != arrowMeta.getBasePotionType()) {
+										return;
+									} else {
+										ItemStack arrowToAdd = new ItemStack(Material.TIPPED_ARROW, 1);
+										arrowToAdd.setItemMeta(launchedArrowMeta);
+										player.getInventory().addItem(arrowToAdd);
+									}
 								}
 							}
 							

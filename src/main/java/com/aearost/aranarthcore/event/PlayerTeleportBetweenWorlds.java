@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -23,18 +24,17 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 
 	/**
 	 * Ensures that a player's inventory is updated when teleported manually via /tp.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onTeleport(final PlayerTeleportEvent e) {
 		if (e.getCause() == TeleportCause.COMMAND) {
 			Player player = e.getPlayer();
-			String currentWorld = e.getFrom().getWorld().getName();
-			String destinationWorld = e.getTo().getWorld().getName();
+			String currentWorld = Objects.requireNonNull(e.getFrom().getWorld()).getName();
+			String destinationWorld = Objects.requireNonNull(Objects.requireNonNull(e.getTo()).getWorld()).getName();
 			if (!currentWorld.equals(destinationWorld)) {
 				GameMode newMode = GameMode.SURVIVAL;
-				if (destinationWorld.toLowerCase().equals("creative")) {
+				if (destinationWorld.equalsIgnoreCase("creative")) {
 					newMode = GameMode.CREATIVE;
 				}
 
@@ -50,7 +50,6 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 					}
 				} catch (IOException exception) {
 					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
-					exception.printStackTrace();
 					e.setCancelled(true);
 				}
 			}

@@ -8,6 +8,8 @@ import org.bukkit.event.block.BlockGrowEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
+import java.util.Objects;
+
 public class ArenaGrowPrevent implements Listener {
 
 	public ArenaGrowPrevent(AranarthCore plugin) {
@@ -16,12 +18,11 @@ public class ArenaGrowPrevent implements Listener {
 
 	/**
 	 * Prevents blocks in the arena world from growing.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArenaBlockGrow(final BlockGrowEvent e) {
-		if (e.getBlock().getLocation().getWorld().getName().toLowerCase().equals("arena")) {
+		if (Objects.requireNonNull(e.getBlock().getLocation().getWorld()).getName().equalsIgnoreCase("arena")) {
 			Material material = e.getBlock().getType();
 			if (material == Material.VINE || material == Material.CAVE_VINES_PLANT) {
 				e.setCancelled(true);

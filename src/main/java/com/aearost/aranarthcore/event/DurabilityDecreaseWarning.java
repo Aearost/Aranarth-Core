@@ -18,15 +18,13 @@ public class DurabilityDecreaseWarning implements Listener {
 
 	/**
 	 * Sends the user warning messages when their gear's durability reaches thresholds.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onDurabilityDecrease(final PlayerItemDamageEvent e) {
-		if (!e.getPlayer().getWorld().getName().toLowerCase().equals("arena")) {
-			if (e.getItem().getItemMeta() instanceof Damageable) {
-				Damageable damageableItemMeta = (Damageable) e.getItem().getItemMeta();
-				int maxDurability = e.getItem().getType().getMaxDurability();
+		if (!e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
+			if (e.getItem().getItemMeta() instanceof Damageable damageableItemMeta) {
+                int maxDurability = e.getItem().getType().getMaxDurability();
 				int damagedDurability = maxDurability - damageableItemMeta.getDamage();
 				int thresholdA = (int) Math.round(maxDurability * 0.1);
 				int thresholdB = (int) Math.round(maxDurability * 0.05);

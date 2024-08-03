@@ -15,12 +15,11 @@ public class ArenaDurabilityPrevent implements Listener {
 
 	/**
 	 * Prevents durability from being affected in the arena world.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onArenaBlockMelt(final PlayerItemDamageEvent e) {
-		if (e.getPlayer().getWorld().getName().toLowerCase().equals("arena")) {
+	public void onArenaDurabilityDecrease(final PlayerItemDamageEvent e) {
+		if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
 			e.setCancelled(true);
 		}
 	}

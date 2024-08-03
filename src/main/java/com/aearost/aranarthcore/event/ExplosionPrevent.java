@@ -10,32 +10,28 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 
 import com.aearost.aranarthcore.AranarthCore;
 
-public class CreeperExplodeDeny implements Listener {
+public class ExplosionPrevent implements Listener {
 
-	public CreeperExplodeDeny(AranarthCore plugin) {
+	public ExplosionPrevent(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**
-	 * Deals with cancelling explosion block damage
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with cancelling explosion block damage.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onCreeperExplodeBlock(final EntityExplodeEvent e) {
+	public void onExplodeBlock(final EntityExplodeEvent e) {
 		e.setCancelled(true);
 	}
 	
 	
 	/**
-	 * Deals with cancelling explosion item damage
-	 * 
-	 * @author Aearost
-	 *
+	 * Deals with cancelling explosion item damage.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onCreeperExplodeItem(final EntityDamageEvent e) {
+	public void onExplodeItem(final EntityDamageEvent e) {
 		if (e.getEntity() instanceof Item) {
 			if (e.getCause() == DamageCause.BLOCK_EXPLOSION || e.getCause() == DamageCause.ENTITY_EXPLOSION) {
 				e.setCancelled(true);

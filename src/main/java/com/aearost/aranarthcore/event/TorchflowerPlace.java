@@ -17,9 +17,8 @@ public class TorchflowerPlace implements Listener {
 	}
 
 	/**
-	 * Adds a light block above the torchflower when placed so the plant emits light
-	 * 
-	 * @param e
+	 * Adds a light block above the torchflower when placed so the plant emits light.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onTorchflowerPlace(final BlockPlaceEvent e) {

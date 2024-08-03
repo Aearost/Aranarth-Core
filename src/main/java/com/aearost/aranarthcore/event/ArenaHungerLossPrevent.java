@@ -15,12 +15,11 @@ public class ArenaHungerLossPrevent implements Listener {
 
 	/**
 	 * Prevents hunger from being lost in the arena world.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onArenaBlockMelt(final FoodLevelChangeEvent e) {
-		if (e.getEntity().getWorld().getName().toLowerCase().equals("arena")) {
+	public void onArenaHungerDeplete(final FoodLevelChangeEvent e) {
+		if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
 			e.setCancelled(true);
 		}
 	}

@@ -20,17 +20,14 @@ public class TippedArrowDamagePrevent implements Listener {
 
 	/**
 	 * Prevents damage from being taken from tipped arrows that apply a positive potion effect.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onArrowHitPlayer(final ProjectileHitEvent e) {
 		if (Objects.nonNull(e.getHitEntity())) {
 			if (e.getHitEntity() instanceof Player) {
-				Player player = (Player) e.getHitEntity();
-				if (e.getEntity() instanceof Arrow) {
-					Arrow arrow = (Arrow) e.getEntity();
-					if (Objects.nonNull(arrow.getBasePotionType())) {
+                if (e.getEntity() instanceof Arrow arrow) {
+                    if (Objects.nonNull(arrow.getBasePotionType())) {
 						boolean shouldPotionDamage = checkIfPotionShouldDamage(arrow.getBasePotionType());
 						if (!shouldPotionDamage) {
 							e.setCancelled(true);
@@ -38,7 +35,7 @@ public class TippedArrowDamagePrevent implements Listener {
 							// Will need to determine how to create a PotionEffect from a PotionType
 							// Difficulties are when the potion effects are from mcMMO
 							// PotionEffect exists but PotionType does not as i.e Absorpion is not a potion in vanilla
-							player.addPotionEffect(null);
+//							player.addPotionEffect(null);
 						}
 					}
 				}
@@ -48,9 +45,8 @@ public class TippedArrowDamagePrevent implements Listener {
 	
 	/**
 	 * Verifies the potion type if it should damage the player.
-	 * 
-	 * @param type
-	 * @return
+	 * @param type The type of potion.
+	 * @return Confirmation of whether the potion would do damage.
 	 */
 	private boolean checkIfPotionShouldDamage(PotionType type) {
 		return (type == PotionType.AWKWARD || type == PotionType.HARMING || type == PotionType.MUNDANE

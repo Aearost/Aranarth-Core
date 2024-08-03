@@ -23,23 +23,21 @@ public class HomePadStep implements Listener {
 	/**
 	 * If the player steps on a pressure plate that is a home pad, prompt them with
 	 * the GUI to allow them to accept or decline.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onPressurePlateStep(final PlayerMoveEvent e) {
-
+	public void onHomepadStep(final PlayerMoveEvent e) {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		boolean isStandingOnHomePad = aranarthPlayer.getIsStandingOnHomePad();
 
 		// When they step on the homepad
-		if (e.getTo().getBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+		if (Objects.requireNonNull(e.getTo()).getBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 			// If they are not on one of the pressure plates
 			if (!isStandingOnHomePad) {
 				// If the current location is a home pad
 				if (Objects.nonNull(AranarthUtils.getHomePad(e.getTo()))) {
-					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("NEW")) {
+					if (!Objects.requireNonNull(AranarthUtils.getHomePad(e.getTo())).getHomeName().equals("NEW")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -59,8 +57,6 @@ public class HomePadStep implements Listener {
 				}
 			}
 		}
-
-		return;
 	}
 
 }

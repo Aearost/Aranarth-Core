@@ -23,9 +23,11 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
 
+import java.util.Objects;
+
 /**
  * Inspired by tiffany352
- * Source: https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/PluginListener.java
+ * Source: <a href="https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/PluginListener.java">tiffany352 GitHub</a>
  */
 public class InvisibleItemFrameInteract implements Listener {
 	
@@ -39,18 +41,19 @@ public class InvisibleItemFrameInteract implements Listener {
 	
 	/**
      * Handles placing an Invisible Item Frame.
+	 * @param e The event.
      */
     @EventHandler
-    public void onPlayerItemFrameInteract(PlayerInteractEvent event) {
-        ItemStack is = event.getItem();
+    public void onPlayerItemFrameInteract(PlayerInteractEvent e) {
+        ItemStack is = e.getItem();
         if (is != null) {
         	if (is.getType() == Material.ITEM_FRAME) {
             	if (is.hasItemMeta()) {
-            		if (is.getItemMeta().hasLore()) {
-            	        Block block = event.getClickedBlock();
+            		if (Objects.requireNonNull(is.getItemMeta()).hasLore()) {
+            	        Block block = e.getClickedBlock();
             	        if (block != null) {
             	        	locationToPlace = block.getLocation();
-            	        	faceToPlace = event.getBlockFace();
+            	        	faceToPlace = e.getBlockFace();
             	        }
             		}
             	}
@@ -60,8 +63,7 @@ public class InvisibleItemFrameInteract implements Listener {
 
 	/**
 	 * Sets the item in the item frame which is not yet hidden.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onItemFramePlace(final HangingPlaceEvent e) {
@@ -79,8 +81,7 @@ public class InvisibleItemFrameInteract implements Listener {
 	
 	/**
      * Adds the item to the invisible item frame and makes the frame invisible.
-     * 
-     * @param e
+     * @param e The event.
      */
     @EventHandler
     public void onPlayerItemFrameEntityInteract(final PlayerInteractEntityEvent e) {
@@ -93,8 +94,7 @@ public class InvisibleItemFrameInteract implements Listener {
 	
     /**
      * Removes the item from the invisible item frame and makes the frame visible again.
-     * 
-     * @param e
+     * @param e The event.
      */
     @EventHandler
     public void onPlayerInteractEntity(final EntityDamageByEntityEvent e) {
@@ -107,8 +107,7 @@ public class InvisibleItemFrameInteract implements Listener {
     
     /**
      * Trigger update to the item frame when it is destroyed.
-     * 
-     * @param e
+	 * @param e The event.
      */
     @EventHandler
     public void onPlayerItemFrameEntityInteract(final HangingBreakByEntityEvent e) {
@@ -122,8 +121,7 @@ public class InvisibleItemFrameInteract implements Listener {
     
     /**
      * Drops an invisible item frame if it is destroyed.
-     * 
-     * @param e
+     * @param e The event.
      */
     @EventHandler
     public void onItemFrameDrop(final ItemSpawnEvent e) {

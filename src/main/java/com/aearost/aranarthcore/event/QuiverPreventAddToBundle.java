@@ -19,10 +19,8 @@ public class QuiverPreventAddToBundle implements Listener {
 	}
 
 	/**
-	 * Prevents players from adding non-potion items to the potion inventory
-	 * 
-	 * @author Aearost
-	 *
+	 * Prevents players from adding non-potion items to the potion inventory.
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onGuiClick(final InventoryClickEvent e) {
@@ -45,8 +43,8 @@ public class QuiverPreventAddToBundle implements Listener {
 				return;
 			}
 			
-			if (cursorItem.getType() == Material.BUNDLE) {
-				if (cursorItem.getItemMeta().hasLore()) {
+			if (Objects.requireNonNull(cursorItem).getType() == Material.BUNDLE) {
+				if (Objects.nonNull(cursorItem.getItemMeta()) && cursorItem.getItemMeta().hasLore()) {
 					e.setCancelled(true);
 				} else if (clickedItem.getType() == Material.BUNDLE) {
 					e.setCancelled(true);

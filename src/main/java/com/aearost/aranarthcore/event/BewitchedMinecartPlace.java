@@ -22,18 +22,13 @@ public class BewitchedMinecartPlace implements Listener {
 	}
 
 	/**
-	 * Handles the auto-refill functionality when consuming of arrows
-	 * 
-	 * @author Aearost
-	 *
+	 * Handles the placing of a Bewitched Minecart.
+	 * @param e The event.
 	 */
 	@EventHandler
-	public void onMinecartPlace(final PlayerInteractEvent e) {
-		
-//		if (e.getHand() == EquipmentSlot.)
-		
+	public void onBewitchedMinecartPlace(final PlayerInteractEvent e) {
 		Player player = e.getPlayer();
-		ItemStack item = null;
+		ItemStack item;
 		if (player.getInventory().getItemInMainHand().getType() == Material.MINECART) {
 			item = player.getInventory().getItemInMainHand();
 		} else if (player.getInventory().getItemInOffHand().getType() == Material.MINECART) {
@@ -46,10 +41,10 @@ public class BewitchedMinecartPlace implements Listener {
 			if (e.getClickedBlock().getType() == Material.RAIL || e.getClickedBlock().getType() == Material.ACTIVATOR_RAIL
 					|| e.getClickedBlock().getType() == Material.DETECTOR_RAIL
 					|| e.getClickedBlock().getType() == Material.POWERED_RAIL) {
-				if (item.getItemMeta().hasLore()) {
+				if (Objects.nonNull(item.getItemMeta()) && item.getItemMeta().hasLore()) {
 					e.setCancelled(true);
-					Minecart minecart = (Minecart) Bukkit.getWorld(
-							player.getWorld().getName()).spawnEntity(e.getClickedBlock().getLocation(), EntityType.MINECART);
+					Minecart minecart = (Minecart) Objects.requireNonNull(Bukkit.getWorld(
+                            player.getWorld().getName())).spawnEntity(e.getClickedBlock().getLocation(), EntityType.MINECART);
 					minecart.setMaxSpeed(3.5);
 					
 					// To add support that the carts will drop as bewitched as well

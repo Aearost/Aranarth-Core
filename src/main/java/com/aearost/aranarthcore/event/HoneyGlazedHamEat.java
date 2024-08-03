@@ -18,8 +18,7 @@ public class HoneyGlazedHamEat implements Listener {
 
 	/**
 	 * Provides additional perks when eating honey glazed ham.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onHoneyGlazedHamEat(final PlayerItemConsumeEvent e) {

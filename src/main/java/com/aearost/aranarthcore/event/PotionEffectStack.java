@@ -22,8 +22,7 @@ public class PotionEffectStack implements Listener {
 
 	/**
 	 * Adds functionality to stack potion effects with limits depending on the effect.
-	 * 
-	 * @param e
+	 * @param e The event.
 	 */
 	@EventHandler
 	public void onPotionAdd(final EntityPotionEffectEvent e) {
@@ -32,9 +31,8 @@ public class PotionEffectStack implements Listener {
 			return;
 		}
 		
-		if (e.getEntity() instanceof LivingEntity) {
-			LivingEntity entity = (LivingEntity) e.getEntity();
-			// If the player currently has that same effect and is re-applying it
+		if (e.getEntity() instanceof LivingEntity entity) {
+            // If the player currently has that same effect and is re-applying it
 			if (Objects.nonNull(e.getOldEffect()) && Objects.nonNull(e.getNewEffect())) {
 				PotionEffect oldEffect = e.getOldEffect();
 				PotionEffect newEffect = e.getNewEffect();
@@ -70,10 +68,9 @@ public class PotionEffectStack implements Listener {
 	/**
 	 * Limits the amplifier level of each effect based on certain potion types.
 	 * All types inevitably will be restricted to an amplifier of 10.
-	 * 
-	 * @param calculatedAmplifier
-	 * @param type
-	 * @return
+	 * @param calculatedAmplifier The amplifier value that was calculated.
+	 * @param type The effect type.
+	 * @return The amplifier after it has been capped accordingly.
 	 */
 	private int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
 		 if (type == PotionEffectType.ABSORPTION) {
