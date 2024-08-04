@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.event;
 
 import org.bukkit.Bukkit;
+import org.bukkit.block.data.type.TNT;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.TNTPrimed;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -22,7 +24,9 @@ public class ExplosionPrevent implements Listener {
 	 */
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
-		e.setCancelled(true);
+		if (!(e.getEntity() instanceof TNT) && !(e.getEntity() instanceof TNTPrimed)) {
+			e.setCancelled(true);
+		}
 	}
 	
 	
