@@ -22,6 +22,7 @@ public class AranarthPlayer {
 	private boolean isDeletingBlacklistedItems;
 	private List<ItemStack> potions;
 	private List<ItemStack> arrows;
+	private List<ItemStack> blacklist;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -36,9 +37,10 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.potions = null;
 		this.arrows = null;
+		this.blacklist = null;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -51,6 +53,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.potions = potions;
 		this.arrows = arrows;
+		this.blacklist = blacklist;
 	}
 
 	/**
@@ -214,7 +217,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the List of potions that the player currently has blacklisted.
+	 * Provides the List of potions that the player currently has in their potion inventory.
 	 * @return The List of the player's potions.
 	 */
 	public List<ItemStack> getPotions() {
@@ -230,7 +233,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the List of arrows that the player currently has blacklisted.
+	 * Provides the List of arrows that the player currently has in their quiver.
 	 * @return The List of the player's arrows.
 	 */
 	public List<ItemStack> getArrows() {
@@ -243,6 +246,22 @@ public class AranarthPlayer {
 	 */
 	public void setArrows(List<ItemStack> arrows) {
 		this.arrows = arrows;
+	}
+
+	/**
+	 * Provides the List of blacklisted items that the player has.
+	 * @return The List of the player's blacklisted items.
+	 */
+	public List<ItemStack> getBlacklist() {
+		return blacklist;
+	}
+
+	/**
+	 * Updates the player's current List of blacklisted items.
+	 * @param blacklist The new List of blacklisted Items.
+	 */
+	public void setBlacklist(List<ItemStack> blacklist) {
+		this.blacklist = blacklist;
 	}
 	
 }

@@ -14,6 +14,9 @@ Features
 [+] Pitcher Plants and Torchflowers now spawn light above when fully grown
 [+] Auto-switching armor with armor stands by shift right-clicking
 [+] New recipe to uncraft glowstone blocks
+[+] Blacklisted items and blacklist method save on server reboot
+[+] TNT block explosions are now permitted
+[~] Increased Quiver from 18 slots to 45
 
 Bug Fixes
 - Converted the plugin to be in Maven using IntelliJ in place of Eclipse

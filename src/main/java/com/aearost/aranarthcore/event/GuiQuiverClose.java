@@ -39,10 +39,10 @@ public class GuiQuiverClose implements Listener {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				
 				List<ItemStack> arrows = aranarthPlayer.getArrows();
-				List<ItemStack> inventoryArrows = new LinkedList<ItemStack>(Arrays.asList(inventory.getContents()));
+				List<ItemStack> inventoryArrows = new LinkedList<>(Arrays.asList(inventory.getContents()));
 
                 if (Objects.isNull(arrows)) {
-                    arrows = new ArrayList<ItemStack>();
+                    arrows = new ArrayList<>();
                 }
 
                 for (ItemStack inventoryArrow : inventoryArrows) {
