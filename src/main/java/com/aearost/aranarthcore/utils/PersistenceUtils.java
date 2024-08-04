@@ -227,6 +227,7 @@ public class PersistenceUtils {
 			String creativeInventory = null;
 			List<ItemStack> potions = null;
 			List<ItemStack> arrows = null;
+			List<ItemStack> blacklist = null;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -283,28 +284,37 @@ public class PersistenceUtils {
                         }
                         fieldCount++;
                     }
-                    case "arrows" -> {
-                        ItemStack[] arrowsAsItemStackArray;
-                        if (!fieldValue.isEmpty()) {
-                            try {
-                                arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-                            } catch (IOException e) {
-                                Bukkit.getLogger().info("There was an issue loading arrows!");
-                                reader.close();
-                                return;
-                            }
-                            arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
-                        }
-                        fieldCount++;
-                    }
+					case "arrows" -> {
+						ItemStack[] arrowsAsItemStackArray;
+						if (!fieldValue.isEmpty()) {
+							try {
+								arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+							} catch (IOException e) {
+								Bukkit.getLogger().info("There was an issue loading arrows!");
+								reader.close();
+								return;
+							}
+							arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
+						}
+						fieldCount++;
+					} case "blacklist" -> {
+						ItemStack[] blacklistAsItemStackArray;
+						if (!fieldValue.isEmpty()) {
+							try {
+								blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+							} catch (IOException e) {
+								Bukkit.getLogger().info("There was an issue loading arrows!");
+								reader.close();
+								return;
+							}
+							blacklist = new LinkedList<ItemStack>(Arrays.asList(blacklistAsItemStackArray));
+						}
+						fieldCount++;
+					}
                 }
 				
-				if (fieldCount == 8) {
-					if (Objects.nonNull(uuid)) {
-						AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows));
-					} else {
-						Bukkit.getLogger().info("The UUID is null!");
-					}
+				if (fieldCount == 9) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(Objects.requireNonNull(uuid)).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist));
 					fieldCount = 0;
 				}
 			}
@@ -370,6 +380,12 @@ public class PersistenceUtils {
 							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
 						} else {
 							writer.write("        \"arrows\": \"\",\n");
+						}
+						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
+							ItemStack[] blacklist = aranarthPlayer.getBlacklist().toArray(new ItemStack[0]);
+							writer.write("        \"blacklist\": \"" + ItemUtils.itemStackArrayToBase64(blacklist) + "\",\n");
+						} else {
+							writer.write("        \"blacklist\": \"\",\n");
 						}
 						
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {

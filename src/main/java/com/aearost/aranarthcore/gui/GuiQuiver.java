@@ -28,7 +28,7 @@ public class GuiQuiver {
 	}
 	
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 18, "Quiver");
+		Inventory gui = Bukkit.getServer().createInventory(player, 45, "Quiver");
 		
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		List<ItemStack> arrows = aranarthPlayer.getArrows();
