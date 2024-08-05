@@ -153,7 +153,7 @@ public class PersistenceUtils {
 						Bukkit.getLogger().info("A new homes.json file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occured in the creation of homes.json");
+					Bukkit.getLogger().info("An error occurred in the creation of homes.json");
 				}
 
 				try {
@@ -228,6 +228,7 @@ public class PersistenceUtils {
 			List<ItemStack> potions = null;
 			List<ItemStack> arrows = null;
 			List<ItemStack> blacklist = null;
+			boolean isDeletingBlacklistedItems = false;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -294,7 +295,7 @@ public class PersistenceUtils {
 								reader.close();
 								return;
 							}
-							arrows = new LinkedList<ItemStack>(Arrays.asList(arrowsAsItemStackArray));
+							arrows = new LinkedList<>(Arrays.asList(arrowsAsItemStackArray));
 						}
 						fieldCount++;
 					} case "blacklist" -> {
@@ -311,10 +312,14 @@ public class PersistenceUtils {
 						}
 						fieldCount++;
 					}
+					case "isDeletingBlacklistedItems" -> {
+						isDeletingBlacklistedItems = Boolean.parseBoolean(fieldValue);
+						fieldCount++;
+					}
                 }
 				
-				if (fieldCount == 9) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(Objects.requireNonNull(uuid)).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist));
+				if (fieldCount == 10) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(Objects.requireNonNull(uuid)).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems));
 					fieldCount = 0;
 				}
 			}
@@ -387,7 +392,8 @@ public class PersistenceUtils {
 						} else {
 							writer.write("        \"blacklist\": \"\",\n");
 						}
-						
+						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
+
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");
 						} else {

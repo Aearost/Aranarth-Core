@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -24,17 +25,19 @@ public class CommandBlacklist {
 				gui.openGui();
 				return true;
 			} else {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (args[1].equals("ignore")) {
-					AranarthUtils.toggleBlacklistIgnoreOrDelete(player.getUniqueId(), false);
+					aranarthPlayer.setIsDeletingBlacklistedItems(false);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
-					return true;
 				} else if (args[1].equals("trash")) {
-					AranarthUtils.toggleBlacklistIgnoreOrDelete(player.getUniqueId(), true);
+					aranarthPlayer.setIsDeletingBlacklistedItems(true);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
-					return true;
 				} else {
 					player.sendMessage(ChatUtils.chatMessageError("Please enter a valid blacklist sub-command!"));
+					return  false;
 				}
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
 			}
         }
         return false;

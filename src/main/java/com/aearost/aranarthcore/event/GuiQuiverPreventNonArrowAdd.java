@@ -53,23 +53,8 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 	}
 	
 	private boolean isItemArrow(ItemStack item) {
-		if (item.getType() == Material.ARROW || item.getType() == Material.TIPPED_ARROW
-				|| item.getType() == Material.SPECTRAL_ARROW) {
-			if (item.getType() == Material.TIPPED_ARROW) {
-				PotionMeta meta = (PotionMeta) item.getItemMeta();
-				if (Objects.nonNull(meta)) {
-					return meta.getBasePotionType() != PotionType.WATER
-							&& meta.getBasePotionType() != PotionType.AWKWARD
-							&& meta.getBasePotionType() != PotionType.MUNDANE
-							&& meta.getBasePotionType() != PotionType.THICK;
-				} else {
-					return false;
-				}
-
-			}
-			return true;
-		}
-		return false;
+		return (item.getType() == Material.ARROW
+				|| item.getType() == Material.TIPPED_ARROW
+				|| item.getType() == Material.SPECTRAL_ARROW);
 	}
-	
 }

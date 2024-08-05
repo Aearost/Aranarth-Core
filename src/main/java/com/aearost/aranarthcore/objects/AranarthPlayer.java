@@ -34,13 +34,13 @@ public class AranarthPlayer {
 		this.survivalInventory = "";
 		this.arenaInventory = "";
 		this.creativeInventory = "";
-		this.isDeletingBlacklistedItems = false;
 		this.potions = null;
 		this.arrows = null;
 		this.blacklist = null;
+		this.isDeletingBlacklistedItems = false;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -48,12 +48,12 @@ public class AranarthPlayer {
 		this.prefix = prefix;
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
-		this.arenaInventory = "";
+		this.arenaInventory = arenaInventory;
 		this.creativeInventory = creativeInventory;
-		this.isDeletingBlacklistedItems = false;
 		this.potions = potions;
 		this.arrows = arrows;
 		this.blacklist = blacklist;
+		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
 	}
 
 	/**

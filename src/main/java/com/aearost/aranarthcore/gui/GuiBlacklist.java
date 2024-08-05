@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.gui;
 import java.util.List;
 import java.util.Objects;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -28,7 +29,8 @@ public class GuiBlacklist {
 	private Inventory initializeGui(Player player) {
 		
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Blacklist");
-		List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
 		if (Objects.nonNull(blacklistedItems)) {
 			for (int i = 0; i < blacklistedItems.size(); i++) {
 				ItemStack blacklistedItem = blacklistedItems.get(i);
