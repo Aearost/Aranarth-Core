@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.TrimPattern;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -29,7 +28,6 @@ public class AranarthUtils {
 
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
-	private static final HashMap<UUID, List<ItemStack>> blacklistedItems = new HashMap<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -72,7 +70,7 @@ public class AranarthUtils {
 		return players.get(uuid);
 	}
 	/**
-	 * Adds a player to the players HashMap.
+	 * Adds or overrides a player to the players HashMap.
 	 *
 	 * @param uuid The UUID of the player to be updated.
 	 * @param aranarthPlayer The new AranarthPlayer to be used.
@@ -155,39 +153,6 @@ public class AranarthUtils {
 	 */
 	public static void setHomes(List<Home> newHomes) {
 		homes = newHomes;
-	}
-
-	/**
-	 * Provides the list of blacklisted items for a particular player.
-	 *
-	 * @param uuid The UUID of the player.
-	 * @return The List of blacklisted items.
-	 */
-	public static List<ItemStack> getBlacklistedItems(UUID uuid) {
-		return blacklistedItems.get(uuid);
-	}
-
-	/**
-	 * Overrides the player's current list of blacklisted items.
-	 *
-	 * @param uuid The UUID of the player.
-	 * @param newBlacklistedItems The list of blacklisted items.
-	 */
-	public static void updateBlacklistedItems(UUID uuid, List<ItemStack> newBlacklistedItems) {
-		blacklistedItems.put(uuid, newBlacklistedItems);
-	}
-
-	/**
-	 * Determines if the player has blacklisted items.
-	 *
-	 * @param uuid The UUID of the player.
-	 * @return Confirmation of whether they have blacklisted items.
-	 */
-	public static boolean hasBlacklistedItems(UUID uuid) {
-		if (Objects.nonNull(blacklistedItems.get(uuid))) {
-			return !blacklistedItems.get(uuid).isEmpty();
-		}
-		return false;
 	}
 
 	/**
@@ -385,16 +350,6 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Handles toggling how the blacklist functionality will work for a particular player.
-	 *
-	 * @param uuid The UUID of the player to be updated.
-	 * @param isDeletingBlacklistedItems The value of whether items are to be deleted.
-	 */
-	public static void toggleBlacklistIgnoreOrDelete(UUID uuid, boolean isDeletingBlacklistedItems) {
-		players.get(uuid).setIsDeletingBlacklistedItems(isDeletingBlacklistedItems);
-	}
-
-	/**
 	 * Handles updates to the fuel source of a dragon head at a particular location.
 	 *
 	 * @param location The Location of the dragon head.
@@ -449,12 +404,4 @@ public class AranarthUtils {
 		Integer newAmount = dragonHeads.get(location) - 1;
 		dragonHeads.put(location, newAmount);
 	}
-
-//	public static PermissionAttachment getPermissions(UUID uuid) {
-//		return permissions.get(uuid);
-//	}
-//
-//	public static void setPermissions(UUID uuid, PermissionAttachment newPermissions) {
-//		permissions.put(uuid, newPermissions);
-//	}
 }

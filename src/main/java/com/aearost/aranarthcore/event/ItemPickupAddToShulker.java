@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event;
 
 import java.util.Objects;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -31,9 +32,9 @@ public class ItemPickupAddToShulker implements Listener {
 	public void onItemPickup(final EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
             ItemStack pickupItem = e.getItem().getItemStack();
-			
-			if (Objects.nonNull(AranarthUtils.getBlacklistedItems(player.getUniqueId()))) {
-				for (ItemStack blacklistedItem : AranarthUtils.getBlacklistedItems(player.getUniqueId())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
+				for (ItemStack blacklistedItem : aranarthPlayer.getBlacklist()) {
 					if (pickupItem.getType() == blacklistedItem.getType()) {
 						return;
 					}

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event;
 
 import java.util.List;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,12 +26,13 @@ public class BlacklistItemPickupPrevent implements Listener {
 	@EventHandler
 	public void onPlayerPickupItem(final EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
-			if (AranarthUtils.hasBlacklistedItems(player.getUniqueId())) {
-				List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (!aranarthPlayer.getBlacklist().isEmpty()) {
+				List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
 				for (ItemStack is : blacklistedItems) {
 					if (is.isSimilar(e.getItem().getItemStack())) {
 						e.setCancelled(true);
-						if (AranarthUtils.getPlayer(player.getUniqueId()).getIsDeletingBlacklistedItems()) {
+						if (aranarthPlayer.getIsDeletingBlacklistedItems()) {
 							// Trash the items
 							e.getItem().remove();
 						}

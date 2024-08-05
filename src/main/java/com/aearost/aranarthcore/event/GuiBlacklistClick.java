@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -32,7 +33,8 @@ public class GuiBlacklistClick implements Listener {
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist") && e.getView().getType() == InventoryType.CHEST) {
 			e.setCancelled(true);
 			Player player = (Player) e.getWhoClicked();
-			List<ItemStack> blacklistedItems = AranarthUtils.getBlacklistedItems(player.getUniqueId());
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
@@ -59,7 +61,7 @@ public class GuiBlacklistClick implements Listener {
 					}
 					blacklistedItems.add(new ItemStack(clickedItem.getType(), 1));
 					player.getInventory().setItem(e.getSlot(), clickedItem);
-					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
+					aranarthPlayer.setBlacklist(blacklistedItems);
 					player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + ChatUtils.getFormattedItemName(clickedItem.getType().name() + " &7to the blacklisted items")));
 					player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
 				}
@@ -75,7 +77,7 @@ public class GuiBlacklistClick implements Listener {
 					player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) + " &7is no longer blacklisted"));
 					player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
 					blacklistedItems.remove(e.getSlot());
-					AranarthUtils.updateBlacklistedItems(player.getUniqueId(), blacklistedItems);
+					aranarthPlayer.setBlacklist(blacklistedItems);
 				}
 			}
 			e.getWhoClicked().closeInventory();
