@@ -29,3 +29,5 @@ Bug Fixes
 - Arena spawn blocks are no longer breakable
 - Added world name to whereis command
 - Potions inventory is now limited to survival worlds
+- Homepads can now only be crafted in the survival worlds (overworld, nether, and end)
+- Fixed Wind Charges not working due to them being considered an explosion
