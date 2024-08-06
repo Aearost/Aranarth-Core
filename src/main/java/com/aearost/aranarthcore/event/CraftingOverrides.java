@@ -121,6 +121,14 @@ public class CraftingOverrides implements Listener {
 					}
 				}
 			}
+			// Homepad prevent craft in non-survival worlds
+			else if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+				if (!Objects.requireNonNull(player.getLocation().getWorld()).getName().startsWith("world")) {
+					e.setCancelled(true);
+					player.sendMessage(ChatUtils.chatMessageError("You cannot craft a homepad in this world!"));
+					return;
+				}
+			}
 		}
 	}
 }
