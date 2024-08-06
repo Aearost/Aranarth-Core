@@ -23,6 +23,7 @@ public class AranarthPlayer {
 	private List<ItemStack> potions;
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
+	private boolean isHitByTippedArrow;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -38,6 +39,7 @@ public class AranarthPlayer {
 		this.arrows = null;
 		this.blacklist = null;
 		this.isDeletingBlacklistedItems = false;
+		this.isHitByTippedArrow = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems) {
@@ -54,6 +56,7 @@ public class AranarthPlayer {
 		this.arrows = arrows;
 		this.blacklist = blacklist;
 		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+		this.isHitByTippedArrow = false;
 	}
 
 	/**
@@ -263,5 +266,20 @@ public class AranarthPlayer {
 	public void setBlacklist(List<ItemStack> blacklist) {
 		this.blacklist = blacklist;
 	}
-	
+
+	/**
+	 * Provides the current value confirming if they were hit by a tipped arrow.
+	 * @return The current value confirming if they were hit by a tipped arrow.
+	 */
+	public boolean getIsHitByTippedArrow() {
+		return isHitByTippedArrow;
+	}
+
+	/**
+	 * Updates the player's current value confirming if they were hit by a tipped arrow.
+	 * @param isHitByTippedArrow The new confirmation of if they were hit by a tipped arrow.
+	 */
+	public void setIsHitByTippedArrow(boolean isHitByTippedArrow) {
+		this.isHitByTippedArrow = isHitByTippedArrow;
+	}
 }
