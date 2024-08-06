@@ -1,6 +1,10 @@
 package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.event.*;
+import com.aearost.aranarthcore.event.block.*;
+import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.event.world.*;
 import com.aearost.aranarthcore.recipes.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -13,8 +17,6 @@ import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
-
-import java.util.Objects;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -101,7 +103,6 @@ public class AranarthCore extends JavaPlugin {
 		new ArenaItemDrops(this);
 		new ArenaMeltPrevent(this);
 		new ArenaGrowPrevent(this);
-		new ArenaPlayerDeath(this);
 		new ArenaDurabilityPrevent(this);
 		new ArenaHungerLossPrevent(this);
 		new ConcretePowderGravityPrevent(this);
@@ -109,7 +110,7 @@ public class AranarthCore extends JavaPlugin {
 		new CoralDry(this);
 		new MobDestroyDoorPrevent(this);
 		new PlayerTeleportBetweenWorlds(this);
-		new CreativeExpChangePrevent(this);
+		new ExpGainPrevent(this);
 		new GuiBlacklistClick(this);
 		new BlacklistItemPickupPrevent(this);
 		new GuiVillagerClick(this);
@@ -139,6 +140,7 @@ public class AranarthCore extends JavaPlugin {
 		new DoorDoubleOpen(this);
 		new ArmorStandSwitch(this);
 		new TippedArrowDamagePrevent(this);
+		new NonSurvivalDeathRespawn(this);
 	}
 
 	/**
@@ -196,8 +198,8 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes the AranarthCore command and tab completion.
 	 */
 	private void initializeCommands() {
-		Objects.requireNonNull(getCommand("ac")).setExecutor(new CommandAC());
-		Objects.requireNonNull(getCommand("ac")).setTabCompleter(new CommandACCompleter());
+		getCommand("ac").setExecutor(new CommandAC());
+		getCommand("ac").setTabCompleter(new CommandACCompleter());
 	}
 
 	/**
