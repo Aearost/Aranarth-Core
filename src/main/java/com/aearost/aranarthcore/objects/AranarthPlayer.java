@@ -24,6 +24,8 @@ public class AranarthPlayer {
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
 	private boolean isHitByTippedArrow;
+	private float expBeforeDeath;
+	private int levelBeforeDeath;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -281,5 +283,37 @@ public class AranarthPlayer {
 	 */
 	public void setIsHitByTippedArrow(boolean isHitByTippedArrow) {
 		this.isHitByTippedArrow = isHitByTippedArrow;
+	}
+
+	/**
+	 * Provides the player's EXP before they died in the arena or creative world.
+	 * @return The player's EXP before they died in the arena or creative world.
+	 */
+	public float getExpBeforeDeath() {
+		return expBeforeDeath;
+	}
+
+	/**
+	 * Updates the player's current EXP before they died in the arena or creative world.
+	 * @param expBeforeDeath The player's current EXP before they died in the arena or creative world.
+	 */
+	public void setExpBeforeDeath(float expBeforeDeath) {
+		this.expBeforeDeath = expBeforeDeath;
+	}
+
+	/**
+	 * Provides the player's level before they died in the arena or creative world.
+	 * @return The player's level before they died in the arena or creative world.
+	 */
+	public int getLevelBeforeDeath() {
+		return levelBeforeDeath;
+	}
+
+	/**
+	 * Updates the player's current level before they died in the arena or creative world.
+	 * @param levelBeforeDeath The player's current level before they died in the arena or creative world.
+	 */
+	public void setLevelBeforeDeath(int levelBeforeDeath) {
+		this.levelBeforeDeath = levelBeforeDeath;
 	}
 }
