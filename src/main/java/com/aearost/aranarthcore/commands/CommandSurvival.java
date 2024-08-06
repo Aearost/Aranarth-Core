@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
@@ -31,7 +30,7 @@ public class CommandSurvival {
 
                 // Teleports you to the survival world spawn
 				try {
-					AranarthUtils.switchInventory(player, Objects.requireNonNull(player.getLocation().getWorld()).getName(), "world");
+					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
 				} catch (IOException e) {
 					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
 					return false;

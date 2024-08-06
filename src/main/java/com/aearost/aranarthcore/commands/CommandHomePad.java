@@ -55,7 +55,7 @@ public class CommandHomePad {
                     case "create" -> {
                         // Must be on a valid homepad
                         if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
-                            if (Objects.requireNonNull(AranarthUtils.getHomePad(player.getLocation())).getHomeName().equals("NEW")) {
+                            if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("NEW")) {
                                 StringBuilder homeName = new StringBuilder();
                                 // Get everything after the create parameter and space-separated
                                 for (int i = 2; i < args.length; i++) {
@@ -99,7 +99,7 @@ public class CommandHomePad {
                                 }
 
                                 List<Home> homes = AranarthUtils.getHomes();
-                                ArrayList<Home> newHomes = new ArrayList<Home>();
+                                ArrayList<Home> newHomes = new ArrayList<>();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
                                     sender.sendMessage(ChatUtils.chatMessageError("There are no homes!"));
                                     return false;

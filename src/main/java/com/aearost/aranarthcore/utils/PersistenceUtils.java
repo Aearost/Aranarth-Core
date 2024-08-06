@@ -47,8 +47,8 @@ public class PersistenceUtils {
 			reader = new Scanner(file);
 
 			int fieldCount = 0;
-			String fieldName = null;
-			String fieldValue = null;
+			String fieldName;
+			String fieldValue;
 
 			String homeName = null;
 			World world = null;
@@ -216,8 +216,8 @@ public class PersistenceUtils {
 
 			// UUID must not be reset each time
 			int fieldCount = 0;
-			String fieldName = null;
-			String fieldValue = null;
+			String fieldName;
+			String fieldValue;
 
 			UUID uuid = null;
 			String nickname = null;
@@ -281,7 +281,7 @@ public class PersistenceUtils {
                                 reader.close();
                                 return;
                             }
-                            potions = new LinkedList<ItemStack>(Arrays.asList(potionsAsItemStackArray));
+                            potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
                         }
                         fieldCount++;
                     }
@@ -308,7 +308,7 @@ public class PersistenceUtils {
 								reader.close();
 								return;
 							}
-							blacklist = new LinkedList<ItemStack>(Arrays.asList(blacklistAsItemStackArray));
+							blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
 						}
 						fieldCount++;
 					}
@@ -319,7 +319,7 @@ public class PersistenceUtils {
                 }
 				
 				if (fieldCount == 10) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(Objects.requireNonNull(uuid)).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems));
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems));
 					fieldCount = 0;
 				}
 			}
