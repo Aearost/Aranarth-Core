@@ -60,12 +60,12 @@ public class CommandPotions {
                                 }
 
                                 // If it is an mcMMO potion
-                                if (potionToCount.hasItemMeta() && Objects.requireNonNull(potionToCount.getItemMeta()).hasItemName()) {
+                                if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
                                     potionName = potionToCount.getItemMeta().getItemName();
                                 } else {
                                     PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
 									if (Objects.nonNull(meta)) {
-										potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(Objects.requireNonNull(meta.getBasePotionType()).name()));
+										potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
 									}
                                 }
 
@@ -80,7 +80,7 @@ public class CommandPotions {
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
                             // Sorts all potion names alphabetically
-                            SortedSet<String> sortedMap = new TreeSet<String>(amountOfPotions.keySet());
+                            SortedSet<String> sortedMap = new TreeSet<>(amountOfPotions.keySet());
 
                             // Displays the potions
                             player.sendMessage(ChatUtils.chatMessage("&7Below are the potions you have stored:"));
