@@ -2,12 +2,16 @@ package com.aearost.aranarthcore.event;
 
 import java.util.Objects;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.ProjectileHitEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
 import com.aearost.aranarthcore.AranarthCore;
@@ -23,19 +27,27 @@ public class TippedArrowDamagePrevent implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onArrowHitPlayer(final ProjectileHitEvent e) {
-		if (Objects.nonNull(e.getHitEntity())) {
-			if (e.getHitEntity() instanceof Player) {
-                if (e.getEntity() instanceof Arrow arrow) {
-                    if (Objects.nonNull(arrow.getBasePotionType())) {
-						boolean shouldPotionDamage = checkIfPotionShouldDamage(arrow.getBasePotionType());
-						if (!shouldPotionDamage) {
-							e.setCancelled(true);
-							
-							// Will need to determine how to create a PotionEffect from a PotionType
-							// Difficulties are when the potion effects are from mcMMO
-							// PotionEffect exists but PotionType does not as i.e Absorpion is not a potion in vanilla
-//							player.addPotionEffect(null);
+	public void onArrowHitPlayer(final EntityDamageEvent e) {
+		if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
+			if (e.getDamageSource().getCausingEntity() instanceof Player) {
+				if (e.getEntity() instanceof Player player) {
+					if (arrow.getItem().hasItemMeta()) {
+						if (arrow.getItem().getItemMeta() instanceof PotionMeta potionMeta) {
+							boolean shouldPotionDamage = checkIfPotionShouldDamage(potionMeta.getBasePotionType());
+							// If it is a positive effect, do not damage and apply the effect
+							if (!shouldPotionDamage) {
+								e.setCancelled(true);
+                                for (PotionEffect effect : Objects.requireNonNull(potionMeta.getBasePotionType()).getPotionEffects()) {
+									PotionEffect newEffect = new PotionEffect(
+											effect.getType(), effect.getDuration() / 8, effect.getAmplifier());
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+									aranarthPlayer.setIsHitByTippedArrow(true);
+									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+									player.addPotionEffect(newEffect);
+									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+								}
+								e.getDamageSource().getDirectEntity().remove();
+							}
 						}
 					}
 				}
@@ -51,6 +63,9 @@ public class TippedArrowDamagePrevent implements Listener {
 	private boolean checkIfPotionShouldDamage(PotionType type) {
 		return (type == PotionType.AWKWARD || type == PotionType.HARMING || type == PotionType.MUNDANE
 				|| type == PotionType.OOZING || type == PotionType.POISON || type == PotionType.SLOWNESS
-				|| type == PotionType.THICK || type == PotionType.WATER || type == PotionType.WEAKNESS);
+				|| type == PotionType.THICK || type == PotionType.WATER || type == PotionType.WEAKNESS
+				|| type == PotionType.TURTLE_MASTER || type == PotionType.WIND_CHARGED || type == PotionType.WEAVING
+				|| type == PotionType.INFESTED
+		);
 	}
 }

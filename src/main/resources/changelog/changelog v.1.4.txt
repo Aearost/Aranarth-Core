@@ -17,6 +17,7 @@ Features
 [+] Blacklisted items and blacklist method save on server reboot
 [+] TNT block explosions are now permitted
 [~] Increased Quiver from 18 slots to 45
+[+] Tipped Arrows will apply positive effects to targetted players without harming them
 
 Bug Fixes
 - Converted the plugin to be in Maven using IntelliJ in place of Eclipse

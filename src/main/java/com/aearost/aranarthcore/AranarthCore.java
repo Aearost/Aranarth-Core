@@ -138,6 +138,7 @@ public class AranarthCore extends JavaPlugin {
 		new GoatDeath(this);
 		new DoorDoubleOpen(this);
 		new ArmorStandSwitch(this);
+		new TippedArrowDamagePrevent(this);
 	}
 
 	/**
