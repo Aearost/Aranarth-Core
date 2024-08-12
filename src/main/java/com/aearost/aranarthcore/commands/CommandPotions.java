@@ -30,13 +30,13 @@ public class CommandPotions {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (!player.getLocation().getWorld().getName().startsWith("world")) {
-				player.sendMessage(ChatUtils.chatMessageError("You must be in Survival to use this command!"));
+				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
 				return false;
 			}
 
             if (args.length == 1) {
 				player.sendMessage(
-						ChatUtils.chatMessageError("You must specify a sub-command! /ac potion <sub-command>"));
+						ChatUtils.chatMessage("&cYou must specify a sub-command! /ac potion <sub-command>"));
 				return false;
 			} else {
                 switch (args[1]) {
@@ -107,11 +107,11 @@ public class CommandPotions {
                         // amplifier)
                     }
                     default ->
-                            player.sendMessage(ChatUtils.chatMessageError("Please enter a valid potion sub-command!"));
+                            player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid potion sub-command!"));
                 }
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
+			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
 		}
 		return false;
 	}

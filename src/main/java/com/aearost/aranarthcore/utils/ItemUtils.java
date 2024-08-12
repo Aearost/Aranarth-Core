@@ -33,7 +33,7 @@ public class ItemUtils {
 			int remainder = ItemUtils.addToInventory(target, copyForHasSpace);
 			sendMessages(itemToAdd, target, sender, remainder);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessageError("That player is not online!"));
+			sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 		}
 	}
 	
@@ -68,7 +68,7 @@ public class ItemUtils {
 					}
 					// If none of the ItemStack was added
 					else {
-						target.sendMessage(ChatUtils.chatMessageError("You do not have enough space for that!"));
+						target.sendMessage(ChatUtils.chatMessage("&cYou do not have enough space for that!"));
 					}
 				}
 			}

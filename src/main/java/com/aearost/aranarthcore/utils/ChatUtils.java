@@ -20,16 +20,6 @@ public class ChatUtils {
 	public static String chatMessage(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r" + msg);
 	}
-	
-	/**
-	 * Allows error messages to be written in red and begin with the AranarthCore prefix.
-	 * 
-	 * @param msg The message to be formatted.
-	 * @return The formatted chat message.
-	 */
-	public static String chatMessageError(String msg) {
-		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r&c" + msg);
-	}
 
 	/**
 	 * Allows messages to contain color codes.
@@ -66,7 +56,7 @@ public class ChatUtils {
 		StringBuilder fullItemName = new StringBuilder();
 		for (int i = 0; i < words.length; i++) {
 			String word = words[i];
-			String formattedWord = "";
+			String formattedWord;
 			// If it shouldn't be capitalized
 			if (word.equals("the") || word.equals("of") || word.equals("and") || word.equals("a") || word.equals("on")) {
 				formattedWord = word;

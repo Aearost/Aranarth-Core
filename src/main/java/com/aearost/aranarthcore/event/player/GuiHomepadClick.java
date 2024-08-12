@@ -128,7 +128,7 @@ public class GuiHomepadClick implements Listener {
 							if (heldItem != Material.AIR) {
 								e.setCancelled(true);
 								if (heldItem == home.getIcon()) {
-									player.sendMessage(ChatUtils.chatMessageError("This homepad already uses that icon!"));
+									player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
 								} else {
 									AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
 									player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));

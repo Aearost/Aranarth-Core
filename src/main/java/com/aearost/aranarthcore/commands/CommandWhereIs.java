@@ -19,7 +19,7 @@ public class CommandWhereIs {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessageError("You must enter a player's username!"));
+			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
 		} else {
 			boolean isPlayerFound = false;
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -32,7 +32,7 @@ public class CommandWhereIs {
 				}
 			}
 			if (!isPlayerFound) {
-				sender.sendMessage(ChatUtils.chatMessageError("That player is not online!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 			}
 		}
 		return false;

@@ -25,7 +25,7 @@ public class SugarcaneBlockPlace implements Listener {
 		ItemStack item = e.getItemInHand();
 		if (item.getType() == Material.BAMBOO_BLOCK && item.getItemMeta().hasLore()) {
 			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessageError("You cannot place a Block of Sugarcane!"));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place a Block of Sugarcane!"));
 		}
 		
 	}

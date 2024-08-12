@@ -27,7 +27,7 @@ public class CommandNickname {
 				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been removed!"));
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError("Console does not have a nickname!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cConsole does not have a nickname!"));
 				return false;
 			}
 		} else if (args.length == 2) {

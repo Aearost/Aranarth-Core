@@ -21,7 +21,7 @@ public class CommandPrefix {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac prefix [player] <prefix>"));
+			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac prefix [player] <prefix>"));
 			return false;
 		} else {
 			if (args.length == 2) {
@@ -38,7 +38,7 @@ public class CommandPrefix {
 					sender.sendMessage(ChatUtils.chatMessage("&7Your prefix has been set to " + args[1]));
 					return true;
 				} else {
-					sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac prefix [player] <prefix>"));
+					sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac prefix [player] <prefix>"));
 					return false;
 				}
 			} else {
@@ -85,7 +85,7 @@ public class CommandPrefix {
 					return true;
 				}
 				
-				sender.sendMessage(ChatUtils.chatMessageError("That player is not online!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 				return false;
 				
 				

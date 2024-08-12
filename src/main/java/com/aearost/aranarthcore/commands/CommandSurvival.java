@@ -32,7 +32,7 @@ public class CommandSurvival {
 				try {
 					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
 				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
+					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 					return false;
 				}
 				for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -47,7 +47,7 @@ public class CommandSurvival {
 
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
 			}
 		}
 		return false;

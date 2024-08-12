@@ -50,11 +50,11 @@ public class GuiBlacklistClick implements Listener {
 					return;
 				}
 				if (blacklistedItems.size() == 27) {
-					player.sendMessage(ChatUtils.chatMessageError("You have already blacklisted 27 items!"));
+					player.sendMessage(ChatUtils.chatMessage("&cYou have already blacklisted 27 items!"));
 				} else {
 					for (ItemStack itemStack : blacklistedItems) {
 						if (clickedItem.getType() == itemStack.getType()) {
-							player.sendMessage(ChatUtils.chatMessageError("This item is already blacklisted!"));
+							player.sendMessage(ChatUtils.chatMessage("&cThis item is already blacklisted!"));
 							e.getWhoClicked().closeInventory();
 							return;
 						}

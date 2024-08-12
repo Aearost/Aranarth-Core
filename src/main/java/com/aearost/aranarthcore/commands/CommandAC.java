@@ -22,7 +22,7 @@ public class CommandAC implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessageError("Incorrect syntax: /ac <sub-command>"));
+			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &7/ac <sub-command>"));
 			return false;
 		} else {
 			boolean commandResult = false;
@@ -49,7 +49,7 @@ public class CommandAC implements CommandExecutor {
 			} else if (args[0].equalsIgnoreCase("whereis")) {
 				commandResult = CommandWhereIs.onCommand(sender, args);
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError("Please enter a valid sub-command!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
 			}
 			return commandResult;
 		}

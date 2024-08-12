@@ -32,10 +32,10 @@ public class CommandMountSwimToggle {
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessageError("You must be on a mount to run this command!"));
+				player.sendMessage(ChatUtils.chatMessage("&cYou must be on a mount to run this command!"));
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessageError("You must be a player to execute this command!"));
+			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
 		}
 		return false;
 	}
