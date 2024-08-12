@@ -33,7 +33,7 @@ public class CommandBlacklist {
 					aranarthPlayer.setIsDeletingBlacklistedItems(true);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
 				} else {
-					player.sendMessage(ChatUtils.chatMessageError("Please enter a valid blacklist sub-command!"));
+					player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid blacklist sub-command!"));
 					return  false;
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

@@ -34,7 +34,7 @@ public class CommandCreative {
 						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
 					}
 				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
+					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 					return false;
 				}
 				for (PotionEffect effect : player.getActivePotionEffects()) {
@@ -49,7 +49,7 @@ public class CommandCreative {
 
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError("You must be a player to use this command!"));
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
 			}
 		}
 		return false;

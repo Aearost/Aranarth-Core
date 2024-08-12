@@ -68,7 +68,7 @@ public class CraftingOverrides implements Listener {
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Chorus Diamond to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
 						return;
 					}
 				}
@@ -76,7 +76,7 @@ public class CraftingOverrides implements Listener {
 				else {
 					if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You must use a Chorus Diamond to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou must use a Chorus Diamond to craft this!"));
 						return;
 					}
 				}
@@ -88,7 +88,7 @@ public class CraftingOverrides implements Listener {
 					if (e.getRecipe().getResult().getType() != Material.SUGAR_CANE &&
 							e.getRecipe().getResult().getType() != Material.BAMBOO) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You cannot use a Sugarcane Block to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Sugarcane Block to craft this!"));
 						return;
 					}
 				}
@@ -96,7 +96,7 @@ public class CraftingOverrides implements Listener {
 				else {
 					if (e.getRecipe().getResult().getType() == Material.SUGAR_CANE) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You must use a Sugarcane Block to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou must use a Sugarcane Block to craft this!"));
 						return;
 					}
 				}
@@ -108,7 +108,7 @@ public class CraftingOverrides implements Listener {
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() == Material.COOKED_PORKCHOP) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You cannot use Honey Glazed Ham to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use Honey Glazed Ham to craft this!"));
 						return;
 					}
 				}
@@ -116,7 +116,7 @@ public class CraftingOverrides implements Listener {
 				else {
 					if (e.getRecipe().getResult().getType() != Material.COOKED_PORKCHOP) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessageError("You must use a regular Cooked Porkchop to craft this!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou must use a regular Cooked Porkchop to craft this!"));
 						return;
 					}
 				}
@@ -125,7 +125,7 @@ public class CraftingOverrides implements Listener {
 			else if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 				if (!player.getLocation().getWorld().getName().startsWith("world")) {
 					e.setCancelled(true);
-					player.sendMessage(ChatUtils.chatMessageError("You cannot craft a homepad in this world!"));
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot craft a homepad in this world!"));
 					return;
 				}
 			}

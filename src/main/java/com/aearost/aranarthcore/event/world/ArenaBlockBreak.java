@@ -28,7 +28,7 @@ public class ArenaBlockBreak implements Listener {
 
 			if ((x >= -4 && x <= 4) && (y >= 100 && y <= 111) && (z >= -4 && z <=4)) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessageError("You cannot break this!"));
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
 			}
 		}
 

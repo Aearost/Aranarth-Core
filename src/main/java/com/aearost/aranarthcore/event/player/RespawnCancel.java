@@ -40,7 +40,7 @@ public class RespawnCancel implements Listener {
 			try {
 				AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
 			} catch (IOException ex) {
-				player.sendMessage(ChatUtils.chatMessageError("Something went wrong with changing world."));
+				player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 				return;
 			}
 			if (x == 0 && z == 3) {

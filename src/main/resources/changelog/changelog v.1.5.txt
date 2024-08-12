@@ -6,3 +6,4 @@ Bug Fixes
 - Restructured event directory to have sub-directories
 - Players no longer lose EXP when dying in the creative or arena worlds
 - Cleaned up many warnings, and silenced other unwanted warning messages
+- Removed the chatMessageError method in ChatUtils

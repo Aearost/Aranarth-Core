@@ -1,14 +1,9 @@
 package com.aearost.aranarthcore.event.block;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -17,7 +12,6 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.ChestItemComparator;
 
 public class ChestSort implements Listener {
 
@@ -36,7 +30,9 @@ public class ChestSort implements Listener {
 					|| e.getClickedBlock().getType() == Material.TRAPPED_CHEST
 					|| e.getClickedBlock().getType() == Material.BARREL) {
 				if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
-					BlockState state = e.getClickedBlock().getState();
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cChest sorting functionality is currently disabled!"));
+
+					/*BlockState state = e.getClickedBlock().getState();
 					Container container = (Container) state;
 					
 					ItemStack[] itemsStacked = stackItemsInContainer(container.getInventory().getContents());
@@ -57,6 +53,7 @@ public class ChestSort implements Listener {
 						sortedArray[i] = sortedList.get(i);
 					}
 					container.getInventory().setContents(sortedArray);
+					*/
 				}
 			}
 		}

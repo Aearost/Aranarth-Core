@@ -30,7 +30,7 @@ public class LogWoodStripPrevent implements Listener {
 				if (getMaterialIfLogOrWood(e.getClickedBlock()) != null) {
 					if (!e.getPlayer().isSneaking()) {
 						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatUtils.chatMessageError("You must be sneaking to strip logs!"));
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou must be sneaking to strip logs!"));
 					}
 				}
 			}

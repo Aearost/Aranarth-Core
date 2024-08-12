@@ -22,7 +22,7 @@ public class CommandPing {
                 player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + player.getPing() + "ms"));
 				return true;
 			} else {
-				sender.sendMessage(ChatUtils.chatMessageError("You must specify a player's ping! /ac ping <player>"));
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ac ping <player>"));
 				return false;
 			}
 		} else {
@@ -38,7 +38,7 @@ public class CommandPing {
                     return true;
 				}
 			}
-            sender.sendMessage(ChatUtils.chatMessageError("That player is not online!"));
+            sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
         }
 		return false;
 	}
