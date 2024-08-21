@@ -33,7 +33,7 @@ public class GuiHomepadClick implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onGuiClick(final InventoryClickEvent e) {
+	public void onGuiClick(final InventoryClickEvent e) throws InterruptedException {
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport") && e.getView().getType() == InventoryType.CHEST) {
 			Player player = (Player) e.getWhoClicked();
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -141,17 +141,19 @@ public class GuiHomepadClick implements Listener {
 										mount.teleport(home.getLocation());
 										player.teleport(home.getLocation());
 										Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+										Thread.sleep(20);
+										player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 										player.sendMessage(ChatUtils
 												.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-										player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
 										mount.addPassenger(player);
 									}
 								} else {
 									player.teleport(home.getLocation());
 									Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+									Thread.sleep(20);
 									player.sendMessage(ChatUtils
 											.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-									player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_DEATH, 1.3F, 2.0F);
+									player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 								}
 							}
 							player.closeInventory();
