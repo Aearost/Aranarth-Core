@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
@@ -27,6 +28,9 @@ public class BlacklistItemPickupPrevent implements Listener {
 	public void onPlayerPickupItem(final EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (Objects.isNull(aranarthPlayer.getBlacklist())) {
+				return;
+			}
 			if (!aranarthPlayer.getBlacklist().isEmpty()) {
 				List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
 				for (ItemStack is : blacklistedItems) {
