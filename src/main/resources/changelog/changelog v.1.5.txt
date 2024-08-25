@@ -1,9 +1,13 @@
 AranarthCore v. 1.5
 
 Features
+[~] Changed the sound effect when teleporting on a homepad
 
 Bug Fixes
-- Restructured event directory to have sub-directories
 - Players no longer lose EXP when dying in the creative or arena worlds
+- Fixed bug where player without blacklisted items picking up items would throw an error
+
+Miscellaneous
+- Restructured event directory to have sub-directories
 - Cleaned up many warnings, and silenced other unwanted warning messages
 - Removed the chatMessageError method in ChatUtils
