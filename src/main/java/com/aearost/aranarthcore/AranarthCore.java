@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.event.*;
 import com.aearost.aranarthcore.event.block.*;
+import com.aearost.aranarthcore.event.misc.PotionEffectStack;
 import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.world.*;
@@ -141,6 +141,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArmorStandSwitch(this);
 		new TippedArrowDamagePrevent(this);
 		new NonSurvivalDeathRespawn(this);
+		new EnderChestPlacePrevent(this);
 	}
 
 	/**

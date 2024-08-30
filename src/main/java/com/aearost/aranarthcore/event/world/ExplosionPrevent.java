@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event;
+package com.aearost.aranarthcore.event.world;
 
 import org.bukkit.Bukkit;
 import org.bukkit.block.data.type.TNT;
