@@ -26,8 +26,10 @@ public class WanderingTraderSpawnAnnounce implements Listener {
 		if (e.getEntityType() == EntityType.WANDERING_TRADER) {
 			WanderingTrader wanderingTrader = (WanderingTrader) e.getEntity();
 			for (Player player : Bukkit.getOnlinePlayers()) {
-				if (player.getLocation().distance(wanderingTrader.getLocation()) <= 100) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has spawned nearby &e" + player.getDisplayName()));
+				if (player.getLocation().getWorld().getName().equalsIgnoreCase("world")) {
+					if (player.getLocation().distance(wanderingTrader.getLocation()) <= 100) {
+						Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has spawned nearby &e" + player.getDisplayName()));
+					}
 				}
 			}
 		}

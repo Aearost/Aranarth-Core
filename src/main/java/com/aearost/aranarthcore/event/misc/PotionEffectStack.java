@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event;
+package com.aearost.aranarthcore.event.misc;
 
 import java.util.Objects;
 

@@ -1,9 +1,12 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.ChestItemComparator;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -12,6 +15,10 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import com.aearost.aranarthcore.AranarthCore;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class ChestSort implements Listener {
 
@@ -29,10 +36,11 @@ public class ChestSort implements Listener {
 			if (e.getClickedBlock().getType() == Material.CHEST
 					|| e.getClickedBlock().getType() == Material.TRAPPED_CHEST
 					|| e.getClickedBlock().getType() == Material.BARREL) {
-				if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+				if (e.getPlayer().getGameMode() == GameMode.SURVIVAL && e.getPlayer().isSneaking()) {
 					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cChest sorting functionality is currently disabled!"));
 
-					/*BlockState state = e.getClickedBlock().getState();
+					/*
+					BlockState state = e.getClickedBlock().getState();
 					Container container = (Container) state;
 					
 					ItemStack[] itemsStacked = stackItemsInContainer(container.getInventory().getContents());
