@@ -8,6 +8,7 @@ Bug Fixes
 - Fixed blacklisted items picking up items without a blacklist would throw an error
 - Wandering traders spawning will no longer cause errors if player is not in survival
 - Can no longer place enderchests in creative mode as the inventories are synced to survival
+- Items and exp are no longer dropped in the arena world when killed
 
 Miscellaneous
 - Restructured event directory to have sub-directories
