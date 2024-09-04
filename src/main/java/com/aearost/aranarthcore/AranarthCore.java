@@ -142,6 +142,7 @@ public class AranarthCore extends JavaPlugin {
 		new TippedArrowDamagePrevent(this);
 		new NonSurvivalDeathRespawn(this);
 		new EnderChestPlacePrevent(this);
+		new ArenaPlayerKill(this);
 	}
 
 	/**
