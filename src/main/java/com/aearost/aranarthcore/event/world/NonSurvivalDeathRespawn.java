@@ -34,6 +34,8 @@ public class NonSurvivalDeathRespawn implements Listener {
 			aranarthPlayer.setLevelBeforeDeath(player.getLevel());
 			aranarthPlayer.setExpBeforeDeath(player.getExp());
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			e.getDrops().clear();
+			e.setDroppedExp(0);
 		}
 	}
 
