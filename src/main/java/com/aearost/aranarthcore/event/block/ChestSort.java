@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.ChestSortOrder;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
@@ -40,6 +42,8 @@ public class ChestSort implements Listener {
 					List<ItemStack> itemsStacked = stackItemsInContainer(container.getInventory().getContents());
 					ItemStack[] sortedItems = sortItems(itemsStacked);
 					container.getInventory().setContents(sortedItems);
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
+					e.getPlayer().playSound(e.getPlayer(), Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
 				}
 			}
 		}
