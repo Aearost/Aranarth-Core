@@ -8,7 +8,7 @@ Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
 - Fixed blacklisted items picking up items without a blacklist would throw an error
 - Wandering traders spawning will no longer cause errors if player is not in survival
-- Can no longer place enderchests in creative mode as the inventories are synced to survival
+- Can no longer open enderchests in creative mode as the inventories are synced to survival
 - Items and exp are no longer dropped in the arena world when killed
 
 Miscellaneous
