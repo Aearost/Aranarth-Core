@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
@@ -24,13 +25,19 @@ public class ChestItemComparator implements Comparator<ItemStack> {
 		boolean isBlockA = a.getType().isBlock();
         boolean isBlockB = b.getType().isBlock();
 
+        Bukkit.getLogger().info("A is " + a.getType().name() + ", B is " + b.getType().name());
+
         if (isBlockA && isBlockB) {
+            Bukkit.getLogger().info("A");
             return compareBlocks(a, b);
         } else if (isBlockA) {
+            Bukkit.getLogger().info("B");
             return -1;
         } else if (isBlockB) {
+            Bukkit.getLogger().info("C");
             return 1;
         } else {
+            Bukkit.getLogger().info("D");
             return compareItems(a, b);
         }
 	}
