@@ -58,6 +58,11 @@ public class PlayerServerJoin implements Listener {
 
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 		perms.setPermission("bending.command.rechoose", true);
+
+		if (player.getName().equalsIgnoreCase("_Breathtaking")) {
+			Bukkit.getLogger().info("Adding Blue Fire to _Breathtaking");
+			perms.setPermission("bending.fire.bluefire", true);
+		}
 	}
 	
 }
