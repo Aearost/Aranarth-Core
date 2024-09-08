@@ -131,7 +131,6 @@ public class AranarthCore extends JavaPlugin {
 		new GuiQuiverClose(this);
 		new GuiQuiverPreventNonArrowAdd(this);
 		new ArrowConsume(this);
-		new BewitchedMinecartPlace(this);
 		new WanderingTraderSpawnAnnounce(this);
 		new PotionEffectStack(this);
 		new MangroveRootShear(this);
@@ -187,7 +186,6 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeInvisibleItemFrame(this);
 		new RecipeHoneyGlazedHam(this);
 		new RecipeQuiver(this);
-		new RecipeBewitchedMinecart(this);
 		new RecipeMushroomBlockBrown(this);
 		new RecipeMushroomBlockBrownUncraft(this);
 		new RecipeMushroomBlockRed(this);

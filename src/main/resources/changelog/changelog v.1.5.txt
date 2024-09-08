@@ -1,8 +1,10 @@
 AranarthCore v. 1.5
 
 Features
+[+] Chests can now be sorted by holding sneak and left-clicking
 [+] Player health is now restored when killing another player in the arena world
 [~] Changed the sound effect when teleporting on a homepad
+[-] Removed Bewitched Minecart as it is no longer needed as of 1.21.2
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
