@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.event.block;
 
-import java.util.HashMap;
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -16,9 +16,8 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.util.HashMap;
+import java.util.Objects;
 
 public class DragonHeadClick implements Listener {
 

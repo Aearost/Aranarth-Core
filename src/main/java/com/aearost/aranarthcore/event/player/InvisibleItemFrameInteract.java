@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,10 +21,6 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.items.InvisibleItemFrame;
-import com.aearost.aranarthcore.runnable.ItemFrameUpdateRunnable;
 
 /**
  * Inspired by tiffany352

@@ -1,16 +1,15 @@
 package com.aearost.aranarthcore.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class GuiQuiver {
 

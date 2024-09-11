@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.misc;
 
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -15,7 +14,7 @@ import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
-import com.aearost.aranarthcore.AranarthCore;
+import java.util.Objects;
 
 public class PotionEffectStack implements Listener {
 

@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
-import java.util.Random;
-
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -10,7 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.aearost.aranarthcore.AranarthCore;
+import java.util.Random;
 
 public class GoatDeath implements Listener {
 

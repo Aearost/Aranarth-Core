@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -8,8 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.potion.PotionEffectType;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class ZombieHorseSpawn implements Listener {
 

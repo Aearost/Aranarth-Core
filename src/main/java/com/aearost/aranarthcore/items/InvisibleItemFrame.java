@@ -1,8 +1,6 @@
 package com.aearost.aranarthcore.items;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -12,7 +10,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Provides the necessary components of an Invisible Item Frame.

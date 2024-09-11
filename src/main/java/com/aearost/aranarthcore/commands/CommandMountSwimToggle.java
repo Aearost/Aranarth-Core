@@ -1,13 +1,12 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
-
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 /**
  * Allows horses and camels to swim and float in water.

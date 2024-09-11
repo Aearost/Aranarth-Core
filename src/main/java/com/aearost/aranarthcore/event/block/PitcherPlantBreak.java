@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
-import java.util.Random;
-
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,7 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.aearost.aranarthcore.AranarthCore;
+import java.util.Random;
 
 public class PitcherPlantBreak implements Listener {
 

@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -14,8 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.AranarthUtils;
+import java.util.Objects;
 
 public class ItemPickupAddToShulker implements Listener {
 

@@ -1,11 +1,10 @@
 package com.aearost.aranarthcore.event.world;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class ArenaHungerLossPrevent implements Listener {
 

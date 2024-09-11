@@ -1,11 +1,10 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 /**
  * Allows players to view the current location of another player.

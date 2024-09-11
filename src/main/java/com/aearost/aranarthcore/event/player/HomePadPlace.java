@@ -1,15 +1,14 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.HomePad;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.items.HomePad;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 
 public class HomePadPlace implements Listener {
 

@@ -1,12 +1,11 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFadeEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class CoralDry implements Listener {
 

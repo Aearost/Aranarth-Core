@@ -1,9 +1,8 @@
 package com.aearost.aranarthcore.commands;
 
-import java.io.IOException;
-import java.util.Objects;
-
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -12,8 +11,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.io.IOException;
+import java.util.Objects;
 
 /**
  * Teleports the player to the arena world, sharing the survival inventory.

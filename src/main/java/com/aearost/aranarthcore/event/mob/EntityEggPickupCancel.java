@@ -1,13 +1,12 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class EntityEggPickupCancel implements Listener {
 

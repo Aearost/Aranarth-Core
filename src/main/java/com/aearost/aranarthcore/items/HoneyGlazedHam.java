@@ -1,13 +1,12 @@
 package com.aearost.aranarthcore.items;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Provides the necessary components of a Honey Glazed Ham item.

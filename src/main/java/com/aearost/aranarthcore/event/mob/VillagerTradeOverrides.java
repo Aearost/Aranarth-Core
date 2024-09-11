@@ -1,9 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
+import com.aearost.aranarthcore.AranarthCore;
+import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Villager;
@@ -14,8 +12,9 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.MerchantRecipe;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class VillagerTradeOverrides implements Listener {
 

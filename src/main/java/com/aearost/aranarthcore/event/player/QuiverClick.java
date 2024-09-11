@@ -1,7 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiQuiver;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -10,9 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.gui.GuiQuiver;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.util.Objects;
 
 public class QuiverClick implements Listener {
 

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -10,8 +11,6 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class MangroveRootShear implements Listener {
 

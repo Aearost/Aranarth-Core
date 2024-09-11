@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -11,8 +12,6 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class TippedArrowDamagePrevent implements Listener {
 
