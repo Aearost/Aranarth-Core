@@ -17,3 +17,6 @@ Miscellaneous
 - Restructured event directory to have sub-directories
 - Cleaned up many warnings, and silenced other unwanted warning messages
 - Removed the chatMessageError method in ChatUtils
+- Fixed typo of variable name in PlayerServerJoin and PlayerServerQuit
+- Can now manually specify which players get Blue Firebending
+- Removed redundant plugin.yml
