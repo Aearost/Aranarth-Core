@@ -1,7 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.HomePad;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -10,9 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.items.HomePad;
-import com.aearost.aranarthcore.utils.AranarthUtils;
+import java.util.Objects;
 
 public class HomePadBreak implements Listener {
 

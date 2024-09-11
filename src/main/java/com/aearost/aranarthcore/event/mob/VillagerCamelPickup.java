@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Camel;
 import org.bukkit.entity.Entity;
@@ -8,8 +9,6 @@ import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class VillagerCamelPickup implements Listener {
 

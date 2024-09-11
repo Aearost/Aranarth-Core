@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.objects;
 
-import java.util.List;
-
 import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
 
 
 /**

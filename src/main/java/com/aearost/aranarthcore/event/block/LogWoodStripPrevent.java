@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -9,9 +11,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class LogWoodStripPrevent implements Listener {
 

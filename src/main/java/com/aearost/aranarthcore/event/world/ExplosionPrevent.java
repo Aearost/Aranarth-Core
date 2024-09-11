@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.world;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.block.data.type.TNT;
 import org.bukkit.entity.BreezeWindCharge;
@@ -11,8 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityExplodeEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
 
 public class ExplosionPrevent implements Listener {
 

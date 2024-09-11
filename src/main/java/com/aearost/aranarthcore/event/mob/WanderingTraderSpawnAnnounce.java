@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -7,9 +9,6 @@ import org.bukkit.entity.WanderingTrader;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntitySpawnEvent;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class WanderingTraderSpawnAnnounce implements Listener {
 

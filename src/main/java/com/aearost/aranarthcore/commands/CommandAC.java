@@ -1,10 +1,9 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 /**
  * This is the master command for all commands related to AranarthCore.

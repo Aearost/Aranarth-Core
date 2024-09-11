@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
-import java.util.Objects;
-
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -12,8 +12,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionType;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.ChatUtils;
+import java.util.Objects;
 
 public class GuiPotionPreventNonPotionAdd implements Listener {
 

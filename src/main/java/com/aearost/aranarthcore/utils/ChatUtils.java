@@ -1,10 +1,9 @@
 package com.aearost.aranarthcore.utils;
 
-import java.util.Random;
-
+import com.aearost.aranarthcore.enums.SpecialDay;
 import org.bukkit.ChatColor;
 
-import com.aearost.aranarthcore.enums.SpecialDay;
+import java.util.Random;
 
 /**
  * Provides utility methods to facilitate the formatting of all chat related content.

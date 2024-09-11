@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -7,9 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class GuiVillagerClick implements Listener {
 

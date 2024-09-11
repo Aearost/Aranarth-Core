@@ -1,19 +1,14 @@
 package com.aearost.aranarthcore.event.mob;
 
-import java.util.Random;
-
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.entity.AbstractHorse;
-import org.bukkit.entity.Camel;
-import org.bukkit.entity.Horse;
-import org.bukkit.entity.SkeletonHorse;
-import org.bukkit.entity.ZombieHorse;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import com.aearost.aranarthcore.AranarthCore;
+import java.util.Random;
 
 public class MountSpawn implements Listener {
 

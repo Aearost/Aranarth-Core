@@ -1,17 +1,16 @@
 package com.aearost.aranarthcore.event.player;
 
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.permissions.PermissionAttachment;
 
 public class PlayerServerJoin implements Listener {
@@ -36,32 +35,32 @@ public class PlayerServerJoin implements Listener {
 			AranarthUtils.setUsername(player);
 		}
 		DateUtils dateUtils = new DateUtils();
-		String nameToDiplay;
+		String nameToDisplay;
 		
 		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDiplay = AranarthUtils.getNickname(player);
+			nameToDisplay = AranarthUtils.getNickname(player);
 		} else {
-			nameToDiplay = AranarthUtils.getUsername(player);
+			nameToDisplay = AranarthUtils.getUsername(player);
 		}
 		
 		if (dateUtils.isValentinesDay()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.VALENTINES)));
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES)));
 		} else if (dateUtils.isEaster()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.EASTER)));
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER)));
 		} else if (dateUtils.isHalloween()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.HALLOWEEN)));
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
 		} else if (dateUtils.isChristmas()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDiplay, SpecialDay.CHRISTMAS)));
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
 		} else {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDiplay));
+			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 		perms.setPermission("bending.command.rechoose", true);
 
+		// Add blue fire to players that want it
 		if (player.getName().equalsIgnoreCase("_Breathtaking")) {
-			Bukkit.getLogger().info("Adding Blue Fire to _Breathtaking");
-			perms.setPermission("bending.fire.bluefire", true);
+			Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
 		}
 	}
 	

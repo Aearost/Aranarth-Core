@@ -1,14 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 import org.bukkit.inventory.meta.Damageable;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 public class DurabilityDecreaseWarning implements Listener {
 

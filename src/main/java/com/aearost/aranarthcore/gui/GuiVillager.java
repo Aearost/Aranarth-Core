@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -7,8 +8,6 @@ import org.bukkit.entity.Villager;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-
-import com.aearost.aranarthcore.utils.ChatUtils;
 
 import java.util.Objects;
 

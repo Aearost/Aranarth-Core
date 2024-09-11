@@ -1,12 +1,11 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
 import com.aearost.aranarthcore.gui.GuiBlacklist;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * Allows the player to prevent specified items from being picked up.

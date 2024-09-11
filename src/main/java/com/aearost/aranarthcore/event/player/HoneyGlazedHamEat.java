@@ -1,14 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
-
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.items.HoneyGlazedHam;
 
 public class HoneyGlazedHamEat implements Listener {
 
