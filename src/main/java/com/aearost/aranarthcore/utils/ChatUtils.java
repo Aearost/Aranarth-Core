@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
 
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Provides utility methods to facilitate the formatting of all chat related content.
@@ -17,6 +19,7 @@ public class ChatUtils {
 	 * @return The formatted chat message.
 	 */
 	public static String chatMessage(String msg) {
+		msg = checkForHex(msg);
 		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r" + msg);
 	}
 
@@ -27,8 +30,33 @@ public class ChatUtils {
 	 * @return The formatted chat message.
 	 */
 	public static String translateToColor(String msg) {
+		msg = checkForHex(msg);
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
+
+	private static String checkForHex(String msg) {
+		Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+		Matcher matcher = pattern.matcher(msg);
+		while (matcher.find()) {
+			// Gets the color code and replaces it with the actual color
+			String color = msg.substring(matcher.start(), matcher.end());
+			msg = msg.replace(color, ChatColor.of(color) + "");
+			matcher = pattern.matcher(msg);
+		}
+		return msg;
+	}
+
+	/*public static String translateToHexColor(String msg) {
+		Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
+		Matcher matcher = pattern.matcher(msg);
+		while (matcher.find()) {
+			// Gets the color code and replaces it with the actual color
+			String color = msg.substring(matcher.start(), matcher.end());
+			msg = msg.replace(color, ChatColor.of(color) + "");
+			matcher = pattern.matcher(msg);
+		}
+		return "";
+	}*/
 
 	/**
 	 * Removes the formatting from messages.
