@@ -50,7 +50,7 @@ public class CommandItemName {
                     } else {
                         if (args.length > 2) {
                             int stringStart = 1;
-                            if (args[1].equalsIgnoreCase("gradient")) {
+                            if (args[1].startsWith("gradientbold")) {
                                 // Start at the actual name
                                 stringStart = 3;
                             }
@@ -67,8 +67,13 @@ public class CommandItemName {
                             }
 
                             String itemName = itemNameSB.toString();
-                            if (args[1].equalsIgnoreCase("gradient")) {
-                                itemName = ChatUtils.translateToGradient(args[2], itemName);
+                            if (args[1].startsWith("gradient")) {
+                                if (args[1].equalsIgnoreCase("gradient")) {
+                                    itemName = ChatUtils.translateToGradient(args[2], itemName, false);
+                                } else if (args[1].equalsIgnoreCase("gradientbold")) {
+                                    itemName = ChatUtils.translateToGradient(args[2], itemName, true);
+                                }
+
                                 if (Objects.isNull(itemName)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
                                     return false;
@@ -77,7 +82,9 @@ public class CommandItemName {
                                 }
                             } else {
                                 meta.setDisplayName(ChatUtils.translateToColor(itemName));
+                                return true;
                             }
+
                             item.setItemMeta(meta);
                             player.getInventory().setItemInMainHand(item);
                             player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));

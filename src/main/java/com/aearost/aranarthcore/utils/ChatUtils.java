@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
 
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -41,10 +40,9 @@ public class ChatUtils {
 	 * @param msg The message to be formatted.
 	 * @return The formatted chat message.
 	 */
-	public static String translateToGradient(String gradientColors, String msg) {
+	public static String translateToGradient(String gradientColors, String msg, boolean isBold) {
 		// The text must be without colour formatting
 		if (msg.contains("#") || msg.contains("&")) {
-			Bukkit.getLogger().info("A: " + msg);
 			return null;
 		}
 
@@ -55,22 +53,22 @@ public class ChatUtils {
 		// Ensure colors are valid hex codes
 		for (String color : colors) {
 			if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
-				Bukkit.getLogger().info("B: " + color);
 				return null;
 			}
 		}
 
 		// If the message has fewer characters than colors, use the first color for all characters
 		if (msgLength < numColors) {
-			Bukkit.getLogger().info("C: " + msg);
 			StringBuilder result = new StringBuilder();
 			String firstColor = colors[0];
+			if (isBold) {
+				firstColor += "&l";
+			}
 			for (char c : msg.toCharArray()) {
 				result.append(firstColor).append(c); // Apply the first color to all characters
 			}
 			msg = result.toString();
 		} else {
-			Bukkit.getLogger().info("D: " + msg);
 			// Calculate the transition points based on the number of colors and message length
 			int sectionSize = msgLength / (numColors - 1); // Number of characters per gradient section
 			StringBuilder result = new StringBuilder();
@@ -88,13 +86,13 @@ public class ChatUtils {
 
 				// Interpolate the color at position i
 				String interpolatedColor = interpolateColor(startColor, endColor, x);
-				Bukkit.getLogger().info("E: " + interpolatedColor);
+				if (isBold) {
+					interpolatedColor += "&l";
+				}
 				result.append(interpolatedColor).append(msg.charAt(i)); // Apply color to the character
 			}
 			msg = result.toString();
-			Bukkit.getLogger().info("F: " + msg);
 		}
-		Bukkit.getLogger().info("G: " + msg);
 		msg = checkForHex(msg);
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
@@ -113,7 +111,8 @@ public class ChatUtils {
 		int g = (int) (g1 + x * (g2 - g1));
 		int b = (int) (b1 + x * (b2 - b1));
 
-		return String.format("#%02X%02X%02X", r, g, b); // Return the interpolated color in hex
+		// Return the interpolated color in hex
+		return String.format("#%02X%02X%02X", r, g, b);
 	}
 
 	private static String checkForHex(String msg) {
