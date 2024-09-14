@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Allows players to view the current location of another player.
+ * Allows specified players to view the current location of another player.
  */
 public class CommandWhereIs {
 
