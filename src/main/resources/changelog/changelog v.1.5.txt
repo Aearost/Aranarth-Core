@@ -21,3 +21,4 @@ Miscellaneous
 - Fixed typo of variable name in PlayerServerJoin and PlayerServerQuit
 - Can now manually specify which players get Blue Firebending
 - Removed redundant plugin.yml
+- Added separation to Aearost and other players for command visibility
