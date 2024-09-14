@@ -7,6 +7,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Objects;
+
 /**
  * Allows players to add nicknames for themselves.
  */
@@ -30,7 +32,6 @@ public class CommandNickname {
 				return false;
 			}
 		} else if (args.length == 2) {
-
 			if (sender instanceof Player player) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -58,15 +59,35 @@ public class CommandNickname {
 		} else {
 			if (sender instanceof Player player) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				StringBuilder nickname = new StringBuilder();
-				for (int i = 1; i < args.length; i++) {
-					if (i < args.length - 1) {
-						nickname.append(args[i]).append(" ");
+				int stringStart = 1;
+				if (args[1].equalsIgnoreCase("gradient")) {
+					stringStart = 3;
+				}
+
+				// Gets the full item name
+				StringBuilder nicknameSB = new StringBuilder();
+				for (int i = stringStart; i < args.length; i++) {
+					nicknameSB.append(args[i]);
+					if (i == args.length - 1) {
+						break;
 					} else {
-						nickname.append(args[i]);
+						nicknameSB.append(" ");
 					}
 				}
-				aranarthPlayer.setNickname(nickname.toString());
+
+				String nickname = nicknameSB.toString();
+				if (args[1].equalsIgnoreCase("gradient")) {
+					nickname = ChatUtils.translateToGradient(args[2], nickname);
+					if (Objects.isNull(nickname)) {
+						player.sendMessage(ChatUtils.chatMessage("&cYour nickname could not be set to a gradient"));
+						return false;
+					} else {
+						aranarthPlayer.setNickname(nickname);
+						player.sendMessage(ChatUtils.chatMessage("&cYour nickname has been set to " + nickname));
+					}
+				}
+
+				aranarthPlayer.setNickname(nickname);
 				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + nickname));
 				return true;
 			}
