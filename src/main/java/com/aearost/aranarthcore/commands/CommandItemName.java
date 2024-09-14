@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -74,11 +73,9 @@ public class CommandItemName {
                                     player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
                                     return false;
                                 } else {
-                                    Bukkit.getLogger().info("Value is: |" + itemName + "|");
                                     meta.setDisplayName(itemName);
                                 }
                             } else {
-                                Bukkit.getLogger().info("Value is 2: |" + itemName + "|");
                                 meta.setDisplayName(ChatUtils.translateToColor(itemName));
                             }
                             item.setItemMeta(meta);

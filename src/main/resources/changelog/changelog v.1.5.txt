@@ -4,6 +4,8 @@ Features
 [+] Chests can now be sorted by holding sneak and left-clicking
 [+] Player health is now restored when killing another player in the arena world
 [+] Added /ac shulker to toggle shulker item pickup functionality
+[+] Added /ac itemname for select players to rename items supporting color codes and hex
+[+] Added /ac nick gradient to allow gradient nickname support
 [~] Changed the sound effect when teleporting on a homepad
 [-] Removed Bewitched Minecart as it is no longer needed as of 1.21.2
 
