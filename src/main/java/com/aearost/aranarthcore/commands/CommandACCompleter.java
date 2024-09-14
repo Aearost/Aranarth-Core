@@ -27,7 +27,7 @@ public class CommandACCompleter implements TabCompleter {
 
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-				if (player.getName().equalsIgnoreCase("bob")) {
+				if (player.getName().equalsIgnoreCase("Aearost")) {
 					displayedOptions = displayForOp(player, displayedOptions, args);
 					if (displayedOptions.isEmpty()) {
 						displayedOptions = displayNoResultsForOp(displayedOptions);
