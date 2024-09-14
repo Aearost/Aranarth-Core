@@ -16,9 +16,9 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 
 import java.util.Objects;
 
-public class ItemPickupAddToShulker implements Listener {
+public class ShulkerItemPickup implements Listener {
 
-	public ItemPickupAddToShulker(AranarthCore plugin) {
+	public ShulkerItemPickup(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -55,6 +55,10 @@ public class ItemPickupAddToShulker implements Listener {
 				if (is != null) {
 					if (is.getItemMeta() instanceof BlockStateMeta im) {
                         if (im.getBlockState() instanceof ShulkerBox shulker) {
+							if (!aranarthPlayer.getIsAddingToShulker()) {
+								return;
+							}
+
                             Inventory shulkerInventory = shulker.getInventory();
 
 							// Cycle through all slots in slots that are shulker boxes

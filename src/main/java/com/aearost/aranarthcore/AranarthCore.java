@@ -97,7 +97,7 @@ public class AranarthCore extends JavaPlugin {
 		new PitcherPlantPlace(this);
 		new PitcherPlantBreak(this);
 		new PillagerOutpostSpawnCancel(this);
-		new ItemPickupAddToShulker(this);
+		new ShulkerItemPickup(this);
 		new ZombieHorseSpawn(this);
 		new ArenaBlockBreak(this);
 		new ArenaItemDrops(this);

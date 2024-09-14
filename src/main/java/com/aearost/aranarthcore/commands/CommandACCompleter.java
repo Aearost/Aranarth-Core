@@ -38,10 +38,13 @@ public class CommandACCompleter implements TabCompleter {
 				if (args[0].equals("s")) {
 					displayedOptions.add("survival");
 					displayedOptions.add("swimtoggle");
+					displayedOptions.add("shulker");
 				} else if ("swimtoggle".startsWith(args[0])) {
 					displayedOptions.add("swimtoggle");
 				} else if ("survival".startsWith(args[0])) {
 					displayedOptions.add("survival");
+				} else if ("shulker".startsWith(args[0])) {
+					displayedOptions.add("shulker");
 				}
 			} else if (!args[0].isEmpty() && "blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
@@ -70,6 +73,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("creative");
 				displayedOptions.add("blacklist");
 				displayedOptions.add("potions");
+				displayedOptions.add("shulker");
 			}
 		}
 
