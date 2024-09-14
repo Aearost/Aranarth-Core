@@ -28,39 +28,53 @@ public class CommandAC implements CommandExecutor {
 			boolean commandResult = false;
 			if (sender instanceof Player player) {
 				if (player.getName().equalsIgnoreCase("Aearost")) {
-					if (args[0].equalsIgnoreCase("whereis")) {
-						commandResult = CommandWhereIs.onCommand(sender, args);
-					} else if (args[0].equalsIgnoreCase("itemname")) {
-						commandResult = CommandItemName.onCommand(sender, args);
-					}
+					commandResult = isSenderOp(sender, args, commandResult);
 				}
-			} else if (args[0].equalsIgnoreCase("homepad")) {
-				commandResult = CommandHomePad.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("swimtoggle")) {
-				commandResult = CommandMountSwimToggle.onCommand(sender);
-			} else if (args[0].equalsIgnoreCase("nick")) {
-				commandResult = CommandNickname.onCommand(sender,args);
-			} else if (args[0].equalsIgnoreCase("ping")) {
-				commandResult = CommandPing.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("prefix")) {
-				commandResult = CommandPrefix.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("arena")) {
-				commandResult = CommandArena.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("survival")) {
-				commandResult = CommandSurvival.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("creative")) {
-				commandResult = CommandCreative.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("blacklist")) {
-				commandResult = CommandBlacklist.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("potions")) {
-				commandResult = CommandPotions.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("shulker")) {
-				commandResult = CommandShulker.onCommand(sender, args);
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
+				commandResult = isValidCommand(sender, args, commandResult);
+				if (!commandResult) {
+					sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
+				}
 			}
 			return commandResult;
 		}
+	}
+
+	private boolean isSenderOp(CommandSender sender, String[] args, boolean commandResult) {
+		if (args[0].equalsIgnoreCase("whereis")) {
+			commandResult = CommandWhereIs.onCommand(sender, args);
+			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("itemname")) {
+			commandResult = CommandItemName.onCommand(sender, args);
+			commandResult = true;
+		}
+		return commandResult;
+	}
+
+	private boolean isValidCommand(CommandSender sender, String[] args, boolean commandResult) {
+		if (args[0].equalsIgnoreCase("homepad")) {
+			commandResult = CommandHomePad.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("swimtoggle")) {
+			commandResult = CommandMountSwimToggle.onCommand(sender);
+		} else if (args[0].equalsIgnoreCase("nick")) {
+			commandResult = CommandNickname.onCommand(sender,args);
+		} else if (args[0].equalsIgnoreCase("ping")) {
+			commandResult = CommandPing.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("prefix")) {
+			commandResult = CommandPrefix.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("arena")) {
+			commandResult = CommandArena.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("survival")) {
+			commandResult = CommandSurvival.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("creative")) {
+			commandResult = CommandCreative.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("blacklist")) {
+			commandResult = CommandBlacklist.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("potions")) {
+			commandResult = CommandPotions.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("shulker")) {
+			commandResult = CommandShulker.onCommand(sender, args);
+		}
+		return commandResult;
 	}
 
 }

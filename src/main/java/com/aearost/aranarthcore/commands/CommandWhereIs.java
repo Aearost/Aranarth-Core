@@ -17,6 +17,13 @@ public class CommandWhereIs {
 	 * @return Confirmation of whether the command was a success or not.
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player player) {
+			if (!player.getName().equalsIgnoreCase("Aearost")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return false;
+			}
+		}
+
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
 		} else {
