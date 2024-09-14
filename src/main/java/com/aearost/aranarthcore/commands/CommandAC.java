@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * This is the master command for all commands related to AranarthCore.
@@ -25,7 +26,15 @@ public class CommandAC implements CommandExecutor {
 			return false;
 		} else {
 			boolean commandResult = false;
-			if (args[0].equalsIgnoreCase("homepad")) {
+			if (sender instanceof Player player) {
+				if (player.getName().equalsIgnoreCase("Aearost")) {
+					if (args[0].equalsIgnoreCase("whereis")) {
+						commandResult = CommandWhereIs.onCommand(sender, args);
+					} else if (args[0].equalsIgnoreCase("itemname")) {
+						commandResult = CommandItemName.onCommand(sender, args);
+					}
+				}
+			} else if (args[0].equalsIgnoreCase("homepad")) {
 				commandResult = CommandHomePad.onCommand(sender, args);
 			} else if (args[0].equalsIgnoreCase("swimtoggle")) {
 				commandResult = CommandMountSwimToggle.onCommand(sender);
@@ -45,8 +54,6 @@ public class CommandAC implements CommandExecutor {
 				commandResult = CommandBlacklist.onCommand(sender, args);
 			} else if (args[0].equalsIgnoreCase("potions")) {
 				commandResult = CommandPotions.onCommand(sender, args);
-			} else if (args[0].equalsIgnoreCase("whereis")) {
-				commandResult = CommandWhereIs.onCommand(sender, args);
 			} else if (args[0].equalsIgnoreCase("shulker")) {
 				commandResult = CommandShulker.onCommand(sender, args);
 			} else {
