@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
 
 import java.util.Random;
 import java.util.regex.Matcher;
@@ -25,13 +26,94 @@ public class ChatUtils {
 
 	/**
 	 * Allows messages to contain color codes.
-	 * 
+	 *
 	 * @param msg The message to be formatted.
 	 * @return The formatted chat message.
 	 */
 	public static String translateToColor(String msg) {
 		msg = checkForHex(msg);
 		return ChatColor.translateAlternateColorCodes('&', msg);
+	}
+
+	/**
+	 * Allows messages to contain color codes.
+	 *
+	 * @param msg The message to be formatted.
+	 * @return The formatted chat message.
+	 */
+	public static String translateToGradient(String gradientColors, String msg) {
+		// The text must be without colour formatting
+		if (msg.contains("#") || msg.contains("&")) {
+			Bukkit.getLogger().info("A: " + msg);
+			return null;
+		}
+
+		String[] colors = gradientColors.split(",");
+		int numColors = colors.length;
+		int msgLength = msg.length();
+
+		// Ensure colors are valid hex codes
+		for (String color : colors) {
+			if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+				Bukkit.getLogger().info("B: " + color);
+				return null;
+			}
+		}
+
+		// If the message has fewer characters than colors, use the first color for all characters
+		if (msgLength < numColors) {
+			Bukkit.getLogger().info("C: " + msg);
+			StringBuilder result = new StringBuilder();
+			String firstColor = colors[0];
+			for (char c : msg.toCharArray()) {
+				result.append(firstColor).append(c); // Apply the first color to all characters
+			}
+			msg = result.toString();
+		} else {
+			Bukkit.getLogger().info("D: " + msg);
+			// Calculate the transition points based on the number of colors and message length
+			int sectionSize = msgLength / (numColors - 1); // Number of characters per gradient section
+			StringBuilder result = new StringBuilder();
+
+			for (int i = 0; i < msgLength; i++) {
+				// Determine which two colors we're interpolating between
+				int colorIndex = Math.min(i / sectionSize, numColors - 2); // Index for the left color
+				String startColor = colors[colorIndex];
+				String endColor = colors[colorIndex + 1];
+
+				// Calculate the interpolation factor between the two colors (0 to 1)
+				int startOfSection = colorIndex * sectionSize;
+				int endOfSection = (colorIndex + 1) * sectionSize;
+				double x = (i - startOfSection) / (double) (endOfSection - startOfSection);
+
+				// Interpolate the color at position i
+				String interpolatedColor = interpolateColor(startColor, endColor, x);
+				Bukkit.getLogger().info("E: " + interpolatedColor);
+				result.append(interpolatedColor).append(msg.charAt(i)); // Apply color to the character
+			}
+			msg = result.toString();
+			Bukkit.getLogger().info("F: " + msg);
+		}
+		Bukkit.getLogger().info("G: " + msg);
+		msg = checkForHex(msg);
+		return ChatColor.translateAlternateColorCodes('&', msg);
+	}
+
+	private static String interpolateColor(String startHex, String endHex, double x) {
+		int r1 = Integer.parseInt(startHex.substring(1, 3), 16);
+		int g1 = Integer.parseInt(startHex.substring(3, 5), 16);
+		int b1 = Integer.parseInt(startHex.substring(5, 7), 16);
+
+		int r2 = Integer.parseInt(endHex.substring(1, 3), 16);
+		int g2 = Integer.parseInt(endHex.substring(3, 5), 16);
+		int b2 = Integer.parseInt(endHex.substring(5, 7), 16);
+
+		// Linear interpolation for each color component
+		int r = (int) (r1 + x * (r2 - r1));
+		int g = (int) (g1 + x * (g2 - g1));
+		int b = (int) (b1 + x * (b2 - b1));
+
+		return String.format("#%02X%02X%02X", r, g, b); // Return the interpolated color in hex
 	}
 
 	private static String checkForHex(String msg) {
@@ -45,18 +127,6 @@ public class ChatUtils {
 		}
 		return msg;
 	}
-
-	/*public static String translateToHexColor(String msg) {
-		Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
-		Matcher matcher = pattern.matcher(msg);
-		while (matcher.find()) {
-			// Gets the color code and replaces it with the actual color
-			String color = msg.substring(matcher.start(), matcher.end());
-			msg = msg.replace(color, ChatColor.of(color) + "");
-			matcher = pattern.matcher(msg);
-		}
-		return "";
-	}*/
 
 	/**
 	 * Removes the formatting from messages.
