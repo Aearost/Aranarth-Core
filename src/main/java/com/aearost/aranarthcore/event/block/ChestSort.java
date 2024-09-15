@@ -10,11 +10,13 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -38,9 +40,18 @@ public class ChestSort implements Listener {
 					BlockState state = e.getClickedBlock().getState();
 					Container container = (Container) state;
 
-					List<ItemStack> itemsStacked = stackItemsInContainer(container.getInventory().getContents());
-					ItemStack[] sortedItems = sortItems(itemsStacked);
-					container.getInventory().setContents(sortedItems);
+					Inventory inventory = container.getInventory();
+					if (inventory.getHolder() instanceof DoubleChest doubleChest) {
+                        inventory = doubleChest.getInventory(); // Get the full 54 slot inventory
+					}
+
+					List<ItemStack> itemsStacked = stackItemsInContainer(inventory.getContents());
+					ItemStack[] stackedArray = new ItemStack[inventory.getContents().length];
+					stackedArray = itemsStacked.toArray(stackedArray);
+					ItemStack[] sortedItems = sortItems(stackedArray);
+					inventory.clear();
+					inventory.setContents(sortedItems);
+
 					e.getPlayer().sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
 					e.getPlayer().playSound(e.getPlayer(), Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
 				}
@@ -79,11 +90,10 @@ public class ChestSort implements Listener {
 				stackedList.add(chestInventory[i]);
 			}
 		}
-
 		return stackedList;
 	}
 
-	private ItemStack[] sortItems(List<ItemStack> stackedItems) {
+	private ItemStack[] sortItems(ItemStack[] stackedItems) {
 		List<ItemStack> sortedItems = new ArrayList<>();
 		List<ItemStack> unsortedItems = new ArrayList<>();
 		ChestSortOrder[] sortOrder = ChestSortOrder.values();
@@ -92,20 +102,22 @@ public class ChestSort implements Listener {
         for (ChestSortOrder item : sortOrder) {
             // Iterates through stacked chest contents
             for (ItemStack is : stackedItems) {
-                // If the iterated is the same sort list item
-                if (item.name().equals(is.getType().name())) {
-                    sortedItems.add(is);
-                }
-                // If not, see if iterated is in list of predefined sort items
-                else {
-                    try {
-						ChestSortOrder.valueOf(is.getType().name());
-                    } catch (IllegalArgumentException e) {
-                        if (!unsortedItems.contains(is)) {
-							unsortedItems.add(is);
+				if (is != null) {
+					// If the iterated is the same sort list item
+					if (item.name().equals(is.getType().name())) {
+						sortedItems.add(is);
+					}
+					// If not, see if iterated is in list of predefined sort items
+					else {
+						try {
+							ChestSortOrder.valueOf(is.getType().name());
+						} catch (IllegalArgumentException e) {
+							if (!unsortedItems.contains(is)) {
+								unsortedItems.add(is);
+							}
 						}
-                    }
-                }
+					}
+				}
             }
         }
 		// Adds all unsorted/non-defined items to the end of the list
