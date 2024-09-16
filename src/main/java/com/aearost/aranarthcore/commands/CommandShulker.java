@@ -27,6 +27,7 @@ public class CommandShulker {
                 player.sendMessage(ChatUtils.chatMessage("&7You are now adding items to shulkers"));
             }
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            return true;
         } else {
             sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
         }

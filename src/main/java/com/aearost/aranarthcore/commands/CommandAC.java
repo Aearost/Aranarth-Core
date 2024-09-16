@@ -28,9 +28,11 @@ public class CommandAC implements CommandExecutor {
 			boolean commandResult = false;
 			if (sender instanceof Player player) {
 				if (player.getName().equalsIgnoreCase("Aearost")) {
-					commandResult = isSenderOp(sender, args, commandResult);
+					commandResult = isSenderOp(sender, args);
+				} else {
+					commandResult = isValidCommand(sender, args);
 				}
-				commandResult = isValidCommand(sender, args, commandResult);
+
 				if (!commandResult) {
 					sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
 				}
@@ -39,18 +41,22 @@ public class CommandAC implements CommandExecutor {
 		}
 	}
 
-	private boolean isSenderOp(CommandSender sender, String[] args, boolean commandResult) {
+	private boolean isSenderOp(CommandSender sender, String[] args) {
+		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("whereis")) {
 			commandResult = CommandWhereIs.onCommand(sender, args);
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("itemname")) {
 			commandResult = CommandItemName.onCommand(sender, args);
 			commandResult = true;
+		} else {
+			commandResult = isValidCommand(sender, args);
 		}
 		return commandResult;
 	}
 
-	private boolean isValidCommand(CommandSender sender, String[] args, boolean commandResult) {
+	private boolean isValidCommand(CommandSender sender, String[] args) {
+		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("homepad")) {
 			commandResult = CommandHomePad.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("swimtoggle")) {
