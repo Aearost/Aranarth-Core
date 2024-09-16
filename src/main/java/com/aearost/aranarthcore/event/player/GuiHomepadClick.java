@@ -105,64 +105,64 @@ public class GuiHomepadClick implements Listener {
 					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 				}
 			} else {
-					if (isClickedHomepadGui) {
-						// If clicking a slot in the last row
-						if (slot >= 27) {
+				if (isClickedHomepadGui) {
+					// If clicking a slot in the last row
+					if (slot >= 27) {
+						e.setCancelled(true);
+						return;
+					}
+
+					List<Home> homes = AranarthUtils.getHomes();
+					Home home = null;
+					try {
+						home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
+					} catch (IndexOutOfBoundsException exception) {
+						e.setCancelled(true);
+					}
+
+					// Only proceed if the slot they click is actually a homepad
+					if (!Objects.isNull(home)) {
+
+						// If the user is trying to update the icon of a home
+						if (heldItem != Material.AIR) {
 							e.setCancelled(true);
-							return;
-						}
-						
-						List<Home> homes = AranarthUtils.getHomes();
-						Home home = null;
-						try {
-							home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
-						} catch (IndexOutOfBoundsException exception) {
-							e.setCancelled(true);
-						}
-						
-						// Only proceed if the slot they click is actually a homepad
-						if (!Objects.isNull(home)) {
-							
-							// If the user is trying to update the icon of a home
-							if (heldItem != Material.AIR) {
-								e.setCancelled(true);
-								if (heldItem == home.getIcon()) {
-									player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
-								} else {
-									AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
-									player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
-								}
+							if (heldItem == home.getIcon()) {
+								player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
 							} else {
-								if (player.isInsideVehicle()) {
-									Entity mount = player.getVehicle();
-									if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
-										player.leaveVehicle();
-										mount.teleport(home.getLocation());
-										player.teleport(home.getLocation());
-										Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
-										Thread.sleep(20);
-										player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
-										player.sendMessage(ChatUtils
-												.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-										mount.addPassenger(player);
-									}
-								} else {
+								AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
+								player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+							}
+						} else {
+							if (player.isInsideVehicle()) {
+								Entity mount = player.getVehicle();
+								if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+									player.leaveVehicle();
+									mount.teleport(home.getLocation());
 									player.teleport(home.getLocation());
 									Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
 									Thread.sleep(20);
+									player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 									player.sendMessage(ChatUtils
 											.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-									player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
+									mount.addPassenger(player);
 								}
+							} else {
+								player.teleport(home.getLocation());
+								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+								Thread.sleep(20);
+								player.sendMessage(ChatUtils
+										.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+								player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 							}
-							player.closeInventory();
-						} else {
-							e.setCancelled(true);
 						}
+						player.closeInventory();
+					} else {
+						e.setCancelled(true);
 					}
-					
 				}
+					
 			}
 		}
+	}
 
 }
