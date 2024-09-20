@@ -193,6 +193,8 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeMushroomStem(this);
 		new RecipeGlowstoneUncraft(this);
 		new RecipeStick(this);
+		new RecipeMossBlock(this);
+		new RecipeMossCarpet(this);
 	}
 
 	/**
