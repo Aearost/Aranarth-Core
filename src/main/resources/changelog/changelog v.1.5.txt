@@ -8,6 +8,7 @@ Features
 [+] Added /ac nick gradient (and gradientbold) to allow gradient nickname support
 [~] Changed the sound effect when teleporting on a homepad
 [-] Removed Bewitched Minecart as it is no longer needed as of 1.21.2
+[+] Added recipe for crafting and uncrafting moss blocks
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
