@@ -31,14 +31,9 @@ public class PlayerTeleportBetweenWorlds implements Listener {
 			String currentWorld = e.getFrom().getWorld().getName();
 			String destinationWorld = e.getTo().getWorld().getName();
 			if (!currentWorld.equals(destinationWorld)) {
-				Bukkit.getLogger().info("Uh oh: " + currentWorld + " | " + destinationWorld);
 				GameMode newMode = GameMode.SURVIVAL;
 				if (destinationWorld.equalsIgnoreCase("creative")) {
 					newMode = GameMode.CREATIVE;
-				}
-
-				if (currentWorld.equals("arena") && destinationWorld.equals("world")) {
-					Bukkit.getLogger().info("CAUSE: " + e.getCause().name());
 				}
 
 				try {
