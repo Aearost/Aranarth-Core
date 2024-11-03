@@ -38,8 +38,8 @@ public class CommandPing {
 				}
 			}
             sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+			return true;
         }
-		return false;
 	}
 
 }
