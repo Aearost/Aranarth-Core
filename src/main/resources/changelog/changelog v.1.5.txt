@@ -16,6 +16,7 @@ Bug Fixes
 - Wandering traders spawning will no longer cause errors if player is not in survival
 - Can no longer open enderchests in creative mode as the inventories are synced to survival
 - Items and exp are no longer dropped in the arena world when killed
+- Fixed issues relating to /ac root command showing error message when not valid
 
 Miscellaneous
 - Restructured event directory to have sub-directories

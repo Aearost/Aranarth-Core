@@ -90,9 +90,9 @@ public class CommandPotions {
                         }
                     }
                     case "add" -> {
-
                         GuiPotions gui = new GuiPotions(player);
                         gui.openGui();
+						return true;
                     }
                     case "remove" -> {
                         // Check next sub-commands to ensure valid syntax
