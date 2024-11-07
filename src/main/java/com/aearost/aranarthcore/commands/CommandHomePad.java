@@ -64,7 +64,7 @@ public class CommandHomePad {
                                         homeName.append(args[i]).append(" ");
                                     }
                                 }
-                                if (homeName.toString().matches("^[^'\"\n\r\t]+$")) {
+                                if (homeName.toString().matches("^[^\"\n\r\t]+$")) {
                                     Location locationDirection = player.getLocation();
                                     locationDirection.setX(locationDirection.getBlockX() + 0.5);
                                     locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
@@ -72,19 +72,18 @@ public class CommandHomePad {
                                             Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
                                     player.sendMessage(
                                             ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
-                                    return true;
                                 } else {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot use the \" character!"));
-                                    return false;
                                 }
+                                return true;
                             } else {
                                 player.sendMessage(ChatUtils.chatMessage("&cYou cannot rename a homepad!"));
-                                return false;
+                                return true;
                             }
                         } else {
                             player.sendMessage(
                                     ChatUtils.chatMessage("&cYou must be standing on a Home Pad to use this command!"));
-                            return false;
+                            return true;
                         }
                     }
                     case "reorder" -> {
