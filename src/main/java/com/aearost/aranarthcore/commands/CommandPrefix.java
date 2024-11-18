@@ -21,7 +21,7 @@ public class CommandPrefix {
 
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac prefix [player] <prefix>"));
-			return false;
+			return true;
 		} else {
 			if (args.length == 2) {
 				if (sender instanceof Player player) {
@@ -38,7 +38,7 @@ public class CommandPrefix {
 					return true;
 				} else {
 					sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac prefix [player] <prefix>"));
-					return false;
+					return true;
 				}
 			} else {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
@@ -85,9 +85,7 @@ public class CommandPrefix {
 				}
 				
 				sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
-				return false;
-				
-				
+				return true;
 			}
 		}
 	}

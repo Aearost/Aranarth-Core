@@ -30,11 +30,16 @@ public class CommandHomePad {
 		if (sender instanceof Player player) {
             if (args.length == 1) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must enter parameters!"));
-				return false;
+				return true;
 			} else {
                 switch (args[1]) {
                     case "give" -> {
                         if (args.length > 2) {
+                            if (!player.getName().equals("Aearost")) {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+                                return true;
+                            }
+
                             Player playerInArg = null;
                             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                 if (onlinePlayer.getName().equalsIgnoreCase(args[2])) {
@@ -130,7 +135,7 @@ public class CommandHomePad {
                     }
                     default -> {
                         player.sendMessage(ChatUtils.chatMessage("&cThat is not a valid parameter!"));
-                        return false;
+                        return true;
                     }
                 }
 			}
