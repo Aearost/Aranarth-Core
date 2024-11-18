@@ -171,7 +171,6 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCobweb(this);
 		new RecipeWoolUncraft(this);
 		new RecipeCalcite(this);
-		new RecipeBundle(this);
 		new RecipeDripstone(this);
 		new RecipeSugarcaneBlockCraft(this);
 		new RecipeSugarcaneBlockUncraft(this);

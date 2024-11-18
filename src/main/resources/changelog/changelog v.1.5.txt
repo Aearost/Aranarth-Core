@@ -9,6 +9,7 @@ Features
 [~] Changed the sound effect when teleporting on a homepad
 [-] Removed Bewitched Minecart as it is no longer needed as of 1.21.2
 [+] Added recipe for crafting and uncrafting moss blocks
+[-] Removed recipe for bundle as it is generic as of 1.21.2
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
