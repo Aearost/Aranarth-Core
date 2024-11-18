@@ -26,13 +26,13 @@ public class CommandPotions {
 		if (sender instanceof Player player) {
 			if (!player.getLocation().getWorld().getName().startsWith("world")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
-				return false;
+				return true;
 			}
 
             if (args.length == 1) {
 				player.sendMessage(
 						ChatUtils.chatMessage("&cYou must specify a sub-command! /ac potion <sub-command>"));
-				return false;
+				return true;
 			} else {
                 switch (args[1]) {
                     case "list" -> {
@@ -42,7 +42,7 @@ public class CommandPotions {
                             List<ItemStack> potions = aranarthPlayer.getPotions();
                             if (potions.isEmpty()) {
                                 player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
-                                return false;
+                                return true;
                             }
 
                             // Counts how many of each potion there is
@@ -107,6 +107,7 @@ public class CommandPotions {
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+			return true;
 		}
 		return false;
 	}
