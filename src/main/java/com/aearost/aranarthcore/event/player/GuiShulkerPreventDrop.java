@@ -26,11 +26,7 @@ public class GuiShulkerPreventDrop implements Listener {
 	public void onShulkerDrop(final InventoryClickEvent e) {
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker") && e.getView().getType() == InventoryType.CHEST) {
 			Inventory inventory = e.getInventory();
-            if (e.getSlot() == e.getWhoClicked().getInventory().getHeldItemSlot()) {
-				e.setCancelled(true);
-			}
-			// Prevents adding a shulker box to a shulker box
-			else if (e.getCurrentItem() != null) {
+            if (e.getCurrentItem() != null) {
 				ItemMeta meta = e.getCurrentItem().hasItemMeta() ? e.getCurrentItem().getItemMeta() : Bukkit.getItemFactory().getItemMeta(e.getCurrentItem().getType());
 				if (meta instanceof BlockStateMeta im) {
 					if (im.getBlockState() instanceof ShulkerBox) {
