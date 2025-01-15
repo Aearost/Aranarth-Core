@@ -28,13 +28,13 @@ public class GuiShulkerPreventDrop implements Listener {
 			Inventory inventory = e.getInventory();
             if (e.getSlot() == e.getWhoClicked().getInventory().getHeldItemSlot()) {
 				e.setCancelled(true);
-			} else if (e.getCurrentItem() != null) {
-				if (e.getCurrentItem().hasItemMeta()) {
-					ItemMeta meta = e.getCurrentItem().getItemMeta();
-					if (meta instanceof BlockStateMeta im) {
-						if (im.getBlockState() instanceof ShulkerBox) {
-							e.setCancelled(true);
-						}
+			}
+			// Prevents adding a shulker box to a shulker box
+			else if (e.getCurrentItem() != null) {
+				ItemMeta meta = e.getCurrentItem().hasItemMeta() ? e.getCurrentItem().getItemMeta() : Bukkit.getItemFactory().getItemMeta(e.getCurrentItem().getType());
+				if (meta instanceof BlockStateMeta im) {
+					if (im.getBlockState() instanceof ShulkerBox) {
+						e.setCancelled(true);
 					}
 				}
 			}
