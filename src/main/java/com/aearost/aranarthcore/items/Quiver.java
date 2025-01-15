@@ -17,7 +17,7 @@ public class Quiver {
 	 * @return The Quiver.
 	 */
 	public static ItemStack getQuiver() {
-		ItemStack quiver = new ItemStack(Material.BUNDLE, 1);
+		ItemStack quiver = new ItemStack(Material.LIGHT_GRAY_BUNDLE, 1);
 		ItemMeta meta = quiver.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
@@ -35,7 +35,7 @@ public class Quiver {
 	}
 	
 	public static String getLore() {
-		return "&eNot a bundle!";
+		return "&eStore your arrows!";
 	}
 	
 }

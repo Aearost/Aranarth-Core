@@ -142,6 +142,9 @@ public class AranarthCore extends JavaPlugin {
 		new NonSurvivalDeathRespawn(this);
 		new EnderChestPlacePrevent(this);
 		new ArenaPlayerKill(this);
+		new ShulkerClick(this);
+		new GuiShulkerClose(this);
+		new GuiShulkerPreventDrop(this);
 	}
 
 	/**

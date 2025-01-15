@@ -54,7 +54,7 @@ public class MountSpawn implements Listener {
 				healthMax = 60;
 			}
 			final int healthValue = r.nextInt((healthMax - healthMin) + 1) + healthMin;
-			horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(healthValue);
+			horse.getAttribute(Attribute.MAX_HEALTH).setBaseValue(healthValue);
 			
 			// A maximum limit of 8 blocks of jump --> 1.28
 			// A minimum limit of 2 blocks of jump --> 0.57
@@ -72,7 +72,7 @@ public class MountSpawn implements Listener {
 				jumpMax = 1.28;
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
-			horse.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(jumpValue);
+			horse.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(jumpValue);
 			
 			// A maximum limit of 25 m/s --> 0.592417062
 			// A minimum limit of 8 m/s --> 0.19
@@ -90,13 +90,13 @@ public class MountSpawn implements Listener {
 				speedMax = 0.592417062;
 			}
 			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
-			horse.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(speedValue);
+			horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
 			
 			// Without this, skeleton horses and zombie horses will not be rideable
 			// and will spawn with very low health
 			if (horse instanceof SkeletonHorse || horse instanceof ZombieHorse) {
 				horse.setTamed(true);
-				horse.setHealth(horse.getAttribute(Attribute.GENERIC_MAX_HEALTH).getValue());
+				horse.setHealth(horse.getAttribute(Attribute.MAX_HEALTH).getValue());
 			}
 		} else if (e.getEntity() instanceof Camel camel) {
             Random r = new Random();
@@ -117,7 +117,7 @@ public class MountSpawn implements Listener {
 				healthMax = 80;
 			}
 			final int healthValue = r.nextInt((healthMax - healthMin) + 1) + healthMin;
-			camel.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(healthValue);
+			camel.getAttribute(Attribute.MAX_HEALTH).setBaseValue(healthValue);
 			
 			// A maximum limit of 4.5 blocks of jump --> 0.909
 			// A minimum limit of 1 blocks of jump --> 0.382
@@ -135,7 +135,7 @@ public class MountSpawn implements Listener {
 				jumpMax = 0.909;
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
-			camel.getAttribute(Attribute.GENERIC_JUMP_STRENGTH).setBaseValue(jumpValue);
+			camel.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(jumpValue);
 			
 			// A maximum limit of 18 m/s --> 0.428
 			// A minimum limit of 8 m/s --> 0.19
@@ -153,7 +153,7 @@ public class MountSpawn implements Listener {
 				speedMax = 0.428;
 			}
 			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
-			camel.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(speedValue);
+			camel.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
 		}
 		
 	}
