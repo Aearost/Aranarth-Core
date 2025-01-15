@@ -1,6 +1,7 @@
 AranarthCore v. 1.5
 
 Features
+[+] Added feature to open shulker by right-clicking air when held
 [+] Chests can now be sorted by holding sneak and left-clicking
 [+] Player health is now restored when killing another player in the arena world
 [+] Added /ac shulker to toggle shulker item pickup functionality
@@ -10,6 +11,7 @@ Features
 [-] Removed Bewitched Minecart as it is no longer needed as of 1.21.2
 [+] Added recipe for crafting and uncrafting moss blocks
 [-] Removed recipe for bundle as it is generic as of 1.21.2
+[~] Made Quivers the Light Gray Bundle variant
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
@@ -27,3 +29,5 @@ Miscellaneous
 - Can now manually specify which players get Blue Firebending
 - Removed redundant plugin.yml
 - Added separation to Aearost and other players for command visibility
+- Adjusted horse attributes with 1.21.4 changes
+- Corrected javadocs for QuiverClick

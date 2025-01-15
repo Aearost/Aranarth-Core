@@ -42,10 +42,10 @@ public class QuiverPreventAddToBundle implements Listener {
 				return;
 			}
 			
-			if (cursorItem.getType() == Material.BUNDLE) {
+			if (cursorItem.getType() == Material.LIGHT_GRAY_BUNDLE) {
 				if (Objects.nonNull(cursorItem.getItemMeta()) && cursorItem.getItemMeta().hasLore()) {
 					e.setCancelled(true);
-				} else if (clickedItem.getType() == Material.BUNDLE) {
+				} else if (clickedItem.getType() == Material.LIGHT_GRAY_BUNDLE) {
 					e.setCancelled(true);
 				}
 			}

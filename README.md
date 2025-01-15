@@ -13,6 +13,7 @@ The plugin contains many diverse features such as:
 - Reduced mob grieving
 - Many custom recipes for items that previously were un-craftable
 - Items are automatically picked up into shulker boxes that contain them
+- Automatic chest sorting
 - Much more!
 
 The plugin has been developed specifically for how we would like to use it, therefore there are multiple values that have been hardcoded in.

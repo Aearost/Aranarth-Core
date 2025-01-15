@@ -66,7 +66,7 @@ public class ArrowConsume implements Listener {
 			if (Objects.isNull(item)) {
 				continue;
 			}
-			if (item.getType() == Material.BUNDLE) {
+			if (item.getType() == Material.LIGHT_GRAY_BUNDLE) {
 				if (item.hasItemMeta()) {
 					hasQuiver = true;
 				}
