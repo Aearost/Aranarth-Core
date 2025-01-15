@@ -1,7 +1,7 @@
 AranarthCore v. 1.5
 
 Features
-[+] Added feature to open shulker by right-clicking air when held
+[+] Added feature to open shulker by right-clicking and sneaking when held in main hand
 [+] Chests can now be sorted by holding sneak and left-clicking
 [+] Player health is now restored when killing another player in the arena world
 [+] Added /ac shulker to toggle shulker item pickup functionality
