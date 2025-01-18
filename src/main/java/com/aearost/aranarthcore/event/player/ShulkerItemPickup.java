@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -56,6 +57,11 @@ public class ShulkerItemPickup implements Listener {
 					if (is.getItemMeta() instanceof BlockStateMeta im) {
                         if (im.getBlockState() instanceof ShulkerBox shulker) {
 							if (!aranarthPlayer.getIsAddingToShulker()) {
+								return;
+							}
+
+							if ((player.getOpenInventory().getTitle()).equals("Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
+								e.setCancelled(true);
 								return;
 							}
 
