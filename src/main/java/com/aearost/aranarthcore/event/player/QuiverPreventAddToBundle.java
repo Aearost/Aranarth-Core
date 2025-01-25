@@ -5,7 +5,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,26 +27,20 @@ public class QuiverPreventAddToBundle implements Listener {
 			return;
 		}
 
-		// If adding a new item to the blacklist
-		if (e.getClick() == ClickType.RIGHT || e.getClick() == ClickType.SHIFT_RIGHT
-				|| e.getClick() == ClickType.CREATIVE) {
-			ItemStack cursorItem = e.getCursor();
-			ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-			if (Objects.isNull(clickedItem)) {
-				return;
+		ItemStack cursorItem = e.getCursor();
+		ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
+		if (Objects.isNull(clickedItem)) {
+			return;
+		}
+
+		if (cursorItem.getType() == Material.LIGHT_GRAY_BUNDLE) {
+			if (Objects.nonNull(cursorItem.getItemMeta()) && cursorItem.getItemMeta().hasLore()) {
+				e.setCancelled(true);
 			}
-			
-			ItemStack currentItem = e.getCurrentItem();
-			if (Objects.isNull(currentItem)) {
-				return;
-			}
-			
-			if (cursorItem.getType() == Material.LIGHT_GRAY_BUNDLE) {
-				if (Objects.nonNull(cursorItem.getItemMeta()) && cursorItem.getItemMeta().hasLore()) {
-					e.setCancelled(true);
-				} else if (clickedItem.getType() == Material.LIGHT_GRAY_BUNDLE) {
-					e.setCancelled(true);
-				}
+		} else if (clickedItem.getType() == Material.LIGHT_GRAY_BUNDLE
+				&& cursorItem.getType() != Material.AIR) {
+			if (Objects.nonNull(clickedItem.getItemMeta()) && clickedItem.getItemMeta().hasLore()) {
+				e.setCancelled(true);
 			}
 		}
 	}
