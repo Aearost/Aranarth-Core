@@ -67,12 +67,30 @@ public class InvisibleItemFrameInteract implements Listener {
 		if (e.getEntity().getType() == EntityType.ITEM_FRAME) {
 			Location placedLocation = e.getBlock().getLocation();
 			BlockFace placedFace = e.getBlockFace();
-			
-			if (placedLocation.equals(this.locationToPlace) && placedFace == this.faceToPlace) {
-				this.locationToPlace = null;
-				this.faceToPlace = null;
-				e.getEntity().getPersistentDataContainer().set(InvisibleItemFrame.IS_INVISIBLE, PersistentDataType.BYTE, (byte) 1);
+
+			if (placedFace == this.faceToPlace) {
+				if (placedFace == BlockFace.UP) {
+					this.locationToPlace.setY(this.locationToPlace.getY() + 1);
+				} else if (placedFace == BlockFace.DOWN) {
+					this.locationToPlace.setY(this.locationToPlace.getY() - 1);
+				} else if (placedFace == BlockFace.EAST) {
+					this.locationToPlace.setX(this.locationToPlace.getX() + 1);
+				} else if (placedFace == BlockFace.WEST) {
+					this.locationToPlace.setX(this.locationToPlace.getX() - 1);
+				} else if (placedFace == BlockFace.SOUTH) {
+					this.locationToPlace.setZ(this.locationToPlace.getZ() + 1);
+				} else if (placedFace == BlockFace.NORTH) {
+					this.locationToPlace.setZ(this.locationToPlace.getZ() - 1);
+				}
+
+				if (placedLocation.equals(this.locationToPlace)) {
+					this.locationToPlace = null;
+					this.faceToPlace = null;
+					e.getEntity().getPersistentDataContainer().set(InvisibleItemFrame.IS_INVISIBLE, PersistentDataType.BYTE, (byte) 1);
+				}
 			}
+
+
 		}
 	}
 	
