@@ -21,6 +21,7 @@ Bug Fixes
 - Items and exp are no longer dropped in the arena world when killed
 - Fixed issues relating to /ac root command showing error message when not valid
 - Fixed issue where invisible item frames were not able to be created due to issue with faces
+- Fixed issue where quiver was able to have items put in it
 
 Miscellaneous
 - Restructured event directory to have sub-directories
