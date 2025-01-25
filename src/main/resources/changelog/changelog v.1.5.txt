@@ -20,6 +20,7 @@ Bug Fixes
 - Can no longer open enderchests in creative mode as the inventories are synced to survival
 - Items and exp are no longer dropped in the arena world when killed
 - Fixed issues relating to /ac root command showing error message when not valid
+- Fixed issue where invisible item frames were not able to be created due to issue with faces
 
 Miscellaneous
 - Restructured event directory to have sub-directories
