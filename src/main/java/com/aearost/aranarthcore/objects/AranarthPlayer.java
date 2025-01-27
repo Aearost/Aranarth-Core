@@ -27,7 +27,6 @@ public class AranarthPlayer {
 	private float expBeforeDeath;
 	private int levelBeforeDeath;
 	private boolean isAddingToShulker;
-	private boolean isAddingToQuiver;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -335,20 +334,5 @@ public class AranarthPlayer {
 	 */
 	public void setIsAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
-	}
-	/**
-	 * Temporary variable tracking if the player is actively adding to their Quiver.
-	 * @return Whether the player is adding to their Quiver.
-	 */
-	public boolean getIsAddingToQuiver() {
-		return isAddingToQuiver;
-	}
-
-	/**
-	 * Setting the temporary variable tracking whether the player is adding to their Quiver.
-	 * @param isAddingToQuiver Whether the player is adding to their Quiver.
-	 */
-	public void setIsAddingToQuiver(boolean isAddingToQuiver) {
-		this.isAddingToQuiver = isAddingToQuiver;
 	}
 }

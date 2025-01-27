@@ -43,6 +43,7 @@ public class GuiQuiver {
 
 		List<ItemStack> initializedArrows = new ArrayList<>();
 		int guiSize = 0;
+		String guiName = "Quiver";
 
 		if (!arrows.isEmpty()) {
             for (ItemStack arrow : arrows) {
@@ -68,15 +69,18 @@ public class GuiQuiver {
 			if (guiSize % 9 != 0) {
 				guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
 			}
-			if (!player.isSneaking()) {
+
+			if (player.isSneaking()) {
+				guiName = "Arrow Selection";
+			} else {
 				guiSize = 45;
-				aranarthPlayer.setIsAddingToQuiver(true);
 			}
+
 			if (guiSize == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
 				return null;
 			}
-			gui = Bukkit.getServer().createInventory(player, guiSize, "Quiver");
+			gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
             for (ItemStack initializedArrow : initializedArrows) {
                 gui.addItem(initializedArrow);

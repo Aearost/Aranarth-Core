@@ -34,24 +34,20 @@ public class GuiQuiverClose implements Listener {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				
 				List<ItemStack> arrows = aranarthPlayer.getArrows();
+				List<ItemStack> inventoryArrows = new LinkedList<>(Arrays.asList(inventory.getContents()));
 
-				// Update inventory mode only
-				if (aranarthPlayer.getIsAddingToQuiver()) {
-					aranarthPlayer.setIsAddingToQuiver(false);
-					List<ItemStack> inventoryArrows = new LinkedList<>(Arrays.asList(inventory.getContents()));
-
-					if (Objects.isNull(arrows)) {
-						arrows = new ArrayList<>();
-					}
-
-					for (ItemStack inventoryArrow : inventoryArrows) {
-						if (Objects.nonNull(inventoryArrow)) {
-							arrows.add(inventoryArrow);
-						}
-					}
-					aranarthPlayer.setArrows(inventoryArrows);
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				if (Objects.isNull(arrows)) {
+					arrows = new ArrayList<>();
 				}
+
+				for (ItemStack inventoryArrow : inventoryArrows) {
+					if (Objects.nonNull(inventoryArrow)) {
+						arrows.add(inventoryArrow);
+					}
+				}
+				aranarthPlayer.setArrows(inventoryArrows);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
             }
 		}
 	}
