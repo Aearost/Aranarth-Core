@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -23,26 +24,65 @@ public class GuiQuiver {
 
 	public void openGui() {
 		player.closeInventory();
-		player.openInventory(initializedGui);
+		if (initializedGui != null) {
+			player.openInventory(initializedGui);
+		}
 	}
 	
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 45, "Quiver");
-		
+
+		Inventory gui = null;
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<ItemStack> arrows = aranarthPlayer.getArrows();
+		List<ItemStack> arrows = new ArrayList<>();
+		for (ItemStack is : aranarthPlayer.getArrows()) {
+			if (is != null) {
+				ItemStack clone = is.clone();
+				arrows.add(clone);
+			}
+		}
+
 		List<ItemStack> initializedArrows = new ArrayList<>();
-		
-		if (Objects.nonNull(arrows)) {
+		int guiSize = 0;
+
+		if (!arrows.isEmpty()) {
             for (ItemStack arrow : arrows) {
                 if (Objects.nonNull(arrow)) {
-					initializedArrows.add(arrow);
+
+					// Arrow selector
+					if (player.isSneaking()) {
+						arrow.setAmount(1);
+						if (!initializedArrows.contains(arrow)) {
+							initializedArrows.add(arrow);
+							guiSize++;
+						}
+					}
+
+					// Modify Quiver inventory
+					else {
+						initializedArrows.add(arrow);
+					}
                 }
             }
+			// Size is based on which method is used
+			// If the amount is a multiple of 9, use a full row
+			if (guiSize % 9 != 0) {
+				guiSize = ((int) (double) (guiSize / 9) + 1) * 9;
+			}
+			if (!player.isSneaking()) {
+				guiSize = 45;
+				aranarthPlayer.setIsAddingToQuiver(true);
+			}
+			if (guiSize == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
+				return null;
+			}
+			gui = Bukkit.getServer().createInventory(player, guiSize, "Quiver");
 
             for (ItemStack initializedArrow : initializedArrows) {
                 gui.addItem(initializedArrow);
             }
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
 		}
 		
 		return gui;

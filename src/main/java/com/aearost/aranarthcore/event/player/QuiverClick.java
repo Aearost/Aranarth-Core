@@ -30,6 +30,7 @@ public class QuiverClick implements Listener {
 				if (e.getItem().getType() == Material.LIGHT_GRAY_BUNDLE) {
 					if (Objects.nonNull(e.getItem().getItemMeta()) && e.getItem().getItemMeta().hasLore()) {
 						if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+							e.setCancelled(true);
 							GuiQuiver gui = new GuiQuiver(e.getPlayer());
 							gui.openGui();
 						} else {
