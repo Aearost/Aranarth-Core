@@ -33,7 +33,7 @@ public class GuiPotionPreventNonPotionAdd implements Listener {
 			}
 			
 			// If adding a new item to the potions inventory
-			if (e.getClickedInventory().getSize() == 41) {
+			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
 				if (Objects.isNull(clickedItem)) {
