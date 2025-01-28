@@ -12,9 +12,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
 
-public class GuiQuiverPreventNonArrowAdd implements Listener {
+public class GuiQuiverClick implements Listener {
 
-	public GuiQuiverPreventNonArrowAdd(AranarthCore plugin) {
+	public GuiQuiverClick(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -31,7 +31,7 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 			}
 			
 			// If adding a new item to the arrows inventory
-			if (e.getClickedInventory().getSize() == 41) {
+			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
 				if (Objects.isNull(clickedItem)) {
@@ -45,6 +45,16 @@ public class GuiQuiverPreventNonArrowAdd implements Listener {
 				if (!isItemArrow(clickedItem)) {
 					e.setCancelled(true);
 				}
+			}
+		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection") && e.getView().getType() == InventoryType.CHEST) {
+			// If the user did not click a slot
+			if (e.getClickedInventory() == null) {
+				return;
+			}
+
+			e.setCancelled(true);
+			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+				// Handle logic to switch slots within inventory if contains that kind of arrow
 			}
 		}
 	}
