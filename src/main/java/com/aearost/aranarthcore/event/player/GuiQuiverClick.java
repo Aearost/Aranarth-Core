@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -91,6 +92,7 @@ public class GuiQuiverClick implements Listener {
 														String newName = arrowName.substring(0, 1).toUpperCase();
 														newName = newName + arrowName.substring(1);
 														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newName + " &7arrows"));
+														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													} else {
 														StringBuilder newNameSB = new StringBuilder();
 														String[] splitArrowName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name()).split(" ");
@@ -106,13 +108,16 @@ public class GuiQuiverClick implements Listener {
 															}
 														}
 														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newNameSB + " &7arrows"));
+														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 													}
 												}
 											} else {
 												if (stackFromQuiver.getType() == Material.ARROW) {
 													player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
+													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												} else if (stackFromQuiver.getType() == Material.SPECTRAL_ARROW) {
 													player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
+													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												} else {
 													player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong!"));
 												}
