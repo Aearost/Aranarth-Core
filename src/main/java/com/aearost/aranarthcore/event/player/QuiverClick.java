@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiQuiver;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +28,7 @@ public class QuiverClick implements Listener {
 			if (Objects.nonNull(e.getItem())) {
 				if (e.getItem().getType() == Material.LIGHT_GRAY_BUNDLE) {
 					if (Objects.nonNull(e.getItem().getItemMeta()) && e.getItem().getItemMeta().hasLore()) {
-						if (e.getPlayer().getGameMode() == GameMode.SURVIVAL) {
+						if (e.getPlayer().getWorld().getName().equals("world")) {
 							e.setCancelled(true);
 							GuiQuiver gui = new GuiQuiver(e.getPlayer());
 							gui.openGui();
