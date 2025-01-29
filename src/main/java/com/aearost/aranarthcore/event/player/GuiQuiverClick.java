@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 
 import java.util.List;
 import java.util.Objects;
@@ -82,7 +83,40 @@ public class GuiQuiverClick implements Listener {
 											// Updates inventory stack with what's in the quiver
 											player.getInventory().setItem(i, stackFromQuiver);
 
-											player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + ChatUtils.getFormattedItemName(stackFromQuiver.getType().name()) + " &7arrows"));
+											if (stackFromQuiver.hasItemMeta()) {
+												if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
+													// If mcMMO arrow
+													if (meta.hasCustomEffects()) {
+														String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
+														String newName = arrowName.substring(0, 1).toUpperCase();
+														newName = newName + arrowName.substring(1);
+														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newName + " &7arrows"));
+													} else {
+														StringBuilder newNameSB = new StringBuilder();
+														String[] splitArrowName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name()).split(" ");
+														for (int k = 0; k < splitArrowName.length; k++) {
+															if (splitArrowName[k].equals("Long") || splitArrowName[k].equals("Strong")) {
+																continue;
+															}
+															newNameSB.append(splitArrowName[k]);
+															if (k == splitArrowName.length - 1) {
+																break;
+															} else {
+																newNameSB.append(" ");
+															}
+														}
+														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newNameSB + " &7arrows"));
+													}
+												}
+											} else {
+												if (stackFromQuiver.getType() == Material.ARROW) {
+													player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
+												} else if (stackFromQuiver.getType() == Material.SPECTRAL_ARROW) {
+													player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
+												} else {
+													player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong!"));
+												}
+											}
 											break;
 										}
 									}
