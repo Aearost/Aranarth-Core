@@ -12,6 +12,7 @@ Features
 [+] Added recipe for crafting and uncrafting moss blocks
 [-] Removed recipe for bundle as it is generic as of 1.21.2
 [~] Made Quivers the Light Gray Bundle variant
+[+] Added arrow-switching functionality in Quivers by holding sneak and right-clicking
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
@@ -33,3 +34,4 @@ Miscellaneous
 - Added separation to Aearost and other players for command visibility
 - Adjusted horse attributes with 1.21.4 changes
 - Corrected javadocs for QuiverClick
+- Corrections made to allow search of clicked inventory based on GUI type rather than slot amount
