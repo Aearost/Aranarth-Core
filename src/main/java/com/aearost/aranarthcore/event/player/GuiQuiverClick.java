@@ -1,15 +1,19 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Objects;
 
 public class GuiQuiverClick implements Listener {
@@ -52,9 +56,46 @@ public class GuiQuiverClick implements Listener {
 				return;
 			}
 
+			// Prevent inventory updates
 			e.setCancelled(true);
+
+			// Handles logic to switch slots if inventory contains that kind of arrow
 			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
-				// Handle logic to switch slots within inventory if contains that kind of arrow
+				if (e.getWhoClicked() instanceof Player player) {
+					ItemStack[] playerInventory = player.getInventory().getContents();
+					for (int i = 0; i < playerInventory.length; i++) {
+						if (playerInventory[i] != null) {
+							// Gets the first arrow in the player's inventory
+							if (isItemArrow(playerInventory[i])) {
+								ItemStack selectedArrow = e.getCurrentItem();
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+								List<ItemStack> playerArrows = aranarthPlayer.getArrows();
+
+								for (int j = 0; j < playerArrows.size(); j++) {
+									if (selectedArrow != null && playerArrows.get(j) != null) {
+
+										// Finds first stack in quiver matching what was clicked
+										if (playerArrows.get(j).isSimilar(selectedArrow)) {
+											ItemStack stackFromQuiver = playerArrows.get(j).clone();
+											// Updates quiver stack with what's in inventory
+											playerArrows.set(j, playerInventory[i]);
+											// Updates inventory stack with what's in the quiver
+											player.getInventory().setItem(i, stackFromQuiver);
+
+											player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + ChatUtils.getFormattedItemName(stackFromQuiver.getType().name()) + " &7arrows"));
+											break;
+										}
+									}
+								}
+								player.closeInventory();
+								return;
+							}
+						}
+					}
+					player.sendMessage(ChatUtils.chatMessage("&cYou must have an arrow in your inventory to do this!"));
+					player.closeInventory();
+				}
+
 			}
 		}
 	}

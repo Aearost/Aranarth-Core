@@ -72,21 +72,27 @@ public class GuiQuiver {
 
 			if (player.isSneaking()) {
 				guiName = "Arrow Selection";
+				if (guiSize == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
+					return null;
+				}
 			} else {
 				guiSize = 45;
 			}
 
-			if (guiSize == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
-				return null;
-			}
 			gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
             for (ItemStack initializedArrow : initializedArrows) {
                 gui.addItem(initializedArrow);
             }
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cYou do not have any arrows in your Quiver!"));
+			guiSize = 45;
+			if (!player.isSneaking()) {
+				gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou must add arrows to your Quiver!"));
+				return null;
+			}
 		}
 		
 		return gui;
