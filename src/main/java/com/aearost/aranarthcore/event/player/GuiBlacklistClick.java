@@ -43,7 +43,7 @@ public class GuiBlacklistClick implements Listener {
 			}
 			
 			// If adding a new item to the blacklist
-			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				if (Objects.isNull(clickedItem)) {
 					return;
