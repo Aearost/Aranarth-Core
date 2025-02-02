@@ -14,6 +14,7 @@ Features
 [~] Made Quivers the Light Gray Bundle variant
 [+] Added arrow-switching functionality in Quivers by holding sneak and right-clicking
 [+] Added /ac randomizer to randomize block placement based on specified percentages
+[+] Added automatic stack replenishment functionality
 [~] Changed blacklist remove message
 
 Bug Fixes
