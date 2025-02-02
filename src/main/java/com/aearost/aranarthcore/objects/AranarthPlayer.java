@@ -27,6 +27,7 @@ public class AranarthPlayer {
 	private float expBeforeDeath;
 	private int levelBeforeDeath;
 	private boolean isAddingToShulker;
+	private List<RandomItem> randomItems;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -44,6 +45,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
+		this.randomItems = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems) {
@@ -62,6 +64,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
+		this.randomItems = null;
 	}
 
 	/**
@@ -334,5 +337,13 @@ public class AranarthPlayer {
 	 */
 	public void setIsAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
+	}
+
+	public List<RandomItem> getRandomItems() {
+		return randomItems;
+	}
+
+	public void setRandomItems(List<RandomItem> randomItems) {
+		this.randomItems = randomItems;
 	}
 }
