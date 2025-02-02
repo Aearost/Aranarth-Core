@@ -109,6 +109,8 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("prefix".startsWith(args[0])) {
 				displayedOptions.add("prefix");
 			}
+		} else if (!args[0].isEmpty() && "randomizer".startsWith(args[0])) {
+			displayedOptions.add("randomizer");
 		}
 		return displayedOptions;
 	}
@@ -142,6 +144,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("blacklist");
 		displayedOptions.add("potions");
 		displayedOptions.add("shulker");
+		displayedOptions.add("randomizer");
 		return displayedOptions;
 	}
 
@@ -208,6 +211,11 @@ public class CommandACCompleter implements TabCompleter {
 				} else {
 					displayedOptions.add("add");
 					displayedOptions.add("list");
+				}
+			}
+			case "randomizer" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("pattern");
 				}
 			}
 		}
