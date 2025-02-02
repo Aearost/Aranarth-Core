@@ -7,7 +7,7 @@ public class RandomItem {
     private ItemStack item;
     private int percentage;
 
-    public RandomItem(ItemStack item, int percentage) {
+    public RandomItem(int percentage, ItemStack item) {
         this.item = item;
         this.percentage = percentage;
     }
