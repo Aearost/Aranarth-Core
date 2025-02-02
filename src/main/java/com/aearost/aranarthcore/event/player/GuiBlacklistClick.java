@@ -73,7 +73,7 @@ public class GuiBlacklistClick implements Listener {
 				}
 				ItemStack blacklistedItem = blacklistedItems.get(e.getSlot());
 				if (Objects.nonNull(blacklistedItem)) {
-					player.sendMessage(ChatUtils.chatMessage("&e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) + " &7is no longer blacklisted"));
+					player.sendMessage(ChatUtils.chatMessage("&7You are no longer blacklisting &e" + ChatUtils.getFormattedItemName(blacklistedItem.getType().name()) ));
 					player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 0.8F);
 					blacklistedItems.remove(e.getSlot());
 					aranarthPlayer.setBlacklist(blacklistedItems);

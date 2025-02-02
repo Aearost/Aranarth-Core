@@ -28,7 +28,8 @@ public class AranarthPlayer {
 	private int levelBeforeDeath;
 	private boolean isAddingToShulker;
 	private List<RandomItem> randomItems;
-	private boolean isRandomizerToggled;
+	private boolean isRandomizing;
+	private boolean isMissingItemMessageSent;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -47,7 +48,8 @@ public class AranarthPlayer {
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = null;
-		this.isRandomizerToggled = false;
+		this.isRandomizing = false;
+		this.isMissingItemMessageSent = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems) {
@@ -67,7 +69,8 @@ public class AranarthPlayer {
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = null;
-		this.isRandomizerToggled = false;
+		this.isRandomizing = false;
+		this.isMissingItemMessageSent = false;
 	}
 
 	/**
@@ -342,19 +345,52 @@ public class AranarthPlayer {
 		this.isAddingToShulker = isAddingToShulker;
 	}
 
+	/**
+	 * Temporary variable tracking the items and percentages the player is randomizing.
+	 * @return The list of items and percentages the player is randomizing.
+	 */
 	public List<RandomItem> getRandomItems() {
 		return randomItems;
 	}
 
+	/**
+	 * Setting the list of items and percentages the player is randomizing.
+	 * @param randomItems The list of items and percentages the player will randomize.
+	 */
 	public void setRandomItems(List<RandomItem> randomItems) {
 		this.randomItems = randomItems;
 	}
 
-	public boolean getIsRandomizerToggled() {
-		return isRandomizerToggled;
+	/**
+	 * Temporary variable tracking if the player is actively randomizing items.
+	 * @return Whether the player is randomizing items.
+	 */
+	public boolean getIsRandomizing() {
+		return isRandomizing;
 	}
 
-	public void setIsRandomizerToggled(boolean isRandomizerToggled) {
-		this.isRandomizerToggled = isRandomizerToggled;
+	/**
+	 * Setting the temporary variable tracking whether the player is randomizing items.
+	 * @param isRandomizing Whether the player is randomizing items.
+	 */
+	public void setIsRandomizing(boolean isRandomizing) {
+		this.isRandomizing = isRandomizing;
 	}
+
+	/**
+	 * Temporary variable tracking if the player is missing items from the randomizer pattern.
+	 * @return Whether the player is missing items from the randomizer pattern.
+	 */
+	public boolean getIsMissingItemMessageSent() {
+		return isMissingItemMessageSent;
+	}
+
+	/**
+	 * Setting the temporary variable tracking whether the player is missing items from the randomizer pattern.
+	 * @param isMissingItemMessageSent Whether the player is missing items from the randomizer pattern.
+	 */
+	public void setIsMissingItemMessageSent(boolean isMissingItemMessageSent) {
+		this.isMissingItemMessageSent = isMissingItemMessageSent;
+	}
+
 }
