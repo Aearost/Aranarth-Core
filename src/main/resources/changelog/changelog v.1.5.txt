@@ -13,6 +13,7 @@ Features
 [-] Removed recipe for bundle as it is generic as of 1.21.2
 [~] Made Quivers the Light Gray Bundle variant
 [+] Added arrow-switching functionality in Quivers by holding sneak and right-clicking
+[+] Added /ac randomizer to randomize block placement based on specified percentages
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
