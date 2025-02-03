@@ -68,11 +68,7 @@ public class RandomizerBlockPlace implements Listener {
 						int higherBracket = 0;
 
 						for (RandomItem randomItem : randomItemList) {
-//							Bukkit.getLogger().info("random: " + randomItem.getItem().getType().name());
 							higherBracket += randomItem.getPercentage();
-//							Bukkit.getLogger().info("Selected: " + selectedPercentage);
-//							Bukkit.getLogger().info("lowerBracket: " + lowerBracket);
-//							Bukkit.getLogger().info("higherBracket: " + higherBracket);
 
 							// The selected item
 							if (selectedPercentage < higherBracket) {
@@ -86,25 +82,16 @@ public class RandomizerBlockPlace implements Listener {
 											} else {
 												placedSlot = 40; // Hardcoded value of off-hand slot
 											}
-//											Bukkit.getLogger().info("Placed slot: " + placedSlot);
-//											Bukkit.getLogger().info("i: " + i);
-//											Bukkit.getLogger().info("A: " + (placedSlot != i));
-//											Bukkit.getLogger().info("B: " + (!contents[placedSlot].isSimilar(contents[i])));
-											/*if (placedSlot == i || contents[placedSlot].isSimilar(contents[i])) {
-												Bukkit.getLogger().info("C");
-												continue;
-											}*/
 											// Temporary backup and update quantity
-											ItemStack tempStack = contents[placedSlot].clone();
-											tempStack.setAmount(contents[placedSlot].getAmount() - 1);
+											ItemStack tempStack = contents[placedSlot].clone(); // 1 dirt
+											tempStack.setAmount(contents[placedSlot].getAmount() - 1); // 0 dirt
 
 											// Exclude logic if and only if the placed item is the same as the random one
 											// Auto-replenish functionality should catch this
-											if (contents[placedSlot].isSimilar(randomItem.getItem()) && tempStack.getAmount() == 0) {
-												Bukkit.getLogger().info("Last of stack and same item");
+											if (tempStack.getAmount() == 0) {
 												continue;
 											}
-											contents[placedSlot] = contents[i];
+											contents[placedSlot] = contents[i].clone();
 											contents[i] = tempStack;
 											player.getInventory().setContents(contents);
 											player.updateInventory();
