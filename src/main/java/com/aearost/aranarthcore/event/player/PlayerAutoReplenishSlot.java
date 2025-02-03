@@ -58,15 +58,17 @@ public class PlayerAutoReplenishSlot implements Listener {
 						Inventory shulkerInventory = shulker.getInventory();
 						ItemStack[] shulkerContents = shulkerInventory.getContents();
 						for (int j = 0; j < shulkerInventory.getSize(); j++) {
-							if (shulkerContents[j].isSimilar(e.getItemInHand())) {
-								contents[placedSlot] = shulkerContents[j];
-								shulkerContents[j].setAmount(0);
-								player.getInventory().setContents(contents);
-								player.updateInventory();
-								shulkerInventory.setContents(shulkerContents);
-								im.setBlockState(shulker);
-								contents[i].setItemMeta(im);
-								return;
+							if (shulkerContents[j] != null) {
+								if (shulkerContents[j].isSimilar(e.getItemInHand())) {
+									contents[placedSlot] = shulkerContents[j].clone();
+									shulkerContents[j].setAmount(0);
+									shulkerInventory.setContents(shulkerContents);
+									im.setBlockState(shulker);
+									contents[i].setItemMeta(im);
+									player.getInventory().setContents(contents);
+									player.updateInventory();
+									return;
+								}
 							}
 						}
 					}
