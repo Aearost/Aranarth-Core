@@ -221,6 +221,7 @@ public class PersistenceUtils {
 			List<ItemStack> arrows = null;
 			List<ItemStack> blacklist = null;
 			boolean isDeletingBlacklistedItems = false;
+			double balance = 0.00;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -308,10 +309,14 @@ public class PersistenceUtils {
 						isDeletingBlacklistedItems = Boolean.parseBoolean(fieldValue);
 						fieldCount++;
 					}
+					case "balance" -> {
+						balance = Double.parseDouble(fieldValue);
+						fieldCount++;
+					}
                 }
 				
-				if (fieldCount == 10) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems));
+				if (fieldCount == 11) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance));
 					fieldCount = 0;
 				}
 			}
@@ -385,6 +390,7 @@ public class PersistenceUtils {
 							writer.write("        \"blacklist\": \"\",\n");
 						}
 						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
+						writer.write("        \"balance\": \"" + aranarthPlayer.getBalance() + "\",\n");
 
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");

@@ -95,9 +95,17 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("shulker".startsWith(args[0])) {
 				displayedOptions.add("shulker");
 			}
-		} else if (!args[0].isEmpty() && "blacklist".startsWith(args[0])) {
-			displayedOptions.add("blacklist");
-		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
+		}else if (!args[0].isEmpty() && args[0].startsWith("b")) {
+			if (args[0].equals("b")) {
+				displayedOptions.add("blacklist");
+				displayedOptions.add("balance");
+			} else if ("blacklist".startsWith(args[0])) {
+				displayedOptions.add("blacklist");
+			} else if ("balance".startsWith(args[0])) {
+				displayedOptions.add("balance");
+			}
+		}
+		else if (!args[0].isEmpty() && args[0].startsWith("p")) {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
@@ -145,6 +153,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("potions");
 		displayedOptions.add("shulker");
 		displayedOptions.add("randomizer");
+		displayedOptions.add("balance");
 		return displayedOptions;
 	}
 
@@ -181,7 +190,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping" -> {
+			case "ping", "balance" -> {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
 				for (Player onlinePlayer : onlinePlayers) {
@@ -218,7 +227,7 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("pattern");
 				}
 			}
-		}
+        }
 		return displayedOptions;
 	}
 

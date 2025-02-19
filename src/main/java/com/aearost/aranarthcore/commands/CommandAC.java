@@ -81,6 +81,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandShulker.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("randomizer")) {
 			commandResult = CommandRandomizer.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("balance")) {
+			commandResult = CommandBalance.onCommand(sender, args);
 		}
 		return commandResult;
 	}

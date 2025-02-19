@@ -30,6 +30,7 @@ public class AranarthPlayer {
 	private List<RandomItem> randomItems;
 	private boolean isRandomizing;
 	private boolean isMissingItemMessageSent;
+	private double balance;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -50,9 +51,10 @@ public class AranarthPlayer {
 		this.randomItems = null;
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
+		this.balance = 0.00;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -71,6 +73,7 @@ public class AranarthPlayer {
 		this.randomItems = null;
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
+		this.balance = balance;
 	}
 
 	/**
@@ -391,6 +394,22 @@ public class AranarthPlayer {
 	 */
 	public void setIsMissingItemMessageSent(boolean isMissingItemMessageSent) {
 		this.isMissingItemMessageSent = isMissingItemMessageSent;
+	}
+
+	/**
+	 * Provides the player's current balance.
+	 * @return The player's current balance.
+	 */
+	public double getBalance() {
+		return balance;
+	}
+
+	/**
+	 * Sets the player's current balance.
+	 * @param balance The new value for the player's balance.
+	 */
+	public void setBalance(double balance) {
+		this.balance = balance;
 	}
 
 }
