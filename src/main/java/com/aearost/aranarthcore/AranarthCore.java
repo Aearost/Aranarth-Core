@@ -199,6 +199,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeStick(this);
 		new RecipeMossBlock(this);
 		new RecipeMossCarpet(this);
+		new RecipeBlackDye(this);
 	}
 
 	/**

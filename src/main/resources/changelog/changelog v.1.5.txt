@@ -16,6 +16,7 @@ Features
 [-] Removed recipe for bundle as it is generic as of 1.21.2
 [~] Made Quivers the Light Gray Bundle variant
 [~] Changed blacklist remove message
+[+] Added alternative recipe for Black Dye
 
 Bug Fixes
 - Players no longer lose EXP when dying in the creative or arena worlds
