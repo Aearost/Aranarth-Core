@@ -1,7 +1,8 @@
 AranarthCore v. 1.6
 
 Features
-[+] N/A
+[+] Added economy functionality
+[+] Added /ac balance [player] command to view your balance or another player's
 
 Bug Fixes
 - N/A
