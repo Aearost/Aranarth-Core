@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
@@ -10,13 +11,20 @@ import java.util.UUID;
 public class PlayerShop {
 
     private UUID uuid;
-    private int x;
-    private int y;
-    private int z;
+    private Location location;
     private ItemStack item;
     private int quantity;
     private double purchasePrice;
     private double sellPrice;
+
+    public PlayerShop(UUID uuid, Location location, ItemStack item, int quantity, double purchasePrice, double sellPrice) {
+        this.uuid = uuid;
+        this.location = location;
+        this.item = item;
+        this.quantity = quantity;
+        this.purchasePrice = purchasePrice;
+        this.sellPrice = sellPrice;
+    }
 
     /**
      * Provides the player's UUID.
@@ -35,52 +43,68 @@ public class PlayerShop {
     }
 
     /**
-     * Provides the shop's X-coordinate.
-     * @return The shop's X-coordinate.
+     * Provides the shop's Location.
+     * @return The shop's location.
      */
-    public int getX() {
-        return x;
+    public Location getLocation() {
+        return location;
     }
 
     /**
-     * Sets the shop's X-coordinate.
-     * @param x The shop's X-coordinate.
+     * Sets the shop's location.
+     * @param location The shop's location.
      */
-    public void setX(int x) {
-        this.x = x;
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
-    /**
-     * Provides the shop's Y-coordinate.
-     * @return The shop's Y-coordinate.
-     */
-    public int getY() {
-        return y;
-    }
-
-    /**
-     * Sets the shop's Y-coordinate.
-     * @param y The shop's Y-coordinate.
-     */
-    public void setY(int y) {
-        this.y = y;
-    }
-
-    /**
-     * Provides the shop's Z-coordinate.
-     * @return The shop's Z-coordinate.
-     */
-    public int getZ() {
-        return z;
-    }
-
-    /**
-     * Sets the shop's Z-coordinate.
-     * @param z The shop's Z-coordinate.
-     */
-    public void setZ(int z) {
-        this.z = z;
-    }
+//    /**
+//     * Provides the shop's X-coordinate.
+//     * @return The shop's X-coordinate.
+//     */
+//    public int getX() {
+//        return x;
+//    }
+//
+//    /**
+//     * Sets the shop's X-coordinate.
+//     * @param x The shop's X-coordinate.
+//     */
+//    public void setX(int x) {
+//        this.x = x;
+//    }
+//
+//    /**
+//     * Provides the shop's Y-coordinate.
+//     * @return The shop's Y-coordinate.
+//     */
+//    public int getY() {
+//        return y;
+//    }
+//
+//    /**
+//     * Sets the shop's Y-coordinate.
+//     * @param y The shop's Y-coordinate.
+//     */
+//    public void setY(int y) {
+//        this.y = y;
+//    }
+//
+//    /**
+//     * Provides the shop's Z-coordinate.
+//     * @return The shop's Z-coordinate.
+//     */
+//    public int getZ() {
+//        return z;
+//    }
+//
+//    /**
+//     * Sets the shop's Z-coordinate.
+//     * @param z The shop's Z-coordinate.
+//     */
+//    public void setZ(int z) {
+//        this.z = z;
+//    }
 
     /**
      * Provides the shop's item.
