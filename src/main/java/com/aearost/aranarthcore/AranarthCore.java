@@ -66,6 +66,7 @@ public class AranarthCore extends JavaPlugin {
 	private void initializeUtils() {
 		PersistenceUtils.loadHomes();
 		PersistenceUtils.loadAranarthPlayers();
+		PersistenceUtils.loadPlayerShops();
 	}
 
 	/**
@@ -244,6 +245,7 @@ public class AranarthCore extends JavaPlugin {
 	public void onDisable() {
 		PersistenceUtils.saveHomes();
 		PersistenceUtils.saveAranarthPlayers();
+		PersistenceUtils.savePlayerShops();
 	}
 
 }

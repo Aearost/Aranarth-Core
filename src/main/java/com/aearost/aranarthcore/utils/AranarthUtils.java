@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,6 +25,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
+	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -398,5 +400,56 @@ public class AranarthUtils {
 	public static void decrementDragonHeadFuelAmount(Location location) {
 		Integer newAmount = dragonHeads.get(location) - 1;
 		dragonHeads.put(location, newAmount);
+	}
+
+	public static HashMap<UUID, List<PlayerShop>> getShops() {
+		return playerShops;
+	}
+
+	public static PlayerShop getShop(Location location) {
+		for (UUID uuid : getShops().keySet()) {
+			List<PlayerShop> shops = playerShops.get(uuid);
+			for (PlayerShop shop : shops) {
+				if (shop.getLocation().equals(location)) {
+					return shop;
+				}
+			}
+		}
+		return null;
+	}
+
+	public static void setShop(UUID uuid, List<PlayerShop> newShops) {
+		playerShops.put(uuid, newShops);
+	}
+
+	public static void removeShop(UUID uuid, Location location) {
+		List<PlayerShop> shops = playerShops.get(uuid);
+		int shopToDeleteSlot = -1;
+		for (int i = 0; i < shops.size(); i++) {
+			if (shops.get(i).getLocation().equals(location)) {
+				shopToDeleteSlot = i;
+				break;
+			}
+		}
+		if (shopToDeleteSlot == -1) {
+			return;
+		}
+		shops.remove(shopToDeleteSlot);
+		setShop(uuid, shops);
+	}
+
+	public static boolean isShop(Location potentialLocation) {
+		HashMap<UUID, List<PlayerShop>> shops = playerShops;
+		for (UUID uuid : shops.keySet()) {
+			for (PlayerShop shop : shops.get(uuid)) {
+				Location shopLocation = shop.getLocation();
+				if (shopLocation.getBlockX() == potentialLocation.getX()
+						&& shopLocation.getBlockY()  == potentialLocation.getX()
+						&& shopLocation.getBlockZ()  == potentialLocation.getX()) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 }
