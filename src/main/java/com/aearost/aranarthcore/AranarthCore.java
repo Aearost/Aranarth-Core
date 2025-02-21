@@ -148,6 +148,9 @@ public class AranarthCore extends JavaPlugin {
 		new GuiShulkerPreventDrop(this);
 		new RandomizerBlockPlace(this);
 		new PlayerAutoReplenishSlot(this);
+		new PlayerShopCreate(this);
+		new PlayerShopDestroy(this);
+		new PlayerShopInteract(this);
 	}
 
 	/**
