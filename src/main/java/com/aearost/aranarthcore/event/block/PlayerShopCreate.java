@@ -12,13 +12,14 @@ import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 public class PlayerShopCreate implements Listener {
 
@@ -27,7 +28,7 @@ public class PlayerShopCreate implements Listener {
 	}
 
 	/**
-	 * Adds a light block above the torchflower when placed so the plant emits light.
+	 * Handles the creation of a player shop.
 	 * @param e The event.
 	 */
 	@EventHandler
@@ -87,6 +88,33 @@ public class PlayerShopCreate implements Listener {
 
 										// If everything is good, create a new shop
 										PlayerShop newShop = new PlayerShop(player.getUniqueId(), blockBelowLocation, shopItem, quantity, buyPrice, 0);
+
+										HashMap<UUID, List<PlayerShop>> shops = AranarthUtils.getShops();
+										if (shops == null) {
+											shops = new HashMap<>();
+										}
+
+										List<PlayerShop> playerShops = shops.get(player.getUniqueId());
+										if (playerShops == null) {
+											playerShops = new ArrayList<>();
+										}
+
+										// Updating an existing shop
+										if (AranarthUtils.isShop(shop.getLocation())) {
+											int index = 0;
+											for (PlayerShop storedShop : playerShops) {
+												if (storedShop.getLocation().getBlockX() == shop.getLocation().getBlockX()
+													&& storedShop.getLocation().getBlockY() == shop.getLocation().getBlockY()
+													&& storedShop.getLocation().getBlockZ() == shop.getLocation().getBlockZ()) {
+													break;
+												}
+												index++;
+											}
+
+											playerShops.set(index, newShop);
+										} else {
+											playerShops.add(newShop);
+										}
 										e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
 										e.setLine(1, ChatUtils.translateToColor("&0&l" + player.getName()));
 										player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
