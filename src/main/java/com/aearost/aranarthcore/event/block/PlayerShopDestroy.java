@@ -31,7 +31,7 @@ public class PlayerShopDestroy implements Listener {
 					destroyedSignLocation.getBlockZ());
 			if (isChestBlock(blockLocationBelow.getBlock().getType())) {
 				if (AranarthUtils.isShop(blockLocationBelow)) {
-					PlayerShop playerShop = AranarthUtils.getShop(blockLocationBelow);
+					PlayerShop playerShop = AranarthUtils.getShop(e.getPlayer().getUniqueId(), blockLocationBelow);
 					if (e.getPlayer().getUniqueId() == playerShop.getUuid()) {
 						AranarthUtils.removeShop(e.getPlayer().getUniqueId(), blockLocationBelow);
 					} else {
@@ -48,7 +48,7 @@ public class PlayerShopDestroy implements Listener {
 					destroyedChestLocation.getBlockZ());
 			if (isSign(blockLocationAbove.getBlock().getType())) {
 				if (AranarthUtils.isShop(destroyedChestLocation)) {
-					PlayerShop playerShop = AranarthUtils.getShop(destroyedChestLocation);
+					PlayerShop playerShop = AranarthUtils.getShop(e.getPlayer().getUniqueId(), destroyedChestLocation);
 					if (e.getPlayer().getUniqueId() == playerShop.getUuid()) {
 						AranarthUtils.removeShop(e.getPlayer().getUniqueId(), destroyedChestLocation);
 					} else {

@@ -43,16 +43,16 @@ public class PlayerShop {
     }
 
     /**
-     * Provides the shop's Location.
-     * @return The shop's location.
+     * Provides the shop's sign Location.
+     * @return The shop's sign location.
      */
     public Location getLocation() {
         return location;
     }
 
     /**
-     * Sets the shop's location.
-     * @param location The shop's location.
+     * Sets the shop's sign location.
+     * @param location The shop's sign location.
      */
     public void setLocation(Location location) {
         this.location = location;

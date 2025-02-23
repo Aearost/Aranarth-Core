@@ -406,8 +406,8 @@ public class AranarthUtils {
 		return playerShops;
 	}
 
-	public static PlayerShop getShop(Location location) {
-		for (UUID uuid : getShops().keySet()) {
+	public static PlayerShop getShop(UUID uuid, Location location) {
+		if (getShops() != null) {
 			List<PlayerShop> shops = playerShops.get(uuid);
 			for (PlayerShop shop : shops) {
 				if (shop.getLocation().equals(location)) {
