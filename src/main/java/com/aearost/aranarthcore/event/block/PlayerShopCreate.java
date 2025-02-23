@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
@@ -35,29 +36,37 @@ public class PlayerShopCreate implements Listener {
 	@EventHandler
 	public void onPlayerShopCreate(final SignChangeEvent e) {
 		String[] lines = e.getLines();
+		Player player = e.getPlayer();
 		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
-			Player player = e.getPlayer();
 			Block sign = e.getBlock();
 
 			// Verifies that the sign follows the shop format
 			if (isValidSignFormat(lines, player)) {
 				Bukkit.getLogger().info("Valid sign format");
-				e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
-				e.setLine(1, ChatUtils.translateToColor("&l" + e.getLines()[1]));
 
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
 					Bukkit.getLogger().info("Valid chest format");
 
 					if (lines[3].startsWith("Buy")) {
-						createOrUpdateShop(sign, player, getShopItem(sign), getShopQuantity(lines[2]), getShopPrice(lines[3]), 0);
+						createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[2]), getShopPrice(lines[3]), 0);
 					} else {
-						createOrUpdateShop(sign, player, getShopItem(sign), getShopQuantity(lines[2]), 0, getShopPrice(lines[3]));
+						createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[2]), 0, getShopPrice(lines[3]));
 					}
 					return;
 				}
 			}
 			clearLines(e);
+		} else {
+			// Remove if the shop previously existed and now was changed
+			if (AranarthUtils.isShop(e.getBlock().getLocation())) {
+				AranarthUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
+				player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+				e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));
+				e.setLine(1, ChatUtils.stripColorFormatting(e.getLine(1)));
+				e.setLine(2, ChatUtils.stripColorFormatting(e.getLine(2)));
+				e.setLine(3, ChatUtils.stripColorFormatting(e.getLine(3)));
+			}
 		}
 	}
 
@@ -67,7 +76,7 @@ public class PlayerShopCreate implements Listener {
 			return false;
 		}
 
-		int shopQuantityResult = getShopQuantity(lines[2]);
+		int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
 		if (shopQuantityResult == 0) {
 			player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
 			return false;
@@ -76,19 +85,19 @@ public class PlayerShopCreate implements Listener {
 			return false;
 		}
 
-		if (lines[3].startsWith("Buy")) {
-			if (getShopPrice(lines[3]) == 0) {
+		if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
+			if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid buying price!"));
 				return false;
-			} else if (getShopPrice(lines[3]) == -1) {
+			} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
 				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for buying price!"));
 				return false;
 			}
-		} else if (lines[3].startsWith("Sell")) {
-			if (getShopPrice(lines[3]) == 0) {
+		} else if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Sell")) {
+			if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid selling price!"));
 				return false;
-			} else if (getShopPrice(lines[3]) == -1) {
+			} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
 				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for selling price!"));
 				return false;
 			}
@@ -194,7 +203,7 @@ public class PlayerShopCreate implements Listener {
 		e.setLine(3, "");
 	}
 
-	private void createOrUpdateShop(Block sign, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
+	private void createOrUpdateShop(SignChangeEvent e, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
 		HashMap<UUID, List<PlayerShop>> shops = AranarthUtils.getShops();
 		if (shops == null) {
 			shops = new HashMap<>();
@@ -205,35 +214,26 @@ public class PlayerShopCreate implements Listener {
 			playerShops = new ArrayList<>();
 		}
 
+		Block sign = e.getBlock();
 		PlayerShop existingShop = AranarthUtils.getShop(player.getUniqueId(), sign.getLocation());
-		PlayerShop newShop = new PlayerShop(player.getUniqueId(), sign.getLocation(), shopItem, quantity, buyPrice, sellPrice);
+		PlayerShop newShop = new PlayerShop(player.getUniqueId(), e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
 		// If the shop exists, remove it
 		if (existingShop != null) {
-			Bukkit.getLogger().info("Removing existing shop!");
 			AranarthUtils.removeShop(player.getUniqueId(), sign.getLocation());
 		}
+		AranarthUtils.addShop(player.getUniqueId(), newShop);
+		e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
+		e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1]));
+		e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2]));
+		e.setLine(3, ChatUtils.translateToColor("&0&l" + e.getLines()[3]));
 
-
-		// Updating an existing shop
-//			if (AranarthUtils.isShop(shop.getLocation())) {
-//				int index = 0;
-//				for (PlayerShop storedShop : playerShops) {
-//					if (storedShop.getLocation().getBlockX() == shop.getLocation().getBlockX()
-//							&& storedShop.getLocation().getBlockY() == shop.getLocation().getBlockY()
-//							&& storedShop.getLocation().getBlockZ() == shop.getLocation().getBlockZ()) {
-//						break;
-//					}
-//					index++;
-//				}
-//
-//				playerShops.set(index, newShop);
-//			} else {
-//				playerShops.add(newShop);
-//			}
-//			e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
-//			e.setLine(1, ChatUtils.translateToColor("&0&l" + player.getName()));
-//			player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+		if (existingShop == null) {
+			player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
+		}
+		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 	}
 
 }

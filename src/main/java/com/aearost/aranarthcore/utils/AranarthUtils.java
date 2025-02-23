@@ -420,24 +420,28 @@ public class AranarthUtils {
 		return null;
 	}
 
-	public static void setShop(UUID uuid, List<PlayerShop> newShops) {
-		playerShops.put(uuid, newShops);
+	public static void addShop(UUID uuid, PlayerShop newShop) {
+		List<PlayerShop> shops = playerShops.get(uuid);
+		if (shops == null) {
+			shops = new ArrayList<>();
+		}
+		shops.add(newShop);
+		playerShops.put(uuid, shops);
 	}
 
 	public static void removeShop(UUID uuid, Location location) {
 		List<PlayerShop> shops = playerShops.get(uuid);
-		int shopToDeleteSlot = -1;
+		int shopSlotToDelete = -1;
 		for (int i = 0; i < shops.size(); i++) {
 			if (shops.get(i).getLocation().equals(location)) {
-				shopToDeleteSlot = i;
+				shopSlotToDelete = i;
 				break;
 			}
 		}
-		if (shopToDeleteSlot == -1) {
-			return;
+		// Only delete if a shop was found
+		if (shopSlotToDelete != -1) {
+			shops.remove(shopSlotToDelete);
 		}
-		shops.remove(shopToDeleteSlot);
-		setShop(uuid, shops);
 	}
 
 	public static boolean isShop(Location potentialLocation) {
@@ -446,8 +450,8 @@ public class AranarthUtils {
 			for (PlayerShop shop : shops.get(uuid)) {
 				Location shopLocation = shop.getLocation();
 				if (shopLocation.getBlockX() == potentialLocation.getX()
-						&& shopLocation.getBlockY()  == potentialLocation.getX()
-						&& shopLocation.getBlockZ()  == potentialLocation.getX()) {
+						&& shopLocation.getBlockY()  == potentialLocation.getY()
+						&& shopLocation.getBlockZ()  == potentialLocation.getZ()) {
 					return true;
 				}
 			}
