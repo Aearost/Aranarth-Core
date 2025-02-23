@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.block;
+package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.PlayerShop;
@@ -76,8 +76,8 @@ public class PlayerShopDestroy implements Listener {
 	}
 
 	private int deleteShopIfPossible(Player player, Location destroyedSignLocation) {
-		if (AranarthUtils.isShop(destroyedSignLocation)) {
-			PlayerShop shop = AranarthUtils.getShop(player.getUniqueId(), destroyedSignLocation);
+		if (AranarthUtils.getShop(destroyedSignLocation) != null) {
+			PlayerShop shop = AranarthUtils.getShop(destroyedSignLocation);
 			// If it is the player's shop
 			if (shop != null) {
 				AranarthUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
