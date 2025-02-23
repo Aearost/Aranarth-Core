@@ -14,15 +14,15 @@ public class PlayerShop {
     private Location location;
     private ItemStack item;
     private int quantity;
-    private double purchasePrice;
+    private double buyPrice;
     private double sellPrice;
 
-    public PlayerShop(UUID uuid, Location location, ItemStack item, int quantity, double purchasePrice, double sellPrice) {
+    public PlayerShop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
         this.uuid = uuid;
         this.location = location;
         this.item = item;
         this.quantity = quantity;
-        this.purchasePrice = purchasePrice;
+        this.buyPrice = buyPrice;
         this.sellPrice = sellPrice;
     }
 
@@ -142,16 +142,16 @@ public class PlayerShop {
      * Provides the shop's purchase price.
      * @return The shop's purchase price.
      */
-    public double getPurchasePrice() {
-        return purchasePrice;
+    public double getBuyPrice() {
+        return buyPrice;
     }
 
     /**
      * Sets the shop's purchase price.
-     * @param purchasePrice The shop's stored quantity.
+     * @param buyPrice The shop's stored quantity.
      */
-    public void setPurchasePrice(double purchasePrice) {
-        this.purchasePrice = purchasePrice;
+    public void setBuyPrice(double buyPrice) {
+        this.buyPrice = buyPrice;
     }
 
     /**

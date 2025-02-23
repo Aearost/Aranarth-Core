@@ -42,13 +42,11 @@ public class PlayerShopCreate implements Listener {
 
 			// Verifies that the sign follows the shop format
 			if (isValidSignFormat(lines, player)) {
-				Bukkit.getLogger().info("Valid sign format");
 
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
-					Bukkit.getLogger().info("Valid chest format");
 
-					if (lines[3].startsWith("Buy")) {
+					if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
 						createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[2]), getShopPrice(lines[3]), 0);
 					} else {
 						createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[2]), 0, getShopPrice(lines[3]));
