@@ -35,13 +35,15 @@ public class PlayerShopCreate implements Listener {
 	@EventHandler
 	public void onPlayerShopCreate(final SignChangeEvent e) {
 		String[] lines = e.getLines();
-		if (lines[0].equals(ChatUtils.stripColorFormatting("[Shop]"))) {
+		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
 			Player player = e.getPlayer();
 			Block sign = e.getBlock();
 
 			// Verifies that the sign follows the shop format
 			if (isValidSignFormat(lines, player)) {
 				Bukkit.getLogger().info("Valid sign format");
+				e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
+				e.setLine(1, ChatUtils.translateToColor("&l" + e.getLines()[1]));
 
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
@@ -52,21 +54,15 @@ public class PlayerShopCreate implements Listener {
 					} else {
 						createOrUpdateShop(sign, player, getShopItem(sign), getShopQuantity(lines[2]), 0, getShopPrice(lines[3]));
 					}
-				} else {
-					clearLines(e);
+					return;
 				}
-			} else {
-				clearLines(e);
 			}
+			clearLines(e);
 		}
 	}
 
 	private boolean isValidSignFormat(String[] lines, Player player) {
-		// [Shop]
-		// Aearost
-		// QTY 15
-		// Buy 10
-		if (!isUsernameMatching(lines[1], player)) {
+		if (!isUsernameMatching(ChatUtils.stripColorFormatting(lines[1]), player)) {
 			player.sendMessage(ChatUtils.chatMessage("&cThat is not your username!"));
 			return false;
 		}
@@ -110,6 +106,10 @@ public class PlayerShopCreate implements Listener {
 
 	private int getShopQuantity(String line) {
 		String[] quantityLineParts = line.split(" ");
+		if (quantityLineParts.length != 2) {
+			return -1;
+		}
+
 		if (ChatUtils.stripColorFormatting(quantityLineParts[0]).equals("QTY")) {
 			int quantity = 0;
 			try {
@@ -139,7 +139,7 @@ public class PlayerShopCreate implements Listener {
 				throw new NumberFormatException();
 			}
 			DecimalFormat df = new DecimalFormat("0.00");
-			return Integer.parseInt(df.format(price));
+			return Double.parseDouble(df.format(price));
 		} catch (NumberFormatException ex) {
 			return 0;
 		}
@@ -155,7 +155,7 @@ public class PlayerShopCreate implements Listener {
 			player.sendMessage(ChatUtils.chatMessage("&cThe first slot of the chest must contain an item!"));
 			return false;
 		}
-
+		// Will confirm only if all checks are valid
 		return true;
 	}
 
@@ -195,9 +195,6 @@ public class PlayerShopCreate implements Listener {
 	}
 
 	private void createOrUpdateShop(Block sign, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
-		// If everything is good, create a new shop
-		PlayerShop newShop = new PlayerShop(player.getUniqueId(), sign.getLocation(), shopItem, quantity, buyPrice, sellPrice);
-
 		HashMap<UUID, List<PlayerShop>> shops = AranarthUtils.getShops();
 		if (shops == null) {
 			shops = new HashMap<>();
@@ -209,13 +206,16 @@ public class PlayerShopCreate implements Listener {
 		}
 
 		PlayerShop existingShop = AranarthUtils.getShop(player.getUniqueId(), sign.getLocation());
+		PlayerShop newShop = new PlayerShop(player.getUniqueId(), sign.getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
-		// Creating a new shop
-		if (existingShop == null) {
-			Bukkit.getLogger().info("Will create a new shop!");
+		// If the shop exists, remove it
+		if (existingShop != null) {
+			Bukkit.getLogger().info("Removing existing shop!");
+			AranarthUtils.removeShop(player.getUniqueId(), sign.getLocation());
 		}
+
+
 		// Updating an existing shop
-		else {
 //			if (AranarthUtils.isShop(shop.getLocation())) {
 //				int index = 0;
 //				for (PlayerShop storedShop : playerShops) {
@@ -234,7 +234,6 @@ public class PlayerShopCreate implements Listener {
 //			e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
 //			e.setLine(1, ChatUtils.translateToColor("&0&l" + player.getName()));
 //			player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
-		}
 	}
 
 }
