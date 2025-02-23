@@ -151,6 +151,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerShopCreate(this);
 		new PlayerShopDestroy(this);
 		new PlayerShopInteract(this);
+		new PlayerShopChestOpen(this);
 	}
 
 	/**

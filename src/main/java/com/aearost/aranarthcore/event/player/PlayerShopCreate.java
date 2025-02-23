@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.block;
+package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.PlayerShop;
@@ -57,7 +57,7 @@ public class PlayerShopCreate implements Listener {
 			clearLines(e);
 		} else {
 			// Remove if the shop previously existed and now was changed
-			if (AranarthUtils.isShop(e.getBlock().getLocation())) {
+			if (AranarthUtils.getShop(e.getBlock().getLocation()) != null) {
 				AranarthUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
 				player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
 				e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));
@@ -213,7 +213,7 @@ public class PlayerShopCreate implements Listener {
 		}
 
 		Block sign = e.getBlock();
-		PlayerShop existingShop = AranarthUtils.getShop(player.getUniqueId(), sign.getLocation());
+		PlayerShop existingShop = AranarthUtils.getShop(sign.getLocation());
 		PlayerShop newShop = new PlayerShop(player.getUniqueId(), e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
 		// If the shop exists, remove it

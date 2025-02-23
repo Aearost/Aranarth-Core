@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.block;
+package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;

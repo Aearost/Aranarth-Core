@@ -406,16 +406,16 @@ public class AranarthUtils {
 		return playerShops;
 	}
 
-	public static PlayerShop getShop(UUID uuid, Location location) {
+	public static PlayerShop getShop(Location location) {
 		if (getShops() != null) {
-			List<PlayerShop> shops = playerShops.get(uuid);
-			if (shops != null) {
-				for (PlayerShop shop : shops) {
+			for (UUID uuid : playerShops.keySet()) {
+				for (PlayerShop shop : playerShops.get(uuid)) {
 					if (shop.getLocation().equals(location)) {
 						return shop;
 					}
 				}
 			}
+
 		}
 		return null;
 	}
@@ -442,20 +442,5 @@ public class AranarthUtils {
 		if (shopSlotToDelete != -1) {
 			shops.remove(shopSlotToDelete);
 		}
-	}
-
-	public static boolean isShop(Location potentialLocation) {
-		HashMap<UUID, List<PlayerShop>> shops = playerShops;
-		for (UUID uuid : shops.keySet()) {
-			for (PlayerShop shop : shops.get(uuid)) {
-				Location shopLocation = shop.getLocation();
-				if (shopLocation.getBlockX() == potentialLocation.getX()
-						&& shopLocation.getBlockY()  == potentialLocation.getY()
-						&& shopLocation.getBlockZ()  == potentialLocation.getZ()) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 }
