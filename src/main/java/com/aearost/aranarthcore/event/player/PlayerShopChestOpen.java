@@ -23,7 +23,7 @@ public class PlayerShopChestOpen implements Listener {
 	 */
 	@EventHandler
 	public void onChestOpen(final PlayerInteractEvent e) {
-		if (isChest(e.getClickedBlock().getType())) {
+		if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
 			Location chestLocation = e.getClickedBlock().getLocation();
 			Location locationAbove = new Location(chestLocation.getWorld(),
 					chestLocation.getBlockX(), chestLocation.getBlockY() + 1, chestLocation.getBlockZ());
