@@ -48,7 +48,7 @@ public class PlayerShopInteract implements Listener {
 						AranarthPlayer clickUser = AranarthUtils.getPlayer(player.getUniqueId());
 						AranarthPlayer shopUser = AranarthUtils.getPlayer(playerShop.getUuid());
 
-						// Handles logic to buy/sell
+						// Buy logic
 						if (playerShop.getBuyPrice() > 0 && playerShop.getSellPrice() == 0) {
 							if (clickUser.getBalance() >= playerShop.getBuyPrice()) {
 								BlockState state = locationBelow.getBlock().getState();
@@ -65,9 +65,9 @@ public class PlayerShopInteract implements Listener {
 
 								// Verifies that there is enough quantity in the chest's inventory
 								// Cycles through the chest's inventory starting from end to beginning
-								for (int i = chestContents.length - 1; i > 0; i--) {
+								for (int i = chestContents.length - 1; i >= 0; i--) {
 									if (chestContents[i] != null && chestContents[i].isSimilar(playerShop.getItem())) {
-										// If the first single slot in the chest contains enough inventory
+										// If the first single slot of the item in the chest contains enough inventory
 										if (chestContents[i].getAmount() >= playerShop.getQuantity() && summedQuantityOfItem == 0) {
 											int newAmount = chestContents[i].getAmount() - playerShop.getQuantity();
 
@@ -80,7 +80,6 @@ public class PlayerShopInteract implements Listener {
 										else {
 											// If the combined amount of slots has enough
 											if (summedQuantityOfItem + chestContents[i].getAmount() >= playerShop.getQuantity()) {
-
 												// Clears accumulated slots of the chest
 												for (Integer index : indexesWithItem) {
 													chestContents[index] = null;
@@ -116,7 +115,8 @@ public class PlayerShopInteract implements Listener {
 
 									player.sendMessage(ChatUtils.chatMessage(
 											"&7You have purchased &e" + playerShop.getQuantity()
-													+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())));
+													+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
+													+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
 									if (!remainder.isEmpty()) {
 										player.sendMessage(ChatUtils.chatMessage("&e" + remainder.size() + " "
 												+ ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
@@ -137,21 +137,98 @@ public class PlayerShopInteract implements Listener {
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to buy this!"));
 							}
-						} else if (playerShop.getSellPrice() > 0 && playerShop.getBuyPrice() == 0) {
+						}
+						// Sell logic
+						else if (playerShop.getSellPrice() > 0 && playerShop.getBuyPrice() == 0) {
 							if (shopUser.getBalance() >= playerShop.getSellPrice()) {
-								clickUser.setBalance(clickUser.getBalance() + playerShop.getSellPrice());
-								shopUser.setBalance(shopUser.getBalance() - playerShop.getSellPrice());
-								player.sendMessage(ChatUtils.chatMessage(
-										"&7You have sold &e" + playerShop.getQuantity()
-												+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())));
-								// If the shop owner is online
-								if (Bukkit.getPlayer(playerShop.getUuid()) != null) {
-									Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
-									shopPlayer.sendMessage(
-											ChatUtils.chatMessage(
-													"&e" + player.getName() + " &7has sold &e" + playerShop.getQuantity()
-															+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase()))
-															+ " &7for &e$" + playerShop.getSellPrice());
+								BlockState state = locationBelow.getBlock().getState();
+								Container container = (Container) state;
+								Inventory chestInventory = container.getInventory();
+								if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
+									chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
+								}
+								boolean chestHasSpace = false;
+								boolean playerHasItems = false;
+								int summedQuantityOfItem = 0;
+
+								ArrayList<Integer> indexesWithItem = new ArrayList<>();
+
+								// Verifies that there is enough quantity in the chest's inventory
+								Container copyOfChest = (Container) container.copy();
+								HashMap<Integer, ItemStack> extraItems = copyOfChest.getInventory().addItem();
+								if (extraItems.isEmpty()) {
+									chestHasSpace = true;
+								}
+
+								// Verifies the player has the items
+								Inventory playerInventory = player.getInventory();
+								ItemStack[] contents = playerInventory.getContents();
+								// Cycles through the player's inventory from end to beginning
+								for (int i = contents.length - 1; i >= 0; i--) {
+									if (contents[i] != null && contents[i].isSimilar(playerShop.getItem())) {
+										// If the first slot in the inventory contains enough of the item
+										if ((contents[i].getAmount() >= playerShop.getQuantity()) && summedQuantityOfItem == 0) {
+											int newAmount = contents[i].getAmount() - playerShop.getQuantity();
+
+											// Updates the player's inventory
+											contents[i].setAmount(newAmount);
+											playerHasItems = true;
+											break;
+										}
+										// If more than one slot is needed
+										else {
+											// If the combined amount of slots has enough
+											if (summedQuantityOfItem + contents[i].getAmount() >= playerShop.getQuantity()) {
+
+												// Clears accumulated slots of the chest
+												for (Integer index : indexesWithItem) {
+													contents[index] = null;
+												}
+												int newAmount = contents[i].getAmount() - (playerShop.getQuantity() - summedQuantityOfItem);
+												contents[i].setAmount(newAmount);
+												playerHasItems = true;
+												break;
+											} else {
+												summedQuantityOfItem += contents[i].getAmount();
+												indexesWithItem.add(i);
+											}
+										}
+									}
+								}
+
+								if (playerHasItems) {
+									if (chestHasSpace) {
+										DecimalFormat df = new DecimalFormat("0.00");
+
+										// Logic to update balances and chest inventory
+										clickUser.setBalance(clickUser.getBalance() + playerShop.getSellPrice());
+										shopUser.setBalance(shopUser.getBalance() - playerShop.getSellPrice());
+										ItemStack shopItem = playerShop.getItem().clone();
+										shopItem.setAmount(playerShop.getQuantity());
+										chestInventory.addItem(shopItem);
+
+										// Logic to remove items from the player's inventory
+										playerInventory.clear();
+										playerInventory.setContents(contents);
+
+										player.sendMessage(ChatUtils.chatMessage(
+												"&7You have sold &e" + playerShop.getQuantity()
+														+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase()))
+												+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice())));
+
+										// If the shop owner is online
+										if (Bukkit.getPlayer(playerShop.getUuid()) != null) {
+											Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
+											shopPlayer.sendMessage(
+													ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + playerShop.getQuantity() + " "
+															+ ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
+															+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
+										}
+									} else {
+										player.sendMessage(ChatUtils.chatMessage("&cThere is no space remaining in the chest!"));
+									}
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough items for this!"));
 								}
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cThis player does not have enough money to sell this!"));
