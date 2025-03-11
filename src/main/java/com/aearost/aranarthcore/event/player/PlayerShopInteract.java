@@ -239,6 +239,10 @@ public class PlayerShopInteract implements Listener {
 					}
 				}
 			}
+			// If the clicked block is a sign but the block below is not a chest
+			else {
+				// Logic for server shops here
+			}
 		} else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
 			PlayerShop playerShop = AranarthUtils.getShop(e.getClickedBlock().getLocation());
 			if (playerShop != null) {
@@ -254,10 +258,20 @@ public class PlayerShopInteract implements Listener {
 		}
 	}
 
+	/**
+	 * Determines if the clicked block is a chest, trapped chest, or barrel.
+	 * @param type The type of material.
+	 * @return Confirmation of whether the block is a chest, trapped chest, or barrel.
+	 */
 	private boolean isChest(Material type) {
 		return type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL;
 	}
 
+	/**
+	 * Determines if the clicked block is a sign.
+	 * @param type The type of material.
+	 * @return Confirmation of whether the block is a sign.
+	 */
 	private boolean isSign(Material type) {
 		return type.name().toLowerCase().endsWith("sign");
 	}

@@ -39,10 +39,20 @@ public class PlayerShopChestOpen implements Listener {
 		}
 	}
 
+	/**
+	 * Determines if the clicked block is a chest, trapped chest, or barrel.
+	 * @param type The type of material.
+	 * @return Confirmation of whether the block is a chest, trapped chest, or barrel.
+	 */
 	private boolean isChest(Material type) {
 		return type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL;
 	}
 
+	/**
+	 * Determines if the clicked block is a sign.
+	 * @param type The type of material.
+	 * @return Confirmation of whether the block is a sign.
+	 */
 	private boolean isSign(Material type) {
 		return type.name().toLowerCase().endsWith("sign");
 	}
