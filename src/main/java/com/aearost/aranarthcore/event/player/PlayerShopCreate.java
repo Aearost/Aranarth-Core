@@ -59,10 +59,11 @@ public class PlayerShopCreate implements Listener {
 		else if (ChatUtils.stripColorFormatting(lines[0]).equals("[Server Shop]")) {
 			if (player.getName().equals("Aearost")) {
 				if (isValidSignFormat(lines, player, false)) {
-					if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
-						createOrUpdateShop(e, null, getShopItem(sign), getShopQuantity(lines[1]), getShopPrice(lines[2]), 0);
+
+                    if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
+						createOrUpdateShop(e, null, getShopItemFromLine(lines[3]), getShopQuantity(lines[1]), getShopPrice(lines[2]), 0);
 					} else {
-						createOrUpdateShop(e, null, getShopItem(sign), getShopQuantity(lines[1]), 0, getShopPrice(lines[2]));
+						createOrUpdateShop(e, null, getShopItemFromLine(lines[3]), getShopQuantity(lines[1]), 0, getShopPrice(lines[2]));
 					}
 					return;
 				}
@@ -81,8 +82,6 @@ public class PlayerShopCreate implements Listener {
 				e.setLine(2, ChatUtils.stripColorFormatting(e.getLine(2)));
 				e.setLine(3, ChatUtils.stripColorFormatting(e.getLine(3)));
 			}
-
-
 		}
 	}
 
@@ -134,7 +133,7 @@ public class PlayerShopCreate implements Listener {
 		}
 		// This is a server shop being created by Aearost
 		else {
-			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
+			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[1]));
 			if (shopQuantityResult == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
 				return false;
@@ -164,10 +163,11 @@ public class PlayerShopCreate implements Listener {
 				return false;
 			}
 
-			if (!lines[3].isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage("&cThe last line must be left empty!"));
+			if (getShopItemFromLine(lines[3]) == null) {
+				player.sendMessage(ChatUtils.chatMessage("&cThere is no item with this name!"));
 				return false;
 			}
+
 			// Will confirm only if all checks are valid
 			return true;
 		}
@@ -175,6 +175,10 @@ public class PlayerShopCreate implements Listener {
 
 	/**
 	 * Provides the quantity of the shop based on the content of the sign.
+	 * Returns -1 if something is wrong with the syntax.
+	 * Returns 0 if there is an incorrect value entered as the number.
+	 * Returns >0 based on the quantity entered.
+	 *
 	 * @param line The line for the shop quantity.
 	 * @return The quantity of the shop item.
 	 */
@@ -282,6 +286,16 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
+	private ItemStack getShopItemFromLine(String line) {
+		try {
+			// Only supports vanilla items with no metadata
+			Material material = Material.valueOf(ChatUtils.stripColorFormatting(line).toUpperCase());
+			return new ItemStack(material, 1);
+		} catch (IllegalArgumentException ex) {
+			return null;
+		}
+	}
+
 	/**
 	 * Handles the logic to clear the lines of the sign if incorrect input is provided.
 	 * @param e The event.
@@ -347,11 +361,11 @@ public class PlayerShopCreate implements Listener {
 		}
 
 		if (existingShop == null) {
-			player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
+			e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
 		}
-		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+		e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 	}
 
 }
