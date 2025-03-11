@@ -37,15 +37,14 @@ public class PlayerShopCreate implements Listener {
 	public void onPlayerShopCreate(final SignChangeEvent e) {
 		String[] lines = e.getLines();
 		Player player = e.getPlayer();
+		Block sign = e.getBlock();
+
+		// If placing a Player Shop
 		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
-			Block sign = e.getBlock();
-
 			// Verifies that the sign follows the shop format
-			if (isValidSignFormat(lines, player)) {
-
+			if (isValidSignFormat(lines, player, true)) {
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
-
 					if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
 						createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[2]), getShopPrice(lines[3]), 0);
 					} else {
@@ -54,8 +53,25 @@ public class PlayerShopCreate implements Listener {
 					return;
 				}
 			}
-			clearLines(e);
-		} else {
+			clearLines(e, true);
+		}
+		// If placing a Server Shop
+		else if (ChatUtils.stripColorFormatting(lines[0]).equals("[Server Shop]")) {
+			if (player.getName().equals("Aearost")) {
+				if (isValidSignFormat(lines, player, false)) {
+					if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
+						createOrUpdateShop(e, null, getShopItem(sign), getShopQuantity(lines[1]), getShopPrice(lines[2]), 0);
+					} else {
+						createOrUpdateShop(e, null, getShopItem(sign), getShopQuantity(lines[1]), 0, getShopPrice(lines[2]));
+					}
+					return;
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a server shop!"));
+			}
+			clearLines(e, false);
+		}
+		else {
 			// Remove if the shop previously existed and now was changed
 			if (AranarthUtils.getShop(e.getBlock().getLocation()) != null) {
 				AranarthUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
@@ -65,46 +81,89 @@ public class PlayerShopCreate implements Listener {
 				e.setLine(2, ChatUtils.stripColorFormatting(e.getLine(2)));
 				e.setLine(3, ChatUtils.stripColorFormatting(e.getLine(3)));
 			}
+
+
 		}
 	}
 
-	private boolean isValidSignFormat(String[] lines, Player player) {
-		if (!isUsernameMatching(ChatUtils.stripColorFormatting(lines[1]), player)) {
-			player.sendMessage(ChatUtils.chatMessage("&cThat is not your username!"));
-			return false;
-		}
-
-		int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
-		if (shopQuantityResult == 0) {
-			player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
-			return false;
-		} else if (shopQuantityResult == -1) {
-			player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
-			return false;
-		}
-
-		if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
-			if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid buying price!"));
-				return false;
-			} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
-				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for buying price!"));
+	private boolean isValidSignFormat(String[] lines, Player player, boolean isPlayerShop) {
+		if (isPlayerShop) {
+			if (!isUsernameMatching(ChatUtils.stripColorFormatting(lines[1]), player)) {
+				player.sendMessage(ChatUtils.chatMessage("&cThat is not your username!"));
 				return false;
 			}
-		} else if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Sell")) {
-			if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid selling price!"));
+
+			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
+			if (shopQuantityResult == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
 				return false;
-			} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
-				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for selling price!"));
+			} else if (shopQuantityResult == -1) {
+				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
 				return false;
 			}
-		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cYou must either buy or sell here!"));
-			return false;
+
+			if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
+				if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid buying price!"));
+					return false;
+				} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
+					player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for buying price!"));
+					return false;
+				}
+			} else if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Sell")) {
+				if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid selling price!"));
+					return false;
+				} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[3])) == -1) {
+					player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for selling price!"));
+					return false;
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou must either buy or sell here!"));
+				return false;
+			}
+			// Will confirm only if all checks are valid
+			return true;
 		}
-		// Will confirm only if all checks are valid
-		return true;
+		// This is a server shop being created by Aearost
+		else {
+			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
+			if (shopQuantityResult == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
+				return false;
+			} else if (shopQuantityResult == -1) {
+				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
+				return false;
+			}
+
+			if (ChatUtils.stripColorFormatting(lines[2]).startsWith("Buy")) {
+				if (getShopPrice(ChatUtils.stripColorFormatting(lines[2])) == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid buying price!"));
+					return false;
+				} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[2])) == -1) {
+					player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for buying price!"));
+					return false;
+				}
+			} else if (ChatUtils.stripColorFormatting(lines[2]).startsWith("Sell")) {
+				if (getShopPrice(ChatUtils.stripColorFormatting(lines[2])) == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid selling price!"));
+					return false;
+				} else if (getShopPrice(ChatUtils.stripColorFormatting(lines[2])) == -1) {
+					player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for selling price!"));
+					return false;
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou must either buy or sell here!"));
+				return false;
+			}
+
+			if (!lines[3].isEmpty()) {
+				player.sendMessage(ChatUtils.chatMessage("&cThe last line must be left empty!"));
+				return false;
+			}
+			// Will confirm only if all checks are valid
+			return true;
+		}
     }
 
 	private boolean isUsernameMatching(String line, Player player) {
@@ -194,8 +253,12 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
-	private void clearLines(SignChangeEvent e) {
-		e.setLine(0, ChatUtils.translateToColor("&4&l[Shop]"));
+	private void clearLines(SignChangeEvent e, boolean isPlayerShop) {
+		if (isPlayerShop) {
+			e.setLine(0, ChatUtils.translateToColor("&4&l[Shop]"));
+		} else {
+			e.setLine(0, ChatUtils.translateToColor("&4&l[Server Shop]"));
+		}
 		e.setLine(1, "");
 		e.setLine(2, "");
 		e.setLine(3, "");
@@ -207,24 +270,38 @@ public class PlayerShopCreate implements Listener {
 			shops = new HashMap<>();
 		}
 
-		List<PlayerShop> playerShops = shops.get(player.getUniqueId());
+		List<PlayerShop> playerShops = null;
+		UUID uuid = null;
+		if (player != null) {
+			uuid = player.getUniqueId();
+		}
+
+		playerShops = shops.get(uuid);
 		if (playerShops == null) {
 			playerShops = new ArrayList<>();
 		}
 
 		Block sign = e.getBlock();
 		PlayerShop existingShop = AranarthUtils.getShop(sign.getLocation());
-		PlayerShop newShop = new PlayerShop(player.getUniqueId(), e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
+		PlayerShop newShop = null;
+		newShop = new PlayerShop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
 		// If the shop exists, remove it
 		if (existingShop != null) {
-			AranarthUtils.removeShop(player.getUniqueId(), sign.getLocation());
+			AranarthUtils.removeShop(uuid, sign.getLocation());
 		}
-		AranarthUtils.addShop(player.getUniqueId(), newShop);
-		e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
-		e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1]));
-		e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2]));
-		e.setLine(3, ChatUtils.translateToColor("&0&l" + e.getLines()[3]));
+
+		AranarthUtils.addShop(uuid, newShop);
+		if (player != null) {
+			e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
+			e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1]));
+			e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2]));
+			e.setLine(3, ChatUtils.translateToColor("&0&l" + e.getLines()[3]));
+		} else {
+			e.setLine(0, ChatUtils.translateToColor("&6&l[Server Shop]"));
+			e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1]));
+			e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2]));
+		}
 
 		if (existingShop == null) {
 			player.sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
