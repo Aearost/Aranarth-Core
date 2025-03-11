@@ -86,9 +86,16 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
+	/**
+	 * Verifies the format of the sign is accurate.
+	 * @param lines The lines of the sign.
+	 * @param player The player making the change to the sign.
+	 * @param isPlayerShop Whether it is a player or server shop.
+	 * @return Confirmation whether the sign is following the valid format or not.
+	 */
 	private boolean isValidSignFormat(String[] lines, Player player, boolean isPlayerShop) {
 		if (isPlayerShop) {
-			if (!isUsernameMatching(ChatUtils.stripColorFormatting(lines[1]), player)) {
+			if (!ChatUtils.stripColorFormatting(lines[1]).equals(player.getName())) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat is not your username!"));
 				return false;
 			}
@@ -166,10 +173,11 @@ public class PlayerShopCreate implements Listener {
 		}
     }
 
-	private boolean isUsernameMatching(String line, Player player) {
-		return line.equals(player.getName());
-	}
-
+	/**
+	 * Provides the quantity of the shop based on the content of the sign.
+	 * @param line The line for the shop quantity.
+	 * @return The quantity of the shop item.
+	 */
 	private int getShopQuantity(String line) {
 		String[] quantityLineParts = line.split(" ");
 		if (quantityLineParts.length != 2) {
@@ -192,6 +200,11 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
+	/**
+	 * Provides the price of the shop based on the content of the sign.
+	 * @param line The line for the shop price.
+	 * @return The price of the shop item.
+	 */
 	private double getShopPrice(String line) {
 		String[] priceLineParts = line.split(" ");
 		if (priceLineParts.length != 2) {
@@ -211,6 +224,12 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
+	/**
+	 * Validates whether the chest format is correct for a player shop.
+	 * @param player The player who is making the change to the sign.
+	 * @param sign The sign of the shop.
+	 * @return Confirmation whether the chest is correctly placed for the shop.
+	 */
 	private boolean isValidChestFormat(Player player, Block sign) {
 		if (!isBlockBelowChest(sign)) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou do not have a chest for the shop!"));
@@ -225,6 +244,11 @@ public class PlayerShopCreate implements Listener {
 		return true;
 	}
 
+	/**
+	 * Determines if the block below is a chest, trapped chest, or barrel.
+	 * @param sign The sign above the block.
+	 * @return Confirmation of whether the block is a chest, trapped chest, or barrel.
+	 */
 	private boolean isBlockBelowChest(Block sign) {
 		Location signLocation = sign.getLocation();
 		Location blockBelowLocation = new Location(signLocation.getWorld(),
@@ -235,6 +259,11 @@ public class PlayerShopCreate implements Listener {
 				|| signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.TRAPPED_CHEST;
 	}
 
+	/**
+	 * Provides a single quantity of the item of the shop.
+	 * @param sign The sign of the shop.
+	 * @return The single quantity of the item for the shop.
+	 */
 	private ItemStack getShopItem(Block sign) {
 		Location signLocation = sign.getLocation();
 		Location blockBelowSign = new Location(signLocation.getWorld(),
@@ -253,6 +282,11 @@ public class PlayerShopCreate implements Listener {
 		}
 	}
 
+	/**
+	 * Handles the logic to clear the lines of the sign if incorrect input is provided.
+	 * @param e The event.
+	 * @param isPlayerShop Confirmation whether the sign is for a player or server shop.
+	 */
 	private void clearLines(SignChangeEvent e, boolean isPlayerShop) {
 		if (isPlayerShop) {
 			e.setLine(0, ChatUtils.translateToColor("&4&l[Shop]"));
@@ -264,6 +298,15 @@ public class PlayerShopCreate implements Listener {
 		e.setLine(3, "");
 	}
 
+	/**
+	 * Handles the logic of creating or updating a shop.
+	 * @param e The event.
+	 * @param player The player who created the shop.
+	 * @param shopItem The item being bought or sold in the shop.
+	 * @param quantity The quantity of the item being bought or sold in the shop.
+	 * @param buyPrice The price to buy the item from the shop.
+	 * @param sellPrice The price to sell the item to the shop.
+	 */
 	private void createOrUpdateShop(SignChangeEvent e, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
 		HashMap<UUID, List<PlayerShop>> shops = AranarthUtils.getShops();
 		if (shops == null) {
