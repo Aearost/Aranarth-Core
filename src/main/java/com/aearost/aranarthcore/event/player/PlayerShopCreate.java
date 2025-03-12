@@ -60,7 +60,7 @@ public class PlayerShopCreate implements Listener {
 			if (player.getName().equals("Aearost")) {
 				if (isValidSignFormat(lines, player, false)) {
 
-                    if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
+                    if (ChatUtils.stripColorFormatting(lines[2]).startsWith("Buy")) {
 						createOrUpdateShop(e, null, getShopItemFromLine(lines[3]), getShopQuantity(lines[1]), getShopPrice(lines[2]), 0);
 					} else {
 						createOrUpdateShop(e, null, getShopItemFromLine(lines[3]), getShopQuantity(lines[1]), 0, getShopPrice(lines[2]));

@@ -10,8 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,20 +38,16 @@ public class PlayerShopDestroy implements Listener {
 
 		int deletionResult = -1;
 		Location destroyedSignLocation = null;
-		Location destroyedChestLocation = null;
 
 		if (isSign(e.getBlock().getType())) {
 			destroyedSignLocation = e.getBlock().getLocation();
-			deletionResult = deleteShopIfPossible(player, destroyedSignLocation);
-		}
-		else if (isChestBlock(e.getBlock().getType())) {
-			destroyedChestLocation = e.getBlock().getLocation();
-			destroyedSignLocation = new Location(destroyedChestLocation.getWorld(),
-					destroyedChestLocation.getBlockX(),
-					destroyedChestLocation.getBlockY() + 1,
-					destroyedChestLocation.getBlockZ());
-			if (isSign(destroyedSignLocation.getBlock().getType())) {
+			PlayerShop playerShop = AranarthUtils.getShop(destroyedSignLocation);
+			if (playerShop != null) {
 				deletionResult = deleteShopIfPossible(player, destroyedSignLocation);
+			}
+			// If the sign is not a shop
+			else {
+				return;
 			}
 		} else {
 			return;
@@ -62,15 +56,6 @@ public class PlayerShopDestroy implements Listener {
 		if (deletionResult == 1) {
 			player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
 			player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
-			// If the chest was destroyed
-			if (destroyedChestLocation != null) {
-				Sign sign = (Sign) destroyedSignLocation.getBlock().getState();
-				sign.getSide(Side.FRONT).setLine(0, "");
-				sign.getSide(Side.FRONT).setLine(1, "");
-				sign.getSide(Side.FRONT).setLine(2, "");
-				sign.getSide(Side.FRONT).setLine(3, "");
-				sign.update();
-			}
 		} else if (deletionResult == 0){
 			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy this shop!"));
 			e.setCancelled(true);
@@ -138,25 +123,21 @@ public class PlayerShopDestroy implements Listener {
 			return -1;
 		}
 
-		if (player != null) {
-			// If it is the player's shop
-			if (shop.getUuid() == player.getUniqueId()) {
-				AranarthUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
-				return 1;
-			}
-			// If it is another player's shop
-			else {
-				return 0;
-			}
+		// If it is the player's shop
+		if (shop.getUuid() == player.getUniqueId()) {
+			AranarthUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
+			return 1;
 		}
 		// If it is a server shop
-		else {
+		else if (shop.getUuid() == null) {
 			if (player.getName().equals("Aearost")) {
 				AranarthUtils.removeShop(null, destroyedSignLocation);
 				return 1;
 			} else {
 				return 0;
 			}
+		} else {
+			return 0;
 		}
 	}
 
