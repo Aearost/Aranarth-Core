@@ -3,6 +3,9 @@ AranarthCore v. 1.6
 Features
 [+] Added economy functionality using player shops
 [+] Added /ac balance [player] command to view your balance or another player's
+[+] Added recipe for pale moss blocks
+[+] Added recipe for pale moss carpets
+[+] Added recipe to uncraft honeycomb blocks back into honeycomb
 
 Bug Fixes
 - Allowed players to move quiver around inventory
