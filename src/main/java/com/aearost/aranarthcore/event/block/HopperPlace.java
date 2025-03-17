@@ -23,7 +23,7 @@ public class HopperPlace implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onPitcherPlantPlace(final BlockPlaceEvent e) {
+	public void onHopperPlace(final BlockPlaceEvent e) {
 		ItemStack item = e.getItemInHand();
 		if (item.getType() == Material.HOPPER) {
 			Location location = e.getBlockPlaced().getLocation();

@@ -154,6 +154,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerShopChestOpen(this);
 		new BabyZombiePreventVillagerDamage(this);
 		new HopperPlace(this);
+		new SignDye(this);
 	}
 
 	/**
