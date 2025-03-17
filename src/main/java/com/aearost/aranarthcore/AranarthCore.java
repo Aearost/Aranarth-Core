@@ -152,6 +152,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerShopDestroy(this);
 		new PlayerShopInteract(this);
 		new PlayerShopChestOpen(this);
+		new BabyZombiePreventVillagerDamage(this);
 	}
 
 	/**
@@ -205,6 +206,8 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeMossBlock(this);
 		new RecipeMossCarpet(this);
 		new RecipeBlackDye(this);
+		new RecipePaleMossBlock(this);
+		new RecipePaleMossCarpet(this);
 	}
 
 	/**
