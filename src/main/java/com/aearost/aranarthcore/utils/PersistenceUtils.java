@@ -462,7 +462,11 @@ public class PersistenceUtils {
 
 				switch (fieldName) {
 					case "uuid" -> {
-						uuid = UUID.fromString(fieldValue);
+						if (fieldValue.equals("null")) {
+							uuid = null;
+						} else {
+							uuid = UUID.fromString(fieldValue);
+						}
 						fieldCount++;
 					}
 					case "worldName" -> {
@@ -560,7 +564,13 @@ public class PersistenceUtils {
 						int shopAmountFromUuid = playerShops.get(uuid).size();
 						for (PlayerShop shop : AranarthUtils.getShops().get(uuid)) {
 							shopCounter++;
-							writer.write("        \"uuid\": \"" + shop.getUuid().toString() + "\",\n");
+							// If it's a server shop
+							if (shop.getUuid() == null) {
+								writer.write("        \"uuid\": \"" + null + "\",\n");
+							} else {
+								writer.write("        \"uuid\": \"" + shop.getUuid().toString() + "\",\n");
+							}
+
 							writer.write("        \"worldName\": \"" + shop.getLocation().getWorld().getName() + "\",\n");
 							writer.write("        \"x\": \"" + shop.getLocation().getX() + "\",\n");
 							writer.write("        \"y\": \"" + shop.getLocation().getY() + "\",\n");

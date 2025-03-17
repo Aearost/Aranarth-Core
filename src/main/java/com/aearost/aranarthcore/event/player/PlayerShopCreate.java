@@ -11,6 +11,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -163,8 +164,12 @@ public class PlayerShopCreate implements Listener {
 				return false;
 			}
 
-			if (getShopItemFromLine(lines[3]) == null) {
+			ItemStack shopItemFromLine = getShopItemFromLine(lines[3]);
+			if (shopItemFromLine == null) {
 				player.sendMessage(ChatUtils.chatMessage("&cThere is no item with this name!"));
+				return false;
+			} else if (shopItemFromLine.getType() == Material.AIR) {
+				player.sendMessage(ChatUtils.chatMessage("&cThere is more than one item with this criteria!"));
 				return false;
 			}
 
@@ -287,10 +292,28 @@ public class PlayerShopCreate implements Listener {
 	}
 
 	private ItemStack getShopItemFromLine(String line) {
+		Material materialForShop = null;
+		int matchingCriteriaCounter = 0;
 		try {
 			// Only supports vanilla items with no metadata
-			Material material = Material.valueOf(ChatUtils.stripColorFormatting(line).toUpperCase());
-			return new ItemStack(material, 1);
+			for (Material material : Material.values()) {
+				// If the name is identical
+				if (material.name().toLowerCase().equals(ChatUtils.stripColorFormatting(line.toLowerCase()))) {
+					return new ItemStack(material, 1);
+				}
+				// If the name isn't fully defined, make sure there's only one item matching it
+				else if (material.name().toLowerCase().startsWith(ChatUtils.stripColorFormatting(line.toLowerCase()))) {
+					materialForShop = material;
+					matchingCriteriaCounter++;
+				}
+			}
+
+			// Validates that only one item matches the line content
+			if (matchingCriteriaCounter == 1) {
+				return new ItemStack(materialForShop, 1);
+			} else {
+				return new ItemStack(Material.AIR);
+			}
 		} catch (IllegalArgumentException ex) {
 			return null;
 		}

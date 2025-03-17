@@ -5,10 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
@@ -184,7 +181,7 @@ public class PlayerShopInteract implements Listener {
 						// Buying from server shop
 						if (playerShop.getBuyPrice() > 0 && playerShop.getSellPrice() == 0) {
 							if (aranarthPlayer.getBalance() >= playerShop.getBuyPrice()) {
-								boolean isOwnerDeletingShop = player.getName().equals("Aearost") && player.isSneaking() && e.getAction() == Action.LEFT_CLICK_BLOCK;
+								boolean isOwnerDeletingShop = player.getName().equals("Aearost") && player.isSneaking() && e.getAction() == Action.LEFT_CLICK_BLOCK && player.getGameMode() == GameMode.CREATIVE;
 								if (!isOwnerDeletingShop) {
 									DecimalFormat df = new DecimalFormat("0.00");
 									aranarthPlayer.setBalance(aranarthPlayer.getBalance() - playerShop.getBuyPrice());
@@ -213,10 +210,10 @@ public class PlayerShopInteract implements Listener {
 						// Selling to server shop
 						else if (playerShop.getSellPrice() > 0 && playerShop.getBuyPrice() == 0) {
 							Inventory playerInventory = player.getInventory();
-							HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(playerInventory.getContents(), playerShop);
-							if (result.containsKey(true)) {
-								boolean isOwnerDeletingShop = player.getName().equals("Aearost") && player.isSneaking() && e.getAction() == Action.LEFT_CLICK_BLOCK;
-								if (!isOwnerDeletingShop) {
+							boolean isOwnerDeletingShop = player.getName().equals("Aearost") && player.isSneaking() && e.getAction() == Action.LEFT_CLICK_BLOCK && player.getGameMode() == GameMode.CREATIVE;
+							if (!isOwnerDeletingShop) {
+								HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(playerInventory.getContents(), playerShop);
+								if (result.containsKey(true)) {
 									DecimalFormat df = new DecimalFormat("0.00");
 									aranarthPlayer.setBalance(aranarthPlayer.getBalance() + playerShop.getSellPrice());
 									ItemStack shopItem = playerShop.getItem().clone();
@@ -230,13 +227,13 @@ public class PlayerShopInteract implements Listener {
 													+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase()))
 											+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice())));
 								} else {
-									player.sendMessage(ChatUtils.chatMessage("&7This server shop has been deleted"));
-									AranarthUtils.removeShop(null, playerShop.getLocation());
-									e.setCancelled(false);
-									player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
+									player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
 								}
 							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+								player.sendMessage(ChatUtils.chatMessage("&7This server shop has been deleted"));
+								AranarthUtils.removeShop(null, playerShop.getLocation());
+								e.setCancelled(false);
+								player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 							}
 						}
 						// Issue with server shop prices
