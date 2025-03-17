@@ -30,7 +30,7 @@ public class PlayerShopDestroy implements Listener {
 		Player player = e.getPlayer();
 
 		// Prevents breaking a block that has a shop on it
-		if (isRelativeBlockShop(e.getBlock())) {
+		if (isRelativeBlockShop(e.getBlock()) && !e.getBlock().getType().name().toLowerCase().endsWith("sign")) {
 			player.sendMessage(ChatUtils.chatMessage("&cPlease destroy the shop on its own"));
 			e.setCancelled(true);
 			return;
