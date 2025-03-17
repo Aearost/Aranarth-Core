@@ -5,7 +5,7 @@ Features
 [+] Added /ac balance [player] command to view your balance or another player's
 
 Bug Fixes
-- N/A
+- Allowed players to move quiver around inventory
 
 Miscellaneous
 - N/A

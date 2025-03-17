@@ -127,7 +127,7 @@ public class AranarthCore extends JavaPlugin {
 		new GuiPotionPreventNonPotionAdd(this);
 		new DragonHeadClick(this);
 		new PotionConsume(this);
-		new QuiverPreventAddToBundle(this);
+		new QuiverSwitchSlots(this);
 		new QuiverClick(this);
 		new GuiQuiverClose(this);
 		new GuiQuiverClick(this);
