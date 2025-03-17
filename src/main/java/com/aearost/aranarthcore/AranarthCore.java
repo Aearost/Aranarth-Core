@@ -208,6 +208,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeBlackDye(this);
 		new RecipePaleMossBlock(this);
 		new RecipePaleMossCarpet(this);
+		new RecipeHoneyBlockUncraft(this);
 	}
 
 	/**
