@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.world.*;
 import com.aearost.aranarthcore.recipes.*;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -47,11 +48,30 @@ public class AranarthCore extends JavaPlugin {
 			}
 		}, 36000, 36000);
 		
-		// Check every 5 seconds to update armour trim effects
+		// Check every 5 seconds to update armour trim effects, and to see if it is a new day
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
 				AranarthUtils.updateArmorTrimEffects();
+
+//				Bukkit.getLogger().info("time: " + Bukkit.getWorld("world").getTime());
+//				Bukkit.getLogger().info("full time: " + Bukkit.getWorld("world").getFullTime());
+//				Bukkit.getLogger().info("game time: " + Bukkit.getWorld("world").getGameTime());
+
+				// Game time is the whole server time
+				// /time set daytime is the specific time in the world
+
+				int dayNum = (int) (Bukkit.getWorld("world").getGameTime() / 24000);
+				int time = (int) (Bukkit.getWorld("world").getTime() / 20);
+
+				// Between the first 5 seconds of a day
+				if (time >= 0 && time < 5) {
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("        &e&lDay " + dayNum));
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
+				}
 			}
 		}, 0, 100);
 	}
