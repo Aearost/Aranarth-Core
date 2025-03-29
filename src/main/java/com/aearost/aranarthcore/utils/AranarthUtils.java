@@ -26,6 +26,7 @@ public class AranarthUtils {
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
+	private static int dayNum = 0;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -442,5 +443,13 @@ public class AranarthUtils {
 		if (shopSlotToDelete != -1) {
 			shops.remove(shopSlotToDelete);
 		}
+	}
+
+	public static int getDayNum() {
+		return dayNum;
+	}
+
+	public static void setDayNum(int newDayNum) {
+		dayNum = newDayNum;
 	}
 }
