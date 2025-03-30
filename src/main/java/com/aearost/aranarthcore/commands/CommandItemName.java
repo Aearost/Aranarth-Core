@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -34,62 +35,55 @@ public class CommandItemName {
                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding an item to use this command!"));
                 } else {
                     ItemMeta meta = item.getItemMeta();
-                    if (args.length == 2) {
-                        if (args[1].equalsIgnoreCase("remove")) {
-                            meta.setDisplayName(null);
-                            player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
-                        } else {
-                            String itemName = ChatUtils.translateToColor(args[1]);
-                            meta.setDisplayName(itemName);
-                            player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
-                        }
+                    if (args.length >= 2 && args[1].equalsIgnoreCase("remove")) {
+                        meta.setDisplayName(null);
+                        player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
-
                         return true;
                     } else {
-                        if (args.length > 2) {
-                            int stringStart = 1;
-                            if (args[1].startsWith("gradientbold")) {
-                                // Start at the actual name
-                                stringStart = 3;
-                            }
-
-                            // Gets the full item name
-                            StringBuilder itemNameSB = new StringBuilder();
-                            for (int i = stringStart; i < args.length; i++) {
-                                itemNameSB.append(args[i]);
-                                if (i == args.length - 1) {
-                                    break;
-                                } else {
-                                    itemNameSB.append(" ");
-                                }
-                            }
-
-                            String itemName = itemNameSB.toString();
-                            if (args[1].startsWith("gradient")) {
-                                if (args[1].equalsIgnoreCase("gradient")) {
-                                    itemName = ChatUtils.translateToGradient(args[2], itemName, false);
-                                } else if (args[1].equalsIgnoreCase("gradientbold")) {
-                                    itemName = ChatUtils.translateToGradient(args[2], itemName, true);
-                                }
-
-                                if (Objects.isNull(itemName)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
-                                    return false;
-                                } else {
-                                    meta.setDisplayName(itemName);
-                                }
-                            } else {
-                                meta.setDisplayName(ChatUtils.translateToColor(itemName));
-                                return true;
-                            }
-
-                            item.setItemMeta(meta);
-                            player.getInventory().setItemInMainHand(item);
-                            player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
-                            return true;
+                        int stringStart = 1;
+                        if (args[1].startsWith("gradient")) {
+                            // Start at the actual name and not the attribute
+                            stringStart = 3;
                         }
+
+                        // Gets the full item name
+                        StringBuilder itemNameSB = new StringBuilder();
+                        for (int i = stringStart; i < args.length; i++) {
+                            itemNameSB.append(args[i]);
+                            if (i == args.length - 1) {
+                                break;
+                            } else {
+                                itemNameSB.append(" ");
+                            }
+                        }
+
+                        String itemName = itemNameSB.toString();
+                        Bukkit.getLogger().info("Full name: |" + itemName + "|");
+                        if (args[1].startsWith("gradient")) {
+                            if (args[1].equalsIgnoreCase("gradient")) {
+                                itemName = ChatUtils.translateToGradient(args[2], itemName, false);
+                            } else if (args[1].equalsIgnoreCase("gradientbold")) {
+                                itemName = ChatUtils.translateToGradient(args[2], itemName, true);
+                            }
+
+                            if (Objects.isNull(itemName)) {
+                                player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
+                                return false;
+                            } else {
+                                meta.setDisplayName(itemName);
+                            }
+                        } else {
+                            Bukkit.getLogger().info("UH");
+                            itemName = ChatUtils.translateToColor(itemName);
+                            meta.setDisplayName(itemName);
+                        }
+
+                        item.setItemMeta(meta);
+                        player.getInventory().setItemInMainHand(item);
+                        player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
+                        return true;
                     }
                 }
             }

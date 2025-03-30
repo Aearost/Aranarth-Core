@@ -12,6 +12,7 @@ Features
 
 Bug Fixes
 - Allowed players to move quiver around inventory
+- Fixed issue preventing multiple word usage of /ac itemname gradient
 
 Miscellaneous
 - N/A
