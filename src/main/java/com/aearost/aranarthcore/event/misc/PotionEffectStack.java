@@ -28,8 +28,9 @@ public class PotionEffectStack implements Listener {
 	 */
 	@EventHandler
 	public void onPotionAdd(final EntityPotionEffectEvent e) {
-		// Prevents recursive call from calling recursively again
-		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN) {
+
+		// Prevents a new potion effect from being called if the effect already is applied
+		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN && e.getOldEffect() != null) {
 			return;
 		}
 

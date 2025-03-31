@@ -26,7 +26,7 @@ public class AranarthUtils {
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
-	private static int dayNum = 0;
+	private static String monthName;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -445,11 +445,12 @@ public class AranarthUtils {
 		}
 	}
 
-	public static int getDayNum() {
-		return dayNum;
+	public static String getMonthName() {
+		return monthName;
 	}
 
-	public static void setDayNum(int newDayNum) {
-		dayNum = newDayNum;
+	public static void setMonthName(String newMonthName) {
+		monthName = newMonthName;
 	}
+
 }
