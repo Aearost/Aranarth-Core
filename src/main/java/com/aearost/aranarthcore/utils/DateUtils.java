@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 
 import java.time.LocalDate;
 
@@ -110,6 +112,8 @@ public class DateUtils {
 			final int month14End = 2045;
 			final int month15End = 2192;
 
+			Bukkit.getLogger().info("");
+
 			// Gets current server year
 			int yearNum = 0;
 			// If the amount is a clean multiple of 2192 (days in one year)
@@ -121,6 +125,7 @@ public class DateUtils {
 
 			// Gets current server day in the given year
 			int dayNumInYear = (dayNum % month15End) + 1;
+			int dayNumInMonth = 0;
 
 			String monthName = null;
 			// Gets the current server month
@@ -129,32 +134,46 @@ public class DateUtils {
 			}
 			else if (dayNumInYear > month1End && dayNumInYear <= month2End) {
 				monthName = "Aquinvór";
+				dayNumInMonth = dayNumInYear - month1End;
 			} else if (dayNumInYear >= month2End && dayNumInYear <= month3End) {
 				monthName = "Nebulivór";
+				dayNumInMonth = dayNumInYear - month2End;
 			} else if (dayNumInYear > month3End && dayNumInYear <= month4End) {
 				monthName = "Ventirór";
+				dayNumInMonth = dayNumInYear - month3End;
 			} else if (dayNumInYear > month4End && dayNumInYear <= month5End) {
 				monthName = "Florivór";
+				dayNumInMonth = dayNumInYear - month4End;
 			} else if (dayNumInYear > month5End && dayNumInYear <= month6End) {
 				monthName = "Calorvór";
+				dayNumInMonth = dayNumInYear - month5End;
 			} else if (dayNumInYear > month6End && dayNumInYear <= month7End) {
 				monthName = "Solarvór";
+				dayNumInMonth = dayNumInYear - month6End;
 			} else if (dayNumInYear > month7End && dayNumInYear <= month8End) {
 				monthName = "Aestivór";
+				dayNumInMonth = dayNumInYear - month7End;
 			} else if (dayNumInYear > month8End && dayNumInYear <= month9End) {
 				monthName = "Ardorvór";
+				dayNumInMonth = dayNumInYear - month8End;
 			} else if (dayNumInYear > month9End && dayNumInYear <= month10End) {
 				monthName = "Fructivór";
+				dayNumInMonth = dayNumInYear - month9End;
 			} else if (dayNumInYear > month10End && dayNumInYear <= month11End) {
 				monthName = "Follivór";
+				dayNumInMonth = dayNumInYear - month10End;
 			} else if (dayNumInYear > month11End && dayNumInYear <= month12End) {
 				monthName = "Umbravór";
+				dayNumInMonth = dayNumInYear - month11End;
 			} else if (dayNumInYear > month12End && dayNumInYear <= month13End) {
 				monthName = "Glacivór";
+				dayNumInMonth = dayNumInYear - month12End;
 			} else if (dayNumInYear > month13End && dayNumInYear <= month14End) {
 				monthName = "Frigorvór";
+				dayNumInMonth = dayNumInYear - month13End;
 			} else if (dayNumInYear > month14End) {
 				monthName = "Obscurvór";
+				dayNumInMonth = dayNumInYear - month14End;
 			} else {
 				Bukkit.getLogger().info("Something went wrong with calculating the month name!");
 				return;
@@ -190,15 +209,50 @@ public class DateUtils {
 				return;
 			}
 
-			displayServerDate(dayNumInYear, dayNumInYear, monthName, weekdayName);
+			displayServerDate(dayNumInMonth, yearNum, monthName, weekdayName);
 		}
 	}
 
-	private void displayServerDate(int dayNumInYear, int yearNum, String monthName, String weekdayName) {
+	private void displayServerDate(int dayNumInMonth, int yearNum, String monthName, String weekdayName) {
+		String dayNumAsString = dayNumInMonth + "";
+		if (dayNumAsString.length() > 1) {
+			if (dayNumAsString.equals("11")) {
+				dayNumAsString += "th";
+			} else if (dayNumAsString.endsWith("12")) {
+				dayNumAsString += "th";
+			} else if (dayNumAsString.endsWith("13")) {
+				dayNumAsString += "th";
+			} else {
+				if (dayNumAsString.endsWith("1")) {
+					dayNumAsString += "st";
+				} else if (dayNumAsString.endsWith("2")) {
+					dayNumAsString += "nd";
+				} else if (dayNumAsString.endsWith("3")) {
+					dayNumAsString += "rd";
+				} else {
+					dayNumAsString += "th";
+				}
+			}
+		} else {
+			if (dayNumAsString.endsWith("1")) {
+				dayNumAsString += "st";
+			} else if (dayNumAsString.endsWith("2")) {
+				dayNumAsString += "nd";
+			} else if (dayNumAsString.endsWith("3")) {
+				dayNumAsString += "rd";
+			} else {
+				dayNumAsString += "th";
+			}
+		}
+
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&e&l" + weekdayName + ", " + monthName + " " + dayNumInYear + ", " + yearNum));
+		Bukkit.broadcastMessage(ChatUtils.chatMessage("&e&l" + weekdayName + ", " + dayNumAsString + " of " + monthName + ", " + yearNum));
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
+
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+		}
 	}
 }
