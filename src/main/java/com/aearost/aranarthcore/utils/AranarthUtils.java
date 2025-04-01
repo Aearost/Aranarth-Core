@@ -27,6 +27,11 @@ public class AranarthUtils {
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 	private static String monthName;
+	private static boolean isSnowing;
+	private static int minSnowDuration;
+	private static int maxSnowDuration;
+	private static int minBetweenSnow;
+	private static int maxBetweenSnow;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -403,10 +408,19 @@ public class AranarthUtils {
 		dragonHeads.put(location, newAmount);
 	}
 
+	/**
+	 * Provides the current list of player shops.
+	 * @return The list of player shops.
+	 */
 	public static HashMap<UUID, List<PlayerShop>> getShops() {
 		return playerShops;
 	}
 
+	/**
+	 * Provides the shop at the input sign location.
+	 * @param location The location of the sign.
+	 * @return The player shop if it exists.
+	 */
 	public static PlayerShop getShop(Location location) {
 		if (getShops() != null) {
 			for (UUID uuid : playerShops.keySet()) {
@@ -421,6 +435,11 @@ public class AranarthUtils {
 		return null;
 	}
 
+	/**
+	 * Adding the input shop by the associated UUID.
+	 * @param uuid The UUID. Null if it is a server shop.
+	 * @param newShop The new player shop.
+	 */
 	public static void addShop(UUID uuid, PlayerShop newShop) {
 		List<PlayerShop> shops = playerShops.get(uuid);
 		if (shops == null) {
@@ -430,6 +449,11 @@ public class AranarthUtils {
 		playerShops.put(uuid, shops);
 	}
 
+	/**
+	 * Removes the player shop at the associated location for the input UUID.
+	 * @param uuid The UUID.
+	 * @param location The location of the sign of the shop.
+	 */
 	public static void removeShop(UUID uuid, Location location) {
 		List<PlayerShop> shops = playerShops.get(uuid);
 		int shopSlotToDelete = -1;
@@ -445,12 +469,100 @@ public class AranarthUtils {
 		}
 	}
 
+	/**
+	 * Provides the current server month name.
+	 * @return The server month name.
+	 */
 	public static String getMonthName() {
 		return monthName;
 	}
 
+	/**
+	 * Updates the current server month name.
+	 * @param newMonthName The new server month name.
+	 */
 	public static void setMonthName(String newMonthName) {
 		monthName = newMonthName;
+	}
+
+	/**
+	 * Provides the current value of whether it is snowing via the particles.
+	 * @return The value of whether it is snowing.
+	 */
+	public static boolean getIsSnowing() {
+		return isSnowing;
+	}
+
+	/**
+	 * Updates the value of whether it is snowing via the particles.
+	 * @param newIsSnowing The new value of whether it is snowing.
+	 */
+	public static void setIsSnowing(boolean newIsSnowing) {
+		isSnowing = newIsSnowing;
+	}
+
+	/**
+	 * Provides the minimum duration of snowfall.
+	 * @return The minimum duration of snowfall.
+	 */
+	public static int getMinSnowDuration() {
+		return minSnowDuration;
+	}
+
+	/**
+	 * Updates the value of the minimum duration of snowfall.
+	 * @param newMinSnowDuration The new minimum duration of snowfall.
+	 */
+	public static void setMinSnowDuration(int newMinSnowDuration) {
+		minSnowDuration = newMinSnowDuration;
+	}
+
+	/**
+	 * Provides the maximum duration of snowfall.
+	 * @return The maximum duration of snowfall.
+	 */
+	public static int getMaxSnowDuration() {
+		return maxSnowDuration;
+	}
+
+	/**
+	 * Updates the value of the maximum duration of snowfall.
+	 * @param newMaxSnowDuration The new maximum duration of snowfall.
+	 */
+	public static void setMaxSnowDuration(int newMaxSnowDuration) {
+		maxSnowDuration = newMaxSnowDuration;
+	}
+
+	/**
+	 * Provides the minimum duration in between snowfalls.
+	 * @return The minimum duration in between snowfalls.
+	 */
+	public static int getMinBetweenSnow() {
+		return minBetweenSnow;
+	}
+
+	/**
+	 * Updates the value of the minimum duration in between snowfalls.
+	 * @param newMinBetweenSnow The new minimum duration in between snowfalls.
+	 */
+	public static void setMinBetweenSnow(int newMinBetweenSnow) {
+		minBetweenSnow = newMinBetweenSnow;
+	}
+
+	/**
+	 * Provides the maximum duration in between snowfalls.
+	 * @return The maximum duration in between snowfalls.
+	 */
+	public static int getMaxBetweenSnow() {
+		return maxBetweenSnow;
+	}
+
+	/**
+	 * Updates the value of the maximum duration in between snowfalls.
+	 * @param newMaxBetweenSnow The new maximum duration in between snowfalls.
+	 */
+	public static void setMaxBetweenSnow(int newMaxBetweenSnow) {
+		maxBetweenSnow = newMaxBetweenSnow;
 	}
 
 }
