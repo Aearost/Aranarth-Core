@@ -160,6 +160,7 @@ public class AranarthCore extends JavaPlugin {
 		new BabyZombiePreventVillagerDamage(this);
 		new HopperPlace(this);
 		new SignDye(this);
+		new WeatherCancel(this);
 	}
 
 	/**

@@ -1,10 +1,11 @@
 package com.aearost.aranarthcore.utils;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Sound;
+import com.aearost.aranarthcore.AranarthCore;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -91,6 +92,9 @@ public class DateUtils {
 		return false;
 	}
 
+	/**
+	 * Identifies the current server date.
+	 */
 	public void calculateServerDate() {
 		// Unformatted in-game day number
 		int dayNum = (int) (Bukkit.getWorld("world").getGameTime() / 24000);
@@ -221,6 +225,13 @@ public class DateUtils {
 		determineMonthEffects();
 	}
 
+	/**
+	 * Displays the server date on new days.
+	 * @param dayNumInMonth The day in the server month.
+	 * @param yearNum The current server year.
+	 * @param monthName The current server month.
+	 * @param weekdayName The current server day of the week.
+	 */
 	private void displayServerDate(int dayNumInMonth, int yearNum, String monthName, String weekdayName) {
 		String dayNumAsString = dayNumInMonth + "";
 		if (dayNumAsString.length() > 1) {
@@ -264,6 +275,9 @@ public class DateUtils {
 		}
 	}
 
+	/**
+	 * Applies the effects of the given month on Aranarth.
+	 */
 	private void determineMonthEffects() {
         switch (AranarthUtils.getMonthName()) {
             case "Ignivór" -> applyIgnivorEffects();
@@ -374,7 +388,7 @@ public class DateUtils {
 	 * Apply the effects during the twelfth month of Umbravor.
 	 */
 	private void applyUmbravorEffects() {
-
+		applySnowParticles(5, 100);
 	}
 
 	/**
@@ -384,6 +398,7 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
+		applySnowParticles(15, 400);
 	}
 
 	/**
@@ -393,6 +408,7 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
 		applyEffectToAllPlayers(effects);
+		applySnowParticles(50, 1000);
 	}
 
 	/**
@@ -403,6 +419,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
+		applySnowParticles(15, 400);
 	}
 
 	/**
@@ -411,10 +428,37 @@ public class DateUtils {
 	 * @param effects The effects to be applied.
 	 */
 	private void applyEffectToAllPlayers(List<PotionEffect> effects) {
-
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.addPotionEffects(effects);
 		}
+	}
+
+	/**
+	 * Applies the manual snow particles in the winter months of Aranarth.
+	 * @param bigFlakeDensity The density of the larger snowflakes, being end rod particles.
+	 * @param smallFlakeDensity The density of the smaller snowflakes, being white ash particles.
+	 */
+	private void applySnowParticles(int bigFlakeDensity, int smallFlakeDensity) {
+		new BukkitRunnable() {
+			int runs = 0;
+
+			@Override
+			public void run() {
+				if (runs == 20) {
+					this.cancel();
+					return;
+				}
+
+				Player player = Bukkit.getPlayer("Aearost");
+				if (player != null) {
+					Location loc = player.getLocation();
+					loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
+					loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+				}
+
+				runs++;
+			}
+		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
 	}
 
 }
