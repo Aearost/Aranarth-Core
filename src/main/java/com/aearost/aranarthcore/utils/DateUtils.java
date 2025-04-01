@@ -444,16 +444,28 @@ public class DateUtils {
 
 			@Override
 			public void run() {
+				// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 				if (runs == 20) {
 					this.cancel();
 					return;
 				}
 
-				Player player = Bukkit.getPlayer("Aearost");
-				if (player != null) {
-					Location loc = player.getLocation();
-					loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
-					loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					if (player != null) {
+						Location loc = player.getLocation();
+						boolean areAllBlocksAir = true;
+						// Ensures blocks above are all air/if they are outside
+						for (int y = loc.getBlockY(); y < loc.getBlockY() + 25; y++) {
+							if (loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() != Material.AIR) {
+								areAllBlocksAir = false;
+							}
+						}
+
+						if (areAllBlocksAir) {
+							loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
+							loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+						}
+					}
 				}
 
 				runs++;
