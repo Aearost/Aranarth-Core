@@ -174,7 +174,6 @@ public class CropHarvest implements Listener {
 	 * @return The number of the crop to be dropped.
 	 */
 	private int wheatBeetrootDropCalculation(int level, boolean isWinterMonth) {
-		Bukkit.getLogger().info("UH");
 		// This uses the same formula as regular wheat seeds dropping
 		Random r = new Random();
 		final int bracket = r.nextInt(10) + 1;
