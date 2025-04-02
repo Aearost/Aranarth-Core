@@ -21,12 +21,10 @@ public class WeatherCancel implements Listener {
 	@EventHandler
 	public void onRain(final WeatherChangeEvent e) {
 		// If being set to raining during a winter month
-		if (e.toWeatherState() && isWinterMonth(AranarthUtils.getMonthName())) {
+		if (e.toWeatherState() && AranarthUtils.isWinterMonth(AranarthUtils.getMonthName())) {
 			e.setCancelled(true);
 		}
 	}
 
-	private boolean isWinterMonth(String monthName) {
-		return monthName.equals("Umbravór") || monthName.equals("Glacivór") || monthName.equals("Frigorvór") || monthName.equals("Obscurvór");
-	}
+
 }
