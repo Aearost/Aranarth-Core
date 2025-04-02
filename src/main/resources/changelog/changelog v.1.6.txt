@@ -14,6 +14,8 @@ Features
 Bug Fixes
 - Allowed players to move quiver around inventory
 - Fixed issue preventing multiple word usage of /ac itemname gradient
+- Crop harvest is now looking for Fortune and not Looting
+- Crop harvest fortune now works on wheat and beetroot when not sneaking
 
 Miscellaneous
 - N/A

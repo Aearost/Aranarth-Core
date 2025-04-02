@@ -161,6 +161,7 @@ public class AranarthCore extends JavaPlugin {
 		new HopperPlace(this);
 		new SignDye(this);
 		new WeatherCancel(this);
+		new BannerExtendPatternLimit(this);
 	}
 
 	/**

@@ -453,9 +453,13 @@ public class DateUtils {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					if (player != null) {
 						Location loc = player.getLocation();
+						if (!loc.getWorld().getName().equals("world")) {
+							continue;
+						}
+
 						boolean areAllBlocksAir = true;
 						// Ensures blocks above are all air/if they are outside
-						for (int y = loc.getBlockY(); y < loc.getBlockY() + 25; y++) {
+						for (int y = loc.getBlockY() + 2; y < loc.getBlockY() + 25; y++) {
 							if (loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() != Material.AIR) {
 								areAllBlocksAir = false;
 							}

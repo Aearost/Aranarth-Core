@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -26,6 +27,7 @@ public class AranarthUtils {
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
+	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static String monthName;
 	private static boolean isSnowing;
 	private static int minSnowDuration;
@@ -563,6 +565,38 @@ public class AranarthUtils {
 	 */
 	public static void setMaxBetweenSnow(int newMaxBetweenSnow) {
 		maxBetweenSnow = newMaxBetweenSnow;
+	}
+
+	/**
+	 * Provides the banner the player is editing.
+	 * @param uuid The player's UUID.
+	 * @return The banner's meta.
+	 */
+	public static BannerMeta getPlayerBanner(UUID uuid) {
+		return playerBanners.get(uuid);
+	}
+
+	/**
+	 * Updates the value of the player's banner.
+	 * @param uuid The UUID of the player.
+	 * @param bannerMeta The banner's meta.
+	 */
+	public static void setPlayerBanner(UUID uuid, BannerMeta bannerMeta) {
+		// If the player is done with editing the banner
+		if (bannerMeta == null) {
+			playerBanners.remove(uuid);
+		}
+
+		playerBanners.put(uuid, bannerMeta);
+	}
+
+	/**
+	 * Confirms if the current month is a winter month.
+	 * @param monthName The name of the month.
+	 * @return Confirmation whether the current month is a winter month.
+	 */
+	public static boolean isWinterMonth(String monthName) {
+		return monthName.equals("Umbravór") || monthName.equals("Glacivór") || monthName.equals("Frigorvór") || monthName.equals("Obscurvór");
 	}
 
 }

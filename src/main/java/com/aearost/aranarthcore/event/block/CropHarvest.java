@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
@@ -32,33 +33,87 @@ public class CropHarvest implements Listener {
 	 */
 	@EventHandler
 	public void onCropHarvest(final BlockBreakEvent e) {
-		if (e.getPlayer().isSneaking()) {
-			Block block = e.getBlock();
-			if (getIsBlockCrop(block)) {
+		Block block = e.getBlock();
+		if (getIsBlockCrop(block)) {
+			ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
+			ItemStack seed = null;
+			Random random = new Random();
+			if (drops.size() > 1) {
+				// The first index (0) is 1 of the following crops (wheat, beetroot, carrot, potato)
+				// The second index (1) is always the seed (wheat seeds, beetroot seeds, carrot, potato)
+				seed = drops.get(1);
+			}
+			// Nether wart never has a second value
+			else {
+				if (drops.getFirst().getType() == Material.NETHER_WART) {
+					seed = drops.getFirst();
+				}
+
+				// Prevent destruction of non-fully grown crop
+				if (e.getPlayer().isSneaking()) {
+					e.setCancelled(true);
+				}
+				// Prevents any other behaviour
+				return;
+			}
+
+			ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+			int level = 0;
+			boolean isUsingFortune = false;
+			if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
+				isUsingFortune = true;
+				level = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
+			}
+
+			// Removes yields of seeds and regular non-fortune harvests during the winter
+			if (AranarthUtils.isWinterMonth(AranarthUtils.getMonthName())) {
+				if (seed.getType() == Material.WHEAT_SEEDS || seed.getType() == Material.BEETROOT_SEEDS) {
+					if (seed.getAmount() > 1) {
+						seed.setAmount(seed.getAmount() - 1);
+					} else if (seed.getAmount() == 1) {
+						int randomSeedAmount = random.nextInt(2);
+						seed = drops.get(randomSeedAmount);
+					}
+
+					int randomCropAmount = random.nextInt(2);
+
+					// Not sneaking but holding fortune tool
+					if (isUsingFortune && getIsMature(e.getBlock())) {
+						if (!e.getPlayer().isSneaking()) {
+							int amountToDrop = wheatBeetrootDropCalculation(level, AranarthUtils.isWinterMonth(AranarthUtils.getMonthName()));
+							drops.get(1).setAmount(amountToDrop);
+							e.setCancelled(true);
+							block.getWorld().dropItemNaturally(block.getLocation(), seed);
+							block.getWorld().dropItemNaturally(block.getLocation(), drops.get(1));
+							e.getBlock().setType(Material.AIR);
+						}
+					} else {
+						drops.get(0).setAmount(randomCropAmount);
+					}
+
+				} else if (drops.get(1).getType() == Material.CARROTS || drops.get(1).getType() == Material.POTATOES) {
+					if (seed.getAmount() >= 2) {
+						seed.setAmount(seed.getAmount() - 2);
+					} else if (seed.getAmount() == 1) {
+						seed.setAmount(0);
+					}
+				}
+			}
+
+			// Auto-replant functionality
+			if (e.getPlayer().isSneaking()) {
 				e.setCancelled(true);
 				if (getIsMature(block)) {
 					// Prevents the block from actually being broken
-					ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
-                    final ItemStack seed;
-                    if (drops.size() > 1) {
-						// The first index (0) is always 1 of the crop (wheat, beetroot, carrot, potato)
-						// The second index (1) is always the seed (wheat seeds, beetroot seeds, carrot, potato)
-                        seed = drops.get(1);
-                    }
-					// Only applies for nether wart
-					else {
-                        seed = drops.getFirst();
-                    }
-                    seed.setAmount(seed.getAmount() - 1);
+					if (seed.getAmount() > 1) {
+						seed.setAmount(seed.getAmount() - 1);
+					}
+
                     for (ItemStack drop : drops) {
 						if (drop != null && drop.getAmount() > 0) {
-							// Adds support to increase yield of wheat per crop if using fortune
+							// Adds support to increase yield per crop if using fortune
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
-								ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-								if (heldItem.containsEnchantment(Enchantment.LOOTING)) {
-									int level = heldItem.getEnchantmentLevel(Enchantment.LOOTING);
-									drop.setAmount(wheatBeetrootDropCalculation(level));
-								}
+								drop.setAmount(wheatBeetrootDropCalculation(level, AranarthUtils.isWinterMonth(AranarthUtils.getMonthName())));
 							}
 							block.getWorld().dropItemNaturally(block.getLocation(), drop);
 						}
@@ -77,7 +132,14 @@ public class CropHarvest implements Listener {
 					
 					// Without this call, there's no way for the crop to actually be re-planted
 					block.setBlockData(crop);
+					return;
 				}
+			}
+
+			e.setCancelled(true);
+			block.setType(Material.AIR);
+			for (ItemStack drop : drops) {
+				block.getWorld().dropItemNaturally(block.getLocation(), drop);
 			}
 		}
 	}
@@ -108,9 +170,11 @@ public class CropHarvest implements Listener {
 	/**
 	 * Determines how much wheat or beetroot to be dropped based on Fortune.
 	 * @param level The fortune level of the tool.
+	 * @param isWinterMonth Confirmation whether the current server month is a winter month.
 	 * @return The number of the crop to be dropped.
 	 */
-	private int wheatBeetrootDropCalculation(int level) {
+	private int wheatBeetrootDropCalculation(int level, boolean isWinterMonth) {
+		Bukkit.getLogger().info("UH");
 		// This uses the same formula as regular wheat seeds dropping
 		Random r = new Random();
 		final int bracket = r.nextInt(10) + 1;
@@ -138,6 +202,12 @@ public class CropHarvest implements Listener {
 			} else if (bracket >= 7){
 				amountToDrop = 3;
 			}
+		}
+
+		// Removes wheat or beetroot drops partially in winter months
+		if (isWinterMonth) {
+			int amountToReduce = r.nextInt(2);
+			amountToDrop = amountToDrop - amountToReduce;
 		}
 		return amountToDrop;
 	}
