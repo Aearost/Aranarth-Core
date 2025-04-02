@@ -2,14 +2,18 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Provides utility methods to facilitate the formatting of all date related content.
@@ -388,7 +392,7 @@ public class DateUtils {
 	 * Apply the effects during the twelfth month of Umbravor.
 	 */
 	private void applyUmbravorEffects() {
-		applySnowParticles(5, 100);
+		applySnow(5, 100);
 	}
 
 	/**
@@ -398,7 +402,7 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
-		applySnowParticles(15, 400);
+		applySnow(15, 400);
 	}
 
 	/**
@@ -408,7 +412,7 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
 		applyEffectToAllPlayers(effects);
-		applySnowParticles(50, 1000);
+		applySnow(50, 1000);
 	}
 
 	/**
@@ -419,7 +423,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
-		applySnowParticles(15, 400);
+		applySnow(15, 400);
 	}
 
 	/**
@@ -438,7 +442,7 @@ public class DateUtils {
 	 * @param bigFlakeDensity The density of the larger snowflakes, being end rod particles.
 	 * @param smallFlakeDensity The density of the smaller snowflakes, being white ash particles.
 	 */
-	private void applySnowParticles(int bigFlakeDensity, int smallFlakeDensity) {
+	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
 		new BukkitRunnable() {
 			int runs = 0;
 
@@ -465,9 +469,15 @@ public class DateUtils {
 							}
 						}
 
+						// Adds snow particle effects
 						if (areAllBlocksAir) {
 							loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
 							loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+						}
+
+						// Attempts to generate snow only once per second
+						if (runs == 0) {
+							generateSnow(loc, bigFlakeDensity);
 						}
 					}
 				}
@@ -475,6 +485,108 @@ public class DateUtils {
 				runs++;
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+	}
+
+	/**
+	 * Handles the generation of snow nearby online players.
+	 * @param loc The current location of the player.
+	 * @param bigFlakeDensity The density of the large snowflakes to base the snowfall chance on.
+	 */
+	private void generateSnow(Location loc, int bigFlakeDensity) {
+		// Blocks that shouldn't have snow placed on them
+		final Set<Material> INVALID_SURFACE_BLOCKS = EnumSet.of(
+				Material.WATER, Material.LAVA, Material.SEAGRASS, Material.TALL_SEAGRASS, Material.KELP, Material.KELP_PLANT,
+				Material.SEA_PICKLE, Material.CAMPFIRE, Material.SOUL_CAMPFIRE, Material.CACTUS, Material.SUGAR_CANE,
+				Material.BAMBOO, Material.BAMBOO_SAPLING, Material.TORCH, Material.WALL_TORCH, Material.REDSTONE_TORCH,
+				Material.SOUL_TORCH, Material.RAIL, Material.ACTIVATOR_RAIL, Material.DETECTOR_RAIL, Material.POWERED_RAIL,
+				Material.LADDER, Material.VINE, Material.SLIME_BLOCK, Material.HONEY_BLOCK,
+				Material.LILY_PAD, Material.ANVIL, Material.BELL, Material.CHAIN, Material.LECTERN, Material.LIGHTNING_ROD,
+				Material.RESPAWN_ANCHOR, Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.LANTERN, Material.SOUL_LANTERN,
+				Material.END_ROD, Material.SCAFFOLDING, Material.FLOWER_POT, Material.CANDLE, Material.CANDLE_CAKE,
+				Material.AMETHYST_CLUSTER, Material.SMALL_AMETHYST_BUD, Material.MEDIUM_AMETHYST_BUD, Material.LARGE_AMETHYST_BUD,
+				Material.POINTED_DRIPSTONE, Material.TURTLE_EGG, Material.SCULK_SENSOR, Material.SCULK_SHRIEKER, Material.BEACON, Material.DIRT_PATH, Material.FARMLAND
+		);
+
+		// Adding other variants
+		for (Material material : Material.values()) {
+			String name = material.name();
+			if (name.endsWith("_WALL") || name.endsWith("_FENCE") || name.endsWith("_FENCE_GATE") || name.endsWith("_BUTTON")
+					|| name.endsWith("_DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
+					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER")) {
+				INVALID_SURFACE_BLOCKS.add(material);
+			}
+		}
+
+		Random random = new Random();
+		// Adds snow to the surrounding blocks from the player
+		int centerX = loc.getBlockX();
+		int centerZ = loc.getBlockZ();
+		World world = loc.getWorld();
+
+		// Loop over columns within a 75 block radius
+		for (int x = centerX - 75; x <= centerX + 75; x++) {
+			for (int z = centerZ - 75; z <= centerZ + 75; z++) {
+
+				// Determines if snow will generate at this block
+				int rand = random.nextInt(1000);
+				// Proportionate to the snow density
+				if (rand > (bigFlakeDensity / 5)) {
+					continue;
+				}
+
+				// Check that the column is within a 75-block circle (optional, for a round area)
+				if (loc.distance(new Location(world, x, loc.getY(), z)) > 75) {
+					continue;
+				}
+
+				Block surfaceBlock = world.getHighestBlockAt(x, z);
+				// If the surface block is invalid, skip this column
+				if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
+					continue;
+				}
+
+				// Ensures that snow only goes on flat parts of stairs/slabs
+				if (surfaceBlock.getBlockData() instanceof Stairs stairs) {
+					if (stairs.getHalf() == Bisected.Half.BOTTOM) {
+						continue;
+					}
+				} else if (surfaceBlock.getBlockData() instanceof Slab slab) {
+					if (slab.getType() == Slab.Type.BOTTOM) {
+						continue;
+					}
+				}
+
+				// Only consider blocks above y=35
+				if (surfaceBlock.getY() <= 35) {
+					continue;
+				}
+
+				Block above = surfaceBlock.getRelative(BlockFace.UP);
+
+				if (above.getType() != Material.AIR) {
+					continue;
+				}
+
+				// Check that there is at least 25 blocks of air above.
+				boolean clearAbove = true;
+				for (int i = 1; i <= 25; i++) {
+					Block checkBlock = surfaceBlock.getRelative(BlockFace.UP, i);
+					if (checkBlock.getType() != Material.AIR) {
+						clearAbove = false;
+						break;
+					}
+				}
+				if (!clearAbove) {
+					continue;
+				}
+
+				// Place snow normally on air
+				if (above.getType() == Material.AIR) {
+					above.setType(Material.SNOW);
+				}
+			}
+		}
+
 	}
 
 }
