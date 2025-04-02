@@ -178,6 +178,7 @@ public class CropHarvest implements Listener {
 		Random r = new Random();
 		final int bracket = r.nextInt(10) + 1;
 		int amountToDrop = 1;
+
 		// 70% chance of getting 1 wheat
 		// 30% chance of getting 2 wheat
 		if (level == 1) {
