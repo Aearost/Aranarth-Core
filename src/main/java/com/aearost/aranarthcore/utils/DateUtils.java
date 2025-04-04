@@ -311,6 +311,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.LUCK, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.REGENERATION, 320, 0));
 		applyEffectToAllPlayers(effects);
+		meltSnow();
 	}
 
 	/**
@@ -321,13 +322,14 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
 		applyEffectToAllPlayers(effects);
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the third month of Nebulivor.
 	 */
 	private void applyNebulivorEffects() {
-
+		meltSnow();
 	}
 
 	/**
@@ -337,55 +339,56 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SPEED, 320, 0));
 		applyEffectToAllPlayers(effects);
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the fifth month of Florivor.
 	 */
 	private void applyFlorivorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the sixth month of Calorvor.
 	 */
 	private void applyCalorvorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the seventh month of Solarvor.
 	 */
 	private void applySolarvorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the eighth month of Aestivor.
 	 */
 	private void applyAestivorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the ninth month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the tenth month of Fructivor.
 	 */
 	private void applyFructivorEffects() {
-
+		meltSnow();
 	}
 
 	/**
 	 * Apply the effects during the eleventh month of Follivor.
 	 */
 	private void applyFollivorEffects() {
-
+		meltSnow();
 	}
 
 	/**
@@ -393,6 +396,7 @@ public class DateUtils {
 	 */
 	private void applyUmbravorEffects() {
 		applySnow(5, 100);
+		meltSnow();
 	}
 
 	/**
@@ -450,38 +454,101 @@ public class DateUtils {
 			public void run() {
 				// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 				if (runs == 20) {
+					// Determines if it is currently storming
+					if (AranarthUtils.getIsStorming()) {
+						// Determines if the storm ended
+						if (AranarthUtils.getStormDuration() <= 0) {
+							Random random = new Random();
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+							AranarthUtils.setIsStorming(false);
+							String monthName = AranarthUtils.getMonthName();
+							// Updates the delay until the next storm
+                            switch (monthName) {
+                                case "Umbravór" ->
+                                    // At least 0.75 days, no more than 5 days
+									AranarthUtils.setStormDelay(random.nextInt(102000) + 18000);
+                                case "Glacivór" ->
+                                    // At least 0.5 days, no more than 2 days
+									AranarthUtils.setStormDelay(random.nextInt(48000) + 12000);
+                                case "Frigorvór" ->
+                                    // At least 0.25 days, no more than 1 day
+									AranarthUtils.setStormDelay(random.nextInt(18000) + 6000);
+                                case "Obscurvór" ->
+                                    // At least 0.5 days, no more than 1.5 days
+									AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
+                            }
+						} else {
+							// 100 ticks per execution
+							AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
+						}
+					}
+					// If it is not storming
+					else {
+						// If it is time for the next storm
+						if (AranarthUtils.getStormDelay() <= 0) {
+							Random random = new Random();
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA storm has started..."));
+							AranarthUtils.setIsStorming(true);
+							String monthName = AranarthUtils.getMonthName();
+							// Updates the duration of the storm
+                            switch (monthName) {
+                                case "Umbravór" ->
+                                    // At least 0.125 days, no more than 0.75 days
+									AranarthUtils.setStormDuration(random.nextInt(15000) + 3000);
+                                case "Glacivór" ->
+                                    // At least 0.5 days, no more than 1.5 days
+									AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
+                                case "Frigorvór" ->
+                                    // At least 0.75 days, no more than 2 days
+									AranarthUtils.setStormDuration(random.nextInt(30000) + 18000);
+                                case "Obscurvór" ->
+                                    // At least 0.25 days, no more than 1 day
+									AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
+                            }
+						} else {
+							// 100 ticks per execution
+							AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+						}
+					}
+
 					this.cancel();
 					return;
 				}
 
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (player != null) {
-						Location loc = player.getLocation();
-						if (!loc.getWorld().getName().equals("world")) {
-							continue;
-						}
+				// Handles applying the snow functionality
+				if (AranarthUtils.getIsStorming()) {
+					// Applies snow nearby all online players
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (player != null) {
+							Location loc = player.getLocation();
+							// Only snows in the survival world
+							if (!loc.getWorld().getName().equals("world")) {
+								continue;
+							}
 
-						boolean areAllBlocksAir = true;
-						// Ensures blocks above are all air/if they are outside
-						for (int y = loc.getBlockY() + 2; y < loc.getBlockY() + 25; y++) {
-							if (loc.getWorld().getBlockAt(loc.getBlockX(), y, loc.getBlockZ()).getType() != Material.AIR) {
+							// Determines if the player is underground or not
+							boolean areAllBlocksAir = true;
+							Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+							if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
 								areAllBlocksAir = false;
 							}
-						}
 
-						// Adds snow particle effects
-						if (areAllBlocksAir) {
-							loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
-							loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
-						}
+							// Only apply particles if the player is exposed to air
+							if (areAllBlocksAir) {
+								// If it is a temperate or cold biome
+								if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+									loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
+									loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+								}
+							}
 
-						// Attempts to generate snow only once per second
-						if (runs == 0) {
-							generateSnow(loc, bigFlakeDensity);
+							// Attempts to generate snow only once per second
+							if (runs % 5 == 0) {
+								generateSnow(loc, bigFlakeDensity);
+							}
 						}
 					}
 				}
-
 				runs++;
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
@@ -527,19 +594,38 @@ public class DateUtils {
 		for (int x = centerX - 75; x <= centerX + 75; x++) {
 			for (int z = centerZ - 75; z <= centerZ + 75; z++) {
 
-				// Determines if snow will generate at this block
-				int rand = random.nextInt(1000);
-				// Proportionate to the snow density
-				if (rand > (bigFlakeDensity / 5)) {
-					continue;
-				}
-
 				// Check that the column is within a 75-block circle (optional, for a round area)
 				if (loc.distance(new Location(world, x, loc.getY(), z)) > 75) {
 					continue;
 				}
 
 				Block surfaceBlock = world.getHighestBlockAt(x, z);
+				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+				// Hot biomes do not get snow
+				if (temperature > 1) {
+					continue;
+				}
+				// Frozen biomes have the highest snow rates
+				else if (temperature <= 0) {
+					bigFlakeDensity = bigFlakeDensity / 2;
+				}
+				// Cold biomes have high snow rates
+				else if (temperature < 0.25) {
+					bigFlakeDensity = bigFlakeDensity / 5;
+				}
+
+				// Temperate biomes have standard snow rates
+				else {
+					bigFlakeDensity = bigFlakeDensity / 10;
+				}
+
+				// Determines if snow will generate at this block
+				int rand = random.nextInt(5000);
+				// Proportionate snow amount to the snow density
+				if (rand > bigFlakeDensity) {
+					continue;
+				}
+
 				// If the surface block is invalid, skip this column
 				if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
 					continue;
@@ -555,15 +641,8 @@ public class DateUtils {
 						continue;
 					}
 				}
-
-				// Only consider blocks above y=35
-				if (surfaceBlock.getY() <= 35) {
-					continue;
-				}
-
 				Block above = surfaceBlock.getRelative(BlockFace.UP);
-
-				if (above.getType() != Material.AIR) {
+				if (above.getType() != Material.AIR && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
 					continue;
 				}
 
@@ -571,7 +650,7 @@ public class DateUtils {
 				boolean clearAbove = true;
 				for (int i = 1; i <= 25; i++) {
 					Block checkBlock = surfaceBlock.getRelative(BlockFace.UP, i);
-					if (checkBlock.getType() != Material.AIR) {
+					if (checkBlock.getType() != Material.AIR && checkBlock.getType() != Material.SHORT_GRASS && checkBlock.getType() != Material.FERN) {
 						clearAbove = false;
 						break;
 					}
@@ -580,13 +659,151 @@ public class DateUtils {
 					continue;
 				}
 
-				// Place snow normally on air
-				if (above.getType() == Material.AIR) {
-					above.setType(Material.SNOW);
-				}
+				// Places the snow
+				above.setType(Material.SNOW);
 			}
 		}
 
 	}
 
+	private void meltSnow() {
+		if (!isWinterMonth(AranarthUtils.getMonthName())) {
+			new BukkitRunnable() {
+				int runs = 0;
+
+				@Override
+				public void run() {
+					// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
+					if (runs == 20) {
+						this.cancel();
+						return;
+					}
+
+					// Melts snow nearby all online players
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (player != null) {
+							Location loc = player.getLocation();
+							// Only melt snow in the survival world
+							if (!loc.getWorld().getName().equals("world")) {
+								continue;
+							}
+
+							// Attempts to generate snow only once per second
+							if (runs % 4 == 0) {
+								Random random = new Random();
+								// Adds snow to the surrounding blocks from the player
+								int centerX = loc.getBlockX();
+								int centerZ = loc.getBlockZ();
+								World world = loc.getWorld();
+
+								// Loop over columns within a 75 block radius
+								for (int x = centerX - 75; x <= centerX + 75; x++) {
+									for (int z = centerZ - 75; z <= centerZ + 75; z++) {
+
+										// Check that the column is within a 75-block circle (optional, for a round area)
+										if (loc.distance(new Location(world, x, loc.getY(), z)) > 75) {
+											continue;
+										}
+
+										Block surfaceBlock = world.getHighestBlockAt(x, z);
+										Block above = surfaceBlock.getRelative(BlockFace.UP);
+										if (above.getType() != Material.SNOW) {
+											continue;
+										}
+
+										double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+										int meltRate = 0;
+										int grassReplaceRate = 0;
+										String biome = surfaceBlock.getBiome().toString();
+
+										// Hot biomes never have snow
+										if (temperature > 1) {
+											continue;
+										}
+										// Frozen biomes never melt
+										else if (temperature <= 0) {
+											continue;
+										}
+										// Cold biomes have higher snow rates so it should melt slower
+										else if (temperature < 0.25) {
+											meltRate = 1;
+											grassReplaceRate = random.nextInt(100) + 1;
+										}
+										// Temperate biomes have standard melting rates
+										else {
+											meltRate = 3;
+											grassReplaceRate = random.nextInt(100) + 1;
+										}
+
+										// Determines if snow will generate at this block
+										int rand = random.nextInt(10000);
+
+										// Proportionate melting rate for the given temperature
+										if (rand > meltRate) {
+											continue;
+										}
+										// Removes the snow
+										above.setType(Material.AIR);
+
+										// Adds short grass depending on biome
+										switch (biome) {
+											case "MEADOW":
+												if (grassReplaceRate > 80) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+											case "PLAINS":
+												if (grassReplaceRate > 30) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+											case "SUNFLOWER_PLAINS":
+												if (grassReplaceRate > 70) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+											case "SAVANNA":
+											case "SAVANNA_PLATEAU":
+												if (grassReplaceRate > 85) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+											case "WINDSWEPT_HILLS":
+											case "WINDSWEPT_FOREST":
+												if (grassReplaceRate > 10) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+											default:
+												// For other biomes that are not excluded, randomly place grass but at a low rate
+												if (grassReplaceRate > 7) {
+													return;
+												}
+												above.setType(Material.SHORT_GRASS);
+												break;
+										}
+									}
+								}
+							}
+						}
+					}
+					runs++;
+				}
+			}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+		}
+	}
+
+	/**
+	 * Confirms if the current month is a winter month.
+	 * @param monthName The name of the month.
+	 * @return Confirmation whether the current month is a winter month.
+	 */
+	public static boolean isWinterMonth(String monthName) {
+		return monthName.equals("Umbravór") || monthName.equals("Glacivór") || monthName.equals("Frigorvór") || monthName.equals("Obscurvór");
+	}
 }
