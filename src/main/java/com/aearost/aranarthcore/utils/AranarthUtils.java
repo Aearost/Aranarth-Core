@@ -29,11 +29,10 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static String monthName;
-	private static boolean isSnowing;
-	private static int minSnowDuration;
-	private static int maxSnowDuration;
-	private static int minBetweenSnow;
-	private static int maxBetweenSnow;
+	private static boolean isStorming;
+	private static int stormDuration;
+	private static int stormDelay;
+
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -488,83 +487,51 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides the current value of whether it is snowing via the particles.
-	 * @return The value of whether it is snowing.
+	 * Provides the current value of whether it is storming.
+	 * @return The value of whether it is storming.
 	 */
-	public static boolean getIsSnowing() {
-		return isSnowing;
+	public static boolean getIsStorming() {
+		return isStorming;
 	}
 
 	/**
-	 * Updates the value of whether it is snowing via the particles.
-	 * @param newIsSnowing The new value of whether it is snowing.
+	 * Updates the value of whether it is storming.
+	 * @param newIsStorming The new value of whether it is storming.
 	 */
-	public static void setIsSnowing(boolean newIsSnowing) {
-		isSnowing = newIsSnowing;
+	public static void setIsStorming(boolean newIsStorming) {
+		isStorming = newIsStorming;
 	}
 
 	/**
-	 * Provides the minimum duration of snowfall.
-	 * @return The minimum duration of snowfall.
+	 * Provides the intended duration of the current storm.
+	 * @return The duration of the current storm.
 	 */
-	public static int getMinSnowDuration() {
-		return minSnowDuration;
+	public static int getStormDuration() {
+		return stormDuration;
 	}
 
 	/**
-	 * Updates the value of the minimum duration of snowfall.
-	 * @param newMinSnowDuration The new minimum duration of snowfall.
+	 * Updates the value of the current storm duration.
+	 * @param newStormDuration The new duration of the storm.
 	 */
-	public static void setMinSnowDuration(int newMinSnowDuration) {
-		minSnowDuration = newMinSnowDuration;
+	public static void setStormDuration(int newStormDuration) {
+		stormDuration = newStormDuration;
 	}
 
 	/**
-	 * Provides the maximum duration of snowfall.
-	 * @return The maximum duration of snowfall.
+	 * Provides the current delay between storms.
+	 * @return The current delay between storms.
 	 */
-	public static int getMaxSnowDuration() {
-		return maxSnowDuration;
+	public static int getStormDelay() {
+		return stormDelay;
 	}
 
 	/**
-	 * Updates the value of the maximum duration of snowfall.
-	 * @param newMaxSnowDuration The new maximum duration of snowfall.
+	 * Updates the value of the delay between storms.
+	 * @param newStormDelay The new delay between storms.
 	 */
-	public static void setMaxSnowDuration(int newMaxSnowDuration) {
-		maxSnowDuration = newMaxSnowDuration;
-	}
-
-	/**
-	 * Provides the minimum duration in between snowfalls.
-	 * @return The minimum duration in between snowfalls.
-	 */
-	public static int getMinBetweenSnow() {
-		return minBetweenSnow;
-	}
-
-	/**
-	 * Updates the value of the minimum duration in between snowfalls.
-	 * @param newMinBetweenSnow The new minimum duration in between snowfalls.
-	 */
-	public static void setMinBetweenSnow(int newMinBetweenSnow) {
-		minBetweenSnow = newMinBetweenSnow;
-	}
-
-	/**
-	 * Provides the maximum duration in between snowfalls.
-	 * @return The maximum duration in between snowfalls.
-	 */
-	public static int getMaxBetweenSnow() {
-		return maxBetweenSnow;
-	}
-
-	/**
-	 * Updates the value of the maximum duration in between snowfalls.
-	 * @param newMaxBetweenSnow The new maximum duration in between snowfalls.
-	 */
-	public static void setMaxBetweenSnow(int newMaxBetweenSnow) {
-		maxBetweenSnow = newMaxBetweenSnow;
+	public static void setStormDelay(int newStormDelay) {
+		stormDelay = newStormDelay;
 	}
 
 	/**
@@ -590,13 +557,6 @@ public class AranarthUtils {
 		playerBanners.put(uuid, bannerMeta);
 	}
 
-	/**
-	 * Confirms if the current month is a winter month.
-	 * @param monthName The name of the month.
-	 * @return Confirmation whether the current month is a winter month.
-	 */
-	public static boolean isWinterMonth(String monthName) {
-		return monthName.equals("Umbravór") || monthName.equals("Glacivór") || monthName.equals("Frigorvór") || monthName.equals("Obscurvór");
-	}
+
 
 }

@@ -1,7 +1,9 @@
 AranarthCore v. 1.6
 
 Features
+[+] Added seasons resulting in snow during winter months and melting during summer months
 [+] Added a server date system
+[+] Added special worldwide effects based on the given season
 [+] Added economy functionality using player shops
 [+] Added /ac balance [player] command to view your balance or another player's
 [+] Added recipe for Pale Moss blocks
