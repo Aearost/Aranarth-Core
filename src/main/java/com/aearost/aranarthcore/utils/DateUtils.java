@@ -137,74 +137,96 @@ public class DateUtils {
 			AranarthUtils.setMonth(monthNum);
 			AranarthUtils.setYear(yearNum);
 
-			String monthName = null;
-			// Gets the current server month
-			if (monthNum == 0) {
-				monthName = "Ignivór";
-			}
-			else if (monthNum == 1) {
-				monthName = "Aquinvór";
-			} else if (monthNum == 2) {
-				monthName = "Nebulivór";
-			} else if (monthNum == 3) {
-				monthName = "Ventirór";
-			} else if (monthNum == 4) {
-				monthName = "Florivór";
-			} else if (monthNum == 5) {
-				monthName = "Calorvór";
-			} else if (monthNum == 6) {
-				monthName = "Solarvór";
-			} else if (monthNum == 7) {
-				monthName = "Aestivór";
-			} else if (monthNum == 8) {
-				monthName = "Ardorvór";
-			} else if (monthNum == 9) {
-				monthName = "Fructivór";
-			} else if (monthNum == 10) {
-				monthName = "Follivór";
-			} else if (monthNum == 11) {
-				monthName = "Umbravór";
-			} else if (monthNum == 12) {
-				monthName = "Glacivór";
-			} else if (monthNum == 13) {
-				monthName = "Frigorvór";
-			} else if (monthNum == 14) {
-				monthName = "Obscurvór";
-			} else {
+			String monthName = provideMonthName(monthNum);
+			if (monthName == null) {
 				Bukkit.getLogger().info("Something went wrong with calculating the month name!");
 				return;
 			}
 
-			String weekdayName = "";
-			if (weekdayNum == 0) {
-				weekdayName = "Hydris";
-			} else if (weekdayNum == 1) {
-				weekdayName = "Terris";
-			}
-			else if (weekdayNum == 2) {
-				weekdayName = "Pyris";
-			}
-			else if (weekdayNum == 3) {
-				weekdayName = "Aeris";
-			}
-			else if (weekdayNum == 4) {
-				weekdayName = "Ferris";
-			}
-			else if (weekdayNum == 5) {
-				weekdayName = "Sylvis";
-			}
-			else if (weekdayNum == 6) {
-				weekdayName = "Umbris";
-			}
-			else if (weekdayNum == 7) {
-				weekdayName = "Aethis";
-			} else {
+			String weekdayName = provideWeekdayName(weekdayNum);
+			if (weekdayName == null) {
 				Bukkit.getLogger().info("Something went wrong with calculating the weekday name!");
 				return;
 			}
-			displayServerDate(day, weekdayName, monthName, yearNum, isNewMonth);
+
+			displayServerDate(dayNum, weekdayName, monthName, yearNum, isNewMonth);
 		}
 		determineMonthEffects();
+	}
+
+	/**
+	 * Provides the server's month name based on the numeric value.
+	 * @param monthNum The numeric month value.
+	 * @return The actual name of the month.
+	 */
+	private String provideMonthName(int monthNum) {
+		if (monthNum == 0) {
+			return "Ignivór";
+		}
+		else if (monthNum == 1) {
+			return "Aquinvór";
+		} else if (monthNum == 2) {
+			return "Nebulivór";
+		} else if (monthNum == 3) {
+			return "Ventirór";
+		} else if (monthNum == 4) {
+			return "Florivór";
+		} else if (monthNum == 5) {
+			return "Calorvór";
+		} else if (monthNum == 6) {
+			return "Solarvór";
+		} else if (monthNum == 7) {
+			return "Aestivór";
+		} else if (monthNum == 8) {
+			return "Ardorvór";
+		} else if (monthNum == 9) {
+			return "Fructivór";
+		} else if (monthNum == 10) {
+			return "Follivór";
+		} else if (monthNum == 11) {
+			return "Umbravór";
+		} else if (monthNum == 12) {
+			return "Glacivór";
+		} else if (monthNum == 13) {
+			return "Frigorvór";
+		} else if (monthNum == 14) {
+			return "Obscurvór";
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Provides the server's weekday name based on the numeric value.
+	 * @param weekdayNum The numeric weekday value.
+	 * @return The actual name of the weekday.
+	 */
+	private String provideWeekdayName(int weekdayNum) {
+		if (weekdayNum == 0) {
+			return "Hydris";
+		} else if (weekdayNum == 1) {
+			return "Terris";
+		}
+		else if (weekdayNum == 2) {
+			return "Pyris";
+		}
+		else if (weekdayNum == 3) {
+			return "Aeris";
+		}
+		else if (weekdayNum == 4) {
+			return "Ferris";
+		}
+		else if (weekdayNum == 5) {
+			return "Sylvis";
+		}
+		else if (weekdayNum == 6) {
+			return "Umbris";
+		}
+		else if (weekdayNum == 7) {
+			return "Aethis";
+		} else {
+			return null;
+		}
 	}
 
 	/**

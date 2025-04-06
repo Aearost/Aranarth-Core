@@ -77,6 +77,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadHomes();
 		PersistenceUtils.loadAranarthPlayers();
 		PersistenceUtils.loadPlayerShops();
+		PersistenceUtils.loadServerDate();
 	}
 
 	/**
@@ -271,6 +272,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveHomes();
 		PersistenceUtils.saveAranarthPlayers();
 		PersistenceUtils.savePlayerShops();
+		PersistenceUtils.saveServerDate();
 	}
 
 }
