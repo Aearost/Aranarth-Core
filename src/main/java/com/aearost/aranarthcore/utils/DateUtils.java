@@ -97,147 +97,194 @@ public class DateUtils {
 	}
 
 	/**
-	 * Identifies the current server date.
+	 * Identifies and re-evaluates the current server date and applies effects based on the given month.
 	 */
 	public void calculateServerDate() {
-		// Unformatted in-game day number
-		int dayNum = (int) (Bukkit.getWorld("world").getGameTime() / 24000);
 		int time = (int) (Bukkit.getWorld("world").getTime() / 20);
 
-
-		// Last day in each season
-		final int month1End = 147;
-		final int month2End = 294;
-		final int month3End = 440;
-		final int month4End = 585;
-		final int month5End = 730;
-		final int month6End = 876;
-		final int month7End = 1022;
-		final int month8End = 1168;
-		final int month9End = 1314;
-		final int month10End = 1460;
-		final int month11End = 1606;
-		final int month12End = 1752;
-		final int month13End = 1898;
-		final int month14End = 2045;
-		final int month15End = 2192;
-
 		// Gets current server year
-		int yearNum = 0;
-		// If the amount is a clean multiple of 2192 (days in one year)
-		if (dayNum % month15End == 0) {
-			yearNum = dayNum / month1End;
-		} else {
-			yearNum = (int) (double) (dayNum / month1End) + 1;
-		}
-
-		// Gets current server day in the given year
-		int dayNumInYear = (dayNum % month15End) + 1;
-		int dayNumInMonth = 0;
-
-		String monthName = null;
-		// Gets the current server month
-		if (dayNumInYear >= 1 && dayNumInYear < month1End) {
-			monthName = "Ignivór";
-		}
-		else if (dayNumInYear > month1End && dayNumInYear <= month2End) {
-			monthName = "Aquinvór";
-			dayNumInMonth = dayNumInYear - month1End;
-		} else if (dayNumInYear >= month2End && dayNumInYear <= month3End) {
-			monthName = "Nebulivór";
-			dayNumInMonth = dayNumInYear - month2End;
-		} else if (dayNumInYear > month3End && dayNumInYear <= month4End) {
-			monthName = "Ventirór";
-			dayNumInMonth = dayNumInYear - month3End;
-		} else if (dayNumInYear > month4End && dayNumInYear <= month5End) {
-			monthName = "Florivór";
-			dayNumInMonth = dayNumInYear - month4End;
-		} else if (dayNumInYear > month5End && dayNumInYear <= month6End) {
-			monthName = "Calorvór";
-			dayNumInMonth = dayNumInYear - month5End;
-		} else if (dayNumInYear > month6End && dayNumInYear <= month7End) {
-			monthName = "Solarvór";
-			dayNumInMonth = dayNumInYear - month6End;
-		} else if (dayNumInYear > month7End && dayNumInYear <= month8End) {
-			monthName = "Aestivór";
-			dayNumInMonth = dayNumInYear - month7End;
-		} else if (dayNumInYear > month8End && dayNumInYear <= month9End) {
-			monthName = "Ardorvór";
-			dayNumInMonth = dayNumInYear - month8End;
-		} else if (dayNumInYear > month9End && dayNumInYear <= month10End) {
-			monthName = "Fructivór";
-			dayNumInMonth = dayNumInYear - month9End;
-		} else if (dayNumInYear > month10End && dayNumInYear <= month11End) {
-			monthName = "Follivór";
-			dayNumInMonth = dayNumInYear - month10End;
-		} else if (dayNumInYear > month11End && dayNumInYear <= month12End) {
-			monthName = "Umbravór";
-			dayNumInMonth = dayNumInYear - month11End;
-		} else if (dayNumInYear > month12End && dayNumInYear <= month13End) {
-			monthName = "Glacivór";
-			dayNumInMonth = dayNumInYear - month12End;
-		} else if (dayNumInYear > month13End && dayNumInYear <= month14End) {
-			monthName = "Frigorvór";
-			dayNumInMonth = dayNumInYear - month13End;
-		} else if (dayNumInYear > month14End) {
-			monthName = "Obscurvór";
-			dayNumInMonth = dayNumInYear - month14End;
-		} else {
-			Bukkit.getLogger().info("Something went wrong with calculating the month name!");
-			return;
-		}
-
-		// Gets current server weekday
-		int weekdayNum = (dayNum % 8) + 1;
-		String weekdayName = null;
-		if (weekdayNum == 1) {
-			weekdayName = "Hydris";
-		} else if (weekdayNum == 2) {
-			weekdayName = "Terris";
-		}
-		else if (weekdayNum == 3) {
-			weekdayName = "Pyris";
-		}
-		else if (weekdayNum == 4) {
-			weekdayName = "Aeris";
-		}
-		else if (weekdayNum == 5) {
-			weekdayName = "Ferris";
-		}
-		else if (weekdayNum == 6) {
-			weekdayName = "Sylvis";
-		}
-		else if (weekdayNum == 7) {
-			weekdayName = "Umbris";
-		}
-		else if (weekdayNum == 8) {
-			weekdayName = "Aethis";
-		} else {
-			Bukkit.getLogger().info("Something went wrong with calculating the weekday name!");
-			return;
-		}
-
-		if (AranarthUtils.getMonthName() == null) {
-			AranarthUtils.setMonthName(monthName);
-		}
+		int dayNum = AranarthUtils.getDay();
+		int weekdayNum = AranarthUtils.getWeekday();
+		int monthNum = AranarthUtils.getMonth();
+		int yearNum = AranarthUtils.getYear();
 
 		// If it is a new day
 		// First 5 seconds of a new day
 		if (time >= 0 && time < 5) {
-			displayServerDate(dayNumInMonth, yearNum, monthName, weekdayName);
+			// Calculates day number based on length of month
+			if (checkIfExceedsMonth(dayNum, monthNum)) {
+				dayNum = 1;
+			} else {
+				dayNum++;
+			}
+
+			if (weekdayNum == 7) {
+				weekdayNum = 0;
+			} else {
+				weekdayNum++;
+			}
+
+			if (monthNum == 14) {
+				monthNum = 0;
+				yearNum++;
+			} else {
+				monthNum++;
+			}
+
+			AranarthUtils.setDay(dayNum);
+			AranarthUtils.setWeekday(weekdayNum);
+			AranarthUtils.setMonth(monthNum);
+			AranarthUtils.setYear(yearNum);
+
+			String monthName = null;
+			// Gets the current server month
+			if (monthNum == 0) {
+				monthName = "Ignivór";
+			}
+			else if (monthNum == 1) {
+				monthName = "Aquinvór";
+			} else if (monthNum == 2) {
+				monthName = "Nebulivór";
+			} else if (monthNum == 3) {
+				monthName = "Ventirór";
+			} else if (monthNum == 4) {
+				monthName = "Florivór";
+			} else if (monthNum == 5) {
+				monthName = "Calorvór";
+			} else if (monthNum == 6) {
+				monthName = "Solarvór";
+			} else if (monthNum == 7) {
+				monthName = "Aestivór";
+			} else if (monthNum == 8) {
+				monthName = "Ardorvór";
+			} else if (monthNum == 9) {
+				monthName = "Fructivór";
+			} else if (monthNum == 10) {
+				monthName = "Follivór";
+			} else if (monthNum == 11) {
+				monthName = "Umbravór";
+			} else if (monthNum == 12) {
+				monthName = "Glacivór";
+			} else if (monthNum == 13) {
+				monthName = "Frigorvór";
+			} else if (monthNum == 14) {
+				monthName = "Obscurvór";
+			} else {
+				Bukkit.getLogger().info("Something went wrong with calculating the month name!");
+				return;
+			}
+
+			String weekdayName = "";
+			if (weekdayNum == 0) {
+				weekdayName = "Hydris";
+			} else if (weekdayNum == 1) {
+				weekdayName = "Terris";
+			}
+			else if (weekdayNum == 2) {
+				weekdayName = "Pyris";
+			}
+			else if (weekdayNum == 3) {
+				weekdayName = "Aeris";
+			}
+			else if (weekdayNum == 4) {
+				weekdayName = "Ferris";
+			}
+			else if (weekdayNum == 5) {
+				weekdayName = "Sylvis";
+			}
+			else if (weekdayNum == 6) {
+				weekdayName = "Umbris";
+			}
+			else if (weekdayNum == 7) {
+				weekdayName = "Aethis";
+			} else {
+				Bukkit.getLogger().info("Something went wrong with calculating the weekday name!");
+				return;
+			}
+			displayServerDate(day, weekdayName, monthName, yearNum);
 		}
 		determineMonthEffects();
 	}
 
 	/**
-	 * Displays the server date on new days.
-	 * @param dayNumInMonth The day in the server month.
-	 * @param yearNum The current server year.
-	 * @param monthName The current server month.
-	 * @param weekdayName The current server day of the week.
+	 * Determines if the day is exceeding the current month's length.
+	 * @param day The current server day.
+	 * @param month The current server month.
+	 * @return Whether the day is exceeding the current month's length.
 	 */
-	private void displayServerDate(int dayNumInMonth, int yearNum, String monthName, String weekdayName) {
-		String dayNumAsString = dayNumInMonth + "";
+	private boolean checkIfExceedsMonth(int day, int month) {
+		// Ignivór
+		if (month == 0) {
+            return day > 147;
+		}
+		// Aquinvór
+		else if (month == 1) {
+            return day > 147;
+		}
+		// Nebulivór
+		else if (month == 2) {
+            return day > 146;
+		}
+		// Ventirór
+		else if (month == 3) {
+            return day > 145;
+		}
+		// Florivór
+		else if (month == 4) {
+            return day > 145;
+		}
+		// Calorvór
+		else if (month == 5) {
+            return day > 146;
+		}
+		// Solarvór
+		else if (month == 6) {
+            return day > 146;
+		}
+		// Aestivór
+		else if (month == 7) {
+            return day > 146;
+		}
+		// Ardorvór
+		else if (month == 8) {
+            return day > 146;
+		}
+		// Fructivór
+		else if (month == 9) {
+            return day > 146;
+		}
+		// Follivór
+		else if (month == 10) {
+            return day > 146;
+		}
+		// Umbravór
+		else if (month == 11) {
+            return day > 146;
+		}
+		// Glacivór
+		else if (month == 12) {
+            return day > 146;
+		}
+		// Frigorvór
+		else if (month == 13) {
+            return day > 147;
+		}
+		// Obscurvór
+		else if (month == 14) {
+            return day > 147;
+		}
+		return false;
+	}
+
+	/**
+	 * Displays the server date on new days.
+	 * @param dayNum The current server day.
+     * @param weekdayName The current server weekday name.
+	 * @param monthName The current server month name.
+	 * @param yearNum The current server year.
+	 */
+	private void displayServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
+		String dayNumAsString = dayNum + "";
 		if (dayNumAsString.length() > 1) {
 			if (dayNumAsString.equals("11")) {
 				dayNumAsString += "th";
@@ -283,23 +330,23 @@ public class DateUtils {
 	 * Applies the effects of the given month on Aranarth.
 	 */
 	private void determineMonthEffects() {
-        switch (AranarthUtils.getMonthName()) {
-            case "Ignivór" -> applyIgnivorEffects();
-            case "Aquinvór" -> applyAquinvorEffects();
-            case "Nebulivór" -> applyNebulivorEffects();
-            case "Ventirór" -> applyVentirorEffects();
-            case "Florivór" -> applyFlorivorEffects();
-            case "Calorvór" -> applyCalorvorEffects();
-            case "Solarvór" -> applySolarvorEffects();
-            case "Aestivór" -> applyAestivorEffects();
-            case "Ardorvór" -> applyArdorvorEffects();
-            case "Fructivór" -> applyFructivorEffects();
-            case "Follivór" -> applyFollivorEffects();
-            case "Umbravór" -> applyUmbravorEffects();
-            case "Glacivór" -> applyGlacivorEffects();
-            case "Frigorvór" -> applyFrigorvorEffects();
-            case "Obscurvór" -> applyObscurvorEffects();
-            default -> Bukkit.getLogger().info("Something went wrong with applying " + AranarthUtils.getMonthName() + "'s effects!");
+        switch (AranarthUtils.getMonth()) {
+            case 0 -> applyIgnivorEffects();
+            case 1 -> applyAquinvorEffects();
+            case 2 -> applyNebulivorEffects();
+            case 3 -> applyVentirorEffects();
+            case 4 -> applyFlorivorEffects();
+            case 5 -> applyCalorvorEffects();
+            case 6 -> applySolarvorEffects();
+            case 7 -> applyAestivorEffects();
+            case 8 -> applyArdorvorEffects();
+            case 9 -> applyFructivorEffects();
+            case 10 -> applyFollivorEffects();
+            case 11 -> applyUmbravorEffects();
+            case 12 -> applyGlacivorEffects();
+            case 13 -> applyFrigorvorEffects();
+            case 14 -> applyObscurvorEffects();
+            default -> Bukkit.getLogger().info("Something went wrong with applying the " + AranarthUtils.getMonth() + "'s effects!");
         }
 	}
 
@@ -461,19 +508,19 @@ public class DateUtils {
 							Random random = new Random();
 							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
 							AranarthUtils.setIsStorming(false);
-							String monthName = AranarthUtils.getMonthName();
+							int monthNum = AranarthUtils.getMonth();
 							// Updates the delay until the next storm
-                            switch (monthName) {
-                                case "Umbravór" ->
+                            switch (monthNum) {
+                                case 11 ->
                                     // At least 0.75 days, no more than 5 days
 									AranarthUtils.setStormDelay(random.nextInt(102000) + 18000);
-                                case "Glacivór" ->
+                                case 12 ->
                                     // At least 0.5 days, no more than 2 days
 									AranarthUtils.setStormDelay(random.nextInt(48000) + 12000);
-                                case "Frigorvór" ->
+                                case 13 ->
                                     // At least 0.25 days, no more than 1 day
 									AranarthUtils.setStormDelay(random.nextInt(18000) + 6000);
-                                case "Obscurvór" ->
+                                case 14 ->
                                     // At least 0.5 days, no more than 1.5 days
 									AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
                             }
@@ -489,19 +536,19 @@ public class DateUtils {
 							Random random = new Random();
 							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA storm has started..."));
 							AranarthUtils.setIsStorming(true);
-							String monthName = AranarthUtils.getMonthName();
+							int monthNum = AranarthUtils.getMonth();
 							// Updates the duration of the storm
-                            switch (monthName) {
-                                case "Umbravór" ->
+                            switch (monthNum) {
+                                case 11 ->
                                     // At least 0.125 days, no more than 0.75 days
 									AranarthUtils.setStormDuration(random.nextInt(15000) + 3000);
-                                case "Glacivór" ->
+                                case 12 ->
                                     // At least 0.5 days, no more than 1.5 days
 									AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
-                                case "Frigorvór" ->
+                                case 13 ->
                                     // At least 0.75 days, no more than 2 days
 									AranarthUtils.setStormDuration(random.nextInt(30000) + 18000);
-                                case "Obscurvór" ->
+                                case 14 ->
                                     // At least 0.25 days, no more than 1 day
 									AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
                             }
@@ -578,7 +625,7 @@ public class DateUtils {
 		for (Material material : Material.values()) {
 			String name = material.name();
 			if (name.endsWith("_WALL") || name.endsWith("_FENCE") || name.endsWith("_FENCE_GATE") || name.endsWith("_BUTTON")
-					|| name.endsWith("_DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
+					|| name.endsWith("DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
 					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER")) {
 				INVALID_SURFACE_BLOCKS.add(material);
 			}
@@ -641,6 +688,7 @@ public class DateUtils {
 						continue;
 					}
 				}
+
 				Block above = surfaceBlock.getRelative(BlockFace.UP);
 				if (above.getType() != Material.AIR && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
 					continue;
@@ -658,16 +706,43 @@ public class DateUtils {
 				if (!clearAbove) {
 					continue;
 				}
-
 				// Places the snow
 				above.setType(Material.SNOW);
+
+				if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+					Location location = surfaceBlock.getLocation();
+					int yAboveGap = location.getBlockY();
+					int yBelowGap = 0;
+					// Keep going down to apply to the next blocks
+					for (int i = location.getBlockY(); i > 62; i--) {
+						Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+						if (block.getType().name().endsWith("LEAVES")) {
+							yAboveGap = block.getY();
+							continue;
+						}
+						// If there is a space underneath the leaves
+						else if (block.getType() == Material.AIR || block.getType() == Material.SHORT_GRASS || block.getType() == Material.FERN) {
+							continue;
+						}
+						// The first solid block under the leaves
+						else {
+							yBelowGap = block.getY();
+
+							// If there is a space in between the two
+							if (yAboveGap > yBelowGap + 1) {
+								location.getWorld().getBlockAt(surfaceBlock.getX(), yBelowGap + 1, surfaceBlock.getZ()).setType(Material.SNOW);
+								break;
+							}
+						}
+					}
+				}
 			}
 		}
 
 	}
 
 	private void meltSnow() {
-		if (!isWinterMonth(AranarthUtils.getMonthName())) {
+		if (!isWinterMonth(AranarthUtils.getMonth())) {
 			new BukkitRunnable() {
 				int runs = 0;
 
@@ -745,48 +820,140 @@ public class DateUtils {
 										// Removes the snow
 										above.setType(Material.AIR);
 
-										// Adds short grass depending on biome
-										switch (biome) {
-											case "MEADOW":
-												if (grassReplaceRate > 80) {
-													return;
+										if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+											Location location = surfaceBlock.getLocation();
+											int yAbove = 0;
+											int yBelow = 0;
+											// Keep going down to apply to the next blocks
+											for (int i = location.getBlockY(); i > 62; i--) {
+												Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+												if (block.getType().name().endsWith("LEAVES")) {
+													yAbove = block.getY();
+													continue;
 												}
-												above.setType(Material.SHORT_GRASS);
-												break;
-											case "PLAINS":
-												if (grassReplaceRate > 30) {
-													return;
+												// If there is a space underneath the leaves
+												else if (block.getType() == Material.AIR || block.getType() == Material.SNOW) {
+													continue;
 												}
-												above.setType(Material.SHORT_GRASS);
-												break;
-											case "SUNFLOWER_PLAINS":
-												if (grassReplaceRate > 70) {
-													return;
+												// The first solid block under the leaves
+												else {
+													yBelow = block.getY();
+
+													// If there is a space in between the two
+													if (yAbove > yBelow + 1) {
+														Block lastBlockAboveGround = location.getWorld().getBlockAt(surfaceBlock.getX(), yBelow + 1, surfaceBlock.getZ());
+														lastBlockAboveGround.setType(Material.AIR);
+
+														// Adds short grass depending on biome
+														switch (biome) {
+															case "MEADOW":
+																if (grassReplaceRate > 80) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+															case "PLAINS":
+																if (grassReplaceRate > 40) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+															case "SUNFLOWER_PLAINS":
+																if (grassReplaceRate > 70) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+															case "SAVANNA":
+															case "SAVANNA_PLATEAU":
+																if (grassReplaceRate > 85) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+															case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
+																if (grassReplaceRate > 65) {
+																	return;
+																} else if (grassReplaceRate > 35) {
+																	lastBlockAboveGround.setType(Material.FERN);
+																} else {
+																	lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																}
+																break;
+															case "WINDSWEPT_HILLS":
+															case "WINDSWEPT_FOREST":
+																if (grassReplaceRate > 10) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+															default:
+																// For other biomes that are not excluded, randomly place grass but at a low rate
+																if (grassReplaceRate > 7) {
+																	return;
+																}
+																lastBlockAboveGround.setType(Material.SHORT_GRASS);
+																break;
+														}
+														break;
+													}
 												}
-												above.setType(Material.SHORT_GRASS);
-												break;
-											case "SAVANNA":
-											case "SAVANNA_PLATEAU":
-												if (grassReplaceRate > 85) {
-													return;
-												}
-												above.setType(Material.SHORT_GRASS);
-												break;
-											case "WINDSWEPT_HILLS":
-											case "WINDSWEPT_FOREST":
-												if (grassReplaceRate > 10) {
-													return;
-												}
-												above.setType(Material.SHORT_GRASS);
-												break;
-											default:
-												// For other biomes that are not excluded, randomly place grass but at a low rate
-												if (grassReplaceRate > 7) {
-													return;
-												}
-												above.setType(Material.SHORT_GRASS);
-												break;
+											}
+										} else {
+											// Adds short grass depending on biome
+											switch (biome) {
+												case "MEADOW":
+													if (grassReplaceRate > 80) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+												case "PLAINS":
+													if (grassReplaceRate > 30) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+												case "SUNFLOWER_PLAINS":
+													if (grassReplaceRate > 70) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+												case "SAVANNA":
+												case "SAVANNA_PLATEAU":
+													if (grassReplaceRate > 85) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+												case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
+													if (grassReplaceRate > 65) {
+														return;
+													} else if (grassReplaceRate > 35) {
+														above.setType(Material.FERN);
+													} else {
+														above.setType(Material.SHORT_GRASS);
+													}
+													break;
+												case "WINDSWEPT_HILLS":
+												case "WINDSWEPT_FOREST":
+													if (grassReplaceRate > 10) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+												default:
+													// For other biomes that are not excluded, randomly place grass but at a low rate
+													if (grassReplaceRate > 7) {
+														return;
+													}
+													above.setType(Material.SHORT_GRASS);
+													break;
+											}
 										}
+
+
 									}
 								}
 							}
@@ -800,10 +967,10 @@ public class DateUtils {
 
 	/**
 	 * Confirms if the current month is a winter month.
-	 * @param monthName The name of the month.
+	 * @param monthNum The current month number.
 	 * @return Confirmation whether the current month is a winter month.
 	 */
-	public static boolean isWinterMonth(String monthName) {
-		return monthName.equals("Umbravór") || monthName.equals("Glacivór") || monthName.equals("Frigorvór") || monthName.equals("Obscurvór");
+	public static boolean isWinterMonth(int monthNum) {
+		return monthNum >= 11;
 	}
 }

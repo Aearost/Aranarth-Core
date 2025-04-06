@@ -67,7 +67,7 @@ public class CropHarvest implements Listener {
 			}
 
 			// Removes yields of seeds and regular non-fortune harvests during the winter
-			if (DateUtils.isWinterMonth(AranarthUtils.getMonthName())) {
+			if (DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 				if (seed.getType() == Material.WHEAT_SEEDS || seed.getType() == Material.BEETROOT_SEEDS) {
 					if (seed.getAmount() > 1) {
 						seed.setAmount(seed.getAmount() - 1);
@@ -81,7 +81,7 @@ public class CropHarvest implements Listener {
 					// Not sneaking but holding fortune tool
 					if (isUsingFortune && getIsMature(e.getBlock())) {
 						if (!e.getPlayer().isSneaking()) {
-							int amountToDrop = wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonthName()));
+							int amountToDrop = wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth()));
 							drops.get(1).setAmount(amountToDrop);
 							e.setCancelled(true);
 							block.getWorld().dropItemNaturally(block.getLocation(), seed);
@@ -114,7 +114,7 @@ public class CropHarvest implements Listener {
 						if (drop != null && drop.getAmount() > 0) {
 							// Adds support to increase yield per crop if using fortune
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
-								drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonthName())));
+								drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
 							}
 							block.getWorld().dropItemNaturally(block.getLocation(), drop);
 						}
