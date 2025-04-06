@@ -602,12 +602,12 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Initializes the server date based on the contents of serverdate.json.
+	 * Initializes the server date based on the contents of serverdate.txt.
 	 */
 	public static void loadServerDate() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "serverdate.json";
+				+ "serverdate.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -664,14 +664,12 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the server date to the serverdate.json file.
+	 * Saves the server date to the serverdate.txt file.
 	 */
 	public static void saveServerDate() {
-		HashMap<UUID, List<PlayerShop>> playerShops = AranarthUtils.getShops();
-		if (playerShops != null) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "serverdate.json";
+					+ File.separator + "serverdate.txt";
 			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 			File file = new File(filePath);
 
@@ -684,10 +682,10 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new serverdate.json file has been generated");
+						Bukkit.getLogger().info("A new serverdate.txt file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of serverdate.json");
+					Bukkit.getLogger().info("An error occurred in the creation of serverdate.txt");
 				}
 
 				try {
@@ -703,7 +701,6 @@ public class PersistenceUtils {
 					Bukkit.getLogger().info("There was an error in saving the serverdate");
 				}
 			}
-		}
 	}
 
 }
