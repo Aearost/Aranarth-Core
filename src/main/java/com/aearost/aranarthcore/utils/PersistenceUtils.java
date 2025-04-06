@@ -524,7 +524,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the contents of the playerShops HashMap to the homes.json file.
+	 * Saves the contents of the playerShops HashMap to the playershops.json file.
 	 */
 	public static void savePlayerShops() {
 		HashMap<UUID, List<PlayerShop>> playerShops = AranarthUtils.getShops();
@@ -555,7 +555,7 @@ public class PersistenceUtils {
 					writer.write("{\n");
 					writer.write("    \"playershops\": {\n");
 
-					int totalUuidAmount = playerShops.keySet().size();
+					int totalUuidAmount = playerShops.size();
 					int currentUuidAmount = 0;
 					int shopCounter = 0;
 
@@ -596,6 +596,111 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the playershops");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the server date based on the contents of serverdate.json.
+	 */
+	public static void loadServerDate() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "serverdate.json";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			int fieldCount = 0;
+			int day = 0;
+			int weekday = 0;
+			int month = 0;
+			int year = 0;
+
+			Bukkit.getLogger().info("Attempting to read the serverdate file...");
+
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				String[] parts = line.split(":");
+
+				switch (parts[0]) {
+					case "day" -> {
+						day = Integer.parseInt(parts[1]);
+						fieldCount++;
+					}
+					case "weekday" -> {
+						weekday = Integer.parseInt(parts[1]);
+						fieldCount++;
+					}
+					case "month" -> {
+						month = Integer.parseInt(parts[1]);
+						fieldCount++;
+					}
+					case "year" -> {
+						year = Integer.parseInt(parts[1]);
+						fieldCount++;
+					}
+				}
+
+				if (fieldCount == 4) {
+					AranarthUtils.setDay(day);
+					AranarthUtils.setWeekday(weekday);
+					AranarthUtils.setMonth(month);
+					AranarthUtils.setYear(year);
+				}
+			}
+			Bukkit.getLogger().info("The server date has been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the server date!");
+		}
+	}
+
+	/**
+	 * Saves the server date to the serverdate.json file.
+	 */
+	public static void saveServerDate() {
+		HashMap<UUID, List<PlayerShop>> playerShops = AranarthUtils.getShops();
+		if (playerShops != null) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "serverdate.json";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new serverdate.json file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of serverdate.json");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+
+					writer.write("day:" + AranarthUtils.getDay() + "\n");
+					writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
+					writer.write("month:" + AranarthUtils.getMonth() + "\n");
+					writer.write("year:" + AranarthUtils.getYear());
+
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the serverdate");
 				}
 			}
 		}
