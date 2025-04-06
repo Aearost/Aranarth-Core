@@ -28,7 +28,10 @@ public class AranarthUtils {
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
-	private static String monthName;
+	private static int day;
+	private static int weekday;
+	private static int month;
+	private static int year;
 	private static boolean isStorming;
 	private static int stormDuration;
 	private static int stormDelay;
@@ -471,19 +474,67 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides the current server month name.
-	 * @return The server month name.
+	 * Provides the current server day.
+	 * @return The server day.
 	 */
-	public static String getMonthName() {
-		return monthName;
+	public static int getDay() {
+		return day;
 	}
 
 	/**
-	 * Updates the current server month name.
-	 * @param newMonthName The new server month name.
+	 * Updates the current server day.
+	 * @param newDay The new server day.
 	 */
-	public static void setMonthName(String newMonthName) {
-		monthName = newMonthName;
+	public static void setDay(int newDay) {
+		day = newDay;
+	}
+
+	/**
+	 * Provides the current server weekday.
+	 * @return The server weekday.
+	 */
+	public static int getWeekday() {
+		return weekday;
+	}
+
+	/**
+	 * Updates the current server weekday.
+	 * @param newWeekday The new server weekday.
+	 */
+	public static void setWeekday(int newWeekday) {
+		weekday = newWeekday;
+	}
+
+	/**
+	 * Provides the current server month.
+	 * @return The server month.
+	 */
+	public static int getMonth() {
+		return month;
+	}
+
+	/**
+	 * Updates the current server month.
+	 * @param newMonth The new server month.
+	 */
+	public static void setMonth(int newMonth) {
+		month = newMonth;
+	}
+
+	/**
+	 * Provides the current server year.
+	 * @return The server year.
+	 */
+	public static int getYear() {
+		return year;
+	}
+
+	/**
+	 * Updates the current server year.
+	 * @param newYear The new server year.
+	 */
+	public static void setYear(int newYear) {
+		year = newYear;
 	}
 
 	/**

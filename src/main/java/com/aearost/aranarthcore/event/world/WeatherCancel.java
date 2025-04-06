@@ -22,7 +22,7 @@ public class WeatherCancel implements Listener {
 	@EventHandler
 	public void onRain(final WeatherChangeEvent e) {
 		// If being set to raining during a winter month
-		if (e.toWeatherState() && DateUtils.isWinterMonth(AranarthUtils.getMonthName())) {
+		if (e.toWeatherState() && DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 			e.setCancelled(true);
 		}
 	}
