@@ -107,6 +107,7 @@ public class DateUtils {
 		int weekdayNum = AranarthUtils.getWeekday();
 		int monthNum = AranarthUtils.getMonth();
 		int yearNum = AranarthUtils.getYear();
+		boolean isNewMonth = false;
 
 		// If it is a new day
 		// First 5 seconds of a new day
@@ -114,6 +115,13 @@ public class DateUtils {
 			// Calculates day number based on length of month
 			if (checkIfExceedsMonth(dayNum, monthNum)) {
 				dayNum = 1;
+				if (monthNum == 14) {
+					monthNum = 0;
+					yearNum++;
+				} else {
+					monthNum++;
+				}
+				isNewMonth = true;
 			} else {
 				dayNum++;
 			}
@@ -122,13 +130,6 @@ public class DateUtils {
 				weekdayNum = 0;
 			} else {
 				weekdayNum++;
-			}
-
-			if (monthNum == 14) {
-				monthNum = 0;
-				yearNum++;
-			} else {
-				monthNum++;
 			}
 
 			AranarthUtils.setDay(dayNum);
@@ -201,7 +202,7 @@ public class DateUtils {
 				Bukkit.getLogger().info("Something went wrong with calculating the weekday name!");
 				return;
 			}
-			displayServerDate(day, weekdayName, monthName, yearNum);
+			displayServerDate(day, weekdayName, monthName, yearNum, isNewMonth);
 		}
 		determineMonthEffects();
 	}
@@ -282,8 +283,9 @@ public class DateUtils {
      * @param weekdayName The current server weekday name.
 	 * @param monthName The current server month name.
 	 * @param yearNum The current server year.
+	 * @param isNewMonth The confirmation whether this is a new month or not.
 	 */
-	private void displayServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
+	private void displayServerDate(int dayNum, String weekdayName, String monthName, int yearNum, boolean isNewMonth) {
 		String dayNumAsString = dayNum + "";
 		if (dayNumAsString.length() > 1) {
 			if (dayNumAsString.equals("11")) {
@@ -322,7 +324,30 @@ public class DateUtils {
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+			if (isNewMonth) {
+				player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+			} else {
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
+				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
+
+				// 0.2s later
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.667f), 4L);
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.26f), 4L);
+
+				// 0.4s later
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.75f), 8L);
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f), 8L);
+
+				// 0.6s later
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f), 12L);
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
+			}
 		}
 	}
 
@@ -741,6 +766,9 @@ public class DateUtils {
 
 	}
 
+	/**
+	 * Handles melting the snow in biomes that had snow applied due to seasons.
+	 */
 	private void meltSnow() {
 		if (!isWinterMonth(AranarthUtils.getMonth())) {
 			new BukkitRunnable() {
@@ -952,8 +980,6 @@ public class DateUtils {
 													break;
 											}
 										}
-
-
 									}
 								}
 							}
