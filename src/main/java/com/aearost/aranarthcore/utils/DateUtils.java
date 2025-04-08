@@ -665,7 +665,9 @@ public class DateUtils {
 				Material.RESPAWN_ANCHOR, Material.TRIPWIRE, Material.TRIPWIRE_HOOK, Material.LANTERN, Material.SOUL_LANTERN,
 				Material.END_ROD, Material.SCAFFOLDING, Material.FLOWER_POT, Material.CANDLE, Material.CANDLE_CAKE,
 				Material.AMETHYST_CLUSTER, Material.SMALL_AMETHYST_BUD, Material.MEDIUM_AMETHYST_BUD, Material.LARGE_AMETHYST_BUD,
-				Material.POINTED_DRIPSTONE, Material.TURTLE_EGG, Material.SCULK_SENSOR, Material.SCULK_SHRIEKER, Material.BEACON, Material.DIRT_PATH, Material.FARMLAND
+				Material.POINTED_DRIPSTONE, Material.TURTLE_EGG, Material.SCULK_SENSOR, Material.SCULK_SHRIEKER, Material.BEACON,
+				Material.DIRT_PATH, Material.FARMLAND, Material.WHEAT, Material.BEETROOT, Material.CARROTS, Material.POTATOES,
+				Material.NETHER_WART, Material.CHEST, Material.TRAPPED_CHEST
 		);
 
 		// Adding other variants
@@ -673,7 +675,7 @@ public class DateUtils {
 			String name = material.name();
 			if (name.endsWith("_WALL") || name.endsWith("_FENCE") || name.endsWith("_FENCE_GATE") || name.endsWith("_BUTTON")
 					|| name.endsWith("DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
-					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER")) {
+					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER") || name.endsWith("_SIGN")) {
 				INVALID_SURFACE_BLOCKS.add(material);
 			}
 		}
@@ -683,6 +685,10 @@ public class DateUtils {
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
+
+		// Corner 1 - x: 351860 z: 220360
+		// Corner 2 - x: 352240 z: 220720
+		boolean isDandelia = false;
 
 		// Loop over columns within a 75 block radius
 		for (int x = centerX - 75; x <= centerX + 75; x++) {
@@ -736,8 +742,18 @@ public class DateUtils {
 					}
 				}
 
+				// Excluding these locations from grass being replaced
+//				if (x <= 352240 && x >= 351860 && z <= 220720 && z >= 220360) {
+//					isDandelia = true;
+//				}
+
 				Block above = surfaceBlock.getRelative(BlockFace.UP);
-				if (above.getType() != Material.AIR && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+				if (above.getType() != Material.AIR) {
+					if (!isDandelia) {
+						if (above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+							continue;
+						}
+					}
 					continue;
 				}
 
@@ -745,9 +761,16 @@ public class DateUtils {
 				boolean clearAbove = true;
 				for (int i = 1; i <= 25; i++) {
 					Block checkBlock = surfaceBlock.getRelative(BlockFace.UP, i);
-					if (checkBlock.getType() != Material.AIR && checkBlock.getType() != Material.SHORT_GRASS && checkBlock.getType() != Material.FERN) {
-						clearAbove = false;
-						break;
+					if (checkBlock.getType() != Material.AIR) {
+						if (!isDandelia) {
+							if (checkBlock.getType() != Material.SHORT_GRASS && checkBlock.getType() != Material.FERN) {
+								clearAbove = false;
+								break;
+							}
+						} else {
+							clearAbove = false;
+							break;
+						}
 					}
 				}
 				if (!clearAbove) {
@@ -820,6 +843,7 @@ public class DateUtils {
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
 								World world = loc.getWorld();
+								boolean isDandelia = false;
 
 								// Loop over columns within a 75 block radius
 								for (int x = centerX - 75; x <= centerX + 75; x++) {
@@ -860,6 +884,11 @@ public class DateUtils {
 											grassReplaceRate = random.nextInt(100) + 1;
 										}
 
+										// Excluding these locations from grass being replaced
+//										if (x <= 352240 && x >= 351860 && z <= 220720 && z >= 220360) {
+//											isDandelia = true;
+//										}
+
 										// Determines if snow will generate at this block
 										int rand = random.nextInt(10000);
 
@@ -893,6 +922,11 @@ public class DateUtils {
 													if (yAbove > yBelow + 1) {
 														Block lastBlockAboveGround = location.getWorld().getBlockAt(surfaceBlock.getX(), yBelow + 1, surfaceBlock.getZ());
 														lastBlockAboveGround.setType(Material.AIR);
+
+														// Do not apply grass if it is Dandelia
+//														if (isDandelia) {
+//															continue;
+//														}
 
 														// Adds short grass depending on biome
 														switch (biome) {
@@ -950,6 +984,10 @@ public class DateUtils {
 												}
 											}
 										} else {
+//											if (isDandelia) {
+//												continue;
+//											}
+
 											// Adds short grass depending on biome
 											switch (biome) {
 												case "MEADOW":
