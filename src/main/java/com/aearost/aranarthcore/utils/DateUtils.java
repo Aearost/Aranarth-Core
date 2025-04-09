@@ -5,7 +5,9 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Slab;
+import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -667,7 +669,11 @@ public class DateUtils {
 				Material.AMETHYST_CLUSTER, Material.SMALL_AMETHYST_BUD, Material.MEDIUM_AMETHYST_BUD, Material.LARGE_AMETHYST_BUD,
 				Material.POINTED_DRIPSTONE, Material.TURTLE_EGG, Material.SCULK_SENSOR, Material.SCULK_SHRIEKER, Material.BEACON,
 				Material.DIRT_PATH, Material.FARMLAND, Material.WHEAT, Material.BEETROOT, Material.CARROTS, Material.POTATOES,
-				Material.NETHER_WART, Material.CHEST, Material.TRAPPED_CHEST
+				Material.NETHER_WART, Material.CHEST, Material.TRAPPED_CHEST, Material.STONECUTTER, Material.MANGROVE_PROPAGULE,
+				Material.DEAD_BUSH, Material.AZALEA, Material.FLOWERING_AZALEA, Material.COBWEB, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM,
+				Material.DECORATED_POT, Material.LIGHT, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET,
+				Material.OXEYE_DAISY, Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.CLOSED_EYEBLOSSOM, Material.OPEN_EYEBLOSSOM,
+				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH
 		);
 
 		// Adding other variants
@@ -675,7 +681,8 @@ public class DateUtils {
 			String name = material.name();
 			if (name.endsWith("_WALL") || name.endsWith("_FENCE") || name.endsWith("_FENCE_GATE") || name.endsWith("_BUTTON")
 					|| name.endsWith("DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
-					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER") || name.endsWith("_SIGN")) {
+					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER") || name.endsWith("_SIGN")
+					|| name.endsWith("_SAPLING") || name.endsWith("_CORAL") || name.endsWith("_FAN") || name.startsWith("POTTED_")) {
 				INVALID_SURFACE_BLOCKS.add(material);
 			}
 		}
@@ -686,16 +693,14 @@ public class DateUtils {
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
 
-		// Corner 1 - x: 351860 z: 220360
-		// Corner 2 - x: 352240 z: 220720
-		boolean isDandelia = false;
+		int snowRadius = 100;
 
-		// Loop over columns within a 75 block radius
-		for (int x = centerX - 75; x <= centerX + 75; x++) {
-			for (int z = centerZ - 75; z <= centerZ + 75; z++) {
+		// Loop over columns within an input block radius
+		for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
+			for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
 
-				// Check that the column is within a 75-block circle (optional, for a round area)
-				if (loc.distance(new Location(world, x, loc.getY(), z)) > 75) {
+				// Check that the column is within circle
+				if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
 					continue;
 				}
 
@@ -713,7 +718,6 @@ public class DateUtils {
 				else if (temperature < 0.25) {
 					bigFlakeDensity = bigFlakeDensity / 5;
 				}
-
 				// Temperate biomes have standard snow rates
 				else {
 					bigFlakeDensity = bigFlakeDensity / 10;
@@ -722,7 +726,8 @@ public class DateUtils {
 				// Determines if snow will generate at this block
 				int rand = random.nextInt(5000);
 				// Proportionate snow amount to the snow density
-				if (rand > bigFlakeDensity) {
+				// if (rand > bigFlakeDensity) {
+				if (-1 > bigFlakeDensity) {
 					continue;
 				}
 
@@ -742,42 +747,21 @@ public class DateUtils {
 					}
 				}
 
-				// Excluding these locations from grass being replaced
-//				if (x <= 352240 && x >= 351860 && z <= 220720 && z >= 220360) {
-//					isDandelia = true;
-//				}
-
 				Block above = surfaceBlock.getRelative(BlockFace.UP);
-				if (above.getType() != Material.AIR) {
-					if (!isDandelia) {
-						if (above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
-							continue;
-						}
-					}
+				if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
 					continue;
 				}
 
-				// Check that there is at least 25 blocks of air above.
-				boolean clearAbove = true;
-				for (int i = 1; i <= 25; i++) {
-					Block checkBlock = surfaceBlock.getRelative(BlockFace.UP, i);
-					if (checkBlock.getType() != Material.AIR) {
-						if (!isDandelia) {
-							if (checkBlock.getType() != Material.SHORT_GRASS && checkBlock.getType() != Material.FERN) {
-								clearAbove = false;
-								break;
-							}
-						} else {
-							clearAbove = false;
-							break;
-						}
+				// Places the snow or adds layer
+				if (above.getBlockData() instanceof Snow snow) {
+					if (snow.getLayers() < 4) {
+						int snowLayers = snow.getLayers();
+						snow.setLayers(snowLayers + 1);
+						above.setBlockData(snow);
 					}
+				} else {
+					above.setType(Material.SNOW);
 				}
-				if (!clearAbove) {
-					continue;
-				}
-				// Places the snow
-				above.setType(Material.SNOW);
 
 				if (surfaceBlock.getType().name().endsWith("LEAVES")) {
 					Location location = surfaceBlock.getLocation();
@@ -791,16 +775,40 @@ public class DateUtils {
 							continue;
 						}
 						// If there is a space underneath the leaves
-						else if (block.getType() == Material.AIR || block.getType() == Material.SHORT_GRASS || block.getType() == Material.FERN) {
+						else if (block.getType() == Material.AIR || block.getType() == Material.SHORT_GRASS || block.getType() == Material.FERN || block.getType() == Material.SNOW) {
 							continue;
 						}
 						// The first solid block under the leaves
 						else {
+							if (INVALID_SURFACE_BLOCKS.contains(block.getType())) {
+								break;
+							}
+
+							// Ensures that snow only goes on flat parts of stairs/slabs
+							if (block.getBlockData() instanceof Stairs stairs) {
+								if (stairs.getHalf() == Bisected.Half.BOTTOM) {
+									continue;
+								}
+							} else if (block.getBlockData() instanceof Slab slab) {
+								if (slab.getType() == Slab.Type.BOTTOM) {
+									continue;
+								}
+							}
+
 							yBelowGap = block.getY();
 
 							// If there is a space in between the two
 							if (yAboveGap > yBelowGap + 1) {
-								location.getWorld().getBlockAt(surfaceBlock.getX(), yBelowGap + 1, surfaceBlock.getZ()).setType(Material.SNOW);
+								Block blockUnderTree = location.getWorld().getBlockAt(surfaceBlock.getX(), yBelowGap + 1, surfaceBlock.getZ());
+								if (blockUnderTree.getBlockData() instanceof Snow snow) {
+									if (snow.getLayers() < 4) {
+										int snowLayers = snow.getLayers();
+										snow.setLayers(snowLayers + 1);
+										blockUnderTree.setBlockData(snow);
+									}
+								} else {
+									blockUnderTree.setType(Material.SNOW);
+								}
 								break;
 							}
 						}
@@ -843,14 +851,14 @@ public class DateUtils {
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
 								World world = loc.getWorld();
-								boolean isDandelia = false;
+								int snowRadius = 100;
 
-								// Loop over columns within a 75 block radius
-								for (int x = centerX - 75; x <= centerX + 75; x++) {
-									for (int z = centerZ - 75; z <= centerZ + 75; z++) {
+								// Loop over columns within a given block radius
+								for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
+									for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
 
-										// Check that the column is within a 75-block circle (optional, for a round area)
-										if (loc.distance(new Location(world, x, loc.getY(), z)) > 75) {
+										// Check that the column is within a circle
+										if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
 											continue;
 										}
 
@@ -884,11 +892,6 @@ public class DateUtils {
 											grassReplaceRate = random.nextInt(100) + 1;
 										}
 
-										// Excluding these locations from grass being replaced
-//										if (x <= 352240 && x >= 351860 && z <= 220720 && z >= 220360) {
-//											isDandelia = true;
-//										}
-
 										// Determines if snow will generate at this block
 										int rand = random.nextInt(10000);
 
@@ -896,148 +899,156 @@ public class DateUtils {
 										if (rand > meltRate) {
 											continue;
 										}
-										// Removes the snow
-										above.setType(Material.AIR);
 
-										if (surfaceBlock.getType().name().endsWith("LEAVES")) {
-											Location location = surfaceBlock.getLocation();
-											int yAbove = 0;
-											int yBelow = 0;
-											// Keep going down to apply to the next blocks
-											for (int i = location.getBlockY(); i > 62; i--) {
-												Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
-												if (block.getType().name().endsWith("LEAVES")) {
-													yAbove = block.getY();
+										if (above.getBlockData() instanceof Snow snow) {
+											int snowLayers = snow.getLayers();
+											if (snowLayers > 1) {
+												snow.setLayers(snowLayers - 1);
+												above.setBlockData(snow);
+											}
+											// Removes snow when there is only 1 layer left
+											else {
+												above.setType(Material.AIR);
+											}
+
+											if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+												Location location = surfaceBlock.getLocation();
+												// Keep going down to apply to the next blocks
+												for (int i = location.getBlockY() - 1; i > 62; i--) {
+													Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+													if (block.getBlockData() instanceof Snow lowerSnow) {
+														int snowLayersAboveGround = lowerSnow.getLayers();
+														if (snowLayersAboveGround > 1) {
+															lowerSnow.setLayers(snowLayersAboveGround - 1);
+															block.setBlockData(lowerSnow);
+															continue;
+														}
+														// Removes snow when there is only 1 layer left
+														else {
+															block.setType(Material.AIR);
+														}
+													} else {
+														continue;
+													}
+
+													// Only replace with grass if the block underneath is grass
+													if (block.getType() != Material.GRASS_BLOCK || block.getType() != Material.DIRT
+															|| block.getType() != Material.PODZOL || block.getType() != Material.COARSE_DIRT) {
+														continue;
+													}
+
+													// Adds short grass depending on biome
+													switch (biome) {
+														case "MEADOW":
+															if (grassReplaceRate > 80) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+														case "PLAINS":
+															if (grassReplaceRate > 40) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+														case "SUNFLOWER_PLAINS":
+															if (grassReplaceRate > 70) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+														case "SAVANNA":
+														case "SAVANNA_PLATEAU":
+															if (grassReplaceRate > 85) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+														case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
+															 "OLD_GROWTH_SPRUCE_TAIGA":
+															if (grassReplaceRate > 65) {
+																break;
+															} else if (grassReplaceRate > 35) {
+																block.setType(Material.FERN);
+															} else {
+																block.setType(Material.SHORT_GRASS);
+															}
+															break;
+														case "WINDSWEPT_HILLS":
+														case "WINDSWEPT_FOREST":
+															if (grassReplaceRate > 10) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+														default:
+															// For other biomes that are not excluded, randomly place grass but at a low rate
+															if (grassReplaceRate > 7) {
+																break;
+															}
+															block.setType(Material.SHORT_GRASS);
+															break;
+													}
+												}
+											} else {
+
+												// Only replace with grass if the block underneath is grass
+												if (surfaceBlock.getType() != Material.GRASS_BLOCK || surfaceBlock.getType() != Material.DIRT
+														|| surfaceBlock.getType() != Material.PODZOL || surfaceBlock.getType() != Material.COARSE_DIRT) {
 													continue;
 												}
-												// If there is a space underneath the leaves
-												else if (block.getType() == Material.AIR || block.getType() == Material.SNOW) {
-													continue;
-												}
-												// The first solid block under the leaves
-												else {
-													yBelow = block.getY();
 
-													// If there is a space in between the two
-													if (yAbove > yBelow + 1) {
-														Block lastBlockAboveGround = location.getWorld().getBlockAt(surfaceBlock.getX(), yBelow + 1, surfaceBlock.getZ());
-														lastBlockAboveGround.setType(Material.AIR);
-
-														// Do not apply grass if it is Dandelia
-//														if (isDandelia) {
-//															continue;
-//														}
-
-														// Adds short grass depending on biome
-														switch (biome) {
-															case "MEADOW":
-																if (grassReplaceRate > 80) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
-															case "PLAINS":
-																if (grassReplaceRate > 40) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
-															case "SUNFLOWER_PLAINS":
-																if (grassReplaceRate > 70) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
-															case "SAVANNA":
-															case "SAVANNA_PLATEAU":
-																if (grassReplaceRate > 85) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
-															case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
-																if (grassReplaceRate > 65) {
-																	return;
-																} else if (grassReplaceRate > 35) {
-																	lastBlockAboveGround.setType(Material.FERN);
-																} else {
-																	lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																}
-																break;
-															case "WINDSWEPT_HILLS":
-															case "WINDSWEPT_FOREST":
-																if (grassReplaceRate > 10) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
-															default:
-																// For other biomes that are not excluded, randomly place grass but at a low rate
-																if (grassReplaceRate > 7) {
-																	return;
-																}
-																lastBlockAboveGround.setType(Material.SHORT_GRASS);
-																break;
+												// Adds short grass depending on biome
+												switch (biome) {
+													case "MEADOW":
+														if (grassReplaceRate > 80) {
+															break;
+														}
+														above.setType(Material.SHORT_GRASS);
+														break;
+													case "PLAINS":
+														if (grassReplaceRate > 30) {
+															break;
+														}
+														above.setType(Material.SHORT_GRASS);
+														break;
+													case "SUNFLOWER_PLAINS":
+														if (grassReplaceRate > 70) {
+															break;
+														}
+														above.setType(Material.SHORT_GRASS);
+														break;
+													case "SAVANNA":
+													case "SAVANNA_PLATEAU":
+														if (grassReplaceRate > 85) {
+															break;
+														}
+														above.setType(Material.SHORT_GRASS);
+														break;
+													case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
+														if (grassReplaceRate > 65) {
+															break;
+														} else if (grassReplaceRate > 35) {
+															above.setType(Material.FERN);
+														} else {
+															above.setType(Material.SHORT_GRASS);
 														}
 														break;
-													}
-												}
-											}
-										} else {
-//											if (isDandelia) {
-//												continue;
-//											}
-
-											// Adds short grass depending on biome
-											switch (biome) {
-												case "MEADOW":
-													if (grassReplaceRate > 80) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
-												case "PLAINS":
-													if (grassReplaceRate > 30) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
-												case "SUNFLOWER_PLAINS":
-													if (grassReplaceRate > 70) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
-												case "SAVANNA":
-												case "SAVANNA_PLATEAU":
-													if (grassReplaceRate > 85) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
-												case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
-													if (grassReplaceRate > 65) {
-														return;
-													} else if (grassReplaceRate > 35) {
-														above.setType(Material.FERN);
-													} else {
+													case "WINDSWEPT_HILLS":
+													case "WINDSWEPT_FOREST":
+														if (grassReplaceRate > 10) {
+															break;
+														}
 														above.setType(Material.SHORT_GRASS);
-													}
-													break;
-												case "WINDSWEPT_HILLS":
-												case "WINDSWEPT_FOREST":
-													if (grassReplaceRate > 10) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
-												default:
-													// For other biomes that are not excluded, randomly place grass but at a low rate
-													if (grassReplaceRate > 7) {
-														return;
-													}
-													above.setType(Material.SHORT_GRASS);
-													break;
+														break;
+													default:
+														// For other biomes that are not excluded, randomly place grass but at a low rate
+														if (grassReplaceRate > 7) {
+															break;
+														}
+														above.setType(Material.SHORT_GRASS);
+														break;
+												}
 											}
 										}
 									}
