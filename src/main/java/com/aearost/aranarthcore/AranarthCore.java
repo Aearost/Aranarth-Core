@@ -39,7 +39,7 @@ public class AranarthCore extends JavaPlugin {
 		initializeItems();
 		// Sets default storm values
 		AranarthUtils.setIsStorming(false);
-		AranarthUtils.setStormDelay(new Random().nextInt(18000)); // Set to 18000
+		AranarthUtils.setStormDelay(new Random().nextInt(100)); // Set to 18000
 
 		plugin = this;
 
