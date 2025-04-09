@@ -672,7 +672,7 @@ public class DateUtils {
 				Material.DEAD_BUSH, Material.AZALEA, Material.FLOWERING_AZALEA, Material.COBWEB, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM,
 				Material.DECORATED_POT, Material.LIGHT, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET,
 				Material.OXEYE_DAISY, Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.CLOSED_EYEBLOSSOM, Material.OPEN_EYEBLOSSOM,
-				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH
+				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH, Material.SNOW, Material.AIR
 		);
 
 		// Adding other variants
@@ -725,8 +725,7 @@ public class DateUtils {
 				// Determines if snow will generate at this block
 				int rand = random.nextInt(5000);
 				// Proportionate snow amount to the snow density
-				// if (rand > bigFlakeDensity) {
-				if (-1 > bigFlakeDensity) {
+				if (rand > bigFlakeDensity) {
 					continue;
 				}
 
@@ -778,6 +777,7 @@ public class DateUtils {
 						// The first solid block under the leaves
 						else {
 							Block blockUnderneath = location.getWorld().getBlockAt(surfaceBlock.getX(), i - 1, surfaceBlock.getZ());
+
 							if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
 								// Places the snow or adds layer
 								if (block.getBlockData() instanceof Snow snow) {
@@ -789,6 +789,13 @@ public class DateUtils {
 								} else {
 									block.setType(Material.SNOW);
 								}
+							}
+
+							// Do not add snow if the block is underneath a full solid block
+							if (blockUnderneath.getType() == Material.GRASS_BLOCK || blockUnderneath.getType() == Material.DIRT
+									|| blockUnderneath.getType() == Material.PODZOL || blockUnderneath.getType() == Material.COARSE_DIRT
+									|| blockUnderneath.getType() == Material.STONE) {
+								break;
 							}
 						}
 					}
@@ -875,8 +882,7 @@ public class DateUtils {
 										int rand = random.nextInt(10000);
 
 										// Proportionate melting rate for the given temperature
-										if (rand > 5000) {
-//										if (rand > meltRate) {
+										if (rand > meltRate) {
 											continue;
 										}
 
@@ -904,18 +910,28 @@ public class DateUtils {
                                                         }
 														// Removes snow when there is only 1 layer left
 														else {
-															Bukkit.getLogger().info("Replacing " + block.getType().name() + " with air");
 															block.setType(Material.AIR);
                                                         }
                                                         continue;
                                                     } else {
-														// Only replace with grass if the block underneath is grass
-														if (block.getType() != Material.GRASS_BLOCK || block.getType() != Material.DIRT
-																|| block.getType() != Material.PODZOL || block.getType() != Material.COARSE_DIRT) {
+														// Only replace with grass if the block underneath is soil
+														if (block.getType() != Material.GRASS_BLOCK && block.getType() != Material.DIRT
+																&& block.getType() != Material.PODZOL && block.getType() != Material.COARSE_DIRT) {
 															continue;
 														}
 
+														// 5% chance of turning the dirt into grass blocks to spread during warm months
+														if (block.getType() == Material.DIRT) {
+															if ((random.nextInt(100) + 1) <= 5) {
+																block.setType(Material.GRASS_BLOCK);
+															}
+														}
+
 														Block blockAboveDirt = location.getWorld().getBlockAt(location.getBlockX(), i + 1, location.getBlockZ());
+														if (blockAboveDirt.getType() != Material.AIR) {
+															continue;
+														}
+
 														// Adds short grass depending on biome
 														switch (biome) {
 															case "MEADOW":
@@ -925,7 +941,7 @@ public class DateUtils {
 																blockAboveDirt.setType(Material.SHORT_GRASS);
 																break;
 															case "PLAINS":
-																if (grassReplaceRate > 40) {
+																if (grassReplaceRate > 35) {
 																	break;
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
@@ -936,18 +952,16 @@ public class DateUtils {
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
 																break;
-															case "SAVANNA":
-															case "SAVANNA_PLATEAU":
-																if (grassReplaceRate > 85) {
+															case "SAVANNA", "SAVANNA_PLATEAU":
+																if (grassReplaceRate > 75) {
 																	break;
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
 																break;
-															case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
-																 "OLD_GROWTH_SPRUCE_TAIGA":
-																if (grassReplaceRate > 65) {
+															case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
+																if (grassReplaceRate > 15) {
 																	break;
-																} else if (grassReplaceRate > 35) {
+																} else if (grassReplaceRate > 5) {
 																	blockAboveDirt.setType(Material.FERN);
 																} else {
 																	blockAboveDirt.setType(Material.SHORT_GRASS);
@@ -962,7 +976,7 @@ public class DateUtils {
 																break;
 															default:
 																// For other biomes that are not excluded, randomly place grass but at a low rate
-																if (grassReplaceRate > 7) {
+																if (grassReplaceRate > 10) {
 																	break;
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
@@ -974,9 +988,20 @@ public class DateUtils {
 											// Not under a tree
 											else {
 
-												// Only replace with grass if the block underneath is grass
-												if (surfaceBlock.getType() != Material.GRASS_BLOCK || surfaceBlock.getType() != Material.DIRT
-														|| surfaceBlock.getType() != Material.PODZOL || surfaceBlock.getType() != Material.COARSE_DIRT) {
+												// Only replace with grass if the block underneath is soil
+												if (surfaceBlock.getType() != Material.GRASS_BLOCK && surfaceBlock.getType() != Material.DIRT
+														&& surfaceBlock.getType() != Material.PODZOL && surfaceBlock.getType() != Material.COARSE_DIRT) {
+													continue;
+												}
+
+												// 5% chance of turning the dirt into grass blocks to spread during warm months
+												if (surfaceBlock.getType() == Material.DIRT) {
+													if ((random.nextInt(100) + 1) <= 5) {
+														surfaceBlock.setType(Material.GRASS_BLOCK);
+													}
+												}
+
+												if (above.getType() != Material.AIR) {
 													continue;
 												}
 
@@ -989,7 +1014,7 @@ public class DateUtils {
 														above.setType(Material.SHORT_GRASS);
 														break;
 													case "PLAINS":
-														if (grassReplaceRate > 30) {
+														if (grassReplaceRate > 35) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
@@ -1000,17 +1025,16 @@ public class DateUtils {
 														}
 														above.setType(Material.SHORT_GRASS);
 														break;
-													case "SAVANNA":
-													case "SAVANNA_PLATEAU":
-														if (grassReplaceRate > 85) {
+													case "SAVANNA", "SAVANNA_PLATEAU":
+														if (grassReplaceRate > 75) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
 														break;
 													case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
-														if (grassReplaceRate > 65) {
+														if (grassReplaceRate > 15) {
 															break;
-														} else if (grassReplaceRate > 35) {
+														} else if (grassReplaceRate > 5) {
 															above.setType(Material.FERN);
 														} else {
 															above.setType(Material.SHORT_GRASS);
@@ -1025,7 +1049,7 @@ public class DateUtils {
 														break;
 													default:
 														// For other biomes that are not excluded, randomly place grass but at a low rate
-														if (grassReplaceRate > 7) {
+														if (grassReplaceRate > 10) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
