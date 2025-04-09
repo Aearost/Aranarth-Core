@@ -5,7 +5,6 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
@@ -765,51 +764,31 @@ public class DateUtils {
 
 				if (surfaceBlock.getType().name().endsWith("LEAVES")) {
 					Location location = surfaceBlock.getLocation();
-					int yAboveGap = location.getBlockY();
-					int yBelowGap = 0;
 					// Keep going down to apply to the next blocks
-					for (int i = location.getBlockY(); i > 62; i--) {
+					for (int i = location.getBlockY(); i > 61; i--) {
 						Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+
 						if (block.getType().name().endsWith("LEAVES")) {
-							yAboveGap = block.getY();
 							continue;
 						}
 						// If there is a space underneath the leaves
-						else if (block.getType() == Material.AIR || block.getType() == Material.SHORT_GRASS || block.getType() == Material.FERN || block.getType() == Material.SNOW) {
+						else if (block.getType() != Material.AIR && block.getType() != Material.SHORT_GRASS && block.getType() != Material.FERN && block.getType() != Material.SNOW) {
 							continue;
 						}
 						// The first solid block under the leaves
 						else {
-							if (INVALID_SURFACE_BLOCKS.contains(block.getType())) {
-								break;
-							}
-
-							// Ensures that snow only goes on flat parts of stairs/slabs
-							if (block.getBlockData() instanceof Stairs stairs) {
-								if (stairs.getHalf() == Bisected.Half.BOTTOM) {
-									continue;
-								}
-							} else if (block.getBlockData() instanceof Slab slab) {
-								if (slab.getType() == Slab.Type.BOTTOM) {
-									continue;
-								}
-							}
-
-							yBelowGap = block.getY();
-
-							// If there is a space in between the two
-							if (yAboveGap > yBelowGap + 1) {
-								Block blockUnderTree = location.getWorld().getBlockAt(surfaceBlock.getX(), yBelowGap + 1, surfaceBlock.getZ());
-								if (blockUnderTree.getBlockData() instanceof Snow snow) {
+							Block blockUnderneath = location.getWorld().getBlockAt(surfaceBlock.getX(), i - 1, surfaceBlock.getZ());
+							if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
+								// Places the snow or adds layer
+								if (block.getBlockData() instanceof Snow snow) {
 									if (snow.getLayers() < 4) {
 										int snowLayers = snow.getLayers();
 										snow.setLayers(snowLayers + 1);
-										blockUnderTree.setBlockData(snow);
+										block.setBlockData(snow);
 									}
 								} else {
-									blockUnderTree.setType(Material.SNOW);
+									block.setType(Material.SNOW);
 								}
-								break;
 							}
 						}
 					}
@@ -914,7 +893,7 @@ public class DateUtils {
 											if (surfaceBlock.getType().name().endsWith("LEAVES")) {
 												Location location = surfaceBlock.getLocation();
 												// Keep going down to apply to the next blocks
-												for (int i = location.getBlockY() - 1; i > 62; i--) {
+												for (int i = location.getBlockY() - 1; i > 61; i--) {
 													Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
 													if (block.getBlockData() instanceof Snow lowerSnow) {
 														int snowLayersAboveGround = lowerSnow.getLayers();
