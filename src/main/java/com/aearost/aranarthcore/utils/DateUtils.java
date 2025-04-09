@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.*;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
@@ -628,15 +629,17 @@ public class DateUtils {
 								areAllBlocksAir = false;
 							}
 
-							// Only apply particles if the player is exposed to air
-							if (areAllBlocksAir) {
-								// If it is a temperate or cold biome
-								if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-									loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
-									loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+							// If it is a warm biome, do not apply snow logic
+							if (highestBlock.getTemperature() < 0.9 && highestBlock.getBiome() != Biome.RIVER) {
+								// Only apply particles if the player is exposed to air
+								if (areAllBlocksAir) {
+									// If it is a temperate or cold biome
+									if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+										loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
+										loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+									}
 								}
 							}
-
 							// Attempts to generate snow only once per second
 							if (runs % 5 == 0) {
 								generateSnow(loc, bigFlakeDensity);
@@ -706,7 +709,7 @@ public class DateUtils {
 				Block surfaceBlock = world.getHighestBlockAt(x, z);
 				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 				// Hot biomes do not get snow
-				if (temperature > 1) {
+				if (temperature > 0.9) {
 					continue;
 				}
 				// Frozen biomes have the highest snow rates
@@ -860,7 +863,7 @@ public class DateUtils {
 										String biome = surfaceBlock.getBiome().toString();
 
 										// Hot biomes never have snow
-										if (temperature > 1) {
+										if (temperature >= 0.9) {
 											continue;
 										}
 										// Frozen biomes never melt
@@ -952,12 +955,6 @@ public class DateUtils {
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
 																break;
-															case "SAVANNA", "SAVANNA_PLATEAU":
-																if (grassReplaceRate > 75) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
 															case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
 																if (grassReplaceRate > 15) {
 																	break;
@@ -1021,12 +1018,6 @@ public class DateUtils {
 														break;
 													case "SUNFLOWER_PLAINS":
 														if (grassReplaceRate > 70) {
-															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
-													case "SAVANNA", "SAVANNA_PLATEAU":
-														if (grassReplaceRate > 75) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
