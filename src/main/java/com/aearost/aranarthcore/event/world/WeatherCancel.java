@@ -24,6 +24,14 @@ public class WeatherCancel implements Listener {
 		// If being set to raining during a winter month
 		if (e.toWeatherState() && DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 			e.setCancelled(true);
+			return;
+		}
+
+		// If there's a snowstorm during Ignivor, allow rain only while it is not snowing
+		if (e.toWeatherState() && AranarthUtils.getMonth() == 0) {
+			if (AranarthUtils.getStormDuration() >= 100) {
+				e.setCancelled(true);
+			}
 		}
 	}
 

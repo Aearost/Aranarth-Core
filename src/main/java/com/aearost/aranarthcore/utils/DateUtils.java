@@ -401,13 +401,30 @@ public class DateUtils {
 
 	/**
 	 * Apply the effects during the first month of Ignivor.
+	 * Note that it can randomly snow during Ignivor, however snow will melt slowly.
 	 */
 	private void applyIgnivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.LUCK, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.REGENERATION, 320, 0));
 		applyEffectToAllPlayers(effects);
-		meltSnow();
+
+		// Lower chance of there being a snowstorm
+		if (AranarthUtils.getIsStorming() || AranarthUtils.getStormDelay() <= 0) {
+			// Randomizes the first storm
+			if (!AranarthUtils.getHasStormedInNonWinterMonth()) {
+				AranarthUtils.setHasStormedInNonWinterMonth(true);
+				AranarthUtils.setStormDelay(new Random().nextInt(240000));
+				return;
+			}
+
+			// Only apply if it is not currently raining in the world
+			if (!Bukkit.getWorld("world").hasStorm()) {
+				applySnow(20, 500);
+			}
+		} else {
+			meltSnow();
+		}
 	}
 
 	/**
@@ -569,9 +586,12 @@ public class DateUtils {
                                 case 13 ->
                                     // At least 0.25 days, no more than 1 day
 									AranarthUtils.setStormDelay(random.nextInt(18000) + 6000);
-                                case 14 ->
-                                    // At least 0.5 days, no more than 1.5 days
-									AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
+								case 14 ->
+									// At least 0.5 days, no more than 1.5 days
+										AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
+								case 1 ->
+									// At least 2 days, no more than 10 days
+										AranarthUtils.setStormDelay(random.nextInt(240000) + 48000);
                             }
 						} else {
 							// 100 ticks per execution
@@ -597,9 +617,12 @@ public class DateUtils {
                                 case 13 ->
                                     // At least 0.75 days, no more than 2 days
 									AranarthUtils.setStormDuration(random.nextInt(30000) + 18000);
-                                case 14 ->
-                                    // At least 0.25 days, no more than 1 day
-									AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
+								case 14 ->
+									// At least 0.25 days, no more than 1 day
+										AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
+								case 1 ->
+									// At least 0.5 days, no more than 1.25 day
+										AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
                             }
 						} else {
 							// 100 ticks per execution
@@ -872,17 +895,26 @@ public class DateUtils {
 										}
 										// Cold biomes have higher snow rates so it should melt slower
 										else if (temperature < 0.25) {
-											meltRate = 1;
+											meltRate = 2;
 											grassReplaceRate = random.nextInt(100) + 1;
 										}
 										// Temperate biomes have standard melting rates
 										else {
-											meltRate = 3;
+											meltRate = 6;
 											grassReplaceRate = random.nextInt(100) + 1;
 										}
 
-										// Determines if snow will generate at this block
+										// Determines if snow will melt at this block
 										int rand = random.nextInt(10000);
+
+										// Reduce snow melting rate if it is Ignivor
+										if (AranarthUtils.getMonth() == 0) {
+											meltRate = meltRate / 2;
+										}
+										// Increased snow melting rate if it is raining
+										else if (loc.getWorld().hasStorm()) {
+											meltRate = meltRate * 4;
+										}
 
 										// Proportionate melting rate for the given temperature
 										if (rand > meltRate) {
@@ -938,7 +970,7 @@ public class DateUtils {
 														// Adds short grass depending on biome
 														switch (biome) {
 															case "MEADOW":
-																if (grassReplaceRate > 80) {
+																if (grassReplaceRate > 55) {
 																	break;
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
@@ -950,7 +982,7 @@ public class DateUtils {
 																blockAboveDirt.setType(Material.SHORT_GRASS);
 																break;
 															case "SUNFLOWER_PLAINS":
-																if (grassReplaceRate > 70) {
+																if (grassReplaceRate > 45) {
 																	break;
 																}
 																blockAboveDirt.setType(Material.SHORT_GRASS);
@@ -1005,7 +1037,7 @@ public class DateUtils {
 												// Adds short grass depending on biome
 												switch (biome) {
 													case "MEADOW":
-														if (grassReplaceRate > 80) {
+														if (grassReplaceRate > 55) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
@@ -1017,7 +1049,7 @@ public class DateUtils {
 														above.setType(Material.SHORT_GRASS);
 														break;
 													case "SUNFLOWER_PLAINS":
-														if (grassReplaceRate > 70) {
+														if (grassReplaceRate > 45) {
 															break;
 														}
 														above.setType(Material.SHORT_GRASS);
