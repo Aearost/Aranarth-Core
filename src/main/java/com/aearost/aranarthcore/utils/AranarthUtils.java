@@ -35,6 +35,7 @@ public class AranarthUtils {
 	private static boolean isStorming;
 	private static int stormDuration;
 	private static int stormDelay;
+	private static boolean hasStormedInNonWinterMonth;
 
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -583,6 +584,22 @@ public class AranarthUtils {
 	 */
 	public static void setStormDelay(int newStormDelay) {
 		stormDelay = newStormDelay;
+	}
+
+	/**
+	 * Provides the confirmation whether it has stormed in a non-winter month since server startup.
+	 * @return Confirmation if it has stormed in a non-winter month since the server startup.
+	 */
+	public static boolean getHasStormedInNonWinterMonth() {
+		return hasStormedInNonWinterMonth;
+	}
+
+	/**
+	 * Updates the value of whether it has stormed in a non-winter month since the server startup.
+	 * @param newHasStormedInNonWinterMonth The new confirmation whether it has stormed in a non-winter month since the server startup.
+	 */
+	public static void setHasStormedInNonWinterMonth(boolean newHasStormedInNonWinterMonth) {
+		hasStormedInNonWinterMonth = newHasStormedInNonWinterMonth;
 	}
 
 	/**
