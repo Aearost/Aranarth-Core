@@ -401,7 +401,8 @@ public class DateUtils {
 
 	/**
 	 * Apply the effects during the first month of Ignivor.
-	 * Note that it can randomly snow during Ignivor, however snow will melt slowly.
+	 * Players are given the Luck and Regeneration effects during this month.
+	 * It can randomly snow during Ignivor, however snow will melt slowly.
 	 */
 	private void applyIgnivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
@@ -409,26 +410,28 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.REGENERATION, 320, 0));
 		applyEffectToAllPlayers(effects);
 
-		// Lower chance of there being a snowstorm
-		if (AranarthUtils.getIsStorming() || AranarthUtils.getStormDelay() <= 0) {
-			// Randomizes the first storm
-			if (!AranarthUtils.getHasStormedInNonWinterMonth()) {
-				AranarthUtils.setHasStormedInNonWinterMonth(true);
-				AranarthUtils.setStormDelay(new Random().nextInt(240000));
-				return;
-			}
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// Delay up to 10 days
+			AranarthUtils.setStormDelay(new Random().nextInt(24000));
+		}
 
-			// Only apply if it is not currently raining in the world
-			if (!Bukkit.getWorld("world").hasStorm()) {
-				applySnow(20, 500);
-			}
-		} else {
+		// If it is raining, only melt
+		if (Bukkit.getWorld("world").hasStorm()) {
 			meltSnow();
+		}
+		// If it is not raining, snow or melt
+		else {
+			// Adds snow but will only apply in low chance - will melt otherwise
+			applySnow(20, 500);
 		}
 	}
 
 	/**
 	 * Apply the effects during the second month of Aquinvor.
+	 * Players are given the Dolphin's Grace and Water Breathing effects during this month.
+	 * There is also an increased chance of rain during the month of Aquinvor.
 	 */
 	private void applyAquinvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
@@ -436,6 +439,14 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
 		applyEffectToAllPlayers(effects);
 		meltSnow();
+
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// Maximum of 2.5 days
+			AranarthUtils.setStormDelay(new Random().nextInt(60000));
+		}
+		applyRain();
 	}
 
 	/**
@@ -508,8 +519,13 @@ public class DateUtils {
 	 * Apply the effects during the twelfth month of Umbravor.
 	 */
 	private void applyUmbravorEffects() {
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// At least 0.75 days, no more than 5 days
+			AranarthUtils.setStormDelay(new Random().nextInt(102000) + 18000);
+		}
 		applySnow(5, 100);
-		meltSnow();
 	}
 
 	/**
@@ -519,6 +535,13 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
+
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// At least 0.5 days, no more than 2 days
+			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000);
+		}
 		applySnow(15, 400);
 	}
 
@@ -529,6 +552,13 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
 		applyEffectToAllPlayers(effects);
+
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// At least 0.25 days, no more than 1 day
+			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000);
+		}
 		applySnow(50, 1000);
 	}
 
@@ -540,6 +570,13 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
+
+		// Applies delay to first snow storm
+		if (!AranarthUtils.getHasStormedInMonth()) {
+			AranarthUtils.setHasStormedInMonth(true);
+			// At least 0.5 days, no more than 1.5 days
+			AranarthUtils.setStormDelay(new Random().nextInt(36000) + 12000);
+		}
 		applySnow(15, 400);
 	}
 
@@ -555,11 +592,20 @@ public class DateUtils {
 	}
 
 	/**
-	 * Applies the manual snow particles in the winter months of Aranarth.
+	 * Calculates the snowstorm duration and delays during the winter months of Aranarth.
+	 * Also applies the custom snow particle effects when it is snowing.
 	 * @param bigFlakeDensity The density of the larger snowflakes, being end rod particles.
 	 * @param smallFlakeDensity The density of the smaller snowflakes, being white ash particles.
 	 */
 	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
+		// Only melts snow if it isn't currently snowing - during Ignivor only
+		if ((AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)
+				&& AranarthUtils.getMonth() == 0) {
+			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+			meltSnow();
+			return;
+		}
+
 		new BukkitRunnable() {
 			int runs = 0;
 
@@ -572,7 +618,7 @@ public class DateUtils {
 						// Determines if the storm ended
 						if (AranarthUtils.getStormDuration() <= 0) {
 							Random random = new Random();
-							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe snowstorm has subsided..."));
 							AranarthUtils.setIsStorming(false);
 							int monthNum = AranarthUtils.getMonth();
 							// Updates the delay until the next storm
@@ -589,7 +635,7 @@ public class DateUtils {
 								case 14 ->
 									// At least 0.5 days, no more than 1.5 days
 										AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
-								case 1 ->
+								case 0 ->
 									// At least 2 days, no more than 10 days
 										AranarthUtils.setStormDelay(random.nextInt(240000) + 48000);
                             }
@@ -603,7 +649,7 @@ public class DateUtils {
 						// If it is time for the next storm
 						if (AranarthUtils.getStormDelay() <= 0) {
 							Random random = new Random();
-							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA storm has started..."));
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA snowstorm has started..."));
 							AranarthUtils.setIsStorming(true);
 							int monthNum = AranarthUtils.getMonth();
 							// Updates the duration of the storm
@@ -620,9 +666,9 @@ public class DateUtils {
 								case 14 ->
 									// At least 0.25 days, no more than 1 day
 										AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
-								case 1 ->
+								case 0 ->
 									// At least 0.5 days, no more than 1.25 day
-										AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
+										AranarthUtils.setStormDuration(random.nextInt(24000) + 6000);
                             }
 						} else {
 							// 100 ticks per execution
@@ -1098,5 +1144,41 @@ public class DateUtils {
 	 */
 	public static boolean isWinterMonth(int monthNum) {
 		return monthNum >= 11;
+	}
+
+	/**
+	 * Applies rain at an increased rate during the month of Aquinvor.
+	 */
+	private void applyRain() {
+		// Determines if it is currently storming
+		if (AranarthUtils.getIsStorming()) {
+			// Determines if the storm ended
+			if (AranarthUtils.getStormDuration() <= 0) {
+				Random random = new Random();
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has stopped..."));
+				Bukkit.getWorld("world").setStorm(false);
+				AranarthUtils.setIsStorming(false);
+				// At least 0.25 days, no more than 20 days
+				AranarthUtils.setStormDelay(random.nextInt(48000) + 6000);
+			} else {
+				// 100 ticks per execution
+				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
+			}
+		}
+		// If it is not storming
+		else {
+			// If it is time for the next storm
+			if (AranarthUtils.getStormDelay() <= 0) {
+				Random random = new Random();
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
+				Bukkit.getWorld("world").setStorm(true);
+				AranarthUtils.setIsStorming(true);
+				// At least 0.5 days, no more than 1.25 days
+				AranarthUtils.setStormDuration(random.nextInt(18000) + 12000);
+			} else {
+				// 100 ticks per execution
+				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+			}
+		}
 	}
 }

@@ -35,7 +35,7 @@ public class AranarthUtils {
 	private static boolean isStorming;
 	private static int stormDuration;
 	private static int stormDelay;
-	private static boolean hasStormedInNonWinterMonth;
+	private static boolean hasStormedInMonth;
 
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -519,7 +519,15 @@ public class AranarthUtils {
 	 * @param newMonth The new server month.
 	 */
 	public static void setMonth(int newMonth) {
+		if (newMonth != month) {
+			// Ensures that each month has a new value
+			hasStormedInMonth = false;
+			stormDelay = 0;
+			stormDuration = 0;
+		}
+
 		month = newMonth;
+
 	}
 
 	/**
@@ -587,19 +595,19 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides the confirmation whether it has stormed in a non-winter month since server startup.
-	 * @return Confirmation if it has stormed in a non-winter month since the server startup.
+	 * Provides the confirmation whether it has stormed since server startup or new month.
+	 * @return Confirmation if it has stormed since the server startup or new month.
 	 */
-	public static boolean getHasStormedInNonWinterMonth() {
-		return hasStormedInNonWinterMonth;
+	public static boolean getHasStormedInMonth() {
+		return hasStormedInMonth;
 	}
 
 	/**
-	 * Updates the value of whether it has stormed in a non-winter month since the server startup.
-	 * @param newHasStormedInNonWinterMonth The new confirmation whether it has stormed in a non-winter month since the server startup.
+	 * Updates the value of whether it has stormed in the month since the server startup or new month.
+	 * @param newHasStormedInMonth The new confirmation whether it has stormed since the server startup or new month.
 	 */
-	public static void setHasStormedInNonWinterMonth(boolean newHasStormedInNonWinterMonth) {
-		hasStormedInNonWinterMonth = newHasStormedInNonWinterMonth;
+	public static void setHasStormedInMonth(boolean newHasStormedInMonth) {
+		hasStormedInMonth = newHasStormedInMonth;
 	}
 
 	/**
