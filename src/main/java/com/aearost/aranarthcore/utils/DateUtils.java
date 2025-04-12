@@ -419,7 +419,7 @@ public class DateUtils {
 
 		// If it is raining, only melt
 		if (Bukkit.getWorld("world").hasStorm()) {
-			meltSnow();
+			meltSnow(1);
 		}
 		// If it is not raining, snow or melt
 		else {
@@ -438,9 +438,9 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
 		applyEffectToAllPlayers(effects);
-		meltSnow();
+		meltSnow(1);
 
-		// Applies delay to first snow storm
+		// Increased rain chance
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// Maximum of 2.5 days
@@ -451,68 +451,72 @@ public class DateUtils {
 
 	/**
 	 * Apply the effects during the third month of Nebulivor.
+	 * Players will be surrounded by a layer of fog.
 	 */
 	private void applyNebulivorEffects() {
-		meltSnow();
+		// Will handle the fog effect as well
+		meltSnow(1);
 	}
 
 	/**
 	 * Apply the effects during the fourth month of Ventiror.
+	 * Players are given the Speed I effect during this month.
 	 */
 	private void applyVentirorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SPEED, 320, 0));
 		applyEffectToAllPlayers(effects);
-		meltSnow();
+		meltSnow(2);
 	}
 
 	/**
 	 * Apply the effects during the fifth month of Florivor.
+	 * Crops will have a chance to increase by two levels during this month.
 	 */
 	private void applyFlorivorEffects() {
-		meltSnow();
+		meltSnow(3);
 	}
 
 	/**
 	 * Apply the effects during the sixth month of Calorvor.
 	 */
 	private void applyCalorvorEffects() {
-		meltSnow();
+		meltSnow(3);
 	}
 
 	/**
 	 * Apply the effects during the seventh month of Solarvor.
 	 */
 	private void applySolarvorEffects() {
-		meltSnow();
+		meltSnow(4);
 	}
 
 	/**
 	 * Apply the effects during the eighth month of Aestivor.
 	 */
 	private void applyAestivorEffects() {
-		meltSnow();
+		meltSnow(5);
 	}
 
 	/**
 	 * Apply the effects during the ninth month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
-		meltSnow();
+		meltSnow(4);
 	}
 
 	/**
 	 * Apply the effects during the tenth month of Fructivor.
 	 */
 	private void applyFructivorEffects() {
-		meltSnow();
+		meltSnow(3);
 	}
 
 	/**
 	 * Apply the effects during the eleventh month of Follivor.
 	 */
 	private void applyFollivorEffects() {
-		meltSnow();
+		meltSnow(2);
 	}
 
 	/**
@@ -602,7 +606,7 @@ public class DateUtils {
 		if ((AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)
 				&& AranarthUtils.getMonth() == 0) {
 			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
-			meltSnow();
+			meltSnow(1);
 			return;
 		}
 
@@ -880,7 +884,7 @@ public class DateUtils {
 	/**
 	 * Handles melting the snow in biomes that had snow applied due to seasons.
 	 */
-	private void meltSnow() {
+	private void meltSnow(int meltMultiplier) {
 		if (!isWinterMonth(AranarthUtils.getMonth())) {
 			new BukkitRunnable() {
 				int runs = 0;
@@ -904,6 +908,20 @@ public class DateUtils {
 
 							// Attempts to generate snow only once per second
 							if (runs % 4 == 0) {
+
+								// Applies fog effect during the month of Nebulivor.
+								if (AranarthUtils.getMonth() == 2) {
+									loc = loc.add(0, 1, 0); // Slightly above feet
+									// Spawn mist particles
+									player.getWorld().spawnParticle(
+											Particle.CLOUD,         // Particle type
+											loc,                    // Center
+											10,                     // Count
+											0.5, 0.5, 0.5,          // X, Y, Z offset (spread)
+											0                      // Extra (for speed, unused here)
+									);
+								}
+
 								Random random = new Random();
 								// Adds snow to the surrounding blocks from the player
 								int centerX = loc.getBlockX();
@@ -961,6 +979,7 @@ public class DateUtils {
 										else if (loc.getWorld().hasStorm()) {
 											meltRate = meltRate * 4;
 										}
+										meltRate = meltRate * meltMultiplier;
 
 										// Proportionate melting rate for the given temperature
 										if (rand > meltRate) {
@@ -1181,4 +1200,5 @@ public class DateUtils {
 			}
 		}
 	}
+
 }
