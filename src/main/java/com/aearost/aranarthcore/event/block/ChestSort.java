@@ -35,7 +35,7 @@ public class ChestSort implements Listener {
 	@EventHandler
 	public void onContainerSort(final PlayerInteractEvent e) {
 		if (e.getHand() == EquipmentSlot.HAND && e.getAction() == Action.LEFT_CLICK_BLOCK) {
-			if (isChest(e.getClickedBlock())) {
+			if (isContainer(e.getClickedBlock())) {
 				if (e.getPlayer().getGameMode() == GameMode.SURVIVAL && e.getPlayer().isSneaking()) {
 					BlockState state = e.getClickedBlock().getState();
 					Container container = (Container) state;
@@ -130,9 +130,10 @@ public class ChestSort implements Listener {
 		return sortedItemsAsArray;
 	}
 
-	private boolean isChest(Block block) {
+	private boolean isContainer(Block block) {
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
-				|| block.getType() == Material.BARREL;
+				|| block.getType() == Material.BARREL
+				|| block.getType().name().endsWith("SHULKER_BOX");
 	}
 }
