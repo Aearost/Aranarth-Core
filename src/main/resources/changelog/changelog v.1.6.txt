@@ -18,6 +18,7 @@ Bug Fixes
 - Fixed issue preventing multiple word usage of /ac itemname gradient
 - Crop harvest is now looking for Fortune and not Looting
 - Crop harvest fortune now works on wheat and beetroot when not sneaking
+- Added support for shulker boxes to be sorted with the chest sort functionality
 
 Miscellaneous
 - N/A
