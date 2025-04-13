@@ -1190,8 +1190,8 @@ public class DateUtils {
 			if (AranarthUtils.getStormDelay() <= 0) {
 				Random random = new Random();
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
-				Bukkit.getWorld("world").setStorm(true);
 				AranarthUtils.setIsStorming(true);
+				Bukkit.getWorld("world").setStorm(true);
 				// At least 0.5 days, no more than 1.25 days
 				AranarthUtils.setStormDuration(random.nextInt(18000) + 12000);
 			} else {

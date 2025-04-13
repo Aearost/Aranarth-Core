@@ -2,11 +2,14 @@ package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.weather.WeatherChangeEvent;
+
+import java.util.Random;
 
 public class WeatherCancel implements Listener {
 
@@ -27,6 +30,15 @@ public class WeatherCancel implements Listener {
 			return;
 		}
 
+		// If the rain is stopping during Aquinvor, manually add new randomizer
+		if (!e.toWeatherState() && AranarthUtils.getMonth() == 1) {
+			Random random = new Random();
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has stopped..."));
+			AranarthUtils.setIsStorming(false);
+			// At least 0.25 days, no more than 20 days
+			AranarthUtils.setStormDelay(random.nextInt(48000) + 6000);
+		}
+
 		// If there's a snowstorm during the month of Ignivor, only allow rain while it is not snowing
 		if (e.toWeatherState() && AranarthUtils.getMonth() == 0) {
 			if (AranarthUtils.getStormDuration() >= 100) {
@@ -42,6 +54,5 @@ public class WeatherCancel implements Listener {
 		}
 
 	}
-
 
 }
