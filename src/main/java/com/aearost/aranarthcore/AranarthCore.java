@@ -169,6 +169,7 @@ public class AranarthCore extends JavaPlugin {
 		new WeatherCancel(this);
 		new BannerExtendPatternLimit(this);
 		new EnhancedCropGrowth(this);
+		new ShulkerPreventSlotSwitch(this);
 	}
 
 	/**

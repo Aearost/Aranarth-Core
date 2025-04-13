@@ -19,6 +19,7 @@ Bug Fixes
 - Crop harvest is now looking for Fortune and not Looting
 - Crop harvest fortune now works on wheat and beetroot when not sneaking
 - Added support for shulker boxes to be sorted with the chest sort functionality
+- Shulker boxes can no longer be placed in other shulker boxes via hotkey slot changes
 
 Miscellaneous
 - N/A
