@@ -29,9 +29,7 @@ public class WeatherCancel implements Listener {
 
 		// If there's a snowstorm during the month of Ignivor, only allow rain while it is not snowing
 		if (e.toWeatherState() && AranarthUtils.getMonth() == 0) {
-			Bukkit.getLogger().info("Starting rain in Ignivor");
 			if (AranarthUtils.getStormDuration() >= 100) {
-				Bukkit.getLogger().info("Not starting rain because it's snowing");
 				e.setCancelled(true);
 				return;
 			}

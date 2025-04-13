@@ -412,6 +412,7 @@ public class DateUtils {
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
+			Bukkit.getLogger().info("First storm");
 			AranarthUtils.setHasStormedInMonth(true);
 			// Delay up to 10 days
 			AranarthUtils.setStormDelay(new Random().nextInt(24000));
@@ -438,7 +439,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
 		applyEffectToAllPlayers(effects);
-		meltSnow(1);
+		meltSnow(2);
 
 		// Increased rain chance
 		if (!AranarthUtils.getHasStormedInMonth()) {
@@ -609,7 +610,6 @@ public class DateUtils {
 			meltSnow(1);
 			return;
 		}
-
 		new BukkitRunnable() {
 			int runs = 0;
 
