@@ -37,6 +37,8 @@ public class AranarthUtils {
 	private static int stormDelay;
 	private static boolean hasStormedInMonth;
 	private static int currentTime;
+	private static int windPlayTimer;
+	private static boolean isPlayingWindSound;
 
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -612,19 +614,35 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides the current world time.
-	 * @return The current world time.
+	 * Provides the current timer since the last wind began.
+	 * @return The current timer since the last wind began.
 	 */
-	public static int getCurrentTime() {
-		return currentTime;
+	public static int getWindPlayTimer() {
+		return windPlayTimer;
 	}
 
 	/**
-	 * Updates the current world time.
-	 * @param newCurrentTime The new world time.
+	 * Updates the current timer since the last wind began.
+	 * @param newWindPlayTimer The new current timer since the last wind began.
 	 */
-	public static void setCurrentTime(int newCurrentTime) {
-		currentTime = newCurrentTime;
+	public static void setWindPlayTimer(int newWindPlayTimer) {
+		windPlayTimer = newWindPlayTimer;
+	}
+
+	/**
+	 * Provides confirmation whether the wind sound is currently playing.
+	 * @return Confirmation whether the wind sound is currently playing.
+	 */
+	public static boolean getIsPlayingWindSound() {
+		return isPlayingWindSound;
+	}
+
+	/**
+	 * Updates the value of whether the wind sound is currently playing.
+	 * @param newIsPlayingWindSound The new value of whether the wind sound is currently playing.
+	 */
+	public static void setIsPlayingWindSound(boolean newIsPlayingWindSound) {
+		isPlayingWindSound = newIsPlayingWindSound;
 	}
 
 	/**

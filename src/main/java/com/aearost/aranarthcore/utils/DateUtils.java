@@ -168,7 +168,7 @@ public class DateUtils {
 		else if (monthNum == 1) {
 			return "Aquinvór";
 		} else if (monthNum == 2) {
-			return "Ventirór";
+			return "Ventivór";
 		} else if (monthNum == 3) {
 			return "Florivór";
 		} else if (monthNum == 4) {
@@ -382,7 +382,7 @@ public class DateUtils {
         switch (AranarthUtils.getMonth()) {
             case 0 -> applyIgnivorEffects();
             case 1 -> applyAquinvorEffects();
-            case 2 -> applyVentirorEffects();
+            case 2 -> applyVentivorEffects();
             case 3 -> applyFlorivorEffects();
             case 4 -> applyCalorvorEffects();
             case 5 -> applyAestivorEffects();
@@ -454,7 +454,7 @@ public class DateUtils {
 	 * Players are given the Speed I effect during this month.
 	 * Random gusts of wind can be heard during this month.
 	 */
-	private void applyVentirorEffects() {
+	private void applyVentivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SPEED, 320, 0));
 		applyEffectToAllPlayers(effects);
@@ -886,6 +886,7 @@ public class DateUtils {
 		if (!isWinterMonth(AranarthUtils.getMonth())) {
 			new BukkitRunnable() {
 				int runs = 0;
+				boolean isPlayingWindSound = AranarthUtils.getIsPlayingWindSound();
 
 				@Override
 				public void run() {
@@ -895,10 +896,24 @@ public class DateUtils {
 						return;
 					}
 
-					boolean isPlayingWindSound = false;
+					// Play wind sound effect during Ventivor
 					if (AranarthUtils.getMonth() == 2) {
-						if (runs == 0 && new Random().nextInt(10) == 0) {
-							isPlayingWindSound = true;
+						if (runs == 0) {
+							// The end of the wind sound
+							if (AranarthUtils.getWindPlayTimer() >= 80) {
+								AranarthUtils.setWindPlayTimer(0);
+								AranarthUtils.setIsPlayingWindSound(false);
+								isPlayingWindSound = false;
+							}
+							// During a wind sound
+							else if (isPlayingWindSound) {
+								AranarthUtils.setWindPlayTimer(AranarthUtils.getWindPlayTimer() + 20);
+							}
+							// If not already playing wind sound, every 5 seconds there's a 10% chance that it will start
+							else if (!AranarthUtils.getIsPlayingWindSound() && new Random().nextInt(10) == 0) {
+								AranarthUtils.setIsPlayingWindSound(true);
+								isPlayingWindSound = true;
+							}
 						}
 					}
 
@@ -907,8 +922,9 @@ public class DateUtils {
 						if (player != null) {
 							Location loc = player.getLocation();
 
-							if (isPlayingWindSound) {
-								player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+							// If it is currently playing the sound and the first set of runs
+							if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
+								playWindEffect(runs, player);
 							}
 
 							// Only melt snow in the survival world
@@ -1194,6 +1210,43 @@ public class DateUtils {
 				// 100 ticks per execution
 				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			}
+		}
+	}
+
+	/**
+	 * Applies a gradually fading in and fading out wind sound effect during the month of Ventivor.
+	 * @param runs The current number of runs within the runnable, one every 1/4 second up to 20 runs.
+	 * @param player The player to play the effect to.
+	 */
+	private void playWindEffect(int runs, Player player) {
+		if (runs == 0) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.01F, 0.5F);
+		} else if (runs == 1) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.02F, 0.5F);
+		} else if (runs == 2) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.05F, 0.5F);
+		} else if (runs == 3) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.075F, 0.5F);
+		} else if (runs == 4) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.1F, 0.5F);
+		} else if (runs == 5) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.12F, 0.5F);
+		} else if (runs == 6) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.15F, 0.5F);
+		} else if (runs == 13) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.12F, 0.5F);
+		} else if (runs == 14) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.1F, 0.5F);
+		} else if (runs == 15) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.075F, 0.5F);
+		} else if (runs == 16) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.05F, 0.5F);
+		} else if (runs == 17) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.03F, 0.5F);
+		} else if (runs == 18) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.02F, 0.5F);
+		} else if (runs == 19) {
+			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.01F, 0.5F);
 		}
 	}
 
