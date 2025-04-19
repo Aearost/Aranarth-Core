@@ -170,6 +170,7 @@ public class AranarthCore extends JavaPlugin {
 		new BannerExtendPatternLimit(this);
 		new EnhancedCropGrowth(this);
 		new ShulkerPreventSlotSwitch(this);
+		new CropGrowBoost(this);
 	}
 
 	/**
