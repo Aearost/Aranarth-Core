@@ -168,21 +168,21 @@ public class DateUtils {
 		else if (monthNum == 1) {
 			return "Aquinvór";
 		} else if (monthNum == 2) {
-			return "Nebulivór";
-		} else if (monthNum == 3) {
 			return "Ventirór";
-		} else if (monthNum == 4) {
+		} else if (monthNum == 3) {
 			return "Florivór";
-		} else if (monthNum == 5) {
+		} else if (monthNum == 4) {
 			return "Calorvór";
-		} else if (monthNum == 6) {
-			return "Solarvór";
-		} else if (monthNum == 7) {
+		} else if (monthNum == 5) {
 			return "Aestivór";
-		} else if (monthNum == 8) {
+		} else if (monthNum == 6) {
 			return "Ardorvór";
-		} else if (monthNum == 9) {
+		} else if (monthNum == 7) {
 			return "Fructivór";
+		} else if (monthNum == 8) {
+			return "Solarvór";
+		} else if (monthNum == 9) {
+			return "Faunivór";
 		} else if (monthNum == 10) {
 			return "Follivór";
 		} else if (monthNum == 11) {
@@ -246,35 +246,35 @@ public class DateUtils {
 		else if (month == 1) {
             return day > 147;
 		}
-		// Nebulivór
+		// Ventirór
 		else if (month == 2) {
             return day > 146;
 		}
-		// Ventirór
+		// Florivór
 		else if (month == 3) {
             return day > 145;
 		}
-		// Florivór
+		// Calorvór
 		else if (month == 4) {
             return day > 145;
 		}
-		// Calorvór
+		// Aestivór
 		else if (month == 5) {
             return day > 146;
 		}
-		// Solarvór
+		// Ardorvór
 		else if (month == 6) {
             return day > 146;
 		}
-		// Aestivór
+		// Fructivór
 		else if (month == 7) {
             return day > 146;
 		}
-		// Ardorvór
+		// Solarvór
 		else if (month == 8) {
             return day > 146;
 		}
-		// Fructivór
+		// Faunivór
 		else if (month == 9) {
             return day > 146;
 		}
@@ -382,14 +382,14 @@ public class DateUtils {
         switch (AranarthUtils.getMonth()) {
             case 0 -> applyIgnivorEffects();
             case 1 -> applyAquinvorEffects();
-            case 2 -> applyNebulivorEffects();
-            case 3 -> applyVentirorEffects();
-            case 4 -> applyFlorivorEffects();
-            case 5 -> applyCalorvorEffects();
-            case 6 -> applySolarvorEffects();
-            case 7 -> applyAestivorEffects();
-            case 8 -> applyArdorvorEffects();
-            case 9 -> applyFructivorEffects();
+            case 2 -> applyVentirorEffects();
+            case 3 -> applyFlorivorEffects();
+            case 4 -> applyCalorvorEffects();
+            case 5 -> applyAestivorEffects();
+            case 6 -> applyArdorvorEffects();
+            case 7 -> applyFructivorEffects();
+			case 8 -> applySolarvorEffects();
+			case 9 -> applyFaunivorEffects();
             case 10 -> applyFollivorEffects();
             case 11 -> applyUmbravorEffects();
             case 12 -> applyGlacivorEffects();
@@ -412,7 +412,6 @@ public class DateUtils {
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
-			Bukkit.getLogger().info("First storm");
 			AranarthUtils.setHasStormedInMonth(true);
 			// Delay up to 10 days
 			AranarthUtils.setStormDelay(new Random().nextInt(24000));
@@ -451,16 +450,9 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the third month of Nebulivor.
-	 */
-	private void applyNebulivorEffects() {
-		// Will handle the fog effect/time looping as well
-		meltSnow(1);
-	}
-
-	/**
 	 * Apply the effects during the fourth month of Ventiror.
 	 * Players are given the Speed I effect during this month.
+	 * Random gusts of wind can be heard during this month.
 	 */
 	private void applyVentirorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
@@ -485,13 +477,6 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the seventh month of Solarvor.
-	 */
-	private void applySolarvorEffects() {
-		meltSnow(4);
-	}
-
-	/**
 	 * Apply the effects during the eighth month of Aestivor.
 	 */
 	private void applyAestivorEffects() {
@@ -509,6 +494,20 @@ public class DateUtils {
 	 * Apply the effects during the tenth month of Fructivor.
 	 */
 	private void applyFructivorEffects() {
+		meltSnow(4);
+	}
+
+	/**
+	 * Apply the effects during the seventh month of Solarvor.
+	 */
+	private void applySolarvorEffects() {
+		meltSnow(4);
+	}
+
+	/**
+	 * Apply the effects during the seventh month of Faunivor.
+	 */
+	private void applyFaunivorEffects() {
 		meltSnow(3);
 	}
 
@@ -892,39 +891,26 @@ public class DateUtils {
 				public void run() {
 					// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 					if (runs == 20) {
-//						// Keeps time at dusk during the month of Nebulivor
-//						if (AranarthUtils.getMonth() == 2) {
-//							World world = Bukkit.getWorld("world");
-//							int currentTime = AranarthUtils.getCurrentTime();
-//
-//							// New day reset
-//							if (currentTime >= 24000) {
-//								AranarthUtils.setCurrentTime(0);
-//								world.setTime(0);
-//								return;
-//							}
-//
-//							// Dusk hold period
-//							if (currentTime < 13000 || currentTime > 23000) {
-//								// If the time is drifting away from 13000 by more than 10 ticks
-//								if (Math.abs(currentTime - 13000) > 10) {
-//									world.setTime(13000);
-//								}
-//							}
-//							Bukkit.getLogger().info("Current time: " + currentTime);
-//							AranarthUtils.setCurrentTime(currentTime + 20);
-//						}
-
 						this.cancel();
 						return;
 					}
 
-
+					boolean isPlayingWindSound = false;
+					if (AranarthUtils.getMonth() == 2) {
+						if (runs == 0 && new Random().nextInt(10) == 0) {
+							isPlayingWindSound = true;
+						}
+					}
 
 					// Melts snow nearby all online players
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						if (player != null) {
 							Location loc = player.getLocation();
+
+							if (isPlayingWindSound) {
+								player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+							}
+
 							// Only melt snow in the survival world
 							if (!loc.getWorld().getName().equals("world")) {
 								continue;
