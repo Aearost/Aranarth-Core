@@ -40,8 +40,6 @@ public class GuiShulkerClose implements Listener {
                     return;
                 }
             }
-            // Should never be reached as per GuiShulkerPreventDrop
-            player.sendMessage(ChatUtils.chatMessage("&cYou are not holding a shulker box!"));
 		}
 		
 	}

@@ -36,6 +36,7 @@ public class AranarthUtils {
 	private static int stormDuration;
 	private static int stormDelay;
 	private static boolean hasStormedInMonth;
+	private static int currentTime;
 
 
 	public AranarthUtils(boolean isServerStarting) {
@@ -608,6 +609,22 @@ public class AranarthUtils {
 	 */
 	public static void setHasStormedInMonth(boolean newHasStormedInMonth) {
 		hasStormedInMonth = newHasStormedInMonth;
+	}
+
+	/**
+	 * Provides the current world time.
+	 * @return The current world time.
+	 */
+	public static int getCurrentTime() {
+		return currentTime;
+	}
+
+	/**
+	 * Updates the current world time.
+	 * @param newCurrentTime The new world time.
+	 */
+	public static void setCurrentTime(int newCurrentTime) {
+		currentTime = newCurrentTime;
 	}
 
 	/**

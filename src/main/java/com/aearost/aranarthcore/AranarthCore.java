@@ -41,6 +41,10 @@ public class AranarthCore extends JavaPlugin {
 		AranarthUtils.setIsStorming(false);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000)); // Set to 18000
 
+		int worldTime = (int) (Bukkit.getWorld("world").getTime() / 20);
+		Bukkit.getLogger().info("World time: " + Bukkit.getWorld("world").getTime());
+		AranarthUtils.setCurrentTime(worldTime);
+
 		plugin = this;
 
 		// Update the persistence files every 30 minutes to protect from loss of data
