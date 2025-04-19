@@ -452,10 +452,9 @@ public class DateUtils {
 
 	/**
 	 * Apply the effects during the third month of Nebulivor.
-	 * Players will be surrounded by a layer of fog.
 	 */
 	private void applyNebulivorEffects() {
-		// Will handle the fog effect as well
+		// Will handle the fog effect/time looping as well
 		meltSnow(1);
 	}
 
@@ -893,9 +892,34 @@ public class DateUtils {
 				public void run() {
 					// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 					if (runs == 20) {
+//						// Keeps time at dusk during the month of Nebulivor
+//						if (AranarthUtils.getMonth() == 2) {
+//							World world = Bukkit.getWorld("world");
+//							int currentTime = AranarthUtils.getCurrentTime();
+//
+//							// New day reset
+//							if (currentTime >= 24000) {
+//								AranarthUtils.setCurrentTime(0);
+//								world.setTime(0);
+//								return;
+//							}
+//
+//							// Dusk hold period
+//							if (currentTime < 13000 || currentTime > 23000) {
+//								// If the time is drifting away from 13000 by more than 10 ticks
+//								if (Math.abs(currentTime - 13000) > 10) {
+//									world.setTime(13000);
+//								}
+//							}
+//							Bukkit.getLogger().info("Current time: " + currentTime);
+//							AranarthUtils.setCurrentTime(currentTime + 20);
+//						}
+
 						this.cancel();
 						return;
 					}
+
+
 
 					// Melts snow nearby all online players
 					for (Player player : Bukkit.getOnlinePlayers()) {
@@ -907,21 +931,7 @@ public class DateUtils {
 							}
 
 							// Attempts to generate snow only once per second
-							if (runs % 4 == 0) {
-
-								// Applies fog effect during the month of Nebulivor.
-								if (AranarthUtils.getMonth() == 2) {
-									loc = loc.add(0, 1, 0); // Slightly above feet
-									// Spawn mist particles
-									player.getWorld().spawnParticle(
-											Particle.CLOUD,         // Particle type
-											loc,                    // Center
-											10,                     // Count
-											0.5, 0.5, 0.5,          // X, Y, Z offset (spread)
-											0                      // Extra (for speed, unused here)
-									);
-								}
-
+							if (runs % 2 == 0) {
 								Random random = new Random();
 								// Adds snow to the surrounding blocks from the player
 								int centerX = loc.getBlockX();
