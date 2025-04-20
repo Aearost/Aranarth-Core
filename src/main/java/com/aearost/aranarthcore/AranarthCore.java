@@ -173,6 +173,7 @@ public class AranarthCore extends JavaPlugin {
 		new CropGrowBoost(this);
 		new BabyMobSpawn(this);
 		new CreeperExtraChargedSpawn(this);
+		new FireTickDamageHigher(this);
 	}
 
 	/**
