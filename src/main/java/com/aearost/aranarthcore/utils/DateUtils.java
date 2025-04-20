@@ -9,6 +9,8 @@ import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
+import org.bukkit.entity.Animals;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -959,6 +961,18 @@ public class DateUtils {
 										}
 									} else {
 										AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
+									}
+								}
+							} else if (runs < 4 && month == 4) {
+								Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
+								for (Entity entity : entitiesInRange) {
+									if (entity instanceof Animals animal && !animal.isAdult()) {
+										int currentAge = animal.getAge();
+
+										// 50% chance to add boost
+										boolean shouldAddBoost = new Random().nextInt(4) > 1;
+										int ageIncrement = 1 + (shouldAddBoost ? 1 : 0);
+										animal.setAge(currentAge + ageIncrement);
 									}
 								}
 							}
