@@ -174,9 +174,9 @@ public class DateUtils {
 		} else if (monthNum == 3) {
 			return "Florivór";
 		} else if (monthNum == 4) {
-			return "Calorvór";
-		} else if (monthNum == 5) {
 			return "Aestivór";
+		} else if (monthNum == 5) {
+			return "Calorvór";
 		} else if (monthNum == 6) {
 			return "Ardorvór";
 		} else if (monthNum == 7) {
@@ -256,13 +256,13 @@ public class DateUtils {
 		else if (month == 3) {
             return day > 145;
 		}
-		// Calorvór
-		else if (month == 4) {
-            return day > 145;
-		}
 		// Aestivór
-		else if (month == 5) {
+		else if (month == 4) {
             return day > 146;
+		}
+		// Calorvór
+		else if (month == 5) {
+            return day > 145;
 		}
 		// Ardorvór
 		else if (month == 6) {
@@ -386,8 +386,8 @@ public class DateUtils {
             case 1 -> applyAquinvorEffects();
             case 2 -> applyVentivorEffects();
             case 3 -> applyFlorivorEffects();
-            case 4 -> applyCalorvorEffects();
-            case 5 -> applyAestivorEffects();
+			case 4 -> applyAestivorEffects();
+            case 5 -> applyCalorvorEffects();
             case 6 -> applyArdorvorEffects();
             case 7 -> applyFructivorEffects();
 			case 8 -> applySolarvorEffects();
@@ -452,7 +452,7 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the fourth month of Ventiror.
+	 * Apply the effects during the third month of Ventiror.
 	 * Players are given the Speed I effect during this month.
 	 * Random gusts of wind can be heard during this month.
 	 */
@@ -464,11 +464,19 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the fifth month of Florivor.
+	 * Apply the effects during the fourth month of Florivor.
 	 * Crops will have a chance to increase by two levels during this month.
 	 */
 	private void applyFlorivorEffects() {
 		meltSnow(3);
+	}
+
+	/**
+	 * Apply the effects during the fifth month of Aestivor.
+	 */
+	private void applyAestivorEffects() {
+		meltSnow(5);
+		applyThunder();
 	}
 
 	/**
@@ -479,35 +487,28 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the eighth month of Aestivor.
-	 */
-	private void applyAestivorEffects() {
-		meltSnow(5);
-	}
-
-	/**
-	 * Apply the effects during the ninth month of Ardorvor.
+	 * Apply the effects during the seventh month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
 		meltSnow(4);
 	}
 
 	/**
-	 * Apply the effects during the tenth month of Fructivor.
+	 * Apply the effects during the eighth month of Fructivor.
 	 */
 	private void applyFructivorEffects() {
 		meltSnow(4);
 	}
 
 	/**
-	 * Apply the effects during the seventh month of Solarvor.
+	 * Apply the effects during the ninth month of Solarvor.
 	 */
 	private void applySolarvorEffects() {
 		meltSnow(4);
 	}
 
 	/**
-	 * Apply the effects during the seventh month of Faunivor.
+	 * Apply the effects during the tenth month of Faunivor.
 	 */
 	private void applyFaunivorEffects() {
 		meltSnow(3);
@@ -1232,7 +1233,7 @@ public class DateUtils {
 			// Determines if the storm ended
 			if (AranarthUtils.getStormDuration() <= 0) {
 				Random random = new Random();
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has stopped..."));
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has ended..."));
 				Bukkit.getWorld("world").setStorm(false);
 				AranarthUtils.setIsStorming(false);
 				// At least 0.25 days, no more than 20 days
@@ -1252,6 +1253,54 @@ public class DateUtils {
 				Bukkit.getWorld("world").setStorm(true);
 				// At least 0.5 days, no more than 1.25 days
 				AranarthUtils.setStormDuration(random.nextInt(18000) + 12000);
+			} else {
+				// 100 ticks per execution
+				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+			}
+		}
+	}
+
+	/**
+	 * Applies thunder at an increased rate during the month of Aestivor.
+	 */
+	private void applyThunder() {
+		// Determines if it is currently storming
+		if (AranarthUtils.getIsStorming()) {
+			// Determines if the storm ended
+			if (AranarthUtils.getStormDuration() <= 0) {
+				Random random = new Random();
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has ended..."));
+				Bukkit.getWorld("world").setThundering(false);
+				Bukkit.getWorld("world").setStorm(false);
+				AranarthUtils.setIsStorming(false);
+				// At least 0.125 days, no more than 7 days
+				AranarthUtils.setStormDelay(random.nextInt(168000) + 3000);
+			} else {
+				// 100 ticks per execution
+				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
+			}
+		}
+		// If it is not storming
+		else {
+			// If it is time for the next storm
+			if (AranarthUtils.getStormDelay() <= 0) {
+				Random random = new Random();
+				// 50% chance of the storm being a thunderstorm
+				boolean isThundering = random.nextInt(10) >= 5;
+				World world = Bukkit.getWorld("world");
+
+				AranarthUtils.setIsStorming(true);
+				if (isThundering) {
+					world.setStorm(true);
+					world.setThunderDuration(AranarthUtils.getStormDuration());
+					world.setThundering(true);
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to thunder..."));
+				} else {
+					world.setStorm(true);
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
+				}
+				// At least 0.5 days, no more than 1 days
+				AranarthUtils.setStormDuration(random.nextInt(12000) + 12000);
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
