@@ -117,7 +117,7 @@ public class CropHarvest implements Listener {
 								drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
 							}
 							// Doubled crop yields during the month of Fructivor
-							if (AranarthUtils.getMonth() == 7) {
+							if (AranarthUtils.getMonth() == 8) {
 								if (getIsBlockCrop(drop.getType())) {
 									drop.setAmount(drop.getAmount() * 2);
 								}
@@ -159,7 +159,7 @@ public class CropHarvest implements Listener {
 			block.setType(Material.AIR);
 			for (ItemStack drop : drops) {
 				// Doubled crop yields during the month of Fructivor
-				if (AranarthUtils.getMonth() == 7) {
+				if (AranarthUtils.getMonth() == 8) {
 					if (getIsBlockCrop(drop.getType())) {
 						drop.setAmount(drop.getAmount() * 2);
 					}
