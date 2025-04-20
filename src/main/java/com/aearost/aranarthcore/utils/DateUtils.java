@@ -180,13 +180,13 @@ public class DateUtils {
 		} else if (monthNum == 6) {
 			return "Ardorvór";
 		} else if (monthNum == 7) {
-			return "Fructivór";
-		} else if (monthNum == 8) {
 			return "Solarvór";
+		} else if (monthNum == 8) {
+			return "Fructivór";
 		} else if (monthNum == 9) {
-			return "Faunivór";
-		} else if (monthNum == 10) {
 			return "Follivór";
+		} else if (monthNum == 10) {
+			return "Faunivór";
 		} else if (monthNum == 11) {
 			return "Umbravór";
 		} else if (monthNum == 12) {
@@ -268,19 +268,19 @@ public class DateUtils {
 		else if (month == 6) {
             return day > 146;
 		}
-		// Fructivór
-		else if (month == 7) {
-            return day > 146;
-		}
 		// Solarvór
+		else if (month == 7) {
+			return day > 146;
+		}
+		// Fructivór
 		else if (month == 8) {
             return day > 146;
 		}
-		// Faunivór
-		else if (month == 9) {
-            return day > 146;
-		}
 		// Follivór
+		else if (month == 9) {
+			return day > 146;
+		}
+		// Faunivór
 		else if (month == 10) {
             return day > 146;
 		}
@@ -389,10 +389,10 @@ public class DateUtils {
 			case 4 -> applyAestivorEffects();
             case 5 -> applyCalorvorEffects();
             case 6 -> applyArdorvorEffects();
-            case 7 -> applyFructivorEffects();
-			case 8 -> applySolarvorEffects();
-			case 9 -> applyFaunivorEffects();
-            case 10 -> applyFollivorEffects();
+            case 7 -> applySolarvorEffects();
+			case 8 -> applyFructivorEffects();
+			case 9 -> applyFollivorEffects();
+			case 10 -> applyFaunivorEffects();
             case 11 -> applyUmbravorEffects();
             case 12 -> applyGlacivorEffects();
             case 13 -> applyFrigorvorEffects();
@@ -497,31 +497,31 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the eighth month of Fructivor.
-	 */
-	private void applyFructivorEffects() {
-		meltSnow(4);
-	}
-
-	/**
-	 * Apply the effects during the ninth month of Solarvor.
+	 * Apply the effects during the eighth month of Solarvor.
 	 */
 	private void applySolarvorEffects() {
 		meltSnow(4);
 	}
 
 	/**
-	 * Apply the effects during the tenth month of Faunivor.
+	 * Apply the effects during the ninth month of Fructivor.
 	 */
-	private void applyFaunivorEffects() {
-		meltSnow(3);
+	private void applyFructivorEffects() {
+		meltSnow(4);
 	}
 
 	/**
-	 * Apply the effects during the eleventh month of Follivor.
+	 * Apply the effects during the tenth month of Follivor.
 	 */
 	private void applyFollivorEffects() {
 		meltSnow(2);
+	}
+
+	/**
+	 * Apply the effects during the eleventh month of Faunivor.
+	 */
+	private void applyFaunivorEffects() {
+		meltSnow(3);
 	}
 
 	/**
