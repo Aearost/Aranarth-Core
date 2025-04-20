@@ -171,6 +171,7 @@ public class AranarthCore extends JavaPlugin {
 		new EnhancedCropGrowth(this);
 		new ShulkerPreventSlotSwitch(this);
 		new CropGrowBoost(this);
+		new BabyMobSpawn(this);
 	}
 
 	/**
