@@ -490,7 +490,9 @@ public class DateUtils {
 	 * Apply the effects during the seventh month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
-		meltSnow(4);
+		List<PotionEffect> effects = new ArrayList<>();
+		effects.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
+		applyEffectToAllPlayers(effects);meltSnow(4);
 		applyForestFire();
 	}
 
