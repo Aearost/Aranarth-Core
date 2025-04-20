@@ -35,7 +35,7 @@ public class CropHarvest implements Listener {
 	@EventHandler
 	public void onCropHarvest(final BlockBreakEvent e) {
 		Block block = e.getBlock();
-		if (getIsBlockCrop(block)) {
+		if (getIsBlockCrop(block.getType())) {
 			ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
 			ItemStack seed = null;
 			Random random = new Random();
@@ -116,6 +116,24 @@ public class CropHarvest implements Listener {
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
 								drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
 							}
+							// Doubled crop yields during the month of Fructivor
+							if (AranarthUtils.getMonth() == 7) {
+								if (getIsBlockCrop(drop.getType())) {
+									drop.setAmount(drop.getAmount() * 2);
+								}
+							}
+							// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
+							else if (AranarthUtils.getMonth() >= 12) {
+								if (getIsBlockCrop(drop.getType())) {
+									if (drop.getAmount() == 1) {
+										if (random.nextInt(2) == 0) {
+											drop.setAmount(0);
+										}
+									} else {
+										drop.setAmount(drop.getAmount() / 2);
+									}
+								}
+							}
 							block.getWorld().dropItemNaturally(block.getLocation(), drop);
 						}
 					}
@@ -140,20 +158,38 @@ public class CropHarvest implements Listener {
 			e.setCancelled(true);
 			block.setType(Material.AIR);
 			for (ItemStack drop : drops) {
+				// Doubled crop yields during the month of Fructivor
+				if (AranarthUtils.getMonth() == 7) {
+					if (getIsBlockCrop(drop.getType())) {
+						drop.setAmount(drop.getAmount() * 2);
+					}
+				}
+				// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
+				else if (AranarthUtils.getMonth() >= 12) {
+					if (getIsBlockCrop(drop.getType())) {
+						if (drop.getAmount() == 1) {
+							if (random.nextInt(2) == 0) {
+								drop.setAmount(0);
+							}
+						} else {
+							drop.setAmount(drop.getAmount() / 2);
+						}
+					}
+				}
 				block.getWorld().dropItemNaturally(block.getLocation(), drop);
 			}
 		}
 	}
 
 	/**
-	 * Confirms if the input block is indeed a crop.
-	 * @param block The block.
+	 * Confirms if the input item is indeed a crop.
+	 * @param type The type of item it is.
 	 * @return Confirmation of whether the block is a crop or not.
 	 */
-	private boolean getIsBlockCrop(Block block) {
-        return block.getType() == Material.WHEAT || block.getType() == Material.CARROTS
-                || block.getType() == Material.POTATOES || block.getType() == Material.BEETROOTS
-                || block.getType() == Material.NETHER_WART;
+	private boolean getIsBlockCrop(Material type) {
+        return type == Material.WHEAT || type == Material.CARROTS
+                || type == Material.POTATOES || type == Material.BEETROOTS
+                || type == Material.NETHER_WART;
     }
 
 	/**
