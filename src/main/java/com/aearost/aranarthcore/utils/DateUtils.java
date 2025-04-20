@@ -941,24 +941,26 @@ public class DateUtils {
 								if (loc.getBlockY() < 62) {
 									return;
 								}
-								// More than 10 seconds since the last cherry leaf particle display
-								if (AranarthUtils.getCherryParticleDelay() > 20) {
-									// 33% chance every 5 seconds of showing the petals
-									if (new Random().nextInt(3) == 0) {
-										AranarthUtils.setCherryParticleDelay(0);
-										for (int i = 0; i < 100; i++) { // Increased particles for visibility
-											int x = (int) ((Math.random() - 0.5) * 64);
-											int y = (int) (Math.random() * 20 - 5); // From 15 above to 5 below
-											int z = (int) ((Math.random() - 0.5) * 64);
-											Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
 
-											Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+								if (isBiomeForCherryParticles(loc.getBlock().getBiome())) {
+									// More than 10 seconds since the last cherry leaf particle display
+									if (AranarthUtils.getCherryParticleDelay() > 20) {
+										// 33% chance every 5 seconds of showing the petals
+										if (new Random().nextInt(3) == 0) {
+											AranarthUtils.setCherryParticleDelay(0);
+											for (int i = 0; i < 100; i++) { // Increased particles for visibility
+												int x = (int) ((Math.random() - 0.5) * 64);
+												int y = (int) (Math.random() * 20 - 5); // From 15 above to 5 below
+												int z = (int) ((Math.random() - 0.5) * 64);
+												Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
+
+												Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+											}
 										}
+									} else {
+										AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
 									}
-								} else {
-									AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
 								}
-
 							}
 
 
@@ -1278,6 +1280,12 @@ public class DateUtils {
 		} else if (runs == 19) {
 			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.01F, 0.5F);
 		}
+	}
+
+	private boolean isBiomeForCherryParticles(Biome biome) {
+		return biome == Biome.PLAINS || biome == Biome.SUNFLOWER_PLAINS || biome == Biome.BIRCH_FOREST
+				|| biome == Biome.OLD_GROWTH_BIRCH_FOREST || biome == Biome.DARK_FOREST || biome == Biome.FOREST
+				|| biome == Biome.FLOWER_FOREST || biome == Biome.MEADOW;
 	}
 
 }
