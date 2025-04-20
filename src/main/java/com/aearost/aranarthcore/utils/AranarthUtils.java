@@ -39,7 +39,7 @@ public class AranarthUtils {
 	private static int currentTime;
 	private static int windPlayTimer;
 	private static boolean isPlayingWindSound;
-
+	private static int cherryParticleDelay;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -643,6 +643,22 @@ public class AranarthUtils {
 	 */
 	public static void setIsPlayingWindSound(boolean newIsPlayingWindSound) {
 		isPlayingWindSound = newIsPlayingWindSound;
+	}
+
+	/**
+	 * Provides the current delay since the last display of cherry leaf particles.
+	 * @return The delay since the last display of cherry leaf particles.
+	 */
+	public static int getCherryParticleDelay() {
+		return cherryParticleDelay;
+	}
+
+	/**
+	 * Updates the value of the current delay since the last display of cherry leaf particles.
+	 * @param newCherryParticleDelay The new value of the delay since the last display of cherry leaf particles.
+	 */
+	public static void setCherryParticleDelay(int newCherryParticleDelay) {
+		cherryParticleDelay = newCherryParticleDelay;
 	}
 
 	/**

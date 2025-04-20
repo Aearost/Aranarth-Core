@@ -22,12 +22,12 @@ import java.util.*;
  */
 public class DateUtils {
 
-	private final int month;
-	private final int day;
+	private final int irlMonth;
+	private final int irlDay;
 	
 	public DateUtils() {
-		this.month = getMonth();
-		this.day = getDay();
+		this.irlMonth = getIrlMonth();
+		this.irlDay = getIrlDay();
 	}
 
 	/**
@@ -35,7 +35,7 @@ public class DateUtils {
 	 *
 	 * @return The current month as an integer.
 	 */
-	private int getMonth() {
+	private int getIrlMonth() {
 		return LocalDate.now().getMonthValue();
 	}
 
@@ -44,7 +44,7 @@ public class DateUtils {
 	 *
 	 * @return The current date of the month as an integer.
 	 */
-	private int getDay() {
+	private int getIrlDay() {
 		return LocalDate.now().getDayOfMonth();
 	}
 
@@ -54,8 +54,8 @@ public class DateUtils {
 	 * @return Confirmation of whether it is roughly Valentine's Day.
 	 */
 	public boolean isValentinesDay() {
-		if (this.month == 2) {
-            return this.day >= 4 && this.day <= 14;
+		if (this.irlMonth == 2) {
+            return this.irlDay >= 4 && this.irlDay <= 14;
 		}
 		return false;
 	}
@@ -66,10 +66,10 @@ public class DateUtils {
 	 * @return Confirmation of whether it is roughly Easter.
 	 */
 	public boolean isEaster() {
-		if (this.month == 3) {
-            return this.day >= 22 && this.day <= 31;
-		} else if (this.month == 4) {
-            return this.day >= 1 && this.day <= 25;
+		if (this.irlMonth == 3) {
+            return this.irlDay >= 22 && this.irlDay <= 31;
+		} else if (this.irlMonth == 4) {
+            return this.irlDay >= 1 && this.irlDay <= 25;
 		}
 		return false;
 	}
@@ -80,8 +80,8 @@ public class DateUtils {
 	 * @return Confirmation of whether it is roughly Halloween.
 	 */
 	public boolean isHalloween() {
-		if (this.month == 10) {
-            return this.day >= 20 && this.day <= 31;
+		if (this.irlMonth == 10) {
+            return this.irlDay >= 20 && this.irlDay <= 31;
 		}
 		return false;
 	}
@@ -92,8 +92,8 @@ public class DateUtils {
 	 * @return Confirmation of whether it is roughly Christmas.
 	 */
 	public boolean isChristmas() {
-		if (this.month == 12) {
-            return this.day >= 15 && this.day <= 25;
+		if (this.irlMonth == 12) {
+            return this.irlDay >= 15 && this.irlDay <= 25;
 		}
 		return false;
 	}
@@ -883,7 +883,8 @@ public class DateUtils {
 	 * Handles melting the snow in biomes that had snow applied due to seasons.
 	 */
 	private void meltSnow(int meltMultiplier) {
-		if (!isWinterMonth(AranarthUtils.getMonth())) {
+		int month = AranarthUtils.getMonth();
+		if (!isWinterMonth(month)) {
 			new BukkitRunnable() {
 				int runs = 0;
 				boolean isPlayingWindSound = AranarthUtils.getIsPlayingWindSound();
@@ -896,8 +897,8 @@ public class DateUtils {
 						return;
 					}
 
-					// Play wind sound effect during Ventivor
-					if (AranarthUtils.getMonth() == 2) {
+					// Determine if wind should be played
+					if (month == 2) {
 						if (runs == 0) {
 							// The end of the wind sound
 							if (AranarthUtils.getWindPlayTimer() >= 80) {
@@ -922,15 +923,44 @@ public class DateUtils {
 						if (player != null) {
 							Location loc = player.getLocation();
 
-							// If it is currently playing the sound and the first set of runs
-							if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
-								playWindEffect(runs, player);
+							// Play wind sound during Ventivor
+							if (month == 2) {
+								// If it is currently playing the sound and the first set of runs
+								if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
+									playWindEffect(runs, player);
+								}
+
+								// Only melt snow in the survival world
+								if (!loc.getWorld().getName().equals("world")) {
+									continue;
+								}
+							}
+							// Add pink petals effect in wind during Florivor
+							else if (runs == 0 && month == 3) {
+								// Only display if above sea level
+								if (loc.getBlockY() < 62) {
+									return;
+								}
+								// More than 10 seconds since the last cherry leaf particle display
+								if (AranarthUtils.getCherryParticleDelay() > 20) {
+									// 33% chance every 5 seconds of showing the petals
+									if (new Random().nextInt(3) == 0) {
+										AranarthUtils.setCherryParticleDelay(0);
+										for (int i = 0; i < 100; i++) { // Increased particles for visibility
+											int x = (int) ((Math.random() - 0.5) * 64);
+											int y = (int) (Math.random() * 20 - 5); // From 15 above to 5 below
+											int z = (int) ((Math.random() - 0.5) * 64);
+											Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
+
+											Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+										}
+									}
+								} else {
+									AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
+								}
+
 							}
 
-							// Only melt snow in the survival world
-							if (!loc.getWorld().getName().equals("world")) {
-								continue;
-							}
 
 							// Attempts to generate snow only once per second
 							if (runs % 2 == 0) {
@@ -984,7 +1014,7 @@ public class DateUtils {
 										int rand = random.nextInt(10000);
 
 										// Reduce snow melting rate if it is Ignivor
-										if (AranarthUtils.getMonth() == 0) {
+										if (month == 0) {
 											meltRate = meltRate / 2;
 										}
 										// Increased snow melting rate if it is raining
