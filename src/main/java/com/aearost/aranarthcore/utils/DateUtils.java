@@ -491,6 +491,7 @@ public class DateUtils {
 	 */
 	private void applyArdorvorEffects() {
 		meltSnow(4);
+		applyForestFire();
 	}
 
 	/**
@@ -1309,6 +1310,33 @@ public class DateUtils {
 	}
 
 	/**
+	 * Applies chances of forest fires at a very low chance during the month of Ardorvor.
+	 */
+	private void applyForestFire() {
+		boolean shouldApplyForestFire = new Random().nextInt(200) == 0;
+		if (shouldApplyForestFire) {
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				Location loc = player.getLocation();
+				int radius = 50;
+				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
+					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
+						Block block = loc.getWorld().getHighestBlockAt(x, z);
+						if (isBiomeForForestFire(loc.getBlock().getBiome())) {
+
+							if (block.getType().name().endsWith("_LEAVES") || block.getType().name().endsWith("_LOG")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&7There is a &c&oforest fire &7nearby " + AranarthUtils.getNickname(player)));
+								loc.getWorld().getHighestBlockAt(x, z).setType(Material.FIRE);
+								return;
+							}
+						}
+
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Applies a gradually fading in and fading out wind sound effect during the month of Ventivor.
 	 * @param runs The current number of runs within the runnable, one every 1/4 second up to 20 runs.
 	 * @param player The player to play the effect to.
@@ -1345,6 +1373,22 @@ public class DateUtils {
 		}
 	}
 
+	/**
+	 * Confirms if the current biome is suitable for a random forest fire.
+	 * @param biome The biome.
+	 * @return Confirmation whether the biome is suitable for a random forest fire.
+	 */
+	private boolean isBiomeForForestFire(Biome biome) {
+		return biome == Biome.FOREST || biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST
+				|| biome == Biome.DARK_FOREST || biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU
+				|| biome == Biome.WOODED_BADLANDS;
+	}
+
+	/**
+	 * Confirms if the current biome is suitable for cherry leaf particles.
+	 * @param biome The biome.
+	 * @return Confirmation whether the biome is suitable for cherry leaf particles.
+	 */
 	private boolean isBiomeForCherryParticles(Biome biome) {
 		return biome == Biome.PLAINS || biome == Biome.SUNFLOWER_PLAINS || biome == Biome.BIRCH_FOREST
 				|| biome == Biome.OLD_GROWTH_BIRCH_FOREST || biome == Biome.DARK_FOREST || biome == Biome.FOREST
