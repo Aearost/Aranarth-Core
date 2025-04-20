@@ -102,7 +102,7 @@ public class CraftingOverrides implements Listener {
 			}
 			// Honey Glazed Ham
 			else if (is.getType() == Material.COOKED_PORKCHOP) {
-				
+
 				// If a Honey Glazed Ham is used in place of a regular Cooked Porkchop
 				if (isHasLore) {
 					if (e.getRecipe().getResult().getType() == Material.COOKED_PORKCHOP) {
@@ -116,6 +116,25 @@ public class CraftingOverrides implements Listener {
 					if (e.getRecipe().getResult().getType() != Material.COOKED_PORKCHOP) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessage("&cYou must use a regular Cooked Porkchop to craft this!"));
+						return;
+					}
+				}
+			}
+			// God Apple Fragment
+			else if (is.getType() == Material.GOLD_NUGGET) {
+				// If a God Apple Fragment is used in place of a regular Gold Nugget
+				if (isHasLore) {
+					if (e.getRecipe().getResult().getType() != Material.ENCHANTED_GOLDEN_APPLE) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use God Apple Fragments to craft this!"));
+						return;
+					}
+				}
+				// If a Gold Nugget is used in place of a God Apple Fragment
+				else {
+					if (e.getRecipe().getResult().getType() == Material.ENCHANTED_GOLDEN_APPLE) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Gold Nugget to craft this!"));
 						return;
 					}
 				}
