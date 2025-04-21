@@ -175,6 +175,7 @@ public class AranarthCore extends JavaPlugin {
 		new CreeperExtraChargedSpawn(this);
 		new FireTickDamageHigher(this);
 		new LeafDecayAppleDropIncrease(this);
+		new LeavesPreventBurn(this);
 	}
 
 	/**
@@ -234,7 +235,6 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCopperExposed(this);
 		new RecipeCopperWeathered(this);
 		new RecipeCopperOxidized(this);
-		new RecipeGodApple(this);
 	}
 
 	/**

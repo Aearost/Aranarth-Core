@@ -6,6 +6,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.type.Leaves;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
@@ -1324,14 +1325,15 @@ public class DateUtils {
 					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
 						Block block = loc.getWorld().getHighestBlockAt(x, z);
 						if (isBiomeForForestFire(loc.getBlock().getBiome())) {
-
-							if (block.getType().name().endsWith("_LEAVES") || block.getType().name().endsWith("_LOG")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&7There is a &c&oforest fire &7nearby " + AranarthUtils.getNickname(player)));
-								loc.getWorld().getHighestBlockAt(x, z).setType(Material.FIRE);
-								return;
+							if (block.getBlockData() instanceof Leaves leaves) {
+								// Only apply to naturally generated trees
+								if (!leaves.isPersistent()) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&7There is a &c&oforest fire &7nearby " + AranarthUtils.getNickname(player)));
+									loc.getWorld().getHighestBlockAt(x, z).setType(Material.FIRE);
+									return;
+								}
 							}
 						}
-
 					}
 				}
 			}
