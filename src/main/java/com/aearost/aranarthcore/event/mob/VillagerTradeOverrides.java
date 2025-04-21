@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -32,62 +33,57 @@ public class VillagerTradeOverrides implements Listener {
             List<MerchantRecipe> trades = Lists.newArrayList(villager.getRecipes());
 			for (int i = 0; i < trades.size(); i++) {
 				MerchantRecipe trade = trades.get(i);
-				
+				MerchantRecipe newTrade = null;
 				if (villager.getProfession() == Profession.MASON) {
 					// Novice trades
 					if (trade.getResult().getType() == Material.BRICK) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 2));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					}
 					// Journeyman trades
 					else if (trade.getResult().getType() == Material.POLISHED_ANDESITE) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 2));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					} else if (trade.getResult().getType() == Material.POLISHED_GRANITE) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier1Stone(), 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 1));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					} else if (trade.getResult().getType() == Material.POLISHED_DIORITE) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier2Stone(), 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier2Stone(), 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 4));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					} else if (trade.getResult().getType() == Material.DRIPSTONE_BLOCK) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier3Stone(), 16), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier3Stone(), 16), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 6));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					}
 					// Expert trades
 					else if (terracottaList().contains(trade.getResult().getType())) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(selectTier3Stone(), 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(selectTier3Stone(), 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 4));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					} else if (trade.getResult().getType() == Material.QUARTZ_BLOCK) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ_BLOCK, 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ_BLOCK, 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 8));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					} else if (trade.getResult().getType() == Material.QUARTZ_PILLAR) {
-						MerchantRecipe newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ_PILLAR, 32), trade.getMaxUses());
+						newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ_PILLAR, 32), trade.getMaxUses());
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 8));
-						newTrade.setExperienceReward(true);
-						newTrade.setVillagerExperience(trade.getVillagerExperience());
-						trades.set(i, newTrade);
 					}
+				} else if (villager.getProfession() == Profession.FARMER) {
+					if (AranarthUtils.getMonth() == 8) {
+						// All trades to yield 3 emeralds instead of 1
+						if (trade.getIngredients().get(0).getType() == Material.WHEAT || trade.getIngredients().get(0).getType() == Material.POTATO
+								|| trade.getIngredients().get(0).getType() == Material.CARROT || trade.getIngredients().get(0).getType() == Material.BEETROOT
+								|| trade.getIngredients().get(0).getType() == Material.PUMPKIN || trade.getIngredients().get(0).getType() == Material.MELON) {
+							newTrade = new MerchantRecipe(new ItemStack(trade.getResult().getType(), 3), trade.getMaxUses());
+							newTrade.addIngredient(trade.getIngredients().get(0));
+						}
+					}
+				}
+				if (newTrade != null) {
+					newTrade.setExperienceReward(true);
+					newTrade.setVillagerExperience(trade.getVillagerExperience());
+					newTrade.setUses(trade.getUses());
+					newTrade.setMaxUses(trade.getMaxUses());
+					newTrade.setSpecialPrice(newTrade.getSpecialPrice());
+					newTrade.setDemand(newTrade.getDemand());
+					trades.set(i, newTrade);
 				}
 			}
 			villager.setRecipes(trades);
