@@ -176,6 +176,7 @@ public class AranarthCore extends JavaPlugin {
 		new FireTickDamageHigher(this);
 		new LeafDecayDrops(this);
 		new LeavesPreventBurn(this);
+		new BoneMealSapling(this);
 	}
 
 	/**
