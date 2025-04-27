@@ -28,7 +28,7 @@ public class QuiverClick implements Listener {
 			if (Objects.nonNull(e.getItem())) {
 				if (e.getItem().getType() == Material.LIGHT_GRAY_BUNDLE) {
 					if (Objects.nonNull(e.getItem().getItemMeta()) && e.getItem().getItemMeta().hasLore()) {
-						if (e.getPlayer().getWorld().getName().equals("world")) {
+						if (e.getPlayer().getWorld().getName().startsWith("world")) {
 							e.setCancelled(true);
 							GuiQuiver gui = new GuiQuiver(e.getPlayer());
 							gui.openGui();

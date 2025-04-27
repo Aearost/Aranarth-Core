@@ -904,7 +904,7 @@ public class DateUtils {
 						return;
 					}
 
-					// Determine if wind should be played
+					// Determine if wind should be played during the month of Ventivor
 					if (month == 2) {
 						if (runs == 0) {
 							// The end of the wind sound
