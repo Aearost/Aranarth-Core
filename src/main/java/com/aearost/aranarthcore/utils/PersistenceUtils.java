@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.PlayerShop;
@@ -621,7 +622,7 @@ public class PersistenceUtils {
 			int fieldCount = 0;
 			int day = 0;
 			int weekday = 0;
-			int month = 0;
+			Month month = null;
 			int year = 0;
 
 			Bukkit.getLogger().info("Attempting to read the serverdate file...");
@@ -640,7 +641,7 @@ public class PersistenceUtils {
 						fieldCount++;
 					}
 					case "month" -> {
-						month = Integer.parseInt(parts[1]);
+						month = Month.valueOf(parts[1]);
 						fieldCount++;
 					}
 					case "year" -> {
@@ -693,7 +694,7 @@ public class PersistenceUtils {
 
 					writer.write("day:" + AranarthUtils.getDay() + "\n");
 					writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
-					writer.write("month:" + AranarthUtils.getMonth() + "\n");
+					writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
 					writer.write("year:" + AranarthUtils.getYear());
 
 					writer.close();

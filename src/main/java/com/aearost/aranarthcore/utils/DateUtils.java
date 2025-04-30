@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -110,7 +111,7 @@ public class DateUtils {
 		// Gets current server year
 		int dayNum = AranarthUtils.getDay();
 		int weekdayNum = AranarthUtils.getWeekday();
-		int monthNum = AranarthUtils.getMonth();
+		Month month = AranarthUtils.getMonth();
 		int yearNum = AranarthUtils.getYear();
 		boolean isNewMonth = false;
 
@@ -118,13 +119,14 @@ public class DateUtils {
 		// First 5 seconds of a new day
 		if (time >= 0 && time < 5) {
 			// Calculates day number based on length of month
-			if (checkIfExceedsMonth(dayNum, monthNum)) {
+			if (checkIfExceedsMonth(dayNum, month)) {
 				dayNum = 1;
-				if (monthNum == 14) {
-					monthNum = 0;
+				if (month == Month.OBSCURVOR) {
+					month = Month.IGNIVOR;
 					yearNum++;
 				} else {
-					monthNum++;
+					// Gets the next month
+					month = Month.values()[month.ordinal() + 1];
 				}
 				isNewMonth = true;
 			} else {
@@ -139,10 +141,10 @@ public class DateUtils {
 
 			AranarthUtils.setDay(dayNum);
 			AranarthUtils.setWeekday(weekdayNum);
-			AranarthUtils.setMonth(monthNum);
+			AranarthUtils.setMonth(month);
 			AranarthUtils.setYear(yearNum);
 
-			String monthName = provideMonthName(monthNum);
+			String monthName = provideMonthName(month);
 			if (monthName == null) {
 				Bukkit.getLogger().info("Something went wrong with calculating the month name!");
 				return;
@@ -161,40 +163,40 @@ public class DateUtils {
 
 	/**
 	 * Provides the server's month name based on the numeric value.
-	 * @param monthNum The numeric month value.
+	 * @param month The numeric month value.
 	 * @return The actual name of the month.
 	 */
-	private String provideMonthName(int monthNum) {
-		if (monthNum == 0) {
+	private String provideMonthName(Month month) {
+		if (month == Month.IGNIVOR) {
 			return "Ignivór";
 		}
-		else if (monthNum == 1) {
+		else if (month == Month.AQUINVOR) {
 			return "Aquinvór";
-		} else if (monthNum == 2) {
+		} else if (month == Month.VENTIVOR) {
 			return "Ventivór";
-		} else if (monthNum == 3) {
+		} else if (month == Month.FLORIVOR) {
 			return "Florivór";
-		} else if (monthNum == 4) {
+		} else if (month == Month.AESTIVOR) {
 			return "Aestivór";
-		} else if (monthNum == 5) {
+		} else if (month == Month.CALORVOR) {
 			return "Calorvór";
-		} else if (monthNum == 6) {
+		} else if (month == Month.ARDORVOR) {
 			return "Ardorvór";
-		} else if (monthNum == 7) {
+		} else if (month == Month.SOLARVOR) {
 			return "Solarvór";
-		} else if (monthNum == 8) {
+		} else if (month == Month.FRUCTIVOR) {
 			return "Fructivór";
-		} else if (monthNum == 9) {
+		} else if (month == Month.FOLLIVOR) {
 			return "Follivór";
-		} else if (monthNum == 10) {
+		} else if (month == Month.FAUNIVOR) {
 			return "Faunivór";
-		} else if (monthNum == 11) {
+		} else if (month == Month.UMBRAVOR) {
 			return "Umbravór";
-		} else if (monthNum == 12) {
+		} else if (month == Month.GLACIVOR) {
 			return "Glacivór";
-		} else if (monthNum == 13) {
+		} else if (month == Month.FRIGORVOR) {
 			return "Frigorvór";
-		} else if (monthNum == 14) {
+		} else if (month == Month.OBSCURVOR) {
 			return "Obscurvór";
 		} else {
 			return null;
@@ -240,65 +242,65 @@ public class DateUtils {
 	 * @param month The current server month.
 	 * @return Whether the day is exceeding the current month's length.
 	 */
-	private boolean checkIfExceedsMonth(int day, int month) {
+	private boolean checkIfExceedsMonth(int day, Month month) {
 		// Ignivór
-		if (month == 0) {
+		if (month == Month.IGNIVOR) {
             return day > 147;
 		}
 		// Aquinvór
-		else if (month == 1) {
+		else if (month == Month.AQUINVOR) {
             return day > 147;
 		}
 		// Ventirór
-		else if (month == 2) {
+		else if (month == Month.VENTIVOR) {
             return day > 146;
 		}
 		// Florivór
-		else if (month == 3) {
+		else if (month == Month.FLORIVOR) {
             return day > 145;
 		}
 		// Aestivór
-		else if (month == 4) {
+		else if (month == Month.AESTIVOR) {
             return day > 146;
 		}
 		// Calorvór
-		else if (month == 5) {
+		else if (month == Month.CALORVOR) {
             return day > 145;
 		}
 		// Ardorvór
-		else if (month == 6) {
+		else if (month == Month.ARDORVOR) {
             return day > 146;
 		}
 		// Solarvór
-		else if (month == 7) {
+		else if (month == Month.SOLARVOR) {
 			return day > 146;
 		}
 		// Fructivór
-		else if (month == 8) {
+		else if (month == Month.FRUCTIVOR) {
             return day > 146;
 		}
 		// Follivór
-		else if (month == 9) {
+		else if (month == Month.FOLLIVOR) {
 			return day > 146;
 		}
 		// Faunivór
-		else if (month == 10) {
+		else if (month == Month.FAUNIVOR) {
             return day > 146;
 		}
 		// Umbravór
-		else if (month == 11) {
+		else if (month == Month.UMBRAVOR) {
             return day > 146;
 		}
 		// Glacivór
-		else if (month == 12) {
+		else if (month == Month.GLACIVOR) {
             return day > 146;
 		}
 		// Frigorvór
-		else if (month == 13) {
+		else if (month == Month.FRIGORVOR) {
             return day > 147;
 		}
 		// Obscurvór
-		else if (month == 14) {
+		else if (month == Month.OBSCURVOR) {
             return day > 147;
 		}
 		return false;
@@ -383,21 +385,21 @@ public class DateUtils {
 	 */
 	private void determineMonthEffects() {
         switch (AranarthUtils.getMonth()) {
-            case 0 -> applyIgnivorEffects();
-            case 1 -> applyAquinvorEffects();
-            case 2 -> applyVentivorEffects();
-            case 3 -> applyFlorivorEffects();
-			case 4 -> applyAestivorEffects();
-            case 5 -> applyCalorvorEffects();
-            case 6 -> applyArdorvorEffects();
-            case 7 -> applySolarvorEffects();
-			case 8 -> applyFructivorEffects();
-			case 9 -> applyFollivorEffects();
-			case 10 -> applyFaunivorEffects();
-            case 11 -> applyUmbravorEffects();
-            case 12 -> applyGlacivorEffects();
-            case 13 -> applyFrigorvorEffects();
-            case 14 -> applyObscurvorEffects();
+			case Month.IGNIVOR -> applyIgnivorEffects();
+			case Month.AQUINVOR -> applyAquinvorEffects();
+			case Month.VENTIVOR -> applyVentivorEffects();
+			case Month.FLORIVOR -> applyFlorivorEffects();
+			case Month.AESTIVOR -> applyAestivorEffects();
+			case Month.CALORVOR -> applyCalorvorEffects();
+			case Month.ARDORVOR -> applyArdorvorEffects();
+			case Month.SOLARVOR -> applySolarvorEffects();
+			case Month.FRUCTIVOR -> applyFructivorEffects();
+			case Month.FOLLIVOR -> applyFollivorEffects();
+			case Month.FAUNIVOR -> applyFaunivorEffects();
+			case Month.UMBRAVOR -> applyUmbravorEffects();
+			case Month.GLACIVOR -> applyGlacivorEffects();
+			case Month.FRIGORVOR -> applyFrigorvorEffects();
+			case Month.OBSCURVOR -> applyObscurvorEffects();
             default -> Bukkit.getLogger().info("Something went wrong with applying the " + AranarthUtils.getMonth() + "'s effects!");
         }
 	}
@@ -610,7 +612,7 @@ public class DateUtils {
 	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
 		// Only melts snow if it isn't currently snowing - during Ignivor only
 		if ((AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)
-				&& AranarthUtils.getMonth() == 0) {
+				&& AranarthUtils.getMonth() == Month.IGNIVOR) {
 			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			meltSnow(1);
 			return;
@@ -629,22 +631,22 @@ public class DateUtils {
 							Random random = new Random();
 							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe snowstorm has subsided..."));
 							AranarthUtils.setIsStorming(false);
-							int monthNum = AranarthUtils.getMonth();
+							Month month = AranarthUtils.getMonth();
 							// Updates the delay until the next storm
-                            switch (monthNum) {
-                                case 11 ->
+                            switch (month) {
+								case Month.UMBRAVOR ->
                                     // At least 0.75 days, no more than 5 days
 									AranarthUtils.setStormDelay(random.nextInt(102000) + 18000);
-                                case 12 ->
+								case Month.GLACIVOR ->
                                     // At least 0.5 days, no more than 2 days
 									AranarthUtils.setStormDelay(random.nextInt(48000) + 12000);
-                                case 13 ->
+								case Month.FRIGORVOR ->
                                     // At least 0.25 days, no more than 1 day
 									AranarthUtils.setStormDelay(random.nextInt(18000) + 6000);
-								case 14 ->
+								case Month.OBSCURVOR ->
 									// At least 0.5 days, no more than 1.5 days
 										AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
-								case 0 ->
+								case Month.IGNIVOR ->
 									// At least 2 days, no more than 10 days
 										AranarthUtils.setStormDelay(random.nextInt(240000) + 48000);
                             }
@@ -660,22 +662,22 @@ public class DateUtils {
 							Random random = new Random();
 							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA snowstorm has started..."));
 							AranarthUtils.setIsStorming(true);
-							int monthNum = AranarthUtils.getMonth();
+							Month month = AranarthUtils.getMonth();
 							// Updates the duration of the storm
-                            switch (monthNum) {
-                                case 11 ->
+                            switch (month) {
+								case Month.UMBRAVOR ->
                                     // At least 0.125 days, no more than 0.75 days
 									AranarthUtils.setStormDuration(random.nextInt(15000) + 3000);
-                                case 12 ->
+								case Month.GLACIVOR ->
                                     // At least 0.5 days, no more than 1.5 days
 									AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
-                                case 13 ->
+								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
 									AranarthUtils.setStormDuration(random.nextInt(30000) + 18000);
-								case 14 ->
+								case Month.OBSCURVOR ->
 									// At least 0.25 days, no more than 1 day
 										AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
-								case 0 ->
+								case Month.IGNIVOR ->
 									// At least 0.5 days, no more than 1.25 day
 										AranarthUtils.setStormDuration(random.nextInt(24000) + 6000);
                             }
@@ -890,7 +892,7 @@ public class DateUtils {
 	 * Handles melting the snow in biomes that had snow applied due to seasons.
 	 */
 	private void meltSnow(int meltMultiplier) {
-		int month = AranarthUtils.getMonth();
+		Month month = AranarthUtils.getMonth();
 		if (!isWinterMonth(month)) {
 			new BukkitRunnable() {
 				int runs = 0;
@@ -905,7 +907,7 @@ public class DateUtils {
 					}
 
 					// Determine if wind should be played during the month of Ventivor
-					if (month == 2) {
+					if (month == Month.VENTIVOR) {
 						if (runs == 0) {
 							// The end of the wind sound
 							if (AranarthUtils.getWindPlayTimer() >= 80) {
@@ -931,7 +933,7 @@ public class DateUtils {
 							Location loc = player.getLocation();
 
 							// Play wind sound during Ventivor
-							if (month == 2) {
+							if (month == Month.VENTIVOR) {
 								// If it is currently playing the sound and the first set of runs
 								if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
 									playWindEffect(runs, player);
@@ -943,7 +945,7 @@ public class DateUtils {
 								}
 							}
 							// Add pink petals effect in wind during Florivor
-							else if (runs == 0 && month == 3) {
+							else if (runs == 0 && month == Month.FLORIVOR) {
 								// Only display if above sea level
 								if (loc.getBlockY() < 62) {
 									return;
@@ -968,7 +970,9 @@ public class DateUtils {
 										AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
 									}
 								}
-							} else if (runs < 4 && month == 4) {
+							}
+							// Increase animal growth during the month of Ardorvor
+							else if (runs < 4 && month == Month.ARDORVOR) {
 								Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
 								for (Entity entity : entitiesInRange) {
 									if (entity instanceof Animals animal && !animal.isAdult()) {
@@ -1035,7 +1039,7 @@ public class DateUtils {
 										int rand = random.nextInt(10000);
 
 										// Reduce snow melting rate if it is Ignivor
-										if (month == 0) {
+										if (month == Month.IGNIVOR) {
 											meltRate = meltRate / 2;
 										}
 										// Increased snow melting rate if it is raining
@@ -1221,11 +1225,11 @@ public class DateUtils {
 
 	/**
 	 * Confirms if the current month is a winter month.
-	 * @param monthNum The current month number.
+	 * @param month The current month.
 	 * @return Confirmation whether the current month is a winter month.
 	 */
-	public static boolean isWinterMonth(int monthNum) {
-		return monthNum >= 11;
+	public static boolean isWinterMonth(Month month) {
+		return month.ordinal() >= 11;
 	}
 
 	/**

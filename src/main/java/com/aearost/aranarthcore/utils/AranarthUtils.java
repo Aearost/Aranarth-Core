@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.PlayerShop;
@@ -30,7 +31,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static int day;
 	private static int weekday;
-	private static int month;
+	private static Month month;
 	private static int year;
 	private static boolean isStorming;
 	private static int stormDuration;
@@ -513,7 +514,7 @@ public class AranarthUtils {
 	 * Provides the current server month.
 	 * @return The server month.
 	 */
-	public static int getMonth() {
+	public static Month getMonth() {
 		return month;
 	}
 
@@ -521,14 +522,13 @@ public class AranarthUtils {
 	 * Updates the current server month.
 	 * @param newMonth The new server month.
 	 */
-	public static void setMonth(int newMonth) {
+	public static void setMonth(Month newMonth) {
 		if (newMonth != month) {
 			// Ensures that each month has a new value
 			hasStormedInMonth = false;
 			stormDelay = 0;
 			stormDuration = 0;
 		}
-
 		month = newMonth;
 
 	}

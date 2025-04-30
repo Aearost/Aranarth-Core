@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.google.common.collect.Lists;
 import org.bukkit.Bukkit;
@@ -66,7 +67,7 @@ public class VillagerTradeOverrides implements Listener {
 						newTrade.addIngredient(new ItemStack(Material.EMERALD, 8));
 					}
 				} else if (villager.getProfession() == Profession.FARMER) {
-					if (AranarthUtils.getMonth() == 8) {
+					if (AranarthUtils.getMonth() == Month.FRUCTIVOR) {
 						// All trades to yield 3 emeralds instead of 1
 						if (trade.getIngredients().get(0).getType() == Material.WHEAT || trade.getIngredients().get(0).getType() == Material.POTATO
 								|| trade.getIngredients().get(0).getType() == Material.CARROT || trade.getIngredients().get(0).getType() == Material.BEETROOT
@@ -100,8 +101,8 @@ public class VillagerTradeOverrides implements Listener {
 	
 	private Material selectTier2Stone() {
 		Random r = new Random();
-		int i = r.nextInt(3);
-		Material[] stones = { Material.DEEPSLATE, Material.COBBLED_DEEPSLATE, Material.DRIPSTONE_BLOCK };
+		int i = r.nextInt(4);
+		Material[] stones = { Material.DEEPSLATE, Material.COBBLED_DEEPSLATE, Material.DRIPSTONE_BLOCK, Material.TUFF };
 		return stones[i];
 	}
 	

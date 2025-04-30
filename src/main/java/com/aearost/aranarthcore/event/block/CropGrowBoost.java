@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,7 +23,7 @@ public class CropGrowBoost implements Listener {
 	 */
 	@EventHandler
 	public void onCropGrow(final BlockGrowEvent e) {
-		if (AranarthUtils.getMonth() == 3) {
+		if (AranarthUtils.getMonth() == Month.FLORIVOR) {
 			Block block = e.getBlock();
 			if (getIsBlockCrop(block)) {
 				Ageable cropWithUpdatedMaturity = getNewCropMaturity(block);
