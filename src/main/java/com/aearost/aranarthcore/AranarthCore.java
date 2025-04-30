@@ -179,6 +179,7 @@ public class AranarthCore extends JavaPlugin {
 		new BoneMealSapling(this);
 		new LogExtraDrops(this);
 		new AnimalDeathDrops(this);
+		new SnowballDoDamageInWinter(this);
 	}
 
 	/**
