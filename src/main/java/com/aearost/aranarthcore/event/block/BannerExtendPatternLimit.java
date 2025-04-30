@@ -56,59 +56,36 @@ public class BannerExtendPatternLimit implements Listener {
 						}
 					}
 				} else {
-					Bukkit.getLogger().info("C");
 					// If removing a banner and not simply removing
 					if (e.getClickedInventory().getContents()[clickedSlot] != null) {
 
 						ItemStack banner = e.getClickedInventory().getContents()[clickedSlot];
 						if (banner.getItemMeta() instanceof BannerMeta bannerMeta) {
 							if (bannerMeta.getPatterns().size() >= 6) {
-								Bukkit.getLogger().info("D");
 								banner.setItemMeta(AranarthUtils.getPlayerBanner(e.getWhoClicked().getUniqueId()));
 							}
 						}
 					}
 				}
 			}
+
+			// Uncomment below when working on this again
+
+
 			// Dye
-			else if (clickedSlot == 1) {
-
-			}
-			// Banner Pattern
-			else if (clickedSlot == 2) {
-
-			}
-			// Result Banner
-			else if (clickedSlot == 3) {
-
-			} else {
-				Bukkit.getLogger().info("Something went wrong with clicking a slot while applying a banner pattern...");
-			}
-//			ItemStack item = e.getCurrentItem();
-//			Bukkit.getLogger().info("A");
-//			if (item.getType().name().endsWith("_BANNER")) {
-//				Bukkit.getLogger().info("B");
-//				if (item.getItemMeta() instanceof BannerMeta) {
-//					Bukkit.getLogger().info("C");
-//					BannerMeta meta = (BannerMeta) item.getItemMeta();
+//			else if (clickedSlot == 1) {
 //
-//					if (meta.getPatterns().size() >= 6) { // Bypass vanilla limit
-//						Bukkit.getLogger().info("D");
-//						// e.setCancelled(true);
-//						ItemStack newBanner = item.clone();
-//						BannerMeta newMeta = (BannerMeta) newBanner.getItemMeta();
-//						List<Pattern> patterns = meta.getPatterns();
-//					}
-//					//Pattern pattern = new Pattern(DyeColor, PatternType);
-////					newMeta.setPatterns(meta.getPatterns());
-////					newBanner.setItemMeta(newMeta);
-////					e.setCurrentItem(newBanner);
-//				} else {
-//					Bukkit.getLogger().info("E");
-//				}
 //			}
-		} else {
-
+//			// Banner Pattern
+//			else if (clickedSlot == 2) {
+//
+//			}
+//			// Result Banner
+//			else if (clickedSlot == 3) {
+//
+//			} else {
+//				Bukkit.getLogger().info("Something went wrong with clicking a slot while applying a banner pattern...");
+//			}
         }
 	}
 }
