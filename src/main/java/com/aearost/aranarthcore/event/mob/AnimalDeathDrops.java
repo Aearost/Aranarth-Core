@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Animals;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -24,15 +25,17 @@ public class AnimalDeathDrops implements Listener {
 	@EventHandler
 	public void onAnimalDeath(final EntityDeathEvent e) {
 		if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
-			for (ItemStack drop : e.getDrops()) {
-				int rand = new Random().nextInt(4);
-				// 50% chance to increase the drop by 1
-				if (rand <= 1) {
-					drop.setAmount(drop.getAmount() + 1);
-				}
-				// 25% chance to increase the drop by 2
-				else if (rand == 3) {
-					drop.setAmount(drop.getAmount() + 2);
+			if (e.getEntity() instanceof Animals) {
+				for (ItemStack drop : e.getDrops()) {
+					int rand = new Random().nextInt(4);
+					// 50% chance to increase the drop by 1
+					if (rand <= 1) {
+						drop.setAmount(drop.getAmount() + 1);
+					}
+					// 25% chance to increase the drop by 2
+					else if (rand == 3) {
+						drop.setAmount(drop.getAmount() + 2);
+					}
 				}
 			}
 		}
