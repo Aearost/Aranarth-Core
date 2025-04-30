@@ -75,7 +75,6 @@ public class CommandItemName {
                                 meta.setDisplayName(itemName);
                             }
                         } else {
-                            Bukkit.getLogger().info("UH");
                             itemName = ChatUtils.translateToColor(itemName);
                             meta.setDisplayName(itemName);
                         }

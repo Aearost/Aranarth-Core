@@ -610,9 +610,9 @@ public class DateUtils {
 	 * @param smallFlakeDensity The density of the smaller snowflakes, being white ash particles.
 	 */
 	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
-		// Only melts snow if it isn't currently snowing - during Ignivor only
-		if ((AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)
-				&& AranarthUtils.getMonth() == Month.IGNIVOR) {
+		// Only melts snow if it isn't currently snowing during the month of Ignivor only
+		if (AranarthUtils.getMonth() == Month.IGNIVOR &&
+				(AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)) {
 			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			meltSnow(1);
 			return;
@@ -686,17 +686,16 @@ public class DateUtils {
 							AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 						}
 					}
-
 					this.cancel();
 					return;
 				}
 
-				// Handles applying the snow functionality
-				if (AranarthUtils.getIsStorming()) {
-					// Applies snow nearby all online players
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (player != null) {
-							Location loc = player.getLocation();
+				// Applies snow nearby all online players
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					if (player != null) {
+						Location loc = player.getLocation();
+						// Handles applying the snow functionality
+						if (AranarthUtils.getIsStorming()) {
 							// Only snows in the survival world
 							if (!loc.getWorld().getName().equals("world")) {
 								continue;
@@ -724,6 +723,10 @@ public class DateUtils {
 							if (runs % 5 == 0) {
 								generateSnow(loc, bigFlakeDensity);
 							}
+						}
+						// Generate ice regardless of the storm
+						if (runs % 5 == 0) {
+							generateIce(loc, bigFlakeDensity);
 						}
 					}
 				}
@@ -755,7 +758,8 @@ public class DateUtils {
 				Material.DEAD_BUSH, Material.AZALEA, Material.FLOWERING_AZALEA, Material.COBWEB, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM,
 				Material.DECORATED_POT, Material.LIGHT, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET,
 				Material.OXEYE_DAISY, Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.CLOSED_EYEBLOSSOM, Material.OPEN_EYEBLOSSOM,
-				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH, Material.SNOW, Material.AIR
+				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH, Material.SNOW, Material.AIR,
+				Material.ICE, Material.PACKED_ICE, Material.BLUE_ICE
 		);
 
 		// Adding other variants
@@ -889,6 +893,66 @@ public class DateUtils {
 	}
 
 	/**
+	 * Handles the generation of ice nearby online players.
+	 * @param loc The current location of the player.
+	 * @param bigFlakeDensity The density of the large snowflakes to base the ice generation rate on.
+	 */
+	private void generateIce(Location loc, int bigFlakeDensity) {
+		Random random = new Random();
+		// Adds snow to the surrounding blocks from the player
+		int centerX = loc.getBlockX();
+		int centerZ = loc.getBlockZ();
+		World world = loc.getWorld();
+
+		int iceRadius = 100;
+
+		// Loop over columns within an input block radius
+		for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
+			for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
+
+				// Check that the column is within circle
+				if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
+					continue;
+				}
+
+				Block surfaceBlock = world.getHighestBlockAt(x, z);
+				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+				// Hot biomes do not get snow
+				if (temperature > 0.9) {
+					continue;
+				}
+				// Frozen biomes have the highest snow rates
+				else if (temperature <= 0) {
+					bigFlakeDensity = bigFlakeDensity / 2;
+				}
+				// Cold biomes have high snow rates
+				else if (temperature < 0.25) {
+					bigFlakeDensity = bigFlakeDensity / 5;
+				}
+				// Temperate biomes have standard snow rates
+				else {
+					bigFlakeDensity = bigFlakeDensity / 10;
+				}
+
+				// Determines if ice will generate at this block
+				int rand = random.nextInt(7500);
+				// Proportionate ice amount to the snow density of the month
+				if (rand > bigFlakeDensity) {
+					continue;
+				}
+
+				// If the surface block is invalid, skip this column
+				if (surfaceBlock.getType() != Material.WATER) {
+					continue;
+				}
+				if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
+					surfaceBlock.setType(Material.ICE);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Handles melting the snow in biomes that had snow applied due to seasons.
 	 */
 	private void meltSnow(int meltMultiplier) {
@@ -986,28 +1050,27 @@ public class DateUtils {
 								}
 							}
 
-
-							// Attempts to generate snow only once per second
+							// Attempts to melt snow only once per second
 							if (runs % 2 == 0) {
 								Random random = new Random();
 								// Adds snow to the surrounding blocks from the player
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
 								World world = loc.getWorld();
-								int snowRadius = 100;
+								int meltRadius = 100;
 
 								// Loop over columns within a given block radius
-								for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
-									for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
+								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
+									for (int z = centerZ - meltRadius; z <= centerZ + meltRadius; z++) {
 
 										// Check that the column is within a circle
-										if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
+										if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
 											continue;
 										}
 
 										Block surfaceBlock = world.getHighestBlockAt(x, z);
 										Block above = surfaceBlock.getRelative(BlockFace.UP);
-										if (above.getType() != Material.SNOW) {
+										if (above.getType() != Material.SNOW && surfaceBlock.getType() != Material.ICE) {
 											continue;
 										}
 
@@ -1035,8 +1098,13 @@ public class DateUtils {
 											grassReplaceRate = random.nextInt(100) + 1;
 										}
 
-										// Determines if snow will melt at this block
+										// Determines if snow or ice will melt at this block
 										int rand = random.nextInt(10000);
+
+										// Ice should melt slightly slower than snow
+										if (surfaceBlock.getType() == Material.ICE) {
+											meltRate = (int) (meltRate / 1.5);
+										}
 
 										// Reduce snow melting rate if it is Ignivor
 										if (month == Month.IGNIVOR) {
@@ -1050,6 +1118,15 @@ public class DateUtils {
 
 										// Proportionate melting rate for the given temperature
 										if (rand > meltRate) {
+											continue;
+										}
+
+
+										// Melt ice if the water is not close to a hot biome or crops
+										if (surfaceBlock.getType() == Material.ICE) {
+											if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
+												surfaceBlock.setType(Material.WATER);
+											}
 											continue;
 										}
 
@@ -1221,6 +1298,46 @@ public class DateUtils {
 				}
 			}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
 		}
+	}
+
+	/**
+	 * Helper method to verify if the water is touching farmland blocks.
+	 * @param surfaceBlock The surface block in question.
+	 * @return Confirmation whether the block is touching farmland.
+	 */
+	private boolean isTouchingFarmland(Block surfaceBlock) {
+		return surfaceBlock.getRelative(BlockFace.NORTH).getType() == Material.FARMLAND
+				|| surfaceBlock.getRelative(BlockFace.EAST).getType() == Material.FARMLAND
+				|| surfaceBlock.getRelative(BlockFace.SOUTH).getType() == Material.FARMLAND
+				|| surfaceBlock.getRelative(BlockFace.WEST).getType() == Material.FARMLAND;
+	}
+
+	/**
+	 * Helper method to verify if the water is close to a hot biome.
+	 * @param surfaceBlock The surface block in question.
+	 * @return Confirmation whether the block is close to a hot biome.
+	 */
+	private boolean isNearbyHotBiome(Block surfaceBlock) {
+		if (surfaceBlock.getTemperature() >= 0.9) {
+			return true;
+		} else {
+			if (surfaceBlock.getBiome() == Biome.RIVER) {
+				Location loc = surfaceBlock.getLocation();
+				// Checks if nearby blocks on X coordinate are in hot biome
+				for (int x = loc.getBlockX() - 25; x < loc.getBlockX() + 25; x++) {
+					if (loc.getWorld().getBlockAt(x, loc.getBlockY(), loc.getBlockZ()).getTemperature() >= 0.9) {
+						return true;
+					}
+				}
+				// Same check but for Z coordinate
+				for (int z = loc.getBlockZ() - 25; z < loc.getBlockZ() + 25; z++) {
+					if (loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), z).getTemperature() >= 0.9) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
