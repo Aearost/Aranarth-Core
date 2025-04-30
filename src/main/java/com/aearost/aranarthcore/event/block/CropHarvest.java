@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
@@ -116,14 +117,15 @@ public class CropHarvest implements Listener {
 							if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
 								drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
 							}
+							Month month = AranarthUtils.getMonth();
 							// Doubled crop yields during the month of Fructivor
-							if (AranarthUtils.getMonth() == 8) {
+							if (month == Month.FRUCTIVOR) {
 								if (getIsBlockCrop(drop.getType())) {
 									drop.setAmount(drop.getAmount() * 2);
 								}
 							}
 							// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
-							else if (AranarthUtils.getMonth() >= 12) {
+							else if (month == Month.GLACIVOR || month == Month.FRIGORVOR || month == Month.OBSCURVOR) {
 								if (getIsBlockCrop(drop.getType())) {
 									if (drop.getAmount() == 1) {
 										if (random.nextInt(2) == 0) {
@@ -157,15 +159,16 @@ public class CropHarvest implements Listener {
 
 			e.setCancelled(true);
 			block.setType(Material.AIR);
+			Month month = AranarthUtils.getMonth();
 			for (ItemStack drop : drops) {
 				// Doubled crop yields during the month of Fructivor
-				if (AranarthUtils.getMonth() == 8) {
+				if (month == Month.FRUCTIVOR) {
 					if (getIsBlockCrop(drop.getType())) {
 						drop.setAmount(drop.getAmount() * 2);
 					}
 				}
 				// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
-				else if (AranarthUtils.getMonth() >= 12) {
+				else if (month == Month.GLACIVOR || month == Month.FRIGORVOR || month == Month.OBSCURVOR) {
 					if (getIsBlockCrop(drop.getType())) {
 						if (drop.getAmount() == 1) {
 							if (random.nextInt(2) == 0) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
@@ -31,7 +32,7 @@ public class WeatherCancel implements Listener {
 		}
 
 		// If the rain is stopping during Aquinvor, manually add new randomizer
-		if (!e.toWeatherState() && AranarthUtils.getMonth() == 1) {
+		if (!e.toWeatherState() && AranarthUtils.getMonth() == Month.AQUINVOR) {
 			Random random = new Random();
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has stopped..."));
 			AranarthUtils.setIsStorming(false);
@@ -40,7 +41,7 @@ public class WeatherCancel implements Listener {
 		}
 
 		// If there's a snowstorm during the month of Ignivor, only allow rain while it is not snowing
-		if (e.toWeatherState() && AranarthUtils.getMonth() == 0) {
+		if (e.toWeatherState() && AranarthUtils.getMonth() == Month.IGNIVOR) {
 			if (AranarthUtils.getStormDuration() >= 100) {
 				e.setCancelled(true);
 				return;
@@ -48,7 +49,7 @@ public class WeatherCancel implements Listener {
 		}
 
 		// Prevent automatic rainfall during the month of Aquinvor
-		if (e.toWeatherState() && AranarthUtils.getMonth() == 1 && !AranarthUtils.getIsStorming()) {
+		if (e.toWeatherState() && AranarthUtils.getMonth() == Month.AQUINVOR && !AranarthUtils.getIsStorming()) {
 			e.setCancelled(true);
 			return;
 		}

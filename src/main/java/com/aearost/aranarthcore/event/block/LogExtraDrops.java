@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -25,7 +26,7 @@ public class LogExtraDrops implements Listener {
 	 */
 	@EventHandler
 	public void onLogDestroy(final BlockBreakEvent e) {
-		if (AranarthUtils.getMonth() == 9) {
+		if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
 			if (e.getBlock().getType().name().endsWith("_LOG") && !e.getBlock().getType().name().endsWith("_STRIPPED_LOG")) {
 				Location loc = e.getBlock().getLocation();
 				// Circles through blocks until a leaf is reached

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Creeper;
@@ -23,7 +24,7 @@ public class CreeperExtraChargedSpawn implements Listener {
 	 */
 	@EventHandler
 	public void onCreeperSpawn(final EntitySpawnEvent e) {
-		if (AranarthUtils.getMonth() == 4) {
+		if (AranarthUtils.getMonth() == Month.AESTIVOR) {
 			if (e.getEntityType() == EntityType.CREEPER) {
 				if (e.getLocation().getWorld().isThundering()) {
 					// 10% chance of it being charged

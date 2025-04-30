@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +24,7 @@ public class BabyMobSpawn implements Listener {
 	 */
 	@EventHandler
 	public void onBabySpawn(final CreatureSpawnEvent e) {
-		if (AranarthUtils.getMonth() == 4) {
+		if (AranarthUtils.getMonth() == Month.CALORVOR) {
 			if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING) {
 				if (e.getEntity() instanceof Ageable ageable) {
 					if (ageable instanceof Animals animal) {

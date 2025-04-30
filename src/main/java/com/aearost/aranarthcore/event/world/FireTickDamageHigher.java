@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.damage.DamageType;
@@ -20,7 +21,7 @@ public class FireTickDamageHigher implements Listener {
 	 */
 	@EventHandler
 	public void onFireDamage(final EntityDamageEvent e) {
-		if (AranarthUtils.getMonth() == 6) {
+		if (AranarthUtils.getMonth() == Month.ARDORVOR) {
 			// Tripled when in fire
 			if (e.getDamageSource().getDamageType() == DamageType.IN_FIRE) {
 				e.setDamage(e.getDamage() * 3);

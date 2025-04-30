@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -27,7 +28,7 @@ public class BoneMealSapling implements Listener {
 	 */
 	@EventHandler
 	public void onBoneMealUse(final PlayerInteractEvent e) {
-		if (AranarthUtils.getMonth() == 9) {
+		if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
 			Player player = e.getPlayer();
 			Material item = player.getInventory().getItemInMainHand().getType();
 			if (item == Material.BONE_MEAL) {

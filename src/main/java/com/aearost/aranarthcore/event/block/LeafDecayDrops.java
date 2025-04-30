@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -33,7 +34,7 @@ public class LeafDecayDrops implements Listener {
 		Block block = e.getBlock();
 
 		// During the month of Solarvor
-		if (AranarthUtils.getMonth() == 7) {
+		if (AranarthUtils.getMonth() == Month.SOLARVOR) {
 			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
 				// 5% chance of dropping an apple instead of 0.5%
 				if (new Random().nextInt(20) == 0) {
@@ -53,7 +54,7 @@ public class LeafDecayDrops implements Listener {
 		}
 
 		// During the month of Follivor
-		if (AranarthUtils.getMonth() == 9) {
+		if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
 			// 25% chance of sapling drop chance
 			if (new Random().nextInt(4) == 0) {
 				if (e.getBlock().getBlockData() instanceof Leaves leaves) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
@@ -23,7 +24,7 @@ public class EnhancedCropGrowth implements Listener {
 	 */
 	@EventHandler
 	public void onCropGrow(final BlockGrowEvent e) {
-		if (AranarthUtils.getMonth() == 4) {
+		if (AranarthUtils.getMonth() == Month.FLORIVOR) {
 			// 30% chance of two stages increasing
 			if ((new Random().nextInt(10) + 1) < 4) {
 				Block block = e.getBlock();
