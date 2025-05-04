@@ -180,6 +180,7 @@ public class AranarthCore extends JavaPlugin {
 		new LogExtraDrops(this);
 		new AnimalDeathDrops(this);
 		new SnowballDoDamageInWinter(this);
+		new WanderingTraderDeath(this);
 	}
 
 	/**
