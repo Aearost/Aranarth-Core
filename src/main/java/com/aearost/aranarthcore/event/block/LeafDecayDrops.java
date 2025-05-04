@@ -40,8 +40,8 @@ public class LeafDecayDrops implements Listener {
 				if (new Random().nextInt(20) == 0) {
 					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.APPLE));
 				}
-				// 0.05% chance of dropping a god apple fragment
-				else if (new Random().nextInt(200) == 0) {
+				// 1% chance of dropping a god apple fragment
+				else if (new Random().nextInt(100) == 0) {
 					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), GodAppleFragment.getGodAppleFragment());
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						// If the player is within 32 blocks of the spawn location
@@ -51,10 +51,10 @@ public class LeafDecayDrops implements Listener {
 					}
 				}
 			}
+			return;
 		}
-
 		// During the month of Follivor
-		if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
+		else if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
 			// 25% chance of sapling drop chance
 			if (new Random().nextInt(4) == 0) {
 				if (e.getBlock().getBlockData() instanceof Leaves leaves) {
@@ -81,6 +81,20 @@ public class LeafDecayDrops implements Listener {
 						return;
 					}
 					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), sapling);
+				}
+			}
+		}
+
+		// 0.005% chance of dropping a god apple fragment
+		// Applies to all months other than Solarvor
+		if (new Random().nextInt(2000) == 0) {
+			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
+				block.getLocation().getWorld().dropItemNaturally(block.getLocation(), GodAppleFragment.getGodAppleFragment());
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					// If the player is within 32 blocks of the spawn location
+					if (block.getLocation().distance(player.getLocation()) <= 32) {
+						player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has been dropped!"));
+					}
 				}
 			}
 		}
