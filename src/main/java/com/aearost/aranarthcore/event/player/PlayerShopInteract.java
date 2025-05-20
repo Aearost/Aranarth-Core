@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -10,8 +9,6 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -21,18 +18,12 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class PlayerShopInteract implements Listener {
+/**
+ * Handles the interacting with a player shop.
+ */
+public class PlayerShopInteract {
 
-	public PlayerShopInteract(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Handles the interacting with a player shop.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onPlayerShopInteract(final PlayerInteractEvent e) {
+	public void execute(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null && isSign(e.getClickedBlock().getType())) {
 			Location signLocation = e.getClickedBlock().getLocation();
 			Location locationBelow = new Location(signLocation.getWorld(),

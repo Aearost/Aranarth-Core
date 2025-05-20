@@ -1,29 +1,18 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
 
-public class QuiverSwitchSlots implements Listener {
-
-	public QuiverSwitchSlots(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents players from adding non-potion items to the potion inventory.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onGuiClick(final InventoryClickEvent e) {
+/**
+ * Prevents players from adding anything into a Quiver.
+ */
+public class QuiverSwitchSlots {
+	public void execute(InventoryClickEvent e) {
 		// If the user did not click a slot
 		if (e.getClickedInventory() == null) {
 			return;

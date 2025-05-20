@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.items.HomePad;
+import com.aearost.aranarthcore.items.Homepad;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -47,7 +47,7 @@ public class CommandHomePad {
                                 }
                             }
                             if (playerInArg != null) {
-                                ItemStack homepadItem = HomePad.getHomePad();
+                                ItemStack homepadItem = Homepad.getHomepad();
                                 ItemUtils.giveItem(homepadItem, playerInArg, sender);
                             } else {
                                 player.sendMessage(ChatUtils.chatMessage("&7" + args[1] + " &cis not a valid player name!"));

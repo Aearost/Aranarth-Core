@@ -1,26 +1,14 @@
 package com.aearost.aranarthcore.event.world;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-public class ArenaBlockBreak implements Listener {
-
-	public ArenaBlockBreak(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents blocks in the arena world's spawn from being destroyed.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onArenaBlockBreak(final BlockBreakEvent e) {
-		if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")
-				&& !e.getPlayer().getName().equalsIgnoreCase("Aearost")) {
+/**
+ * Prevents blocks in the arena world's spawn from being destroyed.
+ */
+public class ArenaBlockBreak {
+	public void execute(final BlockBreakEvent e) {
+		if (!e.getPlayer().getName().equalsIgnoreCase("Aearost")) {
 			int x = e.getBlock().getX();
 			int y = e.getBlock().getY();
 			int z = e.getBlock().getZ();
@@ -30,6 +18,5 @@ public class ArenaBlockBreak implements Listener {
 				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
 			}
 		}
-
 	}
 }

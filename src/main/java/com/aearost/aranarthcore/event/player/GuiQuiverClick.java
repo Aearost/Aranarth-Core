@@ -1,15 +1,11 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
@@ -18,24 +14,17 @@ import org.bukkit.inventory.meta.PotionMeta;
 import java.util.List;
 import java.util.Objects;
 
-public class GuiQuiverClick implements Listener {
-
-	public GuiQuiverClick(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents players from adding non-arrow items to the arrows inventory.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onGuiClick(final InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver") && e.getView().getType() == InventoryType.CHEST) {
+/**
+ * Prevents players from adding non-arrow items to the arrows inventory.
+ */
+public class GuiQuiverClick {
+	public void execute(InventoryClickEvent e) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
 			}
-			
+
 			// If adding a new item to the arrows inventory
 			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
@@ -47,7 +36,7 @@ public class GuiQuiverClick implements Listener {
 					}
 					e.setCancelled(true);
 				}
-				
+
 				if (!isItemArrow(clickedItem)) {
 					e.setCancelled(true);
 				}
@@ -134,7 +123,6 @@ public class GuiQuiverClick implements Listener {
 					player.sendMessage(ChatUtils.chatMessage("&cYou must have an arrow in your inventory to do this!"));
 					player.closeInventory();
 				}
-
 			}
 		}
 	}

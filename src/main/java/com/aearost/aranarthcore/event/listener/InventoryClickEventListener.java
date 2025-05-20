@@ -1,0 +1,46 @@
+package com.aearost.aranarthcore.event.listener;
+
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
+import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
+import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+
+/**
+ * Centralizes all logic to be called by clicking in an inventory.
+ */
+public class InventoryClickEventListener implements Listener {
+
+    public InventoryClickEventListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    @EventHandler
+    public void onInventoryClick(InventoryClickEvent e) {
+        if (e.getView().getType() == InventoryType.CHEST) {
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Teleport")) {
+                new GuiHomepadClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Blacklist")) {
+                new GuiBlacklistClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Villager")) {
+                new GuiVillagerClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection")) {
+                new GuiQuiverClick().execute(e);
+                new QuiverSwitchSlots().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")) {
+                new GuiPotionPreventNonPotionAdd().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
+                new GuiShulkerPreventDrop().execute(e);
+                new ShulkerPreventSlotSwitch().execute(e);
+            }
+        } else if (e.getClickedInventory().getType() == InventoryType.LOOM) {
+            new BannerExtendPatternLimit().execute(e);
+        }
+    }
+}

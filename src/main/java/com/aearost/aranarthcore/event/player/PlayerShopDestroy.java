@@ -1,32 +1,21 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-public class PlayerShopDestroy implements Listener {
-
-	public PlayerShopDestroy(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Handles the deletion of a player shop.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onPlayerShopDestroy(final BlockBreakEvent e) {
+/**
+ * Handles the deletion of a player shop.
+ */
+public class PlayerShopDestroy {
+	public void execute(BlockBreakEvent e) {
 		Player player = e.getPlayer();
 
 		// Prevents breaking a block that has a shop on it

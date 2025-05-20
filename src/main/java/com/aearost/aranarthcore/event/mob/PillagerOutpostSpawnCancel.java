@@ -1,24 +1,14 @@
 package com.aearost.aranarthcore.event.mob;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Pillager;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
-public class PillagerOutpostSpawnCancel implements Listener {
+/**
+ * Deals with preventing pillagers from spawning by their outpost locations.
+ */
+public class PillagerOutpostSpawnCancel {
 
-	public PillagerOutpostSpawnCancel(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Deals with preventing pillagers from spawning by their outpost locations.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onPillagerSpawn(final CreatureSpawnEvent e) {
+	public void execute(CreatureSpawnEvent e) {
 		if (e.getEntity() instanceof Pillager) {
 			int x = e.getLocation().getBlockX();
 			int z = e.getLocation().getBlockZ();
@@ -30,5 +20,4 @@ public class PillagerOutpostSpawnCancel implements Listener {
 			}
 		}
 	}
-
 }

@@ -1,37 +1,23 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockGrowEvent;
 
-public class CropGrowBoost implements Listener {
-
-	public CropGrowBoost(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Adds increased crop growth rates during the month of Florivor.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onCropGrow(final BlockGrowEvent e) {
-		if (AranarthUtils.getMonth() == Month.FLORIVOR) {
-			Block block = e.getBlock();
-			if (getIsBlockCrop(block)) {
-				Ageable cropWithUpdatedMaturity = getNewCropMaturity(block);
-				if (cropWithUpdatedMaturity != null) {
-					block.setBlockData(cropWithUpdatedMaturity);
-				} else {
-					Bukkit.getLogger().info("Something went wrong with a crop's growth boost...");
-				}
+/**
+ * Adds increased crop growth rates during the month of Florivor.
+ */
+public class CropGrowBoost {
+	public void execute(BlockGrowEvent e) {
+		Block block = e.getBlock();
+		if (getIsBlockCrop(block)) {
+			Ageable cropWithUpdatedMaturity = getNewCropMaturity(block);
+			if (cropWithUpdatedMaturity != null) {
+				block.setBlockData(cropWithUpdatedMaturity);
+			} else {
+				Bukkit.getLogger().info("Something went wrong with a crop's growth boost...");
 			}
 		}
 	}
