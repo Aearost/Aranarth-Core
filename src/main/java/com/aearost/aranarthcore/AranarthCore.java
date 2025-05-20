@@ -1,10 +1,9 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.event.block.*;
-import com.aearost.aranarthcore.event.misc.PotionEffectStack;
-import com.aearost.aranarthcore.event.mob.*;
-import com.aearost.aranarthcore.event.player.*;
-import com.aearost.aranarthcore.event.world.*;
+import com.aearost.aranarthcore.event.listener.*;
+import com.aearost.aranarthcore.event.listener.grouped.*;
+import com.aearost.aranarthcore.event.listener.misc.*;
+import com.aearost.aranarthcore.event.listener.misc.PotionEffectStackListener;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
@@ -84,104 +83,46 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes all AranarthCore events.
 	 */
 	private void initializeEvents() {
-		new HomePadStep(this);
-		new HomePadPlace(this);
-		new HomePadBreak(this);
-		new PlayerServerJoin(this);
-		new PlayerServerQuit(this);
-		new GuiHomepadClick(this);
-		new ExplosionPrevent(this);
-		new SoilTrampleCancel(this);
-		new CraftingOverrides(this);
-		new LogWoodStripPrevent(this);
-		new PlayerChat(this);
-		new EndermanPickupCancel(this);
-		new EntityEggPickupCancel(this);
-		new BuddingAmethystBreak(this);
-		new MountSpawn(this);
-		new MountSwim(this);
-		new CropHarvest(this);
-		new RespawnCancel(this);
-		new SugarcaneBlockPlace(this);
-		new TorchflowerPlace(this);
-		new TorchflowerBreak(this);
-		new TorchflowerGrow(this);
-		new PitcherPlantPlace(this);
-		new PitcherPlantBreak(this);
-		new PillagerOutpostSpawnCancel(this);
-		new ShulkerItemPickup(this);
-		new ZombieHorseSpawn(this);
-		new ArenaBlockBreak(this);
-		new ArenaItemDrops(this);
-		new ArenaMeltPrevent(this);
-		new ArenaGrowPrevent(this);
-		new ArenaDurabilityPrevent(this);
-		new ArenaHungerLossPrevent(this);
-		new ConcretePowderGravityPrevent(this);
-		new VillagerTradeOverrides(this);
-		new CoralDry(this);
-		new MobDestroyDoorPrevent(this);
-		new PlayerTeleportBetweenWorlds(this);
-		new ExpGainPrevent(this);
-		new GuiBlacklistClick(this);
-		new BlacklistItemPickupPrevent(this);
-		new GuiVillagerClick(this);
-		new VillagerInventoryViewClick(this);
-		new VillagerCamelPickup(this);
-		new VillagerCamelDismount(this);
-		new DurabilityDecreaseWarning(this);
-		new ParrotJumpCancelDismount(this);
-		new PetHurtPrevent(this);
-		new InvisibleItemFrameInteract(this);
-		new HoneyGlazedHamEat(this);
-		new GuiPotionClose(this);
-		new GuiPotionPreventNonPotionAdd(this);
-		new DragonHeadClick(this);
-		new PotionConsume(this);
-		new QuiverSwitchSlots(this);
-		new QuiverClick(this);
-		new GuiQuiverClose(this);
-		new GuiQuiverClick(this);
-		new ArrowConsume(this);
-		new WanderingTraderSpawnAnnounce(this);
-		new PotionEffectStack(this);
-		new MangroveRootShear(this);
-		new ChestSort(this);
-		new GoatDeath(this);
-		new DoorDoubleOpen(this);
-		new ArmorStandSwitch(this);
-		new TippedArrowDamagePrevent(this);
-		new NonSurvivalDeathRespawn(this);
-		new EnderChestPlacePrevent(this);
-		new ArenaPlayerKill(this);
-		new ShulkerClick(this);
-		new GuiShulkerClose(this);
-		new GuiShulkerPreventDrop(this);
-		new RandomizerBlockPlace(this);
-		new PlayerAutoReplenishSlot(this);
-		new PlayerShopCreate(this);
-		new PlayerShopDestroy(this);
-		new PlayerShopInteract(this);
-		new PlayerShopChestOpen(this);
-		new BabyZombiePreventVillagerDamage(this);
-		new HopperPlace(this);
-		new SignDye(this);
-		new WeatherCancel(this);
-		new BannerExtendPatternLimit(this);
-		new EnhancedCropGrowth(this);
-		new ShulkerPreventSlotSwitch(this);
-		new CropGrowBoost(this);
-		new BabyMobSpawn(this);
-		new CreeperExtraChargedSpawn(this);
-		new FireTickDamageHigher(this);
-		new LeafDecayDrops(this);
-		new LeavesPreventBurn(this);
-		new BoneMealSapling(this);
-		new LogExtraDrops(this);
-		new AnimalDeathDrops(this);
-		new SnowballDoDamageInWinter(this);
-		new WanderingTraderDeath(this);
-	}
+		// General listeners
+		new BlockBreakEventListener(this);
+		new BlockPlaceEventListener(this);
+		new InventoryClickEventListener(this);
+		new PlayerInteractEventListener(this);
+		new PlayerMoveEventListener(this);
+		new EntityChangeBlockEventListener(this);
+		new EntityPickupItemEventListener(this);
+		new CreatureSpawnEventListener(this);
+		new BlockGrowEventListener(this);
+		new ItemSpawnEventListener(this);
+		new BlockFadeEventListener(this);
+		new PlayerItemConsumeEventListener(this);
+		new EntitySpawnEventListener(this);
+		new EntityDamageByEntityEventListener(this);
+
+		// Multi-event listeners for single purpose
+		new InvisibleItemFrameListener(this);
+		new ExplosionListener(this);
+		new SoilTrampleListener(this);
+		new CraftingOverridesListener(this);
+		new PotionConsumeListener(this);
+		new PlayerRespawnEventListener(this);
+
+		// Single-purpose and single-event event listeners
+		new PlayerServerJoinListener(this);
+		new PlayerServerQuitListener(this);
+		new PlayerChatListener(this);
+		new ArenaHungerLossPreventListener(this);
+		new MobDestroyDoorListener(this);
+		new PlayerTeleportBetweenWorldsListener(this);
+		new ExpGainPreventListener(this);
+		new VillagerCamelDismountListener(this);
+		new ArrowConsumeListener(this);
+		new PotionEffectStackListener(this);
+		new PlayerShopCreateListener(this);
+		new WeatherCancelListener(this);
+		new LeafDecayDropsListener(this);
+		new LeavesPreventBurnListener(this);
+		new SnowballHitListener(this);	}
 
 	/**
 	 * Initializes all AranarthCore recipes.

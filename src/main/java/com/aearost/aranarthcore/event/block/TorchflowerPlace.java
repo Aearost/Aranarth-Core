@@ -1,27 +1,16 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
-public class TorchflowerPlace implements Listener {
+/**
+ * Adds a light block above the torchflower when placed so the plant emits light.
+ */
+public class TorchflowerPlace {
 
-	public TorchflowerPlace(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Adds a light block above the torchflower when placed so the plant emits light.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onTorchflowerPlace(final BlockPlaceEvent e) {
-		
+	public void execute(BlockPlaceEvent e) {
 		ItemStack item = e.getItemInHand();
 		if (item.getType() == Material.TORCHFLOWER) {
 			Location location = e.getBlockPlaced().getLocation();
@@ -29,10 +18,6 @@ public class TorchflowerPlace implements Listener {
 			if (locationAbove.getBlock().getType() == Material.AIR) {
 				locationAbove.getBlock().setType(Material.LIGHT);
 			}
-			
-			
 		}
-		
 	}
-
 }

@@ -684,6 +684,15 @@ public class AranarthUtils {
 		playerBanners.put(uuid, bannerMeta);
 	}
 
-
+	/**
+	 * Confirms if the input item is indeed a crop.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the block is a crop or not.
+	 */
+	public static boolean isBlockCrop(Material type) {
+		return type == Material.WHEAT || type == Material.CARROTS
+				|| type == Material.POTATOES || type == Material.BEETROOTS
+				|| type == Material.NETHER_WART;
+	}
 
 }

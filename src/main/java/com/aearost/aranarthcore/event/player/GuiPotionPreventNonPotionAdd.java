@@ -1,11 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
@@ -14,18 +10,11 @@ import org.bukkit.potion.PotionType;
 
 import java.util.Objects;
 
-public class GuiPotionPreventNonPotionAdd implements Listener {
-
-	public GuiPotionPreventNonPotionAdd(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents players from adding non-potion items to the potion inventory.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onGuiClick(final InventoryClickEvent e) {
+/**
+ * Prevents players from adding non-potion items to the potion inventory.
+ */
+public class GuiPotionPreventNonPotionAdd {
+	public void execute(InventoryClickEvent e) {
 		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions") && e.getView().getType() == InventoryType.CHEST) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {

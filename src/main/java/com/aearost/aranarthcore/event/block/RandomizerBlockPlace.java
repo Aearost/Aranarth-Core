@@ -1,14 +1,10 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.RandomItem;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -17,18 +13,11 @@ import org.bukkit.inventory.PlayerInventory;
 import java.util.List;
 import java.util.Random;
 
-public class RandomizerBlockPlace implements Listener {
-
-	public RandomizerBlockPlace(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Randomizes the player's block if it's in their list to randomize.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onRandomizeBlockPlace(final BlockPlaceEvent e) {
+/**
+ * Randomizes the player's block if it's in their list to randomize.
+ */
+public class RandomizerBlockPlace {
+	public void execute(final BlockPlaceEvent e) {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		List<RandomItem> randomItemList = aranarthPlayer.getRandomItems();

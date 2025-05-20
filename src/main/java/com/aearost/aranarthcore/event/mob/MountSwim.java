@@ -7,24 +7,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-public class MountSwim implements Listener {
+/**
+ * Allows mounts to swim in water and staying on the surface.
+ * Also makes their swim speed relative to their movement speed.
+ */
+public class MountSwim {
 
-	public MountSwim(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Allows mounts to swim in water and staying on the surface.
-	 * Also makes their swim speed relative to their movement speed.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onMountSwim(final PlayerInteractEvent e) {
-
+	public void execute(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
 		if (player.isInsideVehicle() && (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel)) {
 
@@ -34,7 +25,7 @@ public class MountSwim implements Listener {
 				public void run() {
 					Player p = e.getPlayer();
 					if (p.getVehicle() instanceof AbstractHorse mount) {
-                        if (isInLiquid(mount)) {
+						if (isInLiquid(mount)) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							if (aranarthPlayer.getIsMountSwimEnabled()) {
 								// Try to find the way to make this speed relative to the speed of the mount

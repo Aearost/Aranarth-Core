@@ -1,11 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
@@ -13,18 +9,11 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-public class PlayerAutoReplenishSlot implements Listener {
-
-	public PlayerAutoReplenishSlot(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Provides functionality to automatically replenish a player's slot with a stack from their inventory.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onBlockPlace(final BlockPlaceEvent e) {
+/**
+ * Provides functionality to automatically replenish a player's slot with a stack from their inventory.
+ */
+public class PlayerAutoReplenishSlot {
+	public void execute(BlockPlaceEvent e) {
 		Player player = e.getPlayer();
 		if (e.getItemInHand().getAmount() - 1 == 0) {
 			PlayerInventory inventory = player.getInventory();
