@@ -87,7 +87,9 @@ public class AranarthCore extends JavaPlugin {
 		new BlockBreakEventListener(this);
 		new BlockPlaceEventListener(this);
 		new InventoryClickEventListener(this);
+		new InventoryCloseEventListener(this);
 		new PlayerInteractEventListener(this);
+		new PlayerInteractEntityEventListener(this);
 		new PlayerMoveEventListener(this);
 		new EntityChangeBlockEventListener(this);
 		new EntityPickupItemEventListener(this);

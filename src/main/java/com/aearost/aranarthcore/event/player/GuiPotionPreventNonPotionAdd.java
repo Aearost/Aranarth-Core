@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -15,14 +14,14 @@ import java.util.Objects;
  */
 public class GuiPotionPreventNonPotionAdd {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions") && e.getView().getType() == InventoryType.CHEST) {
+		if (e.getView().getType() == InventoryType.CHEST) {
 			// If the user did not click a slot
 			if (e.getClickedInventory() == null) {
 				return;
 			}
 			
 			// If adding a new item to the potions inventory
-			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
 				if (Objects.isNull(clickedItem)) {

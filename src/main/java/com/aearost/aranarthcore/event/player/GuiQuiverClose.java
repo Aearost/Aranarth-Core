@@ -33,7 +33,6 @@ public class GuiQuiverClose {
 			}
 			aranarthPlayer.setArrows(inventoryArrows);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
 		}
 	}
 }

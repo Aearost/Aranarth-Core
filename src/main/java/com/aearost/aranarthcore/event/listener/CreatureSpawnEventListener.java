@@ -1,10 +1,12 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.BabyMobSpawn;
 import com.aearost.aranarthcore.event.mob.ParrotJumpCancelDismount;
 import com.aearost.aranarthcore.event.mob.PillagerOutpostSpawnCancel;
 import com.aearost.aranarthcore.event.mob.MountSpawn;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Parrot;
@@ -30,7 +32,7 @@ public class CreatureSpawnEventListener implements Listener {
             new PillagerOutpostSpawnCancel().execute(e);
         } else if (e.getEntity() instanceof Parrot) {
             new ParrotJumpCancelDismount().execute(e);
-        } else if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING) {
+        } else if (AranarthUtils.getMonth() == Month.CALORVOR) {
             new BabyMobSpawn().execute(e);
         }
     }

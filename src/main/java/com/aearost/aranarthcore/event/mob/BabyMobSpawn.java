@@ -11,15 +11,17 @@ import java.util.Random;
  */
 public class BabyMobSpawn {
 	public void execute(CreatureSpawnEvent e) {
-		if (e.getEntity() instanceof Ageable ageable) {
-			if (ageable instanceof Animals animal) {
-				if (!animal.isAdult()) {
-					int rand = new Random().nextInt(2);
-					// 50% chance of having a twin
-					if (rand == 0) {
-						Location loc = e.getLocation();
-						Animals twin = (Animals) loc.getWorld().spawnEntity(loc, e.getEntityType());
-						twin.setBaby();
+		if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING) {
+			if (e.getEntity() instanceof Ageable ageable) {
+				if (ageable instanceof Animals animal) {
+					if (!animal.isAdult()) {
+						int rand = new Random().nextInt(2);
+						// 50% chance of having a twin
+						if (rand == 0) {
+							Location loc = e.getLocation();
+							Animals twin = (Animals) loc.getWorld().spawnEntity(loc, e.getEntityType());
+							twin.setBaby();
+						}
 					}
 				}
 			}

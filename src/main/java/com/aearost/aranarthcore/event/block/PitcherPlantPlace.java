@@ -12,15 +12,13 @@ import org.bukkit.inventory.ItemStack;
 public class PitcherPlantPlace {
 	public void execute(BlockPlaceEvent e) {
 		ItemStack item = e.getItemInHand();
-		if (item.getType() == Material.PITCHER_PLANT) {
-			Location location = e.getBlockPlaced().getLocation();
-			Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 2, location.getZ());
-			if (locationAbove.getBlock().getType() == Material.AIR) {
-				locationAbove.getBlock().setType(Material.LIGHT);
-				Levelled level = (Levelled) locationAbove.getBlock().getBlockData();
-				level.setLevel(10);
-				locationAbove.getBlock().setBlockData(level, true);
-			}
+		Location location = e.getBlockPlaced().getLocation();
+		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 2, location.getZ());
+		if (locationAbove.getBlock().getType() == Material.AIR) {
+			locationAbove.getBlock().setType(Material.LIGHT);
+			Levelled level = (Levelled) locationAbove.getBlock().getBlockData();
+			level.setLevel(10);
+			locationAbove.getBlock().setBlockData(level, true);
 		}
 	}
 }
