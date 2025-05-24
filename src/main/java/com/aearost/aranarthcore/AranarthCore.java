@@ -124,7 +124,8 @@ public class AranarthCore extends JavaPlugin {
 		new WeatherCancelListener(this);
 		new LeafDecayDropsListener(this);
 		new LeavesPreventBurnListener(this);
-		new SnowballHitListener(this);	}
+		new SnowballHitListener(this);
+	}
 
 	/**
 	 * Initializes all AranarthCore recipes.
