@@ -12,6 +12,7 @@ Features
 [+] Added recipe for Exposed Copper
 [+] Added recipe for Weathered Copper
 [+] Added recipe for Oxidized Copper
+[+] Added Aranarthium
 
 Bug Fixes
 - Allowed players to move quiver around inventory
