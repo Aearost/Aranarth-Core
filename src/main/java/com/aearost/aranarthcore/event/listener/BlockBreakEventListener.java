@@ -28,12 +28,12 @@ public class BlockBreakEventListener implements Listener {
         if (type == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
             new HomepadBreak().execute(e);
         } else if (type == Material.BUDDING_AMETHYST) {
-            new BuddingAmethystBreak();
+            new BuddingAmethystBreak().execute(e);
         } else if (AranarthUtils.isBlockCrop(e.getBlock().getType())) {
             new CropHarvest().execute(e);
         } else if (type == Material.TORCHFLOWER || type == Material.TORCHFLOWER_CROP) {
             new TorchflowerBreak().execute(e);
-        } else if (type == Material.PITCHER_CROP) {
+        } else if (type == Material.PITCHER_PLANT || type == Material.PITCHER_CROP) {
             new PitcherPlantBreak().execute(e);
         } else if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
             new ArenaBlockBreak().execute(e);

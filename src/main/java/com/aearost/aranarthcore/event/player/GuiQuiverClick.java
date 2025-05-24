@@ -24,9 +24,8 @@ public class GuiQuiverClick {
 			if (e.getClickedInventory() == null) {
 				return;
 			}
-
 			// If adding a new item to the arrows inventory
-			if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
 				// Ensures a non-empty slot is clicked
 				if (Objects.isNull(clickedItem)) {

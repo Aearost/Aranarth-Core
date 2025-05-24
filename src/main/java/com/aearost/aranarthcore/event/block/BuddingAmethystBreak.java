@@ -10,9 +10,7 @@ import org.bukkit.inventory.ItemStack;
  * If harvested with a silk touch pickaxe, the Budding Amethyst block will drop.
  */
 public class BuddingAmethystBreak {
-
 	public void execute(BlockBreakEvent e) {
-
 		ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
 		if (heldItem.containsEnchantment(Enchantment.SILK_TOUCH) && isHoldingPickaxe(heldItem)) {
 			Location location = e.getBlock().getLocation();

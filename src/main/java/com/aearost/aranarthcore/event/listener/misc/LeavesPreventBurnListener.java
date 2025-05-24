@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -18,11 +20,15 @@ public class LeavesPreventBurnListener implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onLeavesBurn(final BlockIgniteEvent e) {
+	public void onLeavesBurn(BlockIgniteEvent e) {
 		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world")) {
-			if (e.getBlock().getBlockData() instanceof Leaves leaves) {
-				if (leaves.isPersistent()) {
-					e.setCancelled(true);
+			for (BlockFace face : BlockFace.values()) {
+				Block relative = e.getBlock().getRelative(face);
+				if (relative.getBlockData() instanceof Leaves leaves) {
+					if (leaves.isPersistent()) {
+						e.setCancelled(true);
+						break;
+					}
 				}
 			}
 		}

@@ -21,7 +21,7 @@ public class InventoryCloseEventListener implements Listener {
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryCloseEvent e) {
+    public void onInventoryClose(InventoryCloseEvent e) {
         if (e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")) {
                 new GuiPotionClose().execute(e);
