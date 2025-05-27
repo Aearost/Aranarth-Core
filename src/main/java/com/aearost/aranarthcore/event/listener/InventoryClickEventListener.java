@@ -39,8 +39,13 @@ public class InventoryClickEventListener implements Listener {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);
             }
-        } else if (e.getClickedInventory().getType() == InventoryType.LOOM) {
-            new BannerExtendPatternLimit().execute(e);
+        } else {
+            if (e.getClickedInventory() != null) {
+                if (e.getClickedInventory().getType() == InventoryType.LOOM) {
+                    new BannerExtendPatternLimit().execute(e);
+                }
+            }
+
         }
     }
 }
