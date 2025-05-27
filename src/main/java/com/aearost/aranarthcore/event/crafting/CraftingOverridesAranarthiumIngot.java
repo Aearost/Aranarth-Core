@@ -20,22 +20,24 @@ public class CraftingOverridesAranarthiumIngot {
         if (e.getRecipe().getResult().getType() == Material.ECHO_SHARD) {
             String itemName = "";
             if (material == Material.PRISMARINE_CRYSTALS && !DiamondFragment.getDiamondFragment().isSimilar(is)) {
+                player.sendMessage(is.getItemMeta().getDisplayName());
                 itemName = DiamondFragment.getName();
             } else if (material == Material.TURTLE_SCUTE && !EmeraldFragment.getEmeraldFragment().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = EmeraldFragment.getName();
             } else if (material == Material.GOLD_NUGGET && !GoldFragment.getGoldFragment().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = GoldFragment.getName();
             } else if (material == Material.IRON_NUGGET && !IronFragment.getIronFragment().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = IronFragment.getName();
             } else if (material == Material.BLAZE_POWDER && !CopperFragment.getCopperFragment().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = CopperFragment.getName();
             } else if (material == Material.FERMENTED_SPIDER_EYE && !RedstoneCluster.getRedstoneCluster().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = RedstoneCluster.getName();
             } else if (material == Material.BLUE_DYE && !LapisCluster.getLapisCluster().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = LapisCluster.getName();
             } else if (material == Material.PHANTOM_MEMBRANE && !QuartzCluster.getQuartzCluster().isSimilar(is)) {
-                itemName = DiamondFragment.getName();
+                itemName = QuartzCluster.getName();
             }
+
             if (!itemName.isEmpty()) {
                 e.setCancelled(true);
                 if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
