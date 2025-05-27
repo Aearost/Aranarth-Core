@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import com.aearost.aranarthcore.items.*;
+import com.aearost.aranarthcore.items.aranarthium.AranarthiumIngot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -57,6 +58,8 @@ public class CraftingOverridesListener implements Listener {
 				new CraftingOverridesGodAppleFragment().onCraft(e, is, player);
 			} else if (e.getRecipe().getResult().isSimilar(Homepad.getHomepad())) {
 				new CraftingOverridesHomepad().onCraft(e, is, player);
+			} else if (e.getRecipe().getResult().isSimilar(AranarthiumIngot.getAranarthiumIngot())) {
+				new CraftingOverridesOreFragmentsClusters().onCraft(e, is, player);
 			}
 		}
 	}
