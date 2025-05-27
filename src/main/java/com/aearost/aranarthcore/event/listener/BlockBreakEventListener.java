@@ -38,6 +38,9 @@ public class BlockBreakEventListener implements Listener {
         } else if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
             new ArenaBlockBreak().execute(e);
         } else {
+            if (e.getBlock().getType().name().endsWith("_ORE")) {
+                new OreBreak().execute(e);
+            }
             new PlayerShopDestroy().execute(e);
         }
 
