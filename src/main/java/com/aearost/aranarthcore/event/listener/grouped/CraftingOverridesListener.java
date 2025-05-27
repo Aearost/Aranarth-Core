@@ -58,8 +58,9 @@ public class CraftingOverridesListener implements Listener {
 				new CraftingOverridesGodAppleFragment().onCraft(e, is, player);
 			} else if (e.getRecipe().getResult().isSimilar(Homepad.getHomepad())) {
 				new CraftingOverridesHomepad().onCraft(e, is, player);
-			} else if (e.getRecipe().getResult().isSimilar(AranarthiumIngot.getAranarthiumIngot())) {
-				new CraftingOverridesOreFragmentsClusters().onCraft(e, is, player);
+			} else if (e.getRecipe().getResult().isSimilar(AranarthiumIngot.getAranarthiumIngot())
+						|| is.isSimilar(AranarthiumIngot.getAranarthiumIngot())) {
+				new CraftingOverridesAranarthiumIngot().onCraft(e, is, player);
 			}
 		}
 	}

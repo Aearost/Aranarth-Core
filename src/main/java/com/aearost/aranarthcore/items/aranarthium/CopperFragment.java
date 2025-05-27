@@ -27,6 +27,6 @@ public class CopperFragment {
 	}
 	
 	public static String getName() {
-		return ChatUtils.translateToColor("#b87333Copper Fragment");
+		return ChatUtils.translateToColor("#b87333&lCopper Fragment");
 	}
 }
