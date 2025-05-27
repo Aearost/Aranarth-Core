@@ -8,7 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Objects;
 
 /**
- * Provides the necessary components of an IronIron Fragment item.
+ * Provides the necessary components of an Iron Fragment item.
  */
 public class IronFragment {
 

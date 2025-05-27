@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Random;
 
@@ -57,6 +58,15 @@ public class OreBreak {
 				if (random.nextInt(750) == 0) {
 					world.dropItemNaturally(loc, QuartzCluster.getQuartzCluster());
 				}
+				world.dropItemNaturally(loc, CopperFragment.getCopperFragment());
+				world.dropItemNaturally(loc, DiamondFragment.getDiamondFragment());
+				world.dropItemNaturally(loc, EmeraldFragment.getEmeraldFragment());
+				world.dropItemNaturally(loc, GoldFragment.getGoldFragment());
+				world.dropItemNaturally(loc, IronFragment.getIronFragment());
+				world.dropItemNaturally(loc, LapisCluster.getLapisCluster());
+				world.dropItemNaturally(loc, QuartzCluster.getQuartzCluster());
+				world.dropItemNaturally(loc, RedstoneCluster.getRedstoneCluster());
+				world.dropItemNaturally(loc, new ItemStack(Material.NETHERITE_INGOT, 1));
 			}
 		}
 	}

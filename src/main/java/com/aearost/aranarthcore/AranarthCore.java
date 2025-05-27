@@ -184,6 +184,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCopperExposed(this);
 		new RecipeCopperWeathered(this);
 		new RecipeCopperOxidized(this);
+		new RecipeAranarthiumIngot(this);
 	}
 
 	/**
