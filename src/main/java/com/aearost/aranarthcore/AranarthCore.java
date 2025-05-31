@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectStackListener;
 import com.aearost.aranarthcore.recipes.*;
+import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -185,6 +186,12 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeCopperWeathered(this);
 		new RecipeCopperOxidized(this);
 		new RecipeAranarthiumIngot(this);
+		new RecipeAquaticAranarthium(this);
+		new RecipeDwarvenAranarthium(this);
+		new RecipeElvenAranarthium(this);
+		new RecipeEnflamedAranarthium(this);
+		new RecipeMannishAranarthium(this);
+		new RecipeSoulboundAranarthium(this);
 	}
 
 	/**

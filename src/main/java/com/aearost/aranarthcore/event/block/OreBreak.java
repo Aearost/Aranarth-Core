@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.items.aranarthium.*;
+import com.aearost.aranarthcore.items.aranarthium.fragments.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;

@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.aranarthium;
+package com.aearost.aranarthcore.items.aranarthium.fragments;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.crafting;
 
-import com.aearost.aranarthcore.items.aranarthium.*;
+import com.aearost.aranarthcore.items.aranarthium.fragments.*;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
