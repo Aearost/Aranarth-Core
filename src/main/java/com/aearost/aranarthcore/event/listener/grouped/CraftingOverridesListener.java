@@ -3,7 +3,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import com.aearost.aranarthcore.items.*;
-import com.aearost.aranarthcore.items.aranarthium.AranarthiumIngot;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;

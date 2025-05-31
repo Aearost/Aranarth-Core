@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.recipes;
 
-import com.aearost.aranarthcore.items.aranarthium.AranarthiumIngot;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

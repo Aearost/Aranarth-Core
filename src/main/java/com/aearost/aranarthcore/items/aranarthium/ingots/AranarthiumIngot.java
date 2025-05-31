@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.aranarthium;
+package com.aearost.aranarthcore.items.aranarthium.ingots;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
@@ -35,7 +35,7 @@ public class AranarthiumIngot {
 	}
 	
 	public static String getLore() {
-		return "&7It seems sacred...";
+		return "&7&oIt seems sacred...";
 	}
 	
 }
