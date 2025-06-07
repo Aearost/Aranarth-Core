@@ -18,13 +18,12 @@ public class CommandItemName {
     /**
      * @param sender The user that entered the command.
      * @param args   The arguments of the command.
-     * @return Confirmation of whether the command was a success or not.
      */
-    public static boolean onCommand(CommandSender sender, String[] args) {
+    public static void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.getName().equalsIgnoreCase("Aearost")) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-                return false;
+                return;
             }
 
             if (args.length == 1) {
@@ -40,7 +39,7 @@ public class CommandItemName {
                         player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
-                        return true;
+                        return;
                     } else {
                         int stringStart = 1;
                         if (args[1].startsWith("gradient")) {
@@ -70,7 +69,7 @@ public class CommandItemName {
 
                             if (Objects.isNull(itemName)) {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
-                                return false;
+                                return;
                             } else {
                                 meta.setDisplayName(itemName);
                             }
@@ -82,11 +81,11 @@ public class CommandItemName {
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
                         player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
-                        return true;
+                        return;
                     }
                 }
             }
         }
-        return false;
+        return;
     }
 }

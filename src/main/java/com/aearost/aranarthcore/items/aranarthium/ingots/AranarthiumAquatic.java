@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items.aranarthium.ingots;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,30 +12,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Aquatic Aranarthium Ingot item.
  */
-public class AquaticAranarthium {
+public class AranarthiumAquatic implements AranarthItem {
 
 	/**
 	 * @return The Aquatic Aranarthium Ingot.
 	 */
-	public static ItemStack getAquaticAranarthiumIngot() {
-		ItemStack aquaticAranarthiumIngot = new ItemStack(Material.ECHO_SHARD, 1);
-		ItemMeta meta = aquaticAranarthiumIngot.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			aquaticAranarthiumIngot.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return aquaticAranarthiumIngot;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#AEEEEE&lAquatic Aranarthium");
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&7&oThe touch of water...";
 	}
 	

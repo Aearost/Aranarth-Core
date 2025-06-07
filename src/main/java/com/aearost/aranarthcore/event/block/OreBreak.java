@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.items.aranarthium.fragments.*;
+import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -25,51 +25,42 @@ public class OreBreak {
 			if (!heldItem.containsEnchantment(Enchantment.SILK_TOUCH)) {
 				if (material == Material.DIAMOND_ORE || material == Material.DEEPSLATE_DIAMOND_ORE) {
 					if (random.nextInt(125) == 0) {
-						world.dropItemNaturally(loc, DiamondFragment.getDiamondFragment());
+						world.dropItemNaturally(loc, new DiamondCluster().getItem());
 					}
 				} else if (material == Material.EMERALD_ORE || material == Material.DEEPSLATE_EMERALD_ORE) {
 					if (random.nextInt(100) == 0) {
-						world.dropItemNaturally(loc, EmeraldFragment.getEmeraldFragment());
+						world.dropItemNaturally(loc, new EmeraldCluster().getItem());
 					}
 				} else if (material.name().endsWith("_GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
 						if (random.nextInt(750) == 0) {
-							world.dropItemNaturally(loc, GoldFragment.getGoldFragment());
+							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					} else {
 						if (random.nextInt(250) == 0) {
-							world.dropItemNaturally(loc, GoldFragment.getGoldFragment());
+							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					}
 				} else if (material == Material.IRON_ORE || material == Material.DEEPSLATE_IRON_ORE) {
 					if (random.nextInt(350) == 0) {
-						world.dropItemNaturally(loc, IronFragment.getIronFragment());
+						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
 					if (random.nextInt(550) == 0) {
-						world.dropItemNaturally(loc, CopperFragment.getCopperFragment());
+						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
 					if (random.nextInt(300) == 0) {
-						world.dropItemNaturally(loc, RedstoneCluster.getRedstoneCluster());
+						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
 					if (random.nextInt(200) == 0) {
-						world.dropItemNaturally(loc, LapisCluster.getLapisCluster());
+						world.dropItemNaturally(loc, new LapisCluster().getItem());
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
 					if (random.nextInt(750) == 0) {
-						world.dropItemNaturally(loc, QuartzCluster.getQuartzCluster());
+						world.dropItemNaturally(loc, new QuartzCluster().getItem());
 					}
-					world.dropItemNaturally(loc, CopperFragment.getCopperFragment());
-					world.dropItemNaturally(loc, DiamondFragment.getDiamondFragment());
-					world.dropItemNaturally(loc, EmeraldFragment.getEmeraldFragment());
-					world.dropItemNaturally(loc, GoldFragment.getGoldFragment());
-					world.dropItemNaturally(loc, IronFragment.getIronFragment());
-					world.dropItemNaturally(loc, LapisCluster.getLapisCluster());
-					world.dropItemNaturally(loc, QuartzCluster.getQuartzCluster());
-					world.dropItemNaturally(loc, RedstoneCluster.getRedstoneCluster());
-					world.dropItemNaturally(loc, new ItemStack(Material.NETHERITE_INGOT, 1));
 				}
 			}
 		}

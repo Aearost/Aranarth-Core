@@ -44,10 +44,13 @@ public class CommandAC implements CommandExecutor {
 	private boolean isSenderOp(CommandSender sender, String[] args) {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("whereis")) {
-			commandResult = CommandWhereIs.onCommand(sender, args);
+			CommandWhereIs.onCommand(sender, args);
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("itemname")) {
-			commandResult = CommandItemName.onCommand(sender, args);
+			CommandItemName.onCommand(sender, args);
+			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("give")) {
+			CommandGive.onCommand(sender, args);
 			commandResult = true;
 		} else {
 			commandResult = isValidCommand(sender, args);

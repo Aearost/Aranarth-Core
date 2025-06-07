@@ -19,7 +19,7 @@ public class RecipeAranarthiumIngot {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_ARANARTHIUM_INGOT");
-		ShapelessRecipe recipe = new ShapelessRecipe(nk, AranarthiumIngot.getAranarthiumIngot());
+		ShapelessRecipe recipe = new ShapelessRecipe(nk, new AranarthiumIngot().getItem());
 		
 		recipe.addIngredient(1, Material.NETHERITE_INGOT);
 		recipe.addIngredient(1, Material.PRISMARINE_CRYSTALS);

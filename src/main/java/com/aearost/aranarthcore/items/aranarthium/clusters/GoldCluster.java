@@ -1,41 +1,33 @@
-package com.aearost.aranarthcore.items;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Provides the necessary components of a God Apple Fragment item.
+ * Provides the necessary components of an Gold Cluster item.
  */
-public class GodAppleFragment implements AranarthItem {
+public class GoldCluster implements AranarthItem {
 
 	/**
-	 * @return The God Apple Fragment.
+	 * @return The Gold Cluster.
 	 */
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta meta = item.getItemMeta();
-		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
-			lore.add(ChatUtils.translateToColor(getLore()));
-			meta.setLore(lore);
 			item.setItemMeta(meta);
 		}
 	    return item;
 	}
 	
 	public String getName() {
-		return "&6God Apple Fragment";
+		return ChatUtils.translateToColor("#fcd34d&lGold Cluster");
 	}
-	
-	public String getLore() {
-		return "&eA gift from the gods...";
-	}
-	
 }

@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.RandomItem;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -52,7 +51,6 @@ public class RandomizerBlockPlace {
                         }
 					}
 					if (randomItemCount == randomItemList.size()) {
-						Bukkit.getLogger().info("E");
 						Random r = new Random();
 						int selectedPercentage = r.nextInt(100) + 1;
 						int lowerBracket = 0;

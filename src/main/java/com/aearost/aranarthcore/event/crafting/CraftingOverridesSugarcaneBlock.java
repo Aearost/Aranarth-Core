@@ -23,7 +23,7 @@ public class CraftingOverridesSugarcaneBlock {
                 continue;
             }
 
-            if (is.isSimilar(SugarcaneBlock.getSugarcaneBlock())) {
+            if (is.isSimilar(new SugarcaneBlock().getItem())) {
                 sugarcaneBlockCounter++;
             }
         }

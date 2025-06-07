@@ -11,30 +11,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of a Sugarcane Block item.
  */
-public class SugarcaneBlock {
+public class SugarcaneBlock implements AranarthItem {
 
 	/**
 	 * @return The Sugarcane Block.
 	 */
-	public static ItemStack getSugarcaneBlock() {
-		ItemStack sugarcaneBlock = new ItemStack(Material.BAMBOO_BLOCK, 1);
-		ItemMeta meta = sugarcaneBlock.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.BAMBOO_BLOCK, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			sugarcaneBlock.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return sugarcaneBlock;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&aBlock of Sugarcane";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&7An efficient way to be stored!";
 	}
 	

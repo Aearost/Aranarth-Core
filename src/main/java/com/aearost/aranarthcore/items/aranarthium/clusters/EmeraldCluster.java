@@ -1,39 +1,33 @@
-package com.aearost.aranarthcore.items;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
 import java.util.Objects;
 
-
-public class Homepad implements AranarthItem {
+/**
+ * Provides the necessary components of an Emerald Cluster item.
+ */
+public class EmeraldCluster implements AranarthItem {
 
 	/**
-	 * @return The HomePad.
+	 * @return The Emerald Cluster.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, 1);
+		ItemStack item = new ItemStack(Material.TURTLE_SCUTE, 1);
 		ItemMeta meta = item.getItemMeta();
-		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
-			lore.add(ChatUtils.translateToColor(getLore()));
-			meta.setLore(lore);
 			item.setItemMeta(meta);
 		}
 	    return item;
 	}
 	
 	public String getName() {
-		return "&6&lHome Pad";
+		return ChatUtils.translateToColor("#50c878&lEmerald Cluster");
 	}
-	
-	public String getLore() {
-		return "&ePlace this to set up a home pad!";
-	}
-	
 }

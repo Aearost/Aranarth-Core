@@ -19,7 +19,7 @@ public class RecipeSugarcaneBlockCraft {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_SUGARCANE_BLOCK_FROM_SUGARCANE");
-		ShapedRecipe recipe = new ShapedRecipe(nk, SugarcaneBlock.getSugarcaneBlock());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new SugarcaneBlock().getItem());
 
 		recipe.shape("SSS", "SSS", "SSS");
 

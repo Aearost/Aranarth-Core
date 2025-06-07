@@ -11,30 +11,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of a Honey Glazed Ham item.
  */
-public class HoneyGlazedHam {
+public class HoneyGlazedHam implements AranarthItem {
 
 	/**
 	 * @return The Honey Glazed Ham.
 	 */
-	public static ItemStack getHoneyGlazedHam() {
-		ItemStack honeyGlazeHam = new ItemStack(Material.COOKED_PORKCHOP, 1);
-		ItemMeta meta = honeyGlazeHam.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.COOKED_PORKCHOP, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			honeyGlazeHam.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return honeyGlazeHam;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&6Honey Glazed Ham";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&eAin't that sweet?";
 	}
 	

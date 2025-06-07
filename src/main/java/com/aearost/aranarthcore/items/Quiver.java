@@ -11,30 +11,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of a Quiver item.
  */
-public class Quiver {
+public class Quiver implements AranarthItem {
 
 	/**
 	 * @return The Quiver.
 	 */
-	public static ItemStack getQuiver() {
-		ItemStack quiver = new ItemStack(Material.LIGHT_GRAY_BUNDLE, 1);
-		ItemMeta meta = quiver.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.LIGHT_GRAY_BUNDLE, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			quiver.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return quiver;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&6&lQuiver";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&eStore your arrows!";
 	}
 	

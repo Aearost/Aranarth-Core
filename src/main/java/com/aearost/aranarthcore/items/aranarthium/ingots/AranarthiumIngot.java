@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items.aranarthium.ingots;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,30 +12,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Aranarthium Ingot item.
  */
-public class AranarthiumIngot {
+public class AranarthiumIngot implements AranarthItem {
 
 	/**
 	 * @return The Aranarthium Ingot.
 	 */
-	public static ItemStack getAranarthiumIngot() {
-		ItemStack aranarthiumIngot = new ItemStack(Material.ECHO_SHARD, 1);
-		ItemMeta meta = aranarthiumIngot.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			aranarthiumIngot.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return aranarthiumIngot;
+	    return item;
 	}
 	
-	public static String getName() {
-		return ChatUtils.translateToColor("#ffb3b3&lA#ffc7a8&lr#ffdb9d&la#fff093&ln#d7f7a5&la#affeb7&lr#a4f8d8&lt#99f2f9&lh#b1d3f9&li#c9b5f9&lu#e197f9&lm");
+	public String getName() {
+		return ChatUtils.translateToColor("#e67373&lA#f08a65&lr#f7a84f&la#fcd237&ln#a8c84f&la#69d673&lr#42c8a6&lt#2abbdc&lh#5295e9&li#8162ec&lu#a040ec&lm");
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&7&oIt seems sacred...";
 	}
 	
