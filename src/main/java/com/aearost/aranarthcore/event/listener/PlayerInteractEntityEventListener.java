@@ -4,9 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.mob.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.mob.VillagerTradeOverrides;
-import com.aearost.aranarthcore.event.player.ArmorStandSwitch;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,8 +27,6 @@ public class PlayerInteractEntityEventListener implements Listener {
                 new VillagerTradeOverrides().execute(e);
                 new VillagerInventoryViewClick().execute(e);
                 new VillagerCamelPickup().execute(e);
-            } else if (e.getRightClicked() instanceof ArmorStand armorStand) {
-                new ArmorStandSwitch().execute(e);
             }
         }
     }
