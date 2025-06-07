@@ -36,7 +36,7 @@ public class AranarthiumScorched implements AranarthItem {
 	}
 	
 	public String getLore() {
-		return "&7&oThe kiss of fire...";
+		return "&7&oKissed by fire...";
 	}
 	
 }

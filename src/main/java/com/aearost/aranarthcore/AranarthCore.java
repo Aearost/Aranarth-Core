@@ -127,6 +127,7 @@ public class AranarthCore extends JavaPlugin {
 		new LeafDecayDropsListener(this);
 		new LeavesPreventBurnListener(this);
 		new SnowballHitListener(this);
+		new ArmorStandSwitchListener(this);
 	}
 
 	/**

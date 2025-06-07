@@ -1,9 +1,13 @@
-package com.aearost.aranarthcore.event.player;
+package com.aearost.aranarthcore.event.listener.misc;
 
+import com.aearost.aranarthcore.AranarthCore;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Objects;
@@ -11,8 +15,14 @@ import java.util.Objects;
 /**
  * Switches the player's armor if shift right-clicking an armor stand.
  */
-public class ArmorStandSwitch {
-	public void execute(PlayerInteractEntityEvent e) {
+public class ArmorStandSwitchListener implements Listener {
+
+	public ArmorStandSwitchListener(AranarthCore plugin) {
+		Bukkit.getPluginManager().registerEvents(this, plugin);
+	}
+
+	@EventHandler
+	public void execute(PlayerInteractAtEntityEvent e) {
 		if (e.getPlayer().isSneaking()) {
 			if (e.getRightClicked() instanceof ArmorStand armorStand) {
 				Player player = e.getPlayer();
