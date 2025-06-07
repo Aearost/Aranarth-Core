@@ -1,5 +1,6 @@
-package com.aearost.aranarthcore.items.aranarthium.fragments;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -8,14 +9,14 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.Objects;
 
 /**
- * Provides the necessary components of an Iron Fragment item.
+ * Provides the necessary components of an Iron Cluster item.
  */
-public class IronFragment {
+public class IronCluster implements AranarthItem {
 
 	/**
-	 * @return The Iron Fragment.
+	 * @return The Iron Cluster.
 	 */
-	public static ItemStack getIronFragment() {
+	public ItemStack getItem() {
 		ItemStack ironFragment = new ItemStack(Material.IRON_NUGGET, 1);
 		ItemMeta meta = ironFragment.getItemMeta();
 
@@ -26,7 +27,7 @@ public class IronFragment {
 	    return ironFragment;
 	}
 	
-	public static String getName() {
-		return ChatUtils.translateToColor("#eeeeee&lIron Fragment");
+	public String getName() {
+		return ChatUtils.translateToColor("#eeeeee&lIron Cluster");
 	}
 }

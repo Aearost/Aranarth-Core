@@ -27,7 +27,7 @@ public class PlayerInteractEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getItem() != null) {
-            if (e.getItem().isSimilar(Quiver.getQuiver())) {
+            if (e.getItem().isSimilar(new Quiver().getItem())) {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);

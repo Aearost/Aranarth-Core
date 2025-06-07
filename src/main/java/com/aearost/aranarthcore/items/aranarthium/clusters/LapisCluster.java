@@ -1,5 +1,6 @@
-package com.aearost.aranarthcore.items.aranarthium.fragments;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -10,12 +11,12 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Lapis Cluster item.
  */
-public class LapisCluster {
+public class LapisCluster implements AranarthItem {
 
 	/**
 	 * @return The Lapis Cluster.
 	 */
-	public static ItemStack getLapisCluster() {
+	public ItemStack getItem() {
 		ItemStack lapisCluster = new ItemStack(Material.BLUE_DYE, 1);
 		ItemMeta meta = lapisCluster.getItemMeta();
 
@@ -26,7 +27,7 @@ public class LapisCluster {
 	    return lapisCluster;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#4169e1&lLapis Cluster");
 	}
 }

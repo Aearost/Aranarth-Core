@@ -19,7 +19,7 @@ public class RecipeHomePad {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HOME_PAD");
-		ShapedRecipe recipe = new ShapedRecipe(nk, Homepad.getHomepad());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new Homepad().getItem());
 
 		recipe.shape("LDL", "GPG", "LDL");
 

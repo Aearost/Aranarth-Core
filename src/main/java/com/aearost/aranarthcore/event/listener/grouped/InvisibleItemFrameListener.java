@@ -143,7 +143,7 @@ public class InvisibleItemFrameListener implements Listener {
     public void onItemFrameDrop(final ItemSpawnEvent e) {
     	if (e.getEntity().getItemStack().getType() == Material.ITEM_FRAME) {
     		if (this.isInvisibleItemFrameDestroyed) {
-    			e.getEntity().setItemStack(InvisibleItemFrame.getInvisibleItemFrame());
+    			e.getEntity().setItemStack(new InvisibleItemFrame().getItem());
     		}
     	}
     }

@@ -19,7 +19,7 @@ public class PlayerItemConsumeEventListener implements Listener {
 
     @EventHandler
     public void onItemConsume(PlayerItemConsumeEvent e) {
-        if (e.getItem().isSimilar(HoneyGlazedHam.getHoneyGlazedHam())) {
+        if (e.getItem().isSimilar(new HoneyGlazedHam().getItem())) {
             new HoneyGlazedHamEat().execute(e);
         }
     }

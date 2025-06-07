@@ -28,10 +28,10 @@ public class BlockPlaceEventListener implements Listener {
         // Skip auto-replenish of slot
         if (is.getType() == Material.HOPPER) {
             new HopperPlace().execute(e);
-        } else if (is.isSimilar(SugarcaneBlock.getSugarcaneBlock())) {
+        } else if (is.isSimilar(new SugarcaneBlock().getItem())) {
             new SugarcaneBlockPlace().execute(e);
         } else {
-            if (is.isSimilar((Homepad.getHomepad()))) {
+            if (is.isSimilar((new Homepad().getItem()))) {
                 new HomepadPlace().execute(e);
             } else if (is.getType() == Material.TORCHFLOWER) {
                 new TorchflowerPlace().execute(e);

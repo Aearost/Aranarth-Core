@@ -42,7 +42,7 @@ public class LeafDecayDropsListener implements Listener {
 				}
 				// 1% chance of dropping a god apple fragment
 				else if (new Random().nextInt(100) == 0) {
-					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), GodAppleFragment.getGodAppleFragment());
+					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						// If the player is within 32 blocks of the spawn location
 						if (block.getLocation().distance(player.getLocation()) <= 32) {
@@ -89,7 +89,7 @@ public class LeafDecayDropsListener implements Listener {
 		// Applies to all months other than Solarvor
 		if (new Random().nextInt(2000) == 0) {
 			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
-				block.getLocation().getWorld().dropItemNaturally(block.getLocation(), GodAppleFragment.getGodAppleFragment());
+				block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					// If the player is within 32 blocks of the spawn location
 					if (block.getLocation().distance(player.getLocation()) <= 32) {

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items.aranarthium.ingots;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,30 +12,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Elven Aranarthium Ingot item.
  */
-public class ElvenAranarthium {
+public class AranarthiumElven implements AranarthItem {
 
 	/**
 	 * @return The Elven Aranarthium Ingot.
 	 */
-	public static ItemStack getElvenAranarthiumIngot() {
-		ItemStack elvenAranarthiumIngot = new ItemStack(Material.ECHO_SHARD, 1);
-		ItemMeta meta = elvenAranarthiumIngot.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			elvenAranarthiumIngot.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return elvenAranarthiumIngot;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#FAF0E6&lElven Aranarthium");
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&7&oIt is strangely light...";
 	}
 	

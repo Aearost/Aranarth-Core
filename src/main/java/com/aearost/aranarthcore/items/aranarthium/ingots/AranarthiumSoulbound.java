@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items.aranarthium.ingots;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -11,30 +12,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Soulbound Aranarthium Ingot item.
  */
-public class SoulboundAranarthium {
+public class AranarthiumSoulbound implements AranarthItem {
 
 	/**
 	 * @return The Soulbound Aranarthium Ingot.
 	 */
-	public static ItemStack getSoulboundAranarthiumIngot() {
-		ItemStack soulboundAranarthiumIngot = new ItemStack(Material.ECHO_SHARD, 1);
-		ItemMeta meta = soulboundAranarthiumIngot.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			soulboundAranarthiumIngot.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return soulboundAranarthiumIngot;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#9400D3&lSoulbound Aranarthium");
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&7&oBound for life...";
 	}
 	

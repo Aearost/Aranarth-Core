@@ -19,7 +19,7 @@ public class RecipeQuiver {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_QUIVER");
-		ShapedRecipe recipe = new ShapedRecipe(nk, Quiver.getQuiver());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new Quiver().getItem());
 
 		recipe.shape("SLS", "LAL", "LLL");
 

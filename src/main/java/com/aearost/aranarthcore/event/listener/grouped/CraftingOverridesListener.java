@@ -48,18 +48,18 @@ public class CraftingOverridesListener implements Listener {
 				return;
 			}
 
-			if (is.isSimilar(ChorusDiamond.getChorusDiamond())) {
+			if (is.isSimilar(new ChorusDiamond().getItem())) {
 				new CraftingOverridesChorusDiamond().onCraft(e, is, player);
-			} else if (is.isSimilar(SugarcaneBlock.getSugarcaneBlock())) {
+			} else if (is.isSimilar(new SugarcaneBlock().getItem())) {
 				new CraftingOverridesSugarcaneBlock().onCraft(e, is, player);
-			} else if (is.isSimilar(HoneyGlazedHam.getHoneyGlazedHam())) {
+			} else if (is.isSimilar(new HoneyGlazedHam().getItem())) {
 				new CraftingOverridesHoneyGlazedHam().onCraft(e, is, player);
-			} else if (is.isSimilar(GodAppleFragment.getGodAppleFragment())) {
+			} else if (is.isSimilar(new GodAppleFragment().getItem())) {
 				new CraftingOverridesGodAppleFragment().onCraft(e, is, player);
-			} else if (e.getRecipe().getResult().isSimilar(Homepad.getHomepad())) {
+			} else if (e.getRecipe().getResult().isSimilar(new Homepad().getItem())) {
 				new CraftingOverridesHomepad().onCraft(e, is, player);
-			} else if (e.getRecipe().getResult().isSimilar(AranarthiumIngot.getAranarthiumIngot())
-						|| is.isSimilar(AranarthiumIngot.getAranarthiumIngot())) {
+			} else if (e.getRecipe().getResult().isSimilar(new AranarthiumIngot().getItem())
+						|| is.isSimilar(new AranarthiumIngot().getItem())) {
 				new CraftingOverridesAranarthiumIngot().onCraft(e, is, player);
 			}
 		}

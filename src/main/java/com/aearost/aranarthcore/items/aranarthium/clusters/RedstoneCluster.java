@@ -1,5 +1,6 @@
-package com.aearost.aranarthcore.items.aranarthium.fragments;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -10,12 +11,12 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Redstone Cluster item.
  */
-public class RedstoneCluster {
+public class RedstoneCluster implements AranarthItem {
 
 	/**
 	 * @return The Redstone Cluster.
 	 */
-	public static ItemStack getRedstoneCluster() {
+	public ItemStack getItem() {
 		ItemStack redstoneCluster = new ItemStack(Material.FERMENTED_SPIDER_EYE, 1);
 		ItemMeta meta = redstoneCluster.getItemMeta();
 
@@ -26,7 +27,7 @@ public class RedstoneCluster {
 	    return redstoneCluster;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#aa0000&lRedstone Cluster");
 	}
 }

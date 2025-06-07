@@ -1,5 +1,6 @@
-package com.aearost.aranarthcore.items.aranarthium.fragments;
+package com.aearost.aranarthcore.items.aranarthium.clusters;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -10,12 +11,12 @@ import java.util.Objects;
 /**
  * Provides the necessary components of an Quartz Cluster item.
  */
-public class QuartzCluster {
+public class QuartzCluster implements AranarthItem {
 
 	/**
 	 * @return The Quartz Cluster.
 	 */
-	public static ItemStack getQuartzCluster() {
+	public ItemStack getItem() {
 		ItemStack quartzCluster = new ItemStack(Material.PHANTOM_MEMBRANE, 1);
 		ItemMeta meta = quartzCluster.getItemMeta();
 
@@ -26,7 +27,7 @@ public class QuartzCluster {
 	    return quartzCluster;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return ChatUtils.translateToColor("#f8e8e8&lQuartz Cluster");
 	}
 }

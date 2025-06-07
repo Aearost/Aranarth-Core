@@ -20,11 +20,11 @@ public class HomepadBreak {
 		if (Objects.nonNull(AranarthUtils.getHomePad(location))) {
 			e.setCancelled(true);
 			AranarthUtils.removeHomePad(location);
-			location.getWorld().dropItemNaturally(location, Homepad.getHomepad());
+			location.getWorld().dropItemNaturally(location, new Homepad().getItem());
 			location.getBlock().setType(Material.AIR);
 		} else if (Objects.nonNull(AranarthUtils.getHomePad(locationAbove))) {
 			AranarthUtils.removeHomePad(locationAbove);
-			locationAbove.getWorld().dropItemNaturally(locationAbove, Homepad.getHomepad());
+			locationAbove.getWorld().dropItemNaturally(locationAbove, new Homepad().getItem());
 			locationAbove.getBlock().setType(Material.AIR);
 			location.getWorld().dropItemNaturally(location, new ItemStack(e.getBlock().getType()));
 			location.getBlock().setType(Material.AIR);

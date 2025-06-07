@@ -60,6 +60,8 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("whereis");
 		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
 			displayedOptions.add("itemname");
+		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
+			displayedOptions.add("give");
 		} else {
 			displayedOptions = displayForAll(player, displayedOptions, args);
 		}
@@ -131,6 +133,7 @@ public class CommandACCompleter implements TabCompleter {
 	private List<String> displayNoResultsForOp(List<String> displayedOptions) {
 		displayedOptions.add("whereis");
 		displayedOptions.add("itemname");
+		displayedOptions.add("give");
 		displayedOptions = displayNoResultsForAll(displayedOptions);
 		return displayedOptions;
 	}
@@ -169,24 +172,8 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 2) {
 					if (!args[1].isEmpty() && "create".startsWith(args[1])) {
 						displayedOptions.add("create");
-					} else if (!args[1].isEmpty() && "give".startsWith(args[1])) {
-						displayedOptions.add("give");
 					} else {
 						displayedOptions.add("create");
-						displayedOptions.add("give");
-					}
-				} else {
-					if (args[1].equalsIgnoreCase("give")) {
-						Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-						Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-						for (Player onlinePlayer : onlinePlayers) {
-							// Only display the name if it aligns with one that is currently online
-							if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-								displayedOptions.add(onlinePlayer.getName());
-							} else if (args[1].isEmpty()) {
-								displayedOptions.add(onlinePlayer.getName());
-							}
-						}
 					}
 				}
 			}

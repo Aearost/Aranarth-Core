@@ -1,5 +1,6 @@
-package com.aearost.aranarthcore.items;
+package com.aearost.aranarthcore.items.aranarthium.ingots;
 
+import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
@@ -9,15 +10,15 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 /**
- * Provides the necessary components of a God Apple Fragment item.
+ * Provides the necessary components of a Scorched Aranarthium Ingot item.
  */
-public class GodAppleFragment implements AranarthItem {
+public class AranarthiumScorched implements AranarthItem {
 
 	/**
-	 * @return The God Apple Fragment.
+	 * @return The Scorched Aranarthium Ingot.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.GOLD_NUGGET, 1);
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
@@ -31,11 +32,11 @@ public class GodAppleFragment implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "&6God Apple Fragment";
+		return ChatUtils.translateToColor("#ff4500&lScorched Aranarthium");
 	}
 	
 	public String getLore() {
-		return "&eA gift from the gods...";
+		return "&7&oThe kiss of fire...";
 	}
 	
 }

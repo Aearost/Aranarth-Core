@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.recipes.aranarthium;
 
-import com.aearost.aranarthcore.items.aranarthium.ingots.SoulboundAranarthium;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumSoulbound;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,7 +19,7 @@ public class RecipeSoulboundAranarthium {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_SOULBOUND_ARANARTHIUM");
-		ShapedRecipe recipe = new ShapedRecipe(nk, SoulboundAranarthium.getSoulboundAranarthiumIngot());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumSoulbound().getItem());
 
 		recipe.shape("YNY", "CEC", "ATA");
 

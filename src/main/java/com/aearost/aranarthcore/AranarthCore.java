@@ -31,17 +31,18 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
+		plugin = this;
 		initializeUtils();
 		initializeEvents();
 		initializeRecipes();
 		initializeCommands();
 		initializeWorlds();
 		initializeItems();
+
+
 		// Sets default storm values
 		AranarthUtils.setIsStorming(false);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
-
-		plugin = this;
 
 		// Update the persistence files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
@@ -226,7 +227,7 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes the AranarthCore custom items needing namespace keys.
 	 */
 	private void initializeItems() {
-		new InvisibleItemFrame(this);
+		new InvisibleItemFrame();
 	}
 
 	/**

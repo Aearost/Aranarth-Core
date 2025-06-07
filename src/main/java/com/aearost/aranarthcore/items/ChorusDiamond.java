@@ -11,30 +11,30 @@ import java.util.Objects;
 /**
  * Provides the necessary components of a Chorus Diamond item.
  */
-public class ChorusDiamond {
+public class ChorusDiamond implements AranarthItem {
 
 	/**
 	 * @return The Chorus Diamond.
 	 */
-	public static ItemStack getChorusDiamond() {
-		ItemStack chorusDiamond = new ItemStack(Material.DIAMOND, 1);
-		ItemMeta meta = chorusDiamond.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.DIAMOND, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			chorusDiamond.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return chorusDiamond;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&5&lChorus Diamond";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&bYou can't eat this one...";
 	}
 	
