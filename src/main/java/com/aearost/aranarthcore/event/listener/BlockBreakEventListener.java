@@ -39,7 +39,8 @@ public class BlockBreakEventListener implements Listener {
             new ArenaBlockBreak().execute(e);
         } else {
             if (e.getBlock().getType().name().endsWith("_ORE")) {
-                new OreBreak().execute(e);
+                new OreFragmentDrops().execute(e);
+                new DwarvenAranarthiumOreDrops().execute(e);
             }
             new PlayerShopDestroy().execute(e);
         }

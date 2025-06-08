@@ -13,7 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of a Soulbound Aranarthium Leggings item.
@@ -29,7 +29,7 @@ public class SoulboundAranarthiumLeggings implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			meta.setTrim(new ArmorTrim(TrimMaterial.AMETHYST, TrimPattern.RAISER));
 			ArrayList<String> lore = new ArrayList<>();
-			meta.getPersistentDataContainer().set(ARMOUR_TYPE, PersistentDataType.STRING, "soulbound");
+			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "soulbound");
 
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));

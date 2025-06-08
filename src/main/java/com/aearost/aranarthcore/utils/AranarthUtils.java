@@ -10,10 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.trim.TrimPattern;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -21,7 +18,7 @@ import org.bukkit.potion.PotionEffectType;
 import java.io.IOException;
 import java.util.*;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 
 /**
@@ -312,7 +309,7 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Cycles through online players and ensures that they are wearing a full set of armour.
+	 * Cycles through online players and verifies if they are wearing a full set of Aranarthium armor.
 	 */
 	public static void applyArmourEffects() {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
@@ -321,7 +318,7 @@ public class AranarthUtils {
 				if (Objects.nonNull(player)) {
 					ItemStack[] armor = player.getInventory().getArmorContents();
 					if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
-						verifyAndApplyAranarthiumArmourEffects(player, armor);
+						verifyAndApplyAranarthiumArmourEffects(player);
 					}
 				}
 			}
@@ -329,99 +326,54 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Ensures that the given player is wearing Aranarthium Armour and applies its effects.
+	 * Ensures that the given player is wearing a full set of Aranarthium Armour and applies its effects.
 	 * @param player The player being verified.
-	 * @param armor The player's set of armour.
 	 */
-	private static void verifyAndApplyAranarthiumArmourEffects(Player player, ItemStack[] armor) {
-		String armourSet = verifyIfPlayerHasFullSet(armor);
-		if (!armourSet.isEmpty()) {
-            switch (armourSet) {
-                case "aquatic" -> {
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-                    player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-                }
-                case "ardent" -> {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
-                }
-                case "dwarven" -> {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-                }
-                case "elven" -> {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-                }
-                case "scorched" -> {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-                }
-                case "soulbound" -> {
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-                }
-            }
-		}
-	}
-
-	private static String verifyIfPlayerHasFullSet(ItemStack[] armor) {
-		String setAttribute = "";
-		int counter = 0;
-		// Iterates from boots to helmet
-		for (int i = 0; i < 4; i++) {
-			if (armor[0].hasItemMeta()) {
-				ItemMeta meta =  armor[0].getItemMeta();
-				if (meta.getPersistentDataContainer().has(ARMOUR_TYPE, PersistentDataType.STRING)) {
-					// Determines what the set is expected to be
-					if (setAttribute.isEmpty()) {
-						setAttribute = meta.getPersistentDataContainer().get(ARMOUR_TYPE, PersistentDataType.STRING);
-						counter++;
-					} else {
-						if (meta.getPersistentDataContainer().get(ARMOUR_TYPE, PersistentDataType.STRING).equals(setAttribute)) {
-							counter++;
-						}
-					}
-				}
-			}
-		}
-		if (counter == 4) {
-			return setAttribute;
-		} else {
-			return "";
+	private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
+		if (isArmorType(player, "aquatic")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isArmorType(player, "ardent")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
+		} else if (isArmorType(player, "dwarven")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isArmorType(player, "elven")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isArmorType(player, "scorched")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isArmorType(player, "soulbound")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		}
 	}
 
 	/**
-	 * Verifies if the player has the specified armor trim.
-	 *
-	 * @param player The player to be verified.
-	 * @param trimPattern The trim to be verified.
-	 * @return Confirmation of whether the player has the specified trim.
+	 * Verifies if the input armor type is fully equipped by the player.
+	 * @param player The player being verified.
+	 * @param type The armor type to be verified.
+	 * @return Confirmation whether the specified type is fully equipped.
 	 */
-	public static boolean verifyPlayerHasArmorTrim(Player player, TrimPattern trimPattern) {
+	public static boolean isArmorType(Player player, String type) {
 		ItemStack[] armor = player.getInventory().getArmorContents();
-		for (ItemStack is : armor) {
-			if (Objects.nonNull(is)) {
-				// Elytras cannot have trims thus must be ignored
-				if (is.getType() == Material.ELYTRA) {
-					continue;
-				}
-				if (is.getItemMeta() instanceof ArmorMeta armorMeta) {
-                    if (armorMeta.hasTrim()) {
-						if (Objects.nonNull(armorMeta.getTrim())) {
-							if (armorMeta.getTrim().getPattern() == trimPattern) {
-								return true;
-							}
-						}
+		int counter = 0;
+		for (ItemStack is : player.getInventory().getArmorContents()) {
+			if (is.hasItemMeta()) {
+				if (is.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE, PersistentDataType.STRING)) {
+					if (is.getItemMeta().getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING).equals(type)) {
+						counter++;
 					}
 				}
 			}
 		}
-		return false;
+		// Ensures that all 4 pieces of armour are Dwarven
+        return counter == 4;
 	}
 
 	/**

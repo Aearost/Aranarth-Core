@@ -13,7 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of a Scorched Aranarthium Leggings item.
@@ -29,7 +29,7 @@ public class ScorchedAranarthiumLeggings implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			meta.setTrim(new ArmorTrim(TrimMaterial.RESIN, TrimPattern.SNOUT));
 			ArrayList<String> lore = new ArrayList<>();
-			meta.getPersistentDataContainer().set(ARMOUR_TYPE, PersistentDataType.STRING, "scorched");
+			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "scorched");
 
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));

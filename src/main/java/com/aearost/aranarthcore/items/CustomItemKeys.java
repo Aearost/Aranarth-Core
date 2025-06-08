@@ -4,5 +4,5 @@ import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.NamespacedKey;
 
 public class CustomItemKeys {
-    public static final NamespacedKey ARMOUR_TYPE = new NamespacedKey(AranarthCore.getInstance(), "armour_type");
+    public static final NamespacedKey ARMOR_TYPE = new NamespacedKey(AranarthCore.getInstance(), "armor_type");
 }
