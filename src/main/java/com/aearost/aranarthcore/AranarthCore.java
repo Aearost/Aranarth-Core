@@ -58,7 +58,7 @@ public class AranarthCore extends JavaPlugin {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
-				AranarthUtils.updateArmorTrimEffects();
+				AranarthUtils.applyArmourEffects();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
@@ -191,8 +191,8 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeAquaticAranarthium(this);
 		new RecipeDwarvenAranarthium(this);
 		new RecipeElvenAranarthium(this);
-		new RecipeEnflamedAranarthium(this);
-		new RecipeMannishAranarthium(this);
+		new RecipeScorchedAranarthium(this);
+		new RecipeArdentAranarthium(this);
 		new RecipeSoulboundAranarthium(this);
 	}
 

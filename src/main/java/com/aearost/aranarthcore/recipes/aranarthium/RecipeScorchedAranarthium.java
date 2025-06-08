@@ -7,18 +7,18 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.plugin.Plugin;
 
-public class RecipeEnflamedAranarthium {
+public class RecipeScorchedAranarthium {
 
-	public RecipeEnflamedAranarthium(Plugin plugin) {
+	public RecipeScorchedAranarthium(Plugin plugin) {
 		createRecipe(plugin);
 	}
 
 	/**
-	 * Creates the recipe for getting Enflamed Aranarthium.
+	 * Creates the recipe for getting Scorched Aranarthium.
 	 * @param plugin The plugin.
 	 */
 	private void createRecipe(Plugin plugin) {
-		NamespacedKey nk = new NamespacedKey(plugin, "AC_ENFLAMED_ARANARTHIUM");
+		NamespacedKey nk = new NamespacedKey(plugin, "AC_SCORCHED_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumScorched().getItem());
 
 		recipe.shape("MLM", "BEB", "RBR");
