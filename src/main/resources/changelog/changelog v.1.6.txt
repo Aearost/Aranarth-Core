@@ -4,6 +4,8 @@ Features
 [+] Added seasons resulting in snow during winter months and melting during summer months
 [+] Added a server date system
 [+] Added special worldwide effects based on the given season
+[+] Added Aranarthium ingots
+[+] Added Aranarthium armor sets with custom effects
 [+] Added economy functionality using player shops
 [+] Added /ac balance [player] command to view your balance or another player's
 [+] Added recipe for Pale Moss blocks
@@ -12,7 +14,6 @@ Features
 [+] Added recipe for Exposed Copper
 [+] Added recipe for Weathered Copper
 [+] Added recipe for Oxidized Copper
-[+] Added Aranarthium
 
 Bug Fixes
 - Allowed players to move quiver around inventory
@@ -23,4 +24,4 @@ Bug Fixes
 - Shulker boxes can no longer be placed in other shulker boxes via hotkey slot changes
 
 Miscellaneous
-- N/A
+- Restructured all events and listeners into more concise classes to prevent the same listener from being called in two classes

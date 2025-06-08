@@ -102,6 +102,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerItemConsumeEventListener(this);
 		new EntitySpawnEventListener(this);
 		new EntityDamageByEntityEventListener(this);
+		new EntityDamageEventListener(this);
 
 		// Multi-event listeners for single purpose
 		new InvisibleItemFrameListener(this);

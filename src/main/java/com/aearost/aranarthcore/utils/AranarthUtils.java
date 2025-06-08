@@ -364,6 +364,10 @@ public class AranarthUtils {
 		ItemStack[] armor = player.getInventory().getArmorContents();
 		int counter = 0;
 		for (ItemStack is : player.getInventory().getArmorContents()) {
+			if (is == null) {
+				return false;
+			}
+
 			if (is.hasItemMeta()) {
 				if (is.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE, PersistentDataType.STRING)) {
 					if (is.getItemMeta().getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING).equals(type)) {
