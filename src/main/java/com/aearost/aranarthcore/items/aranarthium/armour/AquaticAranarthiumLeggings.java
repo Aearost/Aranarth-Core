@@ -8,9 +8,12 @@ import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
 import org.bukkit.inventory.meta.trim.TrimMaterial;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
 
 /**
  * Provides the necessary components of an Aquatic Aranarthium Leggings item.
@@ -25,6 +28,7 @@ public class AquaticAranarthiumLeggings implements AranarthItem {
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.COAST));
 		ArrayList<String> lore = new ArrayList<>();
+		meta.getPersistentDataContainer().set(ARMOUR_TYPE, PersistentDataType.STRING, "aquatic");
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));

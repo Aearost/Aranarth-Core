@@ -12,12 +12,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.IOException;
 import java.util.*;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+
 
 /**
  * Provides a large variety of utility methods for everything related to AranarthCore.
@@ -307,28 +312,82 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Handles applying armor trim effects.
+	 * Cycles through online players and ensures that they are wearing a full set of armour.
 	 */
-	public static void updateArmorTrimEffects() {
+	public static void applyArmourEffects() {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
 			if (Objects.nonNull(aranarthPlayer.getUsername())) {
 				Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
 				if (Objects.nonNull(player)) {
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.RAISER)) {
-						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 2));
+					ItemStack[] armor = player.getInventory().getArmorContents();
+					if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
+						verifyAndApplyAranarthiumArmourEffects(player, armor);
 					}
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.SILENCE)) {
-						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-					}
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.SHAPER)) {
-						// There is no amplifier to this effect
-						player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-					}
-//					if (verifyPlayerHasArmorTrim(player, TrimPattern.EYE)) {
-//						// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
-//					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * Ensures that the given player is wearing Aranarthium Armour and applies its effects.
+	 * @param player The player being verified.
+	 * @param armor The player's set of armour.
+	 */
+	private static void verifyAndApplyAranarthiumArmourEffects(Player player, ItemStack[] armor) {
+		String armourSet = verifyIfPlayerHasFullSet(armor);
+		if (!armourSet.isEmpty()) {
+            switch (armourSet) {
+                case "aquatic" -> {
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
+                }
+                case "ardent" -> {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 3));
+                }
+                case "dwarven" -> {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
+                }
+                case "elven" -> {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
+                }
+                case "scorched" -> {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
+                }
+                case "soulbound" -> {
+					// No effects for Soulbound yet
+                }
+            }
+		}
+	}
+
+	private static String verifyIfPlayerHasFullSet(ItemStack[] armor) {
+		String setAttribute = "";
+		int counter = 0;
+		// Iterates from boots to helmet
+		for (int i = 0; i < 4; i++) {
+			if (armor[0].hasItemMeta()) {
+				ItemMeta meta =  armor[0].getItemMeta();
+				if (meta.getPersistentDataContainer().has(ARMOUR_TYPE, PersistentDataType.STRING)) {
+					// Determines what the set is expected to be
+					if (setAttribute.isEmpty()) {
+						setAttribute = meta.getPersistentDataContainer().get(ARMOUR_TYPE, PersistentDataType.STRING);
+						counter++;
+					} else {
+						if (meta.getPersistentDataContainer().get(ARMOUR_TYPE, PersistentDataType.STRING).equals(setAttribute)) {
+							counter++;
+						}
+					}
+				}
+			}
+		}
+		if (counter == 4) {
+			return setAttribute;
+		} else {
+			return "";
 		}
 	}
 
