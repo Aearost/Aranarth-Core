@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.event.mob.ExtraWeaponsDamage;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
 import com.aearost.aranarthcore.event.player.TippedArrowDamagePrevent;
 import com.aearost.aranarthcore.event.world.FireDamageIncrease;
@@ -24,15 +25,20 @@ public class EntityDamageEventListener implements Listener {
      */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent e) {
-
         if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
             new TippedArrowDamagePrevent().execute(e);
-        } else if (e.getEntity() instanceof Tameable) {
+        }
+
+        if (e.getEntity() instanceof Tameable tameable && tameable.isTamed()) {
             new PetHurtPrevent().execute(e);
-        } else {
-            if (AranarthUtils.getMonth() == Month.ARDORVOR) {
-                new FireDamageIncrease().execute(e);
-            }
+        }
+        // Do not affect tamed mobs
+        else {
+            new ExtraWeaponsDamage().execute(e);
+        }
+
+        if (AranarthUtils.getMonth() == Month.ARDORVOR) {
+            new FireDamageIncrease().execute(e);
         }
     }
 }
