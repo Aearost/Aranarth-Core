@@ -340,25 +340,29 @@ public class AranarthUtils {
                 case "aquatic" -> {
                     player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
                     player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
                 }
                 case "ardent" -> {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
-					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 3));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
                 }
                 case "dwarven" -> {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
                 }
                 case "elven" -> {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
                 }
                 case "scorched" -> {
 					player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 					player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
                 }
                 case "soulbound" -> {
-					// No effects for Soulbound yet
+					player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
                 }
             }
 		}
