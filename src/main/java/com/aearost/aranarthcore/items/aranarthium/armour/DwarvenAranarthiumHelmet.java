@@ -13,7 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of a Dwarven Aranarthium Helmet item.
@@ -29,7 +29,7 @@ public class DwarvenAranarthiumHelmet implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			meta.setTrim(new ArmorTrim(TrimMaterial.GOLD, TrimPattern.HOST));
 			ArrayList<String> lore = new ArrayList<>();
-			meta.getPersistentDataContainer().set(ARMOUR_TYPE, PersistentDataType.STRING, "dwarven");
+			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "dwarven");
 
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));

@@ -13,7 +13,7 @@ import java.util.Random;
 /**
  * Adds functionality of ore fragment and clusters when breaking ore blocks.
  */
-public class OreBreak {
+public class OreFragmentDrops {
 	public void execute(BlockBreakEvent e) {
 		Material material = e.getBlock().getType();
 		Random random = new Random();

@@ -14,7 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOUR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of an Aquatic Aranarthium Boots item.
@@ -31,7 +31,7 @@ public class AquaticAranarthiumBoots implements AranarthItem {
 			meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.TIDE));
 			meta.addEnchant(Enchantment.DEPTH_STRIDER, 5, true);
 			ArrayList<String> lore = new ArrayList<>();
-			meta.getPersistentDataContainer().set(ARMOUR_TYPE, PersistentDataType.STRING, "aquatic");
+			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
 
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
