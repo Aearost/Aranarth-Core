@@ -16,6 +16,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class RespawnNonSurvival {
     public void execute(PlayerRespawnEvent e) {
+        Bukkit.getLogger().info("A");
         Player player = e.getPlayer();
         player.getInventory().clear();
         String world = e.getPlayer().getWorld().getName();

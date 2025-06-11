@@ -28,14 +28,24 @@ public class PlayerRespawnEventListener implements Listener {
     @EventHandler
     public void onPlayerDeath(final PlayerDeathEvent e) {
         String world = e.getEntity().getWorld().getName();
+        Player player = e.getEntity();
         if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
-            Player player = e.getEntity();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setLevelBeforeDeath(player.getLevel());
             aranarthPlayer.setExpBeforeDeath(player.getExp());
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             e.getDrops().clear();
             e.setDroppedExp(0);
+        } else {
+            if (AranarthUtils.isArmorType(player, "soulbound")) {
+                e.setKeepInventory(true);
+                e.getDrops().clear();
+                e.setDroppedExp(0);
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                aranarthPlayer.setLevelBeforeDeath(player.getLevel());
+                aranarthPlayer.setExpBeforeDeath(player.getExp());
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
         }
     }
 
