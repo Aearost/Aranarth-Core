@@ -1,11 +1,16 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.IOException;
 
@@ -26,6 +31,23 @@ public class RespawnSurvival {
         }
         if (x == 0 && z == 3) {
             e.setRespawnLocation(new Location(e.getRespawnLocation().getWorld(), x, 120, z, 180, 0));
+        }
+
+        if (AranarthUtils.isArmorType(player, "soulbound")) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            int level = aranarthPlayer.getLevelBeforeDeath();
+            float exp = aranarthPlayer.getExpBeforeDeath();
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    player.setLevel(level);
+                    player.setExp(exp);
+                    player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 220, 4));
+                }
+            }.runTaskLater(AranarthCore.getInstance(), 1L);
+            aranarthPlayer.setLevelBeforeDeath(0);
+            aranarthPlayer.setExpBeforeDeath(0);
+            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         }
     }
 }
