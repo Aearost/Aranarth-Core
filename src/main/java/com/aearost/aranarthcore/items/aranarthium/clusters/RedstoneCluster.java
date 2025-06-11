@@ -5,8 +5,11 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.CLUSTER;
 
 /**
  * Provides the necessary components of an Redstone Cluster item.
@@ -19,8 +22,8 @@ public class RedstoneCluster implements AranarthItem {
 	public ItemStack getItem() {
 		ItemStack redstoneCluster = new ItemStack(Material.FERMENTED_SPIDER_EYE, 1);
 		ItemMeta meta = redstoneCluster.getItemMeta();
-
 		if (Objects.nonNull(meta)) {
+			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "redstone");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			redstoneCluster.setItemMeta(meta);
 		}
