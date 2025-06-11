@@ -2,8 +2,6 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
-import com.aearost.aranarthcore.items.*;
-import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -12,8 +10,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Objects;
+import static com.aearost.aranarthcore.items.CustomItemKeys.*;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
 
 public class CraftingOverridesListener implements Listener {
 
@@ -39,28 +40,29 @@ public class CraftingOverridesListener implements Listener {
 	@EventHandler
 	public void onCraftItem(final CraftItemEvent e) {
 		HumanEntity player = e.getWhoClicked();
-		for (ItemStack is : e.getInventory().getMatrix()) {
-			
-			if (is == null) {
+		ItemStack result = e.getRecipe().getResult();
+		for (ItemStack ingredient : e.getInventory().getMatrix()) {
+
+			if (ingredient == null) {
 				continue;
 			}
-			if (Objects.isNull(is.getItemMeta())) {
-				return;
+
+			// If vanilla item is used to craft custom item
+			if (result.hasItemMeta()) {
+				ItemMeta resultMeta = result.getItemMeta();
+				if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
+					new CraftingOverridesCluster().onCraft(e, ingredient, player);
+				}
 			}
 
-			if (is.isSimilar(new ChorusDiamond().getItem())) {
-				new CraftingOverridesChorusDiamond().onCraft(e, is, player);
-			} else if (is.isSimilar(new SugarcaneBlock().getItem())) {
-				new CraftingOverridesSugarcaneBlock().onCraft(e, is, player);
-			} else if (is.isSimilar(new HoneyGlazedHam().getItem())) {
-				new CraftingOverridesHoneyGlazedHam().onCraft(e, is, player);
-			} else if (is.isSimilar(new GodAppleFragment().getItem())) {
-				new CraftingOverridesGodAppleFragment().onCraft(e, is, player);
-			} else if (e.getRecipe().getResult().isSimilar(new Homepad().getItem())) {
-				new CraftingOverridesHomepad().onCraft(e, is, player);
-			} else if (e.getRecipe().getResult().isSimilar(new AranarthiumIngot().getItem())
-						|| is.isSimilar(new AranarthiumIngot().getItem())) {
-				new CraftingOverridesAranarthiumIngot().onCraft(e, is, player);
+			// If custom item is used to craft vanilla recipes
+			else if (ingredient.hasItemMeta()) {
+				ItemMeta ingredientMeta = ingredient.getItemMeta();
+				if (ingredientMeta.getPersistentDataContainer().has(CLUSTER, PersistentDataType.STRING)) {
+					new CraftingOverridesCluster().onCraft(e, ingredient, player);
+				} else if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
+					new CraftingOverridesCluster().onCraft(e, ingredient, player);
+				}
 			}
 		}
 	}

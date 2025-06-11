@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.recipes;
+package com.aearost.aranarthcore.recipes.aranarthium;
 
 import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import org.bukkit.Bukkit;
