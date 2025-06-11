@@ -4,9 +4,12 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.GOD_APPLE_FRAGMENT;
 
 /**
  * Provides the necessary components of a God Apple Fragment item.
@@ -19,9 +22,9 @@ public class GodAppleFragment implements AranarthItem {
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.GOLD_NUGGET, 1);
 		ItemMeta meta = item.getItemMeta();
-		ArrayList<String> lore = new ArrayList<>();
-
 		if (Objects.nonNull(meta)) {
+			ArrayList<String> lore = new ArrayList<>();
+			meta.getPersistentDataContainer().set(GOD_APPLE_FRAGMENT, PersistentDataType.STRING, "god_apple_fragment");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);

@@ -4,9 +4,12 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Objects;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.HONEY_GLAZED_HAM;
 
 /**
  * Provides the necessary components of a Honey Glazed Ham item.
@@ -19,9 +22,9 @@ public class HoneyGlazedHam implements AranarthItem {
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.COOKED_PORKCHOP, 1);
 		ItemMeta meta = item.getItemMeta();
-		ArrayList<String> lore = new ArrayList<>();
-
 		if (Objects.nonNull(meta)) {
+			ArrayList<String> lore = new ArrayList<>();
+			meta.getPersistentDataContainer().set(HONEY_GLAZED_HAM, PersistentDataType.STRING, "honey_glazed_ham");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
