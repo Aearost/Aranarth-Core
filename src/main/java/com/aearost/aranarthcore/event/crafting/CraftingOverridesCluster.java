@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.crafting;
 
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
-import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
+import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -65,7 +65,21 @@ public class CraftingOverridesCluster {
         } else if (material == Material.PHANTOM_MEMBRANE) {
             ingredientItem = new QuartzCluster();
         } else if (material == Material.ECHO_SHARD) {
-            ingredientItem = new AranarthiumIngot();
+            if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("aquatic")) {
+                ingredientItem = new AranarthiumAquatic();
+            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("ardent")) {
+                ingredientItem = new AranarthiumArdent();
+            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("dwarven")) {
+                ingredientItem = new AranarthiumDwarven();
+            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("elven")) {
+                ingredientItem = new AranarthiumElven();
+            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("scorched")) {
+                ingredientItem = new AranarthiumScorched();
+            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("soulbound")) {
+                ingredientItem = new AranarthiumSoulbound();
+            } else {
+                ingredientItem = new AranarthiumIngot();
+            }
         }
 
         String itemName = "";
