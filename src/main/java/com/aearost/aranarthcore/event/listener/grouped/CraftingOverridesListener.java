@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.crafting.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,7 +12,6 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.*;
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
@@ -47,23 +47,33 @@ public class CraftingOverridesListener implements Listener {
 				continue;
 			}
 
-			// If vanilla item is used to craft custom item
-			if (result.hasItemMeta()) {
-				ItemMeta resultMeta = result.getItemMeta();
-				if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
-					new CraftingOverridesCluster().onCraft(e, ingredient, player);
-				}
+			if (hasKey(ARANARTHIUM_INGOT, e, ingredient) || hasKey(CLUSTER, e, ingredient) || hasKey(ARMOR_TYPE, e, ingredient)) {
+				new CraftingOverridesAranarthium().onCraft(e, ingredient, player);
 			}
 
-			// If custom item is used to craft vanilla recipes
-			else if (ingredient.hasItemMeta()) {
-				ItemMeta ingredientMeta = ingredient.getItemMeta();
-				if (ingredientMeta.getPersistentDataContainer().has(CLUSTER, PersistentDataType.STRING)) {
-					new CraftingOverridesCluster().onCraft(e, ingredient, player);
-				} else if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
-					new CraftingOverridesCluster().onCraft(e, ingredient, player);
-				}
+			if (hasKey(CHORUS_DIAMOND, e, ingredient) || hasKey(HOMEPAD, e, ingredient)) {
+				new CraftingOverridesChorusDiamond().onCraft(e, ingredient, player);
 			}
 		}
+	}
+
+	private boolean hasKey(NamespacedKey key, CraftItemEvent e, ItemStack ingredient) {
+		ItemMeta resultMeta;
+		ItemMeta ingredientMeta;
+		if (e.getRecipe().getResult().hasItemMeta()) {
+			resultMeta = e.getRecipe().getResult().getItemMeta();
+			if (resultMeta.getPersistentDataContainer().has(key)) {
+				return true;
+			}
+		}
+
+		if (ingredient.hasItemMeta()) {
+			ingredientMeta = ingredient.getItemMeta();
+            if (ingredientMeta.getPersistentDataContainer().has(key)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

@@ -5,6 +5,10 @@ import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.CHORUS_DIAMOND;
+import static com.aearost.aranarthcore.items.CustomItemKeys.HOMEPAD;
 
 /**
  * Handles the overrides when crafting involving a Chorus Diamond.
@@ -12,23 +16,30 @@ import org.bukkit.inventory.ItemStack;
 public class CraftingOverridesChorusDiamond {
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
-        boolean isHasLore = is.getItemMeta().hasLore();
-
-        // If a Chorus Diamond is used in place of a regular Diamond
-        if (isHasLore) {
-            if (e.getRecipe().getResult().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
-                return;
+        ItemMeta meta = is.getItemMeta();
+        if (e.getRecipe().getResult().hasItemMeta()) {
+            ItemMeta resultMeta = e.getRecipe().getResult().getItemMeta();
+            if (is.getType() == Material.DIAMOND) {
+                if (resultMeta.getPersistentDataContainer().has(HOMEPAD)) {
+                    // A normal diamond is used as an ingredient instead of a chorus diamond
+                    if (!meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou must use a Chorus Diamond to craft this!"));
+                        e.setCancelled(true);
+                    }
+                }
+                // A chorus diamond is used as an ingredient incorrectly
+                else {
+                    if (meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
+                        e.setCancelled(true);
+                    }
+                }
             }
         }
-        // If a regular Diamond is used in place of a Chorus Diamond
+        // Result has no meta, therefore not requiring Chorus Diamonds
         else {
-            if (e.getRecipe().getResult().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou must use a Chorus Diamond to craft this!"));
-                return;
-            }
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Chorus Diamond to craft this!"));
+            e.setCancelled(true);
         }
     }
 
