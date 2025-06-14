@@ -3,8 +3,6 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
-import com.aearost.aranarthcore.items.Homepad;
-import com.aearost.aranarthcore.items.SugarcaneBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -28,10 +26,10 @@ public class BlockPlaceEventListener implements Listener {
         // Skip auto-replenish of slot
         if (is.getType() == Material.HOPPER) {
             new HopperPlace().execute(e);
-        } else if (is.isSimilar(new SugarcaneBlock().getItem())) {
+        } else if (is.getType() == Material.BAMBOO_BLOCK) {
             new SugarcaneBlockPlace().execute(e);
         } else {
-            if (is.isSimilar((new Homepad().getItem()))) {
+            if (is.getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
                 new HomepadPlace().execute(e);
             } else if (is.getType() == Material.TORCHFLOWER) {
                 new TorchflowerPlace().execute(e);

@@ -7,7 +7,6 @@ import com.aearost.aranarthcore.event.player.PlayerShopChestOpen;
 import com.aearost.aranarthcore.event.player.PlayerShopInteract;
 import com.aearost.aranarthcore.event.player.QuiverClick;
 import com.aearost.aranarthcore.event.player.ShulkerClick;
-import com.aearost.aranarthcore.items.Quiver;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -27,7 +26,7 @@ public class PlayerInteractEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getItem() != null) {
-            if (e.getItem().isSimilar(new Quiver().getItem())) {
+            if (e.getItem().getType().name().endsWith("_BUNDLE")) {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);

@@ -104,6 +104,7 @@ public class AranarthCore extends JavaPlugin {
 		new EntityDamageByEntityEventListener(this);
 		new EntityDamageEventListener(this);
 		new EntityTargetEventListener(this);
+		new EntityDeathEventListener(this);
 
 		// Multi-event listeners for single purpose
 		new InvisibleItemFrameListener(this);
