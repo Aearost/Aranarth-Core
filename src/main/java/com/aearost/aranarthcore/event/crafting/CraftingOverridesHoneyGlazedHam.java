@@ -5,6 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.*;
 
 /**
  * Handles the overrides when crafting involving Honey Glazed Ham.
@@ -12,24 +15,20 @@ import org.bukkit.inventory.ItemStack;
 public class CraftingOverridesHoneyGlazedHam {
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
-        boolean isHasLore = is.getItemMeta().hasLore();
-
-        // If a Honey Glazed Ham is used in place of a regular Cooked Porkchop
-        if (isHasLore) {
-            if (e.getRecipe().getResult().getType() == Material.COOKED_PORKCHOP) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use Honey Glazed Ham to craft this!"));
-                return;
+        ItemMeta meta = is.getItemMeta();
+        if (e.getRecipe().getResult().hasItemMeta()) {
+            ItemMeta resultMeta = e.getRecipe().getResult().getItemMeta();
+            if (is.getType() == Material.COOKED_PORKCHOP) {
+                if (meta.getPersistentDataContainer().has(HONEY_GLAZED_HAM)) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Honey Glazed Ham to craft this!"));
+                    e.setCancelled(true);
+                }
             }
         }
-        // If a Cooked Porkchop is used in place of a Honey Glazed Ham
+        // Result has no meta, therefore not requiring Honey Glazed Ham
         else {
-            if (e.getRecipe().getResult().getType() != Material.COOKED_PORKCHOP) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou must use a regular Cooked Porkchop to craft this!"));
-                return;
-            }
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Honey Glazed Ham to craft this!"));
+            e.setCancelled(true);
         }
     }
-
 }
