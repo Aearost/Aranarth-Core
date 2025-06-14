@@ -53,6 +53,7 @@ public class CraftingOverridesListener implements Listener {
 
 			if (hasKey(CHORUS_DIAMOND, e, ingredient) || hasKey(HOMEPAD, e, ingredient)) {
 				new CraftingOverridesChorusDiamond().onCraft(e, ingredient, player);
+				new CraftingOverridesHomepad().onCraft(e, ingredient, player);
 			}
 
 			if (hasKey(GOD_APPLE_FRAGMENT, e, ingredient) || result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
