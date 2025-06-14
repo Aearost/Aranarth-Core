@@ -25,3 +25,4 @@ Bug Fixes
 
 Miscellaneous
 - Restructured all events and listeners into more concise classes to prevent the same listener from being called in two classes
+- Made all items persist using NamespacedKey attributes

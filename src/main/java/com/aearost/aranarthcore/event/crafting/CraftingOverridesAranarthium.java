@@ -17,7 +17,7 @@ import static com.aearost.aranarthcore.items.CustomItemKeys.CLUSTER;
 /**
  * Handles the overrides when crafting involving an Aranarthium Ingot.
  */
-public class CraftingOverridesCluster {
+public class CraftingOverridesAranarthium {
 
     public void onCraft(CraftItemEvent e, ItemStack ingredient, HumanEntity player) {
         ItemStack result = e.getRecipe().getResult();
@@ -30,16 +30,16 @@ public class CraftingOverridesCluster {
         if (ingredient.hasItemMeta()) {
             ItemMeta ingredientMeta = ingredient.getItemMeta();
 
-            // If a cluster is used and result is an Aranarthium ingot
-            if (ingredientMeta.getPersistentDataContainer().has(CLUSTER, PersistentDataType.STRING)) {
-                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
+            // If a cluster is used and result is an Aranarthium ingot, this is good
+            if (ingredientMeta.getPersistentDataContainer().has(CLUSTER)) {
+                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
                     return;
                 }
             }
 
-            // If Aranarthium Ingot is used to craft something other than an enhanced ingot
-            if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
-                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
+            // If Aranarthium Ingot is used to craft an enhanced ingot, this is good
+            if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
                     return;
                 }
             }
@@ -87,7 +87,7 @@ public class CraftingOverridesCluster {
             itemName = ingredientItem.getName();
         }
 
-        if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT, PersistentDataType.STRING)) {
+        if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
             if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
             } else {
@@ -100,61 +100,5 @@ public class CraftingOverridesCluster {
                 player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));
             }
         }
-
-
-
-
-//
-//        // If a fragment or cluster is used instead of a regular material
-//        // Also if an Aranarthium Ingot is used instead of a normal Echo Shard
-//        else if (e.getRecipe().getResult().getType() != Material.ECHO_SHARD) {
-//            AranarthItem cluster = null;
-//            if (material == Material.ECHO_SHARD) {
-//                // Add logic for each piece of gear crafted using Aranarthium here
-//                // Only cancel if it is none of those pieces
-//                e.setCancelled(true);
-//                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use " + new AranarthiumIngot().getName() + " &cto craft this!"));
-//
-//                return;
-//            }
-//            else if (material == Material.PRISMARINE_CRYSTALS) {
-//                cluster = new DiamondCluster();
-//            } else if (material == Material.TURTLE_SCUTE) {
-//                cluster = new EmeraldCluster();
-//            } else if (material == Material.GOLD_NUGGET) {
-//                cluster = new GoldCluster();
-//            } else if (material == Material.IRON_NUGGET) {
-//                cluster = new IronCluster();
-//            } else if (material == Material.BLAZE_POWDER) {
-//                cluster = new CopperCluster();
-//            } else if (material == Material.FERMENTED_SPIDER_EYE) {
-//                cluster = new RedstoneCluster();
-//            } else if (material == Material.BLUE_DYE) {
-//                cluster = new LapisCluster();
-//            } else if (material == Material.PHANTOM_MEMBRANE) {
-//                cluster = new QuartzCluster();
-//            }
-//
-//            String itemName = "";
-//            if (cluster != null && !cluster.getItem().isSimilar(inputItem)) {
-//                player.sendMessage(inputItem.getItemMeta().getDisplayName());
-//                itemName = cluster.getName();
-//            } else {
-//                Bukkit.getLogger().info("Something went wrong with crafting this...");
-//                e.setCancelled(true);
-//                return;
-//            }
-//
-//            if (!itemName.isEmpty()) {
-//                e.setCancelled(true);
-//                if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
-//                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
-//                } else {
-//                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));
-//                }
-//                return;
-//            }
-//        }
     }
-
 }
