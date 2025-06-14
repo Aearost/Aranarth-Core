@@ -32,7 +32,6 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection")) {
                 new GuiQuiverClick().execute(e);
-                new QuiverSwitchSlots().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")) {
                 new GuiPotionPreventNonPotionAdd().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
@@ -47,5 +46,7 @@ public class InventoryClickEventListener implements Listener {
             }
 
         }
+        // Execute regardless of inventory type
+        new QuiverSwitchSlots().execute(e);
     }
 }

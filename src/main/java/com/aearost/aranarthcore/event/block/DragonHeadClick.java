@@ -12,7 +12,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
-import java.util.Objects;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.CHORUS_DIAMOND;
 
 /**
  * Handles the logic to fill a bottle with dragon's breath when clicking on a dragon head.
@@ -43,19 +44,14 @@ public class DragonHeadClick {
                             player.sendMessage(ChatUtils.chatMessage("&cThis dragon head has no fuel!"));
                         }
                     }
-                    // If clicking with a chorus diamond to add fuel
-                    else if (e.getItem().getType() == Material.DIAMOND) {
-                        if (e.getItem().hasItemMeta()) {
-                            ItemMeta meta = e.getItem().getItemMeta();
-                            if (Objects.nonNull(meta)) {
-                                if (meta.hasLore()) {
-                                    boolean isPoweredByRedstone = head.isBlockPowered() || head.isBlockIndirectlyPowered();
-                                    int fuelAmountAdded = AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
-                                    int newAmount = e.getItem().getAmount() - 1;
-                                    e.getItem().setAmount(newAmount);
-                                    player.sendMessage(ChatUtils.chatMessage("&7You have added " + fuelAmountAdded + " fuel to the head!"));
-                                }
-                            }
+                    else if (e.getItem().hasItemMeta()) {
+                        ItemMeta meta = e.getItem().getItemMeta();
+                        if (meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                            boolean isPoweredByRedstone = head.isBlockPowered() || head.isBlockIndirectlyPowered();
+                            int fuelAmountAdded = AranarthUtils.updateDragonHead(location, isPoweredByRedstone);
+                            int newAmount = e.getItem().getAmount() - 1;
+                            e.getItem().setAmount(newAmount);
+                            player.sendMessage(ChatUtils.chatMessage("&7You have added " + fuelAmountAdded + " fuel to the head!"));
                         }
                     }
                 }
