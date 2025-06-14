@@ -5,6 +5,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.*;
 
 /**
  * Handles the overrides when crafting involving God Apple Fragments.
@@ -12,24 +15,23 @@ import org.bukkit.inventory.ItemStack;
 public class CraftingOverridesGodAppleFragment {
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
-        boolean isHasLore = is.getItemMeta().hasLore();
-
-        // If a God Apple Fragment is used in place of a regular Gold Nugget
-        if (isHasLore) {
-            if (e.getRecipe().getResult().getType() != Material.ENCHANTED_GOLDEN_APPLE) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use God Apple Fragments to craft this!"));
-                return;
+        ItemMeta meta = is.getItemMeta();
+        ItemStack result = e.getRecipe().getResult();
+        if (is.getType() == Material.GOLD_NUGGET) {
+            if (result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
+                // A normal gold nugget is used as an ingredient instead of a god apple fragment
+                if (meta == null || !meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou must use a God Apple Fragment to craft this!"));
+                    e.setCancelled(true);
+                }
             }
-        }
-        // If a Gold Nugget is used in place of a God Apple Fragment
-        else {
-            if (e.getRecipe().getResult().getType() == Material.ENCHANTED_GOLDEN_APPLE) {
-                e.setCancelled(true);
-                player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Gold Nugget to craft this!"));
-                return;
+            // A god apple fragment is used as an ingredient incorrectly
+            else {
+                if (meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a God Apple Fragment to craft this!"));
+                    e.setCancelled(true);
+                }
             }
         }
     }
-
 }
