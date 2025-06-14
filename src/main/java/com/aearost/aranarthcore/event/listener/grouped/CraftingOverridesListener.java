@@ -59,6 +59,14 @@ public class CraftingOverridesListener implements Listener {
 			if (hasKey(GOD_APPLE_FRAGMENT, e, ingredient) || result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
 				new CraftingOverridesGodAppleFragment().onCraft(e, ingredient, player);
 			}
+
+			if (hasKey(HONEY_GLAZED_HAM, e, ingredient)) {
+				new CraftingOverridesHoneyGlazedHam().onCraft(e, ingredient, player);
+			}
+
+			if (hasKey(SUGARCANE_BLOCK, e, ingredient)) {
+				new CraftingOverridesSugarcaneBlock().onCraft(e, ingredient, player);
+			}
 		}
 	}
 
