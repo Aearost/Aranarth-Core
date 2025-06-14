@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.aearost.aranarthcore.items.CustomItemKeys.QUIVER;
+
 public class ArrowConsumeListener implements Listener {
 
 	public ArrowConsumeListener(AranarthCore plugin) {
@@ -66,9 +68,10 @@ public class ArrowConsumeListener implements Listener {
 			if (Objects.isNull(item)) {
 				continue;
 			}
-			if (item.getType() == Material.LIGHT_GRAY_BUNDLE) {
-				if (item.hasItemMeta()) {
+			if (item.hasItemMeta()) {
+				if (item.getItemMeta().getPersistentDataContainer().has(QUIVER)) {
 					hasQuiver = true;
+					break;
 				}
 			}
 		}

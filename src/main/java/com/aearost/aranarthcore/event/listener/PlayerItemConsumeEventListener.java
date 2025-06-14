@@ -2,8 +2,8 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.HoneyGlazedHamEat;
-import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
@@ -19,7 +19,7 @@ public class PlayerItemConsumeEventListener implements Listener {
 
     @EventHandler
     public void onItemConsume(PlayerItemConsumeEvent e) {
-        if (e.getItem().isSimilar(new HoneyGlazedHam().getItem())) {
+        if (e.getItem().getType() == Material.COOKED_PORKCHOP) {
             new HoneyGlazedHamEat().execute(e);
         }
     }
