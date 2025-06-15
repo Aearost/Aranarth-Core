@@ -80,7 +80,8 @@ public class AranarthiumArmourCraft {
 									player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + meta.getDisplayName()));
 								}
 								inventory.clear(0);
-								inventory.clear(1);
+								int newIngotAmount = inventory.getItem(1).getAmount() - 1;
+								inventory.getItem(1).setAmount(newIngotAmount);
 							}
 						}
 					}
