@@ -40,11 +40,12 @@ public class InventoryClickEventListener implements Listener {
             }
         } else {
             if (e.getClickedInventory() != null) {
-                if (e.getClickedInventory().getType() == InventoryType.LOOM) {
+                if (e.getView().getType() == InventoryType.ANVIL) {
+                    new AranarthiumArmourCraft().execute(e);
+                } else if (e.getClickedInventory().getType() == InventoryType.LOOM) {
                     new BannerExtendPatternLimit().execute(e);
                 }
             }
-
         }
         // Execute regardless of inventory type
         new QuiverSwitchSlots().execute(e);

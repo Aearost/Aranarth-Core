@@ -70,6 +70,13 @@ public class CraftingOverridesListener implements Listener {
 		}
 	}
 
+	/**
+	 * Determines if the provided NamespacedKey is applied to the input ingredient or result of the recipe.
+	 * @param key The NamespacedKey to search for.
+	 * @param e The crafting event which contains the result.
+	 * @param ingredient The ingredient to be searched for.
+	 * @return Confirmation whether the input ingredient of the result of the recipe contains the NamespacedKey.
+	 */
 	private boolean hasKey(NamespacedKey key, CraftItemEvent e, ItemStack ingredient) {
 		ItemMeta resultMeta;
 		ItemMeta ingredientMeta;
