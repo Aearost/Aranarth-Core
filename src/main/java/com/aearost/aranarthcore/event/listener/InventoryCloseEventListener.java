@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.player.GuiEnhancedAranarthiumClose;
 import com.aearost.aranarthcore.event.player.GuiPotionClose;
 import com.aearost.aranarthcore.event.player.GuiQuiverClose;
 import com.aearost.aranarthcore.event.player.GuiShulkerClose;
@@ -30,6 +31,8 @@ public class InventoryCloseEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
                 new GuiShulkerClose().execute(e);
             }
+        } else if (e.getView().getType() == InventoryType.ANVIL) {
+            new GuiEnhancedAranarthiumClose().execute(e);
         }
     }
 }
