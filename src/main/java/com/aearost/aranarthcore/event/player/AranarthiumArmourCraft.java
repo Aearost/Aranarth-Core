@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -29,7 +30,6 @@ public class AranarthiumArmourCraft {
 			Inventory inventory = e.getClickedInventory();
 			if (e.getClickedInventory().getType() == InventoryType.ANVIL) {
 				if (e.getSlot() == 0) {
-					Bukkit.getLogger().info("A");
 					if (inventory.getItem(0) == null) {
 						if (hasNetheriteArmour(e.getCursor())) {
 							if (hasEnhancedAranarthium(inventory.getItem(1))) {
@@ -72,6 +72,13 @@ public class AranarthiumArmourCraft {
 						if (inventory.getItem(2).hasItemMeta()) {
 							ItemMeta meta = inventory.getItem(2).getItemMeta();
 							if (meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
+								if (inventory.getItem(0).hasItemMeta()) {
+									ItemMeta slot1Meta = inventory.getItem(0).getItemMeta();
+									if (slot1Meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
+										return;
+									}
+								}
+
 								player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1F);
 								String type = meta.getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING);
 								if (type.equals("aquatic") || type.equals("ardent") || type.equals("elven")) {
@@ -87,9 +94,58 @@ public class AranarthiumArmourCraft {
 					}
 				}
 			} else {
+				if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+					ItemStack slot1 = null;
+					ItemStack slot2 = null;
 
-				// Handle shift+clicking inventory here
-
+					if (hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))) {
+						Bukkit.getLogger().info("A1");
+						slot1 = e.getClickedInventory().getItem(e.getSlot());
+						if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) == null) {
+							Bukkit.getLogger().info("A2");
+							e.getClickedInventory().setItem(e.getSlot(), null);
+							new GuiEnhancedAranarthium(player, slot1, null, null).openGui();
+							return;
+						} else if (e.getInventory().getItem(0) != null && e.getInventory().getItem(1) == null) {
+							Bukkit.getLogger().info("A3");
+							if (hasEnhancedAranarthium(e.getInventory().getItem(0))) {
+								Bukkit.getLogger().info("A4");
+								slot2 = e.getInventory().getItem(0);
+							}
+						} else if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) != null) {
+							Bukkit.getLogger().info("A5");
+							if (hasEnhancedAranarthium((e.getInventory().getItem(1)))) {
+								Bukkit.getLogger().info("A6");
+								slot2 = e.getInventory().getItem(1);
+							}
+						}
+						// Armor before ingot
+						new GuiEnhancedAranarthium(player, slot2, slot1, determineArmourResult(slot1, slot2)).openGui();
+					} else if (hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
+						slot1 = e.getClickedInventory().getItem(e.getSlot());
+						Bukkit.getLogger().info("B1");
+						if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) == null) {
+							Bukkit.getLogger().info("B2");
+							e.getClickedInventory().setItem(e.getSlot(), null);
+							new GuiEnhancedAranarthium(player, slot1, null, null).openGui();
+							return;
+						} else if (e.getInventory().getItem(0) != null && e.getInventory().getItem(1) == null) {
+							Bukkit.getLogger().info("B3");
+							if (hasNetheriteArmour(e.getInventory().getItem(0))) {
+								Bukkit.getLogger().info("B4");
+								slot2 = e.getInventory().getItem(0);
+							}
+						} else if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) != null) {
+							Bukkit.getLogger().info("B5");
+							if (hasNetheriteArmour((e.getInventory().getItem(1)))) {
+								slot2 = e.getInventory().getItem(1);
+								Bukkit.getLogger().info("B6");
+							}
+						}
+						// Armor before ingot
+						new GuiEnhancedAranarthium(player, slot2, slot1, determineArmourResult(slot2, slot1)).openGui();
+					}
+				}
 			}
 		}
 	}
