@@ -69,7 +69,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
-					if (random.nextInt((int) (320 * fortuneBonus * dwarvenReduction)) == 0) {
+					if (random.nextInt((int) (460 * fortuneBonus * dwarvenReduction)) == 0) {
 						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
