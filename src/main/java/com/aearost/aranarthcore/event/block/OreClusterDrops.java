@@ -29,55 +29,91 @@ public class OreClusterDrops {
 				if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
 					int enchantmentLevel = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
 					if (enchantmentLevel == 1) {
-						fortuneBonus = 0.9;
+						fortuneBonus = 0.98;
 					} else if (enchantmentLevel == 2) {
-						fortuneBonus = 0.7;
+						fortuneBonus = 0.95;
 					} else if (enchantmentLevel == 3) {
-						fortuneBonus = 0.5;
+						fortuneBonus = 0.9;
 					}
 				}
 
 				double dwarvenReduction = 0;
 				if (AranarthUtils.isArmorType(e.getPlayer(), "dwarven")) {
-					dwarvenReduction = 0.85;
+					dwarvenReduction = 0.9;
 				}
 
 				if (material == Material.DIAMOND_ORE || material == Material.DEEPSLATE_DIAMOND_ORE) {
-					if (random.nextInt((int) (55 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 55 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new DiamondCluster().getItem());
 					}
 				} else if (material == Material.EMERALD_ORE || material == Material.DEEPSLATE_EMERALD_ORE) {
-					if (random.nextInt((int) (15 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 15 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new EmeraldCluster().getItem());
 					}
 				} else if (material.name().endsWith("GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
-						if (random.nextInt((int) (75 * fortuneBonus * dwarvenReduction)) == 0) {
+						double calculation = 75 * fortuneBonus * dwarvenReduction;
+						if (calculation < 0) {
+							return;
+						}
+						else if (random.nextInt((int) (calculation)) == 0) {
 							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					} else {
-						if (random.nextInt((int) (35 * fortuneBonus * dwarvenReduction)) == 0) {
+						double calculation = 35 * fortuneBonus * dwarvenReduction;
+						if (calculation < 0) {
+							return;
+						}
+						else if (random.nextInt((int) (calculation)) == 0) {
 							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					}
 				} else if (material == Material.IRON_ORE || material == Material.DEEPSLATE_IRON_ORE) {
-					if (random.nextInt((int) (30 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 30 * fortuneBonus * dwarvenReduction;
+					if (calculation <= 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
-					if (random.nextInt((int) (105 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 105 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
-					if (random.nextInt((int) (460 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 460 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
-					if (random.nextInt((int) (150 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 150 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new LapisCluster().getItem());
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
-					if (random.nextInt((int) (240 * fortuneBonus * dwarvenReduction)) == 0) {
+					double calculation = 240 * fortuneBonus * dwarvenReduction;
+					if (calculation < 0) {
+						return;
+					}
+					else if (random.nextInt((int) (calculation)) == 0) {
 						world.dropItemNaturally(loc, new QuartzCluster().getItem());
 					}
 				}
