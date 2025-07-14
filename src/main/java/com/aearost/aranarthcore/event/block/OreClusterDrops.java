@@ -44,7 +44,7 @@ public class OreClusterDrops {
 
 				if (material == Material.DIAMOND_ORE || material == Material.DEEPSLATE_DIAMOND_ORE) {
 					double calculation = 55 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
@@ -52,7 +52,7 @@ public class OreClusterDrops {
 					}
 				} else if (material == Material.EMERALD_ORE || material == Material.DEEPSLATE_EMERALD_ORE) {
 					double calculation = 15 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
@@ -61,7 +61,7 @@ public class OreClusterDrops {
 				} else if (material.name().endsWith("GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
 						double calculation = 75 * fortuneBonus * dwarvenReduction;
-						if (calculation < 0) {
+						if (calculation <= 0) {
 							return;
 						}
 						else if (random.nextInt((int) (calculation)) == 0) {
@@ -69,7 +69,7 @@ public class OreClusterDrops {
 						}
 					} else {
 						double calculation = 35 * fortuneBonus * dwarvenReduction;
-						if (calculation < 0) {
+						if (calculation <= 0) {
 							return;
 						}
 						else if (random.nextInt((int) (calculation)) == 0) {
@@ -86,7 +86,7 @@ public class OreClusterDrops {
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
 					double calculation = 105 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
@@ -94,7 +94,7 @@ public class OreClusterDrops {
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
 					double calculation = 460 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
@@ -102,7 +102,7 @@ public class OreClusterDrops {
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
 					double calculation = 150 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
@@ -110,7 +110,7 @@ public class OreClusterDrops {
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
 					double calculation = 240 * fortuneBonus * dwarvenReduction;
-					if (calculation < 0) {
+					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
