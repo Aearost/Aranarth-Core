@@ -34,9 +34,13 @@ public class CommandSurvival {
 					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 					return false;
 				}
-				for (PotionEffect effect : player.getActivePotionEffects()) {
-					player.removePotionEffect(effect.getType());
+				// Only remove potion effects if changing from a non-survival world
+				if (!player.getLocation().getWorld().getName().startsWith("world")) {
+					for (PotionEffect effect : player.getActivePotionEffects()) {
+						player.removePotionEffect(effect.getType());
+					}
 				}
+
 				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.setGameMode(GameMode.SURVIVAL);
