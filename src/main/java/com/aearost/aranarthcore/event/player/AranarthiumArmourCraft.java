@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -29,122 +28,66 @@ public class AranarthiumArmourCraft {
 		if (e.getWhoClicked() instanceof Player player) {
 			Inventory inventory = e.getClickedInventory();
 			if (e.getClickedInventory().getType() == InventoryType.ANVIL) {
-				if (e.getSlot() == 0) {
-					if (inventory.getItem(0) == null) {
-						if (hasNetheriteArmour(e.getCursor())) {
-							if (hasEnhancedAranarthium(inventory.getItem(1))) {
-								ItemStack armor = e.getCursor().clone();
-								ItemStack ingot = inventory.getItem(1).clone();
-								inventory.clear();
-								e.getCursor().setAmount(0);
-								ItemStack result = determineArmourResult(armor, ingot);
-								new GuiEnhancedAranarthium(player, armor, ingot, result).openGui();
-							}
-						}
-					} else {
-						if (hasNetheriteArmour(inventory.getItem(0))) {
-							if (hasEnhancedAranarthium(inventory.getItem(1))) {
-								inventory.clear(2);
-							}
-						}
-					}
-				} else if (e.getSlot() == 1) {
-					if (inventory.getItem(1) == null) {
-						if (hasEnhancedAranarthium(e.getCursor())) {
-							if (hasNetheriteArmour(inventory.getItem(0))) {
-								ItemStack armor = inventory.getItem(0).clone();
-								ItemStack ingot = e.getCursor().clone();
-								inventory.clear();
-								e.getCursor().setAmount(0);
-								ItemStack result = determineArmourResult(armor, ingot);
-								new GuiEnhancedAranarthium(player, armor, ingot, result).openGui();
-							}
-						}
-					} else {
-						if (hasEnhancedAranarthium(inventory.getItem(1))) {
-							if (hasNetheriteArmour(inventory.getItem(0))) {
-								inventory.clear(2);
-							}
-						}
-					}
-				} else if (e.getSlot() == 2) {
-					if (inventory.getItem(2) != null) {
-						if (inventory.getItem(2).hasItemMeta()) {
-							ItemMeta meta = inventory.getItem(2).getItemMeta();
-							if (meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
-								if (inventory.getItem(0).hasItemMeta()) {
-									ItemMeta slot1Meta = inventory.getItem(0).getItemMeta();
-									if (slot1Meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
-										return;
-									}
-								}
+				int slot = e.getSlot();
 
-								player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1F);
-								String type = meta.getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING);
-								if (type.equals("aquatic") || type.equals("ardent") || type.equals("elven")) {
-									player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + meta.getDisplayName()));
-								} else {
-									player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + meta.getDisplayName()));
-								}
-								inventory.clear(0);
-								int newIngotAmount = inventory.getItem(1).getAmount() - 1;
-								inventory.getItem(1).setAmount(newIngotAmount);
+				// Placing on empty slot
+				if (e.getAction() == InventoryAction.PLACE_ALL || e.getAction() == InventoryAction.PLACE_ONE || e.getAction() == InventoryAction.PLACE_ALL) {
+					ItemStack armor = null;
+					ItemStack ingot = null;
+					boolean isArmorFirst = false;
+
+					if (slot == 0) {
+						if (hasNetheriteArmour(e.getCursor()) && hasEnhancedAranarthium(inventory.getItem(1))) {
+							armor = e.getCursor().clone();
+							ingot = inventory.getItem(1).clone();
+							isArmorFirst = true;
+						} else if (hasEnhancedAranarthium(e.getCursor()) && hasNetheriteArmour(inventory.getItem(1))) {
+							ingot = e.getCursor().clone();
+							armor = inventory.getItem(1).clone();
+						}
+					} else if (slot == 1) {
+						if (hasNetheriteArmour(e.getCursor()) && hasEnhancedAranarthium(inventory.getItem(0))) {
+							armor = e.getCursor().clone();
+							ingot = inventory.getItem(0).clone();
+						} else if (hasEnhancedAranarthium(e.getCursor()) && hasNetheriteArmour(inventory.getItem(0))) {
+							ingot = e.getCursor().clone();
+							armor = inventory.getItem(0).clone();
+							isArmorFirst = true;
+						}
+					}
+					// Yield the enhanced armor
+					if (armor != null & ingot != null) {
+						inventory.clear();
+						e.getCursor().setAmount(0);
+						new GuiEnhancedAranarthium(player, armor, ingot, determineArmourResult(armor, ingot), isArmorFirst).openGui();
+					}
+				}
+				// Picking up
+				else if (e.getAction() == InventoryAction.PICKUP_ALL || e.getAction() == InventoryAction.PICKUP_HALF
+						|| e.getAction() == InventoryAction.PICKUP_ONE || e.getAction() == InventoryAction.PICKUP_SOME) {
+					if (slot == 0 || slot == 1) {
+						inventory.setItem(2, null);
+					} else if (slot == 2) {
+						boolean armorInFirst = hasNetheriteArmour(inventory.getItem(0)) && hasEnhancedAranarthium(inventory.getItem(1)) && inventory.getItem(2) != null;
+						boolean ingotInFirst = hasEnhancedAranarthium(inventory.getItem(0)) && hasNetheriteArmour(inventory.getItem(1)) && inventory.getItem(2) != null;
+						if (armorInFirst || ingotInFirst) {
+							inventory.getItem(0).setAmount(inventory.getItem(0).getAmount() - 1);
+							inventory.getItem(1).setAmount(inventory.getItem(1).getAmount() - 1);
+
+							ItemMeta meta = inventory.getItem(2).getItemMeta();
+							player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1F);
+							String type = meta.getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING);
+							if (type.equals("aquatic") || type.equals("ardent") || type.equals("elven")) {
+								player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + meta.getDisplayName()));
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + meta.getDisplayName()));
 							}
 						}
 					}
 				}
-			} else {
-				if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-					ItemStack slot1 = null;
-					ItemStack slot2 = null;
-
-					if (hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))) {
-						Bukkit.getLogger().info("A1");
-						slot1 = e.getClickedInventory().getItem(e.getSlot());
-						if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) == null) {
-							Bukkit.getLogger().info("A2");
-							e.getClickedInventory().setItem(e.getSlot(), null);
-							new GuiEnhancedAranarthium(player, slot1, null, null).openGui();
-							return;
-						} else if (e.getInventory().getItem(0) != null && e.getInventory().getItem(1) == null) {
-							Bukkit.getLogger().info("A3");
-							if (hasEnhancedAranarthium(e.getInventory().getItem(0))) {
-								Bukkit.getLogger().info("A4");
-								slot2 = e.getInventory().getItem(0);
-							}
-						} else if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) != null) {
-							Bukkit.getLogger().info("A5");
-							if (hasEnhancedAranarthium((e.getInventory().getItem(1)))) {
-								Bukkit.getLogger().info("A6");
-								slot2 = e.getInventory().getItem(1);
-							}
-						}
-						// Armor before ingot
-						new GuiEnhancedAranarthium(player, slot2, slot1, determineArmourResult(slot1, slot2)).openGui();
-					} else if (hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
-						slot1 = e.getClickedInventory().getItem(e.getSlot());
-						Bukkit.getLogger().info("B1");
-						if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) == null) {
-							Bukkit.getLogger().info("B2");
-							e.getClickedInventory().setItem(e.getSlot(), null);
-							new GuiEnhancedAranarthium(player, slot1, null, null).openGui();
-							return;
-						} else if (e.getInventory().getItem(0) != null && e.getInventory().getItem(1) == null) {
-							Bukkit.getLogger().info("B3");
-							if (hasNetheriteArmour(e.getInventory().getItem(0))) {
-								Bukkit.getLogger().info("B4");
-								slot2 = e.getInventory().getItem(0);
-							}
-						} else if (e.getInventory().getItem(0) == null && e.getInventory().getItem(1) != null) {
-							Bukkit.getLogger().info("B5");
-							if (hasNetheriteArmour((e.getInventory().getItem(1)))) {
-								slot2 = e.getInventory().getItem(1);
-								Bukkit.getLogger().info("B6");
-							}
-						}
-						// Armor before ingot
-						new GuiEnhancedAranarthium(player, slot2, slot1, determineArmourResult(slot2, slot1)).openGui();
-					}
+				// Switching  two items
+				else if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
+					// TO-DO
 				}
 			}
 		}

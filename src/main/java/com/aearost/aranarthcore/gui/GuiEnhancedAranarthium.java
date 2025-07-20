@@ -10,9 +10,9 @@ public class GuiEnhancedAranarthium {
 	private final Player player;
 	private final Inventory initializedGui;
 
-	public GuiEnhancedAranarthium(Player player, ItemStack armor, ItemStack ingot, ItemStack result) {
+	public GuiEnhancedAranarthium(Player player, ItemStack armor, ItemStack ingot, ItemStack result, boolean isArmorFirst) {
 		this.player = player;
-		this.initializedGui = initializeGui(player, armor, ingot, result);
+		this.initializedGui = initializeGui(player, armor, ingot, result, isArmorFirst);
 	}
 
 	public void openGui() {
@@ -20,11 +20,16 @@ public class GuiEnhancedAranarthium {
 		player.openInventory(initializedGui);
 	}
 	
-	private Inventory initializeGui(Player player, ItemStack armor, ItemStack ingot, ItemStack result) {
+	private Inventory initializeGui(Player player, ItemStack armor, ItemStack ingot, ItemStack result, boolean isArmorFirst) {
 		Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.ANVIL);
 		gui.clear();
-		gui.setItem(0, armor);
-		gui.setItem(1, ingot);
+		if (isArmorFirst) {
+			gui.setItem(0, armor);
+			gui.setItem(1, ingot);
+		} else {
+			gui.setItem(0, ingot);
+			gui.setItem(1, armor);
+		}
 		gui.setItem(2, result);
 		return gui;
 	}
