@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import org.bukkit.Material;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -28,29 +28,30 @@ public class QuiverSwitchSlots {
 		}
 
 		Inventory inventory = e.getClickedInventory();
-		if (inventory.getHolder() instanceof Player player) {
-			int clickedSlot = e.getSlot();
-			ItemStack clickedClone = clickedItem.clone();
-			ItemStack cursorClone = cursorItem.clone();
 
-			// Trying to pick up items holding the quiver
-			if (cursorItem.getType().name().endsWith("_BUNDLE")) {
-				if (cursorItem.hasItemMeta()) {
-					ItemMeta cursorMeta = cursorItem.getItemMeta();
-					if (cursorMeta.getPersistentDataContainer().has(QUIVER)) {
-						e.setCancelled(true);
-						inventory.setItem(clickedSlot, cursorClone);
-						player.setItemOnCursor(clickedClone);
-					}
+
+		int clickedSlot = e.getSlot();
+		ItemStack clickedClone = clickedItem.clone();
+		ItemStack cursorClone = cursorItem.clone();
+		HumanEntity player = e.getWhoClicked();
+
+		// Trying to pick up items holding the quiver
+		if (cursorItem.getType().name().endsWith("_BUNDLE")) {
+			if (cursorItem.hasItemMeta()) {
+				ItemMeta cursorMeta = cursorItem.getItemMeta();
+				if (cursorMeta.getPersistentDataContainer().has(QUIVER)) {
+					e.setCancelled(true);
+					inventory.setItem(clickedSlot, cursorClone);
+					player.setItemOnCursor(clickedClone);
 				}
-			} else if (clickedItem.getType().name().endsWith("_BUNDLE") && cursorItem.getType() != Material.AIR) {
-				if (clickedItem.hasItemMeta()) {
-					ItemMeta clickedMeta = clickedItem.getItemMeta();
-					if (clickedMeta.getPersistentDataContainer().has(QUIVER)) {
-						e.setCancelled(true);
-						inventory.setItem(clickedSlot, cursorClone);
-						player.setItemOnCursor(clickedClone);
-					}
+			}
+		} else if (clickedItem.getType().name().endsWith("_BUNDLE") && cursorItem.getType() != Material.AIR) {
+			if (clickedItem.hasItemMeta()) {
+				ItemMeta clickedMeta = clickedItem.getItemMeta();
+				if (clickedMeta.getPersistentDataContainer().has(QUIVER)) {
+					e.setCancelled(true);
+					inventory.setItem(clickedSlot, cursorClone);
+					player.setItemOnCursor(clickedClone);
 				}
 			}
 		}
