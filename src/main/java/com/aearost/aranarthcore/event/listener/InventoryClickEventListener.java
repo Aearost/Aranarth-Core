@@ -47,6 +47,7 @@ public class InventoryClickEventListener implements Listener {
                 }
             }
         }
+
         // Execute regardless of inventory type
         new QuiverSwitchSlots().execute(e);
     }
