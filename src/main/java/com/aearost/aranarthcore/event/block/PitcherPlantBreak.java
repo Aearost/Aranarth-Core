@@ -42,10 +42,10 @@ public class PitcherPlantBreak {
 		}
 		// Breaking the block under the plant
 		 else if (locationAbove.getBlock().getType() == Material.PITCHER_PLANT) {
-			Location locationAbovePitcherPlant = new Location(location.getWorld(), location.getX(), location.getY() + 3, location.getZ());
-			if (locationAbovePitcherPlant.getBlock().getType() == Material.LIGHT) {
-				locationAbovePitcherPlant.getBlock().setType(Material.AIR);
-			}
+			 Location locationAbovePitcherPlant = new Location(location.getWorld(), location.getX(), location.getY() + 3, location.getZ());
+			 if (locationAbovePitcherPlant.getBlock().getType() == Material.LIGHT) {
+				 locationAbovePitcherPlant.getBlock().setType(Material.AIR);
+			 }
 		}
 	}
 }
