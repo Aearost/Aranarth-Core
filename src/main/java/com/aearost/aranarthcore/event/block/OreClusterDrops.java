@@ -51,7 +51,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new DiamondCluster().getItem());
 					}
 				} else if (material == Material.EMERALD_ORE || material == Material.DEEPSLATE_EMERALD_ORE) {
-					double calculation = 15 * fortuneBonus * dwarvenReduction;
+					double calculation = 7 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -60,7 +60,7 @@ public class OreClusterDrops {
 					}
 				} else if (material.name().endsWith("GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
-						double calculation = 75 * fortuneBonus * dwarvenReduction;
+						double calculation = 250 * fortuneBonus * dwarvenReduction;
 						if (calculation <= 0) {
 							return;
 						}
@@ -77,7 +77,7 @@ public class OreClusterDrops {
 						}
 					}
 				} else if (material == Material.IRON_ORE || material == Material.DEEPSLATE_IRON_ORE) {
-					double calculation = 30 * fortuneBonus * dwarvenReduction;
+					double calculation = 50 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -85,7 +85,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
-					double calculation = 105 * fortuneBonus * dwarvenReduction;
+					double calculation = 460 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -93,7 +93,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
-					double calculation = 460 * fortuneBonus * dwarvenReduction;
+					double calculation = 100 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -101,7 +101,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
-					double calculation = 150 * fortuneBonus * dwarvenReduction;
+					double calculation = 55 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
