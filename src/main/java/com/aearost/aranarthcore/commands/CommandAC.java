@@ -52,6 +52,9 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("give")) {
 			CommandGive.onCommand(sender, args);
 			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("dateset")) {
+			CommandDate.onCommand(sender, args);
+			commandResult = true;
 		} else {
 			commandResult = isValidCommand(sender, args);
 		}
@@ -86,6 +89,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRandomizer.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("balance")) {
 			commandResult = CommandBalance.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("date")) {
+			commandResult = CommandDate.onCommand(sender, args);
 		}
 		return commandResult;
 	}

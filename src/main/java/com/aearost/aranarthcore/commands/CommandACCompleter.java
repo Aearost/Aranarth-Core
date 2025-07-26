@@ -121,6 +121,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "randomizer".startsWith(args[0])) {
 			displayedOptions.add("randomizer");
+		} else if (!args[0].isEmpty() && "date".startsWith(args[0])) {
+			displayedOptions.add("date");
 		}
 		return displayedOptions;
 	}
@@ -157,6 +159,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("shulker");
 		displayedOptions.add("randomizer");
 		displayedOptions.add("balance");
+		displayedOptions.add("date");
 		return displayedOptions;
 	}
 
