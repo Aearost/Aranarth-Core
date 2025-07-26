@@ -4,10 +4,8 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.PlayerShop;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -712,6 +710,68 @@ public class AranarthUtils {
 		return type == Material.WHEAT || type == Material.CARROTS
 				|| type == Material.POTATOES || type == Material.BEETROOTS
 				|| type == Material.NETHER_WART;
+	}
+
+	public static void applyWaterfallEffect() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Location playerLoc = player.getLocation();
+			int radius = 40;
+
+			int px = playerLoc.getBlockX();
+			int py = playerLoc.getBlockY();
+			int pz = playerLoc.getBlockZ();
+
+			World world = player.getWorld();
+
+			for (int x = -radius; x <= radius; x++) {
+				for (int z = -radius; z <= radius; z++) {
+					for (int y = py + 10; y >= py - 10; y--) {
+						Block start = world.getBlockAt(px + x, y, pz + z);
+
+						// Only check flowing water blocks (NOT source blocks)
+						if (start.getType() != Material.WATER) continue;
+
+						if (start.getBlockData() instanceof org.bukkit.block.data.Levelled startLevel) {
+							if (startLevel.getLevel() == 0) continue; // Skip source blocks
+						} else {
+							continue;
+						}
+
+						// Check how far this water can fall
+						int fallHeight = 0;
+						Block landing = null;
+
+						for (int dy = 1; dy <= 10; dy++) {
+							Block below = start.getRelative(0, -dy, 0);
+
+							if (below.getType() == Material.WATER) {
+								if (below.getBlockData() instanceof org.bukkit.block.data.Levelled landingLevel) {
+									if (landingLevel.getLevel() == 0) {
+										// Found a source block as landing
+										fallHeight = dy;
+										landing = below;
+										break;
+									}
+								}
+							} else if (!below.getType().isAir()) {
+								// Hit something solid or non-water — stop
+								break;
+							}
+						}
+
+						// Trigger particle effect if flow into source block from at least 2 blocks up
+						if (fallHeight >= 2 && landing != null) {
+							Location particleLoc = landing.getLocation().add(0.5, 1.2, 0.5);
+
+							if (player.getLocation().distanceSquared(particleLoc) <= radius * radius) {
+								Particle.DustOptions whiteDust = new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0f);
+								player.spawnParticle(Particle.DUST, particleLoc, 5, 0.6, 0.3, 0.6, whiteDust);
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 }

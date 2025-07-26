@@ -44,6 +44,10 @@ public class AranarthCore extends JavaPlugin {
 		AranarthUtils.setIsStorming(false);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
+		runRepeatingTasks();
+	}
+
+	private void runRepeatingTasks() {
 		// Update the persistence files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -53,7 +57,7 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Homes and aranarth players have been saved");
 			}
 		}, 36000, 36000);
-		
+
 		// Check every 5 seconds to update armour trim effects, and to see if it is a new day
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -65,6 +69,14 @@ public class AranarthCore extends JavaPlugin {
 				dateUtils.calculateServerDate();
 			}
 		}, 0, 100);
+
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				AranarthUtils.applyWaterfallEffect();
+			}
+		}, 0, 1);
+
 	}
 
 	public static AranarthCore getInstance() {
