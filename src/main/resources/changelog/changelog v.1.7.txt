@@ -6,7 +6,9 @@ Features
 
 Bug Fixes
 - Prevented the 111th of each month from showing as 111st in date message
+- Prevented wandering trader death throwing error when slain by i.e fall damage or non-mob source
 
 Miscellaneous
 - Restructured date message logic to be a callable method
 - Minor adjustments to the date message to remove extra lines and AranarthCore prefix to all messages
+- Minor changes to wandering trader slain message

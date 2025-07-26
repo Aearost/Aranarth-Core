@@ -14,7 +14,11 @@ public class WanderingTraderDeath {
 		if (e.getDamageSource().getCausingEntity() instanceof Player player) {
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader was slain by " + AranarthUtils.getNickname(player)));
 		} else {
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader was slain by &e" + e.getDamageSource().getCausingEntity().getName()));
+			if (e.getDamageSource().getCausingEntity() != null) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has been slain by &e" + e.getDamageSource().getCausingEntity().getName()));
+			} else {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has died"));
+			}
 		}
 	}
 }
