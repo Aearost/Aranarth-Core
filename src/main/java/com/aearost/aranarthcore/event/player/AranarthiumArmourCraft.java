@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -86,16 +85,17 @@ public class AranarthiumArmourCraft {
 						}
 					}
 				}
-				// Switching  two items
-				else if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
-					Bukkit.getLogger().info("Slot: " + slot);
-					if (slot == 0) {
-						if (inventory.getItem(slot) != null) {
-
-						}
-					}
-				}
+				// Switching items from the anvil inventory to the player inventory
+//				else if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
+//
+//				}
 			}
+//			else {
+				// Switching items from the player inventory to the anvil inventory
+//				if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
+//
+//				}
+//			}
 		}
 	}
 
