@@ -21,7 +21,7 @@ public class GuiEnhancedAranarthium {
 	}
 	
 	private Inventory initializeGui(Player player, ItemStack armor, ItemStack ingot, ItemStack result, boolean isArmorFirst) {
-		Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.ANVIL);
+		Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.ANVIL, "Aranarthium Anvil");
 		gui.clear();
 		if (isArmorFirst) {
 			gui.setItem(0, armor);
