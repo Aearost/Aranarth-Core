@@ -4,14 +4,9 @@ import com.aearost.aranarthcore.objects.ChestSortOrder;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-import org.bukkit.block.DoubleChest;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -26,23 +21,24 @@ public class ChestSort {
         if (e.getHand() == EquipmentSlot.HAND) {
             if (isContainer(e.getClickedBlock())) {
                 if (e.getPlayer().getGameMode() == GameMode.SURVIVAL && e.getPlayer().isSneaking()) {
-                    BlockState state = e.getClickedBlock().getState();
-                    Container container = (Container) state;
-
-                    Inventory inventory = container.getInventory();
-                    if (inventory.getHolder() instanceof DoubleChest doubleChest) {
-                        inventory = doubleChest.getInventory(); // Get the full 54 slot inventory
-                    }
-
-                    List<ItemStack> itemsStacked = stackItemsInContainer(inventory.getContents());
-                    ItemStack[] stackedArray = new ItemStack[inventory.getContents().length];
-                    stackedArray = itemsStacked.toArray(stackedArray);
-                    ItemStack[] sortedItems = sortItems(stackedArray);
-                    inventory.clear();
-                    inventory.setContents(sortedItems);
-
-                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
-                    e.getPlayer().playSound(e.getPlayer(), Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
+                        e.getPlayer().sendMessage(ChatUtils.chatMessage("&cChest sort functionality is currently disabled"));
+//                    BlockState state = e.getClickedBlock().getState();
+//                    Container container = (Container) state;
+//
+//                    Inventory inventory = container.getInventory();
+//                    if (inventory.getHolder() instanceof DoubleChest doubleChest) {
+//                        inventory = doubleChest.getInventory(); // Get the full 54 slot inventory
+//                    }
+//
+//                    List<ItemStack> itemsStacked = stackItemsInContainer(inventory.getContents());
+//                    ItemStack[] stackedArray = new ItemStack[inventory.getContents().length];
+//                    stackedArray = itemsStacked.toArray(stackedArray);
+//                    ItemStack[] sortedItems = sortItems(stackedArray);
+//                    inventory.clear();
+//                    inventory.setContents(sortedItems);
+//
+//                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
+//                    e.getPlayer().playSound(e.getPlayer(), Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
                 }
             }
         }
