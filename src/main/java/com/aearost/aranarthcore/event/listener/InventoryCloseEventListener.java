@@ -32,7 +32,9 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiShulkerClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
-            new GuiEnhancedAranarthiumClose().execute(e);
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
+                new GuiEnhancedAranarthiumClose().execute(e);
+            }
         }
     }
 }
