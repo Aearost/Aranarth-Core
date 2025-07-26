@@ -27,3 +27,4 @@ Miscellaneous
 - Restructured all events and listeners into more concise classes to prevent the same listener from being called in two classes
 - Made all custom items persist using NamespacedKey attributes
 - Made custom items be identified with the NamespacedKeys instead of their lore
+- Disabled Chest Sort

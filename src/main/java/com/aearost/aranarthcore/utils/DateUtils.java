@@ -156,7 +156,37 @@ public class DateUtils {
 				return;
 			}
 
-			displayServerDate(dayNum, weekdayName, monthName, yearNum, isNewMonth);
+			String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
+			Bukkit.broadcastMessage(messages[0]);
+			Bukkit.broadcastMessage(messages[1]);
+			Bukkit.broadcastMessage(messages[2]);
+
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				if (isNewMonth) {
+					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+				} else {
+					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
+					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
+
+					// 0.2s later
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.667f), 4L);
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.26f), 4L);
+
+					// 0.4s later
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.75f), 8L);
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f), 8L);
+
+					// 0.6s later
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f), 12L);
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
+				}
+			}
 		}
 		determineMonthEffects();
 	}
@@ -166,7 +196,7 @@ public class DateUtils {
 	 * @param month The numeric month value.
 	 * @return The actual name of the month.
 	 */
-	private String provideMonthName(Month month) {
+	public static String provideMonthName(Month month) {
 		if (month == Month.IGNIVOR) {
 			return "Ignivór";
 		}
@@ -208,7 +238,7 @@ public class DateUtils {
 	 * @param weekdayNum The numeric weekday value.
 	 * @return The actual name of the weekday.
 	 */
-	private String provideWeekdayName(int weekdayNum) {
+	public static String provideWeekdayName(int weekdayNum) {
 		if (weekdayNum == 0) {
 			return "Hydris";
 		} else if (weekdayNum == 1) {
@@ -312,12 +342,11 @@ public class DateUtils {
      * @param weekdayName The current server weekday name.
 	 * @param monthName The current server month name.
 	 * @param yearNum The current server year.
-	 * @param isNewMonth The confirmation whether this is a new month or not.
 	 */
-	private void displayServerDate(int dayNum, String weekdayName, String monthName, int yearNum, boolean isNewMonth) {
+	public static String[] determineServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
 		String dayNumAsString = dayNum + "";
 		if (dayNumAsString.length() > 1) {
-			if (dayNumAsString.equals("11")) {
+			if (dayNumAsString.endsWith("11")) {
 				dayNumAsString += "th";
 			} else if (dayNumAsString.endsWith("12")) {
 				dayNumAsString += "th";
@@ -346,38 +375,11 @@ public class DateUtils {
 			}
 		}
 
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&e&l" + weekdayName + ", &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum));
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("\n"));
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&6&l------------------------------"));
-
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (isNewMonth) {
-				player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
-			} else {
-				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
-				player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
-
-				// 0.2s later
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.667f), 4L);
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.26f), 4L);
-
-				// 0.4s later
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.75f), 8L);
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f), 8L);
-
-				// 0.6s later
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f), 12L);
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-						player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
-			}
-		}
+		String[] messages = new String[3];
+		messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
+		messages[1] = ChatUtils.translateToColor("&e&l  " + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
+		messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
+		return messages;
 	}
 
 	/**
