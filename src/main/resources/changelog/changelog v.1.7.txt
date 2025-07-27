@@ -4,6 +4,7 @@ Features
 [+] Added /ac date to display the current server date
 [+] Added /ac dateset to change the current server date in-game
 [+] Added particle effect around the bottom of waterfalls
+[+] Can re-add bark to stripped wood and create 6-sided wood from logs using bone meal
 
 Bug Fixes
 - Prevented the 111th of each month from showing as 111st in date message
