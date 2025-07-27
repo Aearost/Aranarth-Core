@@ -36,6 +36,7 @@ public class PlayerInteractEventListener implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
+            new BoneMealWood().execute(e);
             new SignDye().execute(e);
             new DragonHeadClick().execute(e);
             new MangroveRootShear().execute(e);
