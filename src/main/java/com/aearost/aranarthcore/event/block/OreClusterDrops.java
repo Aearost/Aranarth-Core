@@ -68,7 +68,7 @@ public class OreClusterDrops {
 							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					} else {
-						double calculation = 35 * fortuneBonus * dwarvenReduction;
+						double calculation = 40 * fortuneBonus * dwarvenReduction;
 						if (calculation <= 0) {
 							return;
 						}
@@ -85,7 +85,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
-					double calculation = 460 * fortuneBonus * dwarvenReduction;
+					double calculation = 225 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -93,7 +93,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
-					double calculation = 100 * fortuneBonus * dwarvenReduction;
+					double calculation = 75 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -101,7 +101,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
-					double calculation = 55 * fortuneBonus * dwarvenReduction;
+					double calculation = 40 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
