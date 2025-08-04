@@ -85,7 +85,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
-					double calculation = 225 * fortuneBonus * dwarvenReduction;
+					double calculation = 180 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -109,7 +109,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new LapisCluster().getItem());
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
-					double calculation = 240 * fortuneBonus * dwarvenReduction;
+					double calculation = 160 * fortuneBonus * dwarvenReduction;
 					if (calculation <= 0) {
 						return;
 					}
