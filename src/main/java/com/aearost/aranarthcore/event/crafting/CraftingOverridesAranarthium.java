@@ -27,25 +27,39 @@ public class CraftingOverridesAranarthium {
             return;
         }
 
+        // Ignores override when crafting aranarthium ingots or enhanced Aranarthium
         if (ingredient.hasItemMeta()) {
             ItemMeta ingredientMeta = ingredient.getItemMeta();
 
             // If a cluster is used and result is an Aranarthium ingot, this is good
+            // Do not use clusters in enhanced Aranarthium ingot recipes
             if (ingredientMeta.getPersistentDataContainer().has(CLUSTER)) {
                 if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
-                    return;
+                    String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+                    if (ingotType.equals("aranarthium")) {
+                        return;
+                    }
                 }
             }
 
             // If Aranarthium Ingot is used to craft an enhanced ingot, this is good
             if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
                 if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
-                    return;
+                    String ingotType = ingredientMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+                    if (ingotType.equals("aranarthium")) {
+                        return;
+                    }
                 }
             }
         }
+        // Handles normal ingredients being used to craft enhanced Aranarthium
+        else {
+            String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+            if (!ingotType.equals("aranarthium")) {
+                return;
+            }
+        }
 
-        e.setCancelled(true);
         Material material = ingredient.getType();
         AranarthItem ingredientItem = null;
         if (material == Material.PRISMARINE_CRYSTALS) {
@@ -88,12 +102,23 @@ public class CraftingOverridesAranarthium {
         }
 
         if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
-            if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
+            e.setCancelled(true);
+            String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+            if (ingotType.equals("aranarthium")) {
+                if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou must use a " + itemName + " &cto craft this!"));
+                }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must use a " + itemName + " &cto craft this!"));
+                if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));
+                }
             }
         } else {
+            e.setCancelled(true);
             if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
             } else {
