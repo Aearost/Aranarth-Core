@@ -41,6 +41,12 @@ public class PlayerShopCreateListener implements Listener {
 
 		// If placing a Player Shop
 		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
+			// Only allow shop creation in Survival worlds
+			if (!player.getWorld().getName().startsWith("world")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
+				return;
+			}
+
 			// Verifies that the sign follows the shop format
 			if (isValidSignFormat(lines, player, true)) {
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
