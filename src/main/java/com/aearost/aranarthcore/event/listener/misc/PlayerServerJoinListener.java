@@ -7,11 +7,13 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -61,6 +63,35 @@ public class PlayerServerJoinListener implements Listener {
 		if (player.getName().equalsIgnoreCase("_Breathtaking")) {
 			Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
 		}
+
+		playJoinSound();
 	}
-	
+
+	/**
+	 * Plays a sound effect when a player joins the server.
+	 */
+	private void playJoinSound() {
+		new BukkitRunnable() {
+			int runs = 0;
+			@Override
+			public void run() {
+				if (runs == 0) {
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1F);
+					}
+					runs++;
+				} else if (runs == 1){
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+					}
+					runs++;
+				} else {
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+					}
+					cancel();
+				}
+			}
+		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+	}
 }

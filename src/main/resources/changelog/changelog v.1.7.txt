@@ -6,6 +6,9 @@ Features
 [+] Added particle effect around the bottom of waterfalls
 [+] Can re-add bark to stripped wood and create 6-sided wood from logs using bone meal
 [~] Coal is now crafted using 2 charcoal and not just 1
+[~] Prevented shops from being created in non-survival worlds
+[+] Added sounds for when players join and quit the server
+
 
 Bug Fixes
 - Prevented the 111th of each month from showing as 111st in date message

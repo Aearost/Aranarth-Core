@@ -6,10 +6,12 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -43,5 +45,35 @@ public class PlayerServerQuitListener implements Listener {
 		} else {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
 		}
+
+		playQuitSound();
+	}
+
+	/**
+	 * Plays a sound effect when a player quits the server.
+	 */
+	private void playQuitSound() {
+		new BukkitRunnable() {
+			int runs = 0;
+			@Override
+			public void run() {
+				if (runs == 0) {
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+					}
+					runs++;
+				} else if (runs == 1){
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+					}
+					runs++;
+				} else {
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
+					}
+					cancel();
+				}
+			}
+		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
 	}
 }
