@@ -11,7 +11,6 @@ Bug Fixes
 - Prevented wandering trader death throwing error when slain by i.e fall damage or non-mob source
 - Prevented issues where /ac commands couldn't be run by console
 - Added missing response messages from commands executed by Console
-- Added missing check where /ac dateset was executed without any other parameters
 
 Miscellaneous
 - Restructured date message logic to be a callable method
