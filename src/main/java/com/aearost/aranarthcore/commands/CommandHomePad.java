@@ -71,14 +71,14 @@ public class CommandHomePad {
                                 final int newNumber = Integer.parseInt(args[3]);
                                 if (newNumber == homeNumber) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a different number to reorder!"));
-                                    return false;
+                                    return true;
                                 }
 
                                 List<Home> homes = AranarthUtils.getHomes();
                                 ArrayList<Home> newHomes = new ArrayList<>();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cThere are no homes!"));
-                                    return false;
+                                    return true;
                                 }
 
                                 for (int i = 0; i < homes.size(); i++) {
@@ -102,7 +102,7 @@ public class CommandHomePad {
                                         "&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(ChatUtils.chatMessage("&cA home could not be updated!"));
-                                return false;
+                                return true;
                             }
                         }
                     }
@@ -112,12 +112,11 @@ public class CommandHomePad {
                     }
                 }
 			}
-
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+            return true;
 		}
-
-		return true;
+		return false;
 	}
 
 }

@@ -22,7 +22,7 @@ public class CommandPing {
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ac ping <player>"));
-				return false;
+				return true;
 			}
 		} else {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

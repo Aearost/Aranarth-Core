@@ -28,6 +28,10 @@ public class CommandDate {
 			sender.sendMessage(messages[2]);
 			return true;
 		} else if (args[0].equals("dateset")) {
+			if (args.length <= 2) {
+				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: /ac dateset <field> <value>"));
+				return true;
+			}
             switch (args[1]) {
                 case "month" -> {
 					for (Month enumMonth : Month.values()) {

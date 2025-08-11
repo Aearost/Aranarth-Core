@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
@@ -38,6 +39,11 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions = displayNoResultsForAll(displayedOptions);
 					}
 				}
+			} else if (sender instanceof ConsoleCommandSender) {
+				displayedOptions = displayForOp(sender, displayedOptions, args);
+				if (displayedOptions.isEmpty()) {
+					displayedOptions = displayNoResultsForOp(displayedOptions);
+				}
 			}
 		}
 
@@ -50,12 +56,12 @@ public class CommandACCompleter implements TabCompleter {
 
 	/**
 	 * Displays the commands only available to specified players, as well as all other commands.
-	 * @param player The user that entered the command.
+	 * @param sender The user that entered the command.
 	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayForOp(Player player, List<String> displayedOptions, String[] args) {
+	private List<String> displayForOp(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
 			displayedOptions.add("whereis");
 		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
@@ -63,7 +69,7 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
 			displayedOptions.add("give");
 		} else {
-			displayedOptions = displayForAll(player, displayedOptions, args);
+			displayedOptions = displayForAll(sender, displayedOptions, args);
 		}
 
 		return displayedOptions;
@@ -71,12 +77,12 @@ public class CommandACCompleter implements TabCompleter {
 
 	/**
 	 * Displays the commands available to all players.
-	 * @param player The user that entered the command.
+	 * @param sender The user that entered the command.
 	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayForAll(Player player, List<String> displayedOptions, String[] args) {
+	private List<String> displayForAll(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && "homepad".startsWith(args[0])) {
 			displayedOptions.add("homepad");
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
