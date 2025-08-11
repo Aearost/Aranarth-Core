@@ -85,6 +85,8 @@ public class CommandItemName {
                     }
                 }
             }
+        } else {
+            sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
         }
         return;
     }

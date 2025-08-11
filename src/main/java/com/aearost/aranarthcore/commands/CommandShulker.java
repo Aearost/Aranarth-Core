@@ -30,8 +30,8 @@ public class CommandShulker {
             return true;
         } else {
             sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+            return true;
         }
-        return false;
     }
 
 }

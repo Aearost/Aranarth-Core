@@ -38,7 +38,9 @@ public class CommandBlacklist {
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			}
-        }
-        return false;
+        } else {
+			sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+			return true;
+		}
     }
 }
