@@ -46,7 +46,7 @@ public class GuiPotions {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
 
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Your Potions");
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions");
 		for (ItemStack storedPotion : potionsAndAmounts.keySet()) {
 			inventory.addItem(storedPotion);
 		}
