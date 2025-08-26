@@ -36,8 +36,9 @@ public class GuiPotionRemove {
 					return;
 				}
 
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getWhoClicked().getUniqueId());
-				HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts((Player) e.getWhoClicked());
+				Player player = (Player) e.getWhoClicked();
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
 				List<ItemStack> potions = aranarthPlayer.getPotions();
 				int currentAmount = potionsAndAmounts.get(clickedItem);
 				int toBeRemoved = aranarthPlayer.getPotionQuantityToRemove();
@@ -61,12 +62,24 @@ public class GuiPotionRemove {
 					potions.remove(index);
 				}
 
-				aranarthPlayer.setPotions(potions);
-				e.getWhoClicked().sendMessage(ChatUtils.chatMessage("&7You have removed &e" + aranarthPlayer.getPotionQuantityToRemove() + " &7of the potion!"));
-				AranarthUtils.setPlayer(e.getWhoClicked().getUniqueId(), aranarthPlayer);
-
 				e.setCancelled(true);
-				e.getWhoClicked().closeInventory();
+				player.closeInventory();
+
+				int amountToAddToInventory = aranarthPlayer.getPotionQuantityToRemove();
+				aranarthPlayer.setPotions(potions);
+				aranarthPlayer.setPotionQuantityToRemove(0);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				player.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + amountToAddToInventory + " &7potions"));
+
+				// Adds the items to the player's inventory or drops to ground if no space
+				while (amountToAddToInventory > 0) {
+					HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(clickedItem);
+					if (!nonAdded.isEmpty()) {
+						// Will only ever be 1 since this adds 1 potion at a time
+						player.getLocation().getWorld().dropItemNaturally(player.getLocation(), nonAdded.get(0));
+					}
+					amountToAddToInventory--;
+				}
 			}
 		}
 	}
