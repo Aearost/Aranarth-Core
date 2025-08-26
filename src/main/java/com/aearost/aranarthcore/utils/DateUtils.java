@@ -938,7 +938,7 @@ public class DateUtils {
 				Block surfaceBlock = world.getHighestBlockAt(x, z);
 				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 				// Hot biomes do not get snow
-				if (temperature > 0.9) {
+				if (temperature > 0.85) {
 					continue;
 				}
 				// Frozen biomes have the highest snow rates
@@ -1077,7 +1077,7 @@ public class DateUtils {
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
 								World world = loc.getWorld();
-								int meltRadius = 100;
+								int meltRadius = 250;
 
 								// Loop over columns within a given block radius
 								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
@@ -1100,7 +1100,7 @@ public class DateUtils {
 										String biome = surfaceBlock.getBiome().toString();
 
 										// Hot biomes never have snow
-										if (temperature >= 0.9) {
+										if (temperature >= 0.85) {
 											continue;
 										}
 										// Frozen biomes never melt
@@ -1119,7 +1119,7 @@ public class DateUtils {
 										}
 
 										// Determines if snow or ice will melt at this block
-										int rand = random.nextInt(10000);
+										int rand = random.nextInt(8000);
 
 										// Ice should melt slightly slower than snow
 										if (surfaceBlock.getType() == Material.ICE) {
@@ -1338,20 +1338,20 @@ public class DateUtils {
 	 * @return Confirmation whether the block is close to a hot biome.
 	 */
 	private boolean isNearbyHotBiome(Block surfaceBlock) {
-		if (surfaceBlock.getTemperature() >= 0.9) {
+		if (surfaceBlock.getTemperature() >= 0.85) {
 			return true;
 		} else {
 			if (surfaceBlock.getBiome() == Biome.RIVER) {
 				Location loc = surfaceBlock.getLocation();
 				// Checks if nearby blocks on X coordinate are in hot biome
 				for (int x = loc.getBlockX() - 25; x < loc.getBlockX() + 25; x++) {
-					if (loc.getWorld().getBlockAt(x, loc.getBlockY(), loc.getBlockZ()).getTemperature() >= 0.9) {
+					if (loc.getWorld().getBlockAt(x, loc.getBlockY(), loc.getBlockZ()).getTemperature() >= 0.85) {
 						return true;
 					}
 				}
 				// Same check but for Z coordinate
 				for (int z = loc.getBlockZ() - 25; z < loc.getBlockZ() + 25; z++) {
-					if (loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), z).getTemperature() >= 0.9) {
+					if (loc.getWorld().getBlockAt(loc.getBlockX(), loc.getBlockY(), z).getTemperature() >= 0.85) {
 						return true;
 					}
 				}
