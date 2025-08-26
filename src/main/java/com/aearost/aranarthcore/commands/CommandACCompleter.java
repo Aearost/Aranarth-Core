@@ -209,13 +209,22 @@ public class CommandACCompleter implements TabCompleter {
 				}
 			}
 			case "potions" -> {
-				if (!args[1].isEmpty() && "add".startsWith(args[1])) {
-					displayedOptions.add("add");
-				} else if (!args[1].isEmpty() && "list".startsWith(args[1])) {
-					displayedOptions.add("list");
-				} else {
-					displayedOptions.add("add");
-					displayedOptions.add("list");
+				if (args.length == 2) {
+					if (!args[1].isEmpty() && "add".startsWith(args[1])) {
+						displayedOptions.add("add");
+					} else if (!args[1].isEmpty() && "list".startsWith(args[1])) {
+						displayedOptions.add("list");
+					} else if (!args[1].isEmpty() && "remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
+					} else {
+						displayedOptions.add("add");
+						displayedOptions.add("list");
+						displayedOptions.add("remove");
+					}
+				} else if (args.length == 3) {
+					if (args[1].equals("remove") && args[2].isEmpty()) {
+						displayedOptions.add("qty");
+					}
 				}
 			}
 			case "randomizer" -> {
