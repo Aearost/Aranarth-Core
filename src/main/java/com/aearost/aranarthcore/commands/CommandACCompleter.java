@@ -87,9 +87,24 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("homepad");
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
 			displayedOptions.add("nick");
-		} else if (!args[0].isEmpty() && "arena".startsWith(args[0])) {
-			displayedOptions.add("arena");
-		} else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
+			if (args[0].equals("a")) {
+				displayedOptions.add("arena");
+				displayedOptions.add("aranarth");
+			} else {
+				if (args[0].equals("ar")) {
+					displayedOptions.add("arena");
+					displayedOptions.add("aranarth");
+				} else {
+					if ("arena".startsWith(args[0])) {
+						displayedOptions.add("arena");
+					} else if ("aranarth".startsWith(args[0])) {
+						displayedOptions.add("aranarth");
+					}
+				}
+			}
+		}
+		else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
 			displayedOptions.add("creative");
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
