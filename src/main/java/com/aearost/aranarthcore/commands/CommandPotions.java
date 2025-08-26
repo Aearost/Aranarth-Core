@@ -46,31 +46,31 @@ public class CommandPotions {
                             }
 
                             // Counts how many of each potion there is
-                            HashMap<String, Integer> amountOfPotions = new HashMap<>();
-                            for (ItemStack potionToCount : potions) {
-                                String potionName = null;
-                                if (potionToCount.getType() == Material.AIR) {
-                                    potions.remove(potionToCount);
-                                    continue;
-                                }
+							HashMap<String, Integer> amountOfPotions = new HashMap<>();
+							for (ItemStack potionToCount : potions) {
+								String potionName = null;
+								if (potionToCount.getType() == Material.AIR) {
+									potions.remove(potionToCount);
+									continue;
+								}
 
-                                // If it is an mcMMO potion
-                                if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
-                                    potionName = potionToCount.getItemMeta().getItemName();
-                                } else {
-                                    PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
+								// If it is an mcMMO potion
+								if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
+									potionName = potionToCount.getItemMeta().getItemName();
+								} else {
+									PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
 									if (Objects.nonNull(meta)) {
 										potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
 									}
-                                }
+								}
 
-                                if (amountOfPotions.containsKey(potionName)) {
-                                    Integer newAmount = amountOfPotions.get(potionName) + 1;
-                                    amountOfPotions.put(potionName, newAmount);
-                                } else {
-                                    amountOfPotions.put(potionName, 1);
-                                }
-                            }
+								if (amountOfPotions.containsKey(potionName)) {
+									Integer newAmount = amountOfPotions.get(potionName) + 1;
+									amountOfPotions.put(potionName, newAmount);
+								} else {
+									amountOfPotions.put(potionName, 1);
+								}
+							}
                             aranarthPlayer.setPotions(potions);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
@@ -90,7 +90,7 @@ public class CommandPotions {
                         }
                     }
                     case "add" -> {
-                        GuiPotions gui = new GuiPotions(player);
+                        GuiPotions gui = new GuiPotions(player, true);
                         gui.openGui();
 						return true;
                     }
@@ -100,6 +100,9 @@ public class CommandPotions {
                         // /ac potion remove HEALTH_BOOST 7 (assuming this is the accurate name)
                         // Most likely comes from PotionEffectType (for effect) and PotionEffect (for
                         // amplifier)
+						GuiPotions gui = new GuiPotions(player, false);
+						gui.openGui();
+						return true;
                     }
                     default ->
                             player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid potion sub-command!"));
