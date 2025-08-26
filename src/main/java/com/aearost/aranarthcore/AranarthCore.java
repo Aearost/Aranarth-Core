@@ -58,7 +58,7 @@ public class AranarthCore extends JavaPlugin {
 			}
 		}, 36000, 36000);
 
-		// Check every 5 seconds to update armour trim effects, and to see if it is a new day
+		// Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
