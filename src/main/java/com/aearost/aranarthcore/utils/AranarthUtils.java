@@ -9,7 +9,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
-import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -795,11 +794,6 @@ public class AranarthUtils {
 			int amount = potionsAndAmounts.get(potionToCount);
 			amount++;
 			potionsAndAmounts.put(potionToCount, amount);
-		}
-
-		for (ItemStack potion : potionsAndAmounts.keySet()) {
-			PotionMeta meta = (PotionMeta) potion.getItemMeta();
-			Bukkit.getLogger().info(potion.getType() + " | " + meta.getBasePotionType() + " | " + meta.getItemName());
 		}
 
 		return potionsAndAmounts;

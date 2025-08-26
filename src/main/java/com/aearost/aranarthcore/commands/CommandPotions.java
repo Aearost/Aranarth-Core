@@ -46,6 +46,7 @@ public class CommandPotions {
                             }
 
                             // Counts how many of each potion there is
+							// Logic differs too much for using the helper method AranarthUtils.getPotionsAndAmounts()
 							HashMap<String, Integer> amountOfPotions = new HashMap<>();
 							for (ItemStack potionToCount : potions) {
 								String potionName = null;
@@ -99,6 +100,9 @@ public class CommandPotions {
 							try {
 								int quantity = Integer.parseInt(args[2]);
 								if (quantity > 0) {
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+									aranarthPlayer.setPotionQuantityToRemove(quantity);
+									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 									GuiPotions gui = new GuiPotions(player, false);
 									gui.openGui();
 								} else {
