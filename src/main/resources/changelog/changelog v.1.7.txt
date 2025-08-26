@@ -21,3 +21,4 @@ Miscellaneous
 - Restructured date message logic to be a callable method
 - Minor adjustments to the date message to remove extra lines and AranarthCore prefix to all messages
 - Minor changes to wandering trader slain message
+- Added helper method to quickly list the quantity of each potion a player has

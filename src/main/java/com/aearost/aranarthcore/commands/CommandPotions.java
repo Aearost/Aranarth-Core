@@ -95,13 +95,21 @@ public class CommandPotions {
 						return true;
                     }
                     case "remove" -> {
-                        // Check next sub-commands to ensure valid syntax
-                        // Also will need auto-completer to display all potions that they have
-                        // /ac potion remove HEALTH_BOOST 7 (assuming this is the accurate name)
-                        // Most likely comes from PotionEffectType (for effect) and PotionEffect (for
-                        // amplifier)
-						GuiPotions gui = new GuiPotions(player, false);
-						gui.openGui();
+						if (args.length >= 3) {
+							try {
+								int quantity = Integer.parseInt(args[2]);
+								if (quantity > 0) {
+									GuiPotions gui = new GuiPotions(player, false);
+									gui.openGui();
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
+								}
+							} catch (NumberFormatException e) {
+								player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+						}
 						return true;
                     }
                     default ->
