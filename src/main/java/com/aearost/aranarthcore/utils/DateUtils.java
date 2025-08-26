@@ -601,6 +601,25 @@ public class DateUtils {
 	 */
 	private void applyEffectToAllPlayers(List<PotionEffect> effects) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
+			PotionEffect effectToRemove = null;
+
+			for (PotionEffect effect : effects) {
+				if (effect.getType() == PotionEffectType.SLOWNESS) {
+					effectToRemove = effect;
+				}
+			}
+			if (effectToRemove != null) {
+				Location loc = player.getLocation();
+				boolean areAllBlocksAir = true;
+				Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+				if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+					areAllBlocksAir = false;
+				}
+
+				if (!areAllBlocksAir) {
+					effects.remove(effectToRemove);
+				}
+			}
 			player.addPotionEffects(effects);
 		}
 	}
@@ -709,7 +728,7 @@ public class DateUtils {
 							}
 
 							// If it is a warm biome, do not apply snow logic
-							if (highestBlock.getTemperature() < 0.9 && highestBlock.getBiome() != Biome.RIVER) {
+							if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
 								// Only apply particles if the player is exposed to air
 								if (areAllBlocksAir) {
 									// If it is a temperate or cold biome
@@ -779,7 +798,7 @@ public class DateUtils {
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
 
-		int snowRadius = 100;
+		int snowRadius = 250;
 
 		// Loop over columns within an input block radius
 		for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
@@ -792,8 +811,9 @@ public class DateUtils {
 
 				Block surfaceBlock = world.getHighestBlockAt(x, z);
 				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+
 				// Hot biomes do not get snow
-				if (temperature > 0.9) {
+				if (temperature >= 0.85) {
 					continue;
 				}
 				// Frozen biomes have the highest snow rates
@@ -810,7 +830,7 @@ public class DateUtils {
 				}
 
 				// Determines if snow will generate at this block
-				int rand = random.nextInt(5000);
+				int rand = random.nextInt(2000);
 				// Proportionate snow amount to the snow density
 				if (rand > bigFlakeDensity) {
 					continue;
