@@ -9,6 +9,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -772,6 +773,36 @@ public class AranarthUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Returns a HashMap containing the quantity of a given potion that a player has.
+	 * @param player The player running the command.
+	 * @return The HashMap of the potions the player has, as well as the quantity of the potion.
+	 */
+	public static HashMap<ItemStack, Integer> getPotionsAndAmounts(Player player) {
+		List<ItemStack> potions = getPlayer(player.getUniqueId()).getPotions();
+		HashMap<ItemStack, Integer> potionsAndAmounts = new HashMap<>();
+
+		// Counts how many potions of the same type there are
+		for (ItemStack potionToCount : potions) {
+			// Add potion if doesn't exist
+			if (potionsAndAmounts.get(potionToCount) == null) {
+				potionsAndAmounts.put(potionToCount, 1);
+				continue;
+			}
+
+			int amount = potionsAndAmounts.get(potionToCount);
+			amount++;
+			potionsAndAmounts.put(potionToCount, amount);
+		}
+
+		for (ItemStack potion : potionsAndAmounts.keySet()) {
+			PotionMeta meta = (PotionMeta) potion.getItemMeta();
+			Bukkit.getLogger().info(potion.getType() + " | " + meta.getBasePotionType() + " | " + meta.getItemName());
+		}
+
+		return potionsAndAmounts;
 	}
 
 }
