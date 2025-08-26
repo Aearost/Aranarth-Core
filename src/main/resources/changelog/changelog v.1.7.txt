@@ -8,6 +8,7 @@ Features
 [~] Coal is now crafted using 2 charcoal and not just 1
 [~] Prevented shops from being created in non-survival worlds
 [+] Added sounds for when players join and quit the server
+[+] Added support for /ac potion remove <qty> to remove potions from the player's potion inventory
 
 
 Bug Fixes
