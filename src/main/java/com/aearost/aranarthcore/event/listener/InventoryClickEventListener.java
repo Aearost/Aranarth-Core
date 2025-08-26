@@ -32,8 +32,10 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection")) {
                 new GuiQuiverClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")
+                        || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Potions")) {
                 new GuiPotionPreventNonPotionAdd().execute(e);
+                new GuiPotionRemove().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);

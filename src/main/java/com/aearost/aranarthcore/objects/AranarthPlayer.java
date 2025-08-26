@@ -31,6 +31,7 @@ public class AranarthPlayer {
 	private boolean isRandomizing;
 	private boolean isMissingItemMessageSent;
 	private double balance;
+	private int potionQuantityToRemove;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -52,6 +53,7 @@ public class AranarthPlayer {
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = 0.00;
+		this.potionQuantityToRemove = 0;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
@@ -74,6 +76,7 @@ public class AranarthPlayer {
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = balance;
+		this.potionQuantityToRemove = 0;
 	}
 
 	/**
@@ -410,6 +413,21 @@ public class AranarthPlayer {
 	 */
 	public void setBalance(double balance) {
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * @return The quantity to be removed.
+	 */
+	public int getPotionQuantityToRemove() {
+		return potionQuantityToRemove;
+	}
+
+	/**
+	 * Updates the temporary amount of the potion to be removed from the /ac potions remove command.
+	 */
+	public void setPotionQuantityToRemove(int potionQuantityToRemove) {
+		this.potionQuantityToRemove = potionQuantityToRemove;
 	}
 
 }
