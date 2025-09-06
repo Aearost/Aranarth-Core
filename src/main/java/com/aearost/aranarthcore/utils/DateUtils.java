@@ -650,26 +650,28 @@ public class DateUtils {
 						// Determines if the storm ended
 						if (AranarthUtils.getStormDuration() <= 0) {
 							Random random = new Random();
-							updateStorm(false, -1);
+							int duration = 0;
 							Month month = AranarthUtils.getMonth();
 							// Updates the delay until the next storm
-                            switch (month) {
+							switch (month) {
 								case Month.UMBRAVOR ->
-                                    // At least 0.75 days, no more than 5 days
-									AranarthUtils.setStormDelay(random.nextInt(102000) + 18000);
+									// At least 0.75 days, no more than 5 days
+									duration = random.nextInt(102000) + 18000;
 								case Month.GLACIVOR ->
-                                    // At least 0.5 days, no more than 2 days
-									AranarthUtils.setStormDelay(random.nextInt(48000) + 12000);
+									// At least 0.5 days, no more than 2 days
+									duration = random.nextInt(48000) + 12000;
 								case Month.FRIGORVOR ->
-                                    // At least 0.25 days, no more than 1 day
-									AranarthUtils.setStormDelay(random.nextInt(18000) + 6000);
+									// At least 0.25 days, no more than 1 day
+									duration = random.nextInt(18000) + 6000;
 								case Month.OBSCURVOR ->
 									// At least 0.5 days, no more than 1.5 days
-										AranarthUtils.setStormDelay(random.nextInt(36000) + 12000);
+									duration = random.nextInt(36000) + 12000;
 								case Month.IGNIVOR ->
 									// At least 2 days, no more than 10 days
-										AranarthUtils.setStormDelay(random.nextInt(240000) + 48000);
-                            }
+									duration = random.nextInt(240000) + 48000;
+							}
+							AranarthUtils.setStormDelay(duration);
+							updateStorm(false, -1, duration);
 						} else {
 							// 100 ticks per execution
 							AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -680,26 +682,28 @@ public class DateUtils {
 						// If it is time for the next storm
 						if (AranarthUtils.getStormDelay() <= 0) {
 							Random random = new Random();
-							updateStorm(true, -1);
+							int duration = 0;
 							Month month = AranarthUtils.getMonth();
 							// Updates the duration of the storm
                             switch (month) {
 								case Month.UMBRAVOR ->
                                     // At least 0.125 days, no more than 0.75 days
-									AranarthUtils.setStormDuration(random.nextInt(15000) + 3000);
+									duration = random.nextInt(15000) + 3000;
 								case Month.GLACIVOR ->
                                     // At least 0.5 days, no more than 1.5 days
-									AranarthUtils.setStormDuration(random.nextInt(24000) + 12000);
+									duration = random.nextInt(24000) + 12000;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
-									AranarthUtils.setStormDuration(random.nextInt(30000) + 18000);
+									duration = random.nextInt(30000) + 18000;
 								case Month.OBSCURVOR ->
 									// At least 0.25 days, no more than 1 day
-										AranarthUtils.setStormDuration(random.nextInt(18000) + 6000);
+									duration = random.nextInt(18000) + 6000;
 								case Month.IGNIVOR ->
 									// At least 0.5 days, no more than 1.25 day
-										AranarthUtils.setStormDuration(random.nextInt(24000) + 6000);
+									duration = random.nextInt(24000) + 6000;
                             }
+							updateStorm(true, -1, duration);
+							AranarthUtils.setStormDuration(duration);
 						} else {
 							// 100 ticks per execution
 							AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
@@ -1378,9 +1382,11 @@ public class DateUtils {
 			// Determines if the storm ended
 			if (AranarthUtils.getStormDuration() <= 0) {
 				Random random = new Random();
-				updateStorm(false, 0);
-				// At least 0.25 days, no more than 20 days
-				AranarthUtils.setStormDelay(random.nextInt(48000) + 6000);
+
+				// At least 0.25 days, no more than 2.25 days
+				int duration = random.nextInt(48000) + 6000;
+				updateStorm(false, 0, duration);
+				AranarthUtils.setStormDelay(duration);
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -1388,15 +1394,24 @@ public class DateUtils {
 		}
 		// If it is not storming
 		else {
-			// If it is time for the next storm
-			if (AranarthUtils.getStormDelay() <= 0) {
-				Random random = new Random();
-				updateStorm(true, 0);
-				// At least 0.5 days, no more than 1.25 days
-				AranarthUtils.setStormDuration(random.nextInt(18000) + 12000);
+			// Raining from previous server restart
+			if (Bukkit.getWorld("world").hasStorm()) {
+				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
+				AranarthUtils.setStormDelay(0);
+				AranarthUtils.setIsStorming(true);
 			} else {
-				// 100 ticks per execution
-				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+				// If it is time for the next storm
+				if (AranarthUtils.getStormDelay() <= 0) {
+					Random random = new Random();
+
+					// At least 0.5 days, no more than 1.25 days
+					int duration = random.nextInt(18000) + 12000;
+					updateStorm(true, 0, duration);
+					AranarthUtils.setStormDuration(duration);
+				} else {
+					// 100 ticks per execution
+					AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+				}
 			}
 		}
 	}
@@ -1410,13 +1425,15 @@ public class DateUtils {
 			// Determines if the storm ended
 			if (AranarthUtils.getStormDuration() <= 0) {
 				Random random = new Random();
-				if (Bukkit.getWorld("world").isThundering()) {
-					updateStorm(false, 1);
-				} else {
-					updateStorm(false, 0);
-				}
+
 				// At least 0.125 days, no more than 7 days
-				AranarthUtils.setStormDelay(random.nextInt(168000) + 3000);
+				int duration = random.nextInt(168000) + 3000;
+				if (Bukkit.getWorld("world").isThundering()) {
+					updateStorm(false, 1, duration);
+				} else {
+					updateStorm(false, 0, duration);
+				}
+				AranarthUtils.setStormDelay(duration);
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -1424,24 +1441,32 @@ public class DateUtils {
 		}
 		// If it is not storming
 		else {
-			// If it is time for the next storm
-			if (AranarthUtils.getStormDelay() <= 0) {
-				Random random = new Random();
-				// 50% chance of the storm being a thunderstorm
-				boolean isThundering = random.nextInt(10) >= 5;
-				World world = Bukkit.getWorld("world");
-
+			// Raining from previous server restart
+			if (Bukkit.getWorld("world").hasStorm()) {
+				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
+				AranarthUtils.setStormDelay(0);
 				AranarthUtils.setIsStorming(true);
-				if (isThundering) {
-					updateStorm(true, 1);
-				} else {
-					updateStorm(true, 0);
-				}
-				// At least 0.5 days, no more than 1 days
-				AranarthUtils.setStormDuration(random.nextInt(12000) + 12000);
 			} else {
-				// 100 ticks per execution
-				AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+				// If it is time for the next storm
+				if (AranarthUtils.getStormDelay() <= 0) {
+					Random random = new Random();
+					// 50% chance of the storm being a thunderstorm
+					boolean isThundering = random.nextInt(10) >= 5;
+					World world = Bukkit.getWorld("world");
+
+					// At least 0.5 days, no more than 1 day
+					int duration = random.nextInt(12000) + 12000;
+					AranarthUtils.setIsStorming(true);
+					if (isThundering) {
+						updateStorm(true, 1, duration);
+					} else {
+						updateStorm(true, 0, duration);
+					}
+					AranarthUtils.setStormDuration(duration);
+				} else {
+					// 100 ticks per execution
+					AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+				}
 			}
 		}
 	}
@@ -1449,40 +1474,54 @@ public class DateUtils {
 	/**
 	 * Updates chat and storm variables based on the provided inputs.
 	 * @param isStart If it is the beginning of the storm.
-	 * @param type 0 if rain, 1 if thunder, -1 if snow.
+	 * @param type 0 for rain, 1 for thunder, -1 for snow.
+	 * @param duration The amount of ticks the storm will last.
 	 */
-	private void updateStorm(boolean isStart, int type) {
+	private void updateStorm(boolean isStart, int type, int duration) {
 		String message = null;
+		World world = Bukkit.getWorld("world");
 		if (isStart) {
+			AranarthUtils.setIsStorming(true);
 			if (type == 0) {
-				Bukkit.getWorld("world").setStorm(true);
+				world.setClearWeatherDuration(0);
+				world.setStorm(true);
+				world.setWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
 			} else if (type == 1) {
-				Bukkit.getWorld("world").setStorm(true);
-				Bukkit.getWorld("world").setThundering(true);
+				world.setClearWeatherDuration(0);
+				world.setStorm(true);
+				world.setThundering(true);
+				world.setWeatherDuration(duration);
+				world.setThunderDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to thunder...");
 			} else if (type == -1) {
 				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
 			} else {
 				Bukkit.getLogger().info("Something went wrong with starting the storm...");
+				AranarthUtils.setIsStorming(false);
 				return;
 			}
-			AranarthUtils.setIsStorming(true);
 		} else {
+			AranarthUtils.setIsStorming(false);
 			if (type == 0) {
-				Bukkit.getWorld("world").setStorm(false);
+				world.setWeatherDuration(0);
+				world.setStorm(false);
+				world.setClearWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oThe rain has subsided...");
 			} else if (type == 1) {
-				Bukkit.getWorld("world").setStorm(false);
-				Bukkit.getWorld("world").setThundering(false);
+				world.setThunderDuration(0);
+				world.setWeatherDuration(0);
+				world.setThundering(false);
+				world.setStorm(false);
+				world.setClearWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oThe thunderstorm has subsided...");
 			} else if (type == -1) {
 				message = ChatUtils.chatMessage("&7&oThe snowstorm has subsided...");
 			} else {
 				Bukkit.getLogger().info("Something went wrong with ending the storm...");
+				AranarthUtils.setIsStorming(true);
 				return;
 			}
-			AranarthUtils.setIsStorming(false);
 		}
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			if (player.getWorld().getName().equals("world")) {

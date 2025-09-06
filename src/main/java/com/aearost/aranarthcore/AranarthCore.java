@@ -138,7 +138,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArrowConsumeListener(this);
 		new PotionEffectStackListener(this);
 		new PlayerShopCreateListener(this);
-		new WeatherCancelListener(this);
+		new WeatherChangeListener(this);
 		new LeafDecayDropsListener(this);
 		new LeavesPreventBurnListener(this);
 		new SnowballHitListener(this);
