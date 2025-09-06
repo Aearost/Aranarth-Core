@@ -3,10 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.mob.MountSwim;
-import com.aearost.aranarthcore.event.player.PlayerShopChestOpen;
-import com.aearost.aranarthcore.event.player.PlayerShopInteract;
-import com.aearost.aranarthcore.event.player.QuiverClick;
-import com.aearost.aranarthcore.event.player.ShulkerClick;
+import com.aearost.aranarthcore.event.player.*;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,6 +45,8 @@ public class PlayerInteractEventListener implements Listener {
             new ChestSort().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_AIR) {
             new MountSwim().execute(e); // Unclear why this is the case as it is right-clicking the mount
+        } else if (e.getAction() == Action.RIGHT_CLICK_AIR) {
+            new ExpBottle().execute(e);
         }
     }
 }
