@@ -6,21 +6,21 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.weather.WeatherChangeEvent;
 
 import java.util.Random;
 
-public class WeatherCancelListener implements Listener {
+public class WeatherChangeListener implements Listener {
 
-	public WeatherCancelListener(AranarthCore plugin) {
+	public WeatherChangeListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
 	/**
-	 * Prevents the weather from being set to raining during a winter month.
-	 * Instead, manual particles from DateUtils will be displayed.
+	 * Overrides various weather behaviour triggered by a change in the weather.
 	 * @param e The event.
 	 */
 	@EventHandler
@@ -31,13 +31,18 @@ public class WeatherCancelListener implements Listener {
 			return;
 		}
 
-		// If the rain is stopping during Aquinvor, manually add new randomizer
-		if (!e.toWeatherState() && AranarthUtils.getMonth() == Month.AQUINVOR) {
+		// Prevent rain from stopping during Aquinvor before duration ends (i.e sleeping in bed)
+		if (!e.toWeatherState() && AranarthUtils.getMonth() == Month.AQUINVOR && AranarthUtils.getIsStorming()) {
 			Random random = new Random();
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has stopped..."));
 			AranarthUtils.setIsStorming(false);
-			// At least 0.25 days, no more than 20 days
-			AranarthUtils.setStormDelay(random.nextInt(48000) + 6000);
+			// At least 0.25 days, no more than 2.25 days
+			int duration = random.nextInt(48000) + 6000;
+			World world = Bukkit.getWorld("world");
+			world.setWeatherDuration(0);
+			world.setStorm(false);
+			world.setClearWeatherDuration(duration);
+			AranarthUtils.setStormDelay(duration);
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has subsided..."));
 		}
 
 		// If there's a snowstorm during the month of Ignivor, only allow rain while it is not snowing
@@ -52,6 +57,16 @@ public class WeatherCancelListener implements Listener {
 		if (e.toWeatherState() && AranarthUtils.getMonth() == Month.AQUINVOR && !AranarthUtils.getIsStorming()) {
 			e.setCancelled(true);
 			return;
+		}
+
+		// If there is no special weather functionality in the month
+		if (!DateUtils.isWinterMonth(AranarthUtils.getMonth())
+				&& AranarthUtils.getMonth() != Month.AQUINVOR && AranarthUtils.getMonth() != Month.AESTIVOR) {
+			if (e.toWeatherState()) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
+			} else {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe rain has subsided..."));
+			}
 		}
 
 	}
