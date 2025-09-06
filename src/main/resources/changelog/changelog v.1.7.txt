@@ -17,6 +17,7 @@ Features
 [~] Fixed bug where enhanced aranarthium ingots could not be crafted
 [~] Snow will no longer fall in jungle biomes, only mountainous parts of it
 [~] Increased snow radius from 100 blocks to 250
+[+] Players can store their EXP in an EXP bottle by sneak right-clicking
 
 Miscellaneous
 - Restructured date message logic to be a callable method
