@@ -13,4 +13,6 @@ public class CustomItemKeys {
     public static final NamespacedKey HOMEPAD = new NamespacedKey(AranarthCore.getInstance(), "homepad");
     public static final NamespacedKey HONEY_GLAZED_HAM = new NamespacedKey(AranarthCore.getInstance(), "honey_glazed_ham");
     public static final NamespacedKey SUGARCANE_BLOCK = new NamespacedKey(AranarthCore.getInstance(), "sugarcane_block");
+    public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
+    public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
 }
