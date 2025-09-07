@@ -1,10 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.player.GuiEnhancedAranarthiumClose;
-import com.aearost.aranarthcore.event.player.GuiPotionClose;
-import com.aearost.aranarthcore.event.player.GuiQuiverClose;
-import com.aearost.aranarthcore.event.player.GuiShulkerClose;
+import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -34,6 +31,10 @@ public class InventoryCloseEventListener implements Listener {
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
                 new GuiEnhancedAranarthiumClose().execute(e);
+            }
+        } else if (e.getView().getType() == InventoryType.WORKBENCH) {
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Fletching Table")) {
+                new GuiFletchingTableClose().execute(e);
             }
         }
     }

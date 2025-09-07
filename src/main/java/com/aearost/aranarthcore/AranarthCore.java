@@ -117,6 +117,7 @@ public class AranarthCore extends JavaPlugin {
 		new EntityDamageEventListener(this);
 		new EntityTargetEventListener(this);
 		new EntityDeathEventListener(this);
+		new EntityShootBowEventListener(this);
 
 		// Multi-event listeners for single purpose
 		new InvisibleItemFrameListener(this);
@@ -135,7 +136,6 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerTeleportBetweenWorldsListener(this);
 		new ExpGainPreventListener(this);
 		new VillagerCamelDismountListener(this);
-		new ArrowConsumeListener(this);
 		new PotionEffectStackListener(this);
 		new PlayerShopCreateListener(this);
 		new WeatherChangeListener(this);
