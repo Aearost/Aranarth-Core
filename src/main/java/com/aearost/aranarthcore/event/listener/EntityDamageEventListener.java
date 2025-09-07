@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.ExtraWeaponsDamage;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
+import com.aearost.aranarthcore.event.player.SpecialArrowDamageEffects;
 import com.aearost.aranarthcore.event.player.TippedArrowDamagePrevent;
 import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -27,6 +28,7 @@ public class EntityDamageEventListener implements Listener {
     public void onEntityDamage(EntityDamageEvent e) {
         if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
             new TippedArrowDamagePrevent().execute(e);
+            new SpecialArrowDamageEffects().execute(e);
         }
 
         if (e.getEntity() instanceof Tameable tameable && tameable.isTamed()) {
