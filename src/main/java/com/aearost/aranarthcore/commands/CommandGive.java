@@ -40,6 +40,12 @@ public class CommandGive {
 				} else if (args[2].endsWith("Helmet") || args[2].endsWith("Chestplate")
 						|| args[2].endsWith("Leggings") || args[2].endsWith("Boots")) {
 					fullPathName = "com.aearost.aranarthcore.items.aranarthium.armour." + args[2];
+				} else if (args[2].startsWith("Arrow")) {
+					if (args[2].startsWith("Arrowhead")) {
+						fullPathName = "com.aearost.aranarthcore.items.arrowhead." + args[2];
+					} else {
+						fullPathName = "com.aearost.aranarthcore.items.arrow." + args[2];
+					}
 				} else {
 					fullPathName = "com.aearost.aranarthcore.items." + args[2];
 				}
