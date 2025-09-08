@@ -32,7 +32,7 @@ public class ArrowheadDragon implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "&6Dragon's Breath Arrowhead";
+		return "&5Dragon's Breath Arrowhead";
 	}
 	
 }
