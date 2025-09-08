@@ -173,9 +173,9 @@ public class FletchingTableCraft {
 	 * @return The result of the recipe if the input recipe was valid.
 	 */
 	private ItemStack computeArrowResult(ItemStack[] inventory) {
-		ItemStack arrowhead = safe(inventory, 1);
-		ItemStack stick = safe(inventory, 4);
-		ItemStack feather = safe(inventory, 7);
+		ItemStack arrowhead = safe(inventory, 2);
+		ItemStack stick = safe(inventory, 5);
+		ItemStack feather = safe(inventory, 8);
 
 		if (arrowhead == null || stick == null || feather == null) return null;
 		if (stick.getType() != Material.STICK || feather.getType() != Material.FEATHER) return null;

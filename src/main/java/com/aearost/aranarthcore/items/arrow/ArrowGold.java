@@ -10,7 +10,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW_HEAD;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 
 
 public class ArrowGold implements AranarthItem {
@@ -23,7 +23,7 @@ public class ArrowGold implements AranarthItem {
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
-			meta.getPersistentDataContainer().set(ARROW_HEAD, PersistentDataType.STRING, "gold");
+			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "gold");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			meta.setLore(lore);
 			item.setItemMeta(meta);
