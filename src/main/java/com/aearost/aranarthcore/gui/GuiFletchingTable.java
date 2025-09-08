@@ -29,19 +29,13 @@ public class GuiFletchingTable {
 	
 	private Inventory initializeGui(Player player, ItemStack[] inventory) {
         Inventory gui = Bukkit.getServer().createInventory(player, InventoryType.WORKBENCH, "Fletching Table");
-//		if (inventory == null) {
-			ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
-			gui.setItem(1, blank);
-			gui.setItem(3, blank);
-			gui.setItem(4, blank);
-			gui.setItem(6, blank);
-			gui.setItem(7, blank);
-			gui.setItem(9, blank);
-//		} else {
-//			for (int i = 0; i < inventory.length; i++) {
-//				gui.setItem(i, inventory[i]);
-//			}
-//		}
+		ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+		gui.setItem(1, blank);
+		gui.setItem(3, blank);
+		gui.setItem(4, blank);
+		gui.setItem(6, blank);
+		gui.setItem(7, blank);
+		gui.setItem(9, blank);
 		return gui;
 	}
 

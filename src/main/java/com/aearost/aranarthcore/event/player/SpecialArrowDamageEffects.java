@@ -5,6 +5,8 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Random;
+
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 
 /**
@@ -17,7 +19,14 @@ public class SpecialArrowDamageEffects {
 				if (arrow.getPersistentDataContainer().has(ARROW)) {
 					if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("iron")
 						|| arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("gold")) {
-						e.setDamage(e.getDamage() + 2);
+						Random random = new Random();
+						e.setDamage(e.getDamage() + random.nextInt(2) + 2);
+					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("amethyst")) {
+						e.setDamage(e.getDamage() + 4);
+					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("obsidian")) {
+						e.setDamage(e.getDamage() + 10);
+					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("diamond")) {
+						e.setDamage(e.getDamage() + 12);
 					}
 				}
 			}
