@@ -58,8 +58,9 @@ public class GuiPotionRemove {
 						}
 					}
 
+
 					// Removes the potions that were selected
-					for (int index : indexesToRemove) {
+					for (int index : indexesToRemove.reversed()) {
 						potions.remove(index);
 					}
 
