@@ -23,6 +23,7 @@ Features
 [+] Rain messages display in all months
 [~] Restructured how rain and thunder are started and managed
 [~] Fixed issues where rain and thunder was not starting and ending correctly
+[+] Added functionality for charged creepers to spawn in any month at a low rate
 
 Miscellaneous
 - Restructured date message logic to be a callable method
