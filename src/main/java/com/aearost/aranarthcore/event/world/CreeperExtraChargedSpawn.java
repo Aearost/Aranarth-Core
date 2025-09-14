@@ -12,16 +12,21 @@ import java.util.Random;
  */
 public class CreeperExtraChargedSpawn {
 	public void execute(EntitySpawnEvent e) {
-		if (AranarthUtils.getMonth() == Month.AESTIVOR) {
-			if (e.getLocation().getWorld().isThundering()) {
+		if (e.getLocation().getWorld().isThundering()) {
+
+			if (AranarthUtils.getMonth() == Month.AESTIVOR) {
 				// 12.5% chance of it being charged
-				int rand = new Random().nextInt(8);
-				if (rand == 0) {
+				if (new Random().nextInt(8) == 0) {
+					Creeper creeper = (Creeper) e.getEntity();
+					creeper.setPowered(true);
+				}
+			} else {
+				// 50% chance of it being charged in any other month
+				if (new Random().nextInt(50) == 0) {
 					Creeper creeper = (Creeper) e.getEntity();
 					creeper.setPowered(true);
 				}
 			}
 		}
 	}
-
 }
