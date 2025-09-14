@@ -35,7 +35,6 @@ public class AranarthUtils {
 	private static int weekday;
 	private static Month month;
 	private static int year;
-//	private static boolean isStorming;
 	private static int stormDuration;
 	private static int stormDelay;
 	private static boolean hasStormedInMonth;
@@ -568,22 +567,6 @@ public class AranarthUtils {
 	public static void setYear(int newYear) {
 		year = newYear;
 	}
-
-//	/**
-//	 * Provides the current value of whether it is storming.
-//	 * @return The value of whether it is storming.
-//	 */
-//	public static boolean getIsStorming() {
-//		return isStorming;
-//	}
-//
-//	/**
-//	 * Updates the value of whether it is storming.
-//	 * @param newIsStorming The new value of whether it is storming.
-//	 */
-//	public static void setIsStorming(boolean newIsStorming) {
-//		isStorming = newIsStorming;
-//	}
 
 	/**
 	 * Provides the intended duration of the current storm.
