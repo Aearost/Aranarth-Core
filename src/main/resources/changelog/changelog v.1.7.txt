@@ -21,12 +21,13 @@ Features
 [~] Fixed issues with rain not starting/stopping correctly
 [~] Added feature to consider storms from previous server restart
 [+] Rain messages display in all months
-[~] Restructured how rain and thunder are started and managed
 [~] Fixed issues where rain and thunder was not starting and ending correctly
 [+] Added functionality for charged creepers to spawn in any month at a low rate
+[+] Added functionality to prevent snow from forming on the Stashenleda path
 
 Miscellaneous
 - Restructured date message logic to be a callable method
+- Restructured a lot of the weather functionality
 - Minor adjustments to the date message to remove extra lines and AranarthCore prefix to all messages
 - Minor changes to wandering trader slain message
 - Added helper method to quickly list the quantity of each potion a player has
