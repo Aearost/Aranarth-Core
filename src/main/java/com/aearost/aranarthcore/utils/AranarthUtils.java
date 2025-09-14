@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -33,7 +35,7 @@ public class AranarthUtils {
 	private static int weekday;
 	private static Month month;
 	private static int year;
-	private static boolean isStorming;
+//	private static boolean isStorming;
 	private static int stormDuration;
 	private static int stormDelay;
 	private static boolean hasStormedInMonth;
@@ -41,6 +43,7 @@ public class AranarthUtils {
 	private static int windPlayTimer;
 	private static boolean isPlayingWindSound;
 	private static int cherryParticleDelay;
+	private static Weather weather;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -566,21 +569,21 @@ public class AranarthUtils {
 		year = newYear;
 	}
 
-	/**
-	 * Provides the current value of whether it is storming.
-	 * @return The value of whether it is storming.
-	 */
-	public static boolean getIsStorming() {
-		return isStorming;
-	}
-
-	/**
-	 * Updates the value of whether it is storming.
-	 * @param newIsStorming The new value of whether it is storming.
-	 */
-	public static void setIsStorming(boolean newIsStorming) {
-		isStorming = newIsStorming;
-	}
+//	/**
+//	 * Provides the current value of whether it is storming.
+//	 * @return The value of whether it is storming.
+//	 */
+//	public static boolean getIsStorming() {
+//		return isStorming;
+//	}
+//
+//	/**
+//	 * Updates the value of whether it is storming.
+//	 * @param newIsStorming The new value of whether it is storming.
+//	 */
+//	public static void setIsStorming(boolean newIsStorming) {
+//		isStorming = newIsStorming;
+//	}
 
 	/**
 	 * Provides the intended duration of the current storm.
@@ -731,8 +734,10 @@ public class AranarthUtils {
 						// Only check flowing water blocks (NOT source blocks)
 						if (start.getType() != Material.WATER) continue;
 
-						if (start.getBlockData() instanceof org.bukkit.block.data.Levelled startLevel) {
-							if (startLevel.getLevel() == 0) continue; // Skip source blocks
+						if (start.getBlockData() instanceof Levelled startLevel) {
+							if (startLevel.getLevel() == 0) {
+								continue; // Skip source blocks
+							}
 						} else {
 							continue;
 						}
@@ -745,7 +750,7 @@ public class AranarthUtils {
 							Block below = start.getRelative(0, -dy, 0);
 
 							if (below.getType() == Material.WATER) {
-								if (below.getBlockData() instanceof org.bukkit.block.data.Levelled landingLevel) {
+								if (below.getBlockData() instanceof Levelled landingLevel) {
 									if (landingLevel.getLevel() == 0) {
 										// Found a source block as landing
 										fallHeight = dy;
@@ -797,6 +802,22 @@ public class AranarthUtils {
 		}
 
 		return potionsAndAmounts;
+	}
+
+	/**
+	 * Provides the current state of the weather.
+	 * @return The current state of the weather.
+	 */
+	public static Weather getWeather() {
+		return weather;
+	}
+
+	/**
+	 * Updates the value of the current state of the weather.
+	 * @param newWeather The new value of the current state of the weather.
+	 */
+	public static void setWeather(Weather newWeather) {
+		weather = newWeather;
 	}
 
 }

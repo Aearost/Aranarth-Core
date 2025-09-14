@@ -21,6 +21,8 @@ Features
 [~] Fixed issues with rain not starting/stopping correctly
 [~] Added feature to consider storms from previous server restart
 [+] Rain messages display in all months
+[~] Restructured how rain and thunder are started and managed
+[~] Fixed issues where rain and thunder was not starting and ending correctly
 
 Miscellaneous
 - Restructured date message logic to be a callable method
