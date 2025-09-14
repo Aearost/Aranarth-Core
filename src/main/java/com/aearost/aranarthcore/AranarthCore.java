@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
@@ -41,7 +42,7 @@ public class AranarthCore extends JavaPlugin {
 
 
 		// Sets default storm values
-		AranarthUtils.setIsStorming(false);
+		AranarthUtils.setWeather(Weather.CLEAR);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
 		runRepeatingTasks();

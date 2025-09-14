@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Weather;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -424,14 +425,13 @@ public class DateUtils {
 			AranarthUtils.setStormDelay(new Random().nextInt(24000));
 		}
 
-		// If it is raining, only melt
-		if (Bukkit.getWorld("world").hasStorm()) {
-			meltSnow(1);
-		}
-		// If it is not raining, snow or melt
-		else {
+		// If it is not raining, only snow
+		if (AranarthUtils.getWeather() == Weather.SNOW && AranarthUtils.getStormDelay() <= 0 && AranarthUtils.getStormDuration() >= 0) {
 			// Adds snow but will only apply in low chance - will melt otherwise
 			applySnow(20, 500);
+		} else {
+			meltSnow(1);
+			applyRain();
 		}
 	}
 
@@ -481,7 +481,7 @@ public class DateUtils {
 	 */
 	private void applyAestivorEffects() {
 		meltSnow(5);
-		applyThunder();
+		applyRain();
 	}
 
 	/**
@@ -632,12 +632,12 @@ public class DateUtils {
 	 */
 	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
 		// Only melts snow if it isn't currently snowing during the month of Ignivor only
-		if (AranarthUtils.getMonth() == Month.IGNIVOR &&
-				(AranarthUtils.getStormDelay() > 100 && AranarthUtils.getStormDuration() <= 0)) {
-			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+		if (AranarthUtils.getMonth() == Month.IGNIVOR && AranarthUtils.getWeather() != Weather.SNOW) {
+//			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			meltSnow(1);
 			return;
 		}
+
 		new BukkitRunnable() {
 			int runs = 0;
 
@@ -645,33 +645,34 @@ public class DateUtils {
 			public void run() {
 				// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 				if (runs == 20) {
-					// Determines if it is currently storming
-					if (AranarthUtils.getIsStorming()) {
+					// If it is currently storming
+					if (AranarthUtils.getWeather() != Weather.CLEAR) {
 						// Determines if the storm ended
 						if (AranarthUtils.getStormDuration() <= 0) {
 							Random random = new Random();
-							int duration = 0;
+							int delay = 0;
 							Month month = AranarthUtils.getMonth();
 							// Updates the delay until the next storm
 							switch (month) {
 								case Month.UMBRAVOR ->
 									// At least 0.75 days, no more than 5 days
-									duration = random.nextInt(102000) + 18000;
+									delay = random.nextInt(102000) + 18000;
 								case Month.GLACIVOR ->
 									// At least 0.5 days, no more than 2 days
-									duration = random.nextInt(48000) + 12000;
+									delay = random.nextInt(48000) + 12000;
 								case Month.FRIGORVOR ->
 									// At least 0.25 days, no more than 1 day
-									duration = random.nextInt(18000) + 6000;
+									delay = random.nextInt(18000) + 6000;
 								case Month.OBSCURVOR ->
 									// At least 0.5 days, no more than 1.5 days
-									duration = random.nextInt(36000) + 12000;
+									delay = random.nextInt(36000) + 12000;
 								case Month.IGNIVOR ->
 									// At least 2 days, no more than 10 days
-									duration = random.nextInt(240000) + 48000;
+									delay = random.nextInt(240000) + 48000;
 							}
-							AranarthUtils.setStormDelay(duration);
-							updateStorm(false, -1, duration);
+							updateStorm(Weather.CLEAR, delay);
+							// Must be at the end or it interferes with WeatherChangeEventListener
+							AranarthUtils.setStormDelay(delay);
 						} else {
 							// 100 ticks per execution
 							AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -702,7 +703,20 @@ public class DateUtils {
 									// At least 0.5 days, no more than 1.25 day
 									duration = random.nextInt(24000) + 6000;
                             }
-							updateStorm(true, -1, duration);
+
+							// Ignivor can either snow or rain
+							if (month == Month.IGNIVOR) {
+								int chance = random.nextInt(100);
+								if (chance >= 98) {
+									updateStorm(Weather.THUNDER, duration);
+								} else if (chance >= 55) {
+									updateStorm(Weather.RAIN, duration);
+								} else {
+									updateStorm(Weather.SNOW, duration);
+								}
+							} else {
+								updateStorm(Weather.SNOW, duration);
+							}
 							AranarthUtils.setStormDuration(duration);
 						} else {
 							// 100 ticks per execution
@@ -713,43 +727,45 @@ public class DateUtils {
 					return;
 				}
 
-				// Applies snow nearby all online players
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (player != null) {
-						Location loc = player.getLocation();
-						// Handles applying the snow functionality
-						if (AranarthUtils.getIsStorming()) {
-							// Only snows in the survival world
-							if (!loc.getWorld().getName().equals("world")) {
-								continue;
-							}
+				// Handle the snow effects
+				if (AranarthUtils.getWeather() == Weather.SNOW || AranarthUtils.getWeather() == Weather.CLEAR) {
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (player != null) {
+							Location loc = player.getLocation();
+							// Handles applying the snow functionality
+							if (AranarthUtils.getWeather() == Weather.SNOW) {
+								// Only snows in the survival world
+								if (!loc.getWorld().getName().equals("world")) {
+									continue;
+								}
 
-							// Determines if the player is underground or not
-							boolean areAllBlocksAir = true;
-							Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-							if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-								areAllBlocksAir = false;
-							}
+								// Determines if the player is underground or not
+								boolean areAllBlocksAir = true;
+								Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+								if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+									areAllBlocksAir = false;
+								}
 
-							// If it is a warm biome, do not apply snow logic
-							if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
-								// Only apply particles if the player is exposed to air
-								if (areAllBlocksAir) {
-									// If it is a temperate or cold biome
-									if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-										loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
-										loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+								// If it is a warm biome, do not apply snow logic
+								if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
+									// Only apply particles if the player is exposed to air
+									if (areAllBlocksAir) {
+										// If it is a temperate or cold biome
+										if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+											loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
+											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+										}
 									}
 								}
+								// Attempts to generate snow only once per second
+								if (runs % 5 == 0) {
+									generateSnow(loc, bigFlakeDensity);
+								}
 							}
-							// Attempts to generate snow only once per second
+							// Generate ice regardless of if it is snowing
 							if (runs % 5 == 0) {
-								generateSnow(loc, bigFlakeDensity);
+								generateIce(loc, bigFlakeDensity);
 							}
-						}
-						// Generate ice regardless of the storm
-						if (runs % 5 == 0) {
-							generateIce(loc, bigFlakeDensity);
 						}
 					}
 				}
@@ -1059,7 +1075,7 @@ public class DateUtils {
 									}
 								}
 							}
-							// Increase animal growth during the month of Ardorvor
+							// Increase animal growth speed during the month of Ardorvor
 							else if (runs < 4 && month == Month.ARDORVOR) {
 								Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
 								for (Entity entity : entitiesInRange) {
@@ -1374,19 +1390,24 @@ public class DateUtils {
 	}
 
 	/**
-	 * Applies rain at an increased rate during the month of Aquinvor.
+	 * Applies rain manually based on the given month.
 	 */
 	private void applyRain() {
-		// Determines if it is currently storming
-		if (AranarthUtils.getIsStorming()) {
-			// Determines if the storm ended
+		// If it is currently storming
+		if (AranarthUtils.getWeather() != Weather.CLEAR) {
+			// Check if the duration has ended
 			if (AranarthUtils.getStormDuration() <= 0) {
 				Random random = new Random();
 
-				// At least 0.25 days, no more than 2.25 days
-				int duration = random.nextInt(48000) + 6000;
-				updateStorm(false, 0, duration);
-				AranarthUtils.setStormDelay(duration);
+				// At least 0.5 days, no more than 5 days
+				int delay = random.nextInt(108000) + 12000;
+				if (AranarthUtils.getMonth() == Month.AQUINVOR) {
+					// At least 0.25 days, no more than 2.25 days
+					delay = random.nextInt(48000) + 6000;
+				}
+                updateStorm(Weather.CLEAR, delay);
+				// Must be at the end or it interferes with WeatherChangeEventListener
+                AranarthUtils.setStormDelay(delay);
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -1394,11 +1415,16 @@ public class DateUtils {
 		}
 		// If it is not storming
 		else {
+			World world = Bukkit.getWorld("world");
 			// Raining from previous server restart
-			if (Bukkit.getWorld("world").hasStorm()) {
+			if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDelay() == 0 && AranarthUtils.getStormDuration() == 0) {
 				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
 				AranarthUtils.setStormDelay(0);
-				AranarthUtils.setIsStorming(true);
+				if (world.isThundering()) {
+					AranarthUtils.setWeather(Weather.THUNDER);
+				} else {
+					AranarthUtils.setWeather(Weather.RAIN);
+				}
 			} else {
 				// If it is time for the next storm
 				if (AranarthUtils.getStormDelay() <= 0) {
@@ -1406,62 +1432,32 @@ public class DateUtils {
 
 					// At least 0.5 days, no more than 1.25 days
 					int duration = random.nextInt(18000) + 12000;
-					updateStorm(true, 0, duration);
-					AranarthUtils.setStormDuration(duration);
-				} else {
-					// 100 ticks per execution
-					AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
-				}
-			}
-		}
-	}
+					int chance = random.nextInt(10);
 
-	/**
-	 * Applies thunder at an increased rate during the month of Aestivor.
-	 */
-	private void applyThunder() {
-		// Determines if it is currently storming
-		if (AranarthUtils.getIsStorming()) {
-			// Determines if the storm ended
-			if (AranarthUtils.getStormDuration() <= 0) {
-				Random random = new Random();
-
-				// At least 0.125 days, no more than 7 days
-				int duration = random.nextInt(168000) + 3000;
-				if (Bukkit.getWorld("world").isThundering()) {
-					updateStorm(false, 1, duration);
-				} else {
-					updateStorm(false, 0, duration);
-				}
-				AranarthUtils.setStormDelay(duration);
-			} else {
-				// 100 ticks per execution
-				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
-			}
-		}
-		// If it is not storming
-		else {
-			// Raining from previous server restart
-			if (Bukkit.getWorld("world").hasStorm()) {
-				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
-				AranarthUtils.setStormDelay(0);
-				AranarthUtils.setIsStorming(true);
-			} else {
-				// If it is time for the next storm
-				if (AranarthUtils.getStormDelay() <= 0) {
-					Random random = new Random();
-					// 50% chance of the storm being a thunderstorm
-					boolean isThundering = random.nextInt(10) >= 5;
-					World world = Bukkit.getWorld("world");
-
-					// At least 0.5 days, no more than 1 day
-					int duration = random.nextInt(12000) + 12000;
-					AranarthUtils.setIsStorming(true);
-					if (isThundering) {
-						updateStorm(true, 1, duration);
+					if (AranarthUtils.getMonth() == Month.IGNIVOR) {
+						chance = random.nextInt(100);
+						// Ignivor can either snow or rain
+						if (chance >= 98) {
+							updateStorm(Weather.THUNDER, duration);
+						} else if (chance >= 55) {
+							updateStorm(Weather.RAIN, duration);
+						} else {
+							updateStorm(Weather.SNOW, duration);
+						}
+					} else if (AranarthUtils.getMonth() == Month.AESTIVOR) {
+						if (chance > 5) {
+							updateStorm(Weather.THUNDER, duration);
+						} else {
+							updateStorm(Weather.RAIN, duration);
+						}
 					} else {
-						updateStorm(true, 0, duration);
+						if (chance > 1) {
+							updateStorm(Weather.RAIN, duration);
+						} else {
+							updateStorm(Weather.THUNDER, duration);
+						}
 					}
+					// Must be at the end or it interferes with WeatherChangeEventListener
 					AranarthUtils.setStormDuration(duration);
 				} else {
 					// 100 ticks per execution
@@ -1473,61 +1469,50 @@ public class DateUtils {
 
 	/**
 	 * Updates chat and storm variables based on the provided inputs.
-	 * @param isStart If it is the beginning of the storm.
-	 * @param type 0 for rain, 1 for thunder, -1 for snow.
+	 * @param type The type of weather condition being added/removed.
 	 * @param duration The amount of ticks the storm will last.
 	 */
-	private void updateStorm(boolean isStart, int type, int duration) {
+	private void updateStorm(Weather type, int duration) {
 		String message = null;
 		World world = Bukkit.getWorld("world");
-		if (isStart) {
-			AranarthUtils.setIsStorming(true);
-			if (type == 0) {
+
+		// Start of a new weather
+		if (type != Weather.CLEAR) {
+			AranarthUtils.setWeather(type);
+			if (type == Weather.RAIN) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
 				world.setWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
-			} else if (type == 1) {
+			} else if (type == Weather.THUNDER) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
 				world.setThundering(true);
 				world.setWeatherDuration(duration);
 				world.setThunderDuration(duration);
-				message = ChatUtils.chatMessage("&7&oIt has started to thunder...");
-			} else if (type == -1) {
-				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
-			} else {
-				Bukkit.getLogger().info("Something went wrong with starting the storm...");
-				AranarthUtils.setIsStorming(false);
-				return;
-			}
-		} else {
-			AranarthUtils.setIsStorming(false);
-			if (type == 0) {
-				world.setWeatherDuration(0);
-				world.setStorm(false);
-				world.setClearWeatherDuration(duration);
-				message = ChatUtils.chatMessage("&7&oThe rain has subsided...");
-			} else if (type == 1) {
+				message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
+			} else if (type == Weather.SNOW) {
 				world.setThunderDuration(0);
 				world.setWeatherDuration(0);
 				world.setThundering(false);
 				world.setStorm(false);
 				world.setClearWeatherDuration(duration);
-				message = ChatUtils.chatMessage("&7&oThe thunderstorm has subsided...");
-			} else if (type == -1) {
-				message = ChatUtils.chatMessage("&7&oThe snowstorm has subsided...");
+				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
 			} else {
-				Bukkit.getLogger().info("Something went wrong with ending the storm...");
-				AranarthUtils.setIsStorming(true);
+				Bukkit.getLogger().info("Something went wrong with starting the storm...");
+				AranarthUtils.setWeather(Weather.CLEAR);
 				return;
 			}
+		} else {
+			world.setThunderDuration(0);
+			world.setWeatherDuration(0);
+			world.setThundering(false);
+			world.setStorm(false);
+			world.setClearWeatherDuration(duration);
+			AranarthUtils.setWeather(type);
+			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (player.getWorld().getName().equals("world")) {
-				player.sendMessage(message);
-			}
-		}
+		Bukkit.broadcastMessage(message);
 	}
 
 	/**
