@@ -181,6 +181,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("randomizer");
 		displayedOptions.add("balance");
 		displayedOptions.add("date");
+		displayedOptions.add("aranarth");
 		return displayedOptions;
 	}
 
