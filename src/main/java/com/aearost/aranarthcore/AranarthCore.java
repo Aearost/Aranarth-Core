@@ -120,6 +120,7 @@ public class AranarthCore extends JavaPlugin {
 		new EntityDeathEventListener(this);
 		new EntityShootBowEventListener(this);
 		new BlockFormEventListener(this);
+		new BlockPhysicsEventListener(this);
 
 		// Multi-event listeners for single purpose
 		new InvisibleItemFrameListener(this);
