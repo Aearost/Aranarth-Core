@@ -5,6 +5,7 @@ Features
 [+] Added /ac date to display the current server date
 [+] Added /ac dateset to change the current server date in-game
 [+] Added particle effect around the bottom of waterfalls
+[+] Added container lock functionality
 [+] Can re-add bark to stripped wood and create 6-sided wood from logs using bone meal
 [+] Eyeblossoms now light up when changing from opened to closed
 [~] Coal is now crafted using 2 charcoal and not just 1
