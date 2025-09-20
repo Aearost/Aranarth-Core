@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -31,6 +32,7 @@ public class AranarthUtils {
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
+	private static List<LockedContainer> lockedContainers;
 	private static int day;
 	private static int weekday;
 	private static Month month;
@@ -801,6 +803,22 @@ public class AranarthUtils {
 	 */
 	public static void setWeather(Weather newWeather) {
 		weather = newWeather;
+	}
+
+	/**
+	 * Provides the list of locked containers.
+	 * @return The list of locked containers.
+	 */
+	public static List<LockedContainer> getLockedContainers() {
+		return lockedContainers;
+	}
+
+	/**
+	 * Updates the list of locked containers.
+	 * @param newLockedContainers The new list of locked containers.
+	 */
+	public static void setLockedContainers(List<LockedContainer> newLockedContainers) {
+		lockedContainers = newLockedContainers;
 	}
 
 }

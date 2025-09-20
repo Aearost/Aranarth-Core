@@ -1,0 +1,72 @@
+package com.aearost.aranarthcore.objects;
+
+import org.bukkit.Location;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Handles all necessary functionality relating to a locked container on Aranarth.
+ */
+public class LockedContainer {
+
+	private UUID owner;
+	private List<UUID> trusted;
+	private Location location;
+
+	public LockedContainer(UUID owner, List<UUID> trusted, Location location) {
+		this.owner = owner;
+		this.trusted = trusted;
+		this.location = location;
+	}
+
+	/**
+	 * Provides the locked container owner's UUID.
+	 * @return the locked container owner's UUID.
+	 */
+	public UUID getOwner() {
+		return owner;
+	}
+
+	/**
+	 * Updates the locked container's owner's UUID.
+	 * @param owner The locked container's owner's UUID.
+     */
+	public void setOwner(UUID owner) {
+		this.owner = owner;
+	}
+
+	/**
+	 * Provides the list of players that are trusted to open the locked container.
+	 * @return the list of players that are trusted to open the locked container.
+	 */
+	public List<UUID> getTrusted() {
+		return this.trusted;
+	}
+
+	/**
+	 * Updates the list of players that are trusted to open the locked container.
+	 * @param trusted The list of players that will be trusted to open the locked container.
+	 */
+	public void setTrusted(List<UUID> trusted) {
+		this.trusted = trusted;
+	}
+
+	/**
+	 * Provides the current Location of the locked container.
+	 * @return The current Location of the locked container.
+	 */
+	public Location getLocation() {
+		return location;
+	}
+
+	/**
+	 * Updates the location of the locked container.
+	 * @param location The new location of the locked container.
+	 */
+	public void setLocation(Location location) {
+		this.location = location;
+	}
+
+
+}
