@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiShulker;
+import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -24,6 +25,7 @@ public class ShulkerClick {
 					if (is.getItemMeta() instanceof BlockStateMeta im) {
 						if (im.getBlockState() instanceof ShulkerBox shulker) {
 							e.setCancelled(true);
+							player.playSound(player.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
 							Inventory shulkerInventory = shulker.getInventory();
 							GuiShulker gui = new GuiShulker(player, shulkerInventory);
 							gui.openGui();

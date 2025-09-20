@@ -25,6 +25,7 @@ Features
 [~] Fixed issues where rain and thunder was not starting and ending correctly
 [+] Added functionality for charged creepers to spawn in any month at a low rate
 [+] Added functionality to prevent snow from forming on the Stashenleda path
+[+] Added sound for when opening and closing a shulker in backpack-mode
 
 Miscellaneous
 - Restructured date message logic to be a callable method
