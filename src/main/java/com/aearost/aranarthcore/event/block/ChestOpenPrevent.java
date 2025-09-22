@@ -62,12 +62,18 @@ public class ChestOpenPrevent {
             return false;
         } else {
             List<LockedContainer> containers = AranarthUtils.getLockedContainers();
-            for (LockedContainer container : containers) {
-                if (container.getLocation().getBlockX() == block.getX()
-                        && container.getLocation().getBlockY() == block.getY()
-                        && container.getLocation().getBlockZ() == block.getZ()) {
-                    return true;
+            if (containers != null) {
+                for (LockedContainer container : containers) {
+                    if (container.getLocation().getBlockX() == block.getX()
+                            && container.getLocation().getBlockY() == block.getY()
+                            && container.getLocation().getBlockZ() == block.getZ()) {
+                        return true;
+                    }
                 }
+            }
+            // Leave all containers unlocked when there are no locked containers
+            else {
+                return true;
             }
         }
         return false;
