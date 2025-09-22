@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.ExtraWeaponsDamage;
+import com.aearost.aranarthcore.event.mob.HappyGhastPreventDamage;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
 import com.aearost.aranarthcore.event.player.SpecialArrowDamageEffects;
 import com.aearost.aranarthcore.event.player.TippedArrowDamagePrevent;
@@ -10,6 +11,7 @@ import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -37,6 +39,10 @@ public class EntityDamageEventListener implements Listener {
         // Do not affect tamed mobs
         else {
             new ExtraWeaponsDamage().execute(e);
+        }
+
+        if (e.getEntity().getType() == EntityType.HAPPY_GHAST) {
+            new HappyGhastPreventDamage().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.ARDORVOR) {
