@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -32,6 +34,7 @@ public class AranarthPlayer {
 	private boolean isMissingItemMessageSent;
 	private double balance;
 	private int potionQuantityToRemove;
+	private UUID trustedPlayerUUID;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -54,6 +57,7 @@ public class AranarthPlayer {
 		this.isMissingItemMessageSent = false;
 		this.balance = 0.00;
 		this.potionQuantityToRemove = 0;
+		this.trustedPlayerUUID = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
@@ -77,6 +81,7 @@ public class AranarthPlayer {
 		this.isMissingItemMessageSent = false;
 		this.balance = balance;
 		this.potionQuantityToRemove = 0;
+		this.trustedPlayerUUID = null;
 	}
 
 	/**
@@ -425,9 +430,26 @@ public class AranarthPlayer {
 
 	/**
 	 * Updates the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * @param potionQuantityToRemove The quantity of the potion to be removed.
 	 */
 	public void setPotionQuantityToRemove(int potionQuantityToRemove) {
 		this.potionQuantityToRemove = potionQuantityToRemove;
+	}
+
+	/**
+	 * Provides the temporary variable tracking which player is being trusted to a container.
+	 * @return The player's UUID that will be trusted to the container.
+	 */
+	public UUID getTrustedPlayerUUID() {
+		return trustedPlayerUUID;
+	}
+
+	/**
+	 * Updates the temporary variable tracking which player is being trusted to a container.
+	 * @param trustedPlayerUUID The UUID of the player to be trusted.
+	 */
+	public void setTrustedPlayerUUID(UUID trustedPlayerUUID) {
+		this.trustedPlayerUUID = trustedPlayerUUID;
 	}
 
 }

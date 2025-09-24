@@ -35,6 +35,9 @@ public class BlockPlaceEventListener implements Listener {
                 new TorchflowerPlace().execute(e);
             } else if (is.getType() == Material.PITCHER_PLANT) {
                 new PitcherPlantPlace().execute(e);
+            } else if (is.getType() == Material.CHEST || is.getType() == Material.TRAPPED_CHEST
+                        || is.getType() == Material.BARREL || is.getType().name().endsWith("_SHULKER_BOX")) {
+                new ContainerAutoLock().execute(e);
             }
             new RandomizerBlockPlace().execute(e);
             new PlayerAutoReplenishSlot().execute(e);

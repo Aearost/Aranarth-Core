@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Handles preventing of a chest if it is locked and the player clicking is not permitted to open it.
  */
-public class ChestOpenPrevent {
+public class ContainerOpenPrevent {
 
     public void execute(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
@@ -51,7 +51,8 @@ public class ChestOpenPrevent {
                 || block.getType().name().endsWith("SHULKER_BOX");
     }
 
-    /** Verifies if the chest is locked for the player.
+    /**
+     * Verifies if the chest is locked for the player.
      * @param player The player who clicked the container block.
      * @param block The block that was clicked.
      * @return Confirmation whether the player is trusted to the container or not.
@@ -67,7 +68,9 @@ public class ChestOpenPrevent {
                     if (container.getLocation().getBlockX() == block.getX()
                             && container.getLocation().getBlockY() == block.getY()
                             && container.getLocation().getBlockZ() == block.getZ()) {
-                        return true;
+                        if (AranarthUtils.isTrustedToContainer(player, block.getLocation())) {
+                            return true;
+                        }
                     }
                 }
             }

@@ -821,4 +821,70 @@ public class AranarthUtils {
 		lockedContainers = newLockedContainers;
 	}
 
+	/**
+	 * Removes a container if it was a locked container in the list.
+	 * @param location The location of the container being removed.
+	 * @return Confirmation whether the container was previously a locked container.
+	 */
+	public static boolean removeLockedContainerIfExists(Location location) {
+		boolean isLockedContainer = false;
+		int i = 0;
+		while (i < lockedContainers.size()) {
+            if (lockedContainers.get(i).getLocation() == location) {
+                isLockedContainer = true;
+                break;
+            }
+			i++;
+		}
+
+		if (isLockedContainer) {
+			lockedContainers.remove(i);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Confirms whether the player is trusted to the container they are interacting with.
+	 * @param player The player interacting with the container.
+	 * @param location The location of the container.
+	 * @return Confirmation whether the player is trusted to the container.
+	 */
+	public static boolean isTrustedToContainer(Player player, Location location) {
+		if (lockedContainers != null) {
+			for (LockedContainer container : lockedContainers) {
+				if (container.getLocation().getBlockX() == location.getBlockX()
+						&& container.getLocation().getBlockY() == location.getBlockY()
+						&& container.getLocation().getBlockZ() == location.getBlockZ()) {
+					List<UUID> trusted = container.getTrusted();
+					if (trusted.contains(player.getUniqueId())) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Adds a player to the list of trusted players to access the container.
+	 * @param uuidToAdd The UUID of the player being added to the container.
+	 * @param location The location of the container.
+	 */
+	public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
+		List<UUID> trusted = null;
+		for (LockedContainer container : lockedContainers) {
+			if (container.getLocation() == location) {
+				trusted = container.getTrusted();
+				// If the UUID is already there, do nothing
+				if (!trusted.contains(uuidToAdd)) {
+					trusted.add(uuidToAdd);
+				}
+			}
+		}
+	}
+
 }

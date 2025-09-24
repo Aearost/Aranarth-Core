@@ -103,6 +103,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandDate.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("aranarth")) {
 			commandResult = CommandAranarth.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("trust")) {
+			commandResult = CommandTrust.onCommand(sender, args);
 		}
 		return commandResult;
 	}

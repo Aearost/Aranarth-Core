@@ -42,8 +42,8 @@ public class PlayerInteractEventListener implements Listener {
             new EnderChestOpenPrevent().execute(e);
             new PlayerShopChestOpen().execute(e);
             new FletchingTableClick().execute(e);
-            new ChestLock().execute(e);
-            new ChestOpenPrevent().execute(e);
+            new ContainerInteract().execute(e);
+            new ContainerOpenPrevent().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
             new ChestSort().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_AIR) {

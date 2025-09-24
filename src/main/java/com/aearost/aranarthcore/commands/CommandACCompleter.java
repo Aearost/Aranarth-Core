@@ -103,8 +103,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-		}
-		else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
 			displayedOptions.add("creative");
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
@@ -118,7 +117,7 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("shulker".startsWith(args[0])) {
 				displayedOptions.add("shulker");
 			}
-		}else if (!args[0].isEmpty() && args[0].startsWith("b")) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
 			if (args[0].equals("b")) {
 				displayedOptions.add("blacklist");
 				displayedOptions.add("balance");
@@ -127,8 +126,7 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("balance".startsWith(args[0])) {
 				displayedOptions.add("balance");
 			}
-		}
-		else if (!args[0].isEmpty() && args[0].startsWith("p")) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
@@ -144,6 +142,10 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("randomizer");
 		} else if (!args[0].isEmpty() && "date".startsWith(args[0])) {
 			displayedOptions.add("date");
+		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
+			displayedOptions.add("aranarth");
+		} else if (!args[0].isEmpty() && "trust".startsWith(args[0])) {
+			displayedOptions.add("trust");
 		}
 		return displayedOptions;
 	}
@@ -182,6 +184,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("balance");
 		displayedOptions.add("date");
 		displayedOptions.add("aranarth");
+		displayedOptions.add("trust");
 		return displayedOptions;
 	}
 
