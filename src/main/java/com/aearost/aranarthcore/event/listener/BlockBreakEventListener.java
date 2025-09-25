@@ -39,8 +39,7 @@ public class BlockBreakEventListener implements Listener {
             new PitcherPlantBreak().execute(e);
         } else if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
             new ArenaBlockBreak().execute(e);
-        } else if (type == Material.CHEST || type == Material.TRAPPED_CHEST
-                || type == Material.BARREL || type.name().endsWith("_SHULKER_BOX")) {
+        } else if (AranarthUtils.isContainerBlock(e.getBlock())) {
             new ContainerBreak().execute(e);
         } else {
             if (e.getBlock().getType().name().endsWith("_ORE")) {

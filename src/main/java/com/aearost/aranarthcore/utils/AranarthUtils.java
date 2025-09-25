@@ -8,8 +8,11 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -846,30 +849,6 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Confirms whether the player is trusted to the container they are interacting with.
-	 * @param player The player interacting with the container.
-	 * @param location The location of the container.
-	 * @return Confirmation whether the player is trusted to the container.
-	 */
-	public static boolean isTrustedToContainer(Player player, Location location) {
-		if (lockedContainers != null) {
-			for (LockedContainer container : lockedContainers) {
-				if (container.getLocation().getBlockX() == location.getBlockX()
-						&& container.getLocation().getBlockY() == location.getBlockY()
-						&& container.getLocation().getBlockZ() == location.getBlockZ()) {
-					List<UUID> trusted = container.getTrusted();
-					if (trusted.contains(player.getUniqueId())) {
-						return true;
-					} else {
-						return false;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
 	 * Adds a player to the list of trusted players to access the container.
 	 * @param uuidToAdd The UUID of the player being added to the container.
 	 * @param location The location of the container.
@@ -887,4 +866,94 @@ public class AranarthUtils {
 		}
 	}
 
+	public static boolean isContainerBlock(Block block) {
+		return block.getType() == Material.CHEST
+				|| block.getType() == Material.TRAPPED_CHEST
+				|| block.getType() == Material.BARREL
+				|| block.getType().name().endsWith("SHULKER_BOX");
+	}
+
+	/**
+	 * Helper method to determine if the input block is a locked container.
+	 * @param lockedContainerLoc The location of the locked container being iterated.
+	 * @param blockLoc The location of the block being verified.
+	 * @return Confirmation whether the input block is a locked container.
+	 */
+	private static boolean isLockedContainer(Location lockedContainerLoc, Location blockLoc) {
+		if (lockedContainerLoc.getBlockX() == blockLoc.getX()
+				&& lockedContainerLoc.getBlockY() == blockLoc.getY()
+				&& lockedContainerLoc.getBlockZ() == blockLoc.getZ()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Provides the LockedContainer at the given block, if it is indeed a locked container.
+	 * @param block The block being searched.
+	 * @return The LockedContainer object if found, or null if not.
+	 */
+	public static LockedContainer getLockedContainerAtBlock(Block block) {
+		if (isContainerBlock(block)) {
+			for (LockedContainer container : lockedContainers) {
+				if (isLockedContainer(container.getLocation(), block.getLocation())) {
+					return container;
+				} else {
+					// Chests can be two blocks wide and the non-clicked block may be the locked container
+					if (block.getState() instanceof Chest chest) {
+						InventoryHolder holder = chest.getInventory().getHolder();
+						if (holder instanceof DoubleChest doubleChest) {
+							Block left = ((Chest) doubleChest.getLeftSide()).getBlock();
+							Block right = ((Chest) doubleChest.getRightSide()).getBlock();
+							if (isLockedContainer(container.getLocation(), left.getLocation())) {
+								return container;
+							} else if (isLockedContainer(container.getLocation(), right.getLocation())) {
+								return container;
+							}
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Confirms whether the player is trusted to the container they are interacting with.
+	 * @param player The player clicking the block.
+	 * @param block The block that was clicked.
+	 * @return Confirmation whether the player is trusted to the container.
+	 */
+	public static boolean canOpenContainer(Player player, Block block) {
+		if (lockedContainers != null && isContainerBlock(block)) {
+			Location location = block.getLocation();
+			for (LockedContainer container : lockedContainers) {
+				// If the clicked block is a container
+				if (isLockedContainer(container.getLocation(), block.getLocation())) {
+					List<UUID> trusted = container.getTrusted();
+					if (trusted.contains(player.getUniqueId())) {
+						return true;
+					} else {
+						return false;
+					}
+				} else {
+					// Chests can be two blocks wide and the non-clicked block may be the locked container
+					if (block.getState() instanceof Chest chest) {
+						InventoryHolder holder = chest.getInventory().getHolder();
+						if (holder instanceof DoubleChest doubleChest) {
+							Block left = ((Chest) doubleChest.getLeftSide()).getBlock();
+							Block right = ((Chest) doubleChest.getRightSide()).getBlock();
+							if (isLockedContainer(container.getLocation(), left.getLocation())) {
+								return true;
+							} else if (isLockedContainer(container.getLocation(), right.getLocation())) {
+								return true;
+							}
+						}
+					}
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 }
