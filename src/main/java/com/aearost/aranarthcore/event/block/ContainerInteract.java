@@ -5,12 +5,9 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,24 +17,17 @@ public class ContainerInteract {
 
     public void execute(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
-        if (isContainer(block)) {
-            Bukkit.getLogger().info("A");
+        if (AranarthUtils.isContainerBlock(block)) {
             UUID uuid = e.getPlayer().getUniqueId();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-            // If attempting to add a lock to the container
+
+            // If attempting to add a trusted player to the container
             if (aranarthPlayer.getTrustedPlayerUUID() != null) {
-                Bukkit.getLogger().info("B");
-                List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
-                for (LockedContainer container : lockedContainers) {
-                    Bukkit.getLogger().info("C");
-                    Location location = block.getLocation();
-                    if (container.getLocation().getBlockX() == location.getBlockX()
-                            && container.getLocation().getBlockY() == location.getBlockY()
-                            && container.getLocation().getBlockZ() == location.getBlockZ()) {
-                        Bukkit.getLogger().info("D");
+                if (AranarthUtils.canOpenContainer(e.getPlayer(), block)) {
+                    LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
+                    if (container != null) {
                         // Only the owner can add players
                         if (container.getOwner() == uuid) {
-                            Bukkit.getLogger().info("E");
                             AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), container.getLocation());
                             String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
                             e.getPlayer().sendMessage(ChatUtils.chatMessage("&e" + username + " &7has been trusted to this container!"));
@@ -54,11 +44,6 @@ public class ContainerInteract {
         }
     }
 
-    private boolean isContainer(Block block) {
-        return block.getType() == Material.CHEST
-                || block.getType() == Material.TRAPPED_CHEST
-                || block.getType() == Material.BARREL
-                || block.getType().name().endsWith("SHULKER_BOX");
-    }
+
 
 }

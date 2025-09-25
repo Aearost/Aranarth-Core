@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -35,8 +36,7 @@ public class BlockPlaceEventListener implements Listener {
                 new TorchflowerPlace().execute(e);
             } else if (is.getType() == Material.PITCHER_PLANT) {
                 new PitcherPlantPlace().execute(e);
-            } else if (is.getType() == Material.CHEST || is.getType() == Material.TRAPPED_CHEST
-                        || is.getType() == Material.BARREL || is.getType().name().endsWith("_SHULKER_BOX")) {
+            } else if (AranarthUtils.isContainerBlock(e.getBlock())) {
                 new ContainerAutoLock().execute(e);
             }
             new RandomizerBlockPlace().execute(e);
