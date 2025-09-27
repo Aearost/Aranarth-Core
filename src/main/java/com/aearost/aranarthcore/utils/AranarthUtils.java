@@ -813,6 +813,26 @@ public class AranarthUtils {
 	 * @return The list of locked containers.
 	 */
 	public static List<LockedContainer> getLockedContainers() {
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			Bukkit.getLogger().info("There are no locked containers yet!");
+		} else {
+			for (LockedContainer container : lockedContainers) {
+				Bukkit.getLogger().info("-----------");
+				Bukkit.getLogger().info("UUID: " + container.getOwner());
+				Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
+				StringBuilder trusted = new StringBuilder();
+				for (UUID uuid : container.getTrusted()) {
+					if (trusted.isEmpty()) {
+						trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
+					} else {
+						trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
+					}
+
+				}
+				Bukkit.getLogger().info("Trusted: " + trusted);
+				Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
+			}
+		}
 		return lockedContainers;
 	}
 
@@ -830,10 +850,16 @@ public class AranarthUtils {
 	 * @return Confirmation whether the container was previously a locked container.
 	 */
 	public static boolean removeLockedContainerIfExists(Location location) {
+		Bukkit.getLogger().info("A");
 		boolean isLockedContainer = false;
 		int i = 0;
+		List<LockedContainer> lockedContainers = getLockedContainers();
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return false;
+		}
+
 		while (i < lockedContainers.size()) {
-            if (lockedContainers.get(i).getLocation() == location) {
+            if (AranarthUtils.isLockedContainer(lockedContainers.get(i).getLocation(), location)) {
                 isLockedContainer = true;
                 break;
             }
@@ -855,7 +881,7 @@ public class AranarthUtils {
 	 */
 	public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
 		List<UUID> trusted = null;
-		for (LockedContainer container : lockedContainers) {
+		for (LockedContainer container : getLockedContainers()) {
 			if (container.getLocation() == location) {
 				trusted = container.getTrusted();
 				// If the UUID is already there, do nothing
@@ -895,7 +921,7 @@ public class AranarthUtils {
 	 */
 	public static LockedContainer getLockedContainerAtBlock(Block block) {
 		if (isContainerBlock(block)) {
-			for (LockedContainer container : lockedContainers) {
+			for (LockedContainer container : getLockedContainers()) {
 				if (isLockedContainer(container.getLocation(), block.getLocation())) {
 					return container;
 				} else {
@@ -925,35 +951,73 @@ public class AranarthUtils {
 	 * @return Confirmation whether the player is trusted to the container.
 	 */
 	public static boolean canOpenContainer(Player player, Block block) {
-		if (lockedContainers != null && isContainerBlock(block)) {
+		List<LockedContainer> lockedContainers = getLockedContainers();
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return true;
+		}
+
+		if (isContainerBlock(block)) {
 			Location location = block.getLocation();
 			for (LockedContainer container : lockedContainers) {
+				Bukkit.getLogger().info("Iterating over container");
 				// If the clicked block is a container
 				if (isLockedContainer(container.getLocation(), block.getLocation())) {
+					Bukkit.getLogger().info("Block is a locked container");
 					List<UUID> trusted = container.getTrusted();
 					if (trusted.contains(player.getUniqueId())) {
+						Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
 						return true;
 					} else {
+						Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
 						return false;
 					}
 				} else {
-					// Chests can be two blocks wide and the non-clicked block may be the locked container
+					Bukkit.getLogger().info("Clicked block is not the locked container but other might be");
 					if (block.getState() instanceof Chest chest) {
+						Bukkit.getLogger().info("Block was a chest");
 						InventoryHolder holder = chest.getInventory().getHolder();
+						// Chests can be two blocks wide and the non-clicked block may be the locked container
 						if (holder instanceof DoubleChest doubleChest) {
+							Bukkit.getLogger().info("Block was a double chest");
 							Block left = ((Chest) doubleChest.getLeftSide()).getBlock();
 							Block right = ((Chest) doubleChest.getRightSide()).getBlock();
 							if (isLockedContainer(container.getLocation(), left.getLocation())) {
-								return true;
+								Bukkit.getLogger().info("Double chest was locked left");
+								List<UUID> trusted = container.getTrusted();
+								if (trusted.contains(player.getUniqueId())) {
+									Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
+									return true;
+								} else {
+									Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
+									return false;
+								}
 							} else if (isLockedContainer(container.getLocation(), right.getLocation())) {
+								Bukkit.getLogger().info("Double chest was locked right");
+								List<UUID> trusted = container.getTrusted();
+								if (trusted.contains(player.getUniqueId())) {
+									Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
+									return true;
+								} else {
+									Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
+									return false;
+								}
+							}
+							// No lock on the double chest
+							else {
 								return true;
 							}
+						}
+						// If it is a single chest that is not locked
+						else {
+							return true;
 						}
 					}
 					return false;
 				}
 			}
+			return false;
+		} else {
+			return true;
 		}
-		return true;
 	}
 }

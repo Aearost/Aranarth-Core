@@ -39,11 +39,9 @@ public class ContainerInteract {
                 }
             } else {
                 // Logic to remove a lock from a container
+                // Make sure unlock functionality removes lock from BOTH chests if it's double
                 // Logic to untrust a player from a container
             }
         }
     }
-
-
-
 }
