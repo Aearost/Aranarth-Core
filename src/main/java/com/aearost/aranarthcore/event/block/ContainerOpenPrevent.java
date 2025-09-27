@@ -14,9 +14,11 @@ public class ContainerOpenPrevent {
     public void execute(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         Player player = e.getPlayer();
-        if (!AranarthUtils.canOpenContainer(player, block)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
-            e.setCancelled(true);
+        if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {
+            if (!AranarthUtils.canOpenContainer(player, block)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
+                e.setCancelled(true);
+            }
         }
     }
 }
