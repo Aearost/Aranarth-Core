@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.event.block.BlockPlaceEvent;
 
@@ -23,11 +22,6 @@ public class ContainerAutoLock {
         trustedPlayers.add(uuid);
         // Only has the player placing the chest
         LockedContainer container = new LockedContainer(uuid, trustedPlayers, loc);
-
-        if (lockedContainers == null) {
-            lockedContainers = new ArrayList<>();
-        }
-        lockedContainers.add(container);
-        AranarthUtils.setLockedContainers(lockedContainers);
+        AranarthUtils.addLockedContainer(container);
     }
 }
