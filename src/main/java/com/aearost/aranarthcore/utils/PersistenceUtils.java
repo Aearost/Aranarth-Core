@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -668,40 +669,197 @@ public class PersistenceUtils {
 	 * Saves the server date to the serverdate.txt file.
 	 */
 	public static void saveServerDate() {
-			String currentPath = System.getProperty("user.dir");
-			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "serverdate.txt";
-			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-			File file = new File(filePath);
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "serverdate.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
 
-			// If the directory exists
-			boolean isDirectoryCreated = true;
-			if (!pluginDirectory.isDirectory()) {
-				isDirectoryCreated = pluginDirectory.mkdir();
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new serverdate.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of serverdate.txt");
 			}
-			if (isDirectoryCreated) {
-				try {
-					// If the file isn't already there
-					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new serverdate.txt file has been generated");
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+
+				writer.write("day:" + AranarthUtils.getDay() + "\n");
+				writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
+				writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
+				writer.write("year:" + AranarthUtils.getYear());
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the serverdate");
+			}
+		}
+	}
+
+	/**
+	 * Initializes the server date based on the contents of lockedcontainers.txt.
+	 */
+	public static void loadLockedContainers() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "lockedcontainers.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			int fieldCount = 0;
+			String fieldName;
+			String fieldValue;
+
+			UUID owner = null;
+			List<UUID> trusted = new ArrayList<>();
+			String world = "";
+			int x = 0;
+			int y = 0;
+			int z = 0;
+
+			Bukkit.getLogger().info("Attempting to read the lockedcontainers file...");
+
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				String[] parts = line.split("\"");
+
+				// If it's a field and not a parenthesis
+				// Make sure to replace "z" with the last field in the list
+				if (parts[parts.length - 1].equals(",")
+						|| (parts.length > 1 && parts[1].equals("z"))) {
+					fieldName = parts[1];
+					fieldValue = parts[3];
+				} else {
+					continue;
+				}
+
+				switch (fieldName) {
+					case "owner" -> {
+						owner = UUID.fromString(fieldValue);
+						fieldCount++;
 					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of serverdate.txt");
+					case "trusted" -> {
+						String[] trustedUuids = fieldValue.split("___");
+						for (String trustedUuid : trustedUuids) {
+							trusted.add(UUID.fromString(trustedUuid));
+						}
+						fieldCount++;
+					}
+					case "world" -> {
+						world = fieldValue;
+						fieldCount++;
+					}
+					case "x" -> {
+						x = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "y" -> {
+						y = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "z" -> {
+						z = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
 				}
 
-				try {
-					FileWriter writer = new FileWriter(filePath);
-
-					writer.write("day:" + AranarthUtils.getDay() + "\n");
-					writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
-					writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
-					writer.write("year:" + AranarthUtils.getYear());
-
-					writer.close();
-				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the serverdate");
+				if (fieldCount == 6) {
+					LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location(Bukkit.getWorld(world), x, y, z));
+					AranarthUtils.addLockedContainer(lockedContainer);
+					fieldCount = 0;
 				}
 			}
+			Bukkit.getLogger().info("All lockedcontainers have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the lockedcontainers!");
+		}
+	}
+
+	/**
+	 * Saves the server date to the lockedcontainers.txt file.
+	 */
+	public static void saveLockedContainers() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "lockedcontainers.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new lockedcontainers.json file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of lockedcontainers.json");
+			}
+
+			List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("{\n");
+				writer.write("    \"lockedcontainers\": {\n");
+
+				int totalContainerAmount = lockedContainers.size();
+				int currentShopNum = 0;
+
+				for (LockedContainer container : lockedContainers) {
+					currentShopNum++;
+					writer.write("        \"owner\": \"" + container.getOwner().toString() + "\",\n");
+					StringBuilder trusted = new StringBuilder();
+					for (UUID trustedUuid : container.getTrusted()) {
+						if (trusted.isEmpty()) {
+							trusted = new StringBuilder(trustedUuid.toString());
+						} else {
+							trusted.append("___").append(trustedUuid.toString());
+						}
+					}
+					writer.write("        \"trusted\": \"" + trusted + "\",\n");
+					writer.write("        \"world\": \"" + container.getLocation().getWorld().getName() + "\",\n");
+					writer.write("        \"x\": \"" + container.getLocation().getBlockX() + "\",\n");
+					writer.write("        \"y\": \"" + container.getLocation().getBlockY() + "\",\n");
+					writer.write("        \"z\": \"" + container.getLocation().getBlockZ() + "\"\n");
+
+
+					if (currentShopNum == totalContainerAmount) {
+						writer.write("    }\n");
+					} else {
+						writer.write("    },\n");
+						writer.write("    {\n");
+					}
+				}
+
+				writer.write("}\n");
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the lockedcontainers");
+			}
+		}
 	}
 
 }

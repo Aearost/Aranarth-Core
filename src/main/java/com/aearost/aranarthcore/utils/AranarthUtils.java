@@ -813,26 +813,26 @@ public class AranarthUtils {
 	 * @return The list of locked containers.
 	 */
 	public static List<LockedContainer> getLockedContainers() {
-		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			Bukkit.getLogger().info("There are no locked containers yet!");
-		} else {
-			for (LockedContainer container : lockedContainers) {
-				Bukkit.getLogger().info("-----------");
-				Bukkit.getLogger().info("UUID: " + container.getOwner());
-				Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
-				StringBuilder trusted = new StringBuilder();
-				for (UUID uuid : container.getTrusted()) {
-					if (trusted.isEmpty()) {
-						trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
-					} else {
-						trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
-					}
-
-				}
-				Bukkit.getLogger().info("Trusted: " + trusted);
-				Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
-			}
-		}
+//		if (lockedContainers == null || lockedContainers.isEmpty()) {
+//			Bukkit.getLogger().info("There are no locked containers yet!");
+//		} else {
+//			for (LockedContainer container : lockedContainers) {
+//				Bukkit.getLogger().info("-----------");
+//				Bukkit.getLogger().info("UUID: " + container.getOwner());
+//				Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
+//				StringBuilder trusted = new StringBuilder();
+//				for (UUID uuid : container.getTrusted()) {
+//					if (trusted.isEmpty()) {
+//						trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
+//					} else {
+//						trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
+//					}
+//
+//				}
+//				Bukkit.getLogger().info("Trusted: " + trusted);
+//				Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
+//			}
+//		}
 		return lockedContainers;
 	}
 
@@ -1019,5 +1019,16 @@ public class AranarthUtils {
 		} else {
 			return true;
 		}
+	}
+
+	/**
+	 * Adds a new locked container to the list.
+	 * @param lockedContainer The locked container to be added to the list.
+	 */
+	public static void addLockedContainer(LockedContainer lockedContainer) {
+		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+			lockedContainers = new ArrayList<>();
+		}
+		lockedContainers.add(lockedContainer);
 	}
 }

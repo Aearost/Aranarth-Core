@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -27,23 +27,17 @@ public class CommandAC implements CommandExecutor {
 			return false;
 		} else {
 			boolean commandResult = false;
-			// Applies only to Aearost (ops) or Console
-			if (sender instanceof Player || sender instanceof ConsoleCommandSender) {
-				if (sender instanceof Player player) {
-					if (!player.getName().equalsIgnoreCase("Aearost")) {
-						sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
-					}
+			// Applies only to Aearost (ops) or Console=
+			if (sender instanceof Player player) {
+				if (player.getName().equalsIgnoreCase("Aearost")) {
+					commandResult = isSenderOp(sender, args);
+				} else {
+					commandResult = isValidCommand(sender, args);
 				}
-
-				commandResult = isSenderOp(sender, args);
-				if (!commandResult) {
-					sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
-				}
-				return commandResult;
+			} else {
+				commandResult = isValidCommand(sender, args);
 			}
 
-			// Applies both to normal players and to console
-			commandResult = isValidCommand(sender, args);
 			if (!commandResult) {
 				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
 			}
@@ -104,9 +98,10 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("aranarth")) {
 			commandResult = CommandAranarth.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("trust")) {
+			Bukkit.getLogger().info("Before: " + commandResult);
 			commandResult = CommandTrust.onCommand(sender, args);
+			Bukkit.getLogger().info("After: " + commandResult);
 		}
 		return commandResult;
 	}
-
 }
