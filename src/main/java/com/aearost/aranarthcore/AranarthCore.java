@@ -92,7 +92,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadAranarthPlayers();
 		PersistenceUtils.loadPlayerShops();
 		PersistenceUtils.loadServerDate();
-		PersistenceUtils.loadLockedContainers();
+//		PersistenceUtils.loadLockedContainers();
 	}
 
 	/**
@@ -260,7 +260,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveAranarthPlayers();
 		PersistenceUtils.savePlayerShops();
 		PersistenceUtils.saveServerDate();
-		PersistenceUtils.saveLockedContainers();
+//		PersistenceUtils.saveLockedContainers();
 	}
 
 }
