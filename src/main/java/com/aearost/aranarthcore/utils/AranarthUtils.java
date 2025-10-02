@@ -971,7 +971,9 @@ public class AranarthUtils {
 						Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
 						return false;
 					}
-				} else {
+				}
+				// If the clicked block isn't necessarily the locked container
+				else {
 					Bukkit.getLogger().info("Clicked block is not the locked container but other might be");
 					if (block.getState() instanceof Chest chest) {
 						Bukkit.getLogger().info("Block was a chest");
@@ -1011,8 +1013,20 @@ public class AranarthUtils {
 						else {
 							return true;
 						}
+					} else {
+						if (isLockedContainer(container.getLocation(), location)) {
+							Bukkit.getLogger().info("Non chest is locked");
+							List<UUID> trusted = container.getTrusted();
+							if (trusted.contains(player.getUniqueId())) {
+								Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
+								return true;
+							} else {
+								Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
+								return false;
+							}
+						}
+						return true;
 					}
-					return false;
 				}
 			}
 			return false;
