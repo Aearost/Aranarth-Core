@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -59,7 +58,6 @@ public class CommandItemName {
                         }
 
                         String itemName = itemNameSB.toString();
-                        Bukkit.getLogger().info("Full name: |" + itemName + "|");
                         if (args[1].startsWith("gradient")) {
                             if (args[1].equalsIgnoreCase("gradient")) {
                                 itemName = ChatUtils.translateToGradient(args[2], itemName, false);
