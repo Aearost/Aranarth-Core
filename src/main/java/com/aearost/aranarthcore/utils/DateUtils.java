@@ -422,13 +422,14 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// Delay up to 10 days
-			AranarthUtils.setStormDelay(new Random().nextInt(24000));
+//			AranarthUtils.setStormDelay(new Random().nextInt(24000)); TODO
+			AranarthUtils.setStormDelay(300);
 		}
 
 		// If it is not raining, only snow
 		if (AranarthUtils.getWeather() == Weather.SNOW && AranarthUtils.getStormDelay() <= 0 && AranarthUtils.getStormDuration() >= 0) {
 			// Adds snow but will only apply in low chance - will melt otherwise
-			applySnow(20, 500);
+			applySnow(15, 400);
 		} else {
 			meltSnow(1);
 			applyRain();
@@ -466,6 +467,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.SPEED, 320, 0));
 		applyEffectToAllPlayers(effects);
 		meltSnow(2);
+		applyRain();
 	}
 
 	/**
@@ -474,6 +476,7 @@ public class DateUtils {
 	 */
 	private void applyFlorivorEffects() {
 		meltSnow(3);
+		applyRain();
 	}
 
 	/**
@@ -489,6 +492,7 @@ public class DateUtils {
 	 */
 	private void applyCalorvorEffects() {
 		meltSnow(3);
+		applyRain();
 	}
 
 	/**
@@ -499,6 +503,7 @@ public class DateUtils {
 		effects.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 		applyEffectToAllPlayers(effects);meltSnow(4);
 		applyForestFire();
+		applyRain();
 	}
 
 	/**
@@ -506,6 +511,7 @@ public class DateUtils {
 	 */
 	private void applySolarvorEffects() {
 		meltSnow(4);
+		applyRain();
 	}
 
 	/**
@@ -513,6 +519,7 @@ public class DateUtils {
 	 */
 	private void applyFructivorEffects() {
 		meltSnow(4);
+		applyRain();
 	}
 
 	/**
@@ -520,6 +527,7 @@ public class DateUtils {
 	 */
 	private void applyFollivorEffects() {
 		meltSnow(2);
+		applyRain();
 	}
 
 	/**
@@ -527,6 +535,7 @@ public class DateUtils {
 	 */
 	private void applyFaunivorEffects() {
 		meltSnow(3);
+		applyRain();
 	}
 
 	/**
@@ -537,9 +546,18 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.75 days, no more than 5 days
-			AranarthUtils.setStormDelay(new Random().nextInt(102000) + 18000);
+//			AranarthUtils.setStormDelay(new Random().nextInt(102000) + 18000); TODO
+			AranarthUtils.setStormDelay(300);
 		}
-		applySnow(5, 100);
+
+		// If it is not raining, only snow
+		if (AranarthUtils.getWeather() == Weather.SNOW && AranarthUtils.getStormDelay() <= 0 && AranarthUtils.getStormDuration() >= 0) {
+			// Adds snow but will only apply in low chance - will melt otherwise
+			applySnow(20, 250);
+		} else {
+			meltSnow(1);
+			applyRain();
+		}
 	}
 
 	/**
@@ -554,9 +572,10 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.5 days, no more than 2 days
-			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000);
+//			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000); TODO
+			AranarthUtils.setStormDelay(300);
 		}
-		applySnow(15, 400);
+		applySnow(30, 500);
 	}
 
 	/**
@@ -591,7 +610,7 @@ public class DateUtils {
 			// At least 0.5 days, no more than 1.5 days
 			AranarthUtils.setStormDelay(new Random().nextInt(36000) + 12000);
 		}
-		applySnow(15, 400);
+		applySnow(35, 700);
 	}
 
 	/**
@@ -659,7 +678,8 @@ public class DateUtils {
 									delay = random.nextInt(102000) + 18000;
 								case Month.GLACIVOR ->
 									// At least 0.5 days, no more than 2 days
-									delay = random.nextInt(48000) + 12000;
+//									delay = random.nextInt(48000) + 12000; TODO
+									delay = 300;
 								case Month.FRIGORVOR ->
 									// At least 0.25 days, no more than 1 day
 									delay = random.nextInt(18000) + 6000;
@@ -692,7 +712,8 @@ public class DateUtils {
 									duration = random.nextInt(15000) + 3000;
 								case Month.GLACIVOR ->
                                     // At least 0.5 days, no more than 1.5 days
-									duration = random.nextInt(24000) + 12000;
+//									duration = random.nextInt(24000) + 12000; TODO
+									duration = 300;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
 									duration = random.nextInt(30000) + 18000;
@@ -1075,8 +1096,8 @@ public class DateUtils {
 									}
 								}
 							}
-							// Increase animal growth speed during the month of Ardorvor
-							else if (runs < 4 && month == Month.ARDORVOR) {
+							// Increase animal growth speed during the month of Calorvor
+							else if (runs < 4 && month == Month.CALORVOR) {
 								Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
 								for (Entity entity : entitiesInRange) {
 									if (entity instanceof Animals animal && !animal.isAdult()) {
@@ -1407,7 +1428,9 @@ public class DateUtils {
 				}
                 updateStorm(Weather.CLEAR, delay);
 				// Must be at the end or it interferes with WeatherChangeEventListener
-                AranarthUtils.setStormDelay(delay);
+				// Real weather ticks but Aranarth duration only updates after conditions
+				// Because of this, a difference of 100 occurs, so it must be reduced
+                AranarthUtils.setStormDelay(delay - 100);
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -1417,7 +1440,7 @@ public class DateUtils {
 		else {
 			World world = Bukkit.getWorld("world");
 			// Raining from previous server restart
-			if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDelay() == 0 && AranarthUtils.getStormDuration() == 0) {
+			if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDuration() == 0) {
 				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
 				AranarthUtils.setStormDelay(0);
 				if (world.isThundering()) {
@@ -1458,7 +1481,9 @@ public class DateUtils {
 						}
 					}
 					// Must be at the end or it interferes with WeatherChangeEventListener
-					AranarthUtils.setStormDuration(duration);
+					// Real weather ticks but Aranarth duration only updates after conditions
+					// Because of this, a difference of 100 occurs, so it must be reduced
+					AranarthUtils.setStormDuration(duration - 100);
 				} else {
 					// 100 ticks per execution
 					AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
@@ -1479,6 +1504,7 @@ public class DateUtils {
 		// Start of a new weather
 		if (type != Weather.CLEAR) {
 			AranarthUtils.setWeather(type);
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("AAA"));
 			if (type == Weather.RAIN) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
@@ -1510,6 +1536,7 @@ public class DateUtils {
 			world.setStorm(false);
 			world.setClearWeatherDuration(duration);
 			AranarthUtils.setWeather(type);
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("EEE"));
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
 		Bukkit.broadcastMessage(message);

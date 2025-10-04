@@ -51,37 +51,42 @@ public class WeatherChangeListener implements Listener {
 		// Storm is stopping
 		else {
 			// If storm is ending before the duration is over (i.e sleeping in bed)
-			if (AranarthUtils.getStormDuration() >= 100 && AranarthUtils.getStormDelay() <= 0) {
+			if (AranarthUtils.getStormDuration() > 100 && AranarthUtils.getStormDelay() <= 0) {
 				Random random = new Random();
 				AranarthUtils.setWeather(Weather.CLEAR);
 				// At least 0.25 days, no more than 2.25 days
-				int delay = random.nextInt(48000) + 6000;
+//				int delay = random.nextInt(48000) + 6000; TODO
+				int delay = 300;
 
 				if (AranarthUtils.getMonth() == Month.AQUINVOR) {
 					// At least 0.25 days, no more than 2.25 days
-					delay = random.nextInt(48000) + 6000;
+//					delay = random.nextInt(48000) + 6000; TODO
+					delay = 300;
 				}
 
 				AranarthUtils.setStormDelay(delay);
 				AranarthUtils.setStormDuration(0);
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("CCC"));
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
 				return;
 			}
 		}
 
 		// If there is no special weather functionality in the month
-		if (!DateUtils.isWinterMonth(AranarthUtils.getMonth()) && AranarthUtils.getMonth() != Month.IGNIVOR
-				&& AranarthUtils.getMonth() != Month.AQUINVOR && AranarthUtils.getMonth() != Month.AESTIVOR) {
-			if (e.toWeatherState()) {
-				if (AranarthUtils.getWeather() == Weather.RAIN) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
-				} else {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA thunderstorm has started..."));
-				}
-			} else {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
-			}
-		}
+//		if (!DateUtils.isWinterMonth(AranarthUtils.getMonth()) && AranarthUtils.getMonth() != Month.IGNIVOR
+//				&& AranarthUtils.getMonth() != Month.AQUINVOR && AranarthUtils.getMonth() != Month.AESTIVOR) {
+//			Bukkit.broadcastMessage(ChatUtils.chatMessage("BBB"));
+//			if (e.toWeatherState()) {
+//				if (AranarthUtils.getWeather() == Weather.RAIN) {
+//					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
+//				} else {
+//					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA thunderstorm has started..."));
+//				}
+//			} else {
+//				Bukkit.broadcastMessage(ChatUtils.chatMessage("DDD"));
+//				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+//			}
+//		}
 
 	}
 
