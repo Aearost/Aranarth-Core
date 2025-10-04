@@ -29,6 +29,7 @@ Features
 [+] Added sound for when opening and closing a shulker in backpack-mode
 [+] Happy Ghasts can no longer be harmed by players
 [~] Fixed bug where commands had error due incorrect method check
+[~] It will now snow and rain during the month of Umbravor rather than only snow
 
 Miscellaneous
 - Restructured date message logic to be a callable method

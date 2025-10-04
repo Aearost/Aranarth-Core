@@ -29,14 +29,15 @@ public class WeatherChangeListener implements Listener {
 		if (e.toWeatherState()) {
 			// Winter months checks
 			if (DateUtils.isWinterMonth(AranarthUtils.getMonth()) || AranarthUtils.getMonth() == Month.IGNIVOR) {
-				// Always prevent rain in winter months that are not Ignivor
-				if (AranarthUtils.getMonth() != Month.IGNIVOR) {
+				// Always prevent rain in winter months that are not Ignivor or Umbravor
+				if (AranarthUtils.getMonth() != Month.IGNIVOR && AranarthUtils.getMonth() != Month.UMBRAVOR) {
 					e.setCancelled(true);
 					return;
 				}
 
-				// Ignivor can only rain if not snowing
-				if (AranarthUtils.getMonth() == Month.IGNIVOR && AranarthUtils.getWeather() == Weather.SNOW) {
+				// Ignivor and Umbravor can only rain if not snowing
+				if ((AranarthUtils.getMonth() == Month.IGNIVOR || AranarthUtils.getMonth() == Month.UMBRAVOR)
+						&& AranarthUtils.getWeather() == Weather.SNOW) {
 					e.setCancelled(true);
 					return;
 				}
@@ -55,18 +56,15 @@ public class WeatherChangeListener implements Listener {
 				Random random = new Random();
 				AranarthUtils.setWeather(Weather.CLEAR);
 				// At least 0.25 days, no more than 2.25 days
-//				int delay = random.nextInt(48000) + 6000; TODO
-				int delay = 300;
+				int delay = random.nextInt(48000) + 6000;
 
 				if (AranarthUtils.getMonth() == Month.AQUINVOR) {
 					// At least 0.25 days, no more than 2.25 days
-//					delay = random.nextInt(48000) + 6000; TODO
-					delay = 300;
+					delay = random.nextInt(48000) + 6000;
 				}
 
 				AranarthUtils.setStormDelay(delay);
 				AranarthUtils.setStormDuration(0);
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("CCC"));
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
 				return;
 			}
