@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -98,9 +97,7 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("aranarth")) {
 			commandResult = CommandAranarth.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("trust")) {
-			Bukkit.getLogger().info("Before: " + commandResult);
 			commandResult = CommandTrust.onCommand(sender, args);
-			Bukkit.getLogger().info("After: " + commandResult);
 		}
 		return commandResult;
 	}

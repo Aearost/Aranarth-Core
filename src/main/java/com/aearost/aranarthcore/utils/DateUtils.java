@@ -655,12 +655,6 @@ public class DateUtils {
 			return;
 		}
 
-		Bukkit.getLogger().info("--------SNOW--------");
-		Bukkit.getLogger().info("Duration: " + AranarthUtils.getStormDuration());
-		Bukkit.getLogger().info("Real Duration: " + Bukkit.getWorld("world").getWeatherDuration());
-		Bukkit.getLogger().info("Delay: " + AranarthUtils.getStormDelay());
-		Bukkit.getLogger().info("Real Delay: " + Bukkit.getWorld("world").getClearWeatherDuration());
-
 		new BukkitRunnable() {
 			int runs = 0;
 
@@ -1432,11 +1426,6 @@ public class DateUtils {
 	 * Applies rain manually based on the given month.
 	 */
 	private void applyRain() {
-		Bukkit.getLogger().info("--------RAIN--------");
-		Bukkit.getLogger().info("Duration: " + AranarthUtils.getStormDuration());
-		Bukkit.getLogger().info("Real Duration: " + Bukkit.getWorld("world").getWeatherDuration());
-		Bukkit.getLogger().info("Delay: " + AranarthUtils.getStormDelay());
-		Bukkit.getLogger().info("Real Delay: " + Bukkit.getWorld("world").getClearWeatherDuration());
 		// If it is currently storming
 		if (AranarthUtils.getWeather() != Weather.CLEAR) {
 			// Check if the duration has ended

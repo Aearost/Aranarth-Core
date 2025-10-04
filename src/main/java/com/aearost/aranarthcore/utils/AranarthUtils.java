@@ -850,7 +850,6 @@ public class AranarthUtils {
 	 * @return Confirmation whether the container was previously a locked container.
 	 */
 	public static boolean removeLockedContainerIfExists(Location location) {
-		Bukkit.getLogger().info("A");
 		boolean isLockedContainer = false;
 		int i = 0;
 		List<LockedContainer> lockedContainers = getLockedContainers();
