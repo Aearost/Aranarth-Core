@@ -422,8 +422,7 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// Delay up to 10 days
-//			AranarthUtils.setStormDelay(new Random().nextInt(24000)); TODO
-			AranarthUtils.setStormDelay(300);
+			AranarthUtils.setStormDelay(new Random().nextInt(24000));
 		}
 
 		// If it is not raining, only snow
@@ -546,8 +545,7 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.75 days, no more than 5 days
-//			AranarthUtils.setStormDelay(new Random().nextInt(102000) + 18000); TODO
-			AranarthUtils.setStormDelay(300);
+			AranarthUtils.setStormDelay(new Random().nextInt(102000) + 18000);
 		}
 
 		// If it is not raining, only snow
@@ -572,8 +570,7 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.5 days, no more than 2 days
-//			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000); TODO
-			AranarthUtils.setStormDelay(300);
+			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000);
 		}
 		applySnow(30, 500);
 	}
@@ -650,12 +647,19 @@ public class DateUtils {
 	 * @param smallFlakeDensity The density of the smaller snowflakes, being white ash particles.
 	 */
 	private void applySnow(int bigFlakeDensity, int smallFlakeDensity) {
-		// Only melts snow if it isn't currently snowing during the month of Ignivor only
-		if (AranarthUtils.getMonth() == Month.IGNIVOR && AranarthUtils.getWeather() != Weather.SNOW) {
+		// Only melts snow if it isn't currently snowing during the month of Ignivor or Umbravor only
+		if ((AranarthUtils.getMonth() == Month.IGNIVOR || AranarthUtils.getMonth() == Month.UMBRAVOR)
+				&& AranarthUtils.getWeather() != Weather.SNOW) {
 //			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			meltSnow(1);
 			return;
 		}
+
+		Bukkit.getLogger().info("--------SNOW--------");
+		Bukkit.getLogger().info("Duration: " + AranarthUtils.getStormDuration());
+		Bukkit.getLogger().info("Real Duration: " + Bukkit.getWorld("world").getWeatherDuration());
+		Bukkit.getLogger().info("Delay: " + AranarthUtils.getStormDelay());
+		Bukkit.getLogger().info("Real Delay: " + Bukkit.getWorld("world").getClearWeatherDuration());
 
 		new BukkitRunnable() {
 			int runs = 0;
@@ -678,8 +682,7 @@ public class DateUtils {
 									delay = random.nextInt(102000) + 18000;
 								case Month.GLACIVOR ->
 									// At least 0.5 days, no more than 2 days
-//									delay = random.nextInt(48000) + 12000; TODO
-									delay = 300;
+									delay = random.nextInt(48000) + 12000;
 								case Month.FRIGORVOR ->
 									// At least 0.25 days, no more than 1 day
 									delay = random.nextInt(18000) + 6000;
@@ -692,7 +695,9 @@ public class DateUtils {
 							}
 							updateStorm(Weather.CLEAR, delay);
 							// Must be at the end or it interferes with WeatherChangeEventListener
-							AranarthUtils.setStormDelay(delay);
+							// Real weather ticks but Aranarth duration only updates after conditions
+							// Because of this, a difference of 100 occurs, so it must be reduced
+							AranarthUtils.setStormDelay(delay - 100);
 						} else {
 							// 100 ticks per execution
 							AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -712,8 +717,7 @@ public class DateUtils {
 									duration = random.nextInt(15000) + 3000;
 								case Month.GLACIVOR ->
                                     // At least 0.5 days, no more than 1.5 days
-//									duration = random.nextInt(24000) + 12000; TODO
-									duration = 300;
+									duration = random.nextInt(24000) + 12000;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
 									duration = random.nextInt(30000) + 18000;
@@ -725,7 +729,7 @@ public class DateUtils {
 									duration = random.nextInt(24000) + 6000;
                             }
 
-							// Ignivor can either snow or rain
+							// Ignivor can either snow or rain, higher chance of snow
 							if (month == Month.IGNIVOR) {
 								int chance = random.nextInt(100);
 								if (chance >= 98) {
@@ -735,10 +739,24 @@ public class DateUtils {
 								} else {
 									updateStorm(Weather.SNOW, duration);
 								}
+							}
+							// Umbravor can either snow or rain, higher chance of rain
+							else if (month == Month.UMBRAVOR) {
+								int chance = random.nextInt(100);
+								if (chance >= 96) {
+									updateStorm(Weather.THUNDER, duration);
+								} else if (chance >= 40) {
+									updateStorm(Weather.RAIN, duration);
+								} else {
+									updateStorm(Weather.SNOW, duration);
+								}
 							} else {
 								updateStorm(Weather.SNOW, duration);
 							}
-							AranarthUtils.setStormDuration(duration);
+							// Must be at the end or it interferes with WeatherChangeEventListener
+							// Real weather ticks but Aranarth duration only updates after conditions
+							// Because of this, a difference of 100 occurs, so it must be reduced
+							AranarthUtils.setStormDuration(duration - 100);
 						} else {
 							// 100 ticks per execution
 							AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
@@ -1167,8 +1185,8 @@ public class DateUtils {
 											meltRate = (int) (meltRate / 1.5);
 										}
 
-										// Reduce snow melting rate if it is Ignivor
-										if (month == Month.IGNIVOR) {
+										// Reduce snow melting rate if it is Ignivor or Umbravor
+										if (month == Month.IGNIVOR || month == Month.UMBRAVOR) {
 											meltRate = meltRate / 2;
 										}
 										// Increased snow melting rate if it is raining
@@ -1414,6 +1432,11 @@ public class DateUtils {
 	 * Applies rain manually based on the given month.
 	 */
 	private void applyRain() {
+		Bukkit.getLogger().info("--------RAIN--------");
+		Bukkit.getLogger().info("Duration: " + AranarthUtils.getStormDuration());
+		Bukkit.getLogger().info("Real Duration: " + Bukkit.getWorld("world").getWeatherDuration());
+		Bukkit.getLogger().info("Delay: " + AranarthUtils.getStormDelay());
+		Bukkit.getLogger().info("Real Delay: " + Bukkit.getWorld("world").getClearWeatherDuration());
 		// If it is currently storming
 		if (AranarthUtils.getWeather() != Weather.CLEAR) {
 			// Check if the duration has ended
@@ -1459,10 +1482,20 @@ public class DateUtils {
 
 					if (AranarthUtils.getMonth() == Month.IGNIVOR) {
 						chance = random.nextInt(100);
-						// Ignivor can either snow or rain
-						if (chance >= 98) {
+						// Ignivor can either snow or rain, higher chance of snow
+						if (chance >= 95) {
 							updateStorm(Weather.THUNDER, duration);
 						} else if (chance >= 55) {
+							updateStorm(Weather.RAIN, duration);
+						} else {
+							updateStorm(Weather.SNOW, duration);
+						}
+					} else if (AranarthUtils.getMonth() == Month.UMBRAVOR) {
+						chance = random.nextInt(100);
+						// Ignivor can either snow or rain, higher chance of rain
+						if (chance >= 95) {
+							updateStorm(Weather.THUNDER, duration);
+						} else if (chance >= 40) {
 							updateStorm(Weather.RAIN, duration);
 						} else {
 							updateStorm(Weather.SNOW, duration);
