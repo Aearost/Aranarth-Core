@@ -20,8 +20,6 @@ import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 
-import java.util.Random;
-
 public class AranarthCore extends JavaPlugin {
 
 	private static AranarthCore plugin;
@@ -43,7 +41,8 @@ public class AranarthCore extends JavaPlugin {
 
 		// Sets default storm values
 		AranarthUtils.setWeather(Weather.CLEAR);
-		AranarthUtils.setStormDelay(new Random().nextInt(18000));
+//		AranarthUtils.setStormDelay(new Random().nextInt(18000)); TODO
+		AranarthUtils.setStormDelay(300);
 
 		runRepeatingTasks();
 	}
