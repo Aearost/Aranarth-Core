@@ -35,6 +35,8 @@ public class AranarthPlayer {
 	private int potionQuantityToRemove;
 	private UUID trustedPlayerUUID;
 	private UUID untrustedPlayerUUID;
+	private boolean isLockingContainer;
+	private boolean isUnlockingContainer;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -59,6 +61,8 @@ public class AranarthPlayer {
 		this.potionQuantityToRemove = 0;
 		this.trustedPlayerUUID = null;
 		this.untrustedPlayerUUID = null;
+		this.isLockingContainer = false;
+		this.isUnlockingContainer = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
@@ -84,6 +88,8 @@ public class AranarthPlayer {
 		this.potionQuantityToRemove = 0;
 		this.trustedPlayerUUID = null;
 		this.untrustedPlayerUUID = null;
+		this.isLockingContainer = false;
+		this.isUnlockingContainer = false;
 	}
 
 	/**
@@ -468,6 +474,38 @@ public class AranarthPlayer {
 	 */
 	public void setUntrustedPlayerUUID(UUID untrustedPlayerUUID) {
 		this.untrustedPlayerUUID = untrustedPlayerUUID;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is attempting to unlock a container.
+	 * @return Whether the player is attempting to unlock a container.
+	 */
+	public boolean getIsUnlockingContainer() {
+		return isUnlockingContainer;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is attempting to unlock a container.
+	 * @param isUnlockingContainer The temporary variable of whether the player is attempting to unlock a container.
+	 */
+	public void setIsUnlockingContainer(boolean isUnlockingContainer) {
+		this.isUnlockingContainer = isUnlockingContainer;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is attempting to lock a container.
+	 * @return Whether the player is attempting to lock a container.
+	 */
+	public boolean getIsLockingContainer() {
+		return isLockingContainer;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is attempting to lock a container.
+	 * @param isLockingContainer The temporary variable of whether the player is attempting to lock a container.
+	 */
+	public void setIsLockingContainer(boolean isLockingContainer) {
+		this.isLockingContainer = isLockingContainer;
 	}
 
 }
