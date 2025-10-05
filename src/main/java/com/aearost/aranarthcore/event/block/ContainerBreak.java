@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.entity.Player;
@@ -13,16 +14,16 @@ public class ContainerBreak {
     public void execute(BlockBreakEvent e) {
         Player player = e.getPlayer();
         if (AranarthUtils.getLockedContainers() != null) {
-            if (AranarthUtils.canOpenContainer(player, e.getBlock())) {
-                boolean wasLockedContainer = AranarthUtils.removeLockedContainerIfExists(e.getBlock().getLocation());
-                if (wasLockedContainer) {
-                    player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
-                }
+            LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(e.getBlock());
+            if (lockedContainer == null) {
+                return;
+            }
+
+            if (lockedContainer.getOwner() != player.getUniqueId()) {
+                player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
             } else {
-                if (AranarthUtils.getLockedContainers() != null) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to break this container!"));
-                    e.setCancelled(true);
-                }
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to break this container!"));
+                e.setCancelled(true);
             }
         }
     }

@@ -12,12 +12,12 @@ public class LockedContainer {
 
 	private UUID owner;
 	private List<UUID> trusted;
-	private Location location;
+	private Location[] locations;
 
-	public LockedContainer(UUID owner, List<UUID> trusted, Location location) {
+	public LockedContainer(UUID owner, List<UUID> trusted, Location[] locations) {
 		this.owner = owner;
 		this.trusted = trusted;
-		this.location = location;
+		this.locations = locations;
 	}
 
 	/**
@@ -53,19 +53,19 @@ public class LockedContainer {
 	}
 
 	/**
-	 * Provides the current Location of the locked container.
-	 * @return The current Location of the locked container.
+	 * Provides the current Locations of the locked container.
+	 * @return The current Locations of the locked container.
 	 */
-	public Location getLocation() {
-		return location;
+	public Location[] getLocations() {
+		return locations;
 	}
 
 	/**
-	 * Updates the location of the locked container.
-	 * @param location The new location of the locked container.
+	 * Updates the locations of the locked container.
+	 * @param locations The new locations of the locked container.
 	 */
-	public void setLocation(Location location) {
-		this.location = location;
+	public void setLocations(Location[] locations) {
+		this.locations = locations;
 	}
 
 

@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.objects;
 
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -35,6 +34,7 @@ public class AranarthPlayer {
 	private double balance;
 	private int potionQuantityToRemove;
 	private UUID trustedPlayerUUID;
+	private UUID untrustedPlayerUUID;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -58,6 +58,7 @@ public class AranarthPlayer {
 		this.balance = 0.00;
 		this.potionQuantityToRemove = 0;
 		this.trustedPlayerUUID = null;
+		this.untrustedPlayerUUID = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
@@ -82,6 +83,7 @@ public class AranarthPlayer {
 		this.balance = balance;
 		this.potionQuantityToRemove = 0;
 		this.trustedPlayerUUID = null;
+		this.untrustedPlayerUUID = null;
 	}
 
 	/**
@@ -450,6 +452,22 @@ public class AranarthPlayer {
 	 */
 	public void setTrustedPlayerUUID(UUID trustedPlayerUUID) {
 		this.trustedPlayerUUID = trustedPlayerUUID;
+	}
+
+	/**
+	 * Provides the temporary variable tracking which player is being untrusted from a container.
+	 * @return The player's UUID that will be untrusted from the container.
+	 */
+	public UUID getUntrustedPlayerUUID() {
+		return untrustedPlayerUUID;
+	}
+
+	/**
+	 * Updates the temporary variable tracking which player is being untrusted from a container.
+	 * @param untrustedPlayerUUID The UUID of the player to be untrusted.
+	 */
+	public void setUntrustedPlayerUUID(UUID untrustedPlayerUUID) {
+		this.untrustedPlayerUUID = untrustedPlayerUUID;
 	}
 
 }

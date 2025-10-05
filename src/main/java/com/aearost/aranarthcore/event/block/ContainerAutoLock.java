@@ -20,8 +20,8 @@ public class ContainerAutoLock {
         Location loc = e.getBlock().getLocation();
         List<UUID> trustedPlayers = new ArrayList<>();
         trustedPlayers.add(uuid);
-        // Only has the player placing the chest
-        LockedContainer container = new LockedContainer(uuid, trustedPlayers, loc);
+        // Only has the player placing the chest trusted by default
+        LockedContainer container = new LockedContainer(uuid, trustedPlayers, AranarthUtils.getLocationsOfContainer(e.getBlock()));
         AranarthUtils.addLockedContainer(container);
     }
 }
