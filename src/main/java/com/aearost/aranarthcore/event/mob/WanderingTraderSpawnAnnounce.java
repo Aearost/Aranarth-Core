@@ -14,7 +14,7 @@ public class WanderingTraderSpawnAnnounce {
 	public void execute(EntitySpawnEvent e) {
 		WanderingTrader wanderingTrader = (WanderingTrader) e.getEntity();
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (player.getLocation().getWorld().getName().equalsIgnoreCase("world")) {
+			if (player.getLocation().getWorld().getName().equalsIgnoreCase("world") || player.getLocation().getWorld().getName().equalsIgnoreCase("smp")) {
 				if (player.getLocation().distance(wanderingTrader.getLocation()) <= 100) {
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has spawned nearby &e" + AranarthUtils.getNickname(player)));
 					return;

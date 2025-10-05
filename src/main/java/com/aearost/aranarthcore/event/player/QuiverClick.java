@@ -17,7 +17,7 @@ public class QuiverClick {
 			ItemMeta meta = e.getItem().getItemMeta();
 			if (meta.getPersistentDataContainer().has(QUIVER)) {
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-					if (e.getPlayer().getWorld().getName().startsWith("world")) {
+					if (e.getPlayer().getWorld().getName().startsWith("world") || e.getPlayer().getWorld().getName().startsWith("smp")) {
 						e.setCancelled(true);
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();

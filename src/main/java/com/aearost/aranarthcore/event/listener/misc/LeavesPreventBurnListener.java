@@ -21,7 +21,7 @@ public class LeavesPreventBurnListener implements Listener {
 	 */
 	@EventHandler
 	public void onLeavesBurn(BlockIgniteEvent e) {
-		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world")) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world") || e.getBlock().getWorld().getName().equalsIgnoreCase("smp")) {
 			for (BlockFace face : BlockFace.values()) {
 				Block relative = e.getBlock().getRelative(face);
 				if (relative.getBlockData() instanceof Leaves leaves) {
