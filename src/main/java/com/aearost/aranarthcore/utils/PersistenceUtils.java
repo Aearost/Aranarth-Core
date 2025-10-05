@@ -730,9 +730,12 @@ public class PersistenceUtils {
 			UUID owner = null;
 			List<UUID> trusted = new ArrayList<>();
 			String world = "";
-			int x = 0;
-			int y = 0;
-			int z = 0;
+			int x1 = 0;
+			int y1 = 0;
+			int z1 = 0;
+			int x2 = 0;
+			int y2 = 0;
+			int z2 = 0;
 
 			Bukkit.getLogger().info("Attempting to read the lockedcontainers file...");
 
@@ -766,22 +769,36 @@ public class PersistenceUtils {
 						world = fieldValue;
 						fieldCount++;
 					}
-					case "x" -> {
-						x = Integer.parseInt(fieldValue);
+					case "x1" -> {
+						x1 = Integer.parseInt(fieldValue);
 						fieldCount++;
 					}
-					case "y" -> {
-						y = Integer.parseInt(fieldValue);
+					case "y1" -> {
+						y1 = Integer.parseInt(fieldValue);
 						fieldCount++;
 					}
-					case "z" -> {
-						z = Integer.parseInt(fieldValue);
+					case "z1" -> {
+						z1 = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "x2" -> {
+						x2 = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "y2" -> {
+						y2 = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "z2" -> {
+						z2 = Integer.parseInt(fieldValue);
 						fieldCount++;
 					}
 				}
 
-				if (fieldCount == 6) {
-					LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location(Bukkit.getWorld(world), x, y, z));
+				if (fieldCount == 9) {
+					Location loc1 = new Location(Bukkit.getWorld(world), x1, y1, z1);
+					Location loc2 = new Location(Bukkit.getWorld(world), x2, y2, z2);
+					LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location[] { loc1, loc2 });
 					AranarthUtils.addLockedContainer(lockedContainer);
 					fieldCount = 0;
 				}
@@ -840,11 +857,15 @@ public class PersistenceUtils {
 						}
 					}
 					writer.write("        \"trusted\": \"" + trusted + "\",\n");
-					writer.write("        \"world\": \"" + container.getLocation().getWorld().getName() + "\",\n");
-					writer.write("        \"x\": \"" + container.getLocation().getBlockX() + "\",\n");
-					writer.write("        \"y\": \"" + container.getLocation().getBlockY() + "\",\n");
-					writer.write("        \"z\": \"" + container.getLocation().getBlockZ() + "\"\n");
+					Location[] locations = container.getLocations();
 
+					writer.write("        \"world\": \"" + locations[0].getWorld().getName() + "\",\n");
+					writer.write("        \"x1\": \"" + locations[0].getBlockX() + "\",\n");
+					writer.write("        \"y1\": \"" + locations[0].getBlockY() + "\",\n");
+					writer.write("        \"z1\": \"" + locations[0].getBlockZ() + "\"\n");
+					writer.write("        \"x2\": \"" + locations[1].getBlockX() + "\",\n");
+					writer.write("        \"y2\": \"" + locations[1].getBlockY() + "\",\n");
+					writer.write("        \"z2\": \"" + locations[1].getBlockZ() + "\"\n");
 
 					if (currentShopNum == totalContainerAmount) {
 						writer.write("    }\n");

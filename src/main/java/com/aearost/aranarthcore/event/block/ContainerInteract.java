@@ -5,10 +5,13 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -31,7 +34,7 @@ public class ContainerInteract {
                 return;
             }
 
-            // If attempting to add a trusted player to the container
+            // Logic to trust a player to the container
             if (aranarthPlayer.getTrustedPlayerUUID() != null) {
                 // Only the owner can add players
                 if (container.getOwner() == uuid) {
@@ -44,12 +47,52 @@ public class ContainerInteract {
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
                 }
-            } else if (aranarthPlayer.getUntrustedPlayerUUID() != null) {
-
-            } else if (aranarthPlayer.getIsLockingContainer()) {
-
-            } else if (aranarthPlayer.getIsUnlockingContainer()) {
-
+            }
+            // Logic to untrust a player from the container
+            else if (aranarthPlayer.getUntrustedPlayerUUID() != null) {
+                // Only the owner can remove players
+                if (container.getOwner() == uuid) {
+                    boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
+                    String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
+                    if (wasRemoved) {
+                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7is no longer trusted to this container!"));
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &ccould not be removed from this container!"));
+                    }
+                    aranarthPlayer.setUntrustedPlayerUUID(null);
+                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                    e.setCancelled(true);
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                }
+            }
+            // Logic to lock the container
+            else if (aranarthPlayer.getIsLockingContainer()) {
+                List<UUID> trusted = new ArrayList<>();
+                trusted.add(player.getUniqueId());
+                Location[] locations = AranarthUtils.getLocationsOfContainer(block);
+                LockedContainer lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
+                AranarthUtils.addLockedContainer(lockedContainer);
+                aranarthPlayer.setIsLockingContainer(false);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
+            }
+            // Logic to unlock the container
+            else if (aranarthPlayer.getIsUnlockingContainer()) {
+                // Only the owner can remove a lock
+                if (container.getOwner() == uuid) {
+                    boolean wasRemoved = AranarthUtils.removeLockedContainer(block.getLocation());
+                    if (wasRemoved) {
+                        player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cThe lock could not be removed from this container!"));
+                    }
+                    aranarthPlayer.setIsUnlockingContainer(false);
+                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                    e.setCancelled(true);
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                }
             }
         }
     }

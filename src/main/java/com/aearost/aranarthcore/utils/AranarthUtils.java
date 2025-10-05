@@ -890,7 +890,7 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides the Location[] of the container.
+	 * Provides the Location[] of the container, locked or unlocked.
 	 * If it is a double chest, the left chest is the first index, right is the second.
 	 * @param container The container that the location is being fetched for.
 	 * @return The Location[] of the container.
@@ -939,6 +939,37 @@ public class AranarthUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Removes a player from the list of trusted players to access the container.
+	 * @param uuidToRemove The UUID of the player being removed from the container.
+	 * @param location The location of the container.
+	 */
+	public static boolean removePlayerFromContainer(UUID uuidToRemove, Location location) {
+		List<UUID> trusted = null;
+		for (LockedContainer container : getLockedContainers()) {
+			Location loc1 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[0];
+			if (loc2 == null) {
+				if (isSameLocation(loc1, location)) {
+					trusted = container.getTrusted();
+					if (trusted.contains(uuidToRemove)) {
+						trusted.remove(uuidToRemove);
+						return true;
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+					trusted = container.getTrusted();
+					if (trusted.contains(uuidToRemove)) {
+						trusted.remove(uuidToRemove);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
