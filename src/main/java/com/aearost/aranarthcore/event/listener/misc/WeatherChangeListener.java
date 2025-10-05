@@ -73,7 +73,6 @@ public class WeatherChangeListener implements Listener {
 		// If there is no special weather functionality in the month
 //		if (!DateUtils.isWinterMonth(AranarthUtils.getMonth()) && AranarthUtils.getMonth() != Month.IGNIVOR
 //				&& AranarthUtils.getMonth() != Month.AQUINVOR && AranarthUtils.getMonth() != Month.AESTIVOR) {
-//			Bukkit.broadcastMessage(ChatUtils.chatMessage("BBB"));
 //			if (e.toWeatherState()) {
 //				if (AranarthUtils.getWeather() == Weather.RAIN) {
 //					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
@@ -81,7 +80,6 @@ public class WeatherChangeListener implements Listener {
 //					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA thunderstorm has started..."));
 //				}
 //			} else {
-//				Bukkit.broadcastMessage(ChatUtils.chatMessage("DDD"));
 //				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
 //			}
 //		}

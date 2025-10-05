@@ -813,25 +813,26 @@ public class AranarthUtils {
 	 * @return The list of locked containers.
 	 */
 	public static List<LockedContainer> getLockedContainers() {
-//		if (lockedContainers == null || lockedContainers.isEmpty()) {
-//			Bukkit.getLogger().info("There are no locked containers yet!");
-//		} else {
-//			for (LockedContainer container : lockedContainers) {
-//				Bukkit.getLogger().info("-----------");
-//				Bukkit.getLogger().info("UUID: " + container.getOwner());
-//				Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
-//				StringBuilder trusted = new StringBuilder();
-//				for (UUID uuid : container.getTrusted()) {
-//					if (trusted.isEmpty()) {
-//						trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
-//					} else {
-//						trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
-//					}
-//
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			Bukkit.getLogger().info("There are no locked containers yet!");
+			return null;
+		}
+
+//		for (LockedContainer container : lockedContainers) {
+//			Bukkit.getLogger().info("-----------");
+//			Bukkit.getLogger().info("UUID: " + container.getOwner());
+//			Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
+//			StringBuilder trusted = new StringBuilder();
+//			for (UUID uuid : container.getTrusted()) {
+//				if (trusted.isEmpty()) {
+//					trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
+//				} else {
+//					trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
 //				}
-//				Bukkit.getLogger().info("Trusted: " + trusted);
-//				Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
+//
 //			}
+//			Bukkit.getLogger().info("Trusted: " + trusted);
+//			Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
 //		}
 		return lockedContainers;
 	}
@@ -845,23 +846,38 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Adds a new locked container to the list.
+	 * @param lockedContainer The locked container to be added to the list.
+	 */
+	public static void addLockedContainer(LockedContainer lockedContainer) {
+		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+			lockedContainers = new ArrayList<>();
+		}
+		lockedContainers.add(lockedContainer);
+	}
+
+	/**
 	 * Removes a container if it was a locked container in the list.
 	 * @param location The location of the container being removed.
 	 * @return Confirmation whether the container was previously a locked container.
 	 */
-	public static boolean removeLockedContainerIfExists(Location location) {
-		boolean isLockedContainer = false;
-		int i = 0;
+	public static boolean removeLockedContainer(Location location) {
 		List<LockedContainer> lockedContainers = getLockedContainers();
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return false;
 		}
 
+		boolean isLockedContainer = false;
+		int i = 0;
+
 		while (i < lockedContainers.size()) {
-            if (AranarthUtils.isLockedContainer(lockedContainers.get(i).getLocation(), location)) {
-                isLockedContainer = true;
-                break;
-            }
+			Location loc1 = lockedContainers.get(i).getLocations()[0];
+			Location loc2 = lockedContainers.get(i).getLocations()[1];
+
+			if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+				isLockedContainer = true;
+				break;
+			}
 			i++;
 		}
 
@@ -874,6 +890,28 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Provides the Location[] of the container.
+	 * If it is a double chest, the left chest is the first index, right is the second.
+	 * @param container The container that the location is being fetched for.
+	 * @return The Location[] of the container.
+	 */
+	public static Location[] getLocationsOfContainer(Block container) {
+		Location loc1 = container.getLocation();
+		Location loc2 = null;
+		if (container.getState() instanceof Chest chest) {
+			InventoryHolder holder = chest.getInventory().getHolder();
+			// Chests can be two blocks wide and the non-clicked block may be the locked container
+			if (holder instanceof DoubleChest doubleChest) {
+				Chest leftChest = (Chest) doubleChest.getLeftSide();
+				Chest rightChest = (Chest) doubleChest.getRightSide();
+				loc1 = leftChest.getLocation();
+				loc2 = rightChest.getLocation();
+			}
+		}
+		return new Location[] { loc1, loc2 };
+	}
+
+	/**
 	 * Adds a player to the list of trusted players to access the container.
 	 * @param uuidToAdd The UUID of the player being added to the container.
 	 * @param location The location of the container.
@@ -881,16 +919,33 @@ public class AranarthUtils {
 	public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
 		List<UUID> trusted = null;
 		for (LockedContainer container : getLockedContainers()) {
-			if (container.getLocation() == location) {
-				trusted = container.getTrusted();
-				// If the UUID is already there, do nothing
-				if (!trusted.contains(uuidToAdd)) {
-					trusted.add(uuidToAdd);
+			Location loc1 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[0];
+			if (loc2 == null) {
+				if (isSameLocation(loc1, location)) {
+					trusted = container.getTrusted();
+					// If the UUID is already there, do nothing
+					if (!trusted.contains(uuidToAdd)) {
+						trusted.add(uuidToAdd);
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+					trusted = container.getTrusted();
+					// If the UUID is already there, do nothing
+					if (!trusted.contains(uuidToAdd)) {
+						trusted.add(uuidToAdd);
+					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * Confirms if the input block is a container block.
+	 * @param block The block being verified.
+	 * @return Confirmation whether the input block is a container block.
+	 */
 	public static boolean isContainerBlock(Block block) {
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
@@ -899,18 +954,15 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Helper method to determine if the input block is a locked container.
-	 * @param lockedContainerLoc The location of the locked container being iterated.
-	 * @param blockLoc The location of the block being verified.
-	 * @return Confirmation whether the input block is a locked container.
+	 * Helper method to determine if the input locations are the same.
+	 * @param loc1 The first location.
+	 * @param loc2 The second location.
+	 * @return Confirmation whether the input locations are the same.
 	 */
-	private static boolean isLockedContainer(Location lockedContainerLoc, Location blockLoc) {
-		if (lockedContainerLoc.getBlockX() == blockLoc.getX()
-				&& lockedContainerLoc.getBlockY() == blockLoc.getY()
-				&& lockedContainerLoc.getBlockZ() == blockLoc.getZ()) {
-			return true;
-		}
-		return false;
+	private static boolean isSameLocation(Location loc1, Location loc2) {
+		return loc1.getBlockX() == loc2.getX()
+				&& loc1.getBlockY() == loc2.getY()
+				&& loc1.getBlockZ() == loc2.getZ();
 	}
 
 	/**
@@ -921,21 +973,16 @@ public class AranarthUtils {
 	public static LockedContainer getLockedContainerAtBlock(Block block) {
 		if (isContainerBlock(block)) {
 			for (LockedContainer container : getLockedContainers()) {
-				if (isLockedContainer(container.getLocation(), block.getLocation())) {
-					return container;
+				Location loc1 = container.getLocations()[0];
+				Location loc2 = container.getLocations()[1];
+				// If it is a single chest/container
+				if (loc2 == null) {
+					if (isSameLocation(loc1, block.getLocation())) {
+						return container;
+					}
 				} else {
-					// Chests can be two blocks wide and the non-clicked block may be the locked container
-					if (block.getState() instanceof Chest chest) {
-						InventoryHolder holder = chest.getInventory().getHolder();
-						if (holder instanceof DoubleChest doubleChest) {
-							Block left = ((Chest) doubleChest.getLeftSide()).getBlock();
-							Block right = ((Chest) doubleChest.getRightSide()).getBlock();
-							if (isLockedContainer(container.getLocation(), left.getLocation())) {
-								return container;
-							} else if (isLockedContainer(container.getLocation(), right.getLocation())) {
-								return container;
-							}
-						}
+					if (isSameLocation(loc1, block.getLocation()) || isSameLocation(loc2, block.getLocation())) {
+						return container;
 					}
 				}
 			}
@@ -956,92 +1003,16 @@ public class AranarthUtils {
 		}
 
 		if (isContainerBlock(block)) {
-			Location location = block.getLocation();
-			for (LockedContainer container : lockedContainers) {
-				Bukkit.getLogger().info("Iterating over container");
-				// If the clicked block is a container
-				if (isLockedContainer(container.getLocation(), block.getLocation())) {
-					Bukkit.getLogger().info("Block is a locked container");
-					List<UUID> trusted = container.getTrusted();
-					if (trusted.contains(player.getUniqueId())) {
-						Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
-						return true;
-					} else {
-						Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
-						return false;
-					}
-				}
-				// If the clicked block isn't necessarily the locked container
-				else {
-					Bukkit.getLogger().info("Clicked block is not the locked container but other might be");
-					if (block.getState() instanceof Chest chest) {
-						Bukkit.getLogger().info("Block was a chest");
-						InventoryHolder holder = chest.getInventory().getHolder();
-						// Chests can be two blocks wide and the non-clicked block may be the locked container
-						if (holder instanceof DoubleChest doubleChest) {
-							Bukkit.getLogger().info("Block was a double chest");
-							Block left = ((Chest) doubleChest.getLeftSide()).getBlock();
-							Block right = ((Chest) doubleChest.getRightSide()).getBlock();
-							if (isLockedContainer(container.getLocation(), left.getLocation())) {
-								Bukkit.getLogger().info("Double chest was locked left");
-								List<UUID> trusted = container.getTrusted();
-								if (trusted.contains(player.getUniqueId())) {
-									Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
-									return true;
-								} else {
-									Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
-									return false;
-								}
-							} else if (isLockedContainer(container.getLocation(), right.getLocation())) {
-								Bukkit.getLogger().info("Double chest was locked right");
-								List<UUID> trusted = container.getTrusted();
-								if (trusted.contains(player.getUniqueId())) {
-									Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
-									return true;
-								} else {
-									Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
-									return false;
-								}
-							}
-							// No lock on the double chest
-							else {
-								return true;
-							}
-						}
-						// If it is a single chest that is not locked
-						else {
-							return true;
-						}
-					} else {
-						if (isLockedContainer(container.getLocation(), location)) {
-							Bukkit.getLogger().info("Non chest is locked");
-							List<UUID> trusted = container.getTrusted();
-							if (trusted.contains(player.getUniqueId())) {
-								Bukkit.getLogger().info("Trusted contains the clicked player's UUID");
-								return true;
-							} else {
-								Bukkit.getLogger().info("Trusted does not contain the clicked player's UUID");
-								return false;
-							}
-						}
-						return true;
-					}
+			LockedContainer lockedContainer = getLockedContainerAtBlock(block);
+			if (lockedContainer != null) {
+				List<UUID> trusted = lockedContainer.getTrusted();
+				if (trusted.contains(player.getUniqueId())) {
+					return true;
 				}
 			}
-			return false;
-		} else {
-			return true;
 		}
+		return false;
 	}
 
-	/**
-	 * Adds a new locked container to the list.
-	 * @param lockedContainer The locked container to be added to the list.
-	 */
-	public static void addLockedContainer(LockedContainer lockedContainer) {
-		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
-			lockedContainers = new ArrayList<>();
-		}
-		lockedContainers.add(lockedContainer);
-	}
+
 }

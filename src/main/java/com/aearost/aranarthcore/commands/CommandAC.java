@@ -98,6 +98,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandAranarth.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("trust")) {
 			commandResult = CommandTrust.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("untrust")) {
+			commandResult = CommandUntrust.onCommand(sender, args);
 		}
 		return commandResult;
 	}

@@ -1526,7 +1526,6 @@ public class DateUtils {
 		// Start of a new weather
 		if (type != Weather.CLEAR) {
 			AranarthUtils.setWeather(type);
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("AAA"));
 			if (type == Weather.RAIN) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
@@ -1558,7 +1557,6 @@ public class DateUtils {
 			world.setStorm(false);
 			world.setClearWeatherDuration(duration);
 			AranarthUtils.setWeather(type);
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("EEE"));
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
 		Bukkit.broadcastMessage(message);
