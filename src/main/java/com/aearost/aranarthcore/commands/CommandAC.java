@@ -100,6 +100,10 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandTrust.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("untrust")) {
 			commandResult = CommandUntrust.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unlock")) {
+			commandResult = CommandUnlock.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("lock")) {
+			commandResult = CommandLock.onCommand(sender, args);
 		}
 		return commandResult;
 	}
