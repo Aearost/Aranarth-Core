@@ -229,6 +229,27 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	private void initializeWorlds() {
 		// Loads the world if it isn't yet loaded
+		if (Bukkit.getWorld("smp") == null) {
+			WorldCreator wc = new WorldCreator("smp");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("smp_nether") == null) {
+			WorldCreator wc = new WorldCreator("smp_nether");
+			wc.environment(World.Environment.NETHER);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("smp_the_end") == null) {
+			WorldCreator wc = new WorldCreator("smp_the_end");
+			wc.environment(World.Environment.THE_END);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
 		if (Bukkit.getWorld("arena") == null) {
 			WorldCreator wc = new WorldCreator("arena");
 			wc.environment(World.Environment.NORMAL);

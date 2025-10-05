@@ -31,7 +31,7 @@ public class PotionConsumeListener implements Listener {
 	 */
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
-		if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
+		if (e.getPlayer().getLocation().getWorld().getName().startsWith("world") || e.getPlayer().getLocation().getWorld().getName().startsWith("smp")) {
             replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
 		}
 	}

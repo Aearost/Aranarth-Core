@@ -15,7 +15,7 @@ import static com.aearost.aranarthcore.items.CustomItemKeys.HOMEPAD;
 public class CraftingOverridesHomepad {
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
-        if (!player.getLocation().getWorld().getName().startsWith("world")) {
+        if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")) {
             e.setCancelled(true);
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot craft a homepad in this world!"));
             return;

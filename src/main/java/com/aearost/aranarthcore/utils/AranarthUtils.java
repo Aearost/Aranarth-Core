@@ -244,11 +244,14 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		if (currentWorld.equals(destinationWorld)
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))) {
+				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))
+				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("smp"))
+				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("smp"))
+				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("world"))) {
 			return;
 		}
 
-		if (currentWorld.startsWith("world")) {
+		if (currentWorld.startsWith("world") || currentWorld.startsWith("smp")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 			if (destinationWorld.startsWith("arena")) {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
@@ -270,7 +273,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
-			if (destinationWorld.startsWith("world")) {
+			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
@@ -285,7 +288,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
-			if (destinationWorld.startsWith("world")) {
+			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));

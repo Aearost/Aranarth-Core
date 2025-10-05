@@ -80,6 +80,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandArena.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("survival")) {
 			commandResult = CommandSurvival.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("smp")) {
+			commandResult = CommandSMP.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("creative")) {
 			commandResult = CommandCreative.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("blacklist")) {

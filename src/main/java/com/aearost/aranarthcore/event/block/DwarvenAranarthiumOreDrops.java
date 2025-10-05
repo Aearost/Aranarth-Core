@@ -23,7 +23,7 @@ public class DwarvenAranarthiumOreDrops {
 			World world = e.getBlock().getWorld();
 			Location loc = e.getBlock().getLocation();
 			// Only apply in the survival worlds
-			if (loc.getWorld().getName().startsWith("world")) {
+			if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp")) {
 				ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
 				if (!heldItem.containsEnchantment(Enchantment.SILK_TOUCH)) {
 					int chance = random.nextInt(100);

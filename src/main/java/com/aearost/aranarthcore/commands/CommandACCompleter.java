@@ -110,12 +110,15 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("survival");
 				displayedOptions.add("swimtoggle");
 				displayedOptions.add("shulker");
+				displayedOptions.add("smp");
 			} else if ("swimtoggle".startsWith(args[0])) {
 				displayedOptions.add("swimtoggle");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("shulker".startsWith(args[0])) {
 				displayedOptions.add("shulker");
+			} else if ("smp".startsWith(args[0])) {
+				displayedOptions.add("smp");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
 			if (args[0].equals("b")) {
@@ -185,6 +188,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("date");
 		displayedOptions.add("aranarth");
 		displayedOptions.add("trust");
+		displayedOptions.add("smp");
 		return displayedOptions;
 	}
 

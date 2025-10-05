@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.IOException;
 
 /**
- * Overrides spawning behaviour in overworld to spawn in the spawn shack.
+ * Overrides spawning behaviour in Survival and SMP worlds.
  */
 public class RespawnSurvival {
     public void execute(PlayerRespawnEvent e) {
@@ -24,14 +24,20 @@ public class RespawnSurvival {
         Player player = e.getPlayer();
         player.setGameMode(GameMode.SURVIVAL);
         try {
-            AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
+            AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
         } catch (IOException ex) {
             player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
             return;
         }
-        if (x == 0 && z == 3) {
+
+        if (e.getRespawnLocation().getWorld().getName().equals("world")) {
+            if (x == 0 && z == 3) {
+                e.setRespawnLocation(new Location(e.getRespawnLocation().getWorld(), x, 120, z, 180, 0));
+            }
+        } else if (e.getRespawnLocation().getWorld().getName().equals("smp")) {
             e.setRespawnLocation(new Location(e.getRespawnLocation().getWorld(), x, 120, z, 180, 0));
         }
+
 
         if (AranarthUtils.isArmorType(player, "soulbound")) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

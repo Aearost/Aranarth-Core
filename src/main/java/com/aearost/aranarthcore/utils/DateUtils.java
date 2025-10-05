@@ -768,7 +768,7 @@ public class DateUtils {
 							// Handles applying the snow functionality
 							if (AranarthUtils.getWeather() == Weather.SNOW) {
 								// Only snows in the survival world
-								if (!loc.getWorld().getName().equals("world")) {
+								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 									continue;
 								}
 
@@ -1077,7 +1077,7 @@ public class DateUtils {
 								}
 
 								// Only melt snow in the survival world
-								if (!loc.getWorld().getName().equals("world")) {
+								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 									continue;
 								}
 							}
@@ -1101,6 +1101,7 @@ public class DateUtils {
 												Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
 
 												Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+												Bukkit.getWorld("smp").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
 											}
 										}
 									} else {
@@ -1522,6 +1523,7 @@ public class DateUtils {
 	private void updateStorm(Weather type, int duration) {
 		String message = null;
 		World world = Bukkit.getWorld("world");
+		World smp = Bukkit.getWorld("smp");
 
 		// Start of a new weather
 		if (type != Weather.CLEAR) {
@@ -1531,6 +1533,9 @@ public class DateUtils {
 				world.setStorm(true);
 				world.setWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
+				smp.setClearWeatherDuration(0);
+				smp.setStorm(true);
+				smp.setWeatherDuration(duration);
 			} else if (type == Weather.THUNDER) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
@@ -1538,6 +1543,11 @@ public class DateUtils {
 				world.setWeatherDuration(duration);
 				world.setThunderDuration(duration);
 				message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
+				smp.setClearWeatherDuration(0);
+				smp.setStorm(true);
+				smp.setThundering(true);
+				smp.setWeatherDuration(duration);
+				smp.setThunderDuration(duration);
 			} else if (type == Weather.SNOW) {
 				world.setThunderDuration(0);
 				world.setWeatherDuration(0);
@@ -1545,6 +1555,11 @@ public class DateUtils {
 				world.setStorm(false);
 				world.setClearWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
+				smp.setThunderDuration(0);
+				smp.setWeatherDuration(0);
+				smp.setThundering(false);
+				smp.setStorm(false);
+				smp.setClearWeatherDuration(duration);
 			} else {
 				Bukkit.getLogger().info("Something went wrong with starting the storm...");
 				AranarthUtils.setWeather(Weather.CLEAR);
@@ -1558,6 +1573,11 @@ public class DateUtils {
 			world.setClearWeatherDuration(duration);
 			AranarthUtils.setWeather(type);
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
+			smp.setThunderDuration(0);
+			smp.setWeatherDuration(0);
+			smp.setThundering(false);
+			smp.setStorm(false);
+			smp.setClearWeatherDuration(duration);
 		}
 		Bukkit.broadcastMessage(message);
 	}
