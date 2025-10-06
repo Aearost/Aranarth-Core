@@ -37,7 +37,7 @@ public class ContainerInteract {
             // Logic to trust a player to the container
             if (aranarthPlayer.getTrustedPlayerUUID() != null) {
                 // Only the owner can add players
-                if (container.getOwner() == uuid) {
+                if (container.getOwner().equals(uuid)) {
                     AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
                     player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7has been trusted to this container!"));
@@ -51,7 +51,7 @@ public class ContainerInteract {
             // Logic to untrust a player from the container
             else if (aranarthPlayer.getUntrustedPlayerUUID() != null) {
                 // Only the owner can remove players
-                if (container.getOwner() == uuid) {
+                if (container.getOwner().equals(uuid)) {
                     boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
                     if (wasRemoved) {
@@ -80,7 +80,7 @@ public class ContainerInteract {
             // Logic to unlock the container
             else if (aranarthPlayer.getIsUnlockingContainer()) {
                 // Only the owner can remove a lock
-                if (container.getOwner() == uuid) {
+                if (container.getOwner().equals(uuid)) {
                     boolean wasRemoved = AranarthUtils.removeLockedContainer(block.getLocation());
                     if (wasRemoved) {
                         player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));

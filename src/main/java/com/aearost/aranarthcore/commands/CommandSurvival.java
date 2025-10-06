@@ -26,7 +26,6 @@ public class CommandSurvival {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-
                 // Teleports you to the survival world spawn
 				try {
 					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
@@ -34,6 +33,7 @@ public class CommandSurvival {
 					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 					return false;
 				}
+
 				// Only remove potion effects if changing from a non-survival world
 				if (!player.getLocation().getWorld().getName().startsWith("world")) {
 					for (PotionEffect effect : player.getActivePotionEffects()) {

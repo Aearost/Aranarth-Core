@@ -821,26 +821,8 @@ public class AranarthUtils {
 	 */
 	public static List<LockedContainer> getLockedContainers() {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			Bukkit.getLogger().info("There are no locked containers yet!");
 			return null;
 		}
-
-//		for (LockedContainer container : lockedContainers) {
-//			Bukkit.getLogger().info("-----------");
-//			Bukkit.getLogger().info("UUID: " + container.getOwner());
-//			Bukkit.getLogger().info("Owner: " + Bukkit.getPlayer(container.getOwner()).getDisplayName());
-//			StringBuilder trusted = new StringBuilder();
-//			for (UUID uuid : container.getTrusted()) {
-//				if (trusted.isEmpty()) {
-//					trusted = new StringBuilder(Bukkit.getPlayer(uuid).getDisplayName());
-//				} else {
-//					trusted.append(", ").append(Bukkit.getPlayer(uuid).getDisplayName());
-//				}
-//
-//			}
-//			Bukkit.getLogger().info("Trusted: " + trusted);
-//			Bukkit.getLogger().info("x: " + container.getLocation().getBlockX() + " | y: " + container.getLocation().getBlockY() + " | z: " + container.getLocation().getBlockZ());
-//		}
 		return lockedContainers;
 	}
 
@@ -869,7 +851,6 @@ public class AranarthUtils {
 	 * @return Confirmation whether the container was previously a locked container.
 	 */
 	public static boolean removeLockedContainer(Location location) {
-		List<LockedContainer> lockedContainers = getLockedContainers();
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return false;
 		}
@@ -889,7 +870,9 @@ public class AranarthUtils {
 		}
 
 		if (isLockedContainer) {
+			Bukkit.getLogger().info("Size before: " + lockedContainers.size());
 			lockedContainers.remove(i);
+			Bukkit.getLogger().info("Size after: " + lockedContainers.size());
 			return true;
 		} else {
 			return false;
@@ -1009,6 +992,10 @@ public class AranarthUtils {
 	 * @return The LockedContainer object if found, or null if not.
 	 */
 	public static LockedContainer getLockedContainerAtBlock(Block block) {
+		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+			return null;
+		}
+
 		if (isContainerBlock(block)) {
 			for (LockedContainer container : getLockedContainers()) {
 				Location loc1 = container.getLocations()[0];

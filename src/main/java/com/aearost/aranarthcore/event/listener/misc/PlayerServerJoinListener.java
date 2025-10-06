@@ -32,7 +32,7 @@ public class PlayerServerJoinListener implements Listener {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
 		}
 		// If the player changed their username
-		else if (!AranarthUtils.getUsername(player).equals(player.getName())) {
+		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
 		}
 		DateUtils dateUtils = new DateUtils();

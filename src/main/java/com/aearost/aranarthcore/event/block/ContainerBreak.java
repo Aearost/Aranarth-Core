@@ -19,10 +19,16 @@ public class ContainerBreak {
                 return;
             }
 
-            if (lockedContainer.getOwner() != player.getUniqueId()) {
-                player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
+            if (lockedContainer.getOwner().equals(player.getUniqueId())) {
+                boolean isSuccessful = AranarthUtils.removeLockedContainer(e.getBlock().getLocation());
+                if (isSuccessful) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
+                } else {
+                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with destroying the container..."));
+                    e.setCancelled(true);
+                }
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to break this container!"));
+                player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's locked container!"));
                 e.setCancelled(true);
             }
         }
