@@ -14,6 +14,7 @@
       <option name="m_reportEmptyBlocks" value="true" />
     </inspection_tool>
     <inspection_tool class="ExtractMethodRecommender" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="IfStatementWithIdenticalBranches" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
     <inspection_tool class="InstantiationOfUtilityClass" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="ManualMinMaxCalculation" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="NullableProblems" enabled="false" level="WARNING" enabled_by_default="false">
