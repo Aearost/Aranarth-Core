@@ -32,7 +32,7 @@ public class CommandTrust {
 							aranarthPlayer.setTrustedPlayerUUID(offlinePlayer.getUniqueId());
 							aranarthPlayer.setUntrustedPlayerUUID(null);
 							aranarthPlayer.setIsUnlockingContainer(false);
-							aranarthPlayer.setIsLockingContainer(true);
+							aranarthPlayer.setIsLockingContainer(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to trust &e" + offlinePlayer.getName()));
 							isPlayerFound = true;
@@ -42,6 +42,7 @@ public class CommandTrust {
 				}
 				if (!isPlayerFound) {
 					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					return true;
 				}
 			}
 		}

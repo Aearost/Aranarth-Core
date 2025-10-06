@@ -34,75 +34,79 @@ public class ContainerInteract {
             // Logic to trust a player to the container
             if (aranarthPlayer.getTrustedPlayerUUID() != null) {
                 if (container == null) {
-                    return;
-                }
-
-                // Only the owner can add players
-                if (container.getOwner().equals(uuid)) {
-                    AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
-                    String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
-                    player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7has been trusted to this container!"));
-                    aranarthPlayer.setTrustedPlayerUUID(null);
-                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    // Only the owner can add players
+                    if (container.getOwner().equals(uuid)) {
+                        AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
+                        String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
+                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7has been trusted to this container!"));
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    }
                 }
+                aranarthPlayer.setTrustedPlayerUUID(null);
+                AranarthUtils.setPlayer(uuid, aranarthPlayer);
                 e.setCancelled(true);
             }
             // Logic to untrust a player from the container
             else if (aranarthPlayer.getUntrustedPlayerUUID() != null) {
                 if (container == null) {
-                    return;
-                }
-
-                // Only the owner can remove players
-                if (container.getOwner().equals(uuid)) {
-                    boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getUntrustedPlayerUUID(), block.getLocation());
-                    String username = Bukkit.getOfflinePlayer(aranarthPlayer.getUntrustedPlayerUUID()).getName();
-                    if (wasRemoved) {
-                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7is no longer trusted to this container!"));
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &ccould not be removed from this container!"));
-                    }
-                    aranarthPlayer.setUntrustedPlayerUUID(null);
-                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
-                    e.setCancelled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    // Only the owner can remove players
+                    if (container.getOwner().equals(uuid)) {
+                        boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getUntrustedPlayerUUID(), block.getLocation());
+                        String username = Bukkit.getOfflinePlayer(aranarthPlayer.getUntrustedPlayerUUID()).getName();
+                        if (wasRemoved) {
+                            player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7is no longer trusted to this container!"));
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&e" + username + " &ccould not be removed from this container!"));
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    }
                 }
+                aranarthPlayer.setUntrustedPlayerUUID(null);
+                AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                e.setCancelled(true);
             }
             // Logic to lock the container
             else if (aranarthPlayer.getIsLockingContainer()) {
-                List<UUID> trusted = new ArrayList<>();
-                trusted.add(player.getUniqueId());
-                Location[] locations = AranarthUtils.getLocationsOfContainer(block);
-                LockedContainer lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
-                AranarthUtils.addLockedContainer(lockedContainer);
+                if (container != null) {
+                    player.sendMessage(ChatUtils.chatMessage("&cThis container is already locked!"));
+                } else {
+                    List<UUID> trusted = new ArrayList<>();
+                    trusted.add(player.getUniqueId());
+                    Location[] locations = AranarthUtils.getLocationsOfContainer(block);
+                    LockedContainer lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
+                    AranarthUtils.addLockedContainer(lockedContainer);
+                    player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
+                }
                 aranarthPlayer.setIsLockingContainer(false);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
                 e.setCancelled(true);
             }
             // Logic to unlock the container
             else if (aranarthPlayer.getIsUnlockingContainer()) {
                 if (container == null) {
-                    return;
-                }
-
-                // Only the owner can remove a lock
-                if (container.getOwner().equals(uuid)) {
-                    boolean wasRemoved = AranarthUtils.removeLockedContainer(block.getLocation());
-                    if (wasRemoved) {
-                        player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cThe lock could not be removed from this container!"));
-                    }
-                    aranarthPlayer.setIsUnlockingContainer(false);
-                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
-                    e.setCancelled(true);
+                    player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
                 } else {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    // Only the owner can remove a lock
+                    if (container.getOwner().equals(uuid)) {
+                        int breakResult = AranarthUtils.removeLockedContainer(container.getLocations());
+                        if (breakResult == 0) {
+                            player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cThe lock could not be removed from this container!"));
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
+                    }
                 }
+                aranarthPlayer.setIsUnlockingContainer(false);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                e.setCancelled(true);
             }
         }
     }

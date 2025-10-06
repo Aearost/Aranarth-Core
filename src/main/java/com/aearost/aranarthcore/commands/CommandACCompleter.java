@@ -152,13 +152,18 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && "lock".startsWith(args[0])) {
 			displayedOptions.add("lock");
 		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
-			if (args[0].equals("un")) {
+			if (args[0].equals("u")) {
 				displayedOptions.add("untrust");
 				displayedOptions.add("unlock");
-			} else if (!args[0].isEmpty() && "untrust".startsWith(args[0])) {
-				displayedOptions.add("untrust");
-			} else if (!args[0].isEmpty() && "unlock".startsWith(args[0])) {
-				displayedOptions.add("unlock");
+			} else {
+				if (args[0].equals("un")) {
+					displayedOptions.add("untrust");
+					displayedOptions.add("unlock");
+				} else if (!args[0].isEmpty() && "untrust".startsWith(args[0])) {
+					displayedOptions.add("untrust");
+				} else if (!args[0].isEmpty() && "unlock".startsWith(args[0])) {
+					displayedOptions.add("unlock");
+				}
 			}
 		}
 		return displayedOptions;
