@@ -870,9 +870,7 @@ public class AranarthUtils {
 		}
 
 		if (isLockedContainer) {
-			Bukkit.getLogger().info("Size before: " + lockedContainers.size());
 			lockedContainers.remove(i);
-			Bukkit.getLogger().info("Size after: " + lockedContainers.size());
 			return true;
 		} else {
 			return false;

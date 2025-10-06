@@ -20,7 +20,10 @@ public class CommandUnlock {
 		if (sender instanceof Player player) {
 			sender.sendMessage(ChatUtils.chatMessage("&7Right-click the container to be unlocked"));
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			aranarthPlayer.setTrustedPlayerUUID(null);
+			aranarthPlayer.setUntrustedPlayerUUID(null);
 			aranarthPlayer.setIsUnlockingContainer(true);
+			aranarthPlayer.setIsLockingContainer(false);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         } else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));
