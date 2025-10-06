@@ -30,6 +30,9 @@ public class CommandTrust {
 						if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							aranarthPlayer.setTrustedPlayerUUID(offlinePlayer.getUniqueId());
+							aranarthPlayer.setUntrustedPlayerUUID(null);
+							aranarthPlayer.setIsUnlockingContainer(false);
+							aranarthPlayer.setIsLockingContainer(true);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to trust &e" + offlinePlayer.getName()));
 							isPlayerFound = true;

@@ -149,6 +149,17 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("aranarth");
 		} else if (!args[0].isEmpty() && "trust".startsWith(args[0])) {
 			displayedOptions.add("trust");
+		} else if (!args[0].isEmpty() && "lock".startsWith(args[0])) {
+			displayedOptions.add("lock");
+		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
+			if (args[0].equals("un")) {
+				displayedOptions.add("untrust");
+				displayedOptions.add("unlock");
+			} else if (!args[0].isEmpty() && "untrust".startsWith(args[0])) {
+				displayedOptions.add("untrust");
+			} else if (!args[0].isEmpty() && "unlock".startsWith(args[0])) {
+				displayedOptions.add("unlock");
+			}
 		}
 		return displayedOptions;
 	}
@@ -188,6 +199,9 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("date");
 		displayedOptions.add("aranarth");
 		displayedOptions.add("trust");
+		displayedOptions.add("untrust");
+		displayedOptions.add("lock");
+		displayedOptions.add("unlock");
 		displayedOptions.add("smp");
 		return displayedOptions;
 	}
@@ -209,7 +223,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance" -> {
+			case "ping", "balance", "trust", "untrust" -> {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
 				for (Player onlinePlayer : onlinePlayers) {

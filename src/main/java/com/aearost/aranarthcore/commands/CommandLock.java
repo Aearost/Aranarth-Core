@@ -20,6 +20,9 @@ public class CommandLock {
 		if (sender instanceof Player player) {
 			sender.sendMessage(ChatUtils.chatMessage("&7Right-click the container to be locked"));
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			aranarthPlayer.setTrustedPlayerUUID(null);
+			aranarthPlayer.setUntrustedPlayerUUID(null);
+			aranarthPlayer.setIsUnlockingContainer(false);
 			aranarthPlayer.setIsLockingContainer(true);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         } else {
