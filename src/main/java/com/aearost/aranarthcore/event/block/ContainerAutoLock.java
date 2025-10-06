@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Location;
 import org.bukkit.event.block.BlockPlaceEvent;
 
@@ -23,5 +24,6 @@ public class ContainerAutoLock {
         // Only has the player placing the chest trusted by default
         LockedContainer container = new LockedContainer(uuid, trustedPlayers, AranarthUtils.getLocationsOfContainer(e.getBlock()));
         AranarthUtils.addLockedContainer(container);
+        e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked"));
     }
 }
