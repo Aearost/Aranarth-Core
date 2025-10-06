@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -20,10 +21,11 @@ public class ContainerBreak {
             }
 
             if (lockedContainer.getOwner().equals(player.getUniqueId())) {
-                boolean isSuccessful = AranarthUtils.removeLockedContainer(e.getBlock().getLocation());
-                if (isSuccessful) {
+                Location[] singleContainerLocation = new Location[] { e.getBlock().getLocation(), null };
+                int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
+                if (breakResult == 0) {
                     player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
-                } else {
+                } else if (breakResult == -1) {
                     player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with destroying the container..."));
                     e.setCancelled(true);
                 }

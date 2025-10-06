@@ -847,33 +847,66 @@ public class AranarthUtils {
 
 	/**
 	 * Removes a container if it was a locked container in the list.
-	 * @param location The location of the container being removed.
-	 * @return Confirmation whether the container was previously a locked container.
+	 * @param locations The locations of the container being removed.
+	 * @return 0 if the whole container was removed, 1 if one of the container locations was removed, -1 if unsuccessful
 	 */
-	public static boolean removeLockedContainer(Location location) {
+	public static int removeLockedContainer(Location[] locations) {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
-			return false;
+			return -1;
 		}
 
 		boolean isLockedContainer = false;
+		boolean isDoubleContainer = false;
 		int i = 0;
 
 		while (i < lockedContainers.size()) {
 			Location loc1 = lockedContainers.get(i).getLocations()[0];
 			Location loc2 = lockedContainers.get(i).getLocations()[1];
+			isDoubleContainer = loc1 != null && loc2 != null;
 
-			if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
-				isLockedContainer = true;
-				break;
+			if (isDoubleContainer) {
+				// If the whole container is being removed
+				if (locations[1] != null) {
+					if (isSameLocation(loc1, locations[0]) && isSameLocation(loc2, locations[1])) {
+						isLockedContainer = true;
+						lockedContainers.remove(i);
+						return 0;
+					}
+				}
+				// Only one of the two locations is being removed
+				else {
+					// Breaking left chest
+					if (isSameLocation(loc1, locations[0])) {
+						locations[0] = loc2;
+						isLockedContainer = true;
+						break;
+					}
+					// Breaking right chest
+					else if (isSameLocation(loc2, locations[0])) {
+						locations[0] = loc1;
+						isLockedContainer = true;
+						break;
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, locations[0])) {
+					isLockedContainer = true;
+					break;
+				}
 			}
 			i++;
 		}
 
 		if (isLockedContainer) {
-			lockedContainers.remove(i);
-			return true;
+			if (isDoubleContainer) {
+				lockedContainers.get(i).setLocations(locations);
+				return 1;
+			} else {
+				lockedContainers.remove(i);
+				return 0;
+			}
 		} else {
-			return false;
+			return -1;
 		}
 	}
 

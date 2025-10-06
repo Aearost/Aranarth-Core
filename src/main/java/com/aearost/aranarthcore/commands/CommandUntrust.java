@@ -28,20 +28,26 @@ public class CommandUntrust {
 				for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
 					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 						if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							aranarthPlayer.setTrustedPlayerUUID(null);
-							aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
-							aranarthPlayer.setIsUnlockingContainer(false);
-							aranarthPlayer.setIsLockingContainer(true);
-							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to untrust &e" + offlinePlayer.getName()));
-							isPlayerFound = true;
-							return true;
+							if (offlinePlayer.getName().equals(player.getName())) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot untrust yourself!"));
+								return true;
+							} else {
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+								aranarthPlayer.setTrustedPlayerUUID(null);
+								aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
+								aranarthPlayer.setIsUnlockingContainer(false);
+								aranarthPlayer.setIsLockingContainer(false);
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+								player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to untrust &e" + offlinePlayer.getName()));
+								isPlayerFound = true;
+								return true;
+							}
 						}
 					}
 				}
 				if (!isPlayerFound) {
 					sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					return true;
 				}
 			}
 		}
