@@ -33,11 +33,11 @@ public class AranarthCore extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		plugin = this;
+		initializeWorlds();
 		initializeUtils();
 		initializeEvents();
 		initializeRecipes();
 		initializeCommands();
-		initializeWorlds();
 		initializeItems();
 
 
@@ -229,6 +229,27 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	private void initializeWorlds() {
 		// Loads the world if it isn't yet loaded
+		if (Bukkit.getWorld("world") == null) {
+			WorldCreator wc = new WorldCreator("world");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("world_nether") == null) {
+			WorldCreator wc = new WorldCreator("world_nether");
+			wc.environment(World.Environment.NETHER);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("world_the_end") == null) {
+			WorldCreator wc = new WorldCreator("world_the_end");
+			wc.environment(World.Environment.THE_END);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
 		if (Bukkit.getWorld("smp") == null) {
 			WorldCreator wc = new WorldCreator("smp");
 			wc.environment(World.Environment.NORMAL);

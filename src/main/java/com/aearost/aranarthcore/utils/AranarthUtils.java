@@ -226,7 +226,11 @@ public class AranarthUtils {
 					&& location1.getBlockZ() == location2.getBlockZ()
 					&& location1.getWorld().getName().equals(location2.getWorld().getName());
 		} else {
-			Bukkit.getLogger().info("One or more of the worlds does not exist!");
+			if (location1 == null) {
+				Bukkit.getLogger().info("1 is null");
+			} else {
+				Bukkit.getLogger().info("2 is null");
+			}
 			return false;
 		}
 	}

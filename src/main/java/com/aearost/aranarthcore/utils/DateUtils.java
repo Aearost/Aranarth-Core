@@ -1531,10 +1531,12 @@ public class DateUtils {
 			if (type == Weather.RAIN) {
 				world.setClearWeatherDuration(0);
 				world.setStorm(true);
+				world.setThundering(false);
 				world.setWeatherDuration(duration);
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
 				smp.setClearWeatherDuration(0);
 				smp.setStorm(true);
+				smp.setThundering(false);
 				smp.setWeatherDuration(duration);
 			} else if (type == Weather.THUNDER) {
 				world.setClearWeatherDuration(0);
