@@ -1066,6 +1066,10 @@ public class AranarthUtils {
 					return true;
 				}
 			}
+			// The container is not locked
+			else {
+				return true;
+			}
 		}
 		return false;
 	}
