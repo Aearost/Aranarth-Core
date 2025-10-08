@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.DateUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -26,6 +27,17 @@ public class CropHarvest {
 
 	public void execute(BlockBreakEvent e) {
 		Block block = e.getBlock();
+
+		// Prevent block destruction if sneaking
+		if (e.getPlayer().isSneaking()) {
+			e.setCancelled(true);
+		}
+
+		// Only apply logic to fully grown crops
+		if (!getIsMature(block)) {
+			return;
+		}
+
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops());
 		ItemStack seed = null;
 		Random random = new Random();
@@ -39,24 +51,44 @@ public class CropHarvest {
 			if (drops.getFirst().getType() == Material.NETHER_WART) {
 				seed = drops.getFirst();
 			}
-
-			// Prevent destruction of non-fully grown crop
-			if (e.getPlayer().isSneaking()) {
-				e.setCancelled(true);
-			}
-			// Prevents any other behaviour
-			return;
 		}
 
+		if (drops.size() > 1) {
+		}
+
+		Material cropType = drops.get(0).getType();
 		ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-		int level = 0;
-		boolean isUsingFortune = false;
-		if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
-			isUsingFortune = true;
-			level = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
+		int fortuneLevel = 0;
+
+		// Calculates crop yields including fortune and winter yields
+		// Other crops are all considered seeds and fortune is already applied
+		if (cropType == Material.WHEAT || cropType == Material.BEETROOT) {
+			if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
+				fortuneLevel = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
+			}
+			drops.get(0).setAmount(wheatBeetrootDropCalculation(fortuneLevel, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
+		} else if (cropType == Material.NETHER_WART) {
+			if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
+				fortuneLevel = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
+			}
+			int amountToDrop = cropDropCalculation(fortuneLevel, DateUtils.isWinterMonth(AranarthUtils.getMonth()));
+			// Nether wart reduces by seed/crop, must yield at least 1
+			if (amountToDrop == 0) {
+				amountToDrop++;
+			}
+			drops.get(0).setAmount(amountToDrop);
+		} else {
+			if (heldItem.containsEnchantment(Enchantment.FORTUNE)) {
+				fortuneLevel = heldItem.getEnchantmentLevel(Enchantment.FORTUNE);
+			}
+			int amountToDrop = cropDropCalculation(fortuneLevel, DateUtils.isWinterMonth(AranarthUtils.getMonth()));
+			drops.get(0).setAmount(amountToDrop);
 		}
 
-		// Removes yields of seeds and regular non-fortune harvests during the winter
+		if (drops.size() > 1) {
+		}
+
+		// Removes yields of seeds during the winter
 		if (DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 			if (seed.getType() == Material.WHEAT_SEEDS || seed.getType() == Material.BEETROOT_SEEDS) {
 				if (seed.getAmount() > 1) {
@@ -65,23 +97,12 @@ public class CropHarvest {
 					int randomSeedAmount = random.nextInt(2);
 					seed = drops.get(randomSeedAmount);
 				}
-
-				int randomCropAmount = random.nextInt(2);
-
-				// Not sneaking but holding fortune tool
-				if (isUsingFortune && getIsMature(e.getBlock())) {
-					if (!e.getPlayer().isSneaking()) {
-						int amountToDrop = wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth()));
-						drops.get(1).setAmount(amountToDrop);
-						e.setCancelled(true);
-						block.getWorld().dropItemNaturally(block.getLocation(), seed);
-						block.getWorld().dropItemNaturally(block.getLocation(), drops.get(1));
-						e.getBlock().setType(Material.AIR);
-					}
-				} else {
-					drops.get(0).setAmount(randomCropAmount);
+			} else if (seed.getType() == Material.NETHER_WART) {
+				if (seed.getAmount() >= 4) {
+					seed.setAmount(seed.getAmount() - 2);
+				} else if (seed.getAmount() == 3) {
+					seed.setAmount(2);
 				}
-
 			} else if (drops.get(1).getType() == Material.CARROTS || drops.get(1).getType() == Material.POTATOES) {
 				if (seed.getAmount() >= 2) {
 					seed.setAmount(seed.getAmount() - 2);
@@ -90,54 +111,41 @@ public class CropHarvest {
 				}
 			}
 		}
+		// Doubled crop and seed yields during the month of Fructivor
+		else if (AranarthUtils.getMonth() == Month.FRUCTIVOR) {
+			seed.setAmount(seed.getAmount() * 2);
+			if (drops.size() > 1) {
+				drops.get(1).setAmount(drops.get(1).getAmount() * 2);
+			}
+		}
+
+		Ageable crop = (Ageable) block.getBlockData();
 
 		// Auto-replant functionality
 		if (e.getPlayer().isSneaking()) {
 			e.setCancelled(true);
-			if (getIsMature(block)) {
-				// Prevents the block from actually being broken
-				if (seed.getAmount() > 1) {
-					seed.setAmount(seed.getAmount() - 1);
-				}
 
-				for (ItemStack drop : drops) {
-					if (drop != null && drop.getAmount() > 0) {
-						// Adds support to increase yield per crop if using fortune
-						if (drop.getType() == Material.WHEAT || drop.getType() == Material.BEETROOT) {
-							drop.setAmount(wheatBeetrootDropCalculation(level, DateUtils.isWinterMonth(AranarthUtils.getMonth())));
-						}
-						Month month = AranarthUtils.getMonth();
-						// Doubled crop yields during the month of Fructivor
-						if (month == Month.FRUCTIVOR) {
-							if (AranarthUtils.isBlockCrop(drop.getType())) {
-								drop.setAmount(drop.getAmount() * 2);
-							}
-						}
-						// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
-						else if (month == Month.GLACIVOR || month == Month.FRIGORVOR || month == Month.OBSCURVOR) {
-							if (AranarthUtils.isBlockCrop(drop.getType())) {
-								if (drop.getAmount() == 1) {
-									if (random.nextInt(2) == 0) {
-										drop.setAmount(0);
-									}
-								} else {
-									drop.setAmount(drop.getAmount() / 2);
-								}
-							}
-						}
-						block.getWorld().dropItemNaturally(block.getLocation(), drop);
-					}
-				}
-				block.getWorld().playSound(block.getLocation(), Sound.BLOCK_CROP_BREAK, 1.3F, 2.0F);
-				// This allows the crop to be set to the seed level
-				Ageable crop = (Ageable) block.getBlockData();
-				crop.setAge(0);
+			// Manually reducing the seed used to replant the crop
+			if (seed.getAmount() > 1) {
+				seed.setAmount(seed.getAmount() - 1);
+			}
 
-				// mcMMO Herbalism XP gain is lost because of this
-				McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+			for (ItemStack drop : drops) {
+				if (drop != null && drop.getAmount() > 0) {
+					block.getWorld().dropItemNaturally(block.getLocation(), drop);
+				}
+			}
+			block.getWorld().playSound(block.getLocation(), Sound.BLOCK_CROP_BREAK, 1.3F, 2.0F);
+
+			// This allows the crop to be set to the seed fortune Level
+			crop.setAge(0);
+
+			// mcMMO Herbalism XP gain is lost because of this
+			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+			if (mcmmoPlayer != null) {
 				HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
 				HashSet<Block> brokenBlocks = new HashSet<>();
-				brokenBlocks.add(block);
+				brokenBlocks.add(e.getBlock());
 				herbalismManager.awardXPForPlantBlocks(brokenBlocks);
 
 				// Without this call, there's no way for the crop to actually be re-planted
@@ -145,30 +153,28 @@ public class CropHarvest {
 				return;
 			}
 		}
+		// Non-sneaking crop destruction
+		else {
+			Bukkit.getLogger().info("Not sneaking");
+			e.setCancelled(true);
 
-		e.setCancelled(true);
-		block.setType(Material.AIR);
-		Month month = AranarthUtils.getMonth();
-		for (ItemStack drop : drops) {
-			// Doubled crop yields during the month of Fructivor
-			if (month == Month.FRUCTIVOR) {
-				if (AranarthUtils.isBlockCrop(drop.getType())) {
-					drop.setAmount(drop.getAmount() * 2);
-				}
+			for (ItemStack drop : drops) {
+				block.getWorld().dropItemNaturally(block.getLocation(), drop);
 			}
-			// Half crop rate yields during the months of Glacivor, Frigorvor, and Obscurvor
-			else if (month == Month.GLACIVOR || month == Month.FRIGORVOR || month == Month.OBSCURVOR) {
-				if (AranarthUtils.isBlockCrop(drop.getType())) {
-					if (drop.getAmount() == 1) {
-						if (random.nextInt(2) == 0) {
-							drop.setAmount(0);
-						}
-					} else {
-						drop.setAmount(drop.getAmount() / 2);
-					}
-				}
+
+			// mcMMO Herbalism XP gain is lost because of this
+			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+			if (mcmmoPlayer != null) {
+				HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
+				HashSet<Block> brokenBlocks = new HashSet<>();
+				brokenBlocks.add(e.getBlock());
+				herbalismManager.awardXPForPlantBlocks(brokenBlocks);
+
+				// Without this call, there's no way for the crop to actually be re-planted
+				block.setBlockData(crop);
+				block.setType(Material.AIR);
+				return;
 			}
-			block.getWorld().dropItemNaturally(block.getLocation(), drop);
 		}
 	}
 
@@ -179,7 +185,7 @@ public class CropHarvest {
 	 */
 	private boolean getIsMature(Block block) {
 		if (block.getBlockData() instanceof Ageable crop) {
-            return crop.getMaximumAge() == crop.getAge();
+			return crop.getMaximumAge() == crop.getAge();
 		}
 		return false;
 	}
@@ -188,7 +194,7 @@ public class CropHarvest {
 	 * Determines how much wheat or beetroot to be dropped based on Fortune.
 	 * @param level The fortune level of the tool.
 	 * @param isWinterMonth Confirmation whether the current server month is a winter month.
-	 * @return The number of the crop to be dropped.
+	 * @return The number of the crop to be dropped, from 0 to 3.
 	 */
 	private int wheatBeetrootDropCalculation(int level, boolean isWinterMonth) {
 		// This uses the same formula as regular wheat seeds dropping
@@ -196,23 +202,23 @@ public class CropHarvest {
 		final int bracket = r.nextInt(10) + 1;
 		int amountToDrop = 1;
 
-		// 70% chance of getting 1 wheat
-		// 30% chance of getting 2 wheat
+		// 70% chance of getting 1
+		// 30% chance of getting 2
 		if (level == 1) {
 			if (bracket >= 8) {
 				amountToDrop = 2;
 			}
 		}
-		// 30% chance of getting 1 wheat
-		// 70% chance of getting 2 wheat
+		// 30% chance of getting 1
+		// 70% chance of getting 2
 		else if (level == 2) {
 			if (bracket >= 4) {
 				amountToDrop = 2;
 			}
 		}
-		// 20% chance of getting 1 wheat
-		// 60% chance of getting 2 wheat
-		// 20% chance of getting 3 wheat
+		// 20% chance of getting 1
+		// 60% chance of getting 2
+		// 20% chance of getting 3
 		else if (level == 3) {
 			if (bracket >= 3 && bracket < 7) {
 				amountToDrop = 2;
@@ -224,6 +230,40 @@ public class CropHarvest {
 		// Removes wheat or beetroot drops partially in winter months
 		if (isWinterMonth) {
 			int amountToReduce = r.nextInt(2);
+			amountToDrop = amountToDrop - amountToReduce;
+		}
+		return amountToDrop;
+	}
+
+	/**
+	 * Determines how many carrots, potatoes, or nether wart to be dropped based on Fortune.
+	 * @param level The fortune level of the tool.
+	 * @param isWinterMonth Confirmation whether the current server month is a winter month.
+	 * @return The number of the crop to be dropped, from 0 to 7.
+	 */
+	private int cropDropCalculation(int level, boolean isWinterMonth) {
+		Random r = new Random();
+		final int bracket = r.nextInt(10) + 1;
+		int amountToDrop = 1;
+		int baseAmount = 2;
+
+		// 3 to 5
+		if (level == 1) {
+			baseAmount = 3;
+		}
+		// 4 to 6
+		else if (level == 2) {
+			baseAmount = 4;
+		}
+		// 5 to 7
+		else if (level == 3) {
+			baseAmount = 5;
+		}
+		amountToDrop = r.nextInt(3) + baseAmount;
+
+		// Removes drops partially in winter months
+		if (isWinterMonth) {
+			int amountToReduce = r.nextInt(3);
 			amountToDrop = amountToDrop - amountToReduce;
 		}
 		return amountToDrop;
