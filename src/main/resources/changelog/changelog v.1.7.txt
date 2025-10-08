@@ -31,6 +31,7 @@ Features
 [+] Happy Ghasts can no longer be harmed by players
 [~] Fixed bug where commands had error due incorrect method check
 [~] It will now snow and rain during the month of Umbravor rather than only snow
+[~] Fixed bug where nether wart couldn't be auto-replanted
 
 Miscellaneous
 - Restructured date message logic to be a callable method
@@ -38,3 +39,4 @@ Miscellaneous
 - Minor adjustments to the date message to remove extra lines and AranarthCore prefix to all messages
 - Minor changes to wandering trader slain message
 - Added helper method to quickly list the quantity of each potion a player has
+- Re-wrote most of the crop harvest logic
