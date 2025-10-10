@@ -7,28 +7,33 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
 import java.util.Random;
 
 /**
  * Handles storing EXP in the player's held empty bottle.
  */
-public class ExpBottle {
+public class ExpStore {
 
     public void execute(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         if (e.getHand() == EquipmentSlot.HAND) {
             if (player.getInventory().getItemInMainHand().getType() == Material.GLASS_BOTTLE) {
-                if (player.getLevel() > 0) {
+                int amountToReduce = new Random().nextInt(10) + 10;
+                if (player.getTotalExperience() > amountToReduce) {
                     if (player.isSneaking()) {
                         // Reduces by a less than what is gained
-                        int amountToReduce = new Random().nextInt(10) + 10;
                         amountToReduce = amountToReduce * -1;
                         player.giveExp(amountToReduce);
 
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
                         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
-                        player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
+                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
+                        // If the player's inventory was full, drop it to the ground
+                        if (!leftover.isEmpty()) {
+                            player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+                        }
                         player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                     }
                 }
