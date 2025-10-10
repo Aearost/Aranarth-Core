@@ -226,11 +226,6 @@ public class AranarthUtils {
 					&& location1.getBlockZ() == location2.getBlockZ()
 					&& location1.getWorld().getName().equals(location2.getWorld().getName());
 		} else {
-			if (location1 == null) {
-				Bukkit.getLogger().info("1 is null");
-			} else {
-				Bukkit.getLogger().info("2 is null");
-			}
 			return false;
 		}
 	}
@@ -822,6 +817,10 @@ public class AranarthUtils {
 	public static List<LockedContainer> getLockedContainers() {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return null;
+		}
+		Bukkit.getLogger().info("*********************************");
+		for (LockedContainer container : lockedContainers) {
+			Bukkit.getLogger().info(container.toString());
 		}
 		return lockedContainers;
 	}
