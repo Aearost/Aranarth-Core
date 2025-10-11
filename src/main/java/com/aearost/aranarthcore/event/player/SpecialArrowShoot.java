@@ -18,9 +18,9 @@ public class SpecialArrowShoot {
         // Apply the value to the projectile entity
         if (arrowItem.hasItemMeta()) {
             if (arrowItem.getItemMeta().getPersistentDataContainer().has(ARROW)) {
-                String type = arrowItem.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+                String arrowType = arrowItem.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
                 Entity projectile = e.getProjectile();
-                projectile.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, type);
+                projectile.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, arrowType);
             }
         }
     }

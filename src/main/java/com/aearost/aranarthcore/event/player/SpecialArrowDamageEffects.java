@@ -17,17 +17,16 @@ public class SpecialArrowDamageEffects {
 		if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
 			if (e.getDamageSource().getDamageType() == DamageType.ARROW) {
 				if (arrow.getPersistentDataContainer().has(ARROW)) {
-					if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("iron")
-						|| arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("gold")) {
-						Random random = new Random();
-						e.setDamage(e.getDamage() + random.nextInt(2) + 2);
-					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("amethyst")) {
-						e.setDamage(e.getDamage() + 4);
-					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("obsidian")) {
-						e.setDamage(e.getDamage() + 10);
-					} else if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("diamond")) {
-						e.setDamage(e.getDamage() + 12);
-					}
+					String arrowType = arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+                    switch (arrowType) {
+                        case "iron", "gold" -> {
+                            Random random = new Random();
+                            e.setDamage(e.getDamage() + random.nextInt(2) + 2);
+                        }
+                        case "amethyst" -> e.setDamage(e.getDamage() + 4);
+                        case "obsidian" -> e.setDamage(e.getDamage() + 10);
+                        case "diamond" -> e.setDamage(e.getDamage() + 12);
+                    }
 				}
 			}
 		}
