@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -131,10 +132,11 @@ public class GuiQuiverClick {
 											}
 											// Regular or Spectral Arrows
 											else {
-												if (stackFromQuiver.getType() == Material.ARROW) {
+												Bukkit.getLogger().info("AHHH");
+												if (selectedArrow.getType() == Material.ARROW) {
 													player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
-												} else if (stackFromQuiver.getType() == Material.SPECTRAL_ARROW) {
+												} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
 													player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 												}

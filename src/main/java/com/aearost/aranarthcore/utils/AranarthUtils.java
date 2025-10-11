@@ -1086,35 +1086,39 @@ public class AranarthUtils {
 	public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
 		// Basic or special arrow
 		if (launchedArrow.getType() == Material.ARROW) {
-			if (launchedArrow.hasItemMeta()) {
-				if (quiverArrow.hasItemMeta()) {
-					// Both have meta
-					ItemMeta launchedMeta = launchedArrow.getItemMeta();
-					ItemMeta quiverMeta = quiverArrow.getItemMeta();
-					if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
-						if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
-							String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
-							String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
-							if (launchedType.equals(quiverType)) {
-								return launchedArrow;
-							} else {
-								return null;
+			if (quiverArrow.getType() == Material.ARROW) {
+				if (launchedArrow.hasItemMeta()) {
+					if (quiverArrow.hasItemMeta()) {
+						// Both have meta
+						ItemMeta launchedMeta = launchedArrow.getItemMeta();
+						ItemMeta quiverMeta = quiverArrow.getItemMeta();
+						if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
+							if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
+								String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+								String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+								if (launchedType.equals(quiverType)) {
+									return launchedArrow;
+								} else {
+									return null;
+								}
 							}
 						}
+						// One of them is not a Special arrow but has meta somehow
+						Bukkit.getLogger().info("Something went wrong with identifying the arrows...");
+						return null;
+					} else {
+						return null;
 					}
-					// One of them is not a Special arrow but has meta somehow
-					Bukkit.getLogger().info("Something went wrong with identifying the arrows...");
-					return null;
 				} else {
-					return null;
+					if (quiverArrow.hasItemMeta()) {
+						return null;
+					} else {
+						// Both are regular arrows
+						return launchedArrow;
+					}
 				}
 			} else {
-				if (quiverArrow.hasItemMeta()) {
-					return null;
-				} else {
-					// Both are regular arrows
-					return launchedArrow;
-				}
+				return null;
 			}
 		}
 		// Spectral arrow
@@ -1126,13 +1130,13 @@ public class AranarthUtils {
 		// Tipped arrow
 		else {
 			if (quiverArrow.hasItemMeta()) {
-				PotionMeta launchedMeta = (PotionMeta) launchedArrow.getItemMeta();
-				PotionMeta quiverMeta = (PotionMeta) quiverArrow.getItemMeta();
-
-				if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
-					return launchedArrow;
-				} else {
-					return null;
+				if (launchedArrow.getItemMeta() instanceof PotionMeta launchedMeta
+						&& quiverArrow.getItemMeta() instanceof PotionMeta quiverMeta) {
+                    if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
+						return launchedArrow;
+					} else {
+						return null;
+					}
 				}
 			} else {
 				return null;
