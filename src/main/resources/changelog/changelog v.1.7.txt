@@ -32,6 +32,7 @@ Features
 [~] Fixed bug where commands had error due incorrect method check
 [~] It will now snow and rain during the month of Umbravor rather than only snow
 [~] Fixed bug where nether wart couldn't be auto-replanted
+[~] Made sure quivers and potion inventories cannot be opened in non-survival worlds
 
 Miscellaneous
 - Restructured date message logic to be a callable method

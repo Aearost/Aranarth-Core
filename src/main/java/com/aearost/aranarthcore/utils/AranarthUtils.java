@@ -780,7 +780,7 @@ public class AranarthUtils {
 
 		// Counts how many potions of the same type there are
 		for (ItemStack potionToCount : potions) {
-			// Add potion if doesn't exist
+			// Add the potion if it doesn't exist
 			if (potionsAndAmounts.get(potionToCount) == null) {
 				potionsAndAmounts.put(potionToCount, 1);
 				continue;
@@ -818,10 +818,10 @@ public class AranarthUtils {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return null;
 		}
-		Bukkit.getLogger().info("*********************************");
-		for (LockedContainer container : lockedContainers) {
-			Bukkit.getLogger().info(container.toString());
-		}
+//		Bukkit.getLogger().info("*********************************");
+//		for (LockedContainer container : lockedContainers) {
+//			Bukkit.getLogger().info(container.toString());
+//		}
 		return lockedContainers;
 	}
 

@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -72,6 +71,14 @@ public class ContainerAutoLock {
             LockedContainer container = new LockedContainer(uuid, trustedPlayers, AranarthUtils.getLocationsOfContainer(e.getBlock()));
             AranarthUtils.addLockedContainer(container);
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
+        } else {
+            UUID uuid = e.getPlayer().getUniqueId();
+            List<UUID> trusted = new ArrayList<>();
+            trusted.add(uuid);
+            Location[] location = new Location[] { e.getBlock().getLocation(), null };
+            LockedContainer lockedContainer = new LockedContainer(uuid, trusted, location);
+            AranarthUtils.addLockedContainer(lockedContainer);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
         }
     }
 
@@ -82,16 +89,11 @@ public class ContainerAutoLock {
      * @return The locations of both blocks where the first index is the left chest and the second is the right.
      */
     private Location[] getLocationsFromBlocks(Block placed, Block against) {
-
-        Bukkit.getLogger().info("PLACED - x: " + placed.getLocation().getBlockX() + " | y: " + placed.getLocation().getBlockY() + " | z: " + placed.getLocation().getBlockZ());
-        Bukkit.getLogger().info("AGAINST - x: " + against.getLocation().getBlockX() + " | y: " + against.getLocation().getBlockY() + " | z: " + against.getLocation().getBlockZ());
-
         Location placedLoc = placed.getLocation();
         Location againstLoc = against.getLocation();
 
         if (against.getBlockData() instanceof org.bukkit.block.data.type.Chest againstData) {
             if (placed.getBlockData() instanceof org.bukkit.block.data.type.Chest placedData) {
-                Bukkit.getLogger().info("Against face: " + againstData.getFacing().name());
                 if (againstData.getFacing() == BlockFace.NORTH) {
                     // If the right chest was placed, against is the left chest
                     if (againstLoc.getBlockX() > placedLoc.getBlockX()) {
