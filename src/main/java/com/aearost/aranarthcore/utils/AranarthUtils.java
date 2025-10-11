@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.LockedContainer;
@@ -15,6 +16,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.util.*;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 
 
 /**
@@ -1073,5 +1077,85 @@ public class AranarthUtils {
 		return false;
 	}
 
+	/**
+	 * Verifies if the launched arrow and the arrow from the Quiver are the same.
+	 * @param launchedArrow The launched arrow.
+	 * @param quiverArrow The arrow in the quiver.
+	 * @return The arrow if it matches.
+	 */
+	public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
+		// Basic or special arrow
+		if (launchedArrow.getType() == Material.ARROW) {
+			if (launchedArrow.hasItemMeta()) {
+				if (quiverArrow.hasItemMeta()) {
+					// Both have meta
+					ItemMeta launchedMeta = launchedArrow.getItemMeta();
+					ItemMeta quiverMeta = quiverArrow.getItemMeta();
+					if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
+						if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
+							String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+							String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+							if (launchedType.equals(quiverType)) {
+								return launchedArrow;
+							} else {
+								return null;
+							}
+						}
+					}
+					// One of them is not a Special arrow but has meta somehow
+					Bukkit.getLogger().info("Something went wrong with identifying the arrows...");
+					return null;
+				} else {
+					return null;
+				}
+			} else {
+				if (quiverArrow.hasItemMeta()) {
+					return null;
+				} else {
+					// Both are regular arrows
+					return launchedArrow;
+				}
+			}
+		}
+		// Spectral arrow
+		else if (launchedArrow.getType() == Material.SPECTRAL_ARROW) {
+			if (quiverArrow.getType() == Material.SPECTRAL_ARROW) {
+				return launchedArrow;
+			}
+		}
+		// Tipped arrow
+		else {
+			if (quiverArrow.hasItemMeta()) {
+				PotionMeta launchedMeta = (PotionMeta) launchedArrow.getItemMeta();
+				PotionMeta quiverMeta = (PotionMeta) quiverArrow.getItemMeta();
+
+				if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
+					return launchedArrow;
+				} else {
+					return null;
+				}
+			} else {
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Provides the ItemStack with a single quantity of the input arrow type.
+	 * @param arrowType The type of custom arrow.
+	 * @return The arrow with a single quantity.
+	 */
+	public static ItemStack getArrowFromType(String arrowType) {
+		return switch (arrowType) {
+			case "iron" -> new ArrowIron().getItem();
+			case "gold" -> new ArrowGold().getItem();
+			case "amethyst" -> new ArrowAmethyst().getItem();
+			case "obsidian" -> new ArrowObsidian().getItem();
+			case "diamond" -> new ArrowDiamond().getItem();
+			default -> null;
+		};
+	}
 
 }

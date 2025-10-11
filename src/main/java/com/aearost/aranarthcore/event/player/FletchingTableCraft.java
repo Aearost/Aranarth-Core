@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.items.arrowhead.*;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -185,14 +185,7 @@ public class FletchingTableCraft {
 		String special = arrowhead.getItemMeta().getPersistentDataContainer().get(ARROW_HEAD, PersistentDataType.STRING);
 		if (special == null) return null;
 
-		return switch (special) {
-			case "iron" -> new ArrowIron().getItem();
-			case "gold" -> new ArrowGold().getItem();
-			case "amethyst" -> new ArrowAmethyst().getItem();
-			case "obsidian" -> new ArrowObsidian().getItem();
-			case "diamond" -> new ArrowDiamond().getItem();
-			default -> null;
-		};
+		return AranarthUtils.getArrowFromType(special);
 	}
 
 	/**
@@ -252,14 +245,7 @@ public class FletchingTableCraft {
 
 		if (isCraftingArrow(craftingInventory)) {
 			String specialArrowType = craftingInventory[2].getItemMeta().getPersistentDataContainer().get(ARROW_HEAD, PersistentDataType.STRING);
-			ItemStack arrow = switch (specialArrowType) {
-				case "iron" -> new ArrowIron().getItem();
-				case "gold" -> new ArrowGold().getItem();
-				case "amethyst" -> new ArrowAmethyst().getItem();
-				case "obsidian" -> new ArrowObsidian().getItem();
-				case "diamond" -> new ArrowDiamond().getItem();
-				default -> null;
-			};
+			ItemStack arrow = AranarthUtils.getArrowFromType(specialArrowType);
 
 			craftingInventory[0] = arrow;
 			e.getInventory().setContents(craftingInventory);
