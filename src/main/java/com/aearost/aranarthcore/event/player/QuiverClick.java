@@ -22,7 +22,7 @@ public class QuiverClick {
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();
 					} else {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou must be in Survival mode to open the quiver!"));
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to open the quiver!"));
 					}
 				}
 			}
