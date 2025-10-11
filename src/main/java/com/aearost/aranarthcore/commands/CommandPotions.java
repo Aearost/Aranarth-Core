@@ -24,7 +24,7 @@ public class CommandPotions {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			if (!player.getLocation().getWorld().getName().startsWith("world")) {
+			if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
 				return true;
 			}
