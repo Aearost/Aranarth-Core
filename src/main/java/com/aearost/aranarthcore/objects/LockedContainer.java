@@ -71,9 +71,10 @@ public class LockedContainer {
 
 	@Override
 	public String toString() {
-		String divider = "----------";
-		String owner = Bukkit.getOfflinePlayer(getOwner()).getName() + " (" + getOwner() + ")";
+		String divider = "---------------\n";
+		String owner = "OWNER: " + Bukkit.getOfflinePlayer(getOwner()).getName() + " (" + getOwner() + ")";
 		StringBuilder trustedSB = new StringBuilder();
+		trustedSB.append("TRUSTED: ");
 		for (int i = 0; i < getTrusted().size(); i++) {
 			if (i == getTrusted().size() - 1) {
 				trustedSB.append(Bukkit.getOfflinePlayer(getTrusted().get(i)).getName()).append(" (").append(getTrusted().get(i)).append(")");
@@ -93,12 +94,12 @@ public class LockedContainer {
 			y2 = "y2: " + locations[1].getBlockY() + " | ";
 			z2 = "z2: " + locations[1].getBlockZ();
 		}
-		String loc1 = x1 + y1 + z1;
-		String loc2 = x2 + y2 + z2;
+		String loc1 = "LOC 1: " + x1 + y1 + z1;
+		String loc2 = "LOC 2: " + x2 + y2 + z2;
 		if (loc2.isEmpty()) {
-			return owner + "\n" + trusted + "\n" + loc1;
+			return divider + owner + "\n" + trusted + "\n" + loc1;
 		} else {
-			return owner + "\n" + trusted + "\n" + loc1 + "\n" + loc2;
+			return divider + owner + "\n" + trusted + "\n" + loc1 + "\n" + loc2;
 		}
 	}
 
