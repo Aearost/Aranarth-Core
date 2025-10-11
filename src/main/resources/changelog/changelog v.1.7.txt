@@ -35,6 +35,7 @@ Features
 [~] Made sure quivers and potion inventories cannot be opened in non-survival worlds
 [~] Hoppers cannot be placed under any locked chest
 [~] Fixed bug where non-arrow items could be placed in a Quiver by hotbar swapping
+[~] Made tipped arrows show their colour when toggled through the Quiver click
 
 Miscellaneous
 - Restructured date message logic to be a callable method
@@ -43,3 +44,5 @@ Miscellaneous
 - Minor changes to wandering trader slain message
 - Added helper method to quickly list the quantity of each potion a player has
 - Re-wrote most of the crop harvest logic
+- Re-wrote most of ArrowConsume to cleanly identify if the shot and quiver arrows match
+- Simplified logic of special arrow damage effects
