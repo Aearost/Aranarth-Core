@@ -28,7 +28,7 @@ public class ArrowDiamond implements AranarthItem {
 //			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
 //			cmdc.setFloats(List.of((float) 5));
 //			meta.setCustomModelDataComponent(cmdc);
-			meta.setCustomModelData(5);
+			meta.setCustomModelData(1);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "diamond");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
