@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +25,13 @@ public class GuiQuiverClick {
 			if (e.getClickedInventory() == null) {
 				return;
 			}
+
+			// Prevent all hotbar swapping in a Quiver GUI
+			if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
+				e.setCancelled(true);
+				return;
+			}
+
 			// If adding a new item to the arrows inventory
 			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
@@ -76,8 +84,8 @@ public class GuiQuiverClick {
 												if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 													// If mcMMO arrow
 													if (meta.hasCustomEffects()) {
-														String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
-														String newName = arrowName.substring(0, 1).toUpperCase();
+//														String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
+														String arrowName = meta.getCustomEffects().getFirst().getType().getKeyOrNull().getKey();														String newName = arrowName.substring(0, 1).toUpperCase();
 														newName = newName + arrowName.substring(1);
 														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newName + " &7arrows"));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
