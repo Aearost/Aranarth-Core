@@ -25,9 +25,10 @@ public class ArrowGold implements AranarthItem {
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
-			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setFloats(List.of((float) 2));
-			meta.setCustomModelDataComponent(cmdc);
+//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
+//			cmdc.setFloats(List.of((float) 2));
+//			meta.setCustomModelDataComponent(cmdc);
+			meta.setCustomModelData(2);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "gold");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));

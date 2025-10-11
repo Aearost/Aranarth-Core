@@ -25,9 +25,10 @@ public class ArrowAmethyst implements AranarthItem {
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
-			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setFloats(List.of((float) 3));
-			meta.setCustomModelDataComponent(cmdc);
+//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
+//			cmdc.setFloats(List.of((float) 3));
+//			meta.setCustomModelDataComponent(cmdc);
+			meta.setCustomModelData(3);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "amethyst");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
