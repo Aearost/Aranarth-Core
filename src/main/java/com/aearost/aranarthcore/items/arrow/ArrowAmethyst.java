@@ -26,7 +26,7 @@ public class ArrowAmethyst implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
 			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setStrings(List.of("arrowamethyst"));
+			cmdc.setFloats(List.of((float) 3));
 			meta.setCustomModelDataComponent(cmdc);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "amethyst");

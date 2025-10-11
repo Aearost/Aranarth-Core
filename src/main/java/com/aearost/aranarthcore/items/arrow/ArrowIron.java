@@ -26,7 +26,7 @@ public class ArrowIron implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
 			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setStrings(List.of("arrowiron"));
+			cmdc.setFloats(List.of((float) 1));
 			meta.setCustomModelDataComponent(cmdc);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "iron");

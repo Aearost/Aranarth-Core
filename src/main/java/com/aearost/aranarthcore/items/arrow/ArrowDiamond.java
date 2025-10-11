@@ -26,7 +26,7 @@ public class ArrowDiamond implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
 			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setStrings(List.of("arrowdiamond"));
+			cmdc.setFloats(List.of((float) 5));
 			meta.setCustomModelDataComponent(cmdc);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "diamond");
