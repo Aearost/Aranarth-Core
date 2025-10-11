@@ -25,9 +25,10 @@ public class ArrowObsidian implements AranarthItem {
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
-			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setFloats(List.of((float) 4));
-			meta.setCustomModelDataComponent(cmdc);
+//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
+//			cmdc.setFloats(List.of((float) 4));
+//			meta.setCustomModelDataComponent(cmdc);
+			meta.setCustomModelData(4);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "obsidian");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));

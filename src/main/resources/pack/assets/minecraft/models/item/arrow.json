@@ -8,25 +8,25 @@
       "predicate": {
         "custom_model_data": 1
       },
-      "model": "aranarth:item/arrowiron"
+      "model": "aranarth/arrowiron"
     },
     {
       "predicate": {
         "custom_model_data": 2
       },
-      "model": "aranarth:item/arrowgold"
+      "model": "aranarth/arrowgold"
     },
     { "predicate": {
       "custom_model_data": 3
-    }, "model": "aranarth:item/arrowamethyst"
+    }, "model": "aranarth/arrowamethyst"
     },
     { "predicate": {
       "custom_model_data": 4
-    }, "model": "aranarth:item/arrowobsidian"
+    }, "model": "aranarth/arrowobsidian"
     },
     { "predicate": {
       "custom_model_data": 5
-    }, "model": "aranarth:item/arrowdiamond"
+    }, "model": "aranarth/arrowdiamond"
     }
   ]
 }

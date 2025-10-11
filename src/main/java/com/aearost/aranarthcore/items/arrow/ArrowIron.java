@@ -25,9 +25,10 @@ public class ArrowIron implements AranarthItem {
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
-			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
-			cmdc.setFloats(List.of((float) 1));
-			meta.setCustomModelDataComponent(cmdc);
+//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
+//			cmdc.setFloats(List.of((float) 1));
+//			meta.setCustomModelDataComponent(cmdc);
+			meta.setCustomModelData(1);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "iron");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
