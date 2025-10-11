@@ -817,6 +817,8 @@ public class PersistenceUtils {
 					LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location[] { loc1, loc2 });
 					AranarthUtils.addLockedContainer(lockedContainer);
 					fieldCount = 0;
+					owner = null;
+					trusted = new ArrayList<>();
 				}
 			}
 			Bukkit.getLogger().info("All lockedcontainers have been initialized");

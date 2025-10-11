@@ -33,6 +33,7 @@ Features
 [~] It will now snow and rain during the month of Umbravor rather than only snow
 [~] Fixed bug where nether wart couldn't be auto-replanted
 [~] Made sure quivers and potion inventories cannot be opened in non-survival worlds
+[~] Hoppers cannot be placed under any locked chest
 
 Miscellaneous
 - Restructured date message logic to be a callable method
