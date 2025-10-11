@@ -84,8 +84,8 @@ public class GuiQuiverClick {
 												if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
 													// If mcMMO arrow
 													if (meta.hasCustomEffects()) {
-//														String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
-														String arrowName = meta.getCustomEffects().getFirst().getType().getKeyOrNull().getKey();														String newName = arrowName.substring(0, 1).toUpperCase();
+														String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
+														String newName = arrowName.substring(0, 1).toUpperCase();
 														newName = newName + arrowName.substring(1);
 														player.sendMessage(ChatUtils.chatMessage("&7You will now use &e" + newName + " &7arrows"));
 														player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
