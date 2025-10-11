@@ -103,7 +103,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lAquinvor (2)" +
 						"\n&r&oThe Dampened" +
-						"\n\n&rThe month of Aquinvor is plentiful of rain. Players are granted the passive effects of Dolphin's Grace, and Water Breathing. Rain falls more frequently and lasts longer than other months, melting the remaining snow."
+						"\n\n&rThe month of Aquinvor marks the springtime. Players are granted the passive effects of Dolphin's Grace, and Water Breathing. Rain falls more frequently and lasts longer than other months, melting the remaining snow."
 		);
 	}
 
@@ -135,7 +135,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lCalorvor (6)" +
 						"\n&r&oThe Warming" +
-						"\n\n&rThe month of Calorvor represents a period of warmth. Baby animals mature at a quicker rate, and have a 50% chance of being born as a twin."
+						"\n\n&rThe month of Calorvor starts off the summer. Baby animals mature at a quicker rate, and have a 50% chance of being born as a twin."
 		);
 	}
 
@@ -143,7 +143,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lArdorvor (7)" +
 						"\n&r&oThe Enflamed" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Ardorvor is the month of flames. Forest fires start at random throughout the month, and all sources of fire deal more damage."
 		);
 	}
 
@@ -151,7 +151,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lSolarvor (8)" +
 						"\n&r&oThe Fruitful" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Solarvor favours the picking of apples. Increased apple drop rates, and frequent &6God Apple Fragments &rdrops, there will be plenty for all."
 		);
 	}
 
@@ -159,7 +159,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lFructivor (9)" +
 						"\n&r&oThe Harvest" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Fructivor is not for the lazy. Crop yields are doubled, and Farmer villagers favour the vendor by providing improved crop sell rates."
 		);
 	}
 
@@ -167,7 +167,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lFollivor (10)" +
 						"\n&r&oThe Lumbered" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Follivor introduces the start of autumn. Trees provide more log drops, and saplings grow with more efficiency."
 		);
 	}
 
@@ -175,7 +175,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lFaunivor (11)" +
 						"\n&r&oThe Hunting" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Faunivor encourages a little bloodshed. The sacrificed will yield increased drop rates than usual, for both meat and animal products."
 		);
 	}
 
@@ -183,7 +183,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lUmbravor (12)" +
 						"\n&r&oThe Shadowed" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Umbravor marks the beginning of winter. There is a low chance of world-wide snowstorms, and crops are no longer harvested as efficiently."
 		);
 	}
 
@@ -191,7 +191,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lGlacivor (13)" +
 						"\n&r&oThe Frost" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Glacivor sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea."
 		);
 	}
 
@@ -199,7 +199,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lFrigorvor (14)" +
 						"\n&r&oThe Frozen" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Frigorvor brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates."
 		);
 	}
 
@@ -207,7 +207,7 @@ public class CommandAranarth {
 		return ChatUtils.translateToColor(
 				"&lObscurvor (15)" +
 						"\n&r&oThe Darkness" +
-						"\n\n&rThe month of _____"
+						"\n\n&rThe month of Obscurvor is the month of rest. You will harvest blocks at a slower rate, and be hunted more frequently and aggressively by phantoms."
 		);
 	}
 
