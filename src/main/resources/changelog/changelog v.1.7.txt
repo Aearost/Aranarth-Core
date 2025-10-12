@@ -2,7 +2,8 @@ AranarthCore v. 1.7
 
 Features
 [+] Added a new world for a public Survival server, and moved the previous world under /ac smp
-[+] Added /ac aranarth to provide a book filled with information about Aranarth
+[+] Added /ac calendar to provide a book with information about the calendar system
+[+] Added /ac aranarthium to provide a book with information about aranarthium
 [+] Added /ac date to display the current server date
 [+] Added /ac dateset to manually change the current server date in-game
 [+] Added particle effect around the bottom of waterfalls

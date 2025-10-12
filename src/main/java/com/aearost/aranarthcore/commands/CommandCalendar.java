@@ -8,9 +8,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 /**
- * Teleports the player to the arena world, sharing the survival inventory.
+ * Provides the player with a written book outlining the way the calendar works in Aranarth.
  */
-public class CommandAranarth {
+public class CommandCalendar {
 
 	/**
 	 * @param sender The user that entered the command.
