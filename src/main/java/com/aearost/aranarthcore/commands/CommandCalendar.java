@@ -28,21 +28,21 @@ public class CommandCalendar {
 			meta.addPage(bookCalendar1());
 			meta.addPage(bookCalendar2());
 			meta.addPage(bookWeek());
-			meta.addPage(bookMonth1());
-			meta.addPage(bookMonth2());
-			meta.addPage(bookMonth3());
-			meta.addPage(bookMonth4());
-			meta.addPage(bookMonth5());
-			meta.addPage(bookMonth6());
-			meta.addPage(bookMonth7());
-			meta.addPage(bookMonth8());
-			meta.addPage(bookMonth9());
-			meta.addPage(bookMonth10());
-			meta.addPage(bookMonth11());
-			meta.addPage(bookMonth12());
-			meta.addPage(bookMonth13());
-			meta.addPage(bookMonth14());
-			meta.addPage(bookMonth15());
+			meta.addPage(ignivor());
+			meta.addPage(aquinvor());
+			meta.addPage(ventivor());
+			meta.addPage(florivor());
+			meta.addPage(aestivor());
+			meta.addPage(calorvor());
+			meta.addPage(ardorvor());
+			meta.addPage(solarvor());
+			meta.addPage(fructivor());
+			meta.addPage(follivor());
+			meta.addPage(faunivor());
+			meta.addPage(umbravor());
+			meta.addPage(glacivor());
+			meta.addPage(frigorvor());
+			meta.addPage(obscurvor());
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
@@ -91,7 +91,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth1() {
+	private static String ignivor() {
 		return ChatUtils.translateToColor(
 				"&lIgnivor (1)" +
 						"\n&r&oThe New Fire" +
@@ -99,7 +99,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth2() {
+	private static String aquinvor() {
 		return ChatUtils.translateToColor(
 				"&lAquinvor (2)" +
 						"\n&r&oThe Dampened" +
@@ -107,7 +107,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth3() {
+	private static String ventivor() {
 		return ChatUtils.translateToColor(
 				"&lVentivor (3)" +
 						"\n&r&oThe Zephyr" +
@@ -115,7 +115,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth4() {
+	private static String florivor() {
 		return ChatUtils.translateToColor(
 				"&lFlorivor (4)" +
 						"\n&r&oThe Blossoming" +
@@ -123,7 +123,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth5() {
+	private static String aestivor() {
 		return ChatUtils.translateToColor(
 				"&lAestivor (5)" +
 						"\n&r&oThe Electrified" +
@@ -131,7 +131,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth6() {
+	private static String calorvor() {
 		return ChatUtils.translateToColor(
 				"&lCalorvor (6)" +
 						"\n&r&oThe Warming" +
@@ -139,7 +139,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth7() {
+	private static String ardorvor() {
 		return ChatUtils.translateToColor(
 				"&lArdorvor (7)" +
 						"\n&r&oThe Enflamed" +
@@ -147,7 +147,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth8() {
+	private static String solarvor() {
 		return ChatUtils.translateToColor(
 				"&lSolarvor (8)" +
 						"\n&r&oThe Fruitful" +
@@ -155,7 +155,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth9() {
+	private static String fructivor() {
 		return ChatUtils.translateToColor(
 				"&lFructivor (9)" +
 						"\n&r&oThe Harvest" +
@@ -163,23 +163,23 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth10() {
+	private static String follivor() {
 		return ChatUtils.translateToColor(
 				"&lFollivor (10)" +
 						"\n&r&oThe Lumbered" +
-						"\n\n&rThe month of Follivor introduces the start of autumn. Trees provide more log drops, and saplings grow with more efficiency."
+						"\n\n&rThe month of Follivor introduces the start of autumn. Trees provide more EXP and log drops, and saplings grow with more efficiency."
 		);
 	}
 
-	private static String bookMonth11() {
+	private static String faunivor() {
 		return ChatUtils.translateToColor(
 				"&lFaunivor (11)" +
 						"\n&r&oThe Hunting" +
-						"\n\n&rThe month of Faunivor encourages a little bloodshed. The sacrificed will yield increased drop rates than usual, for both meat and animal products."
+						"\n\n&rThe month of Faunivor encourages a little bloodshed. The sacrificed will yield increased weapon damage, and increased drop rates for both meat and animal products."
 		);
 	}
 
-	private static String bookMonth12() {
+	private static String umbravor() {
 		return ChatUtils.translateToColor(
 				"&lUmbravor (12)" +
 						"\n&r&oThe Shadowed" +
@@ -187,7 +187,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth13() {
+	private static String glacivor() {
 		return ChatUtils.translateToColor(
 				"&lGlacivor (13)" +
 						"\n&r&oThe Frost" +
@@ -195,7 +195,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth14() {
+	private static String frigorvor() {
 		return ChatUtils.translateToColor(
 				"&lFrigorvor (14)" +
 						"\n&r&oThe Frozen" +
@@ -203,7 +203,7 @@ public class CommandCalendar {
 		);
 	}
 
-	private static String bookMonth15() {
+	private static String obscurvor() {
 		return ChatUtils.translateToColor(
 				"&lObscurvor (15)" +
 						"\n&r&oThe Darkness" +
