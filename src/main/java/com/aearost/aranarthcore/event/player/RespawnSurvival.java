@@ -39,7 +39,7 @@ public class RespawnSurvival {
         }
 
 
-        if (AranarthUtils.isArmorType(player, "soulbound")) {
+        if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             int level = aranarthPlayer.getLevelBeforeDeath();
             float exp = aranarthPlayer.getExpBeforeDeath();

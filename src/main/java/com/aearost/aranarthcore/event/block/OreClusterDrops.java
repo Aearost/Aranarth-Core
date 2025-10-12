@@ -38,7 +38,7 @@ public class OreClusterDrops {
 				}
 
 				double dwarvenReduction = 0;
-				if (AranarthUtils.isArmorType(e.getPlayer(), "dwarven")) {
+				if (AranarthUtils.isWearingArmorType(e.getPlayer(), "dwarven")) {
 					dwarvenReduction = 0.9;
 				}
 

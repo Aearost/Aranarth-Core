@@ -17,7 +17,7 @@ import java.util.Random;
 public class DwarvenAranarthiumOreDrops {
 	public void execute(BlockBreakEvent e) {
 		Player player = e.getPlayer();
-		if (AranarthUtils.isArmorType(player, "dwarven")) {
+		if (AranarthUtils.isWearingArmorType(player, "dwarven")) {
 			Material material = e.getBlock().getType();
 			Random random = new Random();
 			World world = e.getBlock().getWorld();

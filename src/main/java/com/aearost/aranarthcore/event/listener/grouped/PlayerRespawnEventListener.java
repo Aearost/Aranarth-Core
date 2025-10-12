@@ -37,7 +37,7 @@ public class PlayerRespawnEventListener implements Listener {
             e.getDrops().clear();
             e.setDroppedExp(0);
         } else {
-            if (AranarthUtils.isArmorType(player, "soulbound")) {
+            if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
                 e.setKeepInventory(true);
                 e.getDrops().clear();
                 e.setDroppedExp(0);

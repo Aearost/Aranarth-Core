@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -35,6 +36,27 @@ public class PotionEffectStackListener implements Listener {
 		}
 
 		if (e.getEntity() instanceof LivingEntity entity) {
+
+			if (e.getCause() == Cause.PLUGIN && DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
+				if (e.getEntity() instanceof Player player) {
+					if (AranarthUtils.isWearingArmorType(player, "scorched")) {
+						// If it is the slowness applied by winter months
+						boolean applyingWithoutExistingSlowness = e.getOldEffect() == null
+								&& e.getNewEffect() != null
+								&& e.getNewEffect().getType() == PotionEffectType.SLOWNESS;
+						boolean applyingWithExistingSlowness = e.getOldEffect() != null
+								&& e.getOldEffect().getType() == PotionEffectType.SLOWNESS
+								&& e.getNewEffect() != null
+								&& e.getNewEffect().getType() == PotionEffectType.SLOWNESS;
+
+						if (applyingWithoutExistingSlowness || applyingWithExistingSlowness) {
+							e.setCancelled(true);
+							return;
+						}
+					}
+				}
+			}
+
             // If the player currently has that same effect and is re-applying it
 			if (Objects.nonNull(e.getOldEffect()) && Objects.nonNull(e.getNewEffect())) {
 				PotionEffect oldEffect = e.getOldEffect();
