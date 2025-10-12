@@ -56,14 +56,18 @@ public class ExtraWeaponsDamage {
 							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 						}
 					} else if (AranarthUtils.isArmorType(attacker, "scorched")) {
-						if (weapon.containsEnchantment(Enchantment.FIRE_ASPECT)) {
-							if (weapon.getEnchantmentLevel(Enchantment.FIRE_ASPECT) == 1) {
-								entity.setFireTicks(140);
-							} else {
-								entity.setFireTicks(240);
+						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
+							// Applies fire ticks for any source of melee damage
+							entity.setFireTicks(60);
+							if (weapon.containsEnchantment(Enchantment.FIRE_ASPECT)) {
+								if (weapon.getEnchantmentLevel(Enchantment.FIRE_ASPECT) == 1) {
+									entity.setFireTicks(140);
+								} else {
+									entity.setFireTicks(240);
+								}
+							} else if (weapon.containsEnchantment(Enchantment.FLAME)) {
+								entity.setFireTicks(160);
 							}
-						} else if (weapon.containsEnchantment(Enchantment.FLAME)) {
-							entity.setFireTicks(160);
 						}
 					}
 				}
