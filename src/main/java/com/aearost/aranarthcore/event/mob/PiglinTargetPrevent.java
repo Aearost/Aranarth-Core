@@ -12,7 +12,7 @@ public class PiglinTargetPrevent {
 	public void execute(EntityTargetEvent e) {
 		if (e.getEntity() instanceof PiglinAbstract) {
 			if (e.getTarget() instanceof Player player) {
-				if (AranarthUtils.isArmorType(player, "scorched")) {
+				if (AranarthUtils.isWearingArmorType(player, "scorched")) {
 					e.setCancelled(true);
 				}
 			}

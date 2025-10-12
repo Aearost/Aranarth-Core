@@ -37,6 +37,8 @@ Features
 [~] Hoppers cannot be placed under any locked chest
 [~] Fixed bug where non-arrow items could be placed in a Quiver by hotbar swapping
 [~] Made tipped arrows show their colour when toggled through the Quiver click
+[+] All sources of melee damage now apply fire ticks when wearing Scorched Aranarthium
+[+] Scorched Aranarthium now makes the wearer immune to the slowness applied by the Winter months
 
 Miscellaneous
 - Restructured date message logic to be a callable method

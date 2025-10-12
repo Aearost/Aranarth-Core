@@ -12,7 +12,7 @@ public class GuardianTargetPrevent {
 	public void execute(EntityTargetEvent e) {
 		if (e.getEntity() instanceof Guardian guardian) {
 			if (e.getTarget() instanceof Player player) {
-				if (AranarthUtils.isArmorType(player, "aquatic")) {
+				if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
 					e.setCancelled(true);
 				}
 			}

@@ -24,7 +24,7 @@ public class ExtraWeaponsDamage {
 					Random random = new Random();
 					ItemStack weapon = attacker.getInventory().getItemInMainHand();
 					Material weaponType = attacker.getInventory().getItemInMainHand().getType();
-					if (AranarthUtils.isArmorType(attacker, "aquatic")) {
+					if (AranarthUtils.isWearingArmorType(attacker, "aquatic")) {
 						// Ranged trident throw
 						if (e.getDamageSource().getDamageType() == DamageType.TRIDENT) {
 							// 2 to 6 hearts of additional damage
@@ -36,26 +36,26 @@ public class ExtraWeaponsDamage {
 								e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 							}
 						}
-					} else if (AranarthUtils.isArmorType(attacker, "ardent")) {
+					} else if (AranarthUtils.isWearingArmorType(attacker, "ardent")) {
 						// Sword damage
 						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
 							if (weaponType.name().endsWith("_SWORD")) {
 								e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 							}
 						}
-					} else if (AranarthUtils.isArmorType(attacker, "dwarven")) {
+					} else if (AranarthUtils.isWearingArmorType(attacker, "dwarven")) {
 						// Axe and mace damage increase
 						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
 							if (weaponType.name().endsWith("_AXE") || weaponType == Material.MACE) {
 								e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 							}
 						}
-					} else if (AranarthUtils.isArmorType(attacker, "elven")) {
+					} else if (AranarthUtils.isWearingArmorType(attacker, "elven")) {
 						// Arrow damage increase
 						if (e.getDamageSource().getDamageType() == DamageType.ARROW) {
 							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 						}
-					} else if (AranarthUtils.isArmorType(attacker, "scorched")) {
+					} else if (AranarthUtils.isWearingArmorType(attacker, "scorched")) {
 						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
 							// Applies fire ticks for any source of melee damage
 							entity.setFireTicks(60);

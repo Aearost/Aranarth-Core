@@ -341,26 +341,26 @@ public class AranarthUtils {
 	 * @param player The player being verified.
 	 */
 	private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
-		if (isArmorType(player, "aquatic")) {
+		if (isWearingArmorType(player, "aquatic")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isArmorType(player, "ardent")) {
+		} else if (isWearingArmorType(player, "ardent")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
-		} else if (isArmorType(player, "dwarven")) {
+		} else if (isWearingArmorType(player, "dwarven")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isArmorType(player, "elven")) {
+		} else if (isWearingArmorType(player, "elven")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isArmorType(player, "scorched")) {
+		} else if (isWearingArmorType(player, "scorched")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-		} else if (isArmorType(player, "soulbound")) {
+		} else if (isWearingArmorType(player, "soulbound")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		}
 	}
@@ -371,7 +371,7 @@ public class AranarthUtils {
 	 * @param type The armor type to be verified.
 	 * @return Confirmation whether the specified type is fully equipped.
 	 */
-	public static boolean isArmorType(Player player, String type) {
+	public static boolean isWearingArmorType(Player player, String type) {
 		ItemStack[] armor = player.getInventory().getArmorContents();
 		int counter = 0;
 		for (ItemStack is : player.getInventory().getArmorContents()) {
