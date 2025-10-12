@@ -21,7 +21,7 @@ public class CommandCalendar {
 		if (sender instanceof Player player) {
 			ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
 			BookMeta meta = (BookMeta) book.getItemMeta();
-			meta.setItemName(ChatUtils.translateToColor("&8&l--=&6&lThe Realm of Aranarth&8&l=--"));
+			meta.setItemName(ChatUtils.translateToColor("&8&l--=&6&lThe Calendar&8&l=--"));
 			meta.setAuthor(ChatUtils.translateToColor("&8Unknown"));
 
 			meta.addPage(bookIntroduction());
