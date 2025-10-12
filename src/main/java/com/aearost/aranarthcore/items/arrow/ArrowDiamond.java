@@ -5,11 +5,9 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.components.CustomModelDataComponent;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
@@ -21,7 +19,7 @@ public class ArrowDiamond implements AranarthItem {
 	 * @return The Diamond Arrow.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.ARROW, 1);
+		ItemStack item = new ItemStack(Material.SWEET_BERRIES, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
