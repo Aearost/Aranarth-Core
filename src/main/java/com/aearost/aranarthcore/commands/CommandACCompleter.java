@@ -90,21 +90,28 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
 			if (args[0].equals("a")) {
 				displayedOptions.add("arena");
-				displayedOptions.add("aranarth");
+				displayedOptions.add("aranarthium");
 			} else {
 				if (args[0].equals("ar")) {
 					displayedOptions.add("arena");
-					displayedOptions.add("aranarth");
+					displayedOptions.add("aranarthium");
 				} else {
 					if ("arena".startsWith(args[0])) {
 						displayedOptions.add("arena");
-					} else if ("aranarth".startsWith(args[0])) {
-						displayedOptions.add("aranarth");
+					} else if ("aranarthium".startsWith(args[0])) {
+						displayedOptions.add("aranarthium");
 					}
 				}
 			}
-		} else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
-			displayedOptions.add("creative");
+		} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
+			if (args[0].equals("c")) {
+				displayedOptions.add("creative");
+				displayedOptions.add("calendar");
+			} else if ("creative".startsWith(args[0])) {
+				displayedOptions.add("creative");
+			} else if ("calendar".startsWith(args[0])) {
+				displayedOptions.add("calendar");
+			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
 				displayedOptions.add("survival");
@@ -202,7 +209,8 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("randomizer");
 		displayedOptions.add("balance");
 		displayedOptions.add("date");
-		displayedOptions.add("aranarth");
+		displayedOptions.add("calendar");
+		displayedOptions.add("aranarthium");
 		displayedOptions.add("trust");
 		displayedOptions.add("untrust");
 		displayedOptions.add("lock");
