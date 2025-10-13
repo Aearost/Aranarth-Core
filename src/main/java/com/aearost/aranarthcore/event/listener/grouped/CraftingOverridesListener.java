@@ -67,6 +67,10 @@ public class CraftingOverridesListener implements Listener {
 			if (hasKey(SUGARCANE_BLOCK, e, ingredient)) {
 				new CraftingOverridesSugarcaneBlock().onCraft(e, ingredient, player);
 			}
+
+			if (hasKey(ARROW, e, ingredient) || hasKey(ARROW_HEAD, e, ingredient)) {
+				new CraftingOverridesArrows().onCraft(e, ingredient, player);
+			}
 		}
 	}
 
