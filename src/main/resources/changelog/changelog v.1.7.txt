@@ -2,6 +2,8 @@ AranarthCore v. 1.7
 
 Features
 [+] Added a new world for a public Survival server, and moved the previous world under /ac smp
+[+] Added in Fletching Table functionality
+[+] Added iron, gold, amethyst, obsidian, and diamond arrows and arrow heads
 [+] Added /ac calendar to provide a book with information about the calendar system
 [+] Added /ac aranarthium to provide a book with information about aranarthium
 [+] Added /ac date to display the current server date
