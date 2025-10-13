@@ -687,7 +687,6 @@ public class DateUtils {
 									// At least 2 days, no more than 10 days
 									delay = random.nextInt(240000) + 48000;
 							}
-							Bukkit.getLogger().info("Clearing as A");
 							updateStorm(Weather.CLEAR, delay);
 							// Must be at the end or it interferes with WeatherChangeEventListener
 							// Real weather ticks but Aranarth duration only updates after conditions
@@ -1440,7 +1439,6 @@ public class DateUtils {
 					// At least 0.25 days, no more than 2.25 days
 					delay = random.nextInt(48000) + 6000;
 				}
-				Bukkit.getLogger().info("Clearing as B");
                 updateStorm(Weather.CLEAR, delay);
 				// Must be at the end or it interferes with WeatherChangeEventListener
 				// Real weather ticks but Aranarth duration only updates after conditions
