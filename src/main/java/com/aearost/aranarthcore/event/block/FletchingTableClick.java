@@ -14,6 +14,7 @@ public class FletchingTableClick {
     public void execute(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         if (block.getType() == Material.FLETCHING_TABLE) {
+            e.setCancelled(true);
             Player player = e.getPlayer();
             GuiFletchingTable gui = new GuiFletchingTable(player);
             gui.openGui();
