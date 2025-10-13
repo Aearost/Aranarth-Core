@@ -24,7 +24,6 @@ public class LogExtraDrops {
 					e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(e.getBlock().getType()));
 				}
 
-				// mcMMO Herbalism XP gain is lost because of this
 				McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
 				if (mcmmoPlayer != null) {
 					WoodcuttingManager woodcuttingManager = new WoodcuttingManager(mcmmoPlayer);
