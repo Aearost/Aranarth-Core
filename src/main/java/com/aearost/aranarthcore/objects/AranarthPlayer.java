@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -37,6 +38,10 @@ public class AranarthPlayer {
 	private UUID untrustedPlayerUUID;
 	private boolean isLockingContainer;
 	private boolean isUnlockingContainer;
+	private Pronouns pronouns;
+	private int rank;
+	private int saintRank;
+	private int councilRank;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -63,9 +68,13 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
+		this.pronouns = Pronouns.MALE;
+		this.rank = 0;
+		this.saintRank = 0;
+		this.councilRank = 0;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
+	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -90,6 +99,10 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
+		this.pronouns = pronouns;
+		this.rank = rank;
+		this.saintRank = saintRank;
+		this.councilRank = councilRank;
 	}
 
 	/**
@@ -506,6 +519,70 @@ public class AranarthPlayer {
 	 */
 	public void setIsLockingContainer(boolean isLockingContainer) {
 		this.isLockingContainer = isLockingContainer;
+	}
+
+	/**
+	 * Provides the player's pronouns.
+	 * @return The player's pronouns.
+	 */
+	public Pronouns getPronouns() {
+		return pronouns;
+	}
+
+	/**
+	 * Updates the player's pronouns to the input value.
+	 * @param pronouns The new value.
+	 */
+	public void setPronouns(Pronouns pronouns) {
+		this.pronouns = pronouns;
+	}
+
+	/**
+	 * Provides the rank of the player.
+	 * @return The rank of the player.
+	 */
+	public int getRank() {
+		return rank;
+	}
+
+	/**
+	 * Updates the rank of the player.
+	 * @param rank The new rank of the player.
+	 */
+	public void setRank(int rank) {
+		this.rank = rank;
+	}
+
+	/**
+	 * Provides the Saint rank of the player.
+	 * @return The Saint rank of the player.
+	 */
+	public int getSaintRank() {
+		return saintRank;
+	}
+
+	/**
+	 * Updates the Saint rank of the player.
+	 * @param saintRank The new Saint rank of the player.
+	 */
+	public void setSaintRank(int saintRank) {
+		this.saintRank = saintRank;
+	}
+
+	/**
+	 * Provides the Council rank of the player.
+	 * @return The Council rank of the player.
+	 */
+	public int getCouncilRank() {
+		return councilRank;
+	}
+
+	/**
+	 * Updates the Council rank of the player.
+	 * @param councilRank The new Council rank of the player.
+	 */
+	public void setCouncilRank(int councilRank) {
+		this.councilRank = councilRank;
 	}
 
 }

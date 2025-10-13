@@ -108,6 +108,10 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandUnlock.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("lock")) {
 			commandResult = CommandLock.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("ranks")) {
+			commandResult = CommandRanks.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("rankup")) {
+			commandResult = CommandRankup.onCommand(sender, args);
 		}
 		return commandResult;
 	}

@@ -148,8 +148,37 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("prefix".startsWith(args[0])) {
 				displayedOptions.add("prefix");
 			}
-		} else if (!args[0].isEmpty() && "randomizer".startsWith(args[0])) {
-			displayedOptions.add("randomizer");
+		} else if (!args[0].isEmpty() && args[0].startsWith("r")) {
+			if (args[0].equals("r")) {
+				displayedOptions.add("randomizer");
+				displayedOptions.add("ranks");
+				displayedOptions.add("rankup");
+			} else {
+				if (args[0].equals("ra")) {
+					displayedOptions.add("randomizer");
+					displayedOptions.add("ranks");
+					displayedOptions.add("rankup");
+				} else {
+					if (args[0].equals("ran")) {
+						displayedOptions.add("randomizer");
+						displayedOptions.add("ranks");
+						displayedOptions.add("rankup");
+					} else {
+						if (args[0].startsWith("rank")) {
+							if (args[0].equals("rank")) {
+								displayedOptions.add("ranks");
+								displayedOptions.add("rankup");
+							} else if ("ranks".startsWith(args[0])) {
+								displayedOptions.add("ranks");
+							} else if ("rankup".startsWith(args[0])) {
+								displayedOptions.add("rankup");
+							}
+						} else if ("randomizer".startsWith(args[0])) {
+							displayedOptions.add("randomizer");
+						}
+					}
+				}
+			}
 		} else if (!args[0].isEmpty() && "date".startsWith(args[0])) {
 			displayedOptions.add("date");
 		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
@@ -216,6 +245,8 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("lock");
 		displayedOptions.add("unlock");
 		displayedOptions.add("smp");
+		displayedOptions.add("ranks");
+		displayedOptions.add("rankup");
 		return displayedOptions;
 	}
 
