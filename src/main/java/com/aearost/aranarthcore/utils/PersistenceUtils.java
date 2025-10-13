@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.LockedContainer;
@@ -225,6 +226,10 @@ public class PersistenceUtils {
 			List<ItemStack> blacklist = null;
 			boolean isDeletingBlacklistedItems = false;
 			double balance = 0.00;
+			Pronouns pronouns = null;
+			int rank = 0;
+			int saintRank = 0;
+			int councilRank = 0;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
@@ -235,7 +240,7 @@ public class PersistenceUtils {
 				// If it's a field and not a parenthesis
 				// Make sure to replace "balance" with the last field in the list
 				if (parts[parts.length - 1].equals(",")
-						|| (parts.length > 1 && parts[1].equals("balance"))) {
+						|| (parts.length > 1 && parts[1].equals("councilRank"))) {
 					fieldName = parts[1];
 					fieldValue = parts[3];
 				} else {
@@ -316,10 +321,26 @@ public class PersistenceUtils {
 						balance = Double.parseDouble(fieldValue);
 						fieldCount++;
 					}
+					case "pronouns" -> {
+						pronouns = Pronouns.valueOf(fieldValue);
+						fieldCount++;
+					}
+					case "rank" -> {
+						rank = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "rankSaint" -> {
+						saintRank = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
+					case "rankCouncil" -> {
+						councilRank = Integer.parseInt(fieldValue);
+						fieldCount++;
+					}
                 }
 				
-				if (fieldCount == 11) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance));
+				if (fieldCount == 15) {
+					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
 					fieldCount = 0;
 				}
 			}
@@ -394,6 +415,10 @@ public class PersistenceUtils {
 						}
 						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
 						writer.write("        \"balance\": \"" + aranarthPlayer.getBalance() + "\",\n");
+						writer.write("        \"pronouns\": \"" + aranarthPlayer.getPronouns().name() + "\",\n");
+						writer.write("        \"rank\": \"" + aranarthPlayer.getRank() + "\",\n");
+						writer.write("        \"rankSaint\": \"" + aranarthPlayer.getSaintRank() + "\",\n");
+						writer.write("        \"rankCouncil\": \"" + aranarthPlayer.getCouncilRank() + "\",\n");
 
 						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
 							writer.write("    }\n");
