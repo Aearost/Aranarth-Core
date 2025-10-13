@@ -7,4 +7,4 @@ Features
 [+] Added in pronouns functionality
 
 Miscellaneous
-- TBD
+- Removed redundant logs from weather

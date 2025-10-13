@@ -62,16 +62,38 @@ public class CommandACCompleter implements TabCompleter {
 	 * @return The updated list of options to be displayed.
 	 */
 	private List<String> displayForOp(CommandSender sender, List<String> displayedOptions, String[] args) {
-		if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
+		if (!args[0].isEmpty() && args[0].startsWith("r")) {
+			if (args[0].equals("r")) {
+				displayedOptions.add("rankset");
+			} else {
+				if (args[0].equals("ra")) {
+					displayedOptions.add("rankset");
+				} else {
+					if (args[0].equals("ran")) {
+						displayedOptions.add("rankset");
+					} else {
+						if (args[0].equals("rank")) {
+							displayedOptions.add("rankset");
+						} else {
+							if (args[0].equals("ranks")) {
+								displayedOptions.add("rankset");
+							} else {
+								if ("rankset".startsWith(args[0])) {
+									displayedOptions.add("rankset");
+								}
+							}
+						}
+					}
+				}
+			}
+		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
+			displayedOptions.add("give");
+		} else if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
 			displayedOptions.add("whereis");
 		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
 			displayedOptions.add("itemname");
-		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
-			displayedOptions.add("give");
-		} else {
-			displayedOptions = displayForAll(sender, displayedOptions, args);
 		}
-
+		displayedOptions = displayForAll(sender, displayedOptions, args);
 		return displayedOptions;
 	}
 
@@ -168,10 +190,12 @@ public class CommandACCompleter implements TabCompleter {
 							if (args[0].equals("rank")) {
 								displayedOptions.add("ranks");
 								displayedOptions.add("rankup");
-							} else if ("ranks".startsWith(args[0])) {
-								displayedOptions.add("ranks");
 							} else if ("rankup".startsWith(args[0])) {
 								displayedOptions.add("rankup");
+							} else {
+								if ("ranks".startsWith(args[0])) {
+									displayedOptions.add("ranks");
+								}
 							}
 						} else if ("randomizer".startsWith(args[0])) {
 							displayedOptions.add("randomizer");
@@ -211,6 +235,7 @@ public class CommandACCompleter implements TabCompleter {
 	 * @return The updated list of options to be displayed.
 	 */
 	private List<String> displayNoResultsForOp(List<String> displayedOptions) {
+		// Op-specific commands only
 		displayedOptions.add("whereis");
 		displayedOptions.add("itemname");
 		displayedOptions.add("give");
