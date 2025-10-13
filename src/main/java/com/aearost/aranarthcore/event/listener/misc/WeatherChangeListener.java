@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -53,37 +54,37 @@ public class WeatherChangeListener implements Listener {
 		else {
 			// If storm is ending before the duration is over (i.e sleeping in bed)
 			if (AranarthUtils.getStormDuration() > 100 && AranarthUtils.getStormDelay() <= 0) {
-				Random random = new Random();
-				AranarthUtils.setWeather(Weather.CLEAR);
-				// At least 0.25 days, no more than 2.25 days
-				int delay = random.nextInt(48000) + 6000;
-
-				if (AranarthUtils.getMonth() == Month.AQUINVOR) {
+				if (e.getWorld().getName().equals("world")) {
+					Random random = new Random();
+					AranarthUtils.setWeather(Weather.CLEAR);
 					// At least 0.25 days, no more than 2.25 days
-					delay = random.nextInt(48000) + 6000;
-				}
+					int delay = random.nextInt(48000) + 6000;
 
-				AranarthUtils.setStormDelay(delay);
-				AranarthUtils.setStormDuration(0);
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
-				return;
+					if (AranarthUtils.getMonth() == Month.AQUINVOR) {
+						// At least 0.25 days, no more than 2.25 days
+						delay = random.nextInt(48000) + 6000;
+					}
+
+					AranarthUtils.setStormDelay(delay);
+					AranarthUtils.setStormDuration(0);
+
+					World world = Bukkit.getWorld("world");
+					World smp = Bukkit.getWorld("smp");
+
+					world.setThunderDuration(0);
+					world.setWeatherDuration(0);
+					world.setThundering(false);
+					world.setStorm(false);
+					world.setClearWeatherDuration(delay);
+					smp.setThunderDuration(0);
+					smp.setWeatherDuration(0);
+					smp.setThundering(false);
+					smp.setStorm(false);
+					smp.setClearWeatherDuration(delay);
+					smp.setTime(world.getTime());
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+				}
 			}
 		}
-
-		// If there is no special weather functionality in the month
-//		if (!DateUtils.isWinterMonth(AranarthUtils.getMonth()) && AranarthUtils.getMonth() != Month.IGNIVOR
-//				&& AranarthUtils.getMonth() != Month.AQUINVOR && AranarthUtils.getMonth() != Month.AESTIVOR) {
-//			if (e.toWeatherState()) {
-//				if (AranarthUtils.getWeather() == Weather.RAIN) {
-//					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to rain..."));
-//				} else {
-//					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oA thunderstorm has started..."));
-//				}
-//			} else {
-//				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
-//			}
-//		}
-
 	}
-
 }
