@@ -303,7 +303,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveServerDate();
 		PersistenceUtils.saveLockedContainers();
 
-		Bukkit.clearRecipes();
+		Bukkit.resetRecipes();
 	}
 
 }
