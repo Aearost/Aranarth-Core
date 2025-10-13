@@ -148,6 +148,7 @@ public class AranarthCore extends JavaPlugin {
 		new LeavesPreventBurnListener(this);
 		new SnowballHitListener(this);
 		new ArmorStandSwitchListener(this);
+		new TamingXPFromBreeding(this);
 	}
 
 	/**

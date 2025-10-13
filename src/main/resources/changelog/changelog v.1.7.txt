@@ -41,6 +41,7 @@ Features
 [+] Scorched Aranarthium now makes the wearer immune to the slowness applied by the Winter months
 [+] Added extra XP for logs during the month of Follivor
 [~] Made it so extra wood drops during Follivor are now based on whether the actual log was placed or not
+[+] Added Taming XP yield when breeding animals
 
 Miscellaneous
 - Restructured date message logic to be a callable method
