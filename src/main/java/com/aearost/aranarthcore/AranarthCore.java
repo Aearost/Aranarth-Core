@@ -8,10 +8,7 @@ import com.aearost.aranarthcore.event.listener.misc.PotionEffectStackListener;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.DateUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.aearost.aranarthcore.commands.CommandAC;
@@ -305,6 +302,8 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.savePlayerShops();
 		PersistenceUtils.saveServerDate();
 		PersistenceUtils.saveLockedContainers();
+
+		Bukkit.clearRecipes();
 	}
 
 }
