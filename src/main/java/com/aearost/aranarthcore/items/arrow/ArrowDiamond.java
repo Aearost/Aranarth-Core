@@ -19,7 +19,7 @@ public class ArrowDiamond implements AranarthItem {
 	 * @return The Diamond Arrow.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.SWEET_BERRIES, 1);
+		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			ArrayList<String> lore = new ArrayList<>();
