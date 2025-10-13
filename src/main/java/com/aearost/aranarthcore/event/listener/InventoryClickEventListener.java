@@ -39,6 +39,10 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Ranks")) {
+                new GuiRanksClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Rankup Confirm")) {
+                new GuiRankupClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
