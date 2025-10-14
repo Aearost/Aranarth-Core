@@ -210,27 +210,6 @@ public class PersistenceUtils {
 		Scanner reader;
 		try {
 			reader = new Scanner(file);
-
-//			int fieldCount = 0;
-//			String fieldName;
-//			String fieldValue;
-
-//			UUID uuid = null;
-//			String nickname = null;
-//			String prefix = null;
-//			String survivalInventory = null;
-//			String arenaInventory = null;
-//			String creativeInventory = null;
-//			List<ItemStack> potions = null;
-//			List<ItemStack> arrows = null;
-//			List<ItemStack> blacklist = null;
-//			boolean isDeletingBlacklistedItems = false;
-//			double balance = 0.00;
-//			Pronouns pronouns = null;
-//			int rank = 0;
-//			int saintRank = 0;
-//			int councilRank = 0;
-
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
 			while (reader.hasNextLine()) {
@@ -309,118 +288,6 @@ public class PersistenceUtils {
 
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
 			}
-
-//			while (reader.hasNextLine()) {
-//				String line = reader.nextLine();
-//				String[] parts = line.split("\"");
-//
-//				// If it's a field and not a parenthesis
-//				// Make sure to replace "balance" with the last field in the list
-//				if (parts[parts.length - 1].equals(",")
-//						|| (parts.length > 1 && parts[1].equals("councilRank"))) {
-//					fieldName = parts[1];
-//					fieldValue = parts[3];
-//				} else {
-//					continue;
-//				}
-//
-//                switch (fieldName) {
-//                    case "uuid" -> {
-//                        uuid = UUID.fromString(fieldValue);
-//                        fieldCount++;
-//                    }
-//                    case "nickname" -> {
-//                        nickname = fieldValue;
-//                        fieldCount++;
-//                    }
-//                    case "prefix" -> {
-//                        prefix = fieldValue;
-//                        fieldCount++;
-//                    }
-//					case "survivalInventory" -> {
-//						survivalInventory = fieldValue;
-//						fieldCount++;
-//					}
-//					case "arenaInventory" -> {
-//						arenaInventory = fieldValue;
-//						fieldCount++;
-//					}
-//                    case "creativeInventory" -> {
-//                        creativeInventory = fieldValue;
-//                        fieldCount++;
-//                    }
-//                    case "potions" -> {
-//                        ItemStack[] potionsAsItemStackArray;
-//                        if (!fieldValue.isEmpty()) {
-//                            try {
-//                                potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-//                            } catch (IOException e) {
-//                                Bukkit.getLogger().info("There was an issue loading potions!");
-//                                reader.close();
-//                                return;
-//                            }
-//                            potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
-//                        }
-//                        fieldCount++;
-//                    }
-//					case "arrows" -> {
-//						ItemStack[] arrowsAsItemStackArray;
-//						if (!fieldValue.isEmpty()) {
-//							try {
-//								arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-//							} catch (IOException e) {
-//								Bukkit.getLogger().info("There was an issue loading arrows!");
-//								reader.close();
-//								return;
-//							}
-//							arrows = new LinkedList<>(Arrays.asList(arrowsAsItemStackArray));
-//						}
-//						fieldCount++;
-//					} case "blacklist" -> {
-//						ItemStack[] blacklistAsItemStackArray;
-//						if (!fieldValue.isEmpty()) {
-//							try {
-//								blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-//							} catch (IOException e) {
-//								Bukkit.getLogger().info("There was an issue loading arrows!");
-//								reader.close();
-//								return;
-//							}
-//							blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
-//						}
-//						fieldCount++;
-//					}
-//					case "isDeletingBlacklistedItems" -> {
-//						isDeletingBlacklistedItems = Boolean.parseBoolean(fieldValue);
-//						fieldCount++;
-//					}
-//					case "balance" -> {
-//						balance = Double.parseDouble(fieldValue);
-//						fieldCount++;
-//					}
-//					case "pronouns" -> {
-//						pronouns = Pronouns.valueOf(fieldValue);
-//						fieldCount++;
-//					}
-//					case "rank" -> {
-//						rank = Integer.parseInt(fieldValue);
-//						fieldCount++;
-//					}
-//					case "rankSaint" -> {
-//						saintRank = Integer.parseInt(fieldValue);
-//						fieldCount++;
-//					}
-//					case "rankCouncil" -> {
-//						councilRank = Integer.parseInt(fieldValue);
-//						fieldCount++;
-//					}
-//                }
-//
-//				if (fieldCount == 15) {
-//					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
-//					fieldCount = 0;
-//				}
-//			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
@@ -500,58 +367,6 @@ public class PersistenceUtils {
 								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "\n";
 						writer.write(row);
 					}
-
-//					writer.write("{\n");
-//					writer.write("    \"aranarth_players\": {\n");
-//
-//					int aranarthPlayerCounter = 0;
-//
-//					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
-//						UUID uuid = entry.getKey();
-//						AranarthPlayer aranarthPlayer = entry.getValue();
-//
-//						writer.write("        \"uuid\": \"" + uuid.toString() + "\",\n");
-//						writer.write("        \"nickname\": \"" + aranarthPlayer.getNickname() + "\",\n");
-//						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
-//						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
-//						writer.write("        \"arenaInventory\": \"" + aranarthPlayer.getArenaInventory() + "\",\n");
-//						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
-//						if (Objects.nonNull(aranarthPlayer.getPotions())) {
-//							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[0]);
-//							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
-//						} else {
-//							writer.write("        \"potions\": \"\",\n");
-//						}
-//						if (Objects.nonNull(aranarthPlayer.getArrows())) {
-//							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[0]);
-//							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
-//						} else {
-//							writer.write("        \"arrows\": \"\",\n");
-//						}
-//						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
-//							ItemStack[] blacklist = aranarthPlayer.getBlacklist().toArray(new ItemStack[0]);
-//							writer.write("        \"blacklist\": \"" + ItemUtils.itemStackArrayToBase64(blacklist) + "\",\n");
-//						} else {
-//							writer.write("        \"blacklist\": \"\",\n");
-//						}
-//						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
-//						writer.write("        \"balance\": \"" + aranarthPlayer.getBalance() + "\",\n");
-//						writer.write("        \"pronouns\": \"" + aranarthPlayer.getPronouns().name() + "\",\n");
-//						writer.write("        \"rank\": \"" + aranarthPlayer.getRank() + "\",\n");
-//						writer.write("        \"rankSaint\": \"" + aranarthPlayer.getSaintRank() + "\",\n");
-//						writer.write("        \"rankCouncil\": \"" + aranarthPlayer.getCouncilRank() + "\",\n");
-//
-//						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
-//							writer.write("    }\n");
-//						} else {
-//							writer.write("    },\n");
-//							writer.write("    {\n");
-//							aranarthPlayerCounter++;
-//						}
-//
-//					}
-
-//					writer.write("}\n");
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the aranarth players!");
@@ -566,7 +381,7 @@ public class PersistenceUtils {
 	public static void loadPlayerShops() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "playershops.json";
+				+ "shops.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -578,93 +393,42 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			int fieldCount = 0;
-			String fieldName;
-			String fieldValue;
-
-			UUID uuid = null;
-			World world = null;
-			double x = 0;
-			double y = 0;
-			double z = 0;
-			ItemStack item = null;
-			int quantity = 0;
-			double buyPrice = 0;
-			double sellPrice = 0;
-
-			Bukkit.getLogger().info("Attempting to read the playershops file...");
+			Bukkit.getLogger().info("Attempting to read the shops file...");
 
 			while (reader.hasNextLine()) {
-				String line = reader.nextLine();
-				String[] parts = line.split("\"");
+				String row = reader.nextLine();
 
-				// If it's a field and not a parenthesis
-				// Make sure to replace "sellPrice" with the last field in the list
-				if (parts[parts.length - 1].equals(",")
-						|| (parts.length > 1 && parts[1].equals("sellPrice"))) {
-					fieldName = parts[1];
-					fieldValue = parts[3];
-				} else {
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
 					continue;
 				}
 
-				switch (fieldName) {
-					case "uuid" -> {
-						if (fieldValue.equals("null")) {
-							uuid = null;
-						} else {
-							uuid = UUID.fromString(fieldValue);
-						}
-						fieldCount++;
-					}
-					case "worldName" -> {
-						world = Bukkit.getWorld(fieldValue);
-						fieldCount++;
-					}
-					case "x" -> {
-						x = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-					case "y" -> {
-						y = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-					case "z" -> {
-						z = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-					case "item" -> {
-						try {
-							item = ItemUtils.itemStackArrayFromBase64(fieldValue)[0];
-						} catch (IOException e) {
-							Bukkit.getLogger().info("There was an issue initializing a shop item!");
-							item = new ItemStack(Material.AIR, 1);
-						}
-						fieldCount++;
-					}
-					case "quantity" -> {
-						quantity = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "buyPrice" -> {
-						buyPrice = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-					case "sellPrice" -> {
-						sellPrice = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-				}
+				String[] fields = row.split("\\|");
 
-				if (fieldCount == 9) {
-					Location location = new Location(world, x, y, z);
-					PlayerShop playerShop = new PlayerShop(uuid, location, item, quantity, buyPrice, sellPrice);
-
-					AranarthUtils.addShop(uuid, playerShop);
-					fieldCount = 0;
+				UUID uuid = null;
+				if (!fields[0].isEmpty()) {
+					uuid = UUID.fromString(fields[0]);
 				}
+				String worldName = fields[1];
+				int x = Integer.parseInt(fields[2]);
+				int y = Integer.parseInt(fields[3]);
+				int z = Integer.parseInt(fields[4]);
+				ItemStack item = null;
+				try {
+					item = ItemUtils.itemStackArrayFromBase64(fields[5])[0];
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an issue initializing a shop item!");
+					item = new ItemStack(Material.AIR, 1);
+				}
+				int quantity = Integer.parseInt(fields[6]);
+				double buyPrice = Double.parseDouble(fields[7]);
+				double sellPrice = Double.parseDouble(fields[8]);
+
+				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
+				PlayerShop playerShop = new PlayerShop(uuid, location, item, quantity, buyPrice, sellPrice);
+				AranarthUtils.addShop(uuid, playerShop);
 			}
-			Bukkit.getLogger().info("All playershops have been initialized");
+			Bukkit.getLogger().info("All shops have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
 			Bukkit.getLogger().info("Something went wrong with loading the playershops!");
@@ -679,7 +443,7 @@ public class PersistenceUtils {
 		if (playerShops != null) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "playershops.json";
+					+ File.separator + "shops.txt";
 			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 			File file = new File(filePath);
 
@@ -692,58 +456,42 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new playershops.json file has been generated");
+						Bukkit.getLogger().info("A new shops.txt file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of playershops.json");
+					Bukkit.getLogger().info("An error occurred in the creation of shops.txt");
 				}
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("{\n");
-					writer.write("    \"playershops\": {\n");
-
-					int totalUuidAmount = playerShops.size();
-					int currentUuidAmount = 0;
-					int shopCounter = 0;
+					writer.write("#uuid|worldName|x|y|z|item|quantity|buyPrice|sellPrice\n");
 
 					for (UUID uuid : playerShops.keySet()) {
-						currentUuidAmount++;
-						int shopAmountFromUuid = playerShops.get(uuid).size();
 						for (PlayerShop shop : AranarthUtils.getShops().get(uuid)) {
-							shopCounter++;
-							// If it's a server shop
-							if (shop.getUuid() == null) {
-								writer.write("        \"uuid\": \"" + null + "\",\n");
-							} else {
-								writer.write("        \"uuid\": \"" + shop.getUuid().toString() + "\",\n");
+
+							String uuidString = "";
+							if (uuid != null) {
+								uuidString = uuid.toString();
 							}
+							String worldName = shop.getLocation().getWorld().getName();
+							String x = shop.getLocation().getBlockX() + "";
+							String y = shop.getLocation().getBlockY() + "";
+							String z = shop.getLocation().getBlockZ() + "";
+							String item = ItemUtils.itemStackArrayToBase64(new ItemStack[] { shop.getItem() });
+							String quantity = shop.getQuantity() + "";
+							String buyPrice = shop.getBuyPrice() + "";
+							String sellPrice = shop.getSellPrice() + "";
 
-							writer.write("        \"worldName\": \"" + shop.getLocation().getWorld().getName() + "\",\n");
-							writer.write("        \"x\": \"" + shop.getLocation().getX() + "\",\n");
-							writer.write("        \"y\": \"" + shop.getLocation().getY() + "\",\n");
-							writer.write("        \"z\": \"" + shop.getLocation().getZ() + "\",\n");
-							ItemStack[] itemAsArray = new ItemStack[1];
-							itemAsArray[0] = shop.getItem();
-							writer.write("        \"item\": \"" + ItemUtils.itemStackArrayToBase64(itemAsArray) + "\",\n");
-							writer.write("        \"quantity\": \"" + shop.getQuantity() + "\",\n");
-							writer.write("        \"buyPrice\": \"" + shop.getBuyPrice() + "\",\n");
-							writer.write("        \"sellPrice\": \"" + shop.getSellPrice() + "\"\n");
-
-
-							if (currentUuidAmount == totalUuidAmount && shopCounter == shopAmountFromUuid) {
-								writer.write("    }\n");
-							} else {
-								writer.write("    },\n");
-								writer.write("    {\n");
-							}
+							String row = uuidString + "|" + worldName + "|" + x + "|" + y + "|" + z + "|"
+									+ item + "|" + quantity + "|" + buyPrice + "|" + sellPrice + "\n";
+							writer.write(row);
 						}
 					}
 
 					writer.write("}\n");
 					writer.close();
 				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the playershops");
+					Bukkit.getLogger().info("There was an error in saving the shops");
 				}
 			}
 		}
@@ -869,103 +617,46 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			int fieldCount = 0;
-			String fieldName;
-			String fieldValue;
-
-			UUID owner = null;
-			List<UUID> trusted = new ArrayList<>();
-			String world = "";
-			int x1 = 0;
-			int y1 = 0;
-			int z1 = 0;
-			int x2 = 0;
-			int y2 = 0;
-			int z2 = 0;
-			boolean isLoc2Null = false;
-
 			Bukkit.getLogger().info("Attempting to read the lockedcontainers file...");
 
 			while (reader.hasNextLine()) {
 				String line = reader.nextLine();
-				String[] parts = line.split("\"");
+				String[] fields = line.split("\\|");
 
-				// If it's a field and not a parenthesis
-				// Make sure to replace "z" with the last field in the list
-				if (parts[parts.length - 1].equals(",")
-						|| (parts.length > 1 && parts[1].equals("z2"))) {
-					fieldName = parts[1];
-					fieldValue = parts[3];
-				} else {
+				if (line.startsWith("#")) {
 					continue;
 				}
 
-				switch (fieldName) {
-					case "owner" -> {
-						owner = UUID.fromString(fieldValue);
-						fieldCount++;
-					}
-					case "trusted" -> {
-						String[] trustedUuids = fieldValue.split("___");
-						for (String trustedUuid : trustedUuids) {
-							trusted.add(UUID.fromString(trustedUuid));
-						}
-						fieldCount++;
-					}
-					case "world" -> {
-						world = fieldValue;
-						fieldCount++;
-					}
-					case "x1" -> {
-						x1 = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "y1" -> {
-						y1 = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "z1" -> {
-						z1 = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "x2" -> {
-						try {
-							x2 = Integer.parseInt(fieldValue);
-						} catch (NumberFormatException e) {
-							isLoc2Null = true;
-						}
-						fieldCount++;
-					}
-					case "y2" -> {
-						try {
-							y2 = Integer.parseInt(fieldValue);
-						} catch (NumberFormatException e) {
-							isLoc2Null = true;
-						}
-						fieldCount++;
-					}
-					case "z2" -> {
-						try {
-							z2 = Integer.parseInt(fieldValue);
-						} catch (NumberFormatException e) {
-							isLoc2Null = true;
-						}
-						fieldCount++;
-					}
+				UUID owner = UUID.fromString(fields[0]);
+				String[] trustedUuids = fields[1].split("___");
+				List<UUID> trusted = new ArrayList<>();
+				for (String trustedUuid : trustedUuids) {
+					trusted.add(UUID.fromString(trustedUuid));
+				}
+				String worldName = fields[2];
+				int x1 = Integer.parseInt(fields[3]);
+				int y1 = Integer.parseInt(fields[4]);
+				int z1 = Integer.parseInt(fields[5]);
+				Location loc1 = new Location(Bukkit.getWorld(worldName), x1, y1, z1);
+
+				int x2 = 0;
+				int y2 = 0;
+				int z2 = 0;
+				boolean isLoc2Null = false;
+				try {
+					x2 = Integer.parseInt(fields[6]);
+					y2 = Integer.parseInt(fields[7]);
+					z2 = Integer.parseInt(fields[8]);
+				} catch (NumberFormatException e) {
+					isLoc2Null = true;
+				}
+				Location loc2 = null;
+				if (!isLoc2Null) {
+					loc2 = new Location(Bukkit.getWorld(worldName), x2, y2, z2);
 				}
 
-				if (fieldCount == 9) {
-					Location loc1 = new Location(Bukkit.getWorld(world), x1, y1, z1);
-					Location loc2 = null;
-					if (!isLoc2Null) {
-						loc2 = new Location(Bukkit.getWorld(world), x2, y2, z2);
-					}
-					LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location[] { loc1, loc2 });
-					AranarthUtils.addLockedContainer(lockedContainer);
-					fieldCount = 0;
-					owner = null;
-					trusted = new ArrayList<>();
-				}
+				LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location[] { loc1, loc2 });
+				AranarthUtils.addLockedContainer(lockedContainer);
 			}
 			Bukkit.getLogger().info("All lockedcontainers have been initialized");
 			reader.close();
@@ -1004,15 +695,11 @@ public class PersistenceUtils {
 
 			try {
 				FileWriter writer = new FileWriter(filePath);
-				writer.write("{\n");
-				writer.write("    \"lockedcontainers\": {\n");
+				writer.write("#owner|trusted|worldName|x1|y1|z1|x2|y2|z2\n");
 
 				if (lockedContainers != null && !lockedContainers.isEmpty()) {
-					int totalContainerAmount = lockedContainers.size();
-					int currentShopNum = 0;
 					for (LockedContainer container : lockedContainers) {
-						currentShopNum++;
-						writer.write("        \"owner\": \"" + container.getOwner().toString() + "\",\n");
+						String owner = container.getOwner().toString();
 						StringBuilder trusted = new StringBuilder();
 						for (UUID trustedUuid : container.getTrusted()) {
 							if (trusted.isEmpty()) {
@@ -1021,30 +708,22 @@ public class PersistenceUtils {
 								trusted.append("___").append(trustedUuid.toString());
 							}
 						}
-						writer.write("        \"trusted\": \"" + trusted + "\",\n");
+						String trustedString = trusted.toString();
 						Location[] locations = container.getLocations();
-
-						writer.write("        \"world\": \"" + locations[0].getWorld().getName() + "\",\n");
-						writer.write("        \"x1\": \"" + locations[0].getBlockX() + "\",\n");
-						writer.write("        \"y1\": \"" + locations[0].getBlockY() + "\",\n");
-						writer.write("        \"z1\": \"" + locations[0].getBlockZ() + "\",\n");
-						if (locations[1] == null) {
-							writer.write("        \"x2\": \" \",\n");
-							writer.write("        \"y2\": \" \",\n");
-							writer.write("        \"z2\": \" \"\n");
-						} else {
-							writer.write("        \"x2\": \"" + locations[1].getBlockX() + "\",\n");
-							writer.write("        \"y2\": \"" + locations[1].getBlockY() + "\",\n");
-							writer.write("        \"z2\": \"" + locations[1].getBlockZ() + "\"\n");
+						String worldName = locations[0].getWorld().getName();
+						String x1 = locations[0].getBlockX() + "";
+						String y1 = locations[0].getBlockY() + "";
+						String z1 = locations[0].getBlockZ() + "";
+						String x2 = "";
+						String y2 = "";
+						String z2 = "";
+						if (locations[1] != null) {
+							x2 = locations[1].getBlockX() + "";
+							y2 = locations[1].getBlockY() + "";
+							z2 = locations[1].getBlockZ() + "";
 						}
 
-
-						if (currentShopNum == totalContainerAmount) {
-							writer.write("    }\n");
-						} else {
-							writer.write("    },\n");
-							writer.write("    {\n");
-						}
+						String row = owner + "|" + trustedString + "|" + worldName + "|" + x1 + "|" + y1 + "|" + z1 + "|" + x2 + "|" + y2 + "|" + z2 + "\n";
 					}
 				}
 

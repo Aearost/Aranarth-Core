@@ -9,5 +9,5 @@ Features
 
 Miscellaneous
 - Removed redundant logs from weather
-- Changed aranarth_players.txt format to be pipe-separated lines for each player rather than json
-- Adapted PersistenceUtils to reflect this new format (aranarth_players.txt)
+- Changed persisting files format to be pipe-separated lines for each record rather than json
+- Adapted PersistenceUtils to reflect this new format
