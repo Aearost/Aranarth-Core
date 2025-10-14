@@ -32,13 +32,9 @@ public class PlayerChatListener implements Listener {
         }
         
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(event.getPlayer().getUniqueId());
-        String prefix = aranarthPlayer.getPrefix();
         String nickname = aranarthPlayer.getNickname();
         
         String chatMessage = "⊰";
-        if (!prefix.isEmpty()) {
-        	chatMessage += ChatUtils.translateToColor(prefix + "&r") + " ";
-        }
         if (!nickname.isEmpty()) {
         	chatMessage += ChatUtils.translateToColor(nickname + "&r");
         } else {

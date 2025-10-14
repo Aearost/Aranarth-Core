@@ -196,9 +196,10 @@ public class PersistenceUtils {
 	 * Initializes the homes HashMap based on the contents of aranarth_players.json.
 	 */
 	public static void loadAranarthPlayers() {
+
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "aranarth_players.json";
+				+ "aranarth_players.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -210,140 +211,216 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			// UUID must not be reset each time
-			int fieldCount = 0;
-			String fieldName;
-			String fieldValue;
+//			int fieldCount = 0;
+//			String fieldName;
+//			String fieldValue;
 
-			UUID uuid = null;
-			String nickname = null;
-			String prefix = null;
-			String survivalInventory = null;
-			String arenaInventory = null;
-			String creativeInventory = null;
-			List<ItemStack> potions = null;
-			List<ItemStack> arrows = null;
-			List<ItemStack> blacklist = null;
-			boolean isDeletingBlacklistedItems = false;
-			double balance = 0.00;
-			Pronouns pronouns = null;
-			int rank = 0;
-			int saintRank = 0;
-			int councilRank = 0;
+//			UUID uuid = null;
+//			String nickname = null;
+//			String prefix = null;
+//			String survivalInventory = null;
+//			String arenaInventory = null;
+//			String creativeInventory = null;
+//			List<ItemStack> potions = null;
+//			List<ItemStack> arrows = null;
+//			List<ItemStack> blacklist = null;
+//			boolean isDeletingBlacklistedItems = false;
+//			double balance = 0.00;
+//			Pronouns pronouns = null;
+//			int rank = 0;
+//			int saintRank = 0;
+//			int councilRank = 0;
 
 			Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
 
 			while (reader.hasNextLine()) {
-				String line = reader.nextLine();
-				String[] parts = line.split("\"");
+				String row = reader.nextLine();
 
-				// If it's a field and not a parenthesis
-				// Make sure to replace "balance" with the last field in the list
-				if (parts[parts.length - 1].equals(",")
-						|| (parts.length > 1 && parts[1].equals("councilRank"))) {
-					fieldName = parts[1];
-					fieldValue = parts[3];
-				} else {
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
 					continue;
 				}
 
-                switch (fieldName) {
-                    case "uuid" -> {
-                        uuid = UUID.fromString(fieldValue);
-                        fieldCount++;
-                    }
-                    case "nickname" -> {
-                        nickname = fieldValue;
-                        fieldCount++;
-                    }
-                    case "prefix" -> {
-                        prefix = fieldValue;
-                        fieldCount++;
-                    }
-					case "survivalInventory" -> {
-						survivalInventory = fieldValue;
-						fieldCount++;
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council
+				String[] fields = row.split("\\|");
+
+				UUID uuid = UUID.fromString(fields[0]);
+				String nickname = fields[1];
+				String survivalInventory = fields[2];
+				String arenaInventory = fields[3];
+				String creativeInventory = fields[4];
+
+				List<ItemStack> potions = null;
+				ItemStack[] potionsAsItemStackArray;
+				if (!fields[5].isEmpty()) {
+					try {
+						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[5]);
+					} catch (IOException e) {
+						Bukkit.getLogger().info("There was an issue loading potions!");
+						reader.close();
+						return;
 					}
-					case "arenaInventory" -> {
-						arenaInventory = fieldValue;
-						fieldCount++;
-					}
-                    case "creativeInventory" -> {
-                        creativeInventory = fieldValue;
-                        fieldCount++;
-                    }
-                    case "potions" -> {
-                        ItemStack[] potionsAsItemStackArray;
-                        if (!fieldValue.isEmpty()) {
-                            try {
-                                potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-                            } catch (IOException e) {
-                                Bukkit.getLogger().info("There was an issue loading potions!");
-                                reader.close();
-                                return;
-                            }
-                            potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
-                        }
-                        fieldCount++;
-                    }
-					case "arrows" -> {
-						ItemStack[] arrowsAsItemStackArray;
-						if (!fieldValue.isEmpty()) {
-							try {
-								arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-							} catch (IOException e) {
-								Bukkit.getLogger().info("There was an issue loading arrows!");
-								reader.close();
-								return;
-							}
-							arrows = new LinkedList<>(Arrays.asList(arrowsAsItemStackArray));
-						}
-						fieldCount++;
-					} case "blacklist" -> {
-						ItemStack[] blacklistAsItemStackArray;
-						if (!fieldValue.isEmpty()) {
-							try {
-								blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
-							} catch (IOException e) {
-								Bukkit.getLogger().info("There was an issue loading arrows!");
-								reader.close();
-								return;
-							}
-							blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
-						}
-						fieldCount++;
-					}
-					case "isDeletingBlacklistedItems" -> {
-						isDeletingBlacklistedItems = Boolean.parseBoolean(fieldValue);
-						fieldCount++;
-					}
-					case "balance" -> {
-						balance = Double.parseDouble(fieldValue);
-						fieldCount++;
-					}
-					case "pronouns" -> {
-						pronouns = Pronouns.valueOf(fieldValue);
-						fieldCount++;
-					}
-					case "rank" -> {
-						rank = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "rankSaint" -> {
-						saintRank = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-					case "rankCouncil" -> {
-						councilRank = Integer.parseInt(fieldValue);
-						fieldCount++;
-					}
-                }
-				
-				if (fieldCount == 15) {
-					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
-					fieldCount = 0;
+					potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
 				}
+
+				List<ItemStack> arrows = null;
+				ItemStack[] arrowsAsItemStackArray;
+				if (!fields[6].isEmpty()) {
+					try {
+						arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[6]);
+					} catch (IOException e) {
+						Bukkit.getLogger().info("There was an issue loading arrows!");
+						reader.close();
+						return;
+					}
+					arrows = new LinkedList<>(Arrays.asList(arrowsAsItemStackArray));
+				}
+
+				List<ItemStack> blacklist = null;
+				ItemStack[] blacklistAsItemStackArray;
+				if (!fields[7].isEmpty()) {
+					try {
+						blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[7]);
+					} catch (IOException e) {
+						Bukkit.getLogger().info("There was an issue loading the blacklist!");
+						reader.close();
+						return;
+					}
+					blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
+				}
+
+				boolean isDeletingBlacklistedItems = false;
+				if (fields[8].equals("1")) {
+					isDeletingBlacklistedItems = true;
+				}
+
+				double balance = Double.parseDouble(fields[9]);
+
+				Pronouns pronouns = Pronouns.MALE;
+				if (fields[10].equals("F")) {
+					pronouns = Pronouns.FEMALE;
+				} else if (fields[10].equals("N")) {
+					pronouns = Pronouns.NEUTRAL;
+				}
+
+				int rank = Integer.parseInt(fields[11]);
+				int saintRank = Integer.parseInt(fields[12]);
+				int councilRank = Integer.parseInt(fields[13]);
+
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
 			}
+
+//			while (reader.hasNextLine()) {
+//				String line = reader.nextLine();
+//				String[] parts = line.split("\"");
+//
+//				// If it's a field and not a parenthesis
+//				// Make sure to replace "balance" with the last field in the list
+//				if (parts[parts.length - 1].equals(",")
+//						|| (parts.length > 1 && parts[1].equals("councilRank"))) {
+//					fieldName = parts[1];
+//					fieldValue = parts[3];
+//				} else {
+//					continue;
+//				}
+//
+//                switch (fieldName) {
+//                    case "uuid" -> {
+//                        uuid = UUID.fromString(fieldValue);
+//                        fieldCount++;
+//                    }
+//                    case "nickname" -> {
+//                        nickname = fieldValue;
+//                        fieldCount++;
+//                    }
+//                    case "prefix" -> {
+//                        prefix = fieldValue;
+//                        fieldCount++;
+//                    }
+//					case "survivalInventory" -> {
+//						survivalInventory = fieldValue;
+//						fieldCount++;
+//					}
+//					case "arenaInventory" -> {
+//						arenaInventory = fieldValue;
+//						fieldCount++;
+//					}
+//                    case "creativeInventory" -> {
+//                        creativeInventory = fieldValue;
+//                        fieldCount++;
+//                    }
+//                    case "potions" -> {
+//                        ItemStack[] potionsAsItemStackArray;
+//                        if (!fieldValue.isEmpty()) {
+//                            try {
+//                                potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+//                            } catch (IOException e) {
+//                                Bukkit.getLogger().info("There was an issue loading potions!");
+//                                reader.close();
+//                                return;
+//                            }
+//                            potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
+//                        }
+//                        fieldCount++;
+//                    }
+//					case "arrows" -> {
+//						ItemStack[] arrowsAsItemStackArray;
+//						if (!fieldValue.isEmpty()) {
+//							try {
+//								arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+//							} catch (IOException e) {
+//								Bukkit.getLogger().info("There was an issue loading arrows!");
+//								reader.close();
+//								return;
+//							}
+//							arrows = new LinkedList<>(Arrays.asList(arrowsAsItemStackArray));
+//						}
+//						fieldCount++;
+//					} case "blacklist" -> {
+//						ItemStack[] blacklistAsItemStackArray;
+//						if (!fieldValue.isEmpty()) {
+//							try {
+//								blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fieldValue);
+//							} catch (IOException e) {
+//								Bukkit.getLogger().info("There was an issue loading arrows!");
+//								reader.close();
+//								return;
+//							}
+//							blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
+//						}
+//						fieldCount++;
+//					}
+//					case "isDeletingBlacklistedItems" -> {
+//						isDeletingBlacklistedItems = Boolean.parseBoolean(fieldValue);
+//						fieldCount++;
+//					}
+//					case "balance" -> {
+//						balance = Double.parseDouble(fieldValue);
+//						fieldCount++;
+//					}
+//					case "pronouns" -> {
+//						pronouns = Pronouns.valueOf(fieldValue);
+//						fieldCount++;
+//					}
+//					case "rank" -> {
+//						rank = Integer.parseInt(fieldValue);
+//						fieldCount++;
+//					}
+//					case "rankSaint" -> {
+//						saintRank = Integer.parseInt(fieldValue);
+//						fieldCount++;
+//					}
+//					case "rankCouncil" -> {
+//						councilRank = Integer.parseInt(fieldValue);
+//						fieldCount++;
+//					}
+//                }
+//
+//				if (fieldCount == 15) {
+//					AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, prefix, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
+//					fieldCount = 0;
+//				}
+//			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
@@ -359,7 +436,7 @@ public class PersistenceUtils {
 		if (!aranarthPlayers.isEmpty()) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "aranarth_players.json";
+					+ File.separator + "aranarth_players.txt";
 			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 			File file = new File(filePath);
 
@@ -380,57 +457,101 @@ public class PersistenceUtils {
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("{\n");
-					writer.write("    \"aranarth_players\": {\n");
+					// Template line
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council\n");
 
-					int aranarthPlayerCounter = 0;
-					
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
-						UUID uuid = entry.getKey();
 						AranarthPlayer aranarthPlayer = entry.getValue();
-						
-						writer.write("        \"uuid\": \"" + uuid.toString() + "\",\n");
-						writer.write("        \"nickname\": \"" + aranarthPlayer.getNickname() + "\",\n");
-						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
-						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
-						writer.write("        \"arenaInventory\": \"" + aranarthPlayer.getArenaInventory() + "\",\n");
-						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
-						if (Objects.nonNull(aranarthPlayer.getPotions())) {
-							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[0]);
-							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
-						} else {
-							writer.write("        \"potions\": \"\",\n");
-						}
-						if (Objects.nonNull(aranarthPlayer.getArrows())) {
-							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[0]);
-							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
-						} else {
-							writer.write("        \"arrows\": \"\",\n");
-						}
-						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
-							ItemStack[] blacklist = aranarthPlayer.getBlacklist().toArray(new ItemStack[0]);
-							writer.write("        \"blacklist\": \"" + ItemUtils.itemStackArrayToBase64(blacklist) + "\",\n");
-						} else {
-							writer.write("        \"blacklist\": \"\",\n");
-						}
-						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
-						writer.write("        \"balance\": \"" + aranarthPlayer.getBalance() + "\",\n");
-						writer.write("        \"pronouns\": \"" + aranarthPlayer.getPronouns().name() + "\",\n");
-						writer.write("        \"rank\": \"" + aranarthPlayer.getRank() + "\",\n");
-						writer.write("        \"rankSaint\": \"" + aranarthPlayer.getSaintRank() + "\",\n");
-						writer.write("        \"rankCouncil\": \"" + aranarthPlayer.getCouncilRank() + "\",\n");
 
-						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
-							writer.write("    }\n");
-						} else {
-							writer.write("    },\n");
-							writer.write("    {\n");
-							aranarthPlayerCounter++;
+						String uuid = entry.getKey().toString();
+						String nickname = aranarthPlayer.getNickname();
+						String survivalInventory = aranarthPlayer.getSurvivalInventory();
+						String arenaInventory = aranarthPlayer.getArenaInventory();
+						String creativeInventory = aranarthPlayer.getCreativeInventory();
+						String potions = "";
+						if (Objects.nonNull(aranarthPlayer.getPotions())) {
+							potions = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getPotions().toArray(new ItemStack[0]));
 						}
-						
+						String arrows = "";
+						if (Objects.nonNull(aranarthPlayer.getArrows())) {
+							arrows = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getArrows().toArray(new ItemStack[0]));
+						}
+						String blacklist = "";
+						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
+							blacklist = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getBlacklist().toArray(new ItemStack[0]));
+						}
+						String isDeletingBlacklistedItems = "0";
+						if (aranarthPlayer.getIsDeletingBlacklistedItems()) {
+							isDeletingBlacklistedItems = "1";
+						}
+						String balance = aranarthPlayer.getBalance() + "";
+						String pronouns = "M";
+						if (aranarthPlayer.getPronouns() == Pronouns.FEMALE) {
+							pronouns = "F";
+						} else if (aranarthPlayer.getPronouns() == Pronouns.NEUTRAL) {
+							pronouns = "N";
+						}
+						String rank = aranarthPlayer.getRank() + "";
+						String saint = aranarthPlayer.getSaintRank() + "";
+						String council = aranarthPlayer.getCouncilRank() + "";
+
+						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
+								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
+								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "\n";
+						writer.write(row);
 					}
 
-					writer.write("}\n");
+//					writer.write("{\n");
+//					writer.write("    \"aranarth_players\": {\n");
+//
+//					int aranarthPlayerCounter = 0;
+//
+//					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
+//						UUID uuid = entry.getKey();
+//						AranarthPlayer aranarthPlayer = entry.getValue();
+//
+//						writer.write("        \"uuid\": \"" + uuid.toString() + "\",\n");
+//						writer.write("        \"nickname\": \"" + aranarthPlayer.getNickname() + "\",\n");
+//						writer.write("        \"prefix\": \"" + aranarthPlayer.getPrefix() + "\",\n");
+//						writer.write("        \"survivalInventory\": \"" + aranarthPlayer.getSurvivalInventory() + "\",\n");
+//						writer.write("        \"arenaInventory\": \"" + aranarthPlayer.getArenaInventory() + "\",\n");
+//						writer.write("        \"creativeInventory\": \"" + aranarthPlayer.getCreativeInventory() + "\",\n");
+//						if (Objects.nonNull(aranarthPlayer.getPotions())) {
+//							ItemStack[] potions = aranarthPlayer.getPotions().toArray(new ItemStack[0]);
+//							writer.write("        \"potions\": \"" + ItemUtils.itemStackArrayToBase64(potions) + "\",\n");
+//						} else {
+//							writer.write("        \"potions\": \"\",\n");
+//						}
+//						if (Objects.nonNull(aranarthPlayer.getArrows())) {
+//							ItemStack[] arrows = aranarthPlayer.getArrows().toArray(new ItemStack[0]);
+//							writer.write("        \"arrows\": \"" + ItemUtils.itemStackArrayToBase64(arrows) + "\",\n");
+//						} else {
+//							writer.write("        \"arrows\": \"\",\n");
+//						}
+//						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
+//							ItemStack[] blacklist = aranarthPlayer.getBlacklist().toArray(new ItemStack[0]);
+//							writer.write("        \"blacklist\": \"" + ItemUtils.itemStackArrayToBase64(blacklist) + "\",\n");
+//						} else {
+//							writer.write("        \"blacklist\": \"\",\n");
+//						}
+//						writer.write("        \"isDeletingBlacklistedItems\": \"" + aranarthPlayer.getIsDeletingBlacklistedItems() + "\",\n");
+//						writer.write("        \"balance\": \"" + aranarthPlayer.getBalance() + "\",\n");
+//						writer.write("        \"pronouns\": \"" + aranarthPlayer.getPronouns().name() + "\",\n");
+//						writer.write("        \"rank\": \"" + aranarthPlayer.getRank() + "\",\n");
+//						writer.write("        \"rankSaint\": \"" + aranarthPlayer.getSaintRank() + "\",\n");
+//						writer.write("        \"rankCouncil\": \"" + aranarthPlayer.getCouncilRank() + "\",\n");
+//
+//						if (aranarthPlayerCounter + 1 == aranarthPlayers.size()) {
+//							writer.write("    }\n");
+//						} else {
+//							writer.write("    },\n");
+//							writer.write("    {\n");
+//							aranarthPlayerCounter++;
+//						}
+//
+//					}
+
+//					writer.write("}\n");
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the aranarth players!");

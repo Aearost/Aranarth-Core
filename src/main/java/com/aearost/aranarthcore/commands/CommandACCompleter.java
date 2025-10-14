@@ -162,13 +162,10 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
-				displayedOptions.add("prefix");
 			} else if ("ping".startsWith(args[0])) {
 				displayedOptions.add("ping");
 			} else if ("potions".startsWith(args[0])) {
 				displayedOptions.add("potions");
-			} else if ("prefix".startsWith(args[0])) {
-				displayedOptions.add("prefix");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("r")) {
 			if (args[0].equals("r")) {
@@ -253,7 +250,6 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("swimtoggle");
 		displayedOptions.add("nick");
 		displayedOptions.add("ping");
-		displayedOptions.add("prefix");
 		displayedOptions.add("arena");
 		displayedOptions.add("survival");
 		displayedOptions.add("creative");

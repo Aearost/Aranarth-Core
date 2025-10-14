@@ -16,7 +16,6 @@ public class AranarthPlayer {
 	private boolean isStandingOnHomePad;
 	private int currentGuiPageNum;
 	private String nickname;
-	private String prefix;
 	private boolean isMountSwimEnabled;
 	private String survivalInventory;
 	private String arenaInventory;
@@ -48,7 +47,6 @@ public class AranarthPlayer {
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = "";
-		this.prefix = "";
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
 		this.arenaInventory = "";
@@ -74,12 +72,11 @@ public class AranarthPlayer {
 		this.councilRank = 0;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
-		this.prefix = prefix;
 		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
 		this.arenaInventory = arenaInventory;
@@ -167,22 +164,6 @@ public class AranarthPlayer {
 	 */
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	/**
-	 * Provides the player's current prefix.
-	 * @return The current prefix.
-	 */
-	public String getPrefix() {
-		return prefix;
-	}
-
-	/**
-	 * Updates the current prefix.
-	 * @param prefix The new prefix.
-	 */
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
 	}
 
 	/**

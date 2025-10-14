@@ -74,8 +74,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandNickname.onCommand(sender,args);
 		} else if (args[0].equalsIgnoreCase("ping")) {
 			commandResult = CommandPing.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("prefix")) {
-			commandResult = CommandPrefix.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("arena")) {
 			commandResult = CommandArena.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("survival")) {
