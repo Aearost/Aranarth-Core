@@ -88,6 +88,7 @@ public class CommandPotions {
 							return true;
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
+							return true;
                         }
                     }
                     case "add" -> {

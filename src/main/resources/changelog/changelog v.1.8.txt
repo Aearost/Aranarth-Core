@@ -1,10 +1,13 @@
-AranarthCore v. 1.7
+AranarthCore v. 1.8
 
 Features
 [+] Added in-game ranks and rankup system
 [+] Added donor ranks known as Saints
 [+] Added staff ranks known as Council
 [+] Added in pronouns functionality
+[-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 
 Miscellaneous
 - Removed redundant logs from weather
+- Changed aranarth_players.txt format to be pipe-separated lines for each player rather than json
+- Adapted PersistenceUtils to reflect this new format (aranarth_players.txt)
