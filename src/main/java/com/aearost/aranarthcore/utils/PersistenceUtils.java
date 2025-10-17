@@ -9,7 +9,6 @@ import com.aearost.aranarthcore.objects.PlayerShop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -30,7 +29,7 @@ public class PersistenceUtils {
 	public static void loadHomes() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "homes.json";
+				+ "homes.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -42,82 +41,41 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			int fieldCount = 0;
 			String fieldName;
 			String fieldValue;
-
-			String homeName = null;
-			World world = null;
-			double x = 0;
-			double y = 0;
-			double z = 0;
-			float yaw = 0;
-			float pitch = 0;
-			Material icon = null;
 
 			Bukkit.getLogger().info("Attempting to read the homes file...");
 
 			while (reader.hasNextLine()) {
-				String line = reader.nextLine();
-				String[] parts = line.split("\"");
+				String row = reader.nextLine();
 
-				// If it's a field and not a parenthesis
-				// Make sure to replace "icon" with the last field in the list
-				if (parts[parts.length - 1].equals(",")
-						|| (parts.length > 1 && parts[1].equals("icon"))) {
-					fieldName = parts[1];
-					fieldValue = parts[3];
-				} else {
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
 					continue;
 				}
 
-                switch (fieldName) {
-                    case "homeName" -> {
-                        homeName = fieldValue;
-                        fieldCount++;
-                    }
-                    case "worldName" -> {
-                        world = Bukkit.getWorld(fieldValue);
-                        fieldCount++;
-                    }
-                    case "x" -> {
-                        x = Double.parseDouble(fieldValue);
-                        fieldCount++;
-                    }
-                    case "y" -> {
-                        y = Double.parseDouble(fieldValue);
-                        fieldCount++;
-                    }
-                    case "z" -> {
-                        z = Double.parseDouble(fieldValue);
-                        fieldCount++;
-                    }
-                    case "yaw" -> {
-                        yaw = Float.parseFloat(fieldValue);
-                        fieldCount++;
-                    }
-                    case "pitch" -> {
-                        pitch = Float.parseFloat(fieldValue);
-                        fieldCount++;
-                    }
-                    case "icon" -> {
-                        icon = Material.valueOf(fieldValue);
-                        fieldCount++;
-                    }
-                }
+				// homeName|worldName|x|y|z|yaw|pitch|icon
+				String[] fields = row.split("\\|");
 
-				if (fieldCount == 8) {
-					Location location = new Location(world, x, y, z, yaw, pitch);
-					AranarthUtils.addNewHome(location);
+				String homeName = fields[0];
+				String worldName = fields[1];
+				double x = Double.parseDouble(fields[2]);
+				double y = Double.parseDouble(fields[3]);
+				double z = Double.parseDouble(fields[4]);
+				float yaw = Float.parseFloat(fields[5]);
+				float pitch = Float.parseFloat(fields[6]);
+				Material icon = Material.valueOf(fields[7]);
 
-					if (Objects.nonNull(homeName)) {
-						if (!homeName.equals("NEW")) {
-							AranarthUtils.updateHome(homeName, location, icon);
-						}
+				Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+				AranarthUtils.addNewHome(location);
+
+				if (Objects.nonNull(homeName)) {
+					if (!homeName.equals("NEW")) {
+						AranarthUtils.updateHome(homeName, location, icon);
 					}
-					fieldCount = 0;
 				}
 			}
+
 			Bukkit.getLogger().info("All homes have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
@@ -133,7 +91,7 @@ public class PersistenceUtils {
 		if (!homes.isEmpty()) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "homes.json";
+					+ File.separator + "homes.txt";
 			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 			File file = new File(filePath);
 
@@ -146,43 +104,30 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new homes.json file has been generated");
+						Bukkit.getLogger().info("A new homes.txt file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of homes.json");
+					Bukkit.getLogger().info("An error occurred in the creation of homes.txt");
 				}
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("{\n");
-					writer.write("    \"homes\": {\n");
+					writer.write("#homeName|worldName|x|y|z|yaw|pitch|icon\n");
 
-					int homeCounter = 0;
 					for (Home home : homes) {
-						if (Objects.nonNull(home.getLocation().getWorld())) {
-							writer.write("        \"homeName\": \"" + home.getHomeName() + "\",\n");
-							writer.write("        \"worldName\": \"" + home.getLocation().getWorld().getName() + "\",\n");
-							writer.write("        \"x\": \"" + home.getLocation().getX() + "\",\n");
-							writer.write("        \"y\": \"" + home.getLocation().getY() + "\",\n");
-							writer.write("        \"z\": \"" + home.getLocation().getZ() + "\",\n");
-							writer.write("        \"yaw\": \"" + home.getLocation().getYaw() + "\",\n");
-							writer.write("        \"pitch\": \"" + home.getLocation().getPitch() + "\",\n");
-							writer.write("        \"icon\": \"" + home.getIcon().name() + "\"\n");
-						} else {
-							Bukkit.getLogger().info("The world name is null and the home has been skipped!");
-							return;
-						}
+						String homeName = home.getHomeName();
+						String worldName = home.getLocation().getWorld().getName();
+						String x = home.getLocation().getX() + "";
+						String y = home.getLocation().getY() + "";
+						String z = home.getLocation().getZ() + "";
+						String yaw = home.getLocation().getYaw() + "";
+						String pitch = home.getLocation().getPitch() + "";
+						String icon = home.getIcon().name();
 
-						if (homeCounter + 1 == homes.size()) {
-							writer.write("    }\n");
-						} else {
-							writer.write("    },\n");
-							writer.write("    {\n");
-							homeCounter++;
-						}
+						String row = homeName + "|" + worldName + "|" + x + "|" + y + "|" + z
+								+ "|" + yaw + "|" + pitch + "|" + icon + "\n";
+						writer.write(row);
 					}
-
-					writer.write("}\n");
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the homes");

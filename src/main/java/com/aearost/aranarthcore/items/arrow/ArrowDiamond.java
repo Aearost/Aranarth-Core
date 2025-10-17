@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.items.arrow;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -22,11 +23,12 @@ public class ArrowDiamond implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+			NamespacedKey key = new NamespacedKey(NamespacedKey.MINECRAFT, "stick");
+			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 //			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
 //			cmdc.setFloats(List.of((float) 5));
 //			meta.setCustomModelDataComponent(cmdc);
-			meta.setCustomModelData(1);
 
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "diamond");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
