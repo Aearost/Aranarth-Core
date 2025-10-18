@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items.arrow;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
@@ -23,7 +24,7 @@ public class ArrowDiamond implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(NamespacedKey.MINECRAFT, "stick");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_diamond");
 			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 //			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
