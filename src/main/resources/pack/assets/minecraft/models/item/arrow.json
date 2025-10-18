@@ -2,5 +2,37 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "minecraft:item/arrow"
-  }
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 1001
+      },
+      "model": "aranarthcore:item/arrow_diamond"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1002
+      },
+      "model": "aranarthcore:item/arrow_iron"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1003
+      },
+      "model": "aranarthcore:item/arrow_gold"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1004
+      },
+      "model": "aranarthcore:item/arrow_obsidian"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1005
+      },
+      "model": "aranarthcore:item/arrow_amethyst"
+    }
+  ]
 }

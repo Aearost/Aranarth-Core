@@ -24,10 +24,11 @@ public class ArrowDiamond implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_diamond");
-			meta.setItemModel(key);
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_diamond");
+//			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
-//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
+			meta.setCustomModelData(1001);
+//			CustomModelData cmdc = meta.getCustomModelDataComponent();
 //			cmdc.setFloats(List.of((float) 5));
 //			meta.setCustomModelDataComponent(cmdc);
 
