@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "minecraft:aranarth/arrowgold"
+    "layer0": "aranarthcore:item/arrow_gold"
   }
 }
