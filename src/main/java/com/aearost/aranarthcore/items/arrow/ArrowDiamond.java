@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.items.arrow;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -24,11 +25,11 @@ public class ArrowDiamond implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ARROW, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_diamond");
-//			meta.setItemModel(key);
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_diamond");
+			Bukkit.getLogger().info(String.valueOf(key));
+			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
-			meta.setCustomModelData(1001);
-//			CustomModelData cmdc = meta.getCustomModelDataComponent();
+//			CustomModelDataComponent cmdc = meta.getCustomModelDataComponent();
 //			cmdc.setFloats(List.of((float) 5));
 //			meta.setCustomModelDataComponent(cmdc);
 
