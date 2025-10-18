@@ -433,7 +433,6 @@ public class PersistenceUtils {
 						}
 					}
 
-					writer.write("}\n");
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the shops");
@@ -671,8 +670,6 @@ public class PersistenceUtils {
 						String row = owner + "|" + trustedString + "|" + worldName + "|" + x1 + "|" + y1 + "|" + z1 + "|" + x2 + "|" + y2 + "|" + z2 + "\n";
 					}
 				}
-
-				writer.write("}\n");
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the lockedcontainers");
