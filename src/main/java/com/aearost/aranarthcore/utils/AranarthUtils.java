@@ -20,7 +20,6 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -1182,9 +1181,6 @@ public class AranarthUtils {
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
-		for (PermissionAttachmentInfo perm : player.getEffectivePermissions()) {
-			Bukkit.getLogger().info(perm.getPermission());
-		}
 	}
 
 	/**

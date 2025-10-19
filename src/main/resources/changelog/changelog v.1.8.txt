@@ -11,6 +11,7 @@ Features
 [+] Added in a quiver texture
 [~] Changed the colour of the obsidian arrow
 [~] Corrected issue where unloaded chunks were being selected for weather functionality causing lag
+[~] Removed redundant pages from /ac calendar and added title page
 
 Miscellaneous
 - Removed redundant logs from weather
