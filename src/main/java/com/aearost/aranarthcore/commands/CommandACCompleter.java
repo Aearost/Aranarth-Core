@@ -162,10 +162,13 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
+				displayedOptions.add("pronouns");
 			} else if ("ping".startsWith(args[0])) {
 				displayedOptions.add("ping");
 			} else if ("potions".startsWith(args[0])) {
 				displayedOptions.add("potions");
+			} else if ("pronouns".startsWith(args[0])) {
+				displayedOptions.add("pronouns");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("r")) {
 			if (args[0].equals("r")) {
@@ -268,6 +271,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("smp");
 		displayedOptions.add("ranks");
 		displayedOptions.add("rankup");
+		displayedOptions.add("pronouns");
 		return displayedOptions;
 	}
 
@@ -332,6 +336,21 @@ public class CommandACCompleter implements TabCompleter {
 			case "randomizer" -> {
 				if (args[1].isEmpty()) {
 					displayedOptions.add("pattern");
+				}
+			}
+			case "pronouns" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("male");
+					displayedOptions.add("female");
+				} else {
+					if (!args[1].isEmpty() && "male".startsWith(args[1])) {
+						displayedOptions.add("male");
+					} else if (!args[1].isEmpty() && "female".startsWith(args[1])) {
+						displayedOptions.add("female");
+					} else {
+						displayedOptions.add("male");
+						displayedOptions.add("female");
+					}
 				}
 			}
         }

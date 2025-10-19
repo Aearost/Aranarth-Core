@@ -112,6 +112,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRankup.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("rankset")) {
 			commandResult = CommandRankSet.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("pronouns")) {
+			commandResult = CommandPronouns.onCommand(sender, args);
 		}
 		return commandResult;
 	}
