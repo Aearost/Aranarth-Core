@@ -23,41 +23,43 @@ public class PlayerChatListener implements Listener {
 	}
 
 	@EventHandler
-    public void chatEvent(final AsyncPlayerChatEvent event) {
-        String message = event.getMessage();
+    public void chatEvent(final AsyncPlayerChatEvent e) {
+        String message = e.getMessage();
 
-        for (Player p : event.getRecipients()) {
-            if (message.contains(p.getDisplayName()) && !event.getPlayer().getDisplayName().equals(p.getDisplayName())) {
+        for (Player p : e.getRecipients()) {
+            if (message.contains(p.getDisplayName()) && !e.getPlayer().getDisplayName().equals(p.getDisplayName())) {
                 p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
 
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(event.getPlayer().getUniqueId());
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
         String nickname = aranarthPlayer.getNickname();
         String saintRank = getSaintRank(aranarthPlayer);
         String councilRank = getCouncilRank(aranarthPlayer);
         String rank = getRank(aranarthPlayer);
 
-        String chatMessage = "⊰";
+        String prefix = "⊰";
 
-        chatMessage += saintRank;
-        chatMessage += councilRank;
-        chatMessage += rank;
+        prefix += saintRank;
+        prefix += councilRank;
+        prefix += rank;
 
         if (!nickname.isEmpty()) {
-        	chatMessage += ChatUtils.translateToColor(nickname + "&r");
+        	prefix += nickname + "&r";
         } else {
-        	chatMessage += event.getPlayer().getName();
+        	prefix += e.getPlayer().getName();
         }
 
-        chatMessage += "⊱ &r";
-        chatMessage += event.getMessage();
-        event.setFormat(ChatUtils.translateToColor(chatMessage));
+        prefix += "⊱ &r";
+        prefix = ChatUtils.translateToColor(prefix);
+        String chatMessage = e.getMessage();
 
-//        chatMessage += "⊱ " + ChatUtils.translateToColor(event.getMessage() + "&r");
-//        chatMessage = chatMessage.replaceAll("%", "%%");
-
-//        event.setFormat(chatMessage);
+        if (e.getPlayer().hasPermission("aranarth.chat.hex")) {
+            chatMessage = ChatUtils.translateToColor(chatMessage);
+        } else if (e.getPlayer().hasPermission("aranarth.chat.color")) {
+            chatMessage = ChatUtils.playerColorChat(chatMessage);
+        }
+        e.setFormat(prefix + chatMessage);
     }
 
     /**

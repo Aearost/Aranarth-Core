@@ -1208,7 +1208,6 @@ public class AranarthUtils {
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarthcore.exp", false);
-		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.seen", false);
 		perms.setPermission("aranarth.msg", false);
 		perms.setPermission("aranarth.back", false);
@@ -1228,7 +1227,7 @@ public class AranarthUtils {
 		perms.setPermission("aranarth.randomizer", false);
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
-		perms.setPermission("aranarth.itemname.hex", false);
+		perms.setPermission("aranarth.itemname.gradient", false);
 		perms.setPermission("aranarth.ignore", false);
 		perms.setPermission("aranarth.compact", false);
 		perms.setPermission("aranarth.mute", false);
@@ -1388,14 +1387,6 @@ public class AranarthUtils {
 		} else {
 			return;
 		}
-	}
-
-	public static boolean hasPermission(UUID uuid, String permission) {
-		Player player = Bukkit.getPlayer(uuid);
-		if (player != null) {
-			return player.hasPermission(permission);
-		}
-		return false;
 	}
 
 }

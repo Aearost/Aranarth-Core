@@ -24,6 +24,11 @@ public class CommandRandomizer {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.randomizer")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
+
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (args.length == 1) {
 				if (aranarthPlayer.getIsRandomizing()) {
