@@ -54,6 +54,7 @@ public class GuiRankupClick {
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				AranarthUtils.evaluatePlayerPermissions(player);
 				player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 				player.closeInventory();
 			} else {

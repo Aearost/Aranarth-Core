@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -24,19 +25,23 @@ public class ExpStore {
 
                 if (totalExp >= amountToReduce) {
                     if (player.isSneaking()) {
-                        // Reduces by a less than what is gained
-                        amountToReduce = amountToReduce * -1;
-                        player.giveExp(amountToReduce);
+                        if (player.hasPermission("aranarthcore.exp")) {
+                            // Reduces by a less than what is gained
+                            amountToReduce = amountToReduce * -1;
+                            player.giveExp(amountToReduce);
 
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
-                        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
-                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
-                        // If the player's inventory was full, drop it to the ground
-                        if (!leftover.isEmpty()) {
-                            player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
+                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
+                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
+                            HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
+                            // If the player's inventory was full, drop it to the ground
+                            if (!leftover.isEmpty()) {
+                                player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+                            }
+                            player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to store EXP bottles!"));
                         }
-                        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
                     }
                 }
             }

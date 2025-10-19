@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
@@ -18,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -1160,6 +1162,145 @@ public class AranarthUtils {
 			case "diamond" -> new ArrowDiamond().getItem();
 			default -> null;
 		};
+	}
+
+	/**
+	 * Centralizes all permissions logic being set.
+	 * @param player The player.
+	 */
+	public static void evaluatePlayerPermissions(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+
+		Bukkit.getLogger().info("Evaluating " + player.getName() + "'s permissions");
+		setDefaultPermissions(perms);
+		setRankPermissions(perms, aranarthPlayer.getRank());
+		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
+		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
+		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+	}
+
+	/**
+	 * Sets the default permissions for all players.
+	 * @param perms The permissions the player will have access to.
+	 */
+	private static void setDefaultPermissions(PermissionAttachment perms) {
+		perms.setPermission("bending.command.rechoose", true);
+		perms.setPermission("aranarthcore.exp", false);
+	}
+
+	/**
+	 * Sets the permissions for all in-game ranks.
+	 * @param perms The permissions the player will have access to.
+	 * @param rank The player's in-game rank.
+	 */
+	private static void setRankPermissions(PermissionAttachment perms, int rank) {
+		// Esquire
+		if (rank >= 1) {
+			perms.setPermission("aranarthcore.exp", true);
+		} else {
+			return;
+		}
+
+		// Knight
+		if (rank >= 2) {
+
+		} else {
+			return;
+		}
+
+		// Baron
+		if (rank >= 3) {
+
+		} else {
+			return;
+		}
+
+		// Count
+		if (rank >= 4) {
+
+		} else {
+			return;
+		}
+
+		// Duke
+		if (rank >= 5) {
+
+		} else {
+			return;
+		}
+
+		// Prince
+		if (rank >= 6) {
+
+		} else {
+			return;
+		}
+
+		// King
+		if (rank >= 7) {
+
+		} else {
+			return;
+		}
+	}
+
+	/**
+	 * Sets the permissions for the Saint donor ranks.
+	 * @param perms The permissions the player will have access to.
+	 * @param saintRank The player's Saint rank.
+	 */
+	private static void setSaintPermissions(PermissionAttachment perms, int saintRank) {
+		if (saintRank == 0) {
+			return;
+		}
+
+		if (saintRank >= 1) {
+
+		} else {
+			return;
+		}
+
+		if (saintRank >= 2) {
+
+		} else {
+			return;
+		}
+
+		if (saintRank >= 3) {
+
+		} else {
+			return;
+		}
+	}
+
+	/**
+	 * Sets the permissions for the Council staff ranks.
+	 * @param perms The permissions the player will have access to.
+	 * @param councilRank The player's Council rank.
+	 */
+	private static void setCouncilPermissions(PermissionAttachment perms, int councilRank) {
+		if (councilRank == 0) {
+			return;
+		}
+
+		if (councilRank >= 1) {
+
+		} else {
+			return;
+		}
+
+		if (councilRank >= 2) {
+
+		} else {
+			return;
+		}
+
+		if (councilRank >= 3) {
+
+		} else {
+			return;
+		}
 	}
 
 }

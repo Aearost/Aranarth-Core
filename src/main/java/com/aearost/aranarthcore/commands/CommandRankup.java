@@ -45,7 +45,7 @@ public class CommandRankup {
 			} else {
 				rankName = femaleRanks[currentRank];
 			}
-			GuiRankup gui = new GuiRankup(player, rankName, rankupCosts[currentRank + 1]);
+			GuiRankup gui = new GuiRankup(player, rankName, rankupCosts[currentRank]);
 			gui.openGui();
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));

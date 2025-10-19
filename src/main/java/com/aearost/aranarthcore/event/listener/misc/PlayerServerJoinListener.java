@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -56,14 +55,7 @@ public class PlayerServerJoinListener implements Listener {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
-		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-		perms.setPermission("bending.command.rechoose", true);
-
-		// Add blue fire to players that want it
-		if (player.getName().equalsIgnoreCase("_Breathtaking")) {
-			Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
-		}
-
+		AranarthUtils.evaluatePlayerPermissions(player);
 		playJoinSound();
 	}
 
@@ -94,4 +86,6 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
 	}
+
+
 }
