@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.items.aranarthium.armour;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
@@ -27,6 +29,8 @@ public class ScorchedAranarthiumHelmet implements AranarthItem {
 		ItemStack item = new ItemStack(Material.NETHERITE_HELMET, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_scorched_helmet");
+			meta.setItemModel(key);
 			meta.setTrim(new ArmorTrim(TrimMaterial.RESIN, TrimPattern.WARD));
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "scorched");

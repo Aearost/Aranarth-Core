@@ -6,6 +6,9 @@ Features
 [+] Added staff ranks known as Council
 [+] Added in pronouns functionality
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
+[+] Added in custom resourcepack for arrows and arrowheads
+[+] Added in a quiver texture
+[~] Changed the colour of the obsidian arrow
 
 Miscellaneous
 - Removed redundant logs from weather

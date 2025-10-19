@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.*;
+import static com.aearost.aranarthcore.items.CustomItemKeys.SUGARCANE_BLOCK;
 
 /**
  * Handles the overrides when crafting involving Sugarcane Blocks.
