@@ -10,6 +10,7 @@ Features
 [+] Added in custom resourcepack for arrows and arrowheads
 [+] Added in a quiver texture
 [~] Changed the colour of the obsidian arrow
+[~] Corrected issue where unloaded chunks were being selected for weather functionality causing lag
 
 Miscellaneous
 - Removed redundant logs from weather

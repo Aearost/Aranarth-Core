@@ -650,7 +650,6 @@ public class DateUtils {
 		// Only melts snow if it isn't currently snowing during the month of Ignivor or Umbravor only
 		if ((AranarthUtils.getMonth() == Month.IGNIVOR || AranarthUtils.getMonth() == Month.UMBRAVOR)
 				&& AranarthUtils.getWeather() != Weather.SNOW) {
-//			AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 			meltSnow(1);
 			return;
 		}
@@ -767,8 +766,13 @@ public class DateUtils {
 							Location loc = player.getLocation();
 							// Handles applying the snow functionality
 							if (AranarthUtils.getWeather() == Weather.SNOW) {
-								// Only snows in the survival world
+								// Only apply logic in the survival world
 								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+									continue;
+								}
+
+								// Do not proceed if the chunk is not yet loaded
+								if (!loc.getChunk().isLoaded()) {
 									continue;
 								}
 
@@ -813,6 +817,16 @@ public class DateUtils {
 	 * @param bigFlakeDensity The density of the large snowflakes to base the snowfall chance on.
 	 */
 	private void generateSnow(Location loc, int bigFlakeDensity) {
+		// Only apply logic in the survival world
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+			return;
+		}
+
+		// Do not proceed if the chunk is not yet loaded
+		if (!loc.getChunk().isLoaded()) {
+			return;
+		}
+
 		// Blocks that shouldn't have snow placed on them
 		final Set<Material> INVALID_SURFACE_BLOCKS = EnumSet.of(
 				Material.WATER, Material.LAVA, Material.SEAGRASS, Material.TALL_SEAGRASS, Material.KELP, Material.KELP_PLANT,
@@ -971,6 +985,16 @@ public class DateUtils {
 	 * @param bigFlakeDensity The density of the large snowflakes to base the ice generation rate on.
 	 */
 	private void generateIce(Location loc, int bigFlakeDensity) {
+		// Only apply logic in the survival world
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+			return;
+		}
+
+		// Do not proceed if the chunk is not yet loaded
+		if (!loc.getChunk().isLoaded()) {
+			return;
+		}
+
 		Random random = new Random();
 		// Adds snow to the surrounding blocks from the player
 		int centerX = loc.getBlockX();
@@ -1069,16 +1093,21 @@ public class DateUtils {
 						if (player != null) {
 							Location loc = player.getLocation();
 
+							// Only apply logic in the survival world
+							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+								continue;
+							}
+
+							// Do not proceed if the chunk is not yet loaded
+							if (!loc.getChunk().isLoaded()) {
+								continue;
+							}
+
 							// Play wind sound during Ventivor
 							if (month == Month.VENTIVOR) {
 								// If it is currently playing the sound and the first set of runs
 								if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
 									playWindEffect(runs, player);
-								}
-
-								// Only melt snow in the survival world
-								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
-									continue;
 								}
 							}
 							// Add pink petals effect in wind during Florivor
@@ -1592,6 +1621,16 @@ public class DateUtils {
 		if (shouldApplyForestFire) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				Location loc = player.getLocation();
+				// Only apply logic in the survival world
+				if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+					continue;
+				}
+
+				// Do not proceed if the chunk is not yet loaded
+				if (!loc.getChunk().isLoaded()) {
+					continue;
+				}
+
 				int radius = 50;
 				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
 					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
@@ -1618,6 +1657,17 @@ public class DateUtils {
 	 * @param player The player to play the effect to.
 	 */
 	private void playWindEffect(int runs, Player player) {
+		Location loc = player.getLocation();
+		// Only apply logic in the survival world
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+			return;
+		}
+
+		// Do not proceed if the chunk is not yet loaded
+		if (!loc.getChunk().isLoaded()) {
+			return;
+		}
+
 		if (runs == 0) {
 			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.01F, 0.5F);
 		} else if (runs == 1) {

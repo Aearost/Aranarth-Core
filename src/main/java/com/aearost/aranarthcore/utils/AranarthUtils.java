@@ -34,6 +34,7 @@ import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 /**
  * Provides a large variety of utility methods for everything related to AranarthCore.
  */
+@SuppressWarnings("ALL")
 public class AranarthUtils {
 
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
@@ -1184,9 +1185,28 @@ public class AranarthUtils {
 	 * Sets the default permissions for all players.
 	 * @param perms The permissions the player will have access to.
 	 */
-	private static void setDefaultPermissions(PermissionAttachment perms) {
+	@SuppressWarnings("SpellCheckingInspection")
+    private static void setDefaultPermissions(PermissionAttachment perms) {
 		perms.setPermission("bending.command.rechoose", true);
 		perms.setPermission("aranarthcore.exp", false);
+
+		// Disable sub-elements
+		perms.setPermission("bending.water.healing", false);
+		perms.setPermission("bending.water.plantbending", false);
+		perms.setPermission("bending.fire.combustionbending", false);
+		perms.setPermission("bending.fire.lightningbending", false);
+		perms.setPermission("bending.earth.metalbending", false);
+		perms.setPermission("bending.earth.lavabending", false);
+		perms.setPermission("bending.earth.sandbending", false);
+
+		// Disable abilities
+		perms.setPermission("bending.ability.waterarms", false);
+		perms.setPermission("bending.ability.firecomet", false);
+		perms.setPermission("bending.ability.metalclips", false);
+		perms.setPermission("bending.ability.sonicblast", false);
+		perms.setPermission("bending.ability.suffocate", false);
+
+
 	}
 
 	/**
@@ -1197,49 +1217,61 @@ public class AranarthUtils {
 	private static void setRankPermissions(PermissionAttachment perms, int rank) {
 		// Esquire
 		if (rank >= 1) {
-			perms.setPermission("aranarthcore.exp", true);
+			perms.setPermission("bending.water.healing", true);
+			perms.setPermission("bending.water.plantbending", true);
+			perms.setPermission("bending.earth.sandbending", true);
 		} else {
 			return;
 		}
 
 		// Knight
 		if (rank >= 2) {
-
+			perms.setPermission("bending.earth.metalbending", true);
+			perms.setPermission("aranarthcore.exp", true);
 		} else {
 			return;
 		}
 
 		// Baron
 		if (rank >= 3) {
-
+			perms.setPermission("bending.ability.waterarms", true);
 		} else {
 			return;
 		}
 
 		// Count
 		if (rank >= 4) {
-
+			perms.setPermission("bending.ability.sonicblast", true);
 		} else {
 			return;
 		}
 
 		// Duke
 		if (rank >= 5) {
-
+			perms.setPermission("bending.ability.metalclips", true);
+			perms.setPermission("bending.ability.suffocate", true);
 		} else {
 			return;
 		}
 
 		// Prince
 		if (rank >= 6) {
-
+			perms.setPermission("bending.fire.lightningbending", true);
 		} else {
 			return;
 		}
 
 		// King
 		if (rank >= 7) {
+			perms.setPermission("bending.earth.lavabending", true);
+			perms.setPermission("bending.ability.firecomet", true);
+		} else {
+			return;
+		}
 
+		// Emperor
+		if (rank >= 8) {
+			perms.setPermission("bending.fire.combustionbending", true);
 		} else {
 			return;
 		}
@@ -1301,6 +1333,14 @@ public class AranarthUtils {
 		} else {
 			return;
 		}
+	}
+
+	public static boolean hasPermission(UUID uuid, String permission) {
+		Player player = Bukkit.getPlayer(uuid);
+		if (player != null) {
+			return player.hasPermission(permission);
+		}
+		return false;
 	}
 
 }
