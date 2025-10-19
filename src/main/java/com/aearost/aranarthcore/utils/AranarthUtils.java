@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -1173,22 +1174,25 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 
+
+
 		Bukkit.getLogger().info("Evaluating " + player.getName() + "'s permissions");
 		setDefaultPermissions(perms);
 		setRankPermissions(perms, aranarthPlayer.getRank());
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+		for (PermissionAttachmentInfo perm : player.getEffectivePermissions()) {
+			Bukkit.getLogger().info(perm.getPermission());
+		}
 	}
 
 	/**
 	 * Sets the default permissions for all players.
 	 * @param perms The permissions the player will have access to.
 	 */
-	@SuppressWarnings("SpellCheckingInspection")
     private static void setDefaultPermissions(PermissionAttachment perms) {
 		perms.setPermission("bending.command.rechoose", true);
-		perms.setPermission("aranarthcore.exp", false);
 
 		// Disable sub-elements
 		perms.setPermission("bending.water.healing", false);
@@ -1206,6 +1210,37 @@ public class AranarthUtils {
 		perms.setPermission("bending.ability.sonicblast", false);
 		perms.setPermission("bending.ability.suffocate", false);
 
+		// Disable aranarth functionality
+		perms.setPermission("aranarthcore.exp", false);
+		perms.setPermission("aranarth.itemname", false);
+		perms.setPermission("aranarth.seen", false);
+		perms.setPermission("aranarth.msg", false);
+		perms.setPermission("aranarth.back", false);
+		perms.setPermission("aranarth.tphere", false);
+		perms.setPermission("aranarth.nick", false);
+		perms.setPermission("aranarth.nick.color", false);
+		perms.setPermission("aranarth.nick.hex", false);
+		perms.setPermission("aranarth.nick.gradient", false);
+		perms.setPermission("aranarth.chat.color", false);
+		perms.setPermission("aranarth.chat.hex", false);
+		perms.setPermission("aranarth.toggle.msg", false);
+		perms.setPermission("aranarth.toggle.chat", false);
+		perms.setPermission("aranarth.toggle.tp", false);
+		perms.setPermission("aranarth.hat", false);
+		perms.setPermission("aranarth.trash", false);
+		perms.setPermission("aranarth.blacklist", false);
+		perms.setPermission("aranarth.randomizer", false);
+		perms.setPermission("aranarth.tables", false);
+		perms.setPermission("aranarth.itemname", false);
+		perms.setPermission("aranarth.itemname.hex", false);
+		perms.setPermission("aranarth.ignore", false);
+		perms.setPermission("aranarth.compact", false);
+		perms.setPermission("aranarth.mute", false);
+		perms.setPermission("aranarth.give", true);
+		perms.setPermission("aranarth.whereis", true);
+		perms.setPermission("aranarth.ban", false);
+		perms.setPermission("aranarth.invsee", false);
+		perms.setPermission("aranarth.spy", false);
 
 	}
 
@@ -1220,6 +1255,7 @@ public class AranarthUtils {
 			perms.setPermission("bending.water.healing", true);
 			perms.setPermission("bending.water.plantbending", true);
 			perms.setPermission("bending.earth.sandbending", true);
+			perms.setPermission("aranarth.seen", true);
 		} else {
 			return;
 		}
@@ -1228,6 +1264,7 @@ public class AranarthUtils {
 		if (rank >= 2) {
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("aranarthcore.exp", true);
+			perms.setPermission("aranarth.msg", true);
 		} else {
 			return;
 		}
@@ -1242,6 +1279,7 @@ public class AranarthUtils {
 		// Count
 		if (rank >= 4) {
 			perms.setPermission("bending.ability.sonicblast", true);
+			perms.setPermission("aranarth.back", true);
 		} else {
 			return;
 		}
@@ -1250,6 +1288,7 @@ public class AranarthUtils {
 		if (rank >= 5) {
 			perms.setPermission("bending.ability.metalclips", true);
 			perms.setPermission("bending.ability.suffocate", true);
+			perms.setPermission("aranarth.nick", true);
 		} else {
 			return;
 		}
@@ -1257,6 +1296,9 @@ public class AranarthUtils {
 		// Prince
 		if (rank >= 6) {
 			perms.setPermission("bending.fire.lightningbending", true);
+			perms.setPermission("aranarth.toggle.msg", true);
+			perms.setPermission("aranarth.toggle.chat", true);
+			perms.setPermission("aranarth.tphere", true);
 		} else {
 			return;
 		}
@@ -1265,6 +1307,7 @@ public class AranarthUtils {
 		if (rank >= 7) {
 			perms.setPermission("bending.earth.lavabending", true);
 			perms.setPermission("bending.ability.firecomet", true);
+			perms.setPermission("aranarth.toggle.tp", true);
 		} else {
 			return;
 		}
@@ -1272,6 +1315,7 @@ public class AranarthUtils {
 		// Emperor
 		if (rank >= 8) {
 			perms.setPermission("bending.fire.combustionbending", true);
+			perms.setPermission("aranarth.nick.color", true);
 		} else {
 			return;
 		}
@@ -1288,19 +1332,31 @@ public class AranarthUtils {
 		}
 
 		if (saintRank >= 1) {
-
+			perms.setPermission("aranarth.chat.color", true);
+			perms.setPermission("aranarth.hat", true);
+			perms.setPermission("aranarth.trash", true);
+			perms.setPermission("aranarth.back", true);
+			perms.setPermission("aranarth.nick.color", true);
+			perms.setPermission("aranarth.blacklist", true);
 		} else {
 			return;
 		}
 
 		if (saintRank >= 2) {
-
+			perms.setPermission("aranarth.tables", true);
+			perms.setPermission("aranarth.itemname", true);
+			perms.setPermission("aranarth.chat.hex", true);
+			perms.setPermission("aranarth.nick.hex", true);
+			perms.setPermission("aranarth.ignore", true);
 		} else {
 			return;
 		}
 
 		if (saintRank >= 3) {
-
+			perms.setPermission("aranarth.nick.gradient", true);
+			perms.setPermission("aranarth.itemname.gradient", true);
+			perms.setPermission("aranarth.compact", true);
+			perms.setPermission("aranarth.randomizer", true);
 		} else {
 			return;
 		}
@@ -1317,19 +1373,22 @@ public class AranarthUtils {
 		}
 
 		if (councilRank >= 1) {
-
+			perms.setPermission("aranarth.mute", true);
 		} else {
 			return;
 		}
 
 		if (councilRank >= 2) {
-
+			perms.setPermission("aranarth.ban", true);
+			perms.setPermission("aranarth.give", true);
+			perms.setPermission("aranarth.invsee", true);
+			perms.setPermission("aranarth.spy", true);
 		} else {
 			return;
 		}
 
 		if (councilRank >= 3) {
-
+			perms.setPermission("*", true);
 		} else {
 			return;
 		}
