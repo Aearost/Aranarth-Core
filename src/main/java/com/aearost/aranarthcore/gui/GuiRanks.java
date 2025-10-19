@@ -78,6 +78,8 @@ public class GuiRanks {
 		peasantLore.add(ChatUtils.translateToColor("&f&lBending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- Basic abilities"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- &3&oIcebending"));
+		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
 		peasantMeta.setLore(peasantLore);
 		peasant.setItemMeta(peasantMeta);
 
@@ -94,8 +96,7 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oPlantbending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &2&oSandbending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- Ability to sit on stairs"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /seen"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -110,7 +111,8 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &2&oMetalbending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /recipe"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
 		knightMeta.setLore(knightLore);
 		knight.setItemMeta(knightMeta);
 
@@ -133,8 +135,8 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &b&oWaterArms"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- Ability to create 3 chest shops"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- Ability to set 2 homes"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -157,9 +159,9 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &7&oSonicBlast"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		countLore.add(ChatUtils.translateToColor("&f&o- /back"));
-		countLore.add(ChatUtils.translateToColor("&f&o- Ability to create 7 chest shops"));
-		countLore.add(ChatUtils.translateToColor("&f&o- Ability to set 3 homes"));
+		countLore.add(ChatUtils.translateToColor("&f&o- /ac back"));
+		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
+		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
 		countMeta.setLore(countLore);
 		count.setItemMeta(countMeta);
 
@@ -183,9 +185,8 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &2MetalClips"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &7Suffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /near"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- Ability to create 15 chest shops"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
 		dukeMeta.setLore(dukeLore);
 		duke.setItemMeta(dukeMeta);
 
@@ -208,8 +209,10 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightningbending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /msgtoggle"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- Ability to set 4 homes"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 
@@ -233,8 +236,8 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLavabending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /tptoggle"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- Ability to create 30 chest shops"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		kingMeta.setLore(kingLore);
 		king.setItemMeta(kingMeta);
 
@@ -259,8 +262,9 @@ public class GuiRanks {
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustionbending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to set 5 homes"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited chest shops"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- 5 homes"));
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 
@@ -269,15 +273,14 @@ public class GuiRanks {
 		ArrayList<String> saint1Lore = new ArrayList<>();
 		saint1Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint I - $9.99"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Colored chat and signs"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- /nick, /hat, /craft"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Discord to Minecraft chat"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- Basic colored chat"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- Free element changes"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 9 arrow trails"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 6 gadgets including the Paintball Gun"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 3 mounts including Glacial Steed"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 5 particles including Frozenwalk"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Access to the Cow and Piggy pets"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac hat"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac trash"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac back"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac blacklist"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		saint1Meta.setLore(saint1Lore);
 		saint1.setItemMeta(saint1Meta);
 
@@ -286,13 +289,11 @@ public class GuiRanks {
 		ArrayList<String> saint2Lore = new ArrayList<>();
 		saint2Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint II - $19.99"));
 		saint2Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- Colored nickname"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- /enderchest"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 14 more arrow trails"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 9 gadgets including Thor's Hammer"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 4 mounts including Mount of Fire"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 7 particles including Magical Rods"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 9 pets including the Polar Bear"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- Full colored chat"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac tables"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac ignore"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (color)"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (hex)"));
 		saint2Meta.setLore(saint2Lore);
 		saint2.setItemMeta(saint2Meta);
 
@@ -301,13 +302,10 @@ public class GuiRanks {
 		ArrayList<String> saint3Lore = new ArrayList<>();
 		saint3Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint III - $29.99"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Bold chat and nickname"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Ability to join the server when it's full"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 18 more arrow trails"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 10 gadgets including Trampoline"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 6 mounts including Nyan Sheep"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 7 particles including Fire Waves"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 5 pets including the Wither"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac compact"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac randomizer"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (gradient)"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (gradient)"));
 		saint3Meta.setLore(saint3Lore);
 		saint3.setItemMeta(saint3Meta);
 
