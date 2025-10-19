@@ -5,6 +5,7 @@ Features
 [+] Added donor ranks known as Saints
 [+] Added staff ranks known as Council
 [+] Added in /ac pronouns command to change pronouns
+[+] Updated chat format to support ranks and pronouns
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [+] Added in custom resourcepack for arrows and arrowheads
 [+] Added in a quiver texture
