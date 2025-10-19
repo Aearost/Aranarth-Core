@@ -19,6 +19,11 @@ public class CommandBlacklist {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.blacklist")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
+
             if (args.length == 1) {
 				GuiBlacklist gui = new GuiBlacklist(player);
 				gui.openGui();

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,7 +21,7 @@ public class CommandItemName {
      */
     public static void onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!player.getName().equalsIgnoreCase("Aearost")) {
+            if (!player.hasPermission("aranarth.itemname")) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
                 return;
             }
@@ -42,6 +43,14 @@ public class CommandItemName {
                     } else {
                         int stringStart = 1;
                         if (args[1].startsWith("gradient")) {
+                            Bukkit.getLogger().info("A");
+                            if (!player.hasPermission("aranarth.itemname.gradient")) {
+                                Bukkit.getLogger().info("B");
+                                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                                return;
+                            }
+                            Bukkit.getLogger().info("C");
+
                             // Start at the actual name and not the attribute
                             stringStart = 3;
                         }

@@ -24,13 +24,23 @@ public class ChatUtils {
 	}
 
 	/**
-	 * Allows messages to contain color codes.
+	 * Allows messages to contain color and hex codes.
 	 *
 	 * @param msg The message to be formatted.
 	 * @return The formatted chat message.
 	 */
 	public static String translateToColor(String msg) {
 		msg = checkForHex(msg);
+		return ChatColor.translateAlternateColorCodes('&', msg);
+	}
+
+	/**
+	 * Allows messages to contain color codes.
+	 * To be used only for players that have color chat but not gradient chat permissions.
+	 * @param msg The message to be formatted.
+	 * @return The formatted chat message.
+	 */
+	public static String playerColorChat(String msg) {
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 
