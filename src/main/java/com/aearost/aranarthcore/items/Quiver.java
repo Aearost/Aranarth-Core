@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.items;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,6 +25,8 @@ public class Quiver implements AranarthItem {
 		ItemStack item = new ItemStack(Material.BROWN_BUNDLE, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "quiver");
+			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(QUIVER, PersistentDataType.STRING, "quiver");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));

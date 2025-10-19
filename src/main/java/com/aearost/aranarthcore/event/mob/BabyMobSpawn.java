@@ -1,7 +1,8 @@
 package com.aearost.aranarthcore.event.mob;
 
 import org.bukkit.Location;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Animals;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.Random;

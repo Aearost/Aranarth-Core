@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.mob.WanderingTraderSpawnAnnounce;
 import com.aearost.aranarthcore.event.world.CreeperExtraChargedSpawn;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;

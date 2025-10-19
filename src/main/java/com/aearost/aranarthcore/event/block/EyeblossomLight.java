@@ -4,7 +4,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Levelled;
-import org.bukkit.event.block.*;
+import org.bukkit.event.block.BlockPhysicsEvent;
 
 /**
  * Handles adding and removing light blocks above Eyeblossoms when opening and closing.

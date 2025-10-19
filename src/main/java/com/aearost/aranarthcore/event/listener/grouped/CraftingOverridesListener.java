@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.*;
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
 
 public class CraftingOverridesListener implements Listener {
 
