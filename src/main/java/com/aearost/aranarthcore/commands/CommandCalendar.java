@@ -24,10 +24,8 @@ public class CommandCalendar {
 			meta.setItemName(ChatUtils.translateToColor("&8&l--=&6&lThe Calendar&8&l=--"));
 			meta.setAuthor(ChatUtils.translateToColor("&8Unknown"));
 
-			meta.addPage(bookIntroduction());
-			meta.addPage(bookCalendar1());
-			meta.addPage(bookCalendar2());
-			meta.addPage(bookWeek());
+			meta.addPage(title());
+			meta.addPage(introduction());
 			meta.addPage(ignivor());
 			meta.addPage(aquinvor());
 			meta.addPage(ventivor());
@@ -53,41 +51,14 @@ public class CommandCalendar {
 		}
 	}
 
-	private static String bookIntroduction() {
+	private static String title() {
+		return ChatUtils.translateToColor("\n\n\n\n    &l&oThe Realm of\n      Aranarth");
+	}
+
+	private static String introduction() {
 		return ChatUtils.translateToColor(
 				"Welcome to the &lRealm of Aranarth&r, where time, seasons, and the world is different than what we typically know." +
-				"\n\nIn this guide, you will find some key information on how to navigate the beautiful world, as well as all of the wonders that it has to offer."
-		);
-	}
-
-	private static String bookCalendar1() {
-		return ChatUtils.translateToColor(
-				"&lYear" +
-						"\n&rThere is a new Calendar system that exists in Aranarth, involving custom days of the week, and custom months. Throughout the various months, the world will have different effects depending on the month."
-		);
-	}
-
-	private static String bookCalendar2() {
-		return ChatUtils.translateToColor(
-				"&lYear" +
-						"\n&rOne year equates to roughly 30 days of in real life server uptime, being made up of 15 months and 2192 in-game days." +
-						"\n\n&lMonth" +
-						"\n&rEach month is 145 to 147 in-game days per month, averaging out to roughly 2 days per in-game month."
-		);
-	}
-
-	private static String bookWeek() {
-		return ChatUtils.translateToColor(
-				"&lWeek" +
-						"\n&rWeeks have 8 different days representing one of the elements." +
-						"\n\nHydris - Water" +
-						"\nTerris - Earth" +
-						"\nPyris - Fire" +
-						"\nAeris - Air" +
-						"\nFerris - Metal" +
-						"\nSylvis - Nature" +
-						"\nUmbris - Darkness" +
-						"\nAethis - Aether"
+				"\n\nThroughout the various months of Aranarth, the world will have different effects and unique behaviors."
 		);
 	}
 
