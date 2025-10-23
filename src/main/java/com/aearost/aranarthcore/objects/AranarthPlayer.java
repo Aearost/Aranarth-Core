@@ -41,6 +41,7 @@ public class AranarthPlayer {
 	private int rank;
 	private int saintRank;
 	private int councilRank;
+	private int architectRank;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -70,9 +71,10 @@ public class AranarthPlayer {
 		this.rank = 0;
 		this.saintRank = 0;
 		this.councilRank = 0;
+		this.architectRank = 0;
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -100,6 +102,7 @@ public class AranarthPlayer {
 		this.rank = rank;
 		this.saintRank = saintRank;
 		this.councilRank = councilRank;
+		this.architectRank = architectRank;
 	}
 
 	/**
@@ -564,6 +567,22 @@ public class AranarthPlayer {
 	 */
 	public void setCouncilRank(int councilRank) {
 		this.councilRank = councilRank;
+	}
+
+	/**
+	 * Provides the Architect rank of the player.
+	 * @return The Architect rank of the player.
+	 */
+	public int getArchitectRank() {
+		return architectRank;
+	}
+
+	/**
+	 * Updates the Architect rank of the player.
+	 * @param architectRank The new Architect rank of the player.
+	 */
+	public void setArchitectRank(int architectRank) {
+		this.architectRank = architectRank;
 	}
 
 }

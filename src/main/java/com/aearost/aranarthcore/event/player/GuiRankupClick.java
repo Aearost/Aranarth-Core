@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -54,7 +55,7 @@ public class GuiRankupClick {
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				AranarthUtils.evaluatePlayerPermissions(player);
+				PermissionUtils.evaluatePlayerPermissions(player);
 				player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 				player.closeInventory();
 			} else {

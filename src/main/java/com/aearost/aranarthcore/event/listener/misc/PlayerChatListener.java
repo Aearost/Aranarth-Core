@@ -36,11 +36,13 @@ public class PlayerChatListener implements Listener {
         String nickname = aranarthPlayer.getNickname();
         String saintRank = getSaintRank(aranarthPlayer);
         String councilRank = getCouncilRank(aranarthPlayer);
+        String architectRank = getArchitectRank(aranarthPlayer);
         String rank = getRank(aranarthPlayer);
 
         String prefix = "⊰";
 
         prefix += saintRank;
+        prefix += architectRank;
         prefix += councilRank;
         prefix += rank;
 
@@ -121,6 +123,19 @@ public class PlayerChatListener implements Listener {
             case 1 -> "&3۞ &r";
             case 2 -> "&6۞ &r";
             case 3 -> "&4۞ &r";
+            default -> "";
+        };
+    }
+
+    /**
+     * Provides the String portion of the player's Architect rank.
+     * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+     * @return The String portion of the player's Architect rank.
+     */
+    private String getArchitectRank(AranarthPlayer aranarthPlayer) {
+        int architectRank = aranarthPlayer.getArchitectRank();
+        return switch (architectRank) {
+            case 1 -> "&a&l\uD83D\uDD28 &r"; // Hammer emoji
             default -> "";
         };
     }

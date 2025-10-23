@@ -767,7 +767,7 @@ public class DateUtils {
 							// Handles applying the snow functionality
 							if (AranarthUtils.getWeather() == Weather.SNOW) {
 								// Only apply logic in the survival world
-								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+								if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 									continue;
 								}
 
@@ -818,7 +818,7 @@ public class DateUtils {
 	 */
 	private void generateSnow(Location loc, int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
@@ -986,7 +986,7 @@ public class DateUtils {
 	 */
 	private void generateIce(Location loc, int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
@@ -1094,7 +1094,7 @@ public class DateUtils {
 							Location loc = player.getLocation();
 
 							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+							if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 								continue;
 							}
 
@@ -1622,7 +1622,7 @@ public class DateUtils {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				Location loc = player.getLocation();
 				// Only apply logic in the survival world
-				if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+				if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 					continue;
 				}
 
@@ -1659,7 +1659,7 @@ public class DateUtils {
 	private void playWindEffect(int runs, Player player) {
 		Location loc = player.getLocation();
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
