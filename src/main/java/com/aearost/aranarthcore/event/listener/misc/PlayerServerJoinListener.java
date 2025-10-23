@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -55,7 +56,7 @@ public class PlayerServerJoinListener implements Listener {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
-		AranarthUtils.evaluatePlayerPermissions(player);
+		PermissionUtils.evaluatePlayerPermissions(player);
 		playJoinSound();
 	}
 

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -22,7 +23,8 @@ public class CommandRankSet {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		// /ac rankset rank Aearost 4
 		if (args.length == 4) {
-			if (args[1].equals("rank") || args[1].equals("saint") || args[1].equals("council")) {
+			if (args[1].equalsIgnoreCase("rank") || args[1].equalsIgnoreCase("saint")
+					|| args[1].equalsIgnoreCase("council") || args[1].equalsIgnoreCase("architect")) {
 				OfflinePlayer player = null;
 
 				// Does the player exist
@@ -52,7 +54,7 @@ public class CommandRankSet {
 					if (sender instanceof Player senderPlayer) {
 						if (senderPlayer.getUniqueId().equals(player.getUniqueId())) {
 							isSamePlayer = true;
-							AranarthUtils.evaluatePlayerPermissions(senderPlayer);
+							PermissionUtils.evaluatePlayerPermissions(senderPlayer);
 						}
 					}
 
@@ -90,6 +92,15 @@ public class CommandRankSet {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
 						}
 					}
+					// Limited from 0 to 1
+					else if (args[1].equals("architect")) {
+						if (rank == 1) {
+							aranarthPlayer.setArchitectRank(rank);
+							isSuccessful = true;
+						} else {
+							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+						}
+					}
 
 					if (isSuccessful) {
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -110,7 +121,7 @@ public class CommandRankSet {
 
 							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 								if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-									AranarthUtils.evaluatePlayerPermissions(onlinePlayer);
+									PermissionUtils.evaluatePlayerPermissions(onlinePlayer);
 									if (args[1].equals("rank")) {
 										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your rank has been updated"));
 									} else {

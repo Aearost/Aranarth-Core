@@ -165,7 +165,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect
 				String[] fields = row.split("\\|");
 
 				UUID uuid = UUID.fromString(fields[0]);
@@ -230,8 +230,9 @@ public class PersistenceUtils {
 				int rank = Integer.parseInt(fields[11]);
 				int saintRank = Integer.parseInt(fields[12]);
 				int councilRank = Integer.parseInt(fields[13]);
+				int architectRank = Integer.parseInt(fields[14]);
 
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank));
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -270,7 +271,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -306,10 +307,11 @@ public class PersistenceUtils {
 						String rank = aranarthPlayer.getRank() + "";
 						String saint = aranarthPlayer.getSaintRank() + "";
 						String council = aranarthPlayer.getCouncilRank() + "";
+						String architect = aranarthPlayer.getArchitectRank() + "";
 
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
-								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "\n";
+								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "|" + architect + "\n";
 						writer.write(row);
 					}
 					writer.close();
