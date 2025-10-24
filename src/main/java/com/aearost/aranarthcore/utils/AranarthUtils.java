@@ -32,7 +32,6 @@ import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 /**
  * Provides a large variety of utility methods for everything related to AranarthCore.
  */
-@SuppressWarnings("ALL")
 public class AranarthUtils {
 
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();

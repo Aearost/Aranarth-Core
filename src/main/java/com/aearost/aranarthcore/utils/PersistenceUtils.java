@@ -2,13 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Home;
-import com.aearost.aranarthcore.objects.LockedContainer;
-import com.aearost.aranarthcore.objects.PlayerShop;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import com.aearost.aranarthcore.objects.*;
+import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -24,7 +19,7 @@ import java.util.*;
 public class PersistenceUtils {
 
 	/**
-	 * Initializes the homes HashMap based on the contents of homes.json.
+	 * Initializes the homes HashMap based on the contents of homes.txt.
 	 */
 	public static void loadHomes() {
 		String currentPath = System.getProperty("user.dir");
@@ -84,7 +79,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the contents of the homes HashMap to the homes.json file.
+	 * Saves the contents of the homes HashMap to the homes.txt file.
 	 */
 	public static void saveHomes() {
 		List<Home> homes = AranarthUtils.getHomes();
@@ -138,7 +133,7 @@ public class PersistenceUtils {
 	
 	
 	/**
-	 * Initializes the homes HashMap based on the contents of aranarth_players.json.
+	 * Initializes the players HashMap based on the contents of aranarth_players.txt.
 	 */
 	public static void loadAranarthPlayers() {
 
@@ -242,7 +237,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the contents of the homes HashMap to the aranarth_players.json file.
+	 * Saves the contents of the players HashMap to the aranarth_players.txt file.
 	 */
 	public static void saveAranarthPlayers() {
 		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
@@ -262,10 +257,10 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new aranarth_players.json file has been generated");
+						Bukkit.getLogger().info("A new aranarth_players.txt file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of aranarth_players.json");
+					Bukkit.getLogger().info("An error occurred in the creation of aranarth_players.txt");
 				}
 
 				try {
@@ -323,7 +318,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Initializes the playerShops HashMap based on the contents of playershops.json.
+	 * Initializes the playerShops HashMap based on the contents of playershops.txt.
 	 */
 	public static void loadPlayerShops() {
 		String currentPath = System.getProperty("user.dir");
@@ -675,6 +670,153 @@ public class PersistenceUtils {
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the lockedcontainers");
+			}
+		}
+	}
+
+	/**
+	 * Initializes the dominions HashMap based on the contents of dominions.txt.
+	 */
+	public static void loadDominions() {
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "aranarth_players.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the dominions file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// #name|owner|members|world|chunks|power|x|y|z|yaw|pitch
+				String[] fields = row.split("\\|");
+
+				String name = fields[0];
+				UUID owner = UUID.fromString(fields[1]);
+				List<UUID> members = new ArrayList<>();
+				String[] memberParts = fields[2].split("___");
+				for (String member : memberParts) {
+					members.add(UUID.fromString(member));
+				}
+
+				String worldName = fields[3];
+				World world = Bukkit.getWorld(worldName);
+
+				List<Chunk> chunks = new ArrayList<>();
+				String[] claimedChunks = fields[4].split("___");
+				for (String chunk : claimedChunks) {
+					String[] coordinates = chunk.split(",");
+					int x = Integer.parseInt(coordinates[0]);
+					int z = Integer.parseInt(coordinates[1]);
+					chunks.add(world.getChunkAt(x, z));
+				}
+
+				int power = Integer.parseInt(fields[5]);
+				double x = Double.parseDouble(fields[6]);
+				double y = Double.parseDouble(fields[7]);
+				double z = Double.parseDouble(fields[8]);
+				float yaw = Float.parseFloat(fields[9]);
+				float pitch = Float.parseFloat(fields[10]);
+				double balance = Double.parseDouble(fields[11]);
+
+				DominionUtils.createDominion(new Dominion(name, owner, members, worldName, chunks, power, x, y, z, yaw, pitch, balance));
+			}
+			Bukkit.getLogger().info("All dominions have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the dominions!");
+		}
+	}
+
+	/**
+	 * Saves the contents of the dominions HashMap to the dominions.txt file.
+	 */
+	public static void saveDominions() {
+		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
+		if (!aranarthPlayers.isEmpty()) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "dominions.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new dominions.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of dominions.txt");
+				}
+
+				List<Dominion> dominions = DominionUtils.getDominions();
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					writer.write("#name|owner|members|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
+
+					if (dominions != null && !dominions.isEmpty()) {
+						for (Dominion dominion : dominions) {
+							String name = dominion.getName();
+							String owner = dominion.getOwner().toString();
+							StringBuilder members = new StringBuilder();
+							for (UUID memberUuid : dominion.getMembers()) {
+								if (members.isEmpty()) {
+									members = new StringBuilder(memberUuid.toString());
+								} else {
+									members.append("___").append(memberUuid.toString());
+								}
+							}
+							String membersString = members.toString();
+							String worldName = dominion.getDominionHome().getWorld().getName();
+
+							StringBuilder chunks = new StringBuilder();
+							for (Chunk chunk : dominion.getChunks()) {
+								String chunkXZ = chunk.getX() + "," + chunk.getZ();
+								if (chunks.isEmpty()) {
+									chunks = new StringBuilder(chunkXZ);
+								} else {
+									chunks.append("___").append(chunkXZ);
+								}
+							}
+							String chunksString = chunks.toString();
+
+							String dominionPower = dominion.getDominionPower() + "";
+							Location dominionHome = dominion.getDominionHome();
+							String x = dominionHome.getX() + "";
+							String y = dominionHome.getY() + "";
+							String z = dominionHome.getZ() + "";
+							String yaw = dominionHome.getYaw() + "";
+							String pitch = dominionHome.getPitch() + "";
+							String balance = dominion.getBalance() + "";
+
+							String row = name + "|" + owner + "|" + membersString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "\n";
+							writer.write(row);
+						}
+					}
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the dominions!");
+				}
 			}
 		}
 	}

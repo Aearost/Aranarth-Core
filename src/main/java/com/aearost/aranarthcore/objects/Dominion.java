@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
@@ -11,18 +12,48 @@ import java.util.UUID;
  */
 public class Dominion {
 
+	private String name;
 	private UUID owner;
-	private List<UUID> trusted;
+	private List<UUID> members;
 	private List<Chunk> chunks;
 	private int dominionPower;
 	private Location dominionHome;
+	private double balance;
 
-	public Dominion(UUID owner, List<UUID> trusted, List<Chunk> chunks, int dominionPower, Location dominionHome) {
+	public Dominion(String name, UUID owner, List<UUID> members, List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
+		this.name = name;
 		this.owner = owner;
-		this.trusted = trusted;
+		this.members = members;
 		this.chunks = chunks;
 		this.dominionPower = dominionPower;
 		this.dominionHome = dominionHome;
+		this.balance = balance;
+	}
+
+	public Dominion(String name, UUID owner, List<UUID> members, String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch, double balance) {
+		this.name = name;
+		this.owner = owner;
+		this.members = members;
+		this.chunks = chunks;
+		this.dominionPower = dominionPower;
+		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+		this.balance = balance;
+	}
+
+	/**
+	 * Provides the dominion's name.
+	 * @return The dominion's name.
+	 */
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * Updates the dominion's name.
+	 * @param name The new name of the dominion.
+	 */
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	/**
@@ -45,16 +76,16 @@ public class Dominion {
 	 * Provides the list of players that are trusted to open the dominion.
 	 * @return the list of players that are trusted to open the dominion.
 	 */
-	public List<UUID> getTrusted() {
-		return this.trusted;
+	public List<UUID> getMembers() {
+		return this.members;
 	}
 
 	/**
-	 * Updates the list of players that are trusted to open the dominion.
-	 * @param trusted The list of players that will be trusted to open the dominion.
+	 * Updates the list of players that are trusted in the dominion.
+	 * @param members The list of players that will be in the dominion.
 	 */
-	public void setTrusted(List<UUID> trusted) {
-		this.trusted = trusted;
+	public void setMembers(List<UUID> members) {
+		this.members = members;
 	}
 
 	/**
@@ -103,6 +134,22 @@ public class Dominion {
 	 */
 	public void setDominionHome(Location dominionHome) {
 		this.dominionHome = dominionHome;
+	}
+
+	/**
+	 * Provides the balance of the dominion.
+	 * @return The balance of the dominion.
+	 */
+	public double getBalance() {
+		return balance;
+	}
+
+	/**
+	 * Updates the balance of the dominion.
+	 * @param balance The new balance of the dominion.
+	 */
+	public void setBalance(double balance) {
+		this.balance = balance;
 	}
 
 //	@Override
