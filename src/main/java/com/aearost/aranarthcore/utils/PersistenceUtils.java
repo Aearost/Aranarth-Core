@@ -681,7 +681,7 @@ public class PersistenceUtils {
 
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "aranarth_players.txt";
+				+ "dominions.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -809,7 +809,7 @@ public class PersistenceUtils {
 							String pitch = dominionHome.getPitch() + "";
 							String balance = dominion.getBalance() + "";
 
-							String row = name + "|" + owner + "|" + membersString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "\n";
+							String row = name + "|" + owner + "|" + membersString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + balance + "\n";
 							writer.write(row);
 						}
 					}

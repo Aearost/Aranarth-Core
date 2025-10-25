@@ -203,8 +203,15 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-		} else if (!args[0].isEmpty() && "date".startsWith(args[0])) {
-			displayedOptions.add("date");
+		} else if (!args[0].isEmpty() && args[0].startsWith("d")) {
+			if (args[0].equals("d")) {
+				displayedOptions.add("date");
+				displayedOptions.add("dominion");
+			} else if ("date".startsWith(args[0])) {
+				displayedOptions.add("date");
+			} else if ("dominion".startsWith(args[0])) {
+				displayedOptions.add("dominion");
+			}
 		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
 			displayedOptions.add("aranarth");
 		} else if (!args[0].isEmpty() && "trust".startsWith(args[0])) {
