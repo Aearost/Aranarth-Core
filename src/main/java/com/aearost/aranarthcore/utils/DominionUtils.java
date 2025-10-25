@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.objects.Dominion;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class DominionUtils {
 	 * @param player The player.
 	 * @return The Dominion that the player is in.
 	 */
-	public static Dominion getPlayerDominion(Player player) {
+	public static Dominion getPlayerDominion(OfflinePlayer player) {
 		Dominion playerDominion = null;
 		for (Dominion dominion : dominions) {
 			for (UUID uuid : dominion.getMembers()) {
@@ -66,26 +67,40 @@ public class DominionUtils {
 
 	/**
 	 * Claims the chunk for the dominion.
-	 * @param dominion The dominion attempting to claim the chunk.
-	 * @param chunk The chunk attempting to be claimed.
+	 * @param player The player attempting to claim the chunk.
 	 * @return The message of whether the chunk was claimed.
 	 */
-	public static String claimChunk(Dominion dominion, Chunk chunk) {
+	public static String claimChunk(Player player) {
+		Chunk chunk = player.getLocation().getChunk();
 		Dominion dominionOfChunk = getDominionOfChunk(chunk);
-		if (dominionOfChunk == null) {
-			if (dominion.getBalance() < 100) {
-				double newBalance = dominion.getBalance() - 100;
-				dominion.setBalance(newBalance);
-				List<Chunk> chunks = dominion.getChunks();
-				chunks.add(chunk);
 
-				updateDominion(dominion);
-				return ChatUtils.chatMessage("&7This chunk has been claimed for " + dominion.getName());
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player);
+		if (playerDominion != null) {
+			if (playerDominion.getOwner().equals(player.getUniqueId())) {
+				if (dominionOfChunk == null) {
+					if (playerDominion.getBalance() >= 100) {
+						double newBalance = playerDominion.getBalance() - 100;
+						playerDominion.setBalance(newBalance);
+						List<Chunk> chunks = playerDominion.getChunks();
+						chunks.add(chunk);
+						updateDominion(playerDominion);
+						return ChatUtils.chatMessage("&7This chunk has been claimed for " + playerDominion.getName());
+					} else {
+						return ChatUtils.chatMessage("&cYour dominion cannot afford this!");
+					}
+				} else {
+					if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
+						return ChatUtils.chatMessage("&cThis chunk is already claimed by your dominion");
+					} else {
+						return ChatUtils.chatMessage("&cThis chunk is already claimed by &e" + dominionOfChunk.getName());
+					}
+				}
+
 			} else {
-				return ChatUtils.chatMessage("&cYour dominion cannot afford this!");
+				return ChatUtils.chatMessage("&cOnly the owner of the dominion can claim land!");
 			}
 		} else {
-			return ChatUtils.chatMessage("&cThis chunk is already claimed by " + dominionOfChunk.getName() + "!");
+			return ChatUtils.chatMessage("&cYou are not part of a dominion!");
 		}
     }
 
@@ -105,19 +120,24 @@ public class DominionUtils {
 
 	/**
 	 * Unclaims the chunk that the user is standing in.
-	 * @param dominion The dominion that is attempting to unclaim the chunk.
-	 * @param chunk The chunk that is attempting to be unclaimed.
+	 * @param player The player that is attempting to unclaim the chunk.
 	 * @return The message of whether the chunk was unclaimed.
 	 */
-	public static String unclaimChunk(Dominion dominion, Chunk chunk) {
+	public static String unclaimChunk(Player player) {
+		Chunk chunk = player.getLocation().getChunk();
 		Dominion dominionOfChunk = getDominionOfChunk(chunk);
 		if (dominionOfChunk != null) {
-			if (dominion.getOwner().equals(dominionOfChunk.getOwner())) {
-				dominion.getChunks().remove(chunk);
-				updateDominion(dominion);
-				return ChatUtils.chatMessage("&7This chunk has been unclaimed successfully");
+			Dominion playerDominion = DominionUtils.getPlayerDominion(player);
+			if (playerDominion != null) {
+				if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
+					playerDominion.getChunks().remove(chunk);
+					updateDominion(playerDominion);
+					return ChatUtils.chatMessage("&7This chunk has been unclaimed successfully");
+				} else {
+					return ChatUtils.chatMessage("&cThis chunk not claimed by " + dominionOfChunk.getName() + "!");
+				}
 			} else {
-				return ChatUtils.chatMessage("&cThis chunk not claimed by " + dominionOfChunk.getName() + "!");
+				return ChatUtils.chatMessage("&cYou are not part of a dominion");
 			}
 		} else {
 			return ChatUtils.chatMessage("&cThis chunk is not claimed!");
@@ -125,7 +145,7 @@ public class DominionUtils {
 	}
 
 	public static void disbandDominion(Dominion dominion) {
-
+		dominions.remove(dominion);
 	}
 
 	public static void isClaimable() {
