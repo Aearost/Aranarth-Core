@@ -30,6 +30,8 @@ public class PlayerInteractEventListener implements Listener {
             }
         }
 
+        new DominionInteract().execute(e);
+
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);

@@ -42,6 +42,7 @@ public class AranarthPlayer {
 	private int saintRank;
 	private int councilRank;
 	private int architectRank;
+	private Dominion pendingDominion;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -72,6 +73,7 @@ public class AranarthPlayer {
 		this.saintRank = 0;
 		this.councilRank = 0;
 		this.architectRank = 0;
+		this.pendingDominion = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank) {
@@ -103,6 +105,7 @@ public class AranarthPlayer {
 		this.saintRank = saintRank;
 		this.councilRank = councilRank;
 		this.architectRank = architectRank;
+		this.pendingDominion = null;
 	}
 
 	/**
@@ -158,7 +161,7 @@ public class AranarthPlayer {
 	 * @return The current nickname.
 	 */
 	public String getNickname() {
-		return nickname;
+		return nickname.isEmpty() ? username : nickname;
 	}
 
 	/**
@@ -583,6 +586,22 @@ public class AranarthPlayer {
 	 */
 	public void setArchitectRank(int architectRank) {
 		this.architectRank = architectRank;
+	}
+
+	/**
+	 * Provides the pending Dominion of the player.
+	 * @return The pending Dominion of the player.
+	 */
+	public Dominion getPendingDominion() {
+		return pendingDominion;
+	}
+
+	/**
+	 * Updates the pending Dominion of the player.
+	 * @param pendingDominion The pending Dominion.
+	 */
+	public void setPendingDominion(Dominion pendingDominion) {
+		this.pendingDominion = pendingDominion;
 	}
 
 }

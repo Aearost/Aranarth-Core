@@ -149,12 +149,12 @@ public class DominionUtils {
 		}
 	}
 
+	/**
+	 * Disbands the input Dominion.
+	 * @param dominion The Dominion to be disbanded.
+	 */
 	public static void disbandDominion(Dominion dominion) {
 		dominions.remove(dominion);
-	}
-
-	public static void isClaimable() {
-
 	}
 
 	public static void reEvaluateFoodChests() {
