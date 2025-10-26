@@ -51,10 +51,10 @@ public class CommandDominion {
 					acceptDominionInvite(player);
 				}
 				else if (args[1].equalsIgnoreCase("leave")) {
-
+					leaveDominion(dominion, player);
 				}
 				else if (args[1].equalsIgnoreCase("remove")) {
-
+					removePlayer(args, dominion, player);
 				}
 				else if (args[1].equalsIgnoreCase("disband")) {
 					disbandDominion(dominion, player);
@@ -76,7 +76,17 @@ public class CommandDominion {
 				}
 				else if (args[1].equalsIgnoreCase("who")) {
 					getDominionWho(args, player);
-				} else {
+				}
+				else if (args[1].equalsIgnoreCase("list")) {
+					// All Dominions that currently exist
+					// Sorted by balance
+				}
+				else if (args[1].equalsIgnoreCase("members")) {
+					// /ac dominion members [name]
+					// Without inputting name, show your Dominion's members
+					// When inputting a name, make sure it matches the full name of the Dominion (spaces and all)
+				}
+				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
 				}
 			} else {
@@ -218,19 +228,29 @@ public class CommandDominion {
 	 */
 	private static void getDominionWho(String[] args, Player player) {
 		if (args.length == 2) {
-			player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + DominionUtils.getPlayerDominion(player.getUniqueId()).getName()));
+			Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+			if (dominion != null) {
+				player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + dominion.getName()));
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			}
 			return;
 		}
 
 		if (!args[2].isEmpty()) {
 			UUID uuid = AranarthUtils.getUUIDFromUsername(args[2]);
 			if (uuid == null) {
-				player.sendMessage(ChatUtils.chatMessage("&c" + args[2] + " could not be found!"));
+				player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found!"));
 				return;
 			}
 
 			if (uuid.equals(player.getUniqueId())) {
-				player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + DominionUtils.getPlayerDominion(player.getUniqueId()).getName()));
+				Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+				if (dominion != null) {
+					player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + dominion.getName()));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+				}
 				return;
 			}
 
@@ -242,7 +262,7 @@ public class CommandDominion {
 					player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(uuid).getNickname() + "&7 is not in a Dominion!"));
 				}
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&c" + args[2] + " could not be found!"));
+				player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found!"));
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
@@ -346,6 +366,72 @@ public class CommandDominion {
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou do not have a Dominion invitation!"));
+		}
+	}
+
+	/**
+	 * Allows the player to leave their current Dominion.
+	 * @param dominion The Dominion.
+	 * @param player The player executing the command.
+	 */
+	private static void leaveDominion(Dominion dominion, Player player) {
+		if (dominion != null) {
+			if (dominion.getOwner().equals(player.getUniqueId())) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot leave your own Dominion!"));
+				return;
+			}
+
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			dominion.getMembers().remove(player.getUniqueId());
+			DominionUtils.updateDominion(dominion);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has left the Dominion!"));
+				}
+			}
+			player.sendMessage(ChatUtils.chatMessage("&7You have left the Dominion of &e" + dominion.getName()));
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+		}
+	}
+
+	/**
+	 * Removes the specified Player from the Dominion.
+	 * @param args The command arguments.
+	 * @param dominion The Dominion of the player executing the command.
+	 * @param player The player executing the command.
+	 */
+	private static void removePlayer(String[] args, Dominion dominion, Player player) {
+		if (args.length == 2) {
+			player.sendMessage(ChatUtils.chatMessage("&cPlease specify the player to remove"));
+			return;
+		}
+
+		if (dominion != null) {
+			if (dominion.getOwner().equals(player.getUniqueId())) {
+				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[2]);
+				if (inputUuid != null) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
+					dominion.getMembers().remove(inputUuid);
+					DominionUtils.updateDominion(dominion);
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has been removed from the Dominion!"));
+						}
+					}
+
+					Player removedPlayer = Bukkit.getPlayer(inputUuid);
+					if (removedPlayer.isOnline()) {
+						removedPlayer.sendMessage(ChatUtils.chatMessage("&7You have been removed from the Dominion of &e" + dominion.getName()));
+					}
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found"));
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 		}
 	}
 }
