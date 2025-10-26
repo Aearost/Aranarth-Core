@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -8,7 +9,10 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.potion.PotionEffect;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,10 +43,8 @@ public class CommandDominion {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
 					if (args[1].equalsIgnoreCase("create")) {
-						if (dominion == null) {
-							createDominion(args, player);
-							return true;
-						}
+						createDominion(args, player);
+						return true;
 					}
 					else if (args[1].equalsIgnoreCase("add")) {
 
@@ -63,15 +65,18 @@ public class CommandDominion {
 						return true;
 					}
 					else if (args[1].equalsIgnoreCase("balance")) {
-						player.sendMessage(ChatUtils.chatMessage(dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
+						player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
 						return true;
 					}
 					else if (args[1].equalsIgnoreCase("home")) {
 						teleportToDominionHome(player);
 						return true;
 					}
+					else if (args[1].equalsIgnoreCase("sethome")) {
+
+					}
 					else if (args[1].equalsIgnoreCase("who")) {
-						getDominionName(args, player);
+						getDominionWho(args, player);
 						return true;
 					}
 				} else {
@@ -91,9 +96,29 @@ public class CommandDominion {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (dominion != null) {
 			if (player.hasPermission("aranarth.dominion.home")) {
+				// Teleports you to the survival world spawn
+				try {
+					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
+				} catch (IOException e) {
+					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+					return;
+				}
+
+				// Only remove potion effects if changing from a non-survival world
+				if (!player.getLocation().getWorld().getName().startsWith("world")) {
+					for (PotionEffect effect : player.getActivePotionEffects()) {
+						player.removePotionEffect(effect.getType());
+					}
+				}
+
 				player.teleport(dominion.getDominionHome());
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
+				player.setGameMode(GameMode.SURVIVAL);
+
+				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+				perms.setPermission("worldedit.*", false);
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to your Dominion!"));
 			}
@@ -125,7 +150,7 @@ public class CommandDominion {
 					return;
 				}
 
-				if (dominionName.matches("^[^\"\\n\\r\\t#&]+$")) {
+				if (dominionName.matches("^[A-Za-z ]*$")) {
 					// Ensures the player is not in a dominion
 					if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
 						Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
@@ -139,6 +164,7 @@ public class CommandDominion {
 									Location loc = player.getLocation();
 									List<Chunk> chunks = new ArrayList<>();
 									chunks.add(player.getLocation().getChunk());
+									aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
 
 									DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
 									Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
@@ -175,6 +201,9 @@ public class CommandDominion {
 		if (dominion != null) {
 			if (dominion.getOwner().equals(player.getUniqueId())) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has been disbanded"));
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
+				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
 				DominionUtils.disbandDominion(dominion);
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
@@ -189,7 +218,7 @@ public class CommandDominion {
 	 * @param args The command arguments.
 	 * @param player The player who executed the command.
 	 */
-	private static void getDominionName(String[] args, Player player) {
+	private static void getDominionWho(String[] args, Player player) {
 		if (args.length == 2) {
 			player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + DominionUtils.getPlayerDominion(player.getUniqueId()).getName()));
 			return;
