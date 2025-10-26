@@ -130,17 +130,22 @@ public class DominionUtils {
 			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
 				if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
-					playerDominion.getChunks().remove(chunk);
-					updateDominion(playerDominion);
-					return ChatUtils.chatMessage("&7This chunk has been unclaimed successfully");
+					Chunk homeChunk = playerDominion.getDominionHome().getChunk();
+					if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
+						return "&cYou cannot unclaim the chunk that the home is in!";
+					} else {
+						playerDominion.getChunks().remove(chunk);
+						updateDominion(playerDominion);
+						return "&7This chunk has been unclaimed successfully";
+					}
 				} else {
-					return ChatUtils.chatMessage("&cThis chunk not claimed by " + dominionOfChunk.getName() + "!");
+					return "&cThis chunk not claimed by " + dominionOfChunk.getName() + "!";
 				}
 			} else {
-				return ChatUtils.chatMessage("&cYou are not part of a Dominion");
+				return "&cYou are not part of a Dominion";
 			}
 		} else {
-			return ChatUtils.chatMessage("&cThis chunk is not claimed!");
+			return "&cThis chunk is not claimed!";
 		}
 	}
 
