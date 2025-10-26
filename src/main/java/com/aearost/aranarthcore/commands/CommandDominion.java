@@ -43,9 +43,14 @@ public class CommandDominion {
 
 				if (args[1].equalsIgnoreCase("create")) {
 					createDominion(args, player);
-					return true;
 				}
-				else if (args[1].equalsIgnoreCase("add")) {
+				else if (args[1].equalsIgnoreCase("invite")) {
+					invitePlayerToDominion(args, dominion, player);
+				}
+				else if (args[1].equalsIgnoreCase("accept")) {
+					acceptDominionInvite(player);
+				}
+				else if (args[1].equalsIgnoreCase("leave")) {
 
 				}
 				else if (args[1].equalsIgnoreCase("remove")) {
@@ -53,50 +58,32 @@ public class CommandDominion {
 				}
 				else if (args[1].equalsIgnoreCase("disband")) {
 					disbandDominion(dominion, player);
-					return true;
 				}
 				else if (args[1].equalsIgnoreCase("claim")) {
 					player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
-					return true;
 				}
 				else if (args[1].equalsIgnoreCase("unclaim")) {
 					player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
-					return true;
 				}
 				else if (args[1].equalsIgnoreCase("balance")) {
 					player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
-					return true;
 				}
 				else if (args[1].equalsIgnoreCase("home")) {
 					teleportToDominionHome(player);
-					return true;
 				}
 				else if (args[1].equalsIgnoreCase("sethome")) {
-					if (dominion.getOwner().equals(player.getUniqueId())) {
-						List<Chunk> chunks = dominion.getChunks();
-						if (chunks.contains(player.getLocation().getChunk())) {
-							dominion.setDominionHome(player.getLocation());
-							DominionUtils.updateDominion(dominion);
-							player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's home has been updated"));
-							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.5F);
-						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou can only do this in your Dominion's land!"));
-						}
-						return true;
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
-					}
+					updateDominionHome(dominion, player);
 				}
 				else if (args[1].equalsIgnoreCase("who")) {
 					getDominionWho(args, player);
-					return true;
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
 				}
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
-				return true;
 			}
+			return true;
 		}
-		return false;
 	}
 
 	/**
@@ -141,7 +128,7 @@ public class CommandDominion {
 	/**
 	 * Creates a new dominion.
 	 *
-	 * @param args   The arguments of the command.
+	 * @param args The arguments of the command.
 	 * @param player The player that executed the command.
 	 */
 	private static void createDominion(String[] args, Player player) {
@@ -226,7 +213,7 @@ public class CommandDominion {
 
 	/**
 	 * Provides the dominion name of the input name in the command arguments.
-	 * @param args The command arguments.
+	 * @param args The arguments of the command.
 	 * @param player The player who executed the command.
 	 */
 	private static void getDominionWho(String[] args, Player player) {
@@ -259,6 +246,106 @@ public class CommandDominion {
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
+		}
+	}
+
+	/**
+	 * Updates the home of the dominion to the player's current location.
+	 * @param dominion The dominion of the player.
+	 * @param player The player executing the command.
+	 */
+	private static void updateDominionHome(Dominion dominion, Player player) {
+		if (dominion.getOwner().equals(player.getUniqueId())) {
+			List<Chunk> chunks = dominion.getChunks();
+			if (chunks.contains(player.getLocation().getChunk())) {
+				dominion.setDominionHome(player.getLocation());
+				DominionUtils.updateDominion(dominion);
+				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's home has been updated"));
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.5F);
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou can only do this in your Dominion's land!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+		}
+	}
+
+	/**
+	 * Adds the input player to the dominion.
+	 * @param args The arguments of the command.
+	 * @param dominion The dominion of the player executing the command.
+	 * @param player The player executing the command.
+	 */
+	private static void invitePlayerToDominion(String[] args, Dominion dominion, Player player) {
+		if (args.length == 2) {
+			player.sendMessage(ChatUtils.chatMessage("&cPlease specify the player to add"));
+			return;
+		} else {
+			if (dominion == null) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou are not currently in a Dominion!"));
+				return;
+			}
+
+			if (dominion.getOwner().equals(player.getUniqueId())) {
+				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[2]);
+				if (inputUuid == null) {
+					player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found!"));
+					return;
+				}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
+				Dominion inputDominion = DominionUtils.getPlayerDominion(inputUuid);
+
+				// If the player is not already in a Dominion
+				if (inputDominion == null) {
+					aranarthPlayer.setPendingDominion(dominion);
+					AranarthUtils.setPlayer(inputUuid, aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage("&7An invitation has been sent to &e" + aranarthPlayer.getNickname()));
+					Player invitedPlayer = Bukkit.getPlayer(inputUuid);
+					if (invitedPlayer.isOnline()) {
+						invitedPlayer.sendMessage(ChatUtils.chatMessage("&7You have been invited to join &e" + dominion.getName()));
+						invitedPlayer.sendMessage(ChatUtils.chatMessage("&7Use &e/ac dominion accept &7to join!"));
+					}
+				} else {
+					if (inputDominion.getOwner().equals(dominion.getOwner())) {
+						player.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already in your Dominion!"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already in &e" + dominion.getName()));
+					}
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+			}
+		}
+	}
+
+	/**
+	 * Allows the player to accept a pending Dominion invitation.
+	 * @param player The player executing the command.
+	 */
+	private static void acceptDominionInvite(Player player) {
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		// Trying to join a Dominion when already in one
+		if (playerDominion != null) {
+			Bukkit.getLogger().info("Dominion: " + playerDominion.getName());
+			player.sendMessage(ChatUtils.chatMessage("&cYou must leave your current Dominion first!"));
+			return;
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		Dominion dominion = aranarthPlayer.getPendingDominion();
+		// If the player has a pending Dominion invitation
+		if (dominion != null) {
+			dominion.getMembers().add(player.getUniqueId());
+			DominionUtils.updateDominion(dominion);
+
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has joined the Dominion!"));
+					onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1.2F);
+				}
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have a Dominion invitation!"));
 		}
 	}
 }

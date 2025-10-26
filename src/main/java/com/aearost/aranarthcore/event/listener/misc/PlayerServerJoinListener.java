@@ -39,9 +39,9 @@ public class PlayerServerJoinListener implements Listener {
 		String nameToDisplay;
 		
 		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDisplay = AranarthUtils.getNickname(player);
+			nameToDisplay = "&e" + AranarthUtils.getNickname(player);
 		} else {
-			nameToDisplay = AranarthUtils.getUsername(player);
+			nameToDisplay = "&e" + AranarthUtils.getUsername(player);
 		}
 		
 		if (dateUtils.isValentinesDay()) {
