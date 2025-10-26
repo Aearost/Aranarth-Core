@@ -52,7 +52,7 @@ public class CommandMute {
 				}
 			}
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(args[1]) + " &rcould not be found");
+			sender.sendMessage(ChatUtils.chatMessage("&c" + args[1]) + " &ecould not be found");
 		}
 	}
 

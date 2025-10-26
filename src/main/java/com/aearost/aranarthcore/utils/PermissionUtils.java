@@ -81,6 +81,8 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.spy", false);
 		perms.setPermission("aranarth.unmute", false);
 		perms.setPermission("aranarth.unban", false);
+		perms.setPermission("aranarth.dominion.create", false);
+		perms.setPermission("aranarth.dominion.home", false);
 	}
 
 	/**
@@ -104,6 +106,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("aranarth.msg", true);
+			perms.setPermission("aranarth.dominion.home", true);
 		} else {
 			return;
 		}
@@ -111,6 +114,7 @@ public class PermissionUtils {
 		// Baron
 		if (rank >= 3) {
 			perms.setPermission("bending.ability.waterarms", true);
+			perms.setPermission("aranarth.dominion.create", true);
 		} else {
 			return;
 		}
