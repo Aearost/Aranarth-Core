@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.utils.DateUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -155,7 +154,6 @@ public class CropHarvest {
 		}
 		// Non-sneaking crop destruction
 		else {
-			Bukkit.getLogger().info("Not sneaking");
 			e.setCancelled(true);
 
 			for (ItemStack drop : drops) {
