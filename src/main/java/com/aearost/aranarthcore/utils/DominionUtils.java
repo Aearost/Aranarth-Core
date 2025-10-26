@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.objects.Dominion;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -27,16 +26,17 @@ public class DominionUtils {
 
 	/**
 	 * Provides the Dominion that the player is in.
-	 * @param player The player.
+	 * @param uuid The player's UUID.
 	 * @return The Dominion that the player is in.
 	 */
-	public static Dominion getPlayerDominion(OfflinePlayer player) {
+	public static Dominion getPlayerDominion(UUID uuid) {
 		Dominion playerDominion = null;
 		for (Dominion dominion : dominions) {
-			for (UUID uuid : dominion.getMembers()) {
-				if (player.getUniqueId().equals(uuid)){
-					playerDominion = dominion;
-				}
+			for (UUID memberUuid : dominion.getMembers()) {
+                if (memberUuid.equals(uuid)) {
+                    playerDominion = dominion;
+                    break;
+                }
 			}
 		}
 		return playerDominion;
@@ -74,7 +74,7 @@ public class DominionUtils {
 		Chunk chunk = player.getLocation().getChunk();
 		Dominion dominionOfChunk = getDominionOfChunk(chunk);
 
-		Dominion playerDominion = DominionUtils.getPlayerDominion(player);
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
 			if (playerDominion.getOwner().equals(player.getUniqueId())) {
 				if (dominionOfChunk == null) {
@@ -127,7 +127,7 @@ public class DominionUtils {
 		Chunk chunk = player.getLocation().getChunk();
 		Dominion dominionOfChunk = getDominionOfChunk(chunk);
 		if (dominionOfChunk != null) {
-			Dominion playerDominion = DominionUtils.getPlayerDominion(player);
+			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
 				if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
 					playerDominion.getChunks().remove(chunk);
@@ -137,7 +137,7 @@ public class DominionUtils {
 					return ChatUtils.chatMessage("&cThis chunk not claimed by " + dominionOfChunk.getName() + "!");
 				}
 			} else {
-				return ChatUtils.chatMessage("&cYou are not part of a dominion");
+				return ChatUtils.chatMessage("&cYou are not part of a Dominion");
 			}
 		} else {
 			return ChatUtils.chatMessage("&cThis chunk is not claimed!");

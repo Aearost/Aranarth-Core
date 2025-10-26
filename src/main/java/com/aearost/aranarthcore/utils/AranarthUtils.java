@@ -1162,4 +1162,18 @@ public class AranarthUtils {
 		};
 	}
 
+	/**
+	 * Provides the UUID associated to the given username.
+	 * @param username The username being verified.
+	 * @return The UUID of the associated player.
+	 */
+	public static UUID getUUIDFromUsername(String username) {
+		for (UUID uuid : players.keySet()) {
+			if (getPlayer(uuid).getUsername().equals(username)) {
+				return uuid;
+			}
+		}
+		return null;
+	}
+
 }

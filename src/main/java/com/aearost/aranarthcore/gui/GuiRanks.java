@@ -97,6 +97,7 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &2&oSandbending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac dominion home"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -135,6 +136,7 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &b&oWaterArms"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		baronMeta.setLore(baronLore);

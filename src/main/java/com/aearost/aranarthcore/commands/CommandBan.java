@@ -49,7 +49,7 @@ public class CommandBan {
 			player.ban("You have been banned!", Duration.ZERO, null);
 			sender.sendMessage(ChatUtils.chatMessage(player + " &rhas been banned"));
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage(args[1]) + " &rcould not be found");
+			sender.sendMessage(ChatUtils.chatMessage("&c" + args[1]) + " &ecould not be found");
 		}
 	}
 

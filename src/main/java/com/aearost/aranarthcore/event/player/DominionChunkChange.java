@@ -30,16 +30,21 @@ public class DominionChunkChange {
 				Player player = e.getPlayer();
 				// If entering a dominion
 				if (dominionFrom == null && dominionTo != null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have entered the dominion of &e" + dominionTo.getName()));
+					player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
 				}
 				// If exiting a dominion
 				else if (dominionFrom != null && dominionTo == null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have exited the dominion of &e" + dominionFrom.getName()));
-				}
-				// If entering one dominion next to another
-				else if (dominionFrom != null && dominionTo != null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have exited the dominion of &e" + dominionFrom.getName()));
-					player.sendMessage(ChatUtils.chatMessage("&7You have entered the dominion of &e" + dominionTo.getName()));
+					player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+				} else if (dominionFrom != null && dominionTo != null) {
+					// If you are changing chunk within the same dominion
+					if (dominionFrom.getOwner().equals(dominionTo.getOwner())) {
+						return;
+					}
+					// If entering one dominion next to another
+					else {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+						player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
+					}
 				}
 			}
 		}
