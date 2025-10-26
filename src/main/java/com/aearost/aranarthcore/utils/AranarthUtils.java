@@ -1169,6 +1169,10 @@ public class AranarthUtils {
 	 */
 	public static UUID getUUIDFromUsername(String username) {
 		for (UUID uuid : players.keySet()) {
+			if (getPlayer(uuid).getUsername() == null) {
+				continue;
+			}
+
 			if (getPlayer(uuid).getUsername().equals(username)) {
 				return uuid;
 			}

@@ -97,6 +97,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.water.plantbending", true);
 			perms.setPermission("bending.earth.sandbending", true);
 			perms.setPermission("aranarth.seen", true);
+			perms.setPermission("aranarth.dominion.home", true);
 		} else {
 			return;
 		}
@@ -106,7 +107,6 @@ public class PermissionUtils {
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("aranarth.msg", true);
-			perms.setPermission("aranarth.dominion.home", true);
 		} else {
 			return;
 		}

@@ -27,13 +27,8 @@ public class CommandDominion {
 		// Shorthand of /ac dominion home
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-				if (player.hasPermission("aranarth.dominion.home")) {
-					teleportToDominionHome(player);
-					return true;
-				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a dominion!"));
-					return true;
-				}
+				teleportToDominionHome(player);
+				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
 				return true;
@@ -42,70 +37,42 @@ public class CommandDominion {
 			if (args.length >= 2) {
 				if (sender instanceof Player player) {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-					if (dominion == null) {
-						if (args[1].equalsIgnoreCase("create")) {
-							if (player.hasPermission("aranarth.dominion.create")) {
-								createDominion(args, player);
-								return true;
-							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a dominion!"));
-								return true;
-							}
-						}
-					} else {
-						if (args[1].equalsIgnoreCase("add")) {
 
-						}
-						else if (args[1].equalsIgnoreCase("remove")) {
-
-						}
-						else if (args[1].equalsIgnoreCase("disband")) {
-							disbandDominion(dominion, player);
+					if (args[1].equalsIgnoreCase("create")) {
+						if (dominion == null) {
+							createDominion(args, player);
 							return true;
-						}
-						else if (args[1].equalsIgnoreCase("claim")) {
-							player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
-							return true;
-						}
-						else if (args[1].equalsIgnoreCase("unclaim")) {
-							player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
-							return true;
-						}
-						else if (args[1].equalsIgnoreCase("balance")) {
-							player.sendMessage(ChatUtils.chatMessage(dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
-							return true;
-						}
-						else if (args[1].equalsIgnoreCase("home")) {
-							if (player.hasPermission("aranarth.dominion.home")) {
-								teleportToDominionHome(player);
-								return true;
-							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a dominion!"));
-								return true;
-							}
 						}
 					}
+					else if (args[1].equalsIgnoreCase("add")) {
 
-					// The following work regardless of the player's dominion
-					if (args[1].equalsIgnoreCase("who")) {
-						if (!args[2].isEmpty()) {
-							UUID uuid = AranarthUtils.getUUIDFromUsername(args[2]);
-							if (uuid != null) {
-								Dominion searchedPlayerDominion = DominionUtils.getPlayerDominion(uuid);
-								if (searchedPlayerDominion != null) {
-									player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(uuid).getNickname() + "&7 is in the Dominion of &e" + searchedPlayerDominion.getName()));
-								} else {
-									player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(uuid).getNickname() + "&7 is not in a Dominion!"));
-								}
-								return true;
-							} else {
-								player.sendMessage(ChatUtils.chatMessage("&c" + args[2] + " could not be found!"));
-								return true;
-							}
-						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
-							return true;
-						}
+					}
+					else if (args[1].equalsIgnoreCase("remove")) {
+
+					}
+					else if (args[1].equalsIgnoreCase("disband")) {
+						disbandDominion(dominion, player);
+						return true;
+					}
+					else if (args[1].equalsIgnoreCase("claim")) {
+						player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
+						return true;
+					}
+					else if (args[1].equalsIgnoreCase("unclaim")) {
+						player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
+						return true;
+					}
+					else if (args[1].equalsIgnoreCase("balance")) {
+						player.sendMessage(ChatUtils.chatMessage(dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
+						return true;
+					}
+					else if (args[1].equalsIgnoreCase("home")) {
+						teleportToDominionHome(player);
+						return true;
+					}
+					else if (args[1].equalsIgnoreCase("who")) {
+						getDominionName(args, player);
+						return true;
 					}
 				} else {
 					sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
@@ -123,9 +90,13 @@ public class CommandDominion {
 	private static void teleportToDominionHome(Player player) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (dominion != null) {
-			player.teleport(dominion.getDominionHome());
-			player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-			player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
+			if (player.hasPermission("aranarth.dominion.home")) {
+				player.teleport(dominion.getDominionHome());
+				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to your Dominion!"));
+			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 		}
@@ -138,42 +109,60 @@ public class CommandDominion {
 	 * @param player The player that executed the command.
 	 */
 	private static void createDominion(String[] args, Player player) {
-		if (args.length >= 3) {
-			if (args[2].matches("^[^\"\\n\\r\\t#&]+$")) {
-				// Ensures the player is not in a dominion
-				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
-					Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
-					// Ensures the chunk is not already claimed
-					if (dominionOfChunk == null) {
-						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (aranarthPlayer.getBalance() >= 5000) {
-							if (player.getWorld().getName().startsWith("world")) {
-								List<UUID> members = new ArrayList<>();
-								members.add(player.getUniqueId());
-								Location loc = player.getLocation();
-								List<Chunk> chunks = new ArrayList<>();
-								chunks.add(player.getLocation().getChunk());
+		if (player.hasPermission("aranarth.dominion.create")) {
+			if (args.length >= 3) {
+				StringBuilder parts = new StringBuilder();
+				for (int i = 2; i < args.length; i++) {
+					if (i == args.length - 1) {
+						parts.append(args[i]);
+					} else {
+						parts.append(args[i]).append(" ");
+					}
+				}
+				String dominionName = parts.toString();
+				if (dominionName.length() > 30) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat Dominion name is too long!"));
+					return;
+				}
 
-								DominionUtils.createDominion(new Dominion(args[2], player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
-								Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + args[2]));
-								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1.5F);
+				if (dominionName.matches("^[^\"\\n\\r\\t#&]+$")) {
+					// Ensures the player is not in a dominion
+					if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
+						Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
+						// Ensures the chunk is not already claimed
+						if (dominionOfChunk == null) {
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							if (aranarthPlayer.getBalance() >= 5000) {
+								if (player.getWorld().getName().startsWith("world")) {
+									List<UUID> members = new ArrayList<>();
+									members.add(player.getUniqueId());
+									Location loc = player.getLocation();
+									List<Chunk> chunks = new ArrayList<>();
+									chunks.add(player.getLocation().getChunk());
+
+									DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
+									Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
+									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+										onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1.5F);
+									}
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
 								}
 							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
+								player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $5000 to afford this!"));
 							}
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $5000 to afford this!"));
+							player.sendMessage(ChatUtils.chatMessage("&e" + dominionOfChunk.getName() + " &calready owns this chunk!"));
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&e" + dominionOfChunk.getName() + " &calready owns this chunk!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
+					player.sendMessage(ChatUtils.chatMessage("&cThat name is invalid!"));
 				}
-			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cThat name is invalid!"));
 			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a Dominion!"));
 		}
 	}
 
@@ -195,4 +184,41 @@ public class CommandDominion {
 		}
 	}
 
+	/**
+	 * Provides the dominion name of the input name in the command arguments.
+	 * @param args The command arguments.
+	 * @param player The player who executed the command.
+	 */
+	private static void getDominionName(String[] args, Player player) {
+		if (args.length == 2) {
+			player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + DominionUtils.getPlayerDominion(player.getUniqueId()).getName()));
+			return;
+		}
+
+		if (!args[2].isEmpty()) {
+			UUID uuid = AranarthUtils.getUUIDFromUsername(args[2]);
+			if (uuid == null) {
+				player.sendMessage(ChatUtils.chatMessage("&c" + args[2] + " could not be found!"));
+				return;
+			}
+
+			if (uuid.equals(player.getUniqueId())) {
+				player.sendMessage(ChatUtils.chatMessage("&7You are in the Dominion of &e" + DominionUtils.getPlayerDominion(player.getUniqueId()).getName()));
+				return;
+			}
+
+			if (uuid != null) {
+				Dominion searchedPlayerDominion = DominionUtils.getPlayerDominion(uuid);
+				if (searchedPlayerDominion != null) {
+					player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(uuid).getNickname() + "&7 is in the Dominion of &e" + searchedPlayerDominion.getName()));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(uuid).getNickname() + "&7 is not in a Dominion!"));
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&c" + args[2] + " could not be found!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
+		}
+	}
 }
