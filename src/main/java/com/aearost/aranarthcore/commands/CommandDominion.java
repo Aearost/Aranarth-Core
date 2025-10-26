@@ -38,51 +38,62 @@ public class CommandDominion {
 				return true;
 			}
 		} else {
-			if (args.length >= 2) {
-				if (sender instanceof Player player) {
-					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+			if (sender instanceof Player player) {
+				Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
-					if (args[1].equalsIgnoreCase("create")) {
-						createDominion(args, player);
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("add")) {
-
-					}
-					else if (args[1].equalsIgnoreCase("remove")) {
-
-					}
-					else if (args[1].equalsIgnoreCase("disband")) {
-						disbandDominion(dominion, player);
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("claim")) {
-						player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("unclaim")) {
-						player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("balance")) {
-						player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("home")) {
-						teleportToDominionHome(player);
-						return true;
-					}
-					else if (args[1].equalsIgnoreCase("sethome")) {
-
-					}
-					else if (args[1].equalsIgnoreCase("who")) {
-						getDominionWho(args, player);
-						return true;
-					}
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+				if (args[1].equalsIgnoreCase("create")) {
+					createDominion(args, player);
 					return true;
 				}
+				else if (args[1].equalsIgnoreCase("add")) {
+
+				}
+				else if (args[1].equalsIgnoreCase("remove")) {
+
+				}
+				else if (args[1].equalsIgnoreCase("disband")) {
+					disbandDominion(dominion, player);
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("claim")) {
+					player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("unclaim")) {
+					player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("balance")) {
+					player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("home")) {
+					teleportToDominionHome(player);
+					return true;
+				}
+				else if (args[1].equalsIgnoreCase("sethome")) {
+					if (dominion.getOwner().equals(player.getUniqueId())) {
+						List<Chunk> chunks = dominion.getChunks();
+						if (chunks.contains(player.getLocation().getChunk())) {
+							dominion.setDominionHome(player.getLocation());
+							DominionUtils.updateDominion(dominion);
+							player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's home has been updated"));
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.5F);
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou can only do this in your Dominion's land!"));
+						}
+						return true;
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+					}
+				}
+				else if (args[1].equalsIgnoreCase("who")) {
+					getDominionWho(args, player);
+					return true;
+				}
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+				return true;
 			}
 		}
 		return false;
