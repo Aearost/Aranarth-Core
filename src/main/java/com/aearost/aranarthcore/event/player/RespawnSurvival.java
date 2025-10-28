@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -19,8 +20,6 @@ import java.io.IOException;
  */
 public class RespawnSurvival {
     public void execute(PlayerRespawnEvent e) {
-        double x = e.getRespawnLocation().getBlockX();
-        double z = e.getRespawnLocation().getBlockZ();
         Player player = e.getPlayer();
         player.setGameMode(GameMode.SURVIVAL);
         try {
@@ -30,14 +29,12 @@ public class RespawnSurvival {
             return;
         }
 
-        if (e.getRespawnLocation().getWorld().getName().equals("world")) {
-            if (x == 0 && z == 3) {
-                e.setRespawnLocation(new Location(e.getRespawnLocation().getWorld(), x, 120, z, 180, 0));
-            }
-        } else if (e.getRespawnLocation().getWorld().getName().equals("smp")) {
-            e.setRespawnLocation(new Location(e.getRespawnLocation().getWorld(), x, 120, z, 180, 0));
+        String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
+        if (deathWorld.startsWith("world")) {
+            e.setRespawnLocation(new Location(Bukkit.getWorld("world"), -29.5, 75, -73.5, 0, 0));
+        } else if (deathWorld.startsWith("smp")) {
+            e.setRespawnLocation(new Location(Bukkit.getWorld("smp"), 0.5, 120, 3.5, 180, 0));
         }
-
 
         if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

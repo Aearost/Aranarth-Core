@@ -273,6 +273,10 @@ public class PersistenceUtils {
 
 						String uuid = entry.getKey().toString();
 						String nickname = aranarthPlayer.getNickname();
+						if (nickname.equals(aranarthPlayer.getUsername())) {
+							nickname = "";
+						}
+
 						String survivalInventory = aranarthPlayer.getSurvivalInventory();
 						String arenaInventory = aranarthPlayer.getArenaInventory();
 						String creativeInventory = aranarthPlayer.getCreativeInventory();
