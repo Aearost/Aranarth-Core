@@ -14,6 +14,7 @@ Features
 [~] Corrected issue where unloaded chunks were being selected for weather functionality causing lag
 [~] Removed redundant pages from /ac calendar and added title page
 [~] Added color to highlight a player's name during special timeframes with custom join and quit messages
+[~] Fixed issue where nicknames were being stored as the player's old username
 
 Miscellaneous
 - Removed redundant logs from weather

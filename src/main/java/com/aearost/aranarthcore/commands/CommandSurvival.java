@@ -41,7 +41,7 @@ public class CommandSurvival {
 					}
 				}
 
-				Location loc = new Location(Bukkit.getWorld("world"), 0.5, 80, 3, 180, 0);
+				Location loc = new Location(Bukkit.getWorld("world"), -29.5, 75, -73.5, 0, 0);
 				player.teleport(loc);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.setGameMode(GameMode.SURVIVAL);

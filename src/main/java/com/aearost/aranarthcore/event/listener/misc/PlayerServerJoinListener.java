@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,11 +31,13 @@ public class PlayerServerJoinListener implements Listener {
 		Player player = e.getPlayer();
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
+			player.teleport(new Location(Bukkit.getWorld("world"), -30.5, 78, -55.5, 0, 0));
 		}
 		// If the player changed their username
 		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
 		}
+
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
 		
