@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,6 +19,8 @@ import java.util.*;
  * txt files stored in the AranarthCore plugin folder.
  */
 public class PersistenceUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(PersistenceUtils.class);
 
 	/**
 	 * Initializes the homes HashMap based on the contents of homes.txt.
@@ -160,7 +164,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect|homes
 				String[] fields = row.split("\\|");
 
 				UUID uuid = UUID.fromString(fields[0]);
@@ -226,8 +230,30 @@ public class PersistenceUtils {
 				int saintRank = Integer.parseInt(fields[12]);
 				int councilRank = Integer.parseInt(fields[13]);
 				int architectRank = Integer.parseInt(fields[14]);
+				List<Home> homes = new ArrayList<>();
 
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank));
+				String[] homesStrings = null;
+				if (!fields[15].isEmpty()) {
+					homesStrings = fields[15].split("___");
+				}
+
+				// Only 1 empty index if no homes are set
+				if (!homesStrings[0].equals(" ")) {
+					for (String home : homesStrings) {
+						String[] homeParts = home.split("_");
+						String homeName = homeParts[0];
+						String worldName = homeParts[1];
+						double x = Double.parseDouble(homeParts[2]);
+						double y = Double.parseDouble(homeParts[3]);
+						double z = Double.parseDouble(homeParts[4]);
+						float yaw = Float.parseFloat(homeParts[5]);
+						float pitch = Float.parseFloat(homeParts[6]);
+						Material icon = Material.valueOf(homeParts[7]);
+						Location loc = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+						homes.add(new Home(homeName, loc, icon));
+					}
+				}
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank, homes));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -266,7 +292,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect|homes\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -307,10 +333,36 @@ public class PersistenceUtils {
 						String saint = aranarthPlayer.getSaintRank() + "";
 						String council = aranarthPlayer.getCouncilRank() + "";
 						String architect = aranarthPlayer.getArchitectRank() + "";
+						List<String> homes = new ArrayList<>();
+						for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
+							Home home = aranarthPlayer.getHomes().get(i);
+							String name = home.getHomeName();
+							String worldName = home.getLocation().getWorld().getName();
+							double x = home.getLocation().getX();
+							double y = home.getLocation().getY();
+							double z = home.getLocation().getZ();
+							float yaw = home.getLocation().getYaw();
+							float pitch = home.getLocation().getPitch();
+							Material type = home.getIcon();
+							if (i == aranarthPlayer.getHomes().size() - 1) {
+								homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name());
+							} else {
+								homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name() + "___");
+							}
+						}
+						StringBuilder allHomesBuilder = new StringBuilder();
+						for (String home : homes) {
+							allHomesBuilder.append(home);
+						}
+						String allHomes = allHomesBuilder.toString();
+						if (allHomes.isEmpty()) {
+							allHomes = " ";
+						}
 
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
-								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "|" + architect + "\n";
+								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
+								+ allHomes + "\n";
 						writer.write(row);
 					}
 					writer.close();

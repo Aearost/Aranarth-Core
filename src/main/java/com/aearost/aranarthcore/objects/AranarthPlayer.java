@@ -43,6 +43,7 @@ public class AranarthPlayer {
 	private int councilRank;
 	private int architectRank;
 	private Dominion pendingDominion;
+	private List<Home> homes;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -74,9 +75,10 @@ public class AranarthPlayer {
 		this.councilRank = 0;
 		this.architectRank = 0;
 		this.pendingDominion = null;
+		this.homes = null;
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -106,6 +108,7 @@ public class AranarthPlayer {
 		this.councilRank = councilRank;
 		this.architectRank = architectRank;
 		this.pendingDominion = null;
+		this.homes = homes;
 	}
 
 	/**
@@ -602,6 +605,22 @@ public class AranarthPlayer {
 	 */
 	public void setPendingDominion(Dominion pendingDominion) {
 		this.pendingDominion = pendingDominion;
+	}
+
+	/**
+	 * Provides the player's homes.
+	 * @return The player's homes.
+	 */
+	public List<Home> getHomes() {
+		return homes;
+	}
+
+	/**
+	 * Updates the homes of the player.
+	 * @param homes The new homes of the player.
+	 */
+	public void setHomes(List<Home> homes) {
+		this.homes = homes;
 	}
 
 }

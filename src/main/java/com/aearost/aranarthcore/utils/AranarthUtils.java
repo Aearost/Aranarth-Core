@@ -1180,4 +1180,52 @@ public class AranarthUtils {
 		return null;
 	}
 
+	/**
+	 * Provides the combined total number of homes that a given player can set.
+	 * Includes homes from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of homes that a given player can set.
+	 */
+	public static int getMaxHomeNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankHomeNum = 0;
+		int saintHomeNum = 0;
+
+		if (aranarthPlayer.getRank() <= 2) {
+			rankHomeNum = 1;
+		} else if (aranarthPlayer.getRank() <= 3) {
+			rankHomeNum = 2;
+		} else if (aranarthPlayer.getRank() <= 4) {
+			rankHomeNum = 3;
+		} else if (aranarthPlayer.getRank() <= 6) {
+			rankHomeNum = 4;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankHomeNum = 5;
+		} else {
+			rankHomeNum = 1;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintHomeNum = -1;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintHomeNum = -1;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintHomeNum = -1;
+		}
+
+		return rankHomeNum + saintHomeNum;
+	}
+
+	/**
+	 * Adds a new home to the player.
+	 * Assumes validation was done.
+	 * @param player The player.
+	 * @param home The player's home.
+     */
+	public static void addPlayerHome(Player player, Home home) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		aranarthPlayer.getHomes().add(home);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
 }
