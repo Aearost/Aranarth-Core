@@ -123,7 +123,7 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("home")) {
 			commandResult = CommandHome.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("delhome")) {
-			commandResult = CommandHome.onCommand(sender, args);
+			commandResult = CommandDelhome.onCommand(sender, args);
 		}
 		return commandResult;
 	}
