@@ -1228,4 +1228,21 @@ public class AranarthUtils {
 		setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
 
+	/**
+	 * Deletes one of the player's homes.
+	 * @param player The player.
+	 * @param homeName The player's home name that they will be deleting.
+	 */
+	public static void deletePlayerHome(Player player, String homeName) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		Home homeToDelete = null;
+		for (Home home : aranarthPlayer.getHomes()) {
+			if (home.getHomeName().equalsIgnoreCase(homeName)) {
+				homeToDelete = home;
+			}
+		}
+		aranarthPlayer.getHomes().remove(homeToDelete);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
 }
