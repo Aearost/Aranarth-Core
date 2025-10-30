@@ -43,6 +43,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiRanksClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Rankup Confirm")) {
                 new GuiRankupClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Homes")) {
+                new GuiHomesClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

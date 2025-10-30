@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.gui.GuiHomes;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -40,15 +41,14 @@ public class CommandHome {
 				player.sendMessage(ChatUtils.chatMessage("&cThis home could not be found!"));
 				return true;
 			} else {
-				StringBuilder playerHomes = new StringBuilder();
-				for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
-					playerHomes.append("&e").append(aranarthPlayer.getHomes().get(i).getHomeName());
-					if (i < aranarthPlayer.getHomes().size() - 1) {
-						playerHomes.append("&e, ");
-					}
+				if (aranarthPlayer.getHomes().isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any homes!"));
+					return true;
+				} else {
+					GuiHomes gui = new GuiHomes(player);
+					gui.openGui();
+					return true;
 				}
-				player.sendMessage(ChatUtils.chatMessage("&7Select one of your homes: " + playerHomes));
-				return true;
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
