@@ -68,8 +68,6 @@ public class CommandAC implements CommandExecutor {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("homepad")) {
 			commandResult = CommandHomePad.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("swimtoggle")) {
-			commandResult = CommandMountSwimToggle.onCommand(sender);
 		} else if (args[0].equalsIgnoreCase("nick")) {
 			commandResult = CommandNickname.onCommand(sender,args);
 		} else if (args[0].equalsIgnoreCase("ping")) {
