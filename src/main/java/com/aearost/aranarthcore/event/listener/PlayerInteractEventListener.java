@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
-import com.aearost.aranarthcore.event.mob.MountSwim;
 import com.aearost.aranarthcore.event.player.*;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -47,8 +46,6 @@ public class PlayerInteractEventListener implements Listener {
             new ExpStore().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
             new ChestSort().execute(e);
-        } else if (e.getAction() == Action.LEFT_CLICK_AIR) {
-            new MountSwim().execute(e); // Unclear why this is the case as it is right-clicking the mount
         } else if (e.getAction() == Action.RIGHT_CLICK_AIR) {
             new ExpStore().execute(e);
         }

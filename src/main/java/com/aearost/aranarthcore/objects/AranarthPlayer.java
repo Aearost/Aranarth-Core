@@ -16,7 +16,6 @@ public class AranarthPlayer {
 	private boolean isStandingOnHomePad;
 	private int currentGuiPageNum;
 	private String nickname;
-	private boolean isMountSwimEnabled;
 	private String survivalInventory;
 	private String arenaInventory;
 	private String creativeInventory;
@@ -50,7 +49,6 @@ public class AranarthPlayer {
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = "";
-		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
 		this.arenaInventory = "";
 		this.creativeInventory = "";
@@ -83,7 +81,6 @@ public class AranarthPlayer {
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
-		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
 		this.arenaInventory = arenaInventory;
 		this.creativeInventory = creativeInventory;
@@ -173,22 +170,6 @@ public class AranarthPlayer {
 	 */
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	/**
-	 * Provides confirmation whether the player's mount will swim.
-	 * @return Confirmation whether the player's mount is swimming.
-	 */
-	public boolean getIsMountSwimEnabled() {
-		return isMountSwimEnabled;
-	}
-
-	/**
-	 * Updates whether the player's mount will swim.
-	 * @param isMountSwimEnabled The new value.
-	 */
-	public void setIsMountSwimEnabled(boolean isMountSwimEnabled) {
-		this.isMountSwimEnabled = isMountSwimEnabled;
 	}
 
 	/**

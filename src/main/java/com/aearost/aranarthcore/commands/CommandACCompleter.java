@@ -1,5 +1,9 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -49,7 +53,7 @@ public class CommandACCompleter implements TabCompleter {
 
 		// For all commands that have sub-commands
 		if (args.length > 1) {
-            displayedOptions = displayArgumentsFromOptions(displayedOptions, args);
+            displayedOptions = displayArgumentsFromOptions(sender, displayedOptions, args);
 		}
 		return displayedOptions;
 	}
@@ -105,8 +109,15 @@ public class CommandACCompleter implements TabCompleter {
 	 * @return The updated list of options to be displayed.
 	 */
 	private List<String> displayForAll(CommandSender sender, List<String> displayedOptions, String[] args) {
-		if (!args[0].isEmpty() && "homepad".startsWith(args[0])) {
-			displayedOptions.add("homepad");
+		if (!args[0].isEmpty() && args[0].startsWith("h")) {
+			if ("home".startsWith(args[0])) {
+				displayedOptions.add("homepad");
+				displayedOptions.add("home");
+			} else {
+				if ("homepad".startsWith(args[0])) {
+					displayedOptions.add("homepad");
+				}
+			}
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
 			displayedOptions.add("nick");
 		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
@@ -137,11 +148,11 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
 				displayedOptions.add("survival");
-				displayedOptions.add("swimtoggle");
+				displayedOptions.add("sethome");
 				displayedOptions.add("shulker");
 				displayedOptions.add("smp");
-			} else if ("swimtoggle".startsWith(args[0])) {
-				displayedOptions.add("swimtoggle");
+			} else if ("sethome".startsWith(args[0])) {
+				displayedOptions.add("sethome");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("shulker".startsWith(args[0])) {
@@ -207,10 +218,13 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("d")) {
 				displayedOptions.add("date");
 				displayedOptions.add("dominion");
+				displayedOptions.add("delhome");
 			} else if ("date".startsWith(args[0])) {
 				displayedOptions.add("date");
 			} else if ("dominion".startsWith(args[0])) {
 				displayedOptions.add("dominion");
+			} else if ("delhome".startsWith(args[0])) {
+				displayedOptions.add("delhome");
 			}
 		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
 			displayedOptions.add("aranarth");
@@ -246,6 +260,10 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("whereis");
 		displayedOptions.add("itemname");
 		displayedOptions.add("give");
+		displayedOptions.add("mute");
+		displayedOptions.add("unmute");
+		displayedOptions.add("ban");
+		displayedOptions.add("unban");
 		displayedOptions = displayNoResultsForAll(displayedOptions);
 		return displayedOptions;
 	}
@@ -257,7 +275,6 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> displayNoResultsForAll(List<String> displayedOptions) {
 		displayedOptions.add("homepad");
-		displayedOptions.add("swimtoggle");
 		displayedOptions.add("nick");
 		displayedOptions.add("ping");
 		displayedOptions.add("arena");
@@ -279,6 +296,10 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("ranks");
 		displayedOptions.add("rankup");
 		displayedOptions.add("pronouns");
+		displayedOptions.add("dominion");
+		displayedOptions.add("sethome");
+		displayedOptions.add("delhome");
+		displayedOptions.add("home");
 		return displayedOptions;
 	}
 
@@ -288,7 +309,7 @@ public class CommandACCompleter implements TabCompleter {
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayArgumentsFromOptions(List<String> displayedOptions, String[] args) {
+	private List<String> displayArgumentsFromOptions(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
 			case "homepad" -> {
 				if (args.length == 2) {
@@ -360,7 +381,144 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "home" -> {
+				if (sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (args.length == 1) {
+						// Show all homes
+						for (Home home : aranarthPlayer.getHomes()) {
+							displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+						}
+					} else {
+						// Display all homes starting with what's entered, otherwise show all
+						boolean hasResults = false;
+						for (Home home : aranarthPlayer.getHomes()) {
+							StringBuilder argsAsSingleString = new StringBuilder();
+							for (int i = 1; i < args.length; i++) {
+								argsAsSingleString.append(args[i]);
+								if (i < args.length - 1) {
+									argsAsSingleString.append(" ");
+								}
+							}
+							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
+								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+								hasResults = true;
+							}
+						}
+						// If there were no results, show all homes
+						if (!hasResults) {
+							for (Home home : aranarthPlayer.getHomes()) {
+								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+							}
+						}
+					}
+				}
+			}
+			case "sethome" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("name");
+				}
+			}
+			case "delhome" -> {
+				if (sender instanceof Player player) {
+					// Builds the args into one string
+					StringBuilder argsAsSingleString = new StringBuilder();
+					for (int i = 1; i < args.length; i++) {
+						argsAsSingleString.append(args[i]);
+						if (i < args.length - 1) {
+							argsAsSingleString.append(" ");
+						}
+					}
+
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (argsAsSingleString.isEmpty()) {
+						for (Home home : aranarthPlayer.getHomes()) {
+							displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+						}
+					} else {
+						for (Home home : aranarthPlayer.getHomes()) {
+							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
+								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+							}
+						}
+					}
+				}
+			}
+			case "dominion" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions = addDominionSubCommands(displayedOptions);
+				} else {
+					if (args[1].startsWith("c")) {
+						if (args[1].equalsIgnoreCase("c")) {
+							displayedOptions.add("create");
+							displayedOptions.add("claim");
+						} else if ("create".startsWith(args[1])) {
+							displayedOptions.add("create");
+						} else if ("claim".startsWith(args[1])) {
+							displayedOptions.add("claim");
+						} else {
+							displayedOptions = addDominionSubCommands(displayedOptions);
+						}
+					} else if ("invite".startsWith(args[1])) {
+						displayedOptions.add("invite");
+					} else if ("accept".startsWith(args[1])) {
+						displayedOptions.add("accept");
+					} else if (args[1].startsWith("l")) {
+						if (args[1].equalsIgnoreCase("l")) {
+							displayedOptions.add("list");
+							displayedOptions.add("leave");
+						} else if ("list".startsWith(args[1])) {
+							displayedOptions.add("list");
+						} else if ("leave".startsWith(args[1])) {
+							displayedOptions.add("leave");
+						} else {
+							displayedOptions = addDominionSubCommands(displayedOptions);
+						}
+					} else if ("remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
+					} else if ("disband".startsWith(args[1])) {
+						displayedOptions.add("disband");
+					} else if ("unclaim".startsWith(args[1])) {
+						displayedOptions.add("unclaim");
+					} else if ("balance".startsWith(args[1])) {
+						displayedOptions.add("balance");
+					} else if ("home".startsWith(args[1])) {
+						displayedOptions.add("home");
+					} else if ("sethome".startsWith(args[1])) {
+						displayedOptions.add("sethome");
+					} else if ("who".startsWith(args[1])) {
+						displayedOptions.add("who");
+					} else if ("members".startsWith(args[1])) {
+						displayedOptions.add("members");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
+				}
+			}
         }
+		return displayedOptions;
+	}
+
+	/**
+	 * Helper method to add all dominion sub-command options to the displayed command options.
+	 * @param displayedOptions The current displayed options.
+	 * @return The populated displayed options.
+	 */
+	private static List<String> addDominionSubCommands(List<String> displayedOptions) {
+		displayedOptions.add("create");
+		displayedOptions.add("invite");
+		displayedOptions.add("accept");
+		displayedOptions.add("leave");
+		displayedOptions.add("remove");
+		displayedOptions.add("disband");
+		displayedOptions.add("claim");
+		displayedOptions.add("unclaim");
+		displayedOptions.add("balance");
+		displayedOptions.add("home");
+		displayedOptions.add("sethome");
+		displayedOptions.add("who");
+		displayedOptions.add("list");
+		displayedOptions.add("members");
 		return displayedOptions;
 	}
 
