@@ -158,41 +158,52 @@ public class CommandDominion {
 					return;
 				}
 
-				if (dominionName.matches("^[A-Za-z ]*$")) {
-					// Ensures the player is not in a dominion
-					if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
-						Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
-						// Ensures the chunk is not already claimed
-						if (dominionOfChunk == null) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							if (aranarthPlayer.getBalance() >= 5000) {
-								if (player.getWorld().getName().startsWith("world")) {
-									List<UUID> members = new ArrayList<>();
-									members.add(player.getUniqueId());
-									Location loc = player.getLocation();
-									List<Chunk> chunks = new ArrayList<>();
-									chunks.add(player.getLocation().getChunk());
-									aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
-
-									DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
-									Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
-									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-										onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1.5F);
-									}
-								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
-								}
-							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $5000 to afford this!"));
-							}
-						} else {
-							player.sendMessage(ChatUtils.chatMessage("&e" + dominionOfChunk.getName() + " &calready owns this chunk!"));
-						}
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
+				if (player.hasPermission("aranarth.chat.hex")) {
+					dominionName = ChatUtils.translateToColor(dominionName);
+				} else if (player.hasPermission("aranarth.chat.color")) {
+					dominionName = ChatUtils.playerColorChat(dominionName);
+					if (dominionName == null) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+						return;
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cThat name is invalid!"));
+					if (!dominionName.matches("^[A-Za-z ]*$")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+						return;
+					}
+				}
+
+				// Ensures the player is not in a dominion
+				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
+					Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
+					// Ensures the chunk is not already claimed
+					if (dominionOfChunk == null) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						if (aranarthPlayer.getBalance() >= 5000) {
+							if (player.getWorld().getName().startsWith("world")) {
+								List<UUID> members = new ArrayList<>();
+								members.add(player.getUniqueId());
+								Location loc = player.getLocation();
+								List<Chunk> chunks = new ArrayList<>();
+								chunks.add(player.getLocation().getChunk());
+								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
+
+								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
+								Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
+								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1.5F);
+								}
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $5000 to afford this!"));
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&e" + dominionOfChunk.getName() + " &calready owns this chunk!"));
+					}
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
 				}
 			}
 		} else {

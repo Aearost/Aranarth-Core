@@ -72,6 +72,10 @@ public class CommandSethome {
 						homeName = ChatUtils.translateToColor(homeName);
 					} else if (player.hasPermission("aranarth.chat.color")) {
 						homeName = ChatUtils.playerColorChat(homeName);
+						if (homeName == null) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+							return true;
+						}
 					}
 
 					String strippedName = ChatUtils.stripColorFormatting(homeName);

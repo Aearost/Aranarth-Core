@@ -41,6 +41,9 @@ public class ChatUtils {
 	 * @return The formatted chat message.
 	 */
 	public static String playerColorChat(String msg) {
+		if (msg.contains("#")) {
+			return null;
+		}
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 
