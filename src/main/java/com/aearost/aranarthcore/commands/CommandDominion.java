@@ -231,7 +231,7 @@ public class CommandDominion {
 
 								List<UUID> members = new ArrayList<>();
 								members.add(player.getUniqueId());
-								Location loc = player.getLocation();
+								Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
 								List<Chunk> chunks = new ArrayList<>();
 								chunks.add(player.getLocation().getChunk());
 								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
@@ -341,7 +341,8 @@ public class CommandDominion {
 		if (dominion.getOwner().equals(player.getUniqueId())) {
 			List<Chunk> chunks = dominion.getChunks();
 			if (chunks.contains(player.getLocation().getChunk())) {
-				dominion.setDominionHome(player.getLocation());
+				Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
+				dominion.setDominionHome(loc);
 				DominionUtils.updateDominion(dominion);
 				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's home has been updated"));
 				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.5F);
