@@ -427,6 +427,11 @@ public class CommandDominion {
 
 		if (dominion != null) {
 			if (dominion.getOwner().equals(player.getUniqueId())) {
+				if (player.getName().equalsIgnoreCase(args[2])) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot remove yourself from your Dominion!"));
+					return;
+				}
+
 				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[2]);
 				if (inputUuid != null) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
