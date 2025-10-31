@@ -13,6 +13,7 @@ import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.potion.PotionEffect;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -66,7 +67,13 @@ public class CommandDominion {
 					player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
 				}
 				else if (args[1].equalsIgnoreCase("balance")) {
-					player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + dominion.getBalance()));
+					if (dominion != null) {
+						DecimalFormat df = new DecimalFormat("0.00");
+						String valueWithTwoDecimals = df.format(dominion.getBalance());
+						player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + valueWithTwoDecimals));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+					}
 				}
 				else if (args[1].equalsIgnoreCase("home")) {
 					teleportToDominionHome(player);
