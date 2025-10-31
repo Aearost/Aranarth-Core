@@ -283,6 +283,7 @@ public class GuiRanks {
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac back"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac blacklist"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- 2 additional homes"));
 		saint1Meta.setLore(saint1Lore);
 		saint1.setItemMeta(saint1Meta);
 
@@ -296,6 +297,7 @@ public class GuiRanks {
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac ignore"));
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (color)"));
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (hex)"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- 5 additional homes"));
 		saint2Meta.setLore(saint2Lore);
 		saint2.setItemMeta(saint2Meta);
 
@@ -308,6 +310,7 @@ public class GuiRanks {
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac randomizer"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (gradient)"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (gradient)"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- 10 additional homes"));
 		saint3Meta.setLore(saint3Lore);
 		saint3.setItemMeta(saint3Meta);
 

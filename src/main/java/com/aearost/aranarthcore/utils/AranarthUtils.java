@@ -1206,11 +1206,11 @@ public class AranarthUtils {
 		}
 
 		if (aranarthPlayer.getSaintRank() == 1) {
-			saintHomeNum = -1;
+			saintHomeNum = 2;
 		} else if (aranarthPlayer.getSaintRank() == 2) {
-			saintHomeNum = -1;
+			saintHomeNum = 5;
 		} else if (aranarthPlayer.getSaintRank() == 3) {
-			saintHomeNum = -1;
+			saintHomeNum = 10;
 		}
 
 		return rankHomeNum + saintHomeNum;
