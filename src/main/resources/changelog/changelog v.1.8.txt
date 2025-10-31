@@ -19,6 +19,8 @@ Features
 [~] Added color to highlight a player's name during special timeframes with custom join and quit messages
 [~] Fixed issue where nicknames were being stored as the player's old username
 [~] Happy Ghasts are only immune to damage in the survival and SMP worlds
+[~] Extra logs are only dropped in the survival and SMP worlds
+[~] Fixed bug where saddles and horse armor were double dropping during Faunivor
 
 Miscellaneous
 - Removed redundant logs from weather
