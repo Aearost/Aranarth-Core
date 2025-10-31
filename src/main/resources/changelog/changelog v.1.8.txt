@@ -18,6 +18,7 @@ Features
 [~] Removed redundant pages from /ac calendar and added title page
 [~] Added color to highlight a player's name during special timeframes with custom join and quit messages
 [~] Fixed issue where nicknames were being stored as the player's old username
+[~] Happy Ghasts are only immune to damage in the survival and SMP worlds
 
 Miscellaneous
 - Removed redundant logs from weather
