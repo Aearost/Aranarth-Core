@@ -222,6 +222,13 @@ public class CommandDominion {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						if (aranarthPlayer.getBalance() >= 5000) {
 							if (player.getWorld().getName().startsWith("world")) {
+								for (Dominion dominionInList : DominionUtils.getDominions()) {
+									if (ChatUtils.stripColorFormatting(dominionInList.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(dominionName))) {
+										player.sendMessage(ChatUtils.chatMessage("&cThis name is already used by another Dominion!"));
+										return;
+									}
+								}
+
 								List<UUID> members = new ArrayList<>();
 								members.add(player.getUniqueId());
 								Location loc = player.getLocation();
