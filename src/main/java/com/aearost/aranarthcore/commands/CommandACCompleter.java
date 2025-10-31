@@ -303,6 +303,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("sethome");
 		displayedOptions.add("delhome");
 		displayedOptions.add("home");
+		displayedOptions.add("info");
 		return displayedOptions;
 	}
 
@@ -463,8 +464,17 @@ public class CommandACCompleter implements TabCompleter {
 							} else {
 								displayedOptions = addDominionSubCommands(displayedOptions);
 							}
-						} else if ("invite".startsWith(args[1])) {
-							displayedOptions.add("invite");
+						} else if (args[1].startsWith("i")) {
+							if (args[1].equals("i") || args[1].equals("in")) {
+								displayedOptions.add("invite");
+								displayedOptions.add("info");
+							} else if ("invite".startsWith(args[1])) {
+								displayedOptions.add("invite");
+							} else if ("info".startsWith(args[1])) {
+								displayedOptions.add("info");
+							} else {
+								displayedOptions = addDominionSubCommands(displayedOptions);
+							}
 						} else if ("accept".startsWith(args[1])) {
 							displayedOptions.add("accept");
 						} else if (args[1].startsWith("l")) {
@@ -492,8 +502,6 @@ public class CommandACCompleter implements TabCompleter {
 							displayedOptions.add("sethome");
 						} else if ("who".startsWith(args[1])) {
 							displayedOptions.add("who");
-						} else if ("members".startsWith(args[1])) {
-							displayedOptions.add("members");
 						} else {
 							displayedOptions = addDominionSubCommands(displayedOptions);
 						}
@@ -517,43 +525,76 @@ public class CommandACCompleter implements TabCompleter {
 										}
 									}
 								}
+								case "info" -> {
+									List<Dominion> dominions = DominionUtils.getDominions();
+									for (Dominion dominionFromList : dominions) {
+										displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+									}
+								}
                             }
 						} else {
-							if (args[1].equals("invite") || args[1].equals("who")) {
-								boolean resultsFound = false;
-								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-										displayedOptions.add(onlinePlayer.getName());
-										resultsFound = true;
-									}
-								}
-								// If none were found, display all
-								if (!resultsFound) {
-									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-										displayedOptions.add(onlinePlayer.getName());
-									}
-								}
-							} else if (args[1].equals("remove")) {
-								if (sender instanceof Player player) {
-									boolean resultsFound = false;
-									Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-									if (dominion != null) {
-										for (UUID uuid : dominion.getMembers()) {
-											if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
-												resultsFound = true;
-											}
-										}
+                            switch (args[1]) {
+                                case "invite", "who" -> {
+                                    boolean resultsFound = false;
+                                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                        if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+                                            displayedOptions.add(onlinePlayer.getName());
+                                            resultsFound = true;
+                                        }
+                                    }
+                                    // If none were found, display all
+                                    if (!resultsFound) {
+                                        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                                            displayedOptions.add(onlinePlayer.getName());
+                                        }
+                                    }
+                                }
+                                case "remove" -> {
+                                    if (sender instanceof Player player) {
+                                        boolean resultsFound = false;
+                                        Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+                                        if (dominion != null) {
+                                            for (UUID uuid : dominion.getMembers()) {
+                                                if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+                                                    displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+                                                    resultsFound = true;
+                                                }
+                                            }
 
-										// If none were found, display all
-										if (!resultsFound) {
-											for (UUID uuid : dominion.getMembers()) {
-												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
-											}
-										}
-									}
-								}
-							}
+                                            // If none were found, display all
+                                            if (!resultsFound) {
+                                                for (UUID uuid : dominion.getMembers()) {
+                                                    displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                case "info" -> {
+                                    StringBuilder dominionNameBuilder = new StringBuilder();
+                                    for (int i = 2; i < args.length; i++) {
+                                        dominionNameBuilder.append(args[i]);
+                                        if (i < args.length - 1) {
+                                            dominionNameBuilder.append(" ");
+                                        }
+                                    }
+
+                                    List<Dominion> dominions = DominionUtils.getDominions();
+                                    boolean wasFound = false;
+                                    for (Dominion dominionFromList : dominions) {
+                                        if (ChatUtils.stripColorFormatting(dominionFromList.getName()).toLowerCase().startsWith(dominionNameBuilder.toString().toLowerCase())) {
+                                            displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+                                            wasFound = true;
+                                        }
+                                    }
+                                    // Display all dominion names if what was entered does not match any dominion names
+                                    if (!wasFound) {
+                                        for (Dominion dominionFromList : dominions) {
+                                            displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+                                        }
+                                    }
+                                }
+                            }
 						}
 					}
 				}
@@ -570,6 +611,7 @@ public class CommandACCompleter implements TabCompleter {
 	private static List<String> addDominionSubCommands(List<String> displayedOptions) {
 		displayedOptions.add("create");
 		displayedOptions.add("invite");
+		displayedOptions.add("info");
 		displayedOptions.add("accept");
 		displayedOptions.add("leave");
 		displayedOptions.add("remove");
@@ -581,7 +623,6 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("sethome");
 		displayedOptions.add("who");
 		displayedOptions.add("list");
-		displayedOptions.add("members");
 		return displayedOptions;
 	}
 
