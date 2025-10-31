@@ -80,10 +80,15 @@ public class CommandSethome {
 
 					String strippedName = ChatUtils.stripColorFormatting(homeName);
 					for (Home home : aranarthPlayer.getHomes()) {
-						if (home.getHomeName().equalsIgnoreCase(strippedName)) {
+						if (ChatUtils.stripColorFormatting(home.getHomeName()).equalsIgnoreCase(strippedName)) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use the same home name twice!"));
 							return true;
 						}
+					}
+
+					if (strippedName.isEmpty()) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou must input a name!"));
+						return true;
 					}
 
 					// Create the home at the computed surface location
