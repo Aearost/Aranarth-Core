@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -13,6 +15,7 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Handles the auto complete functionality while using the /ac command.
@@ -387,7 +390,7 @@ public class CommandACCompleter implements TabCompleter {
 					if (args.length == 1) {
 						// Show all homes
 						for (Home home : aranarthPlayer.getHomes()) {
-							displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+							displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
 						}
 					} else {
 						// Display all homes starting with what's entered, otherwise show all
@@ -401,14 +404,14 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
-								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
 								hasResults = true;
 							}
 						}
 						// If there were no results, show all homes
 						if (!hasResults) {
 							for (Home home : aranarthPlayer.getHomes()) {
-								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
 							}
 						}
 					}
@@ -433,12 +436,12 @@ public class CommandACCompleter implements TabCompleter {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (argsAsSingleString.isEmpty()) {
 						for (Home home : aranarthPlayer.getHomes()) {
-							displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+							displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
 						}
 					} else {
 						for (Home home : aranarthPlayer.getHomes()) {
 							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
-								displayedOptions.add(ChatUtils.translateToColor(home.getHomeName()));
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
 							}
 						}
 					}
@@ -448,50 +451,110 @@ public class CommandACCompleter implements TabCompleter {
 				if (args[1].isEmpty()) {
 					displayedOptions = addDominionSubCommands(displayedOptions);
 				} else {
-					if (args[1].startsWith("c")) {
-						if (args[1].equalsIgnoreCase("c")) {
-							displayedOptions.add("create");
-							displayedOptions.add("claim");
-						} else if ("create".startsWith(args[1])) {
-							displayedOptions.add("create");
-						} else if ("claim".startsWith(args[1])) {
-							displayedOptions.add("claim");
+					if (args.length == 2) {
+						if (args[1].startsWith("c")) {
+							if (args[1].equalsIgnoreCase("c")) {
+								displayedOptions.add("create");
+								displayedOptions.add("claim");
+							} else if ("create".startsWith(args[1])) {
+								displayedOptions.add("create");
+							} else if ("claim".startsWith(args[1])) {
+								displayedOptions.add("claim");
+							} else {
+								displayedOptions = addDominionSubCommands(displayedOptions);
+							}
+						} else if ("invite".startsWith(args[1])) {
+							displayedOptions.add("invite");
+						} else if ("accept".startsWith(args[1])) {
+							displayedOptions.add("accept");
+						} else if (args[1].startsWith("l")) {
+							if (args[1].equalsIgnoreCase("l")) {
+								displayedOptions.add("list");
+								displayedOptions.add("leave");
+							} else if ("list".startsWith(args[1])) {
+								displayedOptions.add("list");
+							} else if ("leave".startsWith(args[1])) {
+								displayedOptions.add("leave");
+							} else {
+								displayedOptions = addDominionSubCommands(displayedOptions);
+							}
+						} else if ("remove".startsWith(args[1])) {
+							displayedOptions.add("remove");
+						} else if ("disband".startsWith(args[1])) {
+							displayedOptions.add("disband");
+						} else if ("unclaim".startsWith(args[1])) {
+							displayedOptions.add("unclaim");
+						} else if ("balance".startsWith(args[1])) {
+							displayedOptions.add("balance");
+						} else if ("home".startsWith(args[1])) {
+							displayedOptions.add("home");
+						} else if ("sethome".startsWith(args[1])) {
+							displayedOptions.add("sethome");
+						} else if ("who".startsWith(args[1])) {
+							displayedOptions.add("who");
+						} else if ("members".startsWith(args[1])) {
+							displayedOptions.add("members");
 						} else {
 							displayedOptions = addDominionSubCommands(displayedOptions);
 						}
-					} else if ("invite".startsWith(args[1])) {
-						displayedOptions.add("invite");
-					} else if ("accept".startsWith(args[1])) {
-						displayedOptions.add("accept");
-					} else if (args[1].startsWith("l")) {
-						if (args[1].equalsIgnoreCase("l")) {
-							displayedOptions.add("list");
-							displayedOptions.add("leave");
-						} else if ("list".startsWith(args[1])) {
-							displayedOptions.add("list");
-						} else if ("leave".startsWith(args[1])) {
-							displayedOptions.add("leave");
-						} else {
-							displayedOptions = addDominionSubCommands(displayedOptions);
-						}
-					} else if ("remove".startsWith(args[1])) {
-						displayedOptions.add("remove");
-					} else if ("disband".startsWith(args[1])) {
-						displayedOptions.add("disband");
-					} else if ("unclaim".startsWith(args[1])) {
-						displayedOptions.add("unclaim");
-					} else if ("balance".startsWith(args[1])) {
-						displayedOptions.add("balance");
-					} else if ("home".startsWith(args[1])) {
-						displayedOptions.add("home");
-					} else if ("sethome".startsWith(args[1])) {
-						displayedOptions.add("sethome");
-					} else if ("who".startsWith(args[1])) {
-						displayedOptions.add("who");
-					} else if ("members".startsWith(args[1])) {
-						displayedOptions.add("members");
 					} else {
-						displayedOptions = addDominionSubCommands(displayedOptions);
+						if (args[2].isEmpty()) {
+                            switch (args[1]) {
+                                case "create" -> displayedOptions.add("name");
+								case "invite", "who" -> {
+									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+										displayedOptions.add(onlinePlayer.getName());
+									}
+								}
+								case "remove" -> {
+									if (sender instanceof Player player) {
+										boolean resultsFound = false;
+										Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+										if (dominion != null) {
+											for (UUID uuid : dominion.getMembers()) {
+												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+											}
+										}
+									}
+								}
+                            }
+						} else {
+							if (args[1].equals("invite") || args[1].equals("who")) {
+								boolean resultsFound = false;
+								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+									if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+										displayedOptions.add(onlinePlayer.getName());
+										resultsFound = true;
+									}
+								}
+								// If none were found, display all
+								if (!resultsFound) {
+									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+										displayedOptions.add(onlinePlayer.getName());
+									}
+								}
+							} else if (args[1].equals("remove")) {
+								if (sender instanceof Player player) {
+									boolean resultsFound = false;
+									Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+									if (dominion != null) {
+										for (UUID uuid : dominion.getMembers()) {
+											if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+												resultsFound = true;
+											}
+										}
+
+										// If none were found, display all
+										if (!resultsFound) {
+											for (UUID uuid : dominion.getMembers()) {
+												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+											}
+										}
+									}
+								}
+							}
+						}
 					}
 				}
 			}
