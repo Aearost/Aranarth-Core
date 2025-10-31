@@ -1245,4 +1245,43 @@ public class AranarthUtils {
 		setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
 
+	/**
+	 * Provides the Location with a solid block that is directly underneath the player.
+	 * @param player The player.
+	 * @return The Location.
+	 */
+	public static Location getSolidBlockUnderneathPlayer(Player player) {
+		Location loc = player.getLocation();
+		World world = loc.getWorld();
+
+		// Start from the player's current Y position and go downward
+		int x = loc.getBlockX();
+		int z = loc.getBlockZ();
+		int y = loc.getBlockY();
+
+		Block solidBlock = null;
+
+		for (int currentY = y; currentY >= world.getMinHeight(); currentY--) {
+			Block currentBlock = world.getBlockAt(x, currentY, z);
+			Material type = currentBlock.getType();
+
+			// Check if this block is solid and not water/lava
+			if (type.isSolid() && type != Material.WATER && type != Material.LAVA) {
+				solidBlock = currentBlock;
+				break;
+			}
+		}
+
+		// If a solid block was found, place the player just above it
+		Location surfaceLoc = null;
+		if (solidBlock != null) {
+			surfaceLoc = solidBlock.getLocation().add(0.0, 1, 0.0); // Center and place feet above
+			surfaceLoc.setYaw(loc.getYaw());
+			surfaceLoc.setPitch(loc.getPitch());
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
+		}
+		return surfaceLoc;
+	}
+
 }
