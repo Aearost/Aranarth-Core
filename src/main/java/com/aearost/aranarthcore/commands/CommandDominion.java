@@ -198,7 +198,7 @@ public class CommandDominion {
 								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 1F, 1.5F);
+									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
@@ -231,6 +231,10 @@ public class CommandDominion {
 				aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
 				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
 				DominionUtils.disbandDominion(dominion);
+
+				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+					onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
+				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
 			}

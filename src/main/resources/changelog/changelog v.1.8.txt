@@ -9,6 +9,8 @@ Features
 [+] Added in /ac pronouns command to change pronouns
 [+] Updated chat format to support ranks and pronouns
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
+[-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases
+[~] Restricted the crafting and placing of homepads to only SMP
 [+] Added in custom resourcepack for arrows and arrowheads
 [+] Added in a quiver texture
 [~] Changed the colour of the obsidian arrow
