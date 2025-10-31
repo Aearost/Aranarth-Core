@@ -16,18 +16,21 @@ import java.util.Random;
 public class LogExtraDrops {
 	public void execute(BlockBreakEvent e) {
 		if (e.getBlock().getType().name().endsWith("_LOG") && !e.getBlock().getType().name().endsWith("_STRIPPED_LOG")) {
-			Location loc = e.getBlock().getLocation();
-			boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
-			if (isEligible) {
-				// 33% chance of logs doubling
-				if (new Random().nextInt(3) == 0) {
-					e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(e.getBlock().getType()));
-				}
+			String worldName = e.getBlock().getLocation().getWorld().getName();
+			if (worldName.startsWith("world") || worldName.startsWith("smp")) {
+				Location loc = e.getBlock().getLocation();
+				boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
+				if (isEligible) {
+					// 33% chance of logs doubling
+					if (new Random().nextInt(3) == 0) {
+						e.getBlock().getWorld().dropItemNaturally(e.getBlock().getLocation(), new ItemStack(e.getBlock().getType()));
+					}
 
-				McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
-				if (mcmmoPlayer != null) {
-					WoodcuttingManager woodcuttingManager = new WoodcuttingManager(mcmmoPlayer);
-					woodcuttingManager.processWoodcuttingBlockXP(e.getBlock());
+					McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+					if (mcmmoPlayer != null) {
+						WoodcuttingManager woodcuttingManager = new WoodcuttingManager(mcmmoPlayer);
+						woodcuttingManager.processWoodcuttingBlockXP(e.getBlock());
+					}
 				}
 			}
 		}
