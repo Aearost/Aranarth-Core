@@ -66,6 +66,7 @@ public class AranarthCore extends JavaPlugin {
 			@Override
 			public void run() {
 				AranarthUtils.applyArmourEffects();
+				AranarthUtils.refreshMutes();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();

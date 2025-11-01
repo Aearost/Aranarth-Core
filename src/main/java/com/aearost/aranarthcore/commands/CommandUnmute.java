@@ -46,7 +46,7 @@ public class CommandUnmute {
 		UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 		if (uuid != null) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			aranarthPlayer.setMuteEndDate(" ");
+			aranarthPlayer.setMuteEndDate("");
 			AranarthUtils.setPlayer(uuid, aranarthPlayer);
 			sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has been unmuted"));
 			for (Player player : Bukkit.getOnlinePlayers()) {
