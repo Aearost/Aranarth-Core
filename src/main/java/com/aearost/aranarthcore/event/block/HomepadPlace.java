@@ -19,7 +19,8 @@ public class HomepadPlace {
 			if (meta.getPersistentDataContainer().has(HOMEPAD)) {
 				Location location = e.getBlockPlaced().getLocation();
 				if (!location.getWorld().getName().startsWith("smp")) {
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP!"));
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP" +
+							"!"));
 					e.setCancelled(true);
 					return;
 				}

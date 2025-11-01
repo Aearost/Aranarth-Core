@@ -253,7 +253,7 @@ public class PersistenceUtils {
 						homes.add(new Home(homeName, loc, icon));
 					}
 				}
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank, homes));
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank, homes, ""));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
