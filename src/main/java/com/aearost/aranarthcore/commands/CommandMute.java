@@ -106,6 +106,7 @@ public class CommandMute {
 					aranarthPlayer.setMuteEndDate(unmuteDate);
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				AranarthUtils.addMutedPlayer(player.getUniqueId());
 			}
 		}
 

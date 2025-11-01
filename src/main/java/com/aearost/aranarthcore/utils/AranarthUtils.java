@@ -23,6 +23,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
@@ -52,6 +53,7 @@ public class AranarthUtils {
 	private static boolean isPlayingWindSound;
 	private static int cherryParticleDelay;
 	private static Weather weather;
+	private static final List<UUID> mutedPlayers = new ArrayList<>();
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -822,10 +824,6 @@ public class AranarthUtils {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return null;
 		}
-//		Bukkit.getLogger().info("*********************************");
-//		for (LockedContainer container : lockedContainers) {
-//			Bukkit.getLogger().info(container.toString());
-//		}
 		return lockedContainers;
 	}
 
@@ -1284,4 +1282,94 @@ public class AranarthUtils {
 		return surfaceLoc;
 	}
 
+	/**
+	 * Refreshes all muted players.
+	 */
+	public static void refreshMutes() {
+		// Initial startup of server
+		if (mutedPlayers.isEmpty()) {
+			for (UUID uuid : players.keySet()) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
+					mutedPlayers.add(uuid);
+				}
+			}
+		} else {
+			LocalDateTime currentDate = LocalDateTime.now();
+			List<UUID> toRemove = new ArrayList<>();
+			for (UUID uuid : mutedPlayers) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				String muteEndDate = aranarthPlayer.getMuteEndDate();
+
+				if (muteEndDate.isEmpty()) {
+					continue;
+				}
+
+				LocalDateTime definedMuteDate = null;
+				if (!muteEndDate.equals("none")) {
+					try {
+						int year = Integer.parseInt("20" + muteEndDate.substring(0, 2));
+						int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
+						int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
+						int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
+						int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
+						definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
+					} catch (NumberFormatException e) {
+						Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+						return;
+					}
+				} else {
+					// Always will be before the current date if "none" is the end date
+					definedMuteDate = LocalDateTime.of(2000, 1, 1, 1, 1);
+				}
+
+				if (definedMuteDate.isBefore(currentDate)) {
+					toRemove.add(uuid);
+				}
+			}
+
+			for (UUID uuid : toRemove) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				AranarthUtils.removeMutedPlayer(uuid);
+				aranarthPlayer.setMuteEndDate("");
+				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+				Bukkit.getLogger().info(offlinePlayer.getName() + " has been unmuted");
+				if (offlinePlayer.isOnline()) {
+					Player player = Bukkit.getPlayer(uuid);
+					player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Trims the leading zero if the value is only one digit.
+	 * @param value The value.
+	 * @return The trimmed value.
+	 */
+	private static String trimZero(String value) {
+		if (value.startsWith("0")) {
+			return value.substring(1);
+		} else {
+			return value;
+		}
+	}
+
+	/**
+	 * Adds the player's UUID to the list of muted players.
+	 * @param uuid The player's UUID.
+	 */
+	public static void addMutedPlayer(UUID uuid) {
+		mutedPlayers.add(uuid);
+	}
+
+	/**
+	 * Removes the player's UUID from the list of muted players.
+	 * @param uuid The player's UUID.
+	 */
+	public static void removeMutedPlayer(UUID uuid) {
+		mutedPlayers.remove(uuid);
+	}
 }
