@@ -71,7 +71,6 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.itemname.gradient", false);
-		perms.setPermission("aranarth.ignore", false);
 		perms.setPermission("aranarth.compact", false);
 		perms.setPermission("aranarth.mute", false);
 		perms.setPermission("aranarth.give", true);
@@ -190,7 +189,6 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.chat.hex", true);
 			perms.setPermission("aranarth.nick.hex", true);
-			perms.setPermission("aranarth.ignore", true);
 		} else {
 			return;
 		}
@@ -232,6 +230,7 @@ public class PermissionUtils {
 		}
 
 		if (councilRank >= 3) {
+			perms.setPermission("aranarth.unban", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {

@@ -12,6 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import java.time.LocalDateTime;
+
 /**
  * Handles formatting chat messages.
  * Based on <a href="https://www.spigotmc.org/threads/editing-message-to-player-from-asyncplayerchatevent.362198/">Spigot URL</a>
@@ -33,6 +35,13 @@ public class PlayerChatListener implements Listener {
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+
+        if (isPlayerMuted(aranarthPlayer)) {
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
+            e.setCancelled(true);
+            return;
+        }
+
         String nickname = aranarthPlayer.getNickname();
         String saintRank = getSaintRank(aranarthPlayer);
         String councilRank = getCouncilRank(aranarthPlayer);
@@ -138,6 +147,52 @@ public class PlayerChatListener implements Listener {
             case 1 -> "&a&l\uD83D\uDD28 &r"; // Hammer emoji
             default -> "";
         };
+    }
+
+    /**
+     * Confirms if the player is currently muted.
+     * @param aranarthPlayer The player to be verified.
+     * @return Confirmation if the player is currently muted.
+     */
+    private boolean isPlayerMuted(AranarthPlayer aranarthPlayer) {
+        // YYMMDDhhmm
+        String muteEndDate = aranarthPlayer.getMuteEndDate();
+
+        if (muteEndDate.isEmpty()) {
+            return false;
+        }
+        if (muteEndDate.equals("none")) {
+            return true;
+        }
+
+        LocalDateTime currentDate = LocalDateTime.now();
+        LocalDateTime definedMuteDate = null;
+        try {
+            int year = Integer.parseInt(muteEndDate.substring(0, 2));
+            int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
+            int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
+            int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
+            int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
+            definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
+        } catch (NumberFormatException e) {
+            Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+            return false;
+        }
+
+        return definedMuteDate.isBefore(currentDate);
+    }
+
+    /**
+     * Trims the leading zero if the value is only one digit.
+     * @param value The value.
+     * @return The trimmed value.
+     */
+    private String trimZero(String value) {
+        if (value.startsWith("0")) {
+            return value.substring(1);
+        } else {
+            return value;
+        }
     }
 
 }

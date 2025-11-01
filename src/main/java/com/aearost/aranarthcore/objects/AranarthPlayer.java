@@ -43,6 +43,7 @@ public class AranarthPlayer {
 	private int architectRank;
 	private Dominion pendingDominion;
 	private List<Home> homes;
+	private String muteEndDate;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -74,9 +75,10 @@ public class AranarthPlayer {
 		this.architectRank = 0;
 		this.pendingDominion = null;
 		this.homes = null;
+		this.muteEndDate = "";
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -106,6 +108,7 @@ public class AranarthPlayer {
 		this.architectRank = architectRank;
 		this.pendingDominion = null;
 		this.homes = homes;
+		this.muteEndDate = "";
 	}
 
 	/**
@@ -602,6 +605,26 @@ public class AranarthPlayer {
 	 */
 	public void setHomes(List<Home> homes) {
 		this.homes = homes;
+	}
+
+	/**
+	 * Provides the player's mute end date.
+	 * YYMMDDhhmm - Year | Month | Day | Hour | Minute
+	 * If value is "none", the player is muted indefinitely.
+	 * @return The player's mute end date.
+	 */
+	public String getMuteEndDate() {
+		return muteEndDate;
+	}
+
+	/**
+	 * Updates the player's mute end date.
+	 * YYMMDDhhmm - Year | Month | Day | Hour | Minute
+	 * If value is "none", the player is muted indefinitely.
+	 * @param muteEndDate The player's new mute end date.
+	 */
+	public void setMuteEndDate(String muteEndDate) {
+		this.muteEndDate = muteEndDate;
 	}
 
 }

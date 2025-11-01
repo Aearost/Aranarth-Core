@@ -114,8 +114,12 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandPronouns.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("mute")) {
 			commandResult = CommandMute.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unmute")) {
+			commandResult = CommandUnmute.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("ban")) {
 			commandResult = CommandBan.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unban")) {
+			commandResult = CommandUnban.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("dominion")) {
 			commandResult = CommandDominion.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("sethome")) {
