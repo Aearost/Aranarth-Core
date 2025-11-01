@@ -158,14 +158,16 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
+				Bukkit.getLogger().info(row);
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect|homes
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|pronouns
 				String[] fields = row.split("\\|");
+				int lastIndex = fields.length - 1;
 
 				UUID uuid = UUID.fromString(fields[0]);
 				String nickname = fields[1];
@@ -219,26 +221,21 @@ public class PersistenceUtils {
 
 				double balance = Double.parseDouble(fields[9]);
 
-				Pronouns pronouns = Pronouns.MALE;
-				if (fields[10].equals("F")) {
-					pronouns = Pronouns.FEMALE;
-				} else if (fields[10].equals("N")) {
-					pronouns = Pronouns.NEUTRAL;
-				}
 
-				int rank = Integer.parseInt(fields[11]);
-				int saintRank = Integer.parseInt(fields[12]);
-				int councilRank = Integer.parseInt(fields[13]);
-				int architectRank = Integer.parseInt(fields[14]);
+
+				int rank = Integer.parseInt(fields[10]);
+				int saintRank = Integer.parseInt(fields[11]);
+				int councilRank = Integer.parseInt(fields[12]);
+				int architectRank = Integer.parseInt(fields[13]);
+
 				List<Home> homes = new ArrayList<>();
-
 				String[] homesStrings = null;
-				if (!fields[15].isEmpty()) {
-					homesStrings = fields[15].split("___");
+				if (!fields[14].isEmpty()) {
+					homesStrings = fields[14].split("___");
 				}
 
 				// Only 1 empty index if no homes are set
-				if (!homesStrings[0].equals(" ")) {
+				if (homesStrings != null) {
 					for (String home : homesStrings) {
 						String[] homeParts = home.split("_");
 						String homeName = homeParts[0];
@@ -253,7 +250,19 @@ public class PersistenceUtils {
 						homes.add(new Home(homeName, loc, icon));
 					}
 				}
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, pronouns, rank, saintRank, councilRank, architectRank, homes, ""));
+
+				String muteEndDate = fields[15];
+
+				// Keep pronouns at the end and add before this
+				// No need to update the index as it will be dynamic
+				Pronouns pronouns = Pronouns.MALE;
+				if (fields[lastIndex].equals("F")) {
+					pronouns = Pronouns.FEMALE;
+				} else if (fields[lastIndex].equals("N")) {
+					pronouns = Pronouns.NEUTRAL;
+				}
+
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes, muteEndDate, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -292,7 +301,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|pronouns|rank|saint|council|architect|homes\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -323,12 +332,6 @@ public class PersistenceUtils {
 							isDeletingBlacklistedItems = "1";
 						}
 						String balance = aranarthPlayer.getBalance() + "";
-						String pronouns = "M";
-						if (aranarthPlayer.getPronouns() == Pronouns.FEMALE) {
-							pronouns = "F";
-						} else if (aranarthPlayer.getPronouns() == Pronouns.NEUTRAL) {
-							pronouns = "N";
-						}
 						String rank = aranarthPlayer.getRank() + "";
 						String saint = aranarthPlayer.getSaintRank() + "";
 						String council = aranarthPlayer.getCouncilRank() + "";
@@ -356,13 +359,25 @@ public class PersistenceUtils {
 						}
 						String allHomes = allHomesBuilder.toString();
 						if (allHomes.isEmpty()) {
-							allHomes = " ";
+							allHomes = "";
+						}
+
+						String muteEndDate = aranarthPlayer.getMuteEndDate();
+
+						// Keep pronouns at the end and add before this
+						String pronouns = "M";
+						if (aranarthPlayer.getPronouns() == Pronouns.FEMALE) {
+							pronouns = "F";
+						} else if (aranarthPlayer.getPronouns() == Pronouns.NEUTRAL) {
+							pronouns = "N";
 						}
 
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
-								+ "|" + balance + "|" + pronouns + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
-								+ allHomes + "\n";
+								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
+								+ allHomes + "|" + muteEndDate + "|"
+								// Keep pronouns at the end and add before this
+								+ pronouns + "\n";
 						writer.write(row);
 					}
 					writer.close();

@@ -5,6 +5,7 @@ Features
 [+] Added in-game ranks and rankup system
 [+] Added donor ranks known as Saints
 [+] Added staff ranks known as Council
+[+] Added in /ac mute, /ac unmute, /ac ban, and /ac unban
 [+] Added in /ac home (with GUI), /ac sethome, and /ac delhome
 [+] Added in /ac pronouns command to change pronouns
 [+] Updated chat format to support ranks and pronouns
@@ -26,3 +27,4 @@ Miscellaneous
 - Removed redundant logs from weather
 - Changed persisting files format to be pipe-separated lines for each record rather than json
 - Adapted PersistenceUtils to reflect this new format
+- Moved the pronouns to the end of the list of persisted fields in AranarthPlayer

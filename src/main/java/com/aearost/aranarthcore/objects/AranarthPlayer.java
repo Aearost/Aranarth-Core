@@ -68,7 +68,6 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
-		this.pronouns = Pronouns.MALE;
 		this.rank = 0;
 		this.saintRank = 0;
 		this.councilRank = 0;
@@ -76,9 +75,10 @@ public class AranarthPlayer {
 		this.pendingDominion = null;
 		this.homes = null;
 		this.muteEndDate = "";
+		this.pronouns = Pronouns.MALE;
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, Pronouns pronouns, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -101,7 +101,6 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
-		this.pronouns = pronouns;
 		this.rank = rank;
 		this.saintRank = saintRank;
 		this.councilRank = councilRank;
@@ -109,6 +108,7 @@ public class AranarthPlayer {
 		this.pendingDominion = null;
 		this.homes = homes;
 		this.muteEndDate = "";
+		this.pronouns = pronouns;
 	}
 
 	/**
