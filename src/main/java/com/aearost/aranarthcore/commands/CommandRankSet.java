@@ -21,6 +21,13 @@ public class CommandRankSet {
 	 * @param args The arguments of the command.
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.rankset")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
+		}
+
 		// /ac rankset rank Aearost 4
 		if (args.length == 4) {
 			if (args[1].equalsIgnoreCase("rank") || args[1].equalsIgnoreCase("saint")

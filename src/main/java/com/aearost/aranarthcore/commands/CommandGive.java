@@ -19,6 +19,13 @@ public class CommandGive {
 	 * @param args The arguments of the command.
 	 */
 	public static void onCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.give")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				return;
+			}
+		}
+
 		if (args.length != 3) {
 			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: /ac give <player> <item>"));
 			return;
@@ -28,7 +35,7 @@ public class CommandGive {
 				if (onlinePlayer.getName().equals(args[1])) {
 					player = onlinePlayer;
 					break;
-                }
+				}
 			}
 
 			if (player != null) {
@@ -72,7 +79,7 @@ public class CommandGive {
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThat player was not found!"));
 			}
-        }
+		}
 	}
 
 }

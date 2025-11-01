@@ -2,6 +2,7 @@ AranarthCore v. 1.8
 
 Features
 [+] Added land claiming system known as Dominions
+[+] Set up permissions system and added permissions for all Aranarth functionality
 [+] Added in-game ranks and rankup system
 [+] Added donor ranks known as Saints
 [+] Added staff ranks known as Council
@@ -22,6 +23,7 @@ Features
 [~] Happy Ghasts are only immune to damage in the survival and SMP worlds
 [~] Extra logs are only dropped in the survival and SMP worlds
 [~] Fixed bug where saddles and horse armor were double dropping during Faunivor
+[+] Added command completion for all council commands
 
 Miscellaneous
 - Removed redundant logs from weather

@@ -158,7 +158,6 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
-				Bukkit.getLogger().info(row);
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {

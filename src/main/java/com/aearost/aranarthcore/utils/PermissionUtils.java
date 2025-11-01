@@ -71,10 +71,10 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.itemname.gradient", false);
-		perms.setPermission("aranarth.compact", false);
+		perms.setPermission("aranarth.compress", false);
 		perms.setPermission("aranarth.mute", false);
-		perms.setPermission("aranarth.give", true);
-		perms.setPermission("aranarth.whereis", true);
+		perms.setPermission("aranarth.give", false);
+		perms.setPermission("aranarth.whereis", false);
 		perms.setPermission("aranarth.ban", false);
 		perms.setPermission("aranarth.invsee", false);
 		perms.setPermission("aranarth.spy", false);
@@ -82,6 +82,8 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.unban", false);
 		perms.setPermission("aranarth.dominion.create", false);
 		perms.setPermission("aranarth.dominion.home", false);
+		perms.setPermission("aranarth.give", false);
+		perms.setPermission("aranarth.rankset", false);
 	}
 
 	/**
@@ -196,7 +198,7 @@ public class PermissionUtils {
 		if (saintRank >= 3) {
 			perms.setPermission("aranarth.nick.gradient", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
-			perms.setPermission("aranarth.compact", true);
+			perms.setPermission("aranarth.compress", true);
 			perms.setPermission("aranarth.randomizer", true);
 		} else {
 			return;
@@ -225,12 +227,15 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.invsee", true);
 			perms.setPermission("aranarth.spy", true);
 			perms.setPermission("aranarth.unmute", true);
+			perms.setPermission("aranarth.whereis", true);
 		} else {
 			return;
 		}
 
 		if (councilRank >= 3) {
 			perms.setPermission("aranarth.unban", true);
+			perms.setPermission("aranarth.give", true);
+			perms.setPermission("aranarth.rankset", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {
