@@ -33,74 +33,34 @@ public class CommandACCompleter implements TabCompleter {
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		List<String> displayedOptions = new ArrayList<>();
 
-		if (args.length == 1) {
-			if (sender instanceof Player player) {
-				if (player.getName().equalsIgnoreCase("Aearost")) {
-					displayedOptions = displayForOp(player, displayedOptions, args);
+		if (sender instanceof Player player) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			// Additional commands will display for council
+			if (aranarthPlayer.getCouncilRank() > 0) {
+				if (args.length == 1) {
+					displayedOptions = council(player, displayedOptions, args);
 					if (displayedOptions.isEmpty()) {
-						displayedOptions = displayNoResultsForOp(displayedOptions);
+						displayedOptions = noResultsCouncil(displayedOptions);
 					}
 				} else {
-					displayedOptions = displayForAll(player, displayedOptions, args);
-					if (displayedOptions.isEmpty()) {
-						displayedOptions = displayNoResultsForAll(displayedOptions);
-					}
+					displayedOptions = councilArgs(sender, displayedOptions, args);
 				}
-			} else if (sender instanceof ConsoleCommandSender) {
-				displayedOptions = displayForOp(sender, displayedOptions, args);
-				if (displayedOptions.isEmpty()) {
-					displayedOptions = displayNoResultsForOp(displayedOptions);
-				}
-			}
-		}
-
-		// For all commands that have sub-commands
-		if (args.length > 1) {
-            displayedOptions = displayArgumentsFromOptions(sender, displayedOptions, args);
-		}
-		return displayedOptions;
-	}
-
-	/**
-	 * Displays the commands only available to specified players, as well as all other commands.
-	 * @param sender The user that entered the command.
-	 * @param displayedOptions The list of options to be displayed.
-	 * @param args The arguments of the command.
-	 * @return The updated list of options to be displayed.
-	 */
-	private List<String> displayForOp(CommandSender sender, List<String> displayedOptions, String[] args) {
-		if (!args[0].isEmpty() && args[0].startsWith("r")) {
-			if (args[0].equals("r")) {
-				displayedOptions.add("rankset");
 			} else {
-				if (args[0].equals("ra")) {
-					displayedOptions.add("rankset");
-				} else {
-					if (args[0].equals("ran")) {
-						displayedOptions.add("rankset");
-					} else {
-						if (args[0].equals("rank")) {
-							displayedOptions.add("rankset");
-						} else {
-							if (args[0].equals("ranks")) {
-								displayedOptions.add("rankset");
-							} else {
-								if ("rankset".startsWith(args[0])) {
-									displayedOptions.add("rankset");
-								}
-							}
-						}
+				if (args.length == 1) {
+					displayedOptions = all(player, displayedOptions, args);
+					if (displayedOptions.isEmpty()) {
+						displayedOptions = noResultsAll(displayedOptions);
 					}
+				} else {
+					displayedOptions = allArgs(sender, displayedOptions, args);
 				}
 			}
-		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
-			displayedOptions.add("give");
-		} else if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
-			displayedOptions.add("whereis");
-		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
-			displayedOptions.add("itemname");
+		} else if (sender instanceof ConsoleCommandSender) {
+			displayedOptions = council(sender, displayedOptions, args);
+			if (displayedOptions.isEmpty()) {
+				displayedOptions = noResultsCouncil(displayedOptions);
+			}
 		}
-		displayedOptions = displayForAll(sender, displayedOptions, args);
 		return displayedOptions;
 	}
 
@@ -111,7 +71,7 @@ public class CommandACCompleter implements TabCompleter {
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayForAll(CommandSender sender, List<String> displayedOptions, String[] args) {
+	private List<String> all(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && args[0].startsWith("h")) {
 			if ("home".startsWith(args[0])) {
 				displayedOptions.add("homepad");
@@ -123,6 +83,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
 			displayedOptions.add("nick");
+		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
+			displayedOptions.add("itemname");
 		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
 			if (args[0].equals("a")) {
 				displayedOptions.add("arena");
@@ -143,10 +105,13 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("c")) {
 				displayedOptions.add("creative");
 				displayedOptions.add("calendar");
+				displayedOptions.add("compress");
 			} else if ("creative".startsWith(args[0])) {
 				displayedOptions.add("creative");
 			} else if ("calendar".startsWith(args[0])) {
 				displayedOptions.add("calendar");
+			} else if ("compress".startsWith(args[0])) {
+				displayedOptions.add("compress");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
@@ -254,66 +219,12 @@ public class CommandACCompleter implements TabCompleter {
 	}
 
 	/**
-	 * Displays the commands available to all players when the input does not match an existing command.
-	 * @param displayedOptions The list of options to be displayed.
-	 * @return The updated list of options to be displayed.
-	 */
-	private List<String> displayNoResultsForOp(List<String> displayedOptions) {
-		// Op-specific commands only
-		displayedOptions.add("whereis");
-		displayedOptions.add("itemname");
-		displayedOptions.add("give");
-		displayedOptions.add("mute");
-		displayedOptions.add("unmute");
-		displayedOptions.add("ban");
-		displayedOptions.add("unban");
-		displayedOptions = displayNoResultsForAll(displayedOptions);
-		return displayedOptions;
-	}
-
-	/**
-	 * Displays the commands available to all players when the input does not match an existing command.
-	 * @param displayedOptions The list of options to be displayed.
-	 * @return The updated list of options to be displayed.
-	 */
-	private List<String> displayNoResultsForAll(List<String> displayedOptions) {
-		displayedOptions.add("homepad");
-		displayedOptions.add("nick");
-		displayedOptions.add("ping");
-		displayedOptions.add("arena");
-		displayedOptions.add("survival");
-		displayedOptions.add("creative");
-		displayedOptions.add("blacklist");
-		displayedOptions.add("potions");
-		displayedOptions.add("shulker");
-		displayedOptions.add("randomizer");
-		displayedOptions.add("balance");
-		displayedOptions.add("date");
-		displayedOptions.add("calendar");
-		displayedOptions.add("aranarthium");
-		displayedOptions.add("trust");
-		displayedOptions.add("untrust");
-		displayedOptions.add("lock");
-		displayedOptions.add("unlock");
-		displayedOptions.add("smp");
-		displayedOptions.add("ranks");
-		displayedOptions.add("rankup");
-		displayedOptions.add("pronouns");
-		displayedOptions.add("dominion");
-		displayedOptions.add("sethome");
-		displayedOptions.add("delhome");
-		displayedOptions.add("home");
-		displayedOptions.add("info");
-		return displayedOptions;
-	}
-
-	/**
 	 * Displays the sub-commands available for the given command.
 	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayArgumentsFromOptions(CommandSender sender, List<String> displayedOptions, String[] args) {
+	private List<String> allArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
 			case "homepad" -> {
 				if (args.length == 2) {
@@ -327,11 +238,19 @@ public class CommandACCompleter implements TabCompleter {
 			case "ping", "balance", "trust", "untrust" -> {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+				boolean wasPlayerFound = false;
 				for (Player onlinePlayer : onlinePlayers) {
 					// Only display the name if it aligns with one that is currently online
 					if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+						wasPlayerFound = true;
 						displayedOptions.add(onlinePlayer.getName());
 					} else if (args[1].isEmpty()) {
+						wasPlayerFound = true;
+						displayedOptions.add(onlinePlayer.getName());
+					}
+				}
+				if (!wasPlayerFound) {
+					for (Player onlinePlayer : onlinePlayers) {
 						displayedOptions.add(onlinePlayer.getName());
 					}
 				}
@@ -449,157 +368,185 @@ public class CommandACCompleter implements TabCompleter {
 				}
 			}
 			case "dominion" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions = addDominionSubCommands(displayedOptions);
+				displayedOptions = dominionArgsCompletion(sender, displayedOptions, args);
+			}
+		}
+		return displayedOptions;
+	}
+
+	/**
+	 * Displays the commands available to all players when the input does not match an existing command.
+	 * @param displayedOptions The list of options to be displayed.
+	 * @return The updated list of options to be displayed.
+	 */
+	private List<String> noResultsAll(List<String> displayedOptions) {
+		displayedOptions.add("homepad");
+		displayedOptions.add("nick");
+		displayedOptions.add("ping");
+		displayedOptions.add("arena");
+		displayedOptions.add("survival");
+		displayedOptions.add("creative");
+		displayedOptions.add("blacklist");
+		displayedOptions.add("potions");
+		displayedOptions.add("shulker");
+		displayedOptions.add("randomizer");
+		displayedOptions.add("balance");
+		displayedOptions.add("date");
+		displayedOptions.add("calendar");
+		displayedOptions.add("aranarthium");
+		displayedOptions.add("trust");
+		displayedOptions.add("untrust");
+		displayedOptions.add("lock");
+		displayedOptions.add("unlock");
+		displayedOptions.add("smp");
+		displayedOptions.add("ranks");
+		displayedOptions.add("rankup");
+		displayedOptions.add("pronouns");
+		displayedOptions.add("dominion");
+		displayedOptions.add("sethome");
+		displayedOptions.add("delhome");
+		displayedOptions.add("home");
+		displayedOptions.add("itemname");
+		return displayedOptions;
+	}
+
+	/**
+	 * Displays the commands only available to specified players, as well as all other commands.
+	 * @param sender The user that entered the command.
+	 * @param displayedOptions The list of options to be displayed.
+	 * @param args The arguments of the command.
+	 * @return The updated list of options to be displayed.
+	 */
+	private List<String> council(CommandSender sender, List<String> displayedOptions, String[] args) {
+		if (!args[0].isEmpty() && args[0].startsWith("r")) {
+			if (args[0].equals("r")) {
+				displayedOptions.add("rankset");
+			} else {
+				if (args[0].equals("ra")) {
+					displayedOptions.add("rankset");
 				} else {
-					if (args.length == 2) {
-						if (args[1].startsWith("c")) {
-							if (args[1].equalsIgnoreCase("c")) {
-								displayedOptions.add("create");
-								displayedOptions.add("claim");
-							} else if ("create".startsWith(args[1])) {
-								displayedOptions.add("create");
-							} else if ("claim".startsWith(args[1])) {
-								displayedOptions.add("claim");
-							} else {
-								displayedOptions = addDominionSubCommands(displayedOptions);
-							}
-						} else if (args[1].startsWith("i")) {
-							if (args[1].equals("i") || args[1].equals("in")) {
-								displayedOptions.add("invite");
-								displayedOptions.add("info");
-							} else if ("invite".startsWith(args[1])) {
-								displayedOptions.add("invite");
-							} else if ("info".startsWith(args[1])) {
-								displayedOptions.add("info");
-							} else {
-								displayedOptions = addDominionSubCommands(displayedOptions);
-							}
-						} else if ("accept".startsWith(args[1])) {
-							displayedOptions.add("accept");
-						} else if (args[1].startsWith("l")) {
-							if (args[1].equalsIgnoreCase("l")) {
-								displayedOptions.add("list");
-								displayedOptions.add("leave");
-							} else if ("list".startsWith(args[1])) {
-								displayedOptions.add("list");
-							} else if ("leave".startsWith(args[1])) {
-								displayedOptions.add("leave");
-							} else {
-								displayedOptions = addDominionSubCommands(displayedOptions);
-							}
-						} else if ("remove".startsWith(args[1])) {
-							displayedOptions.add("remove");
-						} else if ("disband".startsWith(args[1])) {
-							displayedOptions.add("disband");
-						} else if ("unclaim".startsWith(args[1])) {
-							displayedOptions.add("unclaim");
-						} else if ("balance".startsWith(args[1])) {
-							displayedOptions.add("balance");
-						} else if ("home".startsWith(args[1])) {
-							displayedOptions.add("home");
-						} else if ("sethome".startsWith(args[1])) {
-							displayedOptions.add("sethome");
-						} else if ("who".startsWith(args[1])) {
-							displayedOptions.add("who");
-						} else {
-							displayedOptions = addDominionSubCommands(displayedOptions);
-						}
+					if (args[0].equals("ran")) {
+						displayedOptions.add("rankset");
 					} else {
-						if (args[2].isEmpty()) {
-                            switch (args[1]) {
-                                case "create" -> displayedOptions.add("name");
-								case "invite", "who" -> {
-									for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-										displayedOptions.add(onlinePlayer.getName());
-									}
-								}
-								case "remove" -> {
-									if (sender instanceof Player player) {
-										boolean resultsFound = false;
-										Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-										if (dominion != null) {
-											for (UUID uuid : dominion.getMembers()) {
-												displayedOptions.add(Bukkit.getPlayer(uuid).getName());
-											}
-										}
-									}
-								}
-								case "info" -> {
-									List<Dominion> dominions = DominionUtils.getDominions();
-									for (Dominion dominionFromList : dominions) {
-										displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
-									}
-								}
-                            }
+						if (args[0].equals("rank")) {
+							displayedOptions.add("rankset");
 						} else {
-                            switch (args[1]) {
-                                case "invite", "who" -> {
-                                    boolean resultsFound = false;
-                                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                                        if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-                                            displayedOptions.add(onlinePlayer.getName());
-                                            resultsFound = true;
-                                        }
-                                    }
-                                    // If none were found, display all
-                                    if (!resultsFound) {
-                                        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                                            displayedOptions.add(onlinePlayer.getName());
-                                        }
-                                    }
-                                }
-                                case "remove" -> {
-                                    if (sender instanceof Player player) {
-                                        boolean resultsFound = false;
-                                        Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-                                        if (dominion != null) {
-                                            for (UUID uuid : dominion.getMembers()) {
-                                                if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-                                                    displayedOptions.add(Bukkit.getPlayer(uuid).getName());
-                                                    resultsFound = true;
-                                                }
-                                            }
-
-                                            // If none were found, display all
-                                            if (!resultsFound) {
-                                                for (UUID uuid : dominion.getMembers()) {
-                                                    displayedOptions.add(Bukkit.getPlayer(uuid).getName());
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                case "info" -> {
-                                    StringBuilder dominionNameBuilder = new StringBuilder();
-                                    for (int i = 2; i < args.length; i++) {
-                                        dominionNameBuilder.append(args[i]);
-                                        if (i < args.length - 1) {
-                                            dominionNameBuilder.append(" ");
-                                        }
-                                    }
-
-                                    List<Dominion> dominions = DominionUtils.getDominions();
-                                    boolean wasFound = false;
-                                    for (Dominion dominionFromList : dominions) {
-                                        if (ChatUtils.stripColorFormatting(dominionFromList.getName()).toLowerCase().startsWith(dominionNameBuilder.toString().toLowerCase())) {
-                                            displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
-                                            wasFound = true;
-                                        }
-                                    }
-                                    // Display all dominion names if what was entered does not match any dominion names
-                                    if (!wasFound) {
-                                        for (Dominion dominionFromList : dominions) {
-                                            displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
-                                        }
-                                    }
-                                }
-                            }
+							if (args[0].equals("ranks")) {
+								displayedOptions.add("rankset");
+							} else {
+								if ("rankset".startsWith(args[0])) {
+									displayedOptions.add("rankset");
+								}
+							}
 						}
 					}
 				}
 			}
-        }
+		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
+			displayedOptions.add("give");
+		} else if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
+			displayedOptions.add("whereis");
+		} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
+			displayedOptions.add("mute");
+		} else if (!args[0].isEmpty() && "ban".startsWith(args[0])) {
+			displayedOptions.add("ban");
+		} else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
+			displayedOptions.add("spy");
+		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
+			displayedOptions.add("spy");
+		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
+			if (args[0].equals("u")) {
+				displayedOptions.add("unmute");
+				displayedOptions.add("unban");
+			} else {
+				if (args[0].equals("un")) {
+					displayedOptions.add("unmute");
+					displayedOptions.add("unban");
+				} else {
+					if ("unmute".startsWith(args[0])) {
+						displayedOptions.add("unmute");
+					} else if ("unban".startsWith(args[0])) {
+						displayedOptions.add("unban");
+					}
+				}
+			}
+		}
+		displayedOptions = all(sender, displayedOptions, args);
+		return displayedOptions;
+	}
+
+	/**
+	 * Displays the sub-commands available for the given command.
+	 * @param displayedOptions The list of options to be displayed.
+	 * @param args The arguments of the command.
+	 * @return The updated list of options to be displayed.
+	 */
+	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
+		switch (args[0]) {
+			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy" -> {
+				// List of online players
+				if (args.length == 2) {
+					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
+					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+					boolean wasPlayerFound = false;
+					for (Player onlinePlayer : onlinePlayers) {
+						// Only display the name if it aligns with one that is currently online
+						if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+							displayedOptions.add(onlinePlayer.getName());
+							wasPlayerFound = true;
+						} else if (args[1].isEmpty()) {
+							displayedOptions.add(onlinePlayer.getName());
+							wasPlayerFound = true;
+						}
+					}
+					if (!wasPlayerFound) {
+						for (Player onlinePlayer : onlinePlayers) {
+							displayedOptions.add(onlinePlayer.getName());
+						}
+					}
+				}
+				// More than 1 sub-command
+				else {
+					switch (args[0]) {
+						case "give" -> {
+							if (args[2].isEmpty()) {
+								displayedOptions.add("item");
+							}
+						}
+						case "mute", "ban" -> {
+							if (args.length == 3) {
+								if (args[2].isEmpty()) {
+									displayedOptions.add("1m");
+									displayedOptions.add("1h");
+									displayedOptions.add("1d");
+									displayedOptions.add("1w");
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		displayedOptions = allArgs(sender, displayedOptions, args);
+		return displayedOptions;
+	}
+
+	/**
+	 * Displays the commands available to council members when the input does not match an existing command.
+	 * @param displayedOptions The list of options to be displayed.
+	 * @return The updated list of options to be displayed.
+	 */
+	private List<String> noResultsCouncil(List<String> displayedOptions) {
+		// Op-specific commands only
+		displayedOptions.add("whereis");
+		displayedOptions.add("give");
+		displayedOptions.add("mute");
+		displayedOptions.add("unmute");
+		displayedOptions.add("ban");
+		displayedOptions.add("unban");
+		displayedOptions.add("invsee");
+		displayedOptions.add("spy");
+		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}
 
@@ -623,6 +570,166 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("sethome");
 		displayedOptions.add("who");
 		displayedOptions.add("list");
+		return displayedOptions;
+	}
+
+	/**
+	 * Helper method to add all dominion sub-command arguments to the displayed command options.
+	 * @param sender The user that entered the command.
+	 * @param displayedOptions The list of options to be displayed.
+	 * @param args The arguments of the command.
+	 * @return The list of options to be displayed.
+	 */
+	private static List<String> dominionArgsCompletion(CommandSender sender, List<String> displayedOptions, String[] args) {
+		if (args[1].isEmpty()) {
+			displayedOptions = addDominionSubCommands(displayedOptions);
+		} else {
+			if (args.length == 2) {
+				if (args[1].startsWith("c")) {
+					if (args[1].equalsIgnoreCase("c")) {
+						displayedOptions.add("create");
+						displayedOptions.add("claim");
+					} else if ("create".startsWith(args[1])) {
+						displayedOptions.add("create");
+					} else if ("claim".startsWith(args[1])) {
+						displayedOptions.add("claim");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
+				} else if (args[1].startsWith("i")) {
+					if (args[1].equals("i") || args[1].equals("in")) {
+						displayedOptions.add("invite");
+						displayedOptions.add("info");
+					} else if ("invite".startsWith(args[1])) {
+						displayedOptions.add("invite");
+					} else if ("info".startsWith(args[1])) {
+						displayedOptions.add("info");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
+				} else if ("accept".startsWith(args[1])) {
+					displayedOptions.add("accept");
+				} else if (args[1].startsWith("l")) {
+					if (args[1].equalsIgnoreCase("l")) {
+						displayedOptions.add("list");
+						displayedOptions.add("leave");
+					} else if ("list".startsWith(args[1])) {
+						displayedOptions.add("list");
+					} else if ("leave".startsWith(args[1])) {
+						displayedOptions.add("leave");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
+				} else if ("remove".startsWith(args[1])) {
+					displayedOptions.add("remove");
+				} else if ("disband".startsWith(args[1])) {
+					displayedOptions.add("disband");
+				} else if ("unclaim".startsWith(args[1])) {
+					displayedOptions.add("unclaim");
+				} else if ("balance".startsWith(args[1])) {
+					displayedOptions.add("balance");
+				} else if ("home".startsWith(args[1])) {
+					displayedOptions.add("home");
+				} else if ("sethome".startsWith(args[1])) {
+					displayedOptions.add("sethome");
+				} else if ("who".startsWith(args[1])) {
+					displayedOptions.add("who");
+				} else {
+					displayedOptions = addDominionSubCommands(displayedOptions);
+				}
+			} else {
+				if (args[2].isEmpty()) {
+					switch (args[1]) {
+						case "create" -> displayedOptions.add("name");
+						case "invite", "who" -> {
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								displayedOptions.add(onlinePlayer.getName());
+							}
+						}
+						case "remove" -> {
+							if (sender instanceof Player player) {
+								boolean resultsFound = false;
+								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+								if (dominion != null) {
+									for (UUID uuid : dominion.getMembers()) {
+										displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+									}
+								}
+							}
+						}
+						case "info" -> {
+							List<Dominion> dominions = DominionUtils.getDominions();
+							for (Dominion dominionFromList : dominions) {
+								displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+							}
+						}
+					}
+				} else {
+					switch (args[1]) {
+						case "invite", "who" -> {
+							boolean resultsFound = false;
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+									displayedOptions.add(onlinePlayer.getName());
+									resultsFound = true;
+								}
+							}
+							// If none were found, display all
+							if (!resultsFound) {
+								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+									displayedOptions.add(onlinePlayer.getName());
+								}
+							}
+						}
+						case "remove" -> {
+							if (sender instanceof Player player) {
+								boolean resultsFound = false;
+								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+								if (dominion != null) {
+									for (UUID uuid : dominion.getMembers()) {
+										if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+											displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+											resultsFound = true;
+										}
+									}
+
+									// If none were found, display all
+									if (!resultsFound) {
+										for (UUID uuid : dominion.getMembers()) {
+											displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+										}
+									}
+								}
+							}
+						}
+						case "info" -> {
+							StringBuilder dominionNameBuilder = new StringBuilder();
+							for (int i = 2; i < args.length; i++) {
+								dominionNameBuilder.append(args[i]);
+								if (i < args.length - 1) {
+									dominionNameBuilder.append(" ");
+								}
+							}
+
+							List<Dominion> dominions = DominionUtils.getDominions();
+							boolean wasFound = false;
+							for (Dominion dominionFromList : dominions) {
+								if (ChatUtils.stripColorFormatting(dominionFromList.getName()).toLowerCase().startsWith(dominionNameBuilder.toString().toLowerCase())) {
+									displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+									wasFound = true;
+								}
+							}
+							// Display all dominion names if what was entered does not match any dominion names
+							if (!wasFound) {
+								for (Dominion dominionFromList : dominions) {
+									displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 		return displayedOptions;
 	}
 

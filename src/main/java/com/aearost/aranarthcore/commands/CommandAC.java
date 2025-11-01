@@ -128,6 +128,38 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandHome.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("delhome")) {
 			commandResult = CommandDelhome.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("compress")) {
+			commandResult = CommandCompress.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tp")) {
+			commandResult = CommandTp.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tphere")) {
+			commandResult = CommandTphere.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("back")) {
+			commandResult = CommandBack.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("seen")) {
+			commandResult = CommandSeen.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("hat")) {
+			commandResult = CommandHat.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("toggle")) {
+			commandResult = CommandToggle.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("rules")) {
+			commandResult = CommandRules.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("warp")) {
+			commandResult = CommandWarp.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("msg")) {
+			commandResult = CommandMsg.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("pay")) {
+			commandResult = CommandPay.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("baltop")) {
+			commandResult = CommandBaltop.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tables")) {
+			commandResult = CommandTables.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("trash")) {
+			commandResult = CommandTrash.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("spy")) {
+			commandResult = CommandSpy.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("invsee")) {
+			commandResult = CommandInvsee.onCommand(sender, args);
 		}
 		return commandResult;
 	}
