@@ -235,7 +235,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "trust", "untrust" -> {
+			case "ping", "balance", "trust", "untrust", "tp", "tphere" -> {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
 				boolean wasPlayerFound = false;
