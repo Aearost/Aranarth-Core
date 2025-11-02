@@ -160,6 +160,10 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("invsee")) {
 			commandResult = CommandInvsee.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpaccept")) {
+			commandResult = CommandTpaccept.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpdeny")) {
+			commandResult = CommandTpdecline.onCommand(sender, args);
 		}
 		return commandResult;
 	}

@@ -44,6 +44,8 @@ public class AranarthPlayer {
 	private Dominion pendingDominion;
 	private List<Home> homes;
 	private String muteEndDate;
+	private UUID teleportToUuid;
+	private UUID teleportFromUuid;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -76,6 +78,8 @@ public class AranarthPlayer {
 		this.homes = null;
 		this.muteEndDate = "";
 		this.pronouns = Pronouns.MALE;
+		this.teleportFromUuid = null;
+		this.teleportToUuid = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, Pronouns pronouns) {
@@ -109,6 +113,8 @@ public class AranarthPlayer {
 		this.homes = homes;
 		this.muteEndDate = "";
 		this.pronouns = pronouns;
+		this.teleportFromUuid = null;
+		this.teleportToUuid = null;
 	}
 
 	/**
@@ -627,4 +633,35 @@ public class AranarthPlayer {
 		this.muteEndDate = muteEndDate;
 	}
 
+	/**
+	 * Provides the UUID of the player that sent the request to teleport to them.
+	 * @return The UUID of the player that sent the request to teleport to them.
+	 */
+	public UUID getTeleportToUuid() {
+		return teleportToUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that sent the request to teleport to them.
+	 * @param teleportToUuid The new UUID of the player that sent the request to teleport to them.
+	 */
+	public void setTeleportToUuid(UUID teleportToUuid) {
+		this.teleportToUuid = teleportToUuid;
+	}
+
+	/**
+	 * Provides the UUID of the player that sent the request to teleport to this player.
+	 * @return The UUID of the player that sent the request to teleport to this player.
+	 */
+	public UUID getTeleportFromUuid() {
+		return teleportFromUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that sent the request to teleport to this player
+	 * @param teleportFromUuid The new UUID of the player that sent the request to teleport to this player
+	 */
+	public void setTeleportFromUuid(UUID teleportFromUuid) {
+		this.teleportFromUuid = teleportFromUuid;
+	}
 }
