@@ -8,7 +8,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 /**
@@ -36,7 +35,7 @@ public class CommandPay {
 					try {
 						amount = Double.parseDouble(args[2]);
 						formattedAmount = formatter.format(amount);
-						amount = Double.parseDouble(formattedAmount); // The actual value will be two decimals
+						amount = Double.parseDouble(formattedAmount.substring(1)); // The actual value will be two decimals
 					} catch (NumberFormatException e) {
 						player.sendMessage(ChatUtils.translateToColor("&cThat is not a valid number!"));
 						return false;
@@ -54,10 +53,10 @@ public class CommandPay {
 							AranarthPlayer aranarthPlayerReceiver = AranarthUtils.getPlayer(target.getUniqueId());
 							aranarthPlayerSender.setBalance(aranarthPlayerSender.getBalance() - amount);
 							aranarthPlayerReceiver.setBalance(aranarthPlayerReceiver.getBalance() + amount);
-							player.sendMessage(ChatUtils.chatMessage("&You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6$" + amount));
+							player.sendMessage(ChatUtils.chatMessage("&7You have paid &e" + aranarthPlayerReceiver.getNickname() + " &6" + formattedAmount));
 							if (target.isOnline()) {
 								Player onlineTarget = Bukkit.getPlayer(target.getUniqueId());
-								onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6$" + amount + " &7from &e" + aranarthPlayerSender.getNickname()));
+								onlineTarget.sendMessage(ChatUtils.chatMessage("&7You have received &6" + formattedAmount + " &7from &e" + aranarthPlayerSender.getNickname()));
 							}
 							return true;
 						} else {
