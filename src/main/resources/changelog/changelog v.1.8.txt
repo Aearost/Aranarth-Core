@@ -6,7 +6,7 @@ Features
 [+] Added in-game ranks and rankup system
 [+] Added donor ranks known as Saints
 [+] Added staff ranks known as Council
-[+] Added in /ac tp, /ac tphere, /ac tpaccept, and /ac tpdecline
+[+] Added in /ac tp, /ac tphere, /ac tpaccept, and /ac tpdeny
 [+] Added in /ac mute, /ac unmute, /ac ban, and /ac unban
 [+] Added in /ac home (with GUI), /ac sethome, and /ac delhome
 [+] Added in /ac pronouns command to change pronouns
