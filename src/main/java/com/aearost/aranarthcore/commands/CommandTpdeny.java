@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 /**
  * Allows the player to deny a pending teleport request.
  */
-public class CommandTpdecline {
+public class CommandTpdeny {
 
 	/**
 	 * @param sender The user that entered the command.
@@ -22,28 +22,34 @@ public class CommandTpdecline {
 			// Prioritize denying teleports to other players
 			if (aranarthPlayer.getTeleportToUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
+				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
-					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has declined your teleport request"));
+					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has denied your teleport request"));
+					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + targetNickname + "&e's &7teleport request"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 				}
-				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
-				player.sendMessage(ChatUtils.chatMessage("&7You have declined &e" + targetNickname + "&e's &7teleport request"));
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
 			} else if (aranarthPlayer.getTeleportFromUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportFromUuid());
+				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportFromUuid()));
 				// If both players are still online
 				if (target != null) {
-					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has declined your teleport request"));
+					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has denied your teleport request"));
+					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + targetNickname + "&e's &7teleport request"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 				}
-				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
-				player.sendMessage(ChatUtils.chatMessage("&7You have declined &e" + targetNickname + "&e's &7teleport request"));
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
 				return true;
@@ -52,7 +58,6 @@ public class CommandTpdecline {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
 			return true;
 		}
-		return false;
-	}
+    }
 
 }
