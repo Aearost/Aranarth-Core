@@ -23,30 +23,38 @@ public class CommandTpaccept {
 			// Prioritize teleporting to other players if both requests exist
 			if (aranarthPlayer.getTeleportToUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
+				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
 					player.teleport(target.getLocation());
-					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + AranarthUtils.getNickname(target)));
+					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
 					player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 				}
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
 			} else if (aranarthPlayer.getTeleportFromUuid() != null) {
-				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
+				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportFromUuid());
+				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportFromUuid()));
 				// If both players are still online
 				if (target != null) {
 					target.teleport(player.getLocation());
 					target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
 					target.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-					player.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(target) + " &7has teleported to you"));
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &7has teleported to you"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 				}
 				// If the player logged off, the request should be cleared
 				aranarthPlayer.setTeleportToUuid(null);
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
 				return true;
@@ -55,7 +63,6 @@ public class CommandTpaccept {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
 			return true;
 		}
-		return false;
-	}
+    }
 
 }

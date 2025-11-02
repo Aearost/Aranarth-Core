@@ -163,7 +163,7 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("tpaccept")) {
 			commandResult = CommandTpaccept.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tpdeny")) {
-			commandResult = CommandTpdecline.onCommand(sender, args);
+			commandResult = CommandTpdeny.onCommand(sender, args);
 		}
 		return commandResult;
 	}
