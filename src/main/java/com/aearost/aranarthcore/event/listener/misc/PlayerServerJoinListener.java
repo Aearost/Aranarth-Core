@@ -31,6 +31,16 @@ public class PlayerServerJoinListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
+		// Clears a player's nickname if they do not have permission for one
+		if (!player.hasPermission("aranarth.nick")) {
+			if (!AranarthUtils.getNickname(player).isEmpty()) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setNickname("");
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
+			}
+		}
+
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
 			player.teleport(new Location(Bukkit.getWorld("world"), -30.5, 78, -55.5, 0, 0));
