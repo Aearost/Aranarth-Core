@@ -514,7 +514,15 @@ public class CommandDominion {
 	private static void displayInfoForDominion(Player player, Dominion dominion) {
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
 		player.sendMessage(ChatUtils.translateToColor("&7The Dominion of &e" + dominion.getName()));
-		player.sendMessage(ChatUtils.translateToColor("&7Leader: &e" + AranarthUtils.getNickname(Bukkit.getPlayer(dominion.getOwner()))));
+
+		AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getOwner());
+		String leaderDisplayedName = "";
+		leaderDisplayedName += AranarthUtils.getSaintRank(leader);
+		leaderDisplayedName += AranarthUtils.getArchitectRank(leader);
+		leaderDisplayedName += AranarthUtils.getCouncilRank(leader);
+		leaderDisplayedName += leader.getNickname();
+
+		player.sendMessage(ChatUtils.translateToColor("&7Leader: &e" + leaderDisplayedName));
 
 		StringBuilder membersBuilder = new StringBuilder();
 		membersBuilder.append("&7Members: &e");
@@ -527,7 +535,14 @@ public class CommandDominion {
 					continue;
 				}
 
-				membersBuilder.append(AranarthUtils.getNickname(Bukkit.getPlayer(dominion.getMembers().get(i))));
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getMembers().get(i));
+				String displayedName = "";
+				displayedName += AranarthUtils.getSaintRank(aranarthPlayer);
+				displayedName += AranarthUtils.getArchitectRank(aranarthPlayer);
+				displayedName += AranarthUtils.getCouncilRank(aranarthPlayer);
+				displayedName += aranarthPlayer.getNickname();
+
+				membersBuilder.append(displayedName);
 				if (i < dominion.getMembers().size() - 1) {
 					membersBuilder.append("&e, ");
 				}
