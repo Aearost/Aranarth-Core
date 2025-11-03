@@ -48,6 +48,7 @@ public class AranarthPlayer {
 	private UUID teleportToUuid;
 	private UUID teleportFromUuid;
 	private Location lastKnownTeleportLocation;
+	private int particleNum = 100;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -83,9 +84,10 @@ public class AranarthPlayer {
 		this.teleportFromUuid = null;
 		this.teleportToUuid = null;
 		this.lastKnownTeleportLocation = null;
+		this.particleNum = 100;
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, Pronouns pronouns) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, int particleNum, Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -119,6 +121,7 @@ public class AranarthPlayer {
 		this.teleportFromUuid = null;
 		this.teleportToUuid = null;
 		this.lastKnownTeleportLocation = null;
+		this.particleNum = particleNum;
 	}
 
 	/**
@@ -683,6 +686,22 @@ public class AranarthPlayer {
 	 */
 	public void setLastKnownTeleportLocation(Location lastKnownTeleportLocation) {
 		this.lastKnownTeleportLocation = lastKnownTeleportLocation;
+	}
+
+	/**
+	 * Provides the number of Aranarth particles seen by the player.
+	 * @return The number of Aranarth particles seen by the player.
+	 */
+	public int getParticleNum() {
+		return particleNum;
+	}
+
+	/**
+	 * Updates the number of Aranarth particles seen by the player.
+	 * @param particleNum The number of Aranarth particles seen by the player.
+	 */
+	public void setParticleNum(int particleNum) {
+		this.particleNum = particleNum;
 	}
 
 }
