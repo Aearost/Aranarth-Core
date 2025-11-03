@@ -870,6 +870,9 @@ public class DateUtils {
 		// Loop over columns within an input block radius
 		for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
 			for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
+				if (AranarthUtils.isSpawnLocation(x, z)) {
+					continue;
+				}
 
 				// Check that the column is within circle
 				if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
@@ -1006,6 +1009,9 @@ public class DateUtils {
 		// Loop over columns within an input block radius
 		for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
 			for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
+				if (AranarthUtils.isSpawnLocation(x, z)) {
+					continue;
+				}
 
 				// Check that the column is within circle
 				if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
@@ -1165,6 +1171,9 @@ public class DateUtils {
 								// Loop over columns within a given block radius
 								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
 									for (int z = centerZ - meltRadius; z <= centerZ + meltRadius; z++) {
+										if (AranarthUtils.isSpawnLocation(x, z)) {
+											continue;
+										}
 
 										// Check that the column is within a circle
 										if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
@@ -1634,6 +1643,9 @@ public class DateUtils {
 				int radius = 50;
 				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
 					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
+						if (AranarthUtils.isSpawnLocation(x, z)) {
+							continue;
+						}
 						Block block = loc.getWorld().getHighestBlockAt(x, z);
 						if (isBiomeForForestFire(loc.getBlock().getBiome())) {
 							if (block.getBlockData() instanceof Leaves leaves) {

@@ -1449,4 +1449,22 @@ public class AranarthUtils {
 			default -> "";
 		};
 	}
+
+	/**
+	 * Confirms if the input coordinate is within the server Spawn.
+	 * @param x The x coordinate.
+	 * @param z The z coordinate.
+	 * @return Confirmation if the input coordinate is within the server Spawn.
+	 */
+	public static boolean isSpawnLocation(int x, int z) {
+		int topRightX = 330;
+		int topRightZ = -450;
+		int bottomLeftX = -350;
+		int bottomLeftZ = 250;
+
+		if ((bottomLeftX < x && x < topRightX) && (bottomLeftZ > z && z > topRightZ)) {
+			return true;
+		}
+		return false;
+	}
 }

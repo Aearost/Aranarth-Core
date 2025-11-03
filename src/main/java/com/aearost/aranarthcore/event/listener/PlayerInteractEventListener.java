@@ -22,7 +22,7 @@ public class PlayerInteractEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getItem() != null) {
-            if (e.getItem().getType().name().endsWith("_BUNDLE")) {
+            if (e.getItem().getType().name().equals("LEATHER")) {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);
