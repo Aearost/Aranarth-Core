@@ -80,7 +80,13 @@ public class CommandBaltop {
 
 		int counter = 1;
 		for (AranarthPlayer aranarthPlayer : playersAsList) {
-			lines.add("&7" + counter + ". &e" + aranarthPlayer.getNickname() + ", &6" + formatter.format(aranarthPlayer.getBalance()));
+			String displayedName = "";
+			displayedName += AranarthUtils.getSaintRank(aranarthPlayer);
+			displayedName += AranarthUtils.getArchitectRank(aranarthPlayer);
+			displayedName += AranarthUtils.getCouncilRank(aranarthPlayer);
+			displayedName += aranarthPlayer.getNickname();
+
+			lines.add("&7" + counter + ". &e" + displayedName + ", &6" + formatter.format(aranarthPlayer.getBalance()));
 			counter++;
 		}
 
