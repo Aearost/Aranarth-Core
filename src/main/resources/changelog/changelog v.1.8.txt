@@ -28,6 +28,8 @@ Features
 [+] Added command completion for all council commands
 [-] Removed all explosions other than wind charges
 [~] Infinity bows no longer work infinitely with special arrows
+[~] Changed Quiver to be a Leather item instead of a bundle
+[+] Added sound effect when opening a Quiver
 
 Miscellaneous
 - Removed redundant logs from weather

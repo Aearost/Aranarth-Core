@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiQuiver;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Sound;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,6 +20,7 @@ public class QuiverClick {
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					if (e.getPlayer().getWorld().getName().startsWith("world") || e.getPlayer().getWorld().getName().startsWith("smp")) {
 						e.setCancelled(true);
+						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ITEM_BUNDLE_REMOVE_ONE, 1F, 0.8F);
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();
 					} else {

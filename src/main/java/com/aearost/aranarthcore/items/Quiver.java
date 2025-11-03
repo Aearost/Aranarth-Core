@@ -22,7 +22,7 @@ public class Quiver implements AranarthItem {
 	 * @return The Quiver.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.BROWN_BUNDLE, 1);
+		ItemStack item = new ItemStack(Material.LEATHER, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "quiver");
