@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -42,6 +43,9 @@ public class CommandSurvival {
 				}
 
 				Location loc = new Location(Bukkit.getWorld("world"), -29.5, 75, -73.5, 0, 0);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.setGameMode(GameMode.SURVIVAL);

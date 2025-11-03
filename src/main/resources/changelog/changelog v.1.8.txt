@@ -11,6 +11,7 @@ Features
 [+] Added in /ac home (with GUI), /ac sethome, and /ac delhome
 [+] Added in /ac pronouns command to change pronouns
 [+] Added in /ac pay, and /ac baltop
+[+] Added in /ac back functionality, tracking a player's last location before they teleported
 [+] Updated chat format to support ranks and pronouns
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases

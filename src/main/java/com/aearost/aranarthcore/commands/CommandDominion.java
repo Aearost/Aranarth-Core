@@ -160,6 +160,10 @@ public class CommandDominion {
 					}
 				}
 
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 				player.teleport(dominion.getDominionHome());
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));

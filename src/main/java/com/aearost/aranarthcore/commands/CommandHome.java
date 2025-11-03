@@ -33,6 +33,9 @@ public class CommandHome {
 
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getHomeName()))) {
+						aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 						player.teleport(home.getLocation());
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getHomeName()));
 						return true;
