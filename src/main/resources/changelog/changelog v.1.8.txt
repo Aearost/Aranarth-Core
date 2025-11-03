@@ -30,6 +30,7 @@ Features
 [~] Infinity bows no longer work infinitely with special arrows
 [~] Changed Quiver to be a Leather item instead of a bundle
 [+] Added sound effect when opening a Quiver
+[~] Fixed feedback message for /ac give sender
 
 Miscellaneous
 - Removed redundant logs from weather

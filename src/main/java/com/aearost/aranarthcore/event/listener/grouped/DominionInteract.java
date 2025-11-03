@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 
 /**
@@ -32,7 +33,9 @@ public class DominionInteract implements Listener {
 	public void onPlace(BlockPlaceEvent e) {
 		boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
 		if (isActionPrevented) {
-			e.setCancelled(true);
+			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -43,7 +46,9 @@ public class DominionInteract implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
 		if (isActionPrevented) {
-			e.setCancelled(true);
+			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -58,12 +63,36 @@ public class DominionInteract implements Listener {
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
 				boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
 				if (isActionPrevented) {
-					e.setCancelled(true);
+					if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
 	}
 
+	/**
+	 * Prevents players from placing non-alive entities in another Dominion.
+	 */
+	@EventHandler
+	public void onInteractEntity(EntityPlaceEvent e) {
+		if (e.getEntity() != null) {
+			EntityType type = e.getEntity().getType();
+			// Armor stands are considered alive
+			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
+				boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getEntity());
+				if (isActionPrevented) {
+					if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+						e.setCancelled(true);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from attacking non-alive entities in another Dominion.
+	 */
 	@EventHandler
 	public void onAttackEntity(EntityDamageEvent e) {
 		if (e.getEntity() != null) {
@@ -73,7 +102,9 @@ public class DominionInteract implements Listener {
 				if (e.getDamageSource().getCausingEntity() instanceof Player player) {
 					boolean isActionPrevented = applyLogic(player, null, e.getEntity());
 					if (isActionPrevented) {
-						e.setCancelled(true);
+						if (!player.hasPermission("aranarth.protect.bypass")) {
+							e.setCancelled(true);
+						}
 					}
 				}
 			}
