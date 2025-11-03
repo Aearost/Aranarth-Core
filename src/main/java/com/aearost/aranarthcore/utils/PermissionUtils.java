@@ -84,6 +84,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.dominion.home", false);
 		perms.setPermission("aranarth.give", false);
 		perms.setPermission("aranarth.rankset", false);
+		perms.setPermission("aranarth.protect.bypass", false);
 	}
 
 	/**
@@ -236,6 +237,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.unban", true);
 			perms.setPermission("aranarth.give", true);
 			perms.setPermission("aranarth.rankset", true);
+			perms.setPermission("aranarth.protect.bypass", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {

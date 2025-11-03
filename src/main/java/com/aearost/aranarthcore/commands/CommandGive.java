@@ -70,8 +70,10 @@ public class CommandGive {
 				if (instance instanceof AranarthItem item) {
 					player.getInventory().addItem(item.getItem());
 					player.sendMessage(ChatUtils.chatMessage(ChatUtils.chatMessage("&7You have been given a " + item.getName())));
-					if (!(sender instanceof Player)) {
-						sender.sendMessage(ChatUtils.chatMessage((ChatUtils.chatMessage("&e" + player.getName() + " &7has been given a " + item.getName()))));
+					if (sender instanceof Player playerSender) {
+						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
+							sender.sendMessage(ChatUtils.chatMessage((ChatUtils.chatMessage("&e" + player.getName() + " &7has been given a " + item.getName()))));
+						}
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));
