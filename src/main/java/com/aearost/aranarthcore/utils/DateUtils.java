@@ -587,8 +587,7 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.25 days, no more than 1 day
-//			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000); TODO
-			AranarthUtils.setStormDelay(300);
+			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000);
 		}
 		applySnow(50, 1000);
 	}
@@ -679,8 +678,7 @@ public class DateUtils {
 									delay = random.nextInt(48000) + 12000;
 								case Month.FRIGORVOR ->
 									// At least 0.25 days, no more than 1 day
-//									delay = random.nextInt(18000) + 6000; TODO
-								delay = 300;
+									delay = random.nextInt(18000) + 6000;
 								case Month.OBSCURVOR ->
 									// At least 0.5 days, no more than 1.5 days
 									delay = random.nextInt(36000) + 12000;
@@ -715,8 +713,7 @@ public class DateUtils {
 									duration = random.nextInt(24000) + 12000;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
-//									duration = random.nextInt(30000) + 18000; TODO
-								duration = 300;
+									duration = random.nextInt(30000) + 18000;
 								case Month.OBSCURVOR ->
 									// At least 0.25 days, no more than 1 day
 									duration = random.nextInt(18000) + 6000;
@@ -789,14 +786,17 @@ public class DateUtils {
 									if (areAllBlocksAir) {
 										// If it is a temperate or cold biome
 										if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-											loc.getWorld().spawnParticle(Particle.END_ROD, loc, bigFlakeDensity, 9, 12, 9, 0.05);
-											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, smallFlakeDensity, 9, 12, 9, 0.05);
+											int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+											int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+
+											loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
+											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
 										}
 									}
 								}
 								// Attempts to generate snow only once per second
 								if (runs % 5 == 0) {
-									generateSnow(loc, bigFlakeDensity);
+									generateSnow(player, loc, bigFlakeDensity);
 								}
 							}
 							// Generate ice regardless of if it is snowing
@@ -816,7 +816,7 @@ public class DateUtils {
 	 * @param loc The current location of the player.
 	 * @param bigFlakeDensity The density of the large snowflakes to base the snowfall chance on.
 	 */
-	private void generateSnow(Location loc, int bigFlakeDensity) {
+	private void generateSnow(Player player, Location loc, int bigFlakeDensity) {
 		// Only apply logic in the survival world
 		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
@@ -1176,6 +1176,11 @@ public class DateUtils {
 
 										// Check that the column is within a circle
 										if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
+											continue;
+										}
+
+										// Do not proceed if the chunk is not yet loaded
+										if (!world.getHighestBlockAt(x, z).getChunk().isLoaded()) {
 											continue;
 										}
 
