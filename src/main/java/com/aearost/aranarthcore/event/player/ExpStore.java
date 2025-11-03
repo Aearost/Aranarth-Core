@@ -25,7 +25,7 @@ public class ExpStore {
 
                 if (totalExp >= amountToReduce) {
                     if (player.isSneaking()) {
-                        if (player.hasPermission("aranarthcore.exp")) {
+                        if (player.hasPermission("aranarth.exp")) {
                             // Reduces by a less than what is gained
                             amountToReduce = amountToReduce * -1;
                             player.giveExp(amountToReduce);
