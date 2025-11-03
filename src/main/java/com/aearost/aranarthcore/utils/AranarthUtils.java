@@ -1467,4 +1467,12 @@ public class AranarthUtils {
 		}
 		return false;
 	}
+
+	/**
+	 * Plays the teleport sound effect.
+	 * @param player The player to play the sound for.
+	 */
+	public static void playTeleportSound(Player player) {
+		player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+	}
 }

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -41,6 +42,9 @@ public class CommandSMP {
 				}
 
 				Location loc = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSMP!"));
 				player.setGameMode(GameMode.SURVIVAL);

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -39,6 +40,10 @@ public class CommandCreative {
 				for (PotionEffect effect : player.getActivePotionEffects()) {
 					player.removePotionEffect(effect.getType());
 				}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
 				player.setGameMode(GameMode.CREATIVE);

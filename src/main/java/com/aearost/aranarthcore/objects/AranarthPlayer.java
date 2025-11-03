@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.Pronouns;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class AranarthPlayer {
 	private String muteEndDate;
 	private UUID teleportToUuid;
 	private UUID teleportFromUuid;
+	private Location lastKnownTeleportLocation;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -80,6 +82,7 @@ public class AranarthPlayer {
 		this.pronouns = Pronouns.MALE;
 		this.teleportFromUuid = null;
 		this.teleportToUuid = null;
+		this.lastKnownTeleportLocation = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, Pronouns pronouns) {
@@ -115,6 +118,7 @@ public class AranarthPlayer {
 		this.pronouns = pronouns;
 		this.teleportFromUuid = null;
 		this.teleportToUuid = null;
+		this.lastKnownTeleportLocation = null;
 	}
 
 	/**
@@ -664,4 +668,21 @@ public class AranarthPlayer {
 	public void setTeleportFromUuid(UUID teleportFromUuid) {
 		this.teleportFromUuid = teleportFromUuid;
 	}
+
+	/**
+	 * Provides the last known location of the player before a previous teleport.
+	 * @return The last known location of the player before a previous teleport.
+	 */
+	public Location getLastKnownTeleportLocation() {
+		return lastKnownTeleportLocation;
+	}
+
+	/**
+	 * Updates the last known location of the player before a previous teleport.
+	 * @param lastKnownTeleportLocation The new last known location of the player before a previous teleport.
+	 */
+	public void setLastKnownTeleportLocation(Location lastKnownTeleportLocation) {
+		this.lastKnownTeleportLocation = lastKnownTeleportLocation;
+	}
+
 }

@@ -30,6 +30,9 @@ public class GuiHomesClick {
 				for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
 					if (e.getSlot() == i) {
 						Home home = aranarthPlayer.getHomes().get(i);
+						aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 						player.teleport(home.getLocation());
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getHomeName()));
 						player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
