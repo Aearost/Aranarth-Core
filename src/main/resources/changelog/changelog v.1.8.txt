@@ -26,6 +26,8 @@ Features
 [~] Extra logs are only dropped in the survival and SMP worlds
 [~] Fixed bug where saddles and horse armor were double dropping during Faunivor
 [+] Added command completion for all council commands
+[-] Removed all explosions other than wind charges
+[~] Infinity bows no longer work infinitely with special arrows
 
 Miscellaneous
 - Removed redundant logs from weather

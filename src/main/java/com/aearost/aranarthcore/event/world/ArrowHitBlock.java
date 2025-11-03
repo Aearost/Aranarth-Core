@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.world;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -15,6 +16,7 @@ public class ArrowHitBlock {
 		Block block = e.getHitBlock();
 		if (e.getEntity() instanceof Arrow arrow) {
 			if (arrow.getPersistentDataContainer().has(ARROW)) {
+				arrow.setItem(AranarthUtils.getArrowFromType(arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING)));
 				if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("obsidian")) {
 					e.getEntity().remove();
 				}
