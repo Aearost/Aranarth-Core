@@ -158,13 +158,14 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
+				Bukkit.getLogger().info(row);
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -301,7 +302,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -376,7 +377,7 @@ public class PersistenceUtils {
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
-								+ allHomes + "|" + muteEndDate + "|" + particles
+								+ allHomes + "|" + muteEndDate + "|" + particles + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);

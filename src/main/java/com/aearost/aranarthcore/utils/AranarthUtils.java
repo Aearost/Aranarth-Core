@@ -712,8 +712,17 @@ public class AranarthUtils {
 				|| type == Material.NETHER_WART;
 	}
 
+	/**
+	 * Applies the waterfall effect at the base of flowing water.
+	 */
 	public static void applyWaterfallEffect() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			// Skips the particle
+			if (new Random().nextInt(100) >= aranarthPlayer.getParticleNum()) {
+				continue;
+			}
+
 			Location playerLoc = player.getLocation();
 			int radius = 40;
 
@@ -1474,5 +1483,24 @@ public class AranarthUtils {
 	 */
 	public static void playTeleportSound(Player player) {
 		player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+	}
+
+	/**
+	 * Calculates the number of particles to be displayed based on the player's particle value.
+	 * @param particleNum The particle amount from the calculated server functionality.
+	 * @param playerParticleNum The amount of particles the player has set to be displayed.
+	 * @return The number of particles to display for the player.
+	 */
+	public static int calculateParticlesForPlayer(int particleNum, int playerParticleNum) {
+		double calculatedDouble = particleNum;
+		calculatedDouble = particleNum * ((double) playerParticleNum / 100);
+		int calculatedInt = (int) Math.floor(calculatedDouble);
+
+		// If the calculated amount yields a value lower than 0 yet the player has particles enabled
+		if (calculatedInt == 0 && playerParticleNum != 0) {
+			return 1;
+		} else {
+			return calculatedInt;
+		}
 	}
 }
