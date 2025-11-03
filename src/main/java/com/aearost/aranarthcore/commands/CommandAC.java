@@ -164,6 +164,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandTpaccept.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tpdeny")) {
 			commandResult = CommandTpdeny.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("particles")) {
+			commandResult = CommandParticles.onCommand(sender, args);
 		}
 		return commandResult;
 	}

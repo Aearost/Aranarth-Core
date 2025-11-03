@@ -251,6 +251,7 @@ public class PersistenceUtils {
 				}
 
 				String muteEndDate = fields[15];
+				int particles = Integer.parseInt(fields[16]);
 
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
@@ -261,7 +262,7 @@ public class PersistenceUtils {
 					pronouns = Pronouns.NEUTRAL;
 				}
 
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes, muteEndDate, pronouns));
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes, muteEndDate, particles, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -362,6 +363,7 @@ public class PersistenceUtils {
 						}
 
 						String muteEndDate = aranarthPlayer.getMuteEndDate();
+						String particles = aranarthPlayer.getParticleNum() + "";
 
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
@@ -374,7 +376,7 @@ public class PersistenceUtils {
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
-								+ allHomes + "|" + muteEndDate + "|"
+								+ allHomes + "|" + muteEndDate + "|" + particles
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);
