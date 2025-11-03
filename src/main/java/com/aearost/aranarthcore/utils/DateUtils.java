@@ -587,7 +587,8 @@ public class DateUtils {
 		if (!AranarthUtils.getHasStormedInMonth()) {
 			AranarthUtils.setHasStormedInMonth(true);
 			// At least 0.25 days, no more than 1 day
-			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000);
+//			AranarthUtils.setStormDelay(new Random().nextInt(18000) + 6000); TODO
+			AranarthUtils.setStormDelay(300);
 		}
 		applySnow(50, 1000);
 	}
@@ -678,7 +679,8 @@ public class DateUtils {
 									delay = random.nextInt(48000) + 12000;
 								case Month.FRIGORVOR ->
 									// At least 0.25 days, no more than 1 day
-									delay = random.nextInt(18000) + 6000;
+//									delay = random.nextInt(18000) + 6000; TODO
+								delay = 300;
 								case Month.OBSCURVOR ->
 									// At least 0.5 days, no more than 1.5 days
 									delay = random.nextInt(36000) + 12000;
@@ -713,7 +715,8 @@ public class DateUtils {
 									duration = random.nextInt(24000) + 12000;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
-									duration = random.nextInt(30000) + 18000;
+//									duration = random.nextInt(30000) + 18000; TODO
+								duration = 300;
 								case Month.OBSCURVOR ->
 									// At least 0.25 days, no more than 1 day
 									duration = random.nextInt(18000) + 6000;
@@ -767,22 +770,19 @@ public class DateUtils {
 							// Handles applying the snow functionality
 							if (AranarthUtils.getWeather() == Weather.SNOW) {
 								// Only apply logic in the survival world
-								if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 									continue;
 								}
-
 								// Do not proceed if the chunk is not yet loaded
 								if (!loc.getChunk().isLoaded()) {
 									continue;
 								}
-
 								// Determines if the player is underground or not
 								boolean areAllBlocksAir = true;
 								Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
 								if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
 									areAllBlocksAir = false;
 								}
-
 								// If it is a warm biome, do not apply snow logic
 								if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
 									// Only apply particles if the player is exposed to air
@@ -818,7 +818,7 @@ public class DateUtils {
 	 */
 	private void generateSnow(Location loc, int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
@@ -866,11 +866,10 @@ public class DateUtils {
 		World world = loc.getWorld();
 
 		int snowRadius = 250;
-
 		// Loop over columns within an input block radius
 		for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
 			for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
-				if (AranarthUtils.isSpawnLocation(x, z)) {
+				if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
 					continue;
 				}
 
@@ -989,7 +988,7 @@ public class DateUtils {
 	 */
 	private void generateIce(Location loc, int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
@@ -1009,7 +1008,7 @@ public class DateUtils {
 		// Loop over columns within an input block radius
 		for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
 			for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
-				if (AranarthUtils.isSpawnLocation(x, z)) {
+				if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
 					continue;
 				}
 
@@ -1100,7 +1099,7 @@ public class DateUtils {
 							Location loc = player.getLocation();
 
 							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 								continue;
 							}
 
@@ -1171,7 +1170,7 @@ public class DateUtils {
 								// Loop over columns within a given block radius
 								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
 									for (int z = centerZ - meltRadius; z <= centerZ + meltRadius; z++) {
-										if (AranarthUtils.isSpawnLocation(x, z)) {
+										if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
 											continue;
 										}
 
@@ -1631,7 +1630,7 @@ public class DateUtils {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				Location loc = player.getLocation();
 				// Only apply logic in the survival world
-				if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+				if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 					continue;
 				}
 
@@ -1643,7 +1642,7 @@ public class DateUtils {
 				int radius = 50;
 				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
 					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
-						if (AranarthUtils.isSpawnLocation(x, z)) {
+						if (AranarthUtils.isSpawnLocation(x, z) && loc.getWorld().getName().equals("world")) {
 							continue;
 						}
 						Block block = loc.getWorld().getHighestBlockAt(x, z);
@@ -1671,7 +1670,7 @@ public class DateUtils {
 	private void playWindEffect(int runs, Player player) {
 		Location loc = player.getLocation();
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") || !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
 		}
 
