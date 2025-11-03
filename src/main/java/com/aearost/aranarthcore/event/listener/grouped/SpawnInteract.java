@@ -29,8 +29,10 @@ public class SpawnInteract implements Listener {
 	public void onPlace(BlockPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getX(), e.getBlock().getZ())) {
 			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+				if (e.getPlayer().getWorld().getName().equals("world")) {
+					e.setCancelled(true);
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+				}
 			}
 		}
 	}
@@ -42,8 +44,10 @@ public class SpawnInteract implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getX(), e.getBlock().getZ())) {
 			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+				if (e.getPlayer().getWorld().getName().equals("world")) {
+					e.setCancelled(true);
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+				}
 			}
 		}
 	}
@@ -56,8 +60,10 @@ public class SpawnInteract implements Listener {
 		if (e.getRightClicked() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation().getBlockX(), e.getRightClicked().getLocation().getBlockZ())) {
 				if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+					if (e.getPlayer().getWorld().getName().equals("world")) {
+						e.setCancelled(true);
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+					}
 				}
 			}
 		}
@@ -71,8 +77,10 @@ public class SpawnInteract implements Listener {
 		if (e.getEntity() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation().getBlockX(), e.getEntity().getLocation().getBlockZ())) {
 				if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+					if (e.getPlayer().getWorld().getName().equals("world")) {
+						e.setCancelled(true);
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+					}
 				}
 			}
 		}
@@ -87,8 +95,11 @@ public class SpawnInteract implements Listener {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation().getBlockX(), e.getEntity().getLocation().getBlockZ())) {
 				if (e.getDamageSource().getCausingEntity() instanceof Player player) {
 					if (!player.hasPermission("aranarth.protect.bypass")) {
-						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+						if (player.getWorld().getName().equals("world")) {
+							e.setCancelled(true);
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+						}
+
 					}
 				}
 			}
