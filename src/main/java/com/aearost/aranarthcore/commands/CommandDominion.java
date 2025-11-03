@@ -162,7 +162,6 @@ public class CommandDominion {
 
 				player.teleport(dominion.getDominionHome());
 				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
 				player.setGameMode(GameMode.SURVIVAL);
 

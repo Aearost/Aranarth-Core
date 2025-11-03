@@ -2,10 +2,8 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
-import org.bukkit.block.data.type.TNT;
 import org.bukkit.entity.BreezeWindCharge;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.TNTPrimed;
 import org.bukkit.entity.WindCharge;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -28,8 +26,7 @@ public class ExplosionListener implements Listener {
 	 */
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
-		if (!(e.getEntity() instanceof TNT) && !(e.getEntity() instanceof TNTPrimed)
-				&& !(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
+		if (!(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
 			e.setCancelled(true);
 		}
 	}
