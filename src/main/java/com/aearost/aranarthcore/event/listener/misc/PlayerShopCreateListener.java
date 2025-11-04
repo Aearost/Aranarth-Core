@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.PlayerShop;
+import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -350,12 +350,12 @@ public class PlayerShopCreateListener implements Listener {
 	 * @param sellPrice The price to sell the item to the shop.
 	 */
 	private void createOrUpdateShop(SignChangeEvent e, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
-		HashMap<UUID, List<PlayerShop>> shops = AranarthUtils.getShops();
+		HashMap<UUID, List<Shop>> shops = AranarthUtils.getShops();
 		if (shops == null) {
 			shops = new HashMap<>();
 		}
 
-		List<PlayerShop> playerShops = null;
+		List<Shop> playerShops = null;
 		UUID uuid = null;
 		if (player != null) {
 			uuid = player.getUniqueId();
@@ -367,9 +367,9 @@ public class PlayerShopCreateListener implements Listener {
 		}
 
 		Block sign = e.getBlock();
-		PlayerShop existingShop = AranarthUtils.getShop(sign.getLocation());
-		PlayerShop newShop = null;
-		newShop = new PlayerShop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
+		Shop existingShop = AranarthUtils.getShop(sign.getLocation());
+		Shop newShop = null;
+		newShop = new Shop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
 		// If the shop exists, remove it
 		if (existingShop != null) {

@@ -51,11 +51,11 @@ public class AranarthCore extends JavaPlugin {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
-				PersistenceUtils.saveHomes();
+				PersistenceUtils.saveHomepads();
 				PersistenceUtils.saveAranarthPlayers();
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
-				PersistenceUtils.savePlayerShops();
+				PersistenceUtils.saveShops();
 				PersistenceUtils.saveDominions();
 				Bukkit.getLogger().info("Homes and aranarth players have been saved");
 			}
@@ -91,10 +91,10 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes necessary Utilities functionality needed on server startup.
 	 */
 	private void initializeUtils() {
-		PersistenceUtils.loadHomes();
-		PersistenceUtils.loadAranarthPlayers();
-		PersistenceUtils.loadPlayerShops();
 		PersistenceUtils.loadServerDate();
+		PersistenceUtils.loadHomepads();
+		PersistenceUtils.loadAranarthPlayers();
+		PersistenceUtils.loadShops();
 		PersistenceUtils.loadLockedContainers();
 		PersistenceUtils.loadDominions();
 	}
@@ -306,10 +306,10 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
-		PersistenceUtils.saveHomes();
-		PersistenceUtils.saveAranarthPlayers();
-		PersistenceUtils.savePlayerShops();
 		PersistenceUtils.saveServerDate();
+		PersistenceUtils.saveHomepads();
+		PersistenceUtils.saveAranarthPlayers();
+		PersistenceUtils.saveShops();
 		PersistenceUtils.saveLockedContainers();
 		PersistenceUtils.saveDominions();
 

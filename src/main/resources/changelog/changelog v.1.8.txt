@@ -13,6 +13,7 @@ Features
 [+] Added in /ac pay, and /ac baltop
 [+] Added in /ac back functionality, tracking a player's last location before they teleported
 [+] Added in /ac particles to control how many Aranarth particles will be displayed
+[+] Added in /ac seen to show the time the player was last online in the sender's timezone
 [+] Updated chat format to support ranks and pronouns
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases

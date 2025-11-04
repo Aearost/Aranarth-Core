@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.objects.PlayerShop;
+import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Location;
@@ -30,7 +30,7 @@ public class PlayerShopDestroy {
 
 		if (isSign(e.getBlock().getType())) {
 			destroyedSignLocation = e.getBlock().getLocation();
-			PlayerShop playerShop = AranarthUtils.getShop(destroyedSignLocation);
+			Shop playerShop = AranarthUtils.getShop(destroyedSignLocation);
 			if (playerShop != null) {
 				deletionResult = deleteShopIfPossible(player, destroyedSignLocation);
 			}
@@ -106,7 +106,7 @@ public class PlayerShopDestroy {
 	 * @return The result of whether the shop was able to be deleted.
 	 */
 	private int deleteShopIfPossible(Player player, Location destroyedSignLocation) {
-		PlayerShop shop = AranarthUtils.getShop(destroyedSignLocation);
+		Shop shop = AranarthUtils.getShop(destroyedSignLocation);
 
 		if (shop == null) {
 			return -1;

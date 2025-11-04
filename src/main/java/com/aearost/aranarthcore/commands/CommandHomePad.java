@@ -31,8 +31,8 @@ public class CommandHomePad {
                 switch (args[1]) {
                     case "create" -> {
                         // Must be on a valid homepad
-                        if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
-                            if (AranarthUtils.getHomePad(player.getLocation()).getHomeName().equals("NEW")) {
+                        if (Objects.nonNull(AranarthUtils.getHomepad(player.getLocation()))) {
+                            if (AranarthUtils.getHomepad(player.getLocation()).getHomeName().equals("NEW")) {
                                 StringBuilder homeName = new StringBuilder();
                                 // Get everything after the create parameter and space-separated
                                 for (int i = 2; i < args.length; i++) {
@@ -46,7 +46,7 @@ public class CommandHomePad {
                                     Location locationDirection = player.getLocation();
                                     locationDirection.setX(locationDirection.getBlockX() + 0.5);
                                     locationDirection.setZ(locationDirection.getBlockZ() + 0.5);
-                                    AranarthUtils.updateHome(homeName.toString(), locationDirection,
+                                    AranarthUtils.updateHomepad(homeName.toString(), locationDirection,
                                             Material.HEAVY_WEIGHTED_PRESSURE_PLATE);
                                     player.sendMessage(
                                             ChatUtils.chatMessage("&7Home &e" + homeName + " &7has been created"));
@@ -74,7 +74,7 @@ public class CommandHomePad {
                                     return true;
                                 }
 
-                                List<Home> homes = AranarthUtils.getHomes();
+                                List<Home> homes = AranarthUtils.getHomepads();
                                 ArrayList<Home> newHomes = new ArrayList<>();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cThere are no homes!"));
@@ -97,7 +97,7 @@ public class CommandHomePad {
                                     }
                                     newHomes.add(homes.get(i));
                                 }
-                                AranarthUtils.setHomes(newHomes);
+                                AranarthUtils.setHomepads(newHomes);
                                 sender.sendMessage(ChatUtils.chatMessage(
                                         "&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
                             } catch (NumberFormatException e) {

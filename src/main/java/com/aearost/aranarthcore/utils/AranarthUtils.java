@@ -8,7 +8,7 @@ import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.objects.LockedContainer;
-import com.aearost.aranarthcore.objects.PlayerShop;
+import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -45,7 +45,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
-	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
+	private static final HashMap<UUID, List<Shop>> shops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static List<LockedContainer> lockedContainers;
 	private static int day;
@@ -64,9 +64,9 @@ public class AranarthUtils {
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
-			PersistenceUtils.loadHomes();
+			PersistenceUtils.loadHomepads();
 		} else {
-			PersistenceUtils.saveHomes();
+			PersistenceUtils.saveHomepads();
 		}
 	}
 
@@ -147,7 +147,7 @@ public class AranarthUtils {
 	 *
 	 * @param location The Location that the homepad is located at.
 	 */
-	public static void addNewHome(Location location) {
+	public static void addNewHomepad(Location location) {
 		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
 	}
 
@@ -158,7 +158,7 @@ public class AranarthUtils {
 	 * @param direction The Location containing the direction of the homepad to be used.
 	 * @param icon The Material that will be displayed for the homepad.
 	 */
-	public static void updateHome(String homeName, Location direction, Material icon) {
+	public static void updateHomepad(String homeName, Location direction, Material icon) {
 		for (int i = 0; i < homes.size(); i++) {
 			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
@@ -174,7 +174,7 @@ public class AranarthUtils {
 	 *
 	 * @return The List of homepads.
 	 */
-	public static List<Home> getHomes() {
+	public static List<Home> getHomepads() {
 		return homes;
 	}
 
@@ -183,7 +183,7 @@ public class AranarthUtils {
 	 *
 	 * @param newHomes The new list of homepads.
 	 */
-	public static void setHomes(List<Home> newHomes) {
+	public static void setHomepads(List<Home> newHomes) {
 		homes = newHomes;
 	}
 
@@ -202,7 +202,7 @@ public class AranarthUtils {
 	 * @param location The location of the homepad.
 	 * @return The homepad at the location.
 	 */
-	public static Home getHomePad(Location location) {
+	public static Home getHomepad(Location location) {
 		for (Home home : homes) {
 			if (locationsMatch(location, home.getLocation())) {
 				return home;
@@ -216,7 +216,7 @@ public class AranarthUtils {
 	 *
 	 * @param location The location of the homepad to be removed.
 	 */
-	public static void removeHomePad(Location location) {
+	public static void removeHomepad(Location location) {
 		Home toRemove = null;
 		for (Home home : homes) {
 			if (locationsMatch(location, home.getLocation())) {
@@ -460,8 +460,8 @@ public class AranarthUtils {
 	 * Provides the current list of player shops.
 	 * @return The list of player shops.
 	 */
-	public static HashMap<UUID, List<PlayerShop>> getShops() {
-		return playerShops;
+	public static HashMap<UUID, List<Shop>> getShops() {
+		return shops;
 	}
 
 	/**
@@ -469,10 +469,10 @@ public class AranarthUtils {
 	 * @param location The location of the sign.
 	 * @return The player shop if it exists.
 	 */
-	public static PlayerShop getShop(Location location) {
+	public static Shop getShop(Location location) {
 		if (getShops() != null) {
-			for (UUID uuid : playerShops.keySet()) {
-				for (PlayerShop shop : playerShops.get(uuid)) {
+			for (UUID uuid : shops.keySet()) {
+				for (Shop shop : shops.get(uuid)) {
 					if (shop.getLocation().equals(location)) {
 						return shop;
 					}
@@ -488,13 +488,13 @@ public class AranarthUtils {
 	 * @param uuid The UUID. Null if it is a server shop.
 	 * @param newShop The new player shop.
 	 */
-	public static void addShop(UUID uuid, PlayerShop newShop) {
-		List<PlayerShop> shops = playerShops.get(uuid);
+	public static void addShop(UUID uuid, Shop newShop) {
+		List<Shop> shops = AranarthUtils.shops.get(uuid);
 		if (shops == null) {
 			shops = new ArrayList<>();
 		}
 		shops.add(newShop);
-		playerShops.put(uuid, shops);
+		AranarthUtils.shops.put(uuid, shops);
 	}
 
 	/**
@@ -503,7 +503,7 @@ public class AranarthUtils {
 	 * @param location The location of the sign of the shop.
 	 */
 	public static void removeShop(UUID uuid, Location location) {
-		List<PlayerShop> shops = playerShops.get(uuid);
+		List<Shop> shops = AranarthUtils.shops.get(uuid);
 		int shopSlotToDelete = -1;
 		for (int i = 0; i < shops.size(); i++) {
 			if (shops.get(i).getLocation().equals(location)) {

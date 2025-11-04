@@ -25,10 +25,10 @@ public class PersistenceUtils {
 	/**
 	 * Initializes the homes HashMap based on the contents of homes.txt.
 	 */
-	public static void loadHomes() {
+	public static void loadHomepads() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "homes.txt";
+				+ "homepads.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -43,7 +43,7 @@ public class PersistenceUtils {
 			String fieldName;
 			String fieldValue;
 
-			Bukkit.getLogger().info("Attempting to read the homes file...");
+			Bukkit.getLogger().info("Attempting to read the homepads file...");
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
@@ -66,31 +66,31 @@ public class PersistenceUtils {
 				Material icon = Material.valueOf(fields[7]);
 
 				Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
-				AranarthUtils.addNewHome(location);
+				AranarthUtils.addNewHomepad(location);
 
 				if (Objects.nonNull(homeName)) {
 					if (!homeName.equals("NEW")) {
-						AranarthUtils.updateHome(homeName, location, icon);
+						AranarthUtils.updateHomepad(homeName, location, icon);
 					}
 				}
 			}
 
-			Bukkit.getLogger().info("All homes have been initialized");
+			Bukkit.getLogger().info("All homepads have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
-			Bukkit.getLogger().info("Something went wrong with loading the homes!");
+			Bukkit.getLogger().info("Something went wrong with loading the homepads!");
 		}
 	}
 
 	/**
 	 * Saves the contents of the homes HashMap to the homes.txt file.
 	 */
-	public static void saveHomes() {
-		List<Home> homes = AranarthUtils.getHomes();
+	public static void saveHomepads() {
+		List<Home> homes = AranarthUtils.getHomepads();
 		if (!homes.isEmpty()) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "homes.txt";
+					+ File.separator + "homepads.txt";
 			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 			File file = new File(filePath);
 
@@ -103,25 +103,25 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new homes.txt file has been generated");
+						Bukkit.getLogger().info("A new homepads.txt file has been generated");
 					}
 				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of homes.txt");
+					Bukkit.getLogger().info("An error occurred in the creation of homepads.txt");
 				}
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					writer.write("#homeName|worldName|x|y|z|yaw|pitch|icon\n");
 
-					for (Home home : homes) {
-						String homeName = home.getHomeName();
-						String worldName = home.getLocation().getWorld().getName();
-						String x = home.getLocation().getX() + "";
-						String y = home.getLocation().getY() + "";
-						String z = home.getLocation().getZ() + "";
-						String yaw = home.getLocation().getYaw() + "";
-						String pitch = home.getLocation().getPitch() + "";
-						String icon = home.getIcon().name();
+					for (Home homepad : homes) {
+						String homeName = homepad.getHomeName();
+						String worldName = homepad.getLocation().getWorld().getName();
+						String x = homepad.getLocation().getX() + "";
+						String y = homepad.getLocation().getY() + "";
+						String z = homepad.getLocation().getZ() + "";
+						String yaw = homepad.getLocation().getYaw() + "";
+						String pitch = homepad.getLocation().getPitch() + "";
+						String icon = homepad.getIcon().name();
 
 						String row = homeName + "|" + worldName + "|" + x + "|" + y + "|" + z
 								+ "|" + yaw + "|" + pitch + "|" + icon + "\n";
@@ -129,7 +129,7 @@ public class PersistenceUtils {
 					}
 					writer.close();
 				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the homes");
+					Bukkit.getLogger().info("There was an error in saving the homepads");
 				}
 			}
 		}
@@ -180,7 +180,7 @@ public class PersistenceUtils {
 					try {
 						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[5]);
 					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading potions!");
+						Bukkit.getLogger().info("There was an issue loading the player's potions!");
 						reader.close();
 						return;
 					}
@@ -193,7 +193,7 @@ public class PersistenceUtils {
 					try {
 						arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[6]);
 					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading arrows!");
+						Bukkit.getLogger().info("There was an issue loading the player's arrows!");
 						reader.close();
 						return;
 					}
@@ -206,7 +206,7 @@ public class PersistenceUtils {
 					try {
 						blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[7]);
 					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading the blacklist!");
+						Bukkit.getLogger().info("There was an issue loading the player's blacklist!");
 						reader.close();
 						return;
 					}
@@ -390,9 +390,9 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Initializes the playerShops HashMap based on the contents of playershops.txt.
+	 * Initializes the shops HashMap based on the contents of shops.txt.
 	 */
-	public static void loadPlayerShops() {
+	public static void loadShops() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
 				+ "shops.txt";
@@ -439,21 +439,21 @@ public class PersistenceUtils {
 				double sellPrice = Double.parseDouble(fields[8]);
 
 				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-				PlayerShop playerShop = new PlayerShop(uuid, location, item, quantity, buyPrice, sellPrice);
+				Shop playerShop = new Shop(uuid, location, item, quantity, buyPrice, sellPrice);
 				AranarthUtils.addShop(uuid, playerShop);
 			}
 			Bukkit.getLogger().info("All shops have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
-			Bukkit.getLogger().info("Something went wrong with loading the playershops!");
+			Bukkit.getLogger().info("Something went wrong with loading the shops!");
 		}
 	}
 
 	/**
-	 * Saves the contents of the playerShops HashMap to the playershops.json file.
+	 * Saves the contents of the shops HashMap to the shops.json file.
 	 */
-	public static void savePlayerShops() {
-		HashMap<UUID, List<PlayerShop>> playerShops = AranarthUtils.getShops();
+	public static void saveShops() {
+		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
 		if (playerShops != null) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
@@ -481,7 +481,7 @@ public class PersistenceUtils {
 					writer.write("#uuid|worldName|x|y|z|item|quantity|buyPrice|sellPrice\n");
 
 					for (UUID uuid : playerShops.keySet()) {
-						for (PlayerShop shop : AranarthUtils.getShops().get(uuid)) {
+						for (Shop shop : AranarthUtils.getShops().get(uuid)) {
 
 							String uuidString = "";
 							if (uuid != null) {
@@ -698,10 +698,10 @@ public class PersistenceUtils {
 			try {
 				// If the file isn't already there
 				if (file.createNewFile()) {
-					Bukkit.getLogger().info("A new lockedcontainers.json file has been generated");
+					Bukkit.getLogger().info("A new lockedcontainers.txt file has been generated");
 				}
 			} catch (IOException e) {
-				Bukkit.getLogger().info("An error occurred in the creation of lockedcontainers.json");
+				Bukkit.getLogger().info("An error occurred in the creation of lockedcontainers.txt");
 			}
 
 			List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
