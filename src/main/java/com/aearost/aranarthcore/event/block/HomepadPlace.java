@@ -24,7 +24,7 @@ public class HomepadPlace {
 					e.setCancelled(true);
 					return;
 				}
-				AranarthUtils.addNewHome(location);
+				AranarthUtils.addNewHomepad(location);
 			}
 		}
 	}

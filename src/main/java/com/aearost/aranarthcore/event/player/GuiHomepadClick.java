@@ -46,7 +46,7 @@ public class GuiHomepadClick {
 				gui.openGui();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 			} else if (currentPage == 0) {
-				int numOfHomes = AranarthUtils.getHomes().size();
+				int numOfHomes = AranarthUtils.getHomepads().size();
 				int maxPages;
 				// If the amount is a multiple of 27
 				if (numOfHomes % 27 == 0) {
@@ -71,7 +71,7 @@ public class GuiHomepadClick {
 		// If they click Next
 		else if (isClickedHomepadGui && slot == 35 && heldItem == Material.AIR) {
 			e.setCancelled(true);
-			int numOfHomes = AranarthUtils.getHomes().size();
+			int numOfHomes = AranarthUtils.getHomepads().size();
 			int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 			int maxPages;
 
@@ -101,7 +101,7 @@ public class GuiHomepadClick {
 					return;
 				}
 
-				List<Home> homes = AranarthUtils.getHomes();
+				List<Home> homes = AranarthUtils.getHomepads();
 				Home home = null;
 				try {
 					home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
@@ -118,7 +118,7 @@ public class GuiHomepadClick {
 						if (heldItem == home.getIcon()) {
 							player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
 						} else {
-							AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
+							AranarthUtils.updateHomepad(home.getHomeName(), home.getLocation(), heldItem);
 							player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
 						}
 					} else {

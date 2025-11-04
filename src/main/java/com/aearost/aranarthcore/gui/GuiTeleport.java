@@ -35,7 +35,7 @@ public class GuiTeleport {
 	}
 
 	private Inventory initializeGui(Player player, int pageNum) {
-		List<Home> homes = AranarthUtils.getHomes();
+		List<Home> homes = AranarthUtils.getHomepads();
 		int totalHomesOnPage = homes.size();
 		int homeNumber = pageNum * 27;
 		

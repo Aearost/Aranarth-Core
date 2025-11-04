@@ -456,6 +456,22 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "itemname" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("remove");
+						displayedOptions.add("remove");
+						displayedOptions.add("gradient");
+						displayedOptions.add("gradientbold");
+					}
+				} else if (args.length > 2) {
+					if (args[1].startsWith("gradient")) {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("name");
+						}
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}

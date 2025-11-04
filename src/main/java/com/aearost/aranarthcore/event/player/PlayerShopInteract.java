@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.PlayerShop;
+import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.*;
@@ -29,7 +29,7 @@ public class PlayerShopInteract {
 			Location locationBelow = new Location(signLocation.getWorld(),
 					signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
 			if (isChest(locationBelow.getBlock().getType())) {
-				PlayerShop playerShop = AranarthUtils.getShop(signLocation);
+				Shop playerShop = AranarthUtils.getShop(signLocation);
 				if (playerShop != null) {
 					if (!playerShop.getUuid().toString().equals(e.getPlayer().getUniqueId().toString())) {
 						e.setCancelled(true);
@@ -161,7 +161,7 @@ public class PlayerShopInteract {
 			}
 			// If the clicked block is a sign but the block below is not a chest
 			else {
-				PlayerShop playerShop = AranarthUtils.getShop(signLocation);
+				Shop playerShop = AranarthUtils.getShop(signLocation);
 				if (playerShop != null) {
 					if (playerShop.getUuid() == null) {
 						e.setCancelled(true);
@@ -235,7 +235,7 @@ public class PlayerShopInteract {
 				}
 			}
 		} else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
-			PlayerShop playerShop = AranarthUtils.getShop(e.getClickedBlock().getLocation());
+			Shop playerShop = AranarthUtils.getShop(e.getClickedBlock().getLocation());
 			if (playerShop != null) {
 				Player player = e.getPlayer();
 				AranarthPlayer shopAranarthPlayer = AranarthUtils.getPlayer(playerShop.getUuid());
@@ -255,7 +255,7 @@ public class PlayerShopInteract {
 	 * @param playerShop The player shop being interacted with.
 	 * @return Confirmation if the contents contain the full amount from the shop.
 	 */
-	private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] contents, PlayerShop playerShop) {
+	private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] contents, Shop playerShop) {
 		boolean hasInventory = false;
 		int summedQuantityOfItem = 0;
 		ArrayList<Integer> indexesWithItem = new ArrayList<>();

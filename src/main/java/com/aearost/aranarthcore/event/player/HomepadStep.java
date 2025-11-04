@@ -25,8 +25,8 @@ public class HomepadStep {
 			// If they are not on one of the pressure plates
 			if (!isStandingOnHomePad) {
 				// If the current location is a home pad
-				if (Objects.nonNull(AranarthUtils.getHomePad(e.getTo()))) {
-					if (!AranarthUtils.getHomePad(e.getTo()).getHomeName().equals("NEW")) {
+				if (Objects.nonNull(AranarthUtils.getHomepad(e.getTo()))) {
+					if (!AranarthUtils.getHomepad(e.getTo()).getHomeName().equals("NEW")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -39,7 +39,7 @@ public class HomepadStep {
 		// When they step off the homepad
 		else if (e.getTo().getBlock().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 			if (isStandingOnHomePad) {
-				if (Objects.nonNull(AranarthUtils.getHomePad(e.getFrom()))) {
+				if (Objects.nonNull(AranarthUtils.getHomepad(e.getFrom()))) {
 					aranarthPlayer.setIsStandingOnHomePad(false);
 					aranarthPlayer.setCurrentGuiPageNum(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

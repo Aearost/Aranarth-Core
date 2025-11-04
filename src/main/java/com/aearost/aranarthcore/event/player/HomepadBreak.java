@@ -17,13 +17,13 @@ public class HomepadBreak {
 	public void execute(BlockBreakEvent e) {
 		Location location = e.getBlock().getLocation();
 		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
-		if (Objects.nonNull(AranarthUtils.getHomePad(location))) {
+		if (Objects.nonNull(AranarthUtils.getHomepad(location))) {
 			e.setCancelled(true);
-			AranarthUtils.removeHomePad(location);
+			AranarthUtils.removeHomepad(location);
 			location.getWorld().dropItemNaturally(location, new Homepad().getItem());
 			location.getBlock().setType(Material.AIR);
-		} else if (Objects.nonNull(AranarthUtils.getHomePad(locationAbove))) {
-			AranarthUtils.removeHomePad(locationAbove);
+		} else if (Objects.nonNull(AranarthUtils.getHomepad(locationAbove))) {
+			AranarthUtils.removeHomepad(locationAbove);
 			locationAbove.getWorld().dropItemNaturally(locationAbove, new Homepad().getItem());
 			locationAbove.getBlock().setType(Material.AIR);
 			location.getWorld().dropItemNaturally(location, new ItemStack(e.getBlock().getType()));

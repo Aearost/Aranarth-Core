@@ -6,9 +6,9 @@ import org.bukkit.inventory.ItemStack;
 import java.util.UUID;
 
 /**
- * Handles all necessary functionality relating to a player shop.
+ * Handles all necessary functionality relating to a shop.
  */
-public class PlayerShop {
+public class Shop {
 
     private UUID uuid;
     private Location location;
@@ -17,7 +17,7 @@ public class PlayerShop {
     private double buyPrice;
     private double sellPrice;
 
-    public PlayerShop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
+    public Shop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
         this.uuid = uuid;
         this.location = location;
         this.item = item;
