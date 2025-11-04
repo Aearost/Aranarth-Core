@@ -132,22 +132,46 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("b")) {
 				displayedOptions.add("blacklist");
 				displayedOptions.add("balance");
+				displayedOptions.add("baltop");
 			} else if ("blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
-			} else if ("balance".startsWith(args[0])) {
-				displayedOptions.add("balance");
+			} else {
+				if (args[0].startsWith("ba")) {
+					if (args[0].equals("ba")) {
+						displayedOptions.add("balance");
+						displayedOptions.add("baltop");
+					} else if (args[0].equals("bal")) {
+						displayedOptions.add("balance");
+						displayedOptions.add("baltop");
+					} else if ("balance".startsWith(args[0])) {
+						displayedOptions.add("balance");
+					} else if ("baltop".startsWith(args[0])) {
+						displayedOptions.add("baltop");
+					}
+				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
 				displayedOptions.add("pronouns");
+				displayedOptions.add("pay");
+				displayedOptions.add("particles");
 			} else if ("ping".startsWith(args[0])) {
 				displayedOptions.add("ping");
 			} else if ("potions".startsWith(args[0])) {
 				displayedOptions.add("potions");
 			} else if ("pronouns".startsWith(args[0])) {
 				displayedOptions.add("pronouns");
+			} else {
+				if (args[0].equals("pa")) {
+					displayedOptions.add("pay");
+					displayedOptions.add("particles");
+				} else if ("pay".startsWith(args[0])) {
+					displayedOptions.add("pay");
+				} else if ("particles".startsWith(args[0])) {
+					displayedOptions.add("particles");
+				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("r")) {
 			if (args[0].equals("r")) {
@@ -196,8 +220,33 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
 			displayedOptions.add("aranarth");
-		} else if (!args[0].isEmpty() && "trust".startsWith(args[0])) {
-			displayedOptions.add("trust");
+		} else if (!args[0].isEmpty() && args[0].startsWith("t")) {
+			if (args[0].equals("t")) {
+				displayedOptions.add("trust");
+				displayedOptions.add("tp");
+				displayedOptions.add("tphere");
+				displayedOptions.add("tpaccept");
+				displayedOptions.add("tpdeny");
+			} else {
+				if (args[0].startsWith("tp")) {
+					if (args[0].equals("tp")) {
+						displayedOptions.add("tp");
+						displayedOptions.add("tphere");
+						displayedOptions.add("tpaccept");
+						displayedOptions.add("tpdeny");
+					} else if ("tphere".startsWith(args[0])) {
+						displayedOptions.add("tphere");
+					} else if ("tpaccept".startsWith(args[0])) {
+						displayedOptions.add("tpaccept");
+					} else if ("tpdeny".startsWith(args[0])) {
+						displayedOptions.add("tpdeny");
+					}
+				} else {
+					if ("trust".startsWith(args[0])) {
+						displayedOptions.add("trust");
+					}
+				}
+			}
 		} else if (!args[0].isEmpty() && "lock".startsWith(args[0])) {
 			displayedOptions.add("lock");
 		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
@@ -235,23 +284,29 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "trust", "untrust", "tp", "tphere" -> {
-				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-				boolean wasPlayerFound = false;
-				for (Player onlinePlayer : onlinePlayers) {
-					// Only display the name if it aligns with one that is currently online
-					if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-						wasPlayerFound = true;
-						displayedOptions.add(onlinePlayer.getName());
-					} else if (args[1].isEmpty()) {
-						wasPlayerFound = true;
-						displayedOptions.add(onlinePlayer.getName());
-					}
-				}
-				if (!wasPlayerFound) {
+			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay" -> {
+				if (args.length == 2) {
+					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
+					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+					boolean wasPlayerFound = false;
 					for (Player onlinePlayer : onlinePlayers) {
-						displayedOptions.add(onlinePlayer.getName());
+						// Only display the name if it aligns with one that is currently online
+						if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+							wasPlayerFound = true;
+							displayedOptions.add(onlinePlayer.getName());
+						} else if (args[1].isEmpty()) {
+							wasPlayerFound = true;
+							displayedOptions.add(onlinePlayer.getName());
+						}
+					}
+					if (!wasPlayerFound) {
+						for (Player onlinePlayer : onlinePlayers) {
+							displayedOptions.add(onlinePlayer.getName());
+						}
+					}
+				} else if (args.length == 3) {
+					if (args[2].isEmpty()) {
+						displayedOptions.add("amount");
 					}
 				}
 			}
@@ -370,6 +425,22 @@ public class CommandACCompleter implements TabCompleter {
 			case "dominion" -> {
 				displayedOptions = dominionArgsCompletion(sender, displayedOptions, args);
 			}
+			case "baltop" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("page");
+					}
+				}
+			}
+			case "particles" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("100");
+						displayedOptions.add("10");
+						displayedOptions.add("0");
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -407,6 +478,13 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("delhome");
 		displayedOptions.add("home");
 		displayedOptions.add("itemname");
+		displayedOptions.add("tp");
+		displayedOptions.add("tphere");
+		displayedOptions.add("tpaccept");
+		displayedOptions.add("tpdeny");
+		displayedOptions.add("pay");
+		displayedOptions.add("baltop");
+		displayedOptions.add("particles");
 		return displayedOptions;
 	}
 
@@ -453,7 +531,7 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
 			displayedOptions.add("spy");
 		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
-			displayedOptions.add("spy");
+			displayedOptions.add("invsee");
 		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
 			if (args[0].equals("u")) {
 				displayedOptions.add("unmute");
