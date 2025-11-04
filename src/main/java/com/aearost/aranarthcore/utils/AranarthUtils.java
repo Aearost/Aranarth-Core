@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
@@ -23,9 +24,14 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
@@ -1502,5 +1508,28 @@ public class AranarthUtils {
 		} else {
 			return calculatedInt;
 		}
+	}
+
+	/**
+	 * Provides the player's timezone.
+	 * @param player The player.
+	 * @param callback The player's timezone.
+	 */
+	public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
+		String ip = player.getAddress().getAddress().getHostAddress();
+		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+			try {
+				URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+				String[] lineSplit = reader.readLine().split("\"");
+				ZoneId zoneId = ZoneId.of(lineSplit[3]);
+				reader.close();
+
+				// Switch back to main thread for player messaging
+				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
+			} catch (Exception e) {
+				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(null));
+			}
+		});
 	}
 }
