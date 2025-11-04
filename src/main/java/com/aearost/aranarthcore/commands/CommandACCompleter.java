@@ -119,14 +119,22 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("sethome");
 				displayedOptions.add("shulker");
 				displayedOptions.add("smp");
-			} else if ("sethome".startsWith(args[0])) {
-				displayedOptions.add("sethome");
+				displayedOptions.add("seen");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("shulker".startsWith(args[0])) {
 				displayedOptions.add("shulker");
 			} else if ("smp".startsWith(args[0])) {
 				displayedOptions.add("smp");
+			} else {
+				if (args[0].equals("se")) {
+					displayedOptions.add("sethome");
+					displayedOptions.add("seen");
+				} else if ("sethome".startsWith(args[0])) {
+					displayedOptions.add("sethome");
+				} else if ("seen".startsWith(args[0])) {
+					displayedOptions.add("seen");
+				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
 			if (args[0].equals("b")) {
@@ -441,6 +449,13 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "seen" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("username");
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -485,6 +500,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("pay");
 		displayedOptions.add("baltop");
 		displayedOptions.add("particles");
+		displayedOptions.add("seen");
 		return displayedOptions;
 	}
 
