@@ -40,3 +40,4 @@ Miscellaneous
 - Changed persisting files format to be pipe-separated lines for each record rather than json
 - Adapted PersistenceUtils to reflect this new format
 - Moved the pronouns to the end of the list of persisted fields in AranarthPlayer
+- Corrected names of Homepads and Shops across all files, methods, etc
