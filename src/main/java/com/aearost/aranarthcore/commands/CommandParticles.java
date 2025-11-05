@@ -25,11 +25,11 @@ public class CommandParticles {
 				int percentage = 100;
 				try {
 					percentage = Integer.parseInt(args[1]);
-					if (percentage < 0 && percentage > 100) {
+					if (percentage < 0 || percentage > 200) {
 						throw new NumberFormatException();
 					}
 				} catch (NumberFormatException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a number between 0 and 100!"));
+					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a number between 0 and 200!"));
 					return true;
 				}
 
