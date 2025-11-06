@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -28,8 +30,9 @@ public class CommandAC implements CommandExecutor {
 			boolean commandResult = false;
 			// Applies only to Aearost (ops) or Console=
 			if (sender instanceof Player player) {
-				if (player.getName().equalsIgnoreCase("Aearost")) {
-					commandResult = isSenderOp(sender, args);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (aranarthPlayer.getCouncilRank() > 0) {
+					commandResult = isCouncil(sender, args);
 				} else {
 					commandResult = isValidCommand(sender, args);
 				}
@@ -44,13 +47,10 @@ public class CommandAC implements CommandExecutor {
 		}
 	}
 
-	private boolean isSenderOp(CommandSender sender, String[] args) {
+	private boolean isCouncil(CommandSender sender, String[] args) {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("whereis")) {
 			CommandWhereIs.onCommand(sender, args);
-			commandResult = true;
-		} else if (args[0].equalsIgnoreCase("itemname")) {
-			CommandItemName.onCommand(sender, args);
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("give")) {
 			CommandGive.onCommand(sender, args);
@@ -166,6 +166,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandTpdeny.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("particles")) {
 			commandResult = CommandParticles.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("itemname")) {
+			commandResult = CommandItemName.onCommand(sender, args);
 		}
 		return commandResult;
 	}

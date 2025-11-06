@@ -19,11 +19,11 @@ public class CommandItemName {
      * @param sender The user that entered the command.
      * @param args   The arguments of the command.
      */
-    public static void onCommand(CommandSender sender, String[] args) {
+    public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
             if (!player.hasPermission("aranarth.itemname")) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-                return;
+                return true;
             }
 
             if (args.length == 1) {
@@ -39,7 +39,7 @@ public class CommandItemName {
                         player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
-                        return;
+                        return true;
                     } else {
                         int stringStart = 1;
                         if (args[1].startsWith("gradient")) {
@@ -47,7 +47,7 @@ public class CommandItemName {
                             if (!player.hasPermission("aranarth.itemname.gradient")) {
                                 Bukkit.getLogger().info("B");
                                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-                                return;
+                                return true;
                             }
                             Bukkit.getLogger().info("C");
 
@@ -76,7 +76,7 @@ public class CommandItemName {
 
                             if (Objects.isNull(itemName)) {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
-                                return;
+                                return true;
                             } else {
                                 meta.setDisplayName(itemName);
                             }
@@ -88,13 +88,14 @@ public class CommandItemName {
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
                         player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
-                        return;
+                        return true;
                     }
                 }
             }
         } else {
             sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+            return true;
         }
-        return;
+        return false;
     }
 }
