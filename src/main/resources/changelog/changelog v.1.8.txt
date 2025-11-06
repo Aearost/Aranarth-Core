@@ -34,6 +34,7 @@ Features
 [~] Changed Quiver to be a Leather item instead of a bundle
 [+] Added sound effect when opening a Quiver
 [~] Fixed feedback message for /ac give sender
+[~] Seemingly fixed major lag spikes from teleporting to unloaded chunks due to DateUtils
 
 Miscellaneous
 - Removed redundant logs from weather

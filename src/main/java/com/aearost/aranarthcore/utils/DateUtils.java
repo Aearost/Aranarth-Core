@@ -761,50 +761,52 @@ public class DateUtils {
 
 				// Handle the snow effects
 				if (AranarthUtils.getWeather() == Weather.SNOW || AranarthUtils.getWeather() == Weather.CLEAR) {
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (player != null) {
-							Location loc = player.getLocation();
-							// Handles applying the snow functionality
-							if (AranarthUtils.getWeather() == Weather.SNOW) {
-								// Only apply logic in the survival world
-								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
-									continue;
-								}
-								// Do not proceed if the chunk is not yet loaded
-								if (!loc.getChunk().isLoaded()) {
-									continue;
-								}
-								// Determines if the player is underground or not
-								boolean areAllBlocksAir = true;
-								Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-								if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-									areAllBlocksAir = false;
-								}
-								// If it is a warm biome, do not apply snow logic
-								if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
-									// Only apply particles if the player is exposed to air
-									if (areAllBlocksAir) {
-										// If it is a temperate or cold biome
-										if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-											int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
-											int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							if (player != null) {
+								Location loc = player.getLocation();
+								// Handles applying the snow functionality
+								if (AranarthUtils.getWeather() == Weather.SNOW) {
+									// Only apply logic in the survival world
+									if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+										continue;
+									}
+									// Do not proceed if the chunk is not yet loaded
+									if (!loc.getChunk().isLoaded()) {
+										continue;
+									}
+									// Determines if the player is underground or not
+									boolean areAllBlocksAir = true;
+									Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+									if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+										areAllBlocksAir = false;
+									}
+									// If it is a warm biome, do not apply snow logic
+									if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
+										// Only apply particles if the player is exposed to air
+										if (areAllBlocksAir) {
+											// If it is a temperate or cold biome
+											if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+												int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+												int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
 
-											loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
-											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
+												loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
+												loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
+											}
 										}
 									}
+									// Attempts to generate snow only once per second
+									if (runs % 5 == 0) {
+										generateSnow(player, loc, bigFlakeDensity);
+									}
 								}
-								// Attempts to generate snow only once per second
+								// Generate ice regardless of if it is snowing
 								if (runs % 5 == 0) {
-									generateSnow(player, loc, bigFlakeDensity);
+									generateIce(loc, bigFlakeDensity);
 								}
-							}
-							// Generate ice regardless of if it is snowing
-							if (runs % 5 == 0) {
-								generateIce(loc, bigFlakeDensity);
 							}
 						}
-					}
+					});
 				}
 				runs++;
 			}
@@ -816,7 +818,7 @@ public class DateUtils {
 	 * @param loc The current location of the player.
 	 * @param bigFlakeDensity The density of the large snowflakes to base the snowfall chance on.
 	 */
-	private void generateSnow(Player player, Location loc, int bigFlakeDensity) {
+	private void generateSnow(Player player, Location loc, final int bigFlakeDensity) {
 		// Only apply logic in the survival world
 		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
@@ -866,119 +868,123 @@ public class DateUtils {
 		World world = loc.getWorld();
 
 		int snowRadius = 250;
-		// Loop over columns within an input block radius
-		for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
-			for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
-				if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
-					continue;
-				}
 
-				// Check that the column is within circle
-				if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
-					continue;
-				}
-
-				Block surfaceBlock = world.getHighestBlockAt(x, z);
-				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-
-				// Hot biomes do not get snow
-				if (temperature >= 0.85) {
-					continue;
-				}
-				// Frozen biomes have the highest snow rates
-				else if (temperature <= 0) {
-					bigFlakeDensity = bigFlakeDensity / 2;
-				}
-				// Cold biomes have high snow rates
-				else if (temperature < 0.25) {
-					bigFlakeDensity = bigFlakeDensity / 5;
-				}
-				// Temperate biomes have standard snow rates
-				else {
-					bigFlakeDensity = bigFlakeDensity / 10;
-				}
-
-				// Determines if snow will generate at this block
-				int rand = random.nextInt(2000);
-				// Proportionate snow amount to the snow density
-				if (rand > bigFlakeDensity) {
-					continue;
-				}
-
-				// If the surface block is invalid, skip this column
-				if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
-					continue;
-				}
-
-				// Ensures that snow only goes on flat parts of stairs/slabs
-				if (surfaceBlock.getBlockData() instanceof Stairs stairs) {
-					if (stairs.getHalf() == Bisected.Half.BOTTOM) {
+		// --- SWITCH BACK TO SYNC ---
+		Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+			// Loop over columns within an input block radius
+			for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
+				for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
+					if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
 						continue;
 					}
-				} else if (surfaceBlock.getBlockData() instanceof Slab slab) {
-					if (slab.getType() == Slab.Type.BOTTOM) {
+
+					// Check that the column is within circle
+					if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
 						continue;
 					}
-				}
 
-				Block above = surfaceBlock.getRelative(BlockFace.UP);
-				if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
-					continue;
-				}
+					Block surfaceBlock = world.getHighestBlockAt(x, z);
+					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+					int snowAmount = bigFlakeDensity;
 
-				// Places the snow or adds layer
-				if (above.getBlockData() instanceof Snow snow) {
-					if (snow.getLayers() < 4) {
-						int snowLayers = snow.getLayers();
-						snow.setLayers(snowLayers + 1);
-						above.setBlockData(snow);
+					// Hot biomes do not get snow
+					if (temperature >= 0.85) {
+						continue;
 					}
-				} else {
-					above.setType(Material.SNOW);
-				}
+					// Frozen biomes have the highest snow rates
+					else if (temperature <= 0) {
+						snowAmount = bigFlakeDensity / 2;
+					}
+					// Cold biomes have high snow rates
+					else if (temperature < 0.25) {
+						snowAmount = bigFlakeDensity / 5;
+					}
+					// Temperate biomes have standard snow rates
+					else {
+						snowAmount = bigFlakeDensity / 10;
+					}
 
-				if (surfaceBlock.getType().name().endsWith("LEAVES")) {
-					Location location = surfaceBlock.getLocation();
-					// Keep going down to apply to the next blocks
-					for (int i = location.getBlockY(); i > 61; i--) {
-						Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+					// Determines if snow will generate at this block
+					int rand = random.nextInt(2000);
+					// Proportionate snow amount to the snow density
+					if (rand > snowAmount) {
+						continue;
+					}
 
-						if (block.getType().name().endsWith("LEAVES")) {
+					// If the surface block is invalid, skip this column
+					if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
+						continue;
+					}
+
+					// Ensures that snow only goes on flat parts of stairs/slabs
+					if (surfaceBlock.getBlockData() instanceof Stairs stairs) {
+						if (stairs.getHalf() == Bisected.Half.BOTTOM) {
 							continue;
 						}
-						// If there is a space underneath the leaves
-						else if (block.getType() != Material.AIR && block.getType() != Material.SHORT_GRASS && block.getType() != Material.FERN && block.getType() != Material.SNOW) {
+					} else if (surfaceBlock.getBlockData() instanceof Slab slab) {
+						if (slab.getType() == Slab.Type.BOTTOM) {
 							continue;
 						}
-						// The first solid block under the leaves
-						else {
-							Block blockUnderneath = location.getWorld().getBlockAt(surfaceBlock.getX(), i - 1, surfaceBlock.getZ());
+					}
 
-							if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
-								// Places the snow or adds layer
-								if (block.getBlockData() instanceof Snow snow) {
-									if (snow.getLayers() < 4) {
-										int snowLayers = snow.getLayers();
-										snow.setLayers(snowLayers + 1);
-										block.setBlockData(snow);
-									}
-								} else {
-									block.setType(Material.SNOW);
-								}
+					Block above = surfaceBlock.getRelative(BlockFace.UP);
+					if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+						continue;
+					}
+
+					// Places the snow or adds layer
+					if (above.getBlockData() instanceof Snow snow) {
+						if (snow.getLayers() < 4) {
+							int snowLayers = snow.getLayers();
+							snow.setLayers(snowLayers + 1);
+							above.setBlockData(snow);
+						}
+					} else {
+						above.setType(Material.SNOW);
+					}
+
+					if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+						Location location = surfaceBlock.getLocation();
+						// Keep going down to apply to the next blocks
+						for (int i = location.getBlockY(); i > 61; i--) {
+							Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+
+							if (block.getType().name().endsWith("LEAVES")) {
+								continue;
 							}
+							// If there is a space underneath the leaves
+							else if (block.getType() != Material.AIR && block.getType() != Material.SHORT_GRASS && block.getType() != Material.FERN && block.getType() != Material.SNOW) {
+								continue;
+							}
+							// The first solid block under the leaves
+							else {
+								Block blockUnderneath = location.getWorld().getBlockAt(surfaceBlock.getX(), i - 1, surfaceBlock.getZ());
 
-							// Do not add snow if the block is underneath a full solid block
-							if (blockUnderneath.getType() == Material.GRASS_BLOCK || blockUnderneath.getType() == Material.DIRT
-									|| blockUnderneath.getType() == Material.PODZOL || blockUnderneath.getType() == Material.COARSE_DIRT
-									|| blockUnderneath.getType() == Material.STONE) {
-								break;
+								if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
+									// Places the snow or adds layer
+									if (block.getBlockData() instanceof Snow snow) {
+										if (snow.getLayers() < 4) {
+											int snowLayers = snow.getLayers();
+											snow.setLayers(snowLayers + 1);
+											block.setBlockData(snow);
+										}
+									} else {
+										block.setType(Material.SNOW);
+									}
+								}
+
+								// Do not add snow if the block is underneath a full solid block
+								if (blockUnderneath.getType() == Material.GRASS_BLOCK || blockUnderneath.getType() == Material.DIRT
+										|| blockUnderneath.getType() == Material.PODZOL || blockUnderneath.getType() == Material.COARSE_DIRT
+										|| blockUnderneath.getType() == Material.STONE) {
+									break;
+								}
 							}
 						}
 					}
 				}
 			}
-		}
-
+		});
 	}
 
 	/**
@@ -986,7 +992,7 @@ public class DateUtils {
 	 * @param loc The current location of the player.
 	 * @param bigFlakeDensity The density of the large snowflakes to base the ice generation rate on.
 	 */
-	private void generateIce(Location loc, int bigFlakeDensity) {
+	private void generateIce(Location loc, final int bigFlakeDensity) {
 		// Only apply logic in the survival world
 		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
 			return;
@@ -1002,56 +1008,59 @@ public class DateUtils {
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
-
 		int iceRadius = 250;
 
-		// Loop over columns within an input block radius
-		for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
-			for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
-				if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
-					continue;
-				}
+		// --- SWITCH BACK TO SYNC ---
+		Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+			// Loop over columns within an input block radius
+			for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
+				for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
+					if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+						continue;
+					}
 
-				// Check that the column is within circle
-				if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
-					continue;
-				}
+					// Check that the column is within circle
+					if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
+						continue;
+					}
 
-				Block surfaceBlock = world.getHighestBlockAt(x, z);
-				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-				// Hot biomes do not get snow
-				if (temperature > 0.85) {
-					continue;
-				}
-				// Frozen biomes have the highest snow rates
-				else if (temperature <= 0) {
-					bigFlakeDensity = bigFlakeDensity / 2;
-				}
-				// Cold biomes have high snow rates
-				else if (temperature < 0.25) {
-					bigFlakeDensity = bigFlakeDensity / 5;
-				}
-				// Temperate biomes have standard snow rates
-				else {
-					bigFlakeDensity = bigFlakeDensity / 10;
-				}
+					Block surfaceBlock = world.getHighestBlockAt(x, z);
+					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+					int freezeRate = bigFlakeDensity;
+					// Hot biomes do not get snow
+					if (temperature > 0.85) {
+						continue;
+					}
+					// Frozen biomes have the highest snow rates
+					else if (temperature <= 0) {
+						freezeRate = bigFlakeDensity / 2;
+					}
+					// Cold biomes have high snow rates
+					else if (temperature < 0.25) {
+						freezeRate = bigFlakeDensity / 5;
+					}
+					// Temperate biomes have standard snow rates
+					else {
+						freezeRate = bigFlakeDensity / 10;
+					}
 
-				// Determines if ice will generate at this block
-				int rand = random.nextInt(7500);
-				// Proportionate ice amount to the snow density of the month
-				if (rand > bigFlakeDensity) {
-					continue;
-				}
+					// Determines if ice will generate at this block
+					int rand = random.nextInt(7500);
+					// Proportionate ice amount to the snow density of the month
+					if (rand > freezeRate) {
+						continue;
+					}
 
-				// If the surface block is invalid, skip this column
-				if (surfaceBlock.getType() != Material.WATER) {
-					continue;
-				}
-				if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
-					surfaceBlock.setType(Material.ICE);
+					// If the surface block is invalid, skip this column
+					if (surfaceBlock.getType() != Material.WATER) {
+						continue;
+					}
+					if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
+						surfaceBlock.setType(Material.ICE);
+					}
 				}
 			}
-		}
+		});
 	}
 
 	/**
@@ -1093,323 +1102,337 @@ public class DateUtils {
 						}
 					}
 
-					// Melts snow nearby all online players
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (player != null) {
-							Location loc = player.getLocation();
+					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+						// Melts snow nearby all online players
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							if (player != null) {
+								Location loc = player.getLocation();
 
-							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
-								continue;
-							}
-
-							// Do not proceed if the chunk is not yet loaded
-							if (!loc.getChunk().isLoaded()) {
-								continue;
-							}
-
-							// Play wind sound during Ventivor
-							if (month == Month.VENTIVOR) {
-								// If it is currently playing the sound and the first set of runs
-								if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
-									playWindEffect(runs, player);
-								}
-							}
-							// Add pink petals effect in wind during Florivor
-							else if (runs == 0 && month == Month.FLORIVOR) {
-								// Only display if above sea level
-								if (loc.getBlockY() < 62) {
-									return;
+								// Only apply logic in the survival world
+								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+									continue;
 								}
 
-								if (isBiomeForCherryParticles(loc.getBlock().getBiome())) {
-									// More than 10 seconds since the last cherry leaf particle display
-									if (AranarthUtils.getCherryParticleDelay() > 20) {
-										// 33% chance every 5 seconds of showing the petals
-										if (new Random().nextInt(3) == 0) {
-											AranarthUtils.setCherryParticleDelay(0);
-											for (int i = 0; i < 100; i++) { // Increased particles for visibility
-												int x = (int) ((Math.random() - 0.5) * 64);
-												int y = (int) (Math.random() * 20 - 5); // From 15 above to 5 below
-												int z = (int) ((Math.random() - 0.5) * 64);
-												Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
-
-												Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
-												Bukkit.getWorld("smp").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
-											}
-										}
-									} else {
-										AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
-									}
-								}
-							}
-							// Increase animal growth speed during the month of Calorvor
-							else if (runs < 4 && month == Month.CALORVOR) {
-								Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
-								for (Entity entity : entitiesInRange) {
-									if (entity instanceof Animals animal && !animal.isAdult()) {
-										int currentAge = animal.getAge();
-
-										// 50% chance to add boost
-										boolean shouldAddBoost = new Random().nextInt(4) > 1;
-										int ageIncrement = 1 + (shouldAddBoost ? 1 : 0);
-										animal.setAge(currentAge + ageIncrement);
-									}
-								}
-							}
-
-							// Attempts to melt snow only once per second
-							if (runs % 2 == 0) {
-								Random random = new Random();
-								// Adds snow to the surrounding blocks from the player
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
-								World world = loc.getWorld();
 								int meltRadius = 250;
+								World world = loc.getWorld();
+								Random random = new Random();
 
-								// Loop over columns within a given block radius
+								// Precompute candidate coordinates asynchronously
+								List<Location> toMelt = new ArrayList<>();
+
 								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
 									for (int z = centerZ - meltRadius; z <= centerZ + meltRadius; z++) {
-										if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+										double distance = loc.distance(new Location(world, x, loc.getY(), z));
+										if (distance > meltRadius) continue;
+
+										// Only add locations in loaded chunks (safe to check async)
+										if (!world.isChunkLoaded(x >> 4, z >> 4)) {
 											continue;
 										}
 
-										// Check that the column is within a circle
-										if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
-											continue;
+										// Collect this location for processing later
+										toMelt.add(new Location(world, x, loc.getY(), z));
+									}
+								}
+
+								// --- SWITCH BACK TO SYNC ---
+								Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+
+									// Play wind sound during Ventivor
+									if (month == Month.VENTIVOR) {
+										// If it is currently playing the sound and the first set of runs
+										if (isPlayingWindSound && AranarthUtils.getWindPlayTimer() < 20) {
+											playWindEffect(runs, player);
+										}
+									}
+									// Add pink petals effect in wind during Florivor
+									else if (runs == 0 && month == Month.FLORIVOR) {
+										// Only display if above sea level
+										if (loc.getBlockY() < 62) {
+											return;
 										}
 
-										// Do not proceed if the chunk is not yet loaded
-										if (!world.getHighestBlockAt(x, z).getChunk().isLoaded()) {
-											continue;
-										}
+										if (isBiomeForCherryParticles(loc.getBlock().getBiome())) {
+											// More than 10 seconds since the last cherry leaf particle display
+											if (AranarthUtils.getCherryParticleDelay() > 20) {
+												// 33% chance every 5 seconds of showing the petals
+												if (new Random().nextInt(3) == 0) {
+													AranarthUtils.setCherryParticleDelay(0);
+													for (int i = 0; i < 100; i++) { // Increased particles for visibility
+														int x = (int) ((Math.random() - 0.5) * 64);
+														int y = (int) (Math.random() * 20 - 5); // From 15 above to 5 below
+														int z = (int) ((Math.random() - 0.5) * 64);
+														Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
 
-										Block surfaceBlock = world.getHighestBlockAt(x, z);
-										Block above = surfaceBlock.getRelative(BlockFace.UP);
-										if (above.getType() != Material.SNOW && surfaceBlock.getType() != Material.ICE) {
-											continue;
-										}
-
-										double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-										int meltRate = 0;
-										int grassReplaceRate = 0;
-										String biome = surfaceBlock.getBiome().toString();
-
-										// Hot biomes never have snow
-										if (temperature >= 0.85) {
-											continue;
-										}
-										// Frozen biomes never melt
-										else if (temperature <= 0) {
-											continue;
-										}
-										// Cold biomes have higher snow rates so it should melt slower
-										else if (temperature < 0.25) {
-											meltRate = 2;
-											grassReplaceRate = random.nextInt(100) + 1;
-										}
-										// Temperate biomes have standard melting rates
-										else {
-											meltRate = 6;
-											grassReplaceRate = random.nextInt(100) + 1;
-										}
-
-										// Determines if snow or ice will melt at this block
-										int rand = random.nextInt(8000);
-
-										// Ice should melt slightly slower than snow
-										if (surfaceBlock.getType() == Material.ICE) {
-											meltRate = (int) (meltRate / 1.5);
-										}
-
-										// Reduce snow melting rate if it is Ignivor or Umbravor
-										if (month == Month.IGNIVOR || month == Month.UMBRAVOR) {
-											meltRate = meltRate / 2;
-										}
-										// Increased snow melting rate if it is raining
-										else if (loc.getWorld().hasStorm()) {
-											meltRate = meltRate * 4;
-										}
-										meltRate = meltRate * meltMultiplier;
-
-										// Proportionate melting rate for the given temperature
-										if (rand > meltRate) {
-											continue;
-										}
-
-
-										// Melt ice if the water is not close to a hot biome or crops
-										if (surfaceBlock.getType() == Material.ICE) {
-											if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
-												surfaceBlock.setType(Material.WATER);
+														Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+														Bukkit.getWorld("smp").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+													}
+												}
+											} else {
+												AranarthUtils.setCherryParticleDelay(AranarthUtils.getCherryParticleDelay() + 20);
 											}
-											continue;
 										}
+									}
+									// Increase animal growth speed during the month of Calorvor
+									else if (runs < 4 && month == Month.CALORVOR) {
+										Collection<Entity> entitiesInRange = loc.getWorld().getNearbyEntities(loc, 50, 50, 50);
+										for (Entity entity : entitiesInRange) {
+											if (entity instanceof Animals animal && !animal.isAdult()) {
+												int currentAge = animal.getAge();
 
-										if (above.getBlockData() instanceof Snow snow) {
-											int snowLayers = snow.getLayers();
-											if (snowLayers > 1) {
-												snow.setLayers(snowLayers - 1);
-												above.setBlockData(snow);
+												// 50% chance to add boost
+												boolean shouldAddBoost = new Random().nextInt(4) > 1;
+												int ageIncrement = 1 + (shouldAddBoost ? 1 : 0);
+												animal.setAge(currentAge + ageIncrement);
 											}
-											// Removes snow when there is only 1 layer left
+										}
+									}
+
+									if (runs % 2 == 0) {
+										for (Location meltLoc : toMelt) {
+											World w = meltLoc.getWorld();
+											int x = meltLoc.getBlockX();
+											int z = meltLoc.getBlockZ();
+
+											if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+												continue;
+											}
+
+											// Check that the column is within a circle
+											if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
+												continue;
+											}
+
+											Block surfaceBlock = world.getHighestBlockAt(x, z);
+											Block above = surfaceBlock.getRelative(BlockFace.UP);
+											if (above.getType() != Material.SNOW && surfaceBlock.getType() != Material.ICE) {
+												continue;
+											}
+
+											double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+											int meltRate = 0;
+											int grassReplaceRate = 0;
+											String biome = surfaceBlock.getBiome().toString();
+
+											// Hot biomes never have snow
+											if (temperature >= 0.85) {
+												continue;
+											}
+											// Frozen biomes never melt
+											else if (temperature <= 0) {
+												continue;
+											}
+											// Cold biomes have higher snow rates so it should melt slower
+											else if (temperature < 0.25) {
+												meltRate = 2;
+												grassReplaceRate = random.nextInt(100) + 1;
+											}
+											// Temperate biomes have standard melting rates
 											else {
-												above.setType(Material.AIR);
+												meltRate = 6;
+												grassReplaceRate = random.nextInt(100) + 1;
 											}
 
-											if (surfaceBlock.getType().name().endsWith("LEAVES")) {
-												Location location = surfaceBlock.getLocation();
-												// Keep going down to apply to the next blocks
-												for (int i = location.getBlockY(); i > 61; i--) {
-													Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
-													if (block.getBlockData() instanceof Snow lowerSnow) {
-														int snowLayersAboveGround = lowerSnow.getLayers();
-														if (snowLayersAboveGround > 1) {
-															lowerSnow.setLayers(snowLayersAboveGround - 1);
-															block.setBlockData(lowerSnow);
-                                                        }
-														// Removes snow when there is only 1 layer left
-														else {
-															block.setType(Material.AIR);
-                                                        }
-                                                        continue;
-                                                    } else {
-														// Only replace with grass if the block underneath is soil
-														if (block.getType() != Material.GRASS_BLOCK && block.getType() != Material.DIRT
-																&& block.getType() != Material.PODZOL && block.getType() != Material.COARSE_DIRT) {
-															continue;
-														}
+											// Determines if snow or ice will melt at this block
+											int rand = random.nextInt(8000);
 
-														// 5% chance of turning the dirt into grass blocks to spread during warm months
-														if (block.getType() == Material.DIRT) {
-															if ((random.nextInt(100) + 1) <= 5) {
-																block.setType(Material.GRASS_BLOCK);
+											// Ice should melt slightly slower than snow
+											if (surfaceBlock.getType() == Material.ICE) {
+												meltRate = (int) (meltRate / 1.5);
+											}
+
+											// Reduce snow melting rate if it is Ignivor or Umbravor
+											if (month == Month.IGNIVOR || month == Month.UMBRAVOR) {
+												meltRate = meltRate / 2;
+											}
+											// Increased snow melting rate if it is raining
+											else if (loc.getWorld().hasStorm()) {
+												meltRate = meltRate * 4;
+											}
+											meltRate = meltRate * meltMultiplier;
+
+											// Proportionate melting rate for the given temperature
+											if (rand > meltRate) {
+												continue;
+											}
+
+											// Melt ice if the water is not close to a hot biome or crops
+											if (surfaceBlock.getType() == Material.ICE) {
+												if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
+													surfaceBlock.setType(Material.WATER);
+												}
+												continue;
+											}
+
+											if (above.getBlockData() instanceof Snow snow) {
+												int snowLayers = snow.getLayers();
+												if (snowLayers > 1) {
+													snow.setLayers(snowLayers - 1);
+													above.setBlockData(snow);
+												}
+												// Removes snow when there is only 1 layer left
+												else {
+													above.setType(Material.AIR);
+												}
+
+												if (surfaceBlock.getType().name().endsWith("LEAVES")) {
+													Location location = surfaceBlock.getLocation();
+													// Keep going down to apply to the next blocks
+													for (int i = location.getBlockY(); i > 61; i--) {
+														Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
+														if (block.getBlockData() instanceof Snow lowerSnow) {
+															int snowLayersAboveGround = lowerSnow.getLayers();
+															if (snowLayersAboveGround > 1) {
+																lowerSnow.setLayers(snowLayersAboveGround - 1);
+																block.setBlockData(lowerSnow);
+															}
+															// Removes snow when there is only 1 layer left
+															else {
+																block.setType(Material.AIR);
+															}
+															continue;
+														} else {
+															// Only replace with grass if the block underneath is soil
+															if (block.getType() != Material.GRASS_BLOCK && block.getType() != Material.DIRT
+																	&& block.getType() != Material.PODZOL && block.getType() != Material.COARSE_DIRT) {
+																continue;
+															}
+
+															// 5% chance of turning the dirt into grass blocks to spread during warm months
+															if (block.getType() == Material.DIRT) {
+																if ((random.nextInt(100) + 1) <= 5) {
+																	block.setType(Material.GRASS_BLOCK);
+																}
+															}
+
+															Block blockAboveDirt = location.getWorld().getBlockAt(location.getBlockX(), i + 1, location.getBlockZ());
+															if (blockAboveDirt.getType() != Material.AIR) {
+																continue;
+															}
+
+															// Adds short grass depending on biome
+															switch (biome) {
+																case "MEADOW":
+																	if (grassReplaceRate > 55) {
+																		break;
+																	}
+																	blockAboveDirt.setType(Material.SHORT_GRASS);
+																	break;
+																case "PLAINS":
+																	if (grassReplaceRate > 35) {
+																		break;
+																	}
+																	blockAboveDirt.setType(Material.SHORT_GRASS);
+																	break;
+																case "SUNFLOWER_PLAINS":
+																	if (grassReplaceRate > 45) {
+																		break;
+																	}
+																	blockAboveDirt.setType(Material.SHORT_GRASS);
+																	break;
+																case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
+																	 "OLD_GROWTH_SPRUCE_TAIGA":
+																	if (grassReplaceRate > 15) {
+																		break;
+																	} else if (grassReplaceRate > 5) {
+																		blockAboveDirt.setType(Material.FERN);
+																	} else {
+																		blockAboveDirt.setType(Material.SHORT_GRASS);
+																	}
+																	break;
+																case "WINDSWEPT_HILLS":
+																case "WINDSWEPT_FOREST":
+																	if (grassReplaceRate > 10) {
+																		break;
+																	}
+																	blockAboveDirt.setType(Material.SHORT_GRASS);
+																	break;
+																default:
+																	// For other biomes that are not excluded, randomly place grass but at a low rate
+																	if (grassReplaceRate > 10) {
+																		break;
+																	}
+																	blockAboveDirt.setType(Material.SHORT_GRASS);
+																	break;
 															}
 														}
-
-														Block blockAboveDirt = location.getWorld().getBlockAt(location.getBlockX(), i + 1, location.getBlockZ());
-														if (blockAboveDirt.getType() != Material.AIR) {
-															continue;
-														}
-
-														// Adds short grass depending on biome
-														switch (biome) {
-															case "MEADOW":
-																if (grassReplaceRate > 55) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
-															case "PLAINS":
-																if (grassReplaceRate > 35) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
-															case "SUNFLOWER_PLAINS":
-																if (grassReplaceRate > 45) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
-															case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
-																if (grassReplaceRate > 15) {
-																	break;
-																} else if (grassReplaceRate > 5) {
-																	blockAboveDirt.setType(Material.FERN);
-																} else {
-																	blockAboveDirt.setType(Material.SHORT_GRASS);
-																}
-																break;
-															case "WINDSWEPT_HILLS":
-															case "WINDSWEPT_FOREST":
-																if (grassReplaceRate > 10) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
-															default:
-																// For other biomes that are not excluded, randomly place grass but at a low rate
-																if (grassReplaceRate > 10) {
-																	break;
-																}
-																blockAboveDirt.setType(Material.SHORT_GRASS);
-																break;
-														}
 													}
 												}
-											}
-											// Not under a tree
-											else {
+												// Not under a tree
+												else {
 
-												// Only replace with grass if the block underneath is soil
-												if (surfaceBlock.getType() != Material.GRASS_BLOCK && surfaceBlock.getType() != Material.DIRT
-														&& surfaceBlock.getType() != Material.PODZOL && surfaceBlock.getType() != Material.COARSE_DIRT) {
-													continue;
-												}
-
-												// 5% chance of turning the dirt into grass blocks to spread during warm months
-												if (surfaceBlock.getType() == Material.DIRT) {
-													if ((random.nextInt(100) + 1) <= 5) {
-														surfaceBlock.setType(Material.GRASS_BLOCK);
+													// Only replace with grass if the block underneath is soil
+													if (surfaceBlock.getType() != Material.GRASS_BLOCK && surfaceBlock.getType() != Material.DIRT
+															&& surfaceBlock.getType() != Material.PODZOL && surfaceBlock.getType() != Material.COARSE_DIRT) {
+														continue;
 													}
-												}
 
-												if (above.getType() != Material.AIR) {
-													continue;
-												}
+													// 5% chance of turning the dirt into grass blocks to spread during warm months
+													if (surfaceBlock.getType() == Material.DIRT) {
+														if ((random.nextInt(100) + 1) <= 5) {
+															surfaceBlock.setType(Material.GRASS_BLOCK);
+														}
+													}
 
-												// Adds short grass depending on biome
-												switch (biome) {
-													case "MEADOW":
-														if (grassReplaceRate > 55) {
-															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
-													case "PLAINS":
-														if (grassReplaceRate > 35) {
-															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
-													case "SUNFLOWER_PLAINS":
-														if (grassReplaceRate > 45) {
-															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
-													case "TAIGA", "OLD_GROWTH_PINE_TAIGA", "OLD_GROWTH_SPRUCE_TAIGA":
-														if (grassReplaceRate > 15) {
-															break;
-														} else if (grassReplaceRate > 5) {
-															above.setType(Material.FERN);
-														} else {
+													if (above.getType() != Material.AIR) {
+														continue;
+													}
+
+													// Adds short grass depending on biome
+													switch (biome) {
+														case "MEADOW":
+															if (grassReplaceRate > 55) {
+																break;
+															}
 															above.setType(Material.SHORT_GRASS);
-														}
-														break;
-													case "WINDSWEPT_HILLS":
-													case "WINDSWEPT_FOREST":
-														if (grassReplaceRate > 10) {
 															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
-													default:
-														// For other biomes that are not excluded, randomly place grass but at a low rate
-														if (grassReplaceRate > 10) {
+														case "PLAINS":
+															if (grassReplaceRate > 35) {
+																break;
+															}
+															above.setType(Material.SHORT_GRASS);
 															break;
-														}
-														above.setType(Material.SHORT_GRASS);
-														break;
+														case "SUNFLOWER_PLAINS":
+															if (grassReplaceRate > 45) {
+																break;
+															}
+															above.setType(Material.SHORT_GRASS);
+															break;
+														case "TAIGA", "OLD_GROWTH_PINE_TAIGA",
+															 "OLD_GROWTH_SPRUCE_TAIGA":
+															if (grassReplaceRate > 15) {
+																break;
+															} else if (grassReplaceRate > 5) {
+																above.setType(Material.FERN);
+															} else {
+																above.setType(Material.SHORT_GRASS);
+															}
+															break;
+														case "WINDSWEPT_HILLS":
+														case "WINDSWEPT_FOREST":
+															if (grassReplaceRate > 10) {
+																break;
+															}
+															above.setType(Material.SHORT_GRASS);
+															break;
+														default:
+															// For other biomes that are not excluded, randomly place grass but at a low rate
+															if (grassReplaceRate > 10) {
+																break;
+															}
+															above.setType(Material.SHORT_GRASS);
+															break;
+													}
 												}
 											}
 										}
 									}
-								}
+								});
 							}
 						}
-					}
+					});
 					runs++;
 				}
 			}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
