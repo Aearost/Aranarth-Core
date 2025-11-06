@@ -271,6 +271,8 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("unlock");
 				}
 			}
+		} else if (!args[0].isEmpty() && "warp".startsWith(args[0])) {
+			displayedOptions.add("warp");
 		}
 		return displayedOptions;
 	}
@@ -479,6 +481,57 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "warp" -> {
+				// Should always be a player executing this command
+				if (sender instanceof Player player) {
+					if (args.length == 2) {
+						if (args[1].isEmpty()) {
+							for (Home warp : AranarthUtils.getWarps()) {
+								displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+							}
+						}
+
+						if (player.hasPermission("aranarth.warp.modify")) {
+							if (args[1].isEmpty()) {
+								displayedOptions.add("create");
+								displayedOptions.add("delete");
+							} else if ("create".startsWith(args[1])) {
+								displayedOptions.add("create");
+							} else if ("delete".startsWith(args[1])) {
+								displayedOptions.add("delete");
+							} else {
+								for (Home warp : AranarthUtils.getWarps()) {
+									if (ChatUtils.stripColorFormatting(warp.getName()).startsWith(args[1])) {
+										displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+									}
+								}
+							}
+						}
+					} else {
+						if (player.hasPermission("aranarth.warp.modify")) {
+							if (args[2].isEmpty()) {
+								if (args[1].equalsIgnoreCase("create")) {
+									displayedOptions.add("name");
+								} else if (args[1].equalsIgnoreCase("delete")) {
+									for (Home warp : AranarthUtils.getWarps()) {
+										displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+									}
+								}
+							} else {
+								if (args[1].equalsIgnoreCase("delete")) {
+									for (Home warp : AranarthUtils.getWarps()) {
+										if (ChatUtils.stripColorFormatting(warp.getName()).startsWith(args[2])) {
+											displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+										}
+									}
+								}
+							}
+						}
+					}
+
+				}
+
+			}
 		}
 		return displayedOptions;
 	}
@@ -524,6 +577,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("baltop");
 		displayedOptions.add("particles");
 		displayedOptions.add("seen");
+		displayedOptions.add("warp");
 		return displayedOptions;
 	}
 
