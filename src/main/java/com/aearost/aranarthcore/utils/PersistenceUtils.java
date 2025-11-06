@@ -308,7 +308,9 @@ public class PersistenceUtils {
 
 						String uuid = entry.getKey().toString();
 						String nickname = aranarthPlayer.getNickname();
-						if (nickname.equals(aranarthPlayer.getUsername())) {
+						if (nickname == null) {
+							nickname = "";
+						} else if (nickname.equals(aranarthPlayer.getUsername())) {
 							nickname = "";
 						}
 
