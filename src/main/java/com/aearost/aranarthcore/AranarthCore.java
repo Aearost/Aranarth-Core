@@ -137,6 +137,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerRespawnEventListener(this);
 		new DominionInteract(this);
 		new SpawnInteract(this);
+		new PortalEventListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

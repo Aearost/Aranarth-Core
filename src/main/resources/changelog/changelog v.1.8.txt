@@ -41,3 +41,4 @@ Miscellaneous
 - Adapted PersistenceUtils to reflect this new format
 - Moved the pronouns to the end of the list of persisted fields in AranarthPlayer
 - Corrected names of Homepads and Shops across all files, methods, etc
+- Added support for nether and end portals across both Survival and SMP worlds
