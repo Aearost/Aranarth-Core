@@ -29,9 +29,9 @@ public class CommandDelhome {
 				}
 				String homeName = ChatUtils.stripColorFormatting(homeNameBuilder.toString());
 				for (Home home : aranarthPlayer.getHomes()) {
-					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getHomeName()))) {
+					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 						AranarthUtils.deletePlayerHome(player, homeName);
-						player.sendMessage(ChatUtils.chatMessage("&7You have deleted the home &e" + home.getHomeName()));
+						player.sendMessage(ChatUtils.chatMessage("&7You have deleted the home &e" + home.getName()));
 						return true;
 					}
 				}

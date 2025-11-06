@@ -48,7 +48,7 @@ public class CommandSethome {
 
 					String strippedName = ChatUtils.stripColorFormatting(homeName);
 					for (Home home : aranarthPlayer.getHomes()) {
-						if (ChatUtils.stripColorFormatting(home.getHomeName()).equalsIgnoreCase(strippedName)) {
+						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use the same home name twice!"));
 							return true;
 						}

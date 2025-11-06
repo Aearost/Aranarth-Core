@@ -32,7 +32,7 @@ public class CommandHomePad {
                     case "create" -> {
                         // Must be on a valid homepad
                         if (Objects.nonNull(AranarthUtils.getHomepad(player.getLocation()))) {
-                            if (AranarthUtils.getHomepad(player.getLocation()).getHomeName().equals("NEW")) {
+                            if (AranarthUtils.getHomepad(player.getLocation()).getName().equals("NEW")) {
                                 StringBuilder homeName = new StringBuilder();
                                 // Get everything after the create parameter and space-separated
                                 for (int i = 2; i < args.length; i++) {
@@ -99,7 +99,7 @@ public class CommandHomePad {
                                 }
                                 AranarthUtils.setHomepads(newHomes);
                                 sender.sendMessage(ChatUtils.chatMessage(
-                                        "&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
+                                        "&7You have updated the slot number of " + homes.get(homeNumber).getName()));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(ChatUtils.chatMessage("&cA home could not be updated!"));
                                 return true;

@@ -118,8 +118,8 @@ public class GuiHomepadClick {
 						if (heldItem == home.getIcon()) {
 							player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
 						} else {
-							AranarthUtils.updateHomepad(home.getHomeName(), home.getLocation(), heldItem);
-							player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+							AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
+							player.sendMessage(ChatUtils.chatMessage(home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
 						}
 					} else {
 						if (player.isInsideVehicle()) {
@@ -128,7 +128,7 @@ public class GuiHomepadClick {
 								player.leaveVehicle();
 								mount.teleport(home.getLocation());
 								player.teleport(home.getLocation());
-								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 								try {
 									Thread.sleep(20);
 								} catch (InterruptedException ex) {
@@ -136,19 +136,19 @@ public class GuiHomepadClick {
 								}
 								player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 								player.sendMessage(ChatUtils
-										.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+										.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 								mount.addPassenger(player);
 							}
 						} else {
 							player.teleport(home.getLocation());
-							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 							try {
 								Thread.sleep(20);
 							} catch (InterruptedException ex) {
 								Bukkit.getLogger().info("Something went wrong with the teleportation...");
 							}
 							player.sendMessage(ChatUtils
-									.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 							player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 						}
 					}
