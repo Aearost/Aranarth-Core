@@ -452,7 +452,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the contents of the shops HashMap to the shops.json file.
+	 * Saves the contents of the shops HashMap to the shops.txt file.
 	 */
 	public static void saveShops() {
 		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
@@ -749,7 +749,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Initializes the dominions HashMap based on the contents of dominions.txt.
+	 * Initializes the dominions list based on the contents of dominions.txt.
 	 */
 	public static void loadDominions() {
 
@@ -817,7 +817,7 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Saves the contents of the dominions HashMap to the dominions.txt file.
+	 * Saves the contents of the dominions list to the dominions.txt file.
 	 */
 	public static void saveDominions() {
 		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
@@ -894,5 +894,114 @@ public class PersistenceUtils {
 			}
 		}
 	}
+
+	/**
+	 * Initializes the warps list based on the contents of warps.txt.
+	 */
+	public static void loadWarps() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "warps.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the warps file...");
+			List<Home> warps = new ArrayList<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// warpName|worldName|x|y|z|yaw|pitch|icon
+				String[] fields = row.split("\\|");
+
+				String warpName = fields[0];
+				String worldName = fields[1];
+				double x = Double.parseDouble(fields[2]);
+				double y = Double.parseDouble(fields[3]);
+				double z = Double.parseDouble(fields[4]);
+				float yaw = Float.parseFloat(fields[5]);
+				float pitch = Float.parseFloat(fields[6]);
+				Material icon = Material.valueOf(fields[7]);
+
+				Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+				Home warp = new Home(warpName, location, icon);
+				warps.add(warp);
+			}
+			AranarthUtils.setWarps(warps);
+			Bukkit.getLogger().info("All warps have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the warps!");
+		}
+	}
+
+	/**
+	 * Saves the contents of the warps list to the warps.txt file.
+	 */
+	public static void saveWarps() {
+		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
+		if (playerShops != null) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "warps.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new warps.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of warps.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					writer.write("#warpName|worldName|x|y|z|yaw|pitch|icon\n");
+
+					for (Home warp : AranarthUtils.getWarps()) {
+						String warpName = warp.getHomeName();
+						String worldName = warp.getLocation().getWorld().getName();
+						String x = warp.getLocation().getX() + "";
+						String y = warp.getLocation().getY() + "";
+						String z = warp.getLocation().getZ() + "";
+						String yaw = warp.getLocation().getYaw() + "";
+						String pitch = warp.getLocation().getPitch() + "";
+						String icon = warp.getIcon().name();
+
+						String row = warpName + "|" + worldName + "|" + x + "|" + y + "|" + z
+								+ "|" + yaw + "|" + pitch + "|" + icon + "\n";
+						writer.write(row);
+					}
+
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the warps");
+				}
+			}
+		}
+	}
+
+
 
 }

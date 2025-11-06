@@ -61,14 +61,7 @@ public class AranarthUtils {
 	private static int cherryParticleDelay;
 	private static Weather weather;
 	private static final List<UUID> mutedPlayers = new ArrayList<>();
-
-	public AranarthUtils(boolean isServerStarting) {
-		if (isServerStarting) {
-			PersistenceUtils.loadHomepads();
-		} else {
-			PersistenceUtils.saveHomepads();
-		}
-	}
+	private static List<Home> warps = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -1532,4 +1525,37 @@ public class AranarthUtils {
 			}
 		});
 	}
+
+	/**
+	 * Provides the list of warps.
+	 * @return The list of warps.
+	 */
+	public static List<Home> getWarps() {
+		return warps;
+	}
+
+	/**
+	 * Updates the list of warps.
+	 * @param newWarps The list of warps.
+	 */
+	public static void setWarps(List<Home> newWarps) {
+		warps = newWarps;
+	}
+
+	/**
+	 * Adds a new warp to the list of warps.
+	 * @param warp The new warp.
+	 */
+	public static void addWarp(Home warp) {
+		warps.add(warp);
+	}
+
+	/**
+	 * Removes a warp from the list of warps.
+	 * @param warp The warp to be removed.
+	 */
+	public static void removeWarp(Home warp) {
+		warps.remove(warp);
+	}
+
 }

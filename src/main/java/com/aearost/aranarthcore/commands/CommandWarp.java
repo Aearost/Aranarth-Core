@@ -1,7 +1,11 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * Allows the player to warp to the input warp name.
@@ -13,8 +17,77 @@ public class CommandWarp {
 	 * @param args The arguments of the command.
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
-		sender.sendMessage(ChatUtils.chatMessage("&4This feature is not currently implemented."));
-		return true;
-	}
+		if (sender instanceof Player player) {
+			if (args.length == 1) {
+				// GUI for warps
+				return true;
+			} else if (args.length == 2) {
+				if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("delete")) {
+					if (player.hasPermission("aranarth.warp.modify")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou must specify a warp name"));
+						return true;
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+						return true;
+					}
+				} else {
+					for (Home warp : AranarthUtils.getWarps()) {
+						if (ChatUtils.stripColorFormatting(warp.getHomeName()).equalsIgnoreCase(args[1])) {
+							player.teleport(warp.getLocation());
+							AranarthUtils.playTeleportSound(player);
+							player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getHomeName()));
+							return true;
+						}
+					}
+					player.sendMessage(ChatUtils.chatMessage("&cThe warp &e" + args[1] + " &ccould not be found!"));
+					return true;
+				}
+			} else {
+				if (args[1].equalsIgnoreCase("create")) {
+					if (player.hasPermission("aranarth.warp.modify")) {
+						for (Home warp : AranarthUtils.getWarps()) {
+							if (ChatUtils.stripColorFormatting(warp.getHomeName()).equalsIgnoreCase(args[2])) {
+								player.sendMessage(ChatUtils.chatMessage("&cThe warp &e" + args[2] + " &calready exists!"));
+								return true;
+							}
+						}
 
+						Home warp = new Home(args[2], player.getLocation(), Material.BARRIER);
+						AranarthUtils.addWarp(warp);
+						player.sendMessage(ChatUtils.chatMessage("&7You have added the warp &e" + warp.getHomeName()));
+						return true;
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+						return true;
+					}
+				} else if (args[1].equalsIgnoreCase("delete")) {
+					if (player.hasPermission("aranarth.warp.modify")) {
+						Home warpToDelete = null;
+						for (Home warp : AranarthUtils.getWarps()) {
+							if (ChatUtils.stripColorFormatting(warp.getHomeName()).equalsIgnoreCase(args[2])) {
+								warpToDelete = warp;
+								break;
+							}
+						}
+
+						if (warpToDelete != null) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have removed the warp &e" + warpToDelete.getHomeName()));
+							AranarthUtils.removeWarp(warpToDelete);
+							return true;
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cThe warp &e" + args[2] + " &ccould not be found!"));
+							return true;
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+						return true;
+					}
+				}
+			}
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			return true;
+		}
+		return false;
+	}
 }
