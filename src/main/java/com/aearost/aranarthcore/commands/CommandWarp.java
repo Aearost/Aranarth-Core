@@ -20,6 +20,10 @@ public class CommandWarp {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 1) {
+				if (AranarthUtils.getWarps().isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&7There are currently no warps"));
+					return true;
+				}
 				GuiWarps gui = new GuiWarps(player);
 				gui.openGui();
 				return true;
