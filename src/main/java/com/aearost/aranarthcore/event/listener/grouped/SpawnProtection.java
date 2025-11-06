@@ -3,7 +3,9 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,7 +16,7 @@ import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.entity.EntitySpawnEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.*;
 
 /**
  * Prevents crops from being trampled by both players and other mobs
@@ -135,6 +137,69 @@ public class SpawnProtection implements Listener {
 	public void onMobSpawn(EntitySpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
 			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Prevents players from enabling their bending at spawn.
+	 */
+	@EventHandler
+	public void onToggleBending(PlayerCommandPreprocessEvent e) {
+		Player player = e.getPlayer();
+		if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+			String[] parts = e.getMessage().split(" ");
+			if (parts.length > 1) {
+				if (parts[0].startsWith("/b")) {
+					if (parts[1].startsWith("t")) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending at Spawn!"));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Automatically toggles the player's bending based on their movement to and from spawn.
+	 */
+	@EventHandler
+	public void onExitSpawn(PlayerMoveEvent e) {
+		toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+	}
+
+	/**
+	 * Automatically toggles the player's bending based on their teleportation to and from spawn.
+	 */
+	@EventHandler
+	public void onTeleportFromSpawn(PlayerTeleportEvent e) {
+		toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+	}
+
+	/**
+	 * Handles the actual toggling of the player's bending based on movement or teleportation to and from spawn.
+	 * @param player The player.
+	 * @param from The player's previous location before the movement or teleportation.
+	 * @param to The player's previous location after the movement or teleportation.
+	 */
+	private void toggleBendingForLocation(Player player, Location from, Location to) {
+		boolean fromSpawn = AranarthUtils.isSpawnLocation(from.getBlock().getLocation());
+		boolean toSpawn = AranarthUtils.isSpawnLocation(to.getBlock().getLocation());
+
+		// Leaving spawn
+		if (fromSpawn && !toSpawn) {
+			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+			if (!bPlayer.isToggled()) {
+				bPlayer.toggleBending();
+				return;
+			}
+		}
+
+		// Consistently keep bending disabled at spawn
+		if (AranarthUtils.isSpawnLocation(to)) {
+			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+			if (bPlayer.isToggled()) {
+				bPlayer.toggleBending();
+			}
 		}
 	}
 }

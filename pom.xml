@@ -82,5 +82,12 @@
             <artifactId>snakeyaml</artifactId>
             <version>2.2</version>
         </dependency>
+        <!--  ProjectKorra  -->
+        <dependency>
+            <groupId>com.projectkorra</groupId>
+            <artifactId>projectkorra</artifactId>
+            <version>1.12.1-PRE-RELEASE-1</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
