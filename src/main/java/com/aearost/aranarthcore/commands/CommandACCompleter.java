@@ -460,9 +460,16 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 2) {
 					if (args[1].isEmpty()) {
 						displayedOptions.add("remove");
-						displayedOptions.add("remove");
+						displayedOptions.add("name");
 						displayedOptions.add("gradient");
 						displayedOptions.add("gradientbold");
+					} else if ("gradient".startsWith(args[1])) {
+						displayedOptions.add("gradient");
+						displayedOptions.add("gradientbold");
+					} else if ("gradientbold".startsWith(args[1])) {
+						displayedOptions.add("gradientbold");
+					} else if ("remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
 					}
 				} else if (args.length > 2) {
 					if (args[1].startsWith("gradient")) {
