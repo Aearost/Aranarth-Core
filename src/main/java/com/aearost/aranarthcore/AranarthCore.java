@@ -136,7 +136,7 @@ public class AranarthCore extends JavaPlugin {
 		new PotionConsumeListener(this);
 		new PlayerRespawnEventListener(this);
 		new DominionInteract(this);
-		new SpawnInteract(this);
+		new SpawnProtection(this);
 		new PortalEventListener(this);
 
 		// Single-purpose and single-event event listeners
