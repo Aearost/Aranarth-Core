@@ -1244,7 +1244,7 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
 		Home homeToDelete = null;
 		for (Home home : aranarthPlayer.getHomes()) {
-			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getHomeName()))) {
+			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
 				homeToDelete = home;
 			}
 		}

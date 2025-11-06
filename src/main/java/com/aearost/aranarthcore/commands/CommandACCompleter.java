@@ -373,7 +373,7 @@ public class CommandACCompleter implements TabCompleter {
 					if (args.length == 1) {
 						// Show all homes
 						for (Home home : aranarthPlayer.getHomes()) {
-							displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
+							displayedOptions.add(ChatUtils.stripColorFormatting(home.getName()));
 						}
 					} else {
 						// Display all homes starting with what's entered, otherwise show all
@@ -386,15 +386,15 @@ public class CommandACCompleter implements TabCompleter {
 									argsAsSingleString.append(" ");
 								}
 							}
-							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
-								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
+							if (ChatUtils.stripColorFormatting(home.getName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getName()));
 								hasResults = true;
 							}
 						}
 						// If there were no results, show all homes
 						if (!hasResults) {
 							for (Home home : aranarthPlayer.getHomes()) {
-								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getName()));
 							}
 						}
 					}
@@ -419,12 +419,12 @@ public class CommandACCompleter implements TabCompleter {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (argsAsSingleString.isEmpty()) {
 						for (Home home : aranarthPlayer.getHomes()) {
-							displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
+							displayedOptions.add(ChatUtils.stripColorFormatting(home.getName()));
 						}
 					} else {
 						for (Home home : aranarthPlayer.getHomes()) {
-							if (ChatUtils.stripColorFormatting(home.getHomeName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
-								displayedOptions.add(ChatUtils.stripColorFormatting(home.getHomeName()));
+							if (ChatUtils.stripColorFormatting(home.getName()).toLowerCase().startsWith(argsAsSingleString.toString().toLowerCase())) {
+								displayedOptions.add(ChatUtils.stripColorFormatting(home.getName()));
 							}
 						}
 					}

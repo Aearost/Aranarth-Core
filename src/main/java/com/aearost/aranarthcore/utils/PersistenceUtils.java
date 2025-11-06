@@ -114,7 +114,7 @@ public class PersistenceUtils {
 					writer.write("#homeName|worldName|x|y|z|yaw|pitch|icon\n");
 
 					for (Home homepad : homes) {
-						String homeName = homepad.getHomeName();
+						String homeName = homepad.getName();
 						String worldName = homepad.getLocation().getWorld().getName();
 						String x = homepad.getLocation().getX() + "";
 						String y = homepad.getLocation().getY() + "";
@@ -341,7 +341,7 @@ public class PersistenceUtils {
 						List<String> homes = new ArrayList<>();
 						for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
 							Home home = aranarthPlayer.getHomes().get(i);
-							String name = home.getHomeName();
+							String name = home.getName();
 							String worldName = home.getLocation().getWorld().getName();
 							double x = home.getLocation().getX();
 							double y = home.getLocation().getY();
@@ -980,7 +980,7 @@ public class PersistenceUtils {
 					writer.write("#warpName|worldName|x|y|z|yaw|pitch|icon\n");
 
 					for (Home warp : AranarthUtils.getWarps()) {
-						String warpName = warp.getHomeName();
+						String warpName = warp.getName();
 						String worldName = warp.getLocation().getWorld().getName();
 						String x = warp.getLocation().getX() + "";
 						String y = warp.getLocation().getY() + "";

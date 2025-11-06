@@ -10,12 +10,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-public class GuiHomes {
+public class GuiWarps {
 
 	private final Player player;
 	private final Inventory initializedGui;
 
-	public GuiHomes(Player player) {
+	public GuiWarps(Player player) {
 		this.player = player;
 		this.initializedGui = initializeGui(player);
 	}
@@ -30,8 +30,8 @@ public class GuiHomes {
 	private Inventory initializeGui(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Inventory gui = null;
-		int guiSize = aranarthPlayer.getHomes().size();
-		String guiName = "Your Homes";
+		int guiSize = AranarthUtils.getWarps().size();
+		String guiName = "Warps";
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row
@@ -41,10 +41,10 @@ public class GuiHomes {
 
 		gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
-		for (Home home : aranarthPlayer.getHomes()) {
-			ItemStack homeItem = new ItemStack(home.getIcon(), 1);
+		for (Home warp : AranarthUtils.getWarps()) {
+			ItemStack homeItem = new ItemStack(warp.getIcon(), 1);
 			ItemMeta homeItemMeta = homeItem.getItemMeta();
-			homeItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + home.getName()));
+			homeItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + warp.getName()));
 			homeItem.setItemMeta(homeItemMeta);
 			gui.addItem(homeItem);
 		}

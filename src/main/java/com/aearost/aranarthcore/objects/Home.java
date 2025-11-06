@@ -4,16 +4,16 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 
 /**
- * Handles all necessary functionality relating to a homepad on Aranarth.
+ * Handles all necessary functionality relating to homes in Aranarth.
  */
 public class Home {
 
-	private final String homeName;
+	private final String name;
 	private Location location;
 	private final Material icon;
 	
 	public Home(String homeName, Location location, Material icon) {
-		this.homeName = homeName;
+		this.name = homeName;
 		this.location = location;
 		this.icon = icon;
 	}
@@ -22,8 +22,8 @@ public class Home {
 	 * Provides the current home name.
 	 * @return the current home name.
 	 */
-	public String getHomeName() {
-		return homeName;
+	public String getName() {
+		return name;
 	}
 
 	/**

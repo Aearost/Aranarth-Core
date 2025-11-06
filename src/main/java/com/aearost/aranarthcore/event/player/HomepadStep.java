@@ -26,7 +26,7 @@ public class HomepadStep {
 			if (!isStandingOnHomePad) {
 				// If the current location is a home pad
 				if (Objects.nonNull(AranarthUtils.getHomepad(e.getTo()))) {
-					if (!AranarthUtils.getHomepad(e.getTo()).getHomeName().equals("NEW")) {
+					if (!AranarthUtils.getHomepad(e.getTo()).getName().equals("NEW")) {
 						aranarthPlayer.setIsStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
