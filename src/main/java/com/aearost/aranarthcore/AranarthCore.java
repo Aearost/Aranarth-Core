@@ -38,7 +38,6 @@ public class AranarthCore extends JavaPlugin {
 		initializeCommands();
 		initializeItems();
 
-
 		// Sets default storm values
 		AranarthUtils.setWeather(Weather.CLEAR);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
@@ -97,6 +96,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadShops();
 		PersistenceUtils.loadLockedContainers();
 		PersistenceUtils.loadDominions();
+		PersistenceUtils.loadWarps();
 	}
 
 	/**
@@ -313,6 +313,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveShops();
 		PersistenceUtils.saveLockedContainers();
 		PersistenceUtils.saveDominions();
+		PersistenceUtils.saveWarps();
 
 		Bukkit.resetRecipes();
 	}
