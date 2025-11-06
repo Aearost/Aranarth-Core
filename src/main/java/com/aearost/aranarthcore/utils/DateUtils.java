@@ -875,7 +875,7 @@ public class DateUtils {
 					// Only add locations in loaded chunks
 					if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
 
-					if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+					if (AranarthUtils.isSpawnLocation(loc) && world.getName().equals("world")) {
 						continue;
 					}
 
@@ -1024,7 +1024,7 @@ public class DateUtils {
 			// Loop over columns within an input block radius
 			for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
 				for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
-					if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+					if (AranarthUtils.isSpawnLocation(loc) && world.getName().equals("world")) {
 						continue;
 					}
 
@@ -1212,7 +1212,7 @@ public class DateUtils {
 											int x = meltLoc.getBlockX();
 											int z = meltLoc.getBlockZ();
 
-											if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
+											if (AranarthUtils.isSpawnLocation(loc) && world.getName().equals("world")) {
 												continue;
 											}
 
@@ -1686,7 +1686,7 @@ public class DateUtils {
 				int radius = 50;
 				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
 					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
-						if (AranarthUtils.isSpawnLocation(x, z) && loc.getWorld().getName().equals("world")) {
+						if (AranarthUtils.isSpawnLocation(loc) && loc.getWorld().getName().equals("world")) {
 							continue;
 						}
 						Block block = loc.getWorld().getHighestBlockAt(x, z);

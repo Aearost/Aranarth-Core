@@ -20,8 +20,8 @@ public class SpawnChangeLocation {
 		if (e.getTo().getWorld().getName().startsWith("world")) {
 			Location from = e.getFrom();
 			Location to = e.getTo();
-			boolean fromSpawn = AranarthUtils.isSpawnLocation(from.getBlockX(), from.getBlockZ());
-			boolean toSpawn = AranarthUtils.isSpawnLocation(to.getBlockX(), to.getBlockZ());
+			boolean fromSpawn = AranarthUtils.isSpawnLocation(from.getBlock().getLocation());
+			boolean toSpawn = AranarthUtils.isSpawnLocation(to.getBlock().getLocation());
 
 			// If it's the same location
 			if (from.getX() == to.getX() && from.getZ() == to.getZ() && from.getWorld().getName().equals(to.getWorld().getName())) {
