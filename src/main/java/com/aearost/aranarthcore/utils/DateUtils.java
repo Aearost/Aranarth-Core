@@ -761,52 +761,50 @@ public class DateUtils {
 
 				// Handle the snow effects
 				if (AranarthUtils.getWeather() == Weather.SNOW || AranarthUtils.getWeather() == Weather.CLEAR) {
-					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
-						for (Player player : Bukkit.getOnlinePlayers()) {
-							if (player != null) {
-								Location loc = player.getLocation();
-								// Handles applying the snow functionality
-								if (AranarthUtils.getWeather() == Weather.SNOW) {
-									// Only apply logic in the survival world
-									if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
-										continue;
-									}
-									// Do not proceed if the chunk is not yet loaded
-									if (!loc.getChunk().isLoaded()) {
-										continue;
-									}
-									// Determines if the player is underground or not
-									boolean areAllBlocksAir = true;
-									Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-									if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-										areAllBlocksAir = false;
-									}
-									// If it is a warm biome, do not apply snow logic
-									if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
-										// Only apply particles if the player is exposed to air
-										if (areAllBlocksAir) {
-											// If it is a temperate or cold biome
-											if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-												int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
-												int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (player != null) {
+							Location loc = player.getLocation();
+							// Handles applying the snow functionality
+							if (AranarthUtils.getWeather() == Weather.SNOW) {
+								// Only apply logic in the survival world
+								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+									continue;
+								}
+								// Do not proceed if the chunk is not yet loaded
+								if (!loc.getChunk().isLoaded()) {
+									continue;
+								}
+								// Determines if the player is underground or not
+								boolean areAllBlocksAir = true;
+								Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+								if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+									areAllBlocksAir = false;
+								}
+								// If it is a warm biome, do not apply snow logic
+								if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
+									// Only apply particles if the player is exposed to air
+									if (areAllBlocksAir) {
+										// If it is a temperate or cold biome
+										if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+											int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+											int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
 
-												loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
-												loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
-											}
+											loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
+											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
 										}
 									}
-									// Attempts to generate snow only once per second
-									if (runs % 5 == 0) {
-										generateSnow(player, loc, bigFlakeDensity);
-									}
 								}
-								// Generate ice regardless of if it is snowing
+								// Attempts to generate snow only once per second
 								if (runs % 5 == 0) {
-									generateIce(loc, bigFlakeDensity);
+									generateSnow(player, loc, bigFlakeDensity);
 								}
 							}
+							// Generate ice regardless of if it is snowing
+							if (runs % 5 == 0) {
+								generateIce(loc, bigFlakeDensity);
+							}
 						}
-					});
+					}
 				}
 				runs++;
 			}
@@ -866,14 +864,17 @@ public class DateUtils {
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
-
 		int snowRadius = 250;
 
-		// --- SWITCH BACK TO SYNC ---
-		Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+			List<Block> toSnow = new ArrayList<>();
+
 			// Loop over columns within an input block radius
 			for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
 				for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
+					// Only add locations in loaded chunks
+					if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
+
 					if (AranarthUtils.isSpawnLocation(x, z) && world.getName().equals("world")) {
 						continue;
 					}
@@ -931,7 +932,14 @@ public class DateUtils {
 					if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
 						continue;
 					}
+					toSnow.add(above);
+				}
+			}
 
+			// --- SWITCH BACK TO SYNC ---
+			Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+				for (Block above : toSnow) {
+					Block surfaceBlock = above.getRelative(BlockFace.DOWN);
 					// Places the snow or adds layer
 					if (above.getBlockData() instanceof Snow snow) {
 						if (snow.getLayers() < 4) {
@@ -945,6 +953,7 @@ public class DateUtils {
 
 					if (surfaceBlock.getType().name().endsWith("LEAVES")) {
 						Location location = surfaceBlock.getLocation();
+
 						// Keep going down to apply to the next blocks
 						for (int i = location.getBlockY(); i > 61; i--) {
 							Block block = location.getWorld().getBlockAt(location.getBlockX(), i, location.getBlockZ());
@@ -983,7 +992,7 @@ public class DateUtils {
 						}
 					}
 				}
-			}
+			});
 		});
 	}
 
@@ -1010,8 +1019,8 @@ public class DateUtils {
 		World world = loc.getWorld();
 		int iceRadius = 250;
 
-		// --- SWITCH BACK TO SYNC ---
-		Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+			List<Block> toFreeze = new ArrayList<>();
 			// Loop over columns within an input block radius
 			for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
 				for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
@@ -1055,11 +1064,18 @@ public class DateUtils {
 					if (surfaceBlock.getType() != Material.WATER) {
 						continue;
 					}
+					toFreeze.add(surfaceBlock);
+				}
+			}
+
+			// --- SWITCH BACK TO SYNC ---
+			Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+				for (Block surfaceBlock : toFreeze) {
 					if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
 						surfaceBlock.setType(Material.ICE);
 					}
 				}
-			}
+			});
 		});
 	}
 
