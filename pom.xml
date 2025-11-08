@@ -63,6 +63,10 @@
             <id>neetgames</id>
             <url>https://nexus.neetgames.com/repository/maven-releases/</url>
         </repository>
+        <repository>
+            <id>Scarsz-Nexus</id>
+            <url>https://nexus.scarsz.me/content/groups/public/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -87,6 +91,12 @@
             <groupId>com.projectkorra</groupId>
             <artifactId>projectkorra</artifactId>
             <version>1.12.1-PRE-RELEASE-1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.discordsrv</groupId>
+            <artifactId>discordsrv</artifactId>
+            <version>1.28.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

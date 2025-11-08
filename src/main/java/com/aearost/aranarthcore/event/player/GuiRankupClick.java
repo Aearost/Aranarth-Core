@@ -4,11 +4,15 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.awt.*;
 import java.text.NumberFormat;
 
 /**
@@ -52,6 +56,19 @@ public class GuiRankupClick {
 						|| ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")) {
 					aOrAn = "an";
 				}
+
+				// DiscordSRV message
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+//				EmbedBuilder embed = new EmbedBuilder()
+//						.setThumbnail(url)
+//						.setTitle("**" + player.getName() + "** has become " + aOrAn + " **" + ChatUtils.stripColorFormatting(rankDisplay) + "**!")
+//						.setColor(Color.MAGENTA);
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has become " + aOrAn + " " + ChatUtils.stripColorFormatting(rankDisplay) + "!", null, url)
+						.setColor(Color.CYAN);
+				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+				channel.sendMessageEmbeds(embed.build()).queue();
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

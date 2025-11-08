@@ -28,16 +28,18 @@ public class PermissionUtils {
 
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-		for (Element element : bendingPlayer.getElements()) {
-			for (Element.SubElement subElement : Element.getSubElements(element)) {
-				if (bendingPlayer.hasSubElementPermission(subElement)) {
-					bendingPlayer.addSubElement(subElement);
-				} else {
-					bendingPlayer.getSubElements().remove(subElement);
+		if (bendingPlayer != null) {
+			for (Element element : bendingPlayer.getElements()) {
+				for (Element.SubElement subElement : Element.getSubElements(element)) {
+					if (bendingPlayer.hasSubElementPermission(subElement)) {
+						bendingPlayer.addSubElement(subElement);
+					} else {
+						bendingPlayer.getSubElements().remove(subElement);
+					}
 				}
 			}
+			bendingPlayer.removeUnusableAbilities();
 		}
-		bendingPlayer.removeUnusableAbilities();
 
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
