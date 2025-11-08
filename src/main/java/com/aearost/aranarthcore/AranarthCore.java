@@ -115,7 +115,6 @@ public class AranarthCore extends JavaPlugin {
 		new EntityPickupItemEventListener(this);
 		new CreatureSpawnEventListener(this);
 		new BlockGrowEventListener(this);
-		new ItemSpawnEventListener(this);
 		new BlockFadeEventListener(this);
 		new PlayerItemConsumeEventListener(this);
 		new EntitySpawnEventListener(this);
@@ -138,12 +137,12 @@ public class AranarthCore extends JavaPlugin {
 		new DominionInteract(this);
 		new SpawnProtection(this);
 		new PortalEventListener(this);
+		new ArenaProtection(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
 		new PlayerServerQuitListener(this);
 		new PlayerChatListener(this);
-		new ArenaHungerLossPreventListener(this);
 		new MobDestroyDoorListener(this);
 		new PlayerTeleportBetweenWorldsListener(this);
 		new ExpGainPreventListener(this);
