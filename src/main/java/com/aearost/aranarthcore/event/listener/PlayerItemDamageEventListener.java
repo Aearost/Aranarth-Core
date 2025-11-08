@@ -2,7 +2,6 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.DurabilityDecreaseWarning;
-import com.aearost.aranarthcore.event.world.ArenaDurabilityPrevent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,10 +18,6 @@ public class PlayerItemDamageEventListener implements Listener {
 
     @EventHandler
     public void onItemDamage(PlayerItemDamageEvent e) {
-        if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
-            new ArenaDurabilityPrevent().execute(e);
-        } else {
-            new DurabilityDecreaseWarning().execute(e);
-        }
+        new DurabilityDecreaseWarning().execute(e);
     }
 }

@@ -37,6 +37,7 @@ Features
 [+] Added sound effect when opening a Quiver
 [~] Fixed feedback message for /ac give sender
 [~] Seemingly fixed major lag spikes from teleporting to unloaded chunks due to DateUtils
+[~] Fixed bug where vines were still growing in the arena world
 
 Miscellaneous
 - Removed redundant logs from weather
@@ -48,3 +49,4 @@ Miscellaneous
 - Fixed issue where nickname was null and caused errors in saving Aranarth Players
 - Restructured the logic of prefix and message formatting into ChatUtils
 - Added support for all admin council ranks to use /ac balance to update a player's balance
+- Centralized all arena logic in one grouped event listener class
