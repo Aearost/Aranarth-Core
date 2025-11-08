@@ -13,9 +13,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.*;
 
 /**
@@ -134,7 +134,7 @@ public class SpawnProtection implements Listener {
 	 * Prevents mobs from spawning at spawn.
 	 */
 	@EventHandler
-	public void onMobSpawn(EntitySpawnEvent e) {
+	public void onMobSpawn(CreatureSpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
 			e.setCancelled(true);
 		}
