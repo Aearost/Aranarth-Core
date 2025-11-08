@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.Element;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
@@ -19,18 +21,33 @@ public class PermissionUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 
-		setDefaultPermissions(perms);
+		setDefaultPermissions(player, perms);
 		setRankPermissions(perms, aranarthPlayer.getRank());
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
+
+		// Updates the sub-elements and abilities according to their current rank
+		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		for (Element element : bendingPlayer.getElements()) {
+			for (Element.SubElement subElement : Element.getSubElements(element)) {
+				if (bendingPlayer.hasSubElementPermission(subElement)) {
+					bendingPlayer.addSubElement(subElement);
+				} else {
+					bendingPlayer.getSubElements().remove(subElement);
+				}
+			}
+		}
+		bendingPlayer.removeUnusableAbilities();
+
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
 
 	/**
 	 * Sets the default permissions for all players.
+	 * @param player The player whose permissions are being evaluated.
 	 * @param perms The permissions the player will have access to.
 	 */
-	private static void setDefaultPermissions(PermissionAttachment perms) {
+	private static void setDefaultPermissions(Player player, PermissionAttachment perms) {
 		perms.setPermission("bending.command.rechoose", true);
 
 		// Disable sub-elements
@@ -41,6 +58,8 @@ public class PermissionUtils {
 		perms.setPermission("bending.earth.metalbending", false);
 		perms.setPermission("bending.earth.lavabending", false);
 		perms.setPermission("bending.earth.sandbending", false);
+		perms.setPermission("bending.water.bloodbending", false);
+		perms.setPermission("bending.water.bloodbending.anytime", false);
 
 		// Disable abilities
 		perms.setPermission("bending.ability.waterarms", false);
