@@ -7,7 +7,10 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 
 import java.text.NumberFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Lists the players with the highest balances.
