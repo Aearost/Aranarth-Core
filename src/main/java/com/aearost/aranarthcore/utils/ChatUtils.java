@@ -1,8 +1,12 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -257,5 +261,94 @@ public class ChatUtils {
 			return displayName;
 		}
 		return messages[randomInt];
+	}
+
+	/**
+	 * Formats the player's prefix based on their current ranks.
+	 * @param player The player sending the message.
+	 * @return The formatted prefix.
+	 */
+	public static String formatChatPrefix(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		String nickname = aranarthPlayer.getNickname();
+		String prefix = "&l⊰&r";
+
+		prefix += AranarthUtils.getSaintRank(aranarthPlayer);
+		prefix += AranarthUtils.getArchitectRank(aranarthPlayer);
+		prefix += AranarthUtils.getCouncilRank(aranarthPlayer);
+		prefix += AranarthUtils.getRank(aranarthPlayer);
+
+		if (!nickname.isEmpty()) {
+			prefix += nickname + "&r";
+		} else {
+			prefix += player.getName();
+		}
+
+		prefix += "&l⊱ &r";
+		prefix = ChatUtils.translateToColor(prefix);
+		return prefix;
+	}
+
+	/**
+	 * Formats the player's message based on their permissions.
+	 * @param player The player sending the message.
+	 * @param msg The message to be formatted.
+	 * @return The formatted message.
+	 */
+	public static String formatChatMessage(Player player, String msg) {
+		if (player.hasPermission("aranarth.chat.hex")) {
+			msg = ChatUtils.translateToColor(msg);
+		} else if (player.hasPermission("aranarth.chat.color")) {
+			msg = ChatUtils.playerColorChat(msg);
+		}
+		return msg;
+	}
+
+	/**
+	 * Confirms if the player is currently muted.
+	 * @param player The player to be verified.
+	 * @return Confirmation if the player is currently muted.
+	 */
+	public static boolean isPlayerMuted(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+		// YYMMDDhhmm
+		String muteEndDate = aranarthPlayer.getMuteEndDate();
+
+		if (muteEndDate.isEmpty()) {
+			return false;
+		}
+		if (muteEndDate.equals("none")) {
+			return true;
+		}
+
+		LocalDateTime currentDate = LocalDateTime.now();
+		LocalDateTime definedMuteDate = null;
+		try {
+			int year = Integer.parseInt(muteEndDate.substring(0, 2));
+			int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
+			int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
+			int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
+			int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
+			definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
+		} catch (NumberFormatException e) {
+			Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+			return false;
+		}
+
+		return definedMuteDate.isBefore(currentDate);
+	}
+
+	/**
+	 * Trims the leading zero if the value is only one digit.
+	 * @param value The value.
+	 * @return The trimmed value.
+	 */
+	private static String trimZero(String value) {
+		if (value.startsWith("0")) {
+			return value.substring(1);
+		} else {
+			return value;
+		}
 	}
 }
