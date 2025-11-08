@@ -50,7 +50,9 @@ public class CommandBalance {
 					}
 				} else if (args.length == 3) {
 					if (sender instanceof Player player) {
-						if (!player.getName().equals("Aearost")) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						// Only Council admins can run this command
+						if (aranarthPlayer.getCouncilRank() != 3) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
 							return true;
 						}

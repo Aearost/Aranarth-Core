@@ -47,3 +47,4 @@ Miscellaneous
 - Added support for nether and end portals across both Survival and SMP worlds
 - Fixed issue where nickname was null and caused errors in saving Aranarth Players
 - Restructured the logic of prefix and message formatting into ChatUtils
+- Added support for all admin council ranks to use /ac balance to update a player's balance
