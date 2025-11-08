@@ -15,6 +15,7 @@ Features
 [+] Added in /ac particles to control how many Aranarth particles will be displayed
 [+] Added in /ac seen to show the time the player was last online in the sender's timezone
 [+] Added in /ac warp functionality and warp persistence
+[+] Added in /ac msg command
 [+] Updated chat format to support ranks and pronouns
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases
@@ -45,3 +46,4 @@ Miscellaneous
 - Corrected names of Homepads and Shops across all files, methods, etc
 - Added support for nether and end portals across both Survival and SMP worlds
 - Fixed issue where nickname was null and caused errors in saving Aranarth Players
+- Restructured the logic of prefix and message formatting into ChatUtils
