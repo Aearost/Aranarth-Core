@@ -273,6 +273,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "warp".startsWith(args[0])) {
 			displayedOptions.add("warp");
+		} else if (!args[0].isEmpty() && "msg".startsWith(args[0])) {
+			displayedOptions.add("msg");
 		}
 		return displayedOptions;
 	}
@@ -294,7 +296,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay" -> {
+			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay", "msg" -> {
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
@@ -315,8 +317,23 @@ public class CommandACCompleter implements TabCompleter {
 						}
 					}
 				} else if (args.length == 3) {
-					if (args[2].isEmpty()) {
-						displayedOptions.add("amount");
+					if (args[0].equalsIgnoreCase("pay")) {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("amount");
+						}
+					} else if (args[0].equalsIgnoreCase("balance")) {
+						if (sender instanceof Player player) {
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							if (aranarthPlayer.getCouncilRank() == 3) {
+								if (args[2].isEmpty()) {
+									displayedOptions.add("amount");
+								}
+							}
+						}
+					} else if (args[0].equalsIgnoreCase("msg")) {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("message");
+						}
 					}
 				}
 			}
@@ -578,6 +595,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("particles");
 		displayedOptions.add("seen");
 		displayedOptions.add("warp");
+		displayedOptions.add("msg");
 		return displayedOptions;
 	}
 
