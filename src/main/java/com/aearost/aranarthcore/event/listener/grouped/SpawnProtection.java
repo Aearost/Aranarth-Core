@@ -202,4 +202,20 @@ public class SpawnProtection implements Listener {
 			}
 		}
 	}
+
+	/**
+	 * Prevents players from dealing and taking damage at spawn.
+	 */
+	@EventHandler
+	private void onDamage(EntityDamageEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+			if (e.getEntity() instanceof Player target) {
+				if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+					attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm players at Spawn!"));
+				}
+				// Additionally prevents the target from being damaged, regardless of the source of damage
+				e.setCancelled(true);
+			}
+		}
+	}
 }
