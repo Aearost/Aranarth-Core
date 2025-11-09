@@ -186,6 +186,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("randomizer");
 				displayedOptions.add("ranks");
 				displayedOptions.add("rankup");
+				displayedOptions.add("rules");
 			} else {
 				if (args[0].equals("ra")) {
 					displayedOptions.add("randomizer");
@@ -210,6 +211,8 @@ public class CommandACCompleter implements TabCompleter {
 							}
 						} else if ("randomizer".startsWith(args[0])) {
 							displayedOptions.add("randomizer");
+						} else if ("rules".startsWith(args[0])) {
+							displayedOptions.add("rules");
 						}
 					}
 				}
@@ -596,6 +599,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("seen");
 		displayedOptions.add("warp");
 		displayedOptions.add("msg");
+		displayedOptions.add("rules");
 		return displayedOptions;
 	}
 
