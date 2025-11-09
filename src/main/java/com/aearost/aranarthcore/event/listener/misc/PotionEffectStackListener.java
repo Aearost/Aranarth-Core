@@ -121,8 +121,8 @@ public class PotionEffectStackListener implements Listener {
 				calculatedAmplifier = 2;
 			}
 		} else if (type == PotionEffectType.RESISTANCE) {
-			if (calculatedAmplifier >= 5) {
-				calculatedAmplifier = 4;
+			if (calculatedAmplifier >= 3) {
+				calculatedAmplifier = 2;
 			}
 		} else if (type == PotionEffectType.SLOWNESS) {
 			if (calculatedAmplifier >= 5) {

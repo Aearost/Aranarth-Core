@@ -8,6 +8,8 @@ import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 /**
  * Allows the player to accept a pending teleport request.
  */
@@ -26,6 +28,13 @@ public class CommandTpaccept {
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
+					try {
+						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), target.getLocation().getWorld().getName());
+					} catch (IOException e) {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+						return true;
+					}
+
 					aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 					player.teleport(target.getLocation());
 					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
@@ -44,6 +53,13 @@ public class CommandTpaccept {
 				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 				// If both players are still online
 				if (target != null) {
+					try {
+						AranarthUtils.switchInventory(player, target.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
+					} catch (IOException e) {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+						return true;
+					}
+
 					targetPlayer.setLastKnownTeleportLocation(target.getLocation());
 					AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
 					target.teleport(player.getLocation());

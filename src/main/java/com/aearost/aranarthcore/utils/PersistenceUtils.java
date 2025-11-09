@@ -339,20 +339,22 @@ public class PersistenceUtils {
 						String council = aranarthPlayer.getCouncilRank() + "";
 						String architect = aranarthPlayer.getArchitectRank() + "";
 						List<String> homes = new ArrayList<>();
-						for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
-							Home home = aranarthPlayer.getHomes().get(i);
-							String name = home.getName();
-							String worldName = home.getLocation().getWorld().getName();
-							double x = home.getLocation().getX();
-							double y = home.getLocation().getY();
-							double z = home.getLocation().getZ();
-							float yaw = home.getLocation().getYaw();
-							float pitch = home.getLocation().getPitch();
-							Material type = home.getIcon();
-							if (i == aranarthPlayer.getHomes().size() - 1) {
-								homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name());
-							} else {
-								homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name() + "___");
+						if (aranarthPlayer.getHomes() != null) {
+							for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
+								Home home = aranarthPlayer.getHomes().get(i);
+								String name = home.getName();
+								String worldName = home.getLocation().getWorld().getName();
+								double x = home.getLocation().getX();
+								double y = home.getLocation().getY();
+								double z = home.getLocation().getZ();
+								float yaw = home.getLocation().getYaw();
+								float pitch = home.getLocation().getPitch();
+								Material type = home.getIcon();
+								if (i == aranarthPlayer.getHomes().size() - 1) {
+									homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name());
+								} else {
+									homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name() + "___");
+								}
 							}
 						}
 						StringBuilder allHomesBuilder = new StringBuilder();

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,7 +65,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
-		this.randomItems = null;
+		this.randomItems = new ArrayList<>();
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = 0.00;
@@ -78,7 +79,7 @@ public class AranarthPlayer {
 		this.councilRank = 0;
 		this.architectRank = 0;
 		this.pendingDominion = null;
-		this.homes = null;
+		this.homes = new ArrayList<>();
 		this.muteEndDate = "";
 		this.pronouns = Pronouns.MALE;
 		this.teleportFromUuid = null;

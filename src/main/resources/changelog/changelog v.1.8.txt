@@ -40,6 +40,7 @@ Features
 [~] Fixed feedback message for /ac give sender
 [~] Seemingly fixed major lag spikes from teleporting to unloaded chunks due to DateUtils
 [~] Fixed bug where vines were still growing in the arena world
+[~] Decreased Resistance cap to 3 levels
 
 Miscellaneous
 - Removed redundant logs from weather

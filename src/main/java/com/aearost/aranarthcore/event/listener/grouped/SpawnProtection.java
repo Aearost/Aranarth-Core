@@ -191,17 +191,21 @@ public class SpawnProtection implements Listener {
 		// Leaving spawn
 		if (fromSpawn && !toSpawn) {
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-			if (!bPlayer.isToggled()) {
-				bPlayer.toggleBending();
-				return;
+			if (bPlayer != null) {
+				if (!bPlayer.isToggled()) {
+					bPlayer.toggleBending();
+					return;
+				}
 			}
 		}
 
 		// Consistently keep bending disabled at spawn
 		if (AranarthUtils.isSpawnLocation(to)) {
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-			if (bPlayer.isToggled()) {
-				bPlayer.toggleBending();
+			if (bPlayer != null) {
+				if (bPlayer.isToggled()) {
+					bPlayer.toggleBending();
+				}
 			}
 		}
 	}
