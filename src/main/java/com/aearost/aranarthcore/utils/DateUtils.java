@@ -3,9 +3,6 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -165,34 +162,30 @@ public class DateUtils {
 			Bukkit.broadcastMessage(messages[1]);
 			Bukkit.broadcastMessage(messages[2]);
 
+			if (isNewMonth) {
+				String description = "";
+				switch (month) {
+					case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
+					case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
+					case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
+					case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
+					case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
+					case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
+					case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
+					case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
+					case Month.FRUCTIVOR -> description = DateUtils.getFructivorDescription();
+					case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
+					case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
+					case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
+					case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
+					case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
+					case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
+				}
+			}
+
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
-					String description = "";
-					switch (month) {
-						case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
-						case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
-						case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
-						case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
-						case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
-						case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
-						case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
-						case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
-						case Month.FRUCTIVOR -> description = DateUtils.getFructivorDescription();
-						case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
-						case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
-						case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
-						case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
-						case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
-						case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
-					}
-
 					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
-					EmbedBuilder embed = new EmbedBuilder()
-							.setTitle("**The month of " + monthName + " has begun!**")
-							.setDescription(description)
-							.setColor(java.awt.Color.ORANGE);
-					TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-					channel.sendMessageEmbeds(embed.build()).queue();
 				} else {
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
