@@ -42,6 +42,8 @@ public class PlayerChatListener implements Listener {
 
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
-        e.setFormat(prefix + chatMessage);
+        String msg = prefix + chatMessage;
+        msg = msg.replaceAll("%", "%%"); // Throws exception with only one
+        e.setFormat(msg);
     }
 }
