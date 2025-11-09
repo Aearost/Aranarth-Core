@@ -60,10 +60,6 @@ public class GuiRankupClick {
 				// DiscordSRV message
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-//				EmbedBuilder embed = new EmbedBuilder()
-//						.setThumbnail(url)
-//						.setTitle("**" + player.getName() + "** has become " + aOrAn + " **" + ChatUtils.stripColorFormatting(rankDisplay) + "**!")
-//						.setColor(Color.MAGENTA);
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has become " + aOrAn + " " + ChatUtils.stripColorFormatting(rankDisplay) + "!", null, url)
 						.setColor(Color.CYAN);
