@@ -59,22 +59,25 @@ public class DiscordUtils {
 		}
 		guild.addRoleToMember(playerDiscordId, roleToAdd).queue();
 
-		String aOrAn = "a";
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
-		String[] rankNameNoBrackets = rankName.split("]");
-		rankName = rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 2);
-		if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
-			aOrAn = "an";
-		}
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			String aOrAn = "a";
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
+			String[] rankNameNoBrackets = rankName.split("]");
+			rankName = rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 2);
+			if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
+				aOrAn = "an";
+			}
 
-		String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-		EmbedBuilder embed = new EmbedBuilder()
-				.setAuthor(player.getName() + " has become " + aOrAn + " " + rankName + "!", null, url)
-				.setColor(Color.CYAN);
-		TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-		channel.sendMessageEmbeds(embed.build()).queue();
+			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor(player.getName() + " has become " + aOrAn + " " + rankName + "!", null, url)
+					.setColor(Color.CYAN);
+			TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+			channel.sendMessageEmbeds(embed.build()).queue();
+		}
     }
 
 	/**
@@ -102,14 +105,17 @@ public class DiscordUtils {
 			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
 		}
 
-		if (isSaint) {
-			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-			EmbedBuilder embed = new EmbedBuilder()
-					.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
-					.setColor(Color.MAGENTA);
-			TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-			channel.sendMessageEmbeds(embed.build()).queue();
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isSaint) {
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
+						.setColor(Color.MAGENTA);
+				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+				channel.sendMessageEmbeds(embed.build()).queue();
+			}
 		}
 	}
 
@@ -138,14 +144,17 @@ public class DiscordUtils {
 			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
 		}
 
-		if (isArchitect) {
-			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-			EmbedBuilder embed = new EmbedBuilder()
-					.setAuthor(player.getName() + " has become an Architect!", null, url)
-					.setColor(Color.YELLOW);
-			TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-			channel.sendMessageEmbeds(embed.build()).queue();
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isArchitect) {
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has become an Architect!", null, url)
+						.setColor(Color.YELLOW);
+				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+				channel.sendMessageEmbeds(embed.build()).queue();
+			}
 		}
 	}
 
@@ -189,23 +198,26 @@ public class DiscordUtils {
 			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue();
 		}
 
-		if (isHelper || isModerator || isAdmin) {
-			String rankName = "";
-			if (isAdmin) {
-				rankName = "an Admin";
-			} else if (isModerator) {
-				rankName = "a Moderator";
-			} else {
-				rankName = "a Helper";
-			}
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isHelper || isModerator || isAdmin) {
+				String rankName = "";
+				if (isAdmin) {
+					rankName = "an Admin";
+				} else if (isModerator) {
+					rankName = "a Moderator";
+				} else {
+					rankName = "a Helper";
+				}
 
-			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-			EmbedBuilder embed = new EmbedBuilder()
-					.setAuthor(player.getName() + " has become " + rankName + "!", null, url)
-					.setColor(Color.YELLOW);
-			TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-			channel.sendMessageEmbeds(embed.build()).queue();
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has become " + rankName + "!", null, url)
+						.setColor(Color.YELLOW);
+				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+				channel.sendMessageEmbeds(embed.build()).queue();
+			}
 		}
 	}
 
