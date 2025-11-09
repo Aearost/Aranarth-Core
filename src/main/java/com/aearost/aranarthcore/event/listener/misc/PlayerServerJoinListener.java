@@ -31,15 +31,6 @@ public class PlayerServerJoinListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		// Clears a player's nickname if they do not have permission for one
-		if (!player.hasPermission("aranarth.nick")) {
-			if (!AranarthUtils.getNickname(player).isEmpty()) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				aranarthPlayer.setNickname("");
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
-			}
-		}
 
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
@@ -48,6 +39,16 @@ public class PlayerServerJoinListener implements Listener {
 		// If the player changed their username
 		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
 			AranarthUtils.setUsername(player);
+		}
+
+		// Clears a player's nickname if they do not have permission for one
+		if (!player.hasPermission("aranarth.nick")) {
+			if (!AranarthUtils.getNickname(player).isEmpty()) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				aranarthPlayer.setNickname("");
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
+			}
 		}
 
 		// Unbans the player's IP if it was previously banned
