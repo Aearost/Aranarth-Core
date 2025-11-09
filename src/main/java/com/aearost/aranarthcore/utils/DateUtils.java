@@ -3,6 +3,9 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
@@ -164,7 +167,32 @@ public class DateUtils {
 
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
+					String description = "";
+					switch (month) {
+						case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
+						case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
+						case Month.VENTIVOR -> description = DateUtils.getVentivorDescription();
+						case Month.FLORIVOR -> description = DateUtils.getFlorivorDescription();
+						case Month.AESTIVOR -> description = DateUtils.getAestivorDescription();
+						case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
+						case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
+						case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
+						case Month.FRUCTIVOR -> description = DateUtils.getFructivorDescription();
+						case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
+						case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
+						case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
+						case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
+						case Month.FRIGORVOR -> description = DateUtils.getFrigorvorDescription();
+						case Month.OBSCURVOR -> description = DateUtils.getObscurvorDescription();
+					}
+
 					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+					EmbedBuilder embed = new EmbedBuilder()
+							.setTitle("**The month of " + monthName + " has begun!**")
+							.setDescription(description)
+							.setColor(java.awt.Color.ORANGE);
+					TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+					channel.sendMessageEmbeds(embed.build()).queue();
 				} else {
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
@@ -200,8 +228,7 @@ public class DateUtils {
 	public static String provideMonthName(Month month) {
 		if (month == Month.IGNIVOR) {
 			return "Ignivór";
-		}
-		else if (month == Month.AQUINVOR) {
+		} else if (month == Month.AQUINVOR) {
 			return "Aquinvór";
 		} else if (month == Month.VENTIVOR) {
 			return "Ventivór";
@@ -436,6 +463,14 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Ignivor.
+	 * @return The Description of the month.
+	 */
+	public static String getIgnivorDescription() {
+		return "The month of Ignivór represents the beginning of the new year. Players are granted passive Regeneration I, as well as passive Luck. While snowstorms are still a possibility, they are much rarer, and snow begins to melt.";
+	}
+
+	/**
 	 * Apply the effects during the second month of Aquinvor.
 	 * Players are given the Dolphin's Grace and Water Breathing effects during this month.
 	 * There is also an increased chance of rain during the month of Aquinvor.
@@ -457,6 +492,14 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Aquinvor.
+	 * @return The Description of the month.
+	 */
+	public static String getAquinvorDescription() {
+		return "The month of Aquinvór marks the springtime. Players are granted the passive effects of Dolphin's Grace, and Water Breathing. Rain falls more frequently and lasts longer than other months, melting the remaining snow.";
+	}
+
+	/**
 	 * Apply the effects during the third month of Ventiror.
 	 * Players are given the Speed I effect during this month.
 	 * Random gusts of wind can be heard during this month.
@@ -470,12 +513,28 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Ventivor.
+	 * @return The Description of the month.
+	 */
+	public static String getVentivorDescription() {
+		return "The month of Ventivór brings a wind behind your tail. The sound of wind is heard flying through the air, granting players with the passive effect of Speed I.";
+	}
+
+	/**
 	 * Apply the effects during the fourth month of Florivor.
 	 * Crops will have a chance to increase by two levels during this month.
 	 */
 	private void applyFlorivorEffects() {
 		meltSnow(3);
 		applyRain();
+	}
+
+	/**
+	 * Provides the Description of the month of Florivor.
+	 * @return The Description of the month.
+	 */
+	public static String getFlorivorDescription() {
+		return "The month of Florivór smells of flower petals drifting in the wind. Aside from the cherry leaves across the world, there is also a doubled crop growth rate.";
 	}
 
 	/**
@@ -487,11 +546,27 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Aestivor.
+	 * @return The Description of the month.
+	 */
+	public static String getAestivorDescription() {
+		return "The month of Aestivór is ridden with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 5% chance that creepers will spawn as the charged variant.";
+	}
+
+	/**
 	 * Apply the effects during the sixth month of Calorvor.
 	 */
 	private void applyCalorvorEffects() {
 		meltSnow(3);
 		applyRain();
+	}
+
+	/**
+	 * Provides the Description of the month of Calorvor.
+	 * @return The Description of the month.
+	 */
+	public static String getCalorvorDescription() {
+		return "The month of Calorvór starts off the summer. Baby animals mature at a quicker rate, and have a 50% chance of being born as a twin.";
 	}
 
 	/**
@@ -506,11 +581,27 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Ardorvor.
+	 * @return The Description of the month.
+	 */
+	public static String getArdorvorDescription() {
+		return "The month of Ardorvór is the month of flames. Forest fires start at random throughout the month, and all sources of fire deal more damage.";
+	}
+
+	/**
 	 * Apply the effects during the eighth month of Solarvor.
 	 */
 	private void applySolarvorEffects() {
 		meltSnow(4);
 		applyRain();
+	}
+
+	/**
+	 * Provides the Description of the month of Solarvor.
+	 * @return The Description of the month.
+	 */
+	public static String getSolarvorDescription() {
+		return "The month of Solarvór favours the picking of apples. Increased apple drop rates, and frequent &6God Apple Fragments &rdrops, there will be plenty for all.";
 	}
 
 	/**
@@ -522,6 +613,14 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Fructivor.
+	 * @return The Description of the month.
+	 */
+	public static String getFructivorDescription() {
+		return "The month of Fructivór is not for the lazy. Crop yields are doubled, and Farmer villagers favour the vendor by providing improved crop sell rates.";
+	}
+
+	/**
 	 * Apply the effects during the tenth month of Follivor.
 	 */
 	private void applyFollivorEffects() {
@@ -530,11 +629,27 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Follivor.
+	 * @return The Description of the month.
+	 */
+	public static String getFollivorDescription() {
+		return "The month of Follivór introduces the start of autumn. Trees provide more EXP and additional log drops, and saplings grow at quicker speeds";
+	}
+
+	/**
 	 * Apply the effects during the eleventh month of Faunivor.
 	 */
 	private void applyFaunivorEffects() {
 		meltSnow(3);
 		applyRain();
+	}
+
+	/**
+	 * Provides the Description of the month of Faunivor.
+	 * @return The Description of the month.
+	 */
+	public static String getFaunivorDescription() {
+		return "The month of Faunivór encourages a little bloodshed. The sacrificed will yield increased weapon damage, and increased drop rates for both meat and animal products.";
 	}
 
 	/**
@@ -559,6 +674,14 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Umbravor.
+	 * @return The Description of the month.
+	 */
+	public static String getUmbravorDescription() {
+		return "The month of Umbravór marks the beginning of winter. There is a low chance of world-wide snowstorms, and crops are no longer harvested as efficiently.";
+	}
+
+	/**
 	 * Apply the effects during the thirteenth month of Glacivor.
 	 */
 	private void applyGlacivorEffects() {
@@ -573,6 +696,14 @@ public class DateUtils {
 			AranarthUtils.setStormDelay(new Random().nextInt(48000) + 12000);
 		}
 		applySnow(30, 500);
+	}
+
+	/**
+	 * Provides the Description of the month of Glacivor.
+	 * @return The Description of the month.
+	 */
+	public static String getGlacivorDescription() {
+		return "The month of Glacivór sends shivers down your spine. You will be slowed down in your tracks, and water begins to freeze in rivers and the sea.";
 	}
 
 	/**
@@ -593,6 +724,14 @@ public class DateUtils {
 	}
 
 	/**
+	 * Provides the Description of the month of Frigorvor.
+	 * @return The Description of the month.
+	 */
+	public static String getFrigorvorDescription() {
+		return "The month of Frigorvór brings the heaviest snowfalls. Your movements will be slowed even further, as will your crop growth rates.";
+	}
+
+	/**
 	 * Apply the effects during the fifteenth month of Obscurvor.
 	 */
 	private void applyObscurvorEffects() {
@@ -608,6 +747,14 @@ public class DateUtils {
 			AranarthUtils.setStormDelay(new Random().nextInt(36000) + 12000);
 		}
 		applySnow(35, 700);
+	}
+
+	/**
+	 * Provides the Description of the month of Obscurvor.
+	 * @return The Description of the month.
+	 */
+	public static String getObscurvorDescription() {
+		return "The month of Obscurvór is the month of rest. You will harvest blocks at a slower rate, and be hunted more frequently and aggressively by phantoms.";
 	}
 
 	/**
