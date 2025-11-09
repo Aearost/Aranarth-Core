@@ -8,6 +8,8 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.io.IOException;
+
 /**
  * Allows the player to teleport to one of their homes
  */
@@ -33,6 +35,14 @@ public class CommandHome {
 
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
+						// Teleports you to the survival world spawn
+						try {
+							AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), home.getLocation().getWorld().getName());
+						} catch (IOException e) {
+							player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+							return true;
+						}
+
 						aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
