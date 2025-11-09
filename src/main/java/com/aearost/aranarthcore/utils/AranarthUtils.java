@@ -1338,7 +1338,7 @@ public class AranarthUtils {
 		// If a solid block was found, place the player just above it
 		Location surfaceLoc = null;
 		if (solidBlock != null) {
-			surfaceLoc = solidBlock.getLocation().add(0.0, 1, 0.0); // Center and place feet above
+			surfaceLoc = solidBlock.getLocation().add(0.5, 1, 0.5); // Center and place feet above
 			surfaceLoc.setYaw(loc.getYaw());
 			surfaceLoc.setPitch(loc.getPitch());
 		} else {
