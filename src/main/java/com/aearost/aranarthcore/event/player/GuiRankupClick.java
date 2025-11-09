@@ -3,16 +3,13 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
-import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.awt.*;
 import java.text.NumberFormat;
 
 /**
@@ -46,28 +43,18 @@ public class GuiRankupClick {
 				String aOrAn = "a";
 
 				NumberFormat formatter = NumberFormat.getCurrencyInstance();
-//					PersistenceUtils.logTransaction(player.getName() + " (" + formatter.format(balance) + ") spent "
-//							+ price + " and has ranked up to " + rankDisplay);
 				aranarthPlayer.setBalance(balance - price);
 				aranarthPlayer.setRank(aranarthPlayer.getRank() + 1);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-//					ChatUtils.updatePlayerGroupsAndPrefix(player);
 				if (ChatUtils.stripColorFormatting(rankDisplay).equals("Esquire")
-						|| ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")) {
+						|| ChatUtils.stripColorFormatting(rankDisplay).equals("Emperor")
+						|| ChatUtils.stripColorFormatting(rankDisplay).equals("Empress")) {
 					aOrAn = "an";
 				}
-
-				// DiscordSRV message
-				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-				EmbedBuilder embed = new EmbedBuilder()
-						.setAuthor(player.getName() + " has become " + aOrAn + " " + ChatUtils.stripColorFormatting(rankDisplay) + "!", null, url)
-						.setColor(Color.CYAN);
-				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-				channel.sendMessageEmbeds(embed.build()).queue();
+				DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				PermissionUtils.evaluatePlayerPermissions(player);
 				player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 				player.closeInventory();

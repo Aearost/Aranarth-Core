@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -76,6 +77,7 @@ public class CommandRankSet {
 					if (args[1].equals("rank")) {
 						if (rank <= 8) {
 							aranarthPlayer.setRank(rank);
+							DiscordUtils.updateRank(player, rank, true);
 							isSuccessful = true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
@@ -85,6 +87,7 @@ public class CommandRankSet {
 					else if (args[1].equals("saint")) {
 						if (rank <= 3) {
 							aranarthPlayer.setSaintRank(rank);
+							DiscordUtils.updateSaint(player, rank, true);
 							isSuccessful = true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
@@ -94,6 +97,7 @@ public class CommandRankSet {
 					else if (args[1].equals("council")) {
 						if (rank <= 3) {
 							aranarthPlayer.setCouncilRank(rank);
+							DiscordUtils.updateCouncil(player, rank, true);
 							isSuccessful = true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
@@ -101,8 +105,9 @@ public class CommandRankSet {
 					}
 					// Limited from 0 to 1
 					else if (args[1].equals("architect")) {
-						if (rank == 1) {
+						if (rank <= 1) {
 							aranarthPlayer.setArchitectRank(rank);
+							DiscordUtils.updateArchitect(player, rank, true);
 							isSuccessful = true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));

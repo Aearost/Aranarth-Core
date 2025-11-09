@@ -18,6 +18,7 @@ Features
 [+] Added in /ac msg command
 [+] Added in /ac rules
 [+] Updated chat format to support ranks and pronouns
+[+] Added discord role auto-assignment when rank is changed (rankup or by command)
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases
 [~] Restricted the crafting and placing of homepads to only SMP

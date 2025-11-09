@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -56,7 +57,9 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveServerDate();
 				PersistenceUtils.saveShops();
 				PersistenceUtils.saveDominions();
-				Bukkit.getLogger().info("Homes and aranarth players have been saved");
+				PersistenceUtils.saveWarps();
+				DiscordUtils.updateAllDiscordRoles();
+				Bukkit.getLogger().info("Aranarth data has been saved");
 			}
 		}, 36000, 36000);
 
