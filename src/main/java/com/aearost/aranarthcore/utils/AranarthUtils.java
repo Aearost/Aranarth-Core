@@ -1398,7 +1398,6 @@ public class AranarthUtils {
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-				Bukkit.getLogger().info(offlinePlayer.getName() + " has been unmuted");
 				if (offlinePlayer.isOnline()) {
 					Player player = Bukkit.getPlayer(uuid);
 					player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));

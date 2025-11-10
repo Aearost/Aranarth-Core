@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -8,7 +9,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.UUID;
 
 /**
  * Mutes the specified player.
@@ -44,6 +48,11 @@ public class CommandMute {
 			return;
 		}
 
+		UUID senderUuid = null;
+		if (sender instanceof Player senderPlayer) {
+			senderUuid = senderPlayer.getUniqueId();
+		}
+
 		boolean wasPlayerMuted = false;
 		String playerName = args[1];
 		String nickname = "";
@@ -58,52 +67,69 @@ public class CommandMute {
 				if (args.length == 2) {
 					aranarthPlayer.setMuteEndDate("none");
 				} else {
-					char last = args[2].charAt(args[2].length() - 1);
-					String timeAsString = args[2].substring(0, args[2].length() - 1);
-					int time = 0;
-					try {
-						time = Integer.parseInt(timeAsString);
-					} catch (NumberFormatException e) {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
-						return;
-					}
+					if (args.length >= 4) {
+						char last = args[2].charAt(args[2].length() - 1);
+						String timeAsString = args[2].substring(0, args[2].length() - 1);
+						int time = 0;
+						try {
+							time = Integer.parseInt(timeAsString);
+						} catch (NumberFormatException e) {
+							sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+							return;
+						}
 
-					LocalDateTime date = LocalDateTime.now();
+						LocalDateTime date = LocalDateTime.now();
 
-					// Minute
-					if (last == 'm') {
-						date = date.plusMinutes(time);
-					}
-					// Hour
-					else if (last == 'h') {
-						date = date.plusHours(time);
-					}
-					// Day
-					else if (last == 'd') {
-						date = date.plusDays(time);
-					}
-					// Week
-					else if (last == 'w') {
-						date = date.plusWeeks(time);
+						// Minute
+						if (last == 'm') {
+							date = date.plusMinutes(time);
+						}
+						// Hour
+						else if (last == 'h') {
+							date = date.plusHours(time);
+						}
+						// Day
+						else if (last == 'd') {
+							date = date.plusDays(time);
+						}
+						// Week
+						else if (last == 'w') {
+							date = date.plusWeeks(time);
+						} else {
+							sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+							return;
+						}
+
+						int year = date.getYear();
+						int month = date.getMonthValue();
+						int day = date.getDayOfMonth();
+						int hour = date.getHour();
+						int minute = date.getMinute();
+
+						// Format of yymmddhhmm
+						String unmuteDate = "";
+						unmuteDate += (year + "").substring(2); // Gets last 2 digits
+						unmuteDate += appendZero(month);
+						unmuteDate += appendZero(day);
+						unmuteDate += appendZero(hour);
+						unmuteDate += appendZero(minute);
+						aranarthPlayer.setMuteEndDate(unmuteDate);
+						StringBuilder reason = new StringBuilder();
+						for (int i = 3; i < args.length; i++) {
+							reason.append(args[i]);
+							if (i < args.length - 1) {
+								reason.append(" ");
+							}
+						}
+
+						Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
+								ZoneId.systemDefault()), "mute", reason.toString(), senderUuid);
+						AranarthUtils.addPunishment(player.getUniqueId(), punishment);
+
 					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+						sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a duration and a reason for the mute!"));
 						return;
 					}
-
-					int year = date.getYear();
-					int month = date.getMonthValue();
-					int day = date.getDayOfMonth();
-					int hour = date.getHour();
-					int minute = date.getMinute();
-
-					// Format of yymmddhhmm
-					String unmuteDate = "";
-					unmuteDate += (year + "").substring(2); // Gets last 2 digits
-					unmuteDate += appendZero(month);
-					unmuteDate += appendZero(day);
-					unmuteDate += appendZero(hour);
-					unmuteDate += appendZero(minute);
-					aranarthPlayer.setMuteEndDate(unmuteDate);
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				AranarthUtils.addMutedPlayer(player.getUniqueId());
