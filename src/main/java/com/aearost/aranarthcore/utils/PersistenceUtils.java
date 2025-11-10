@@ -1036,15 +1036,18 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|date|type|reason
+				// uuid|date|type|reason|appliedBy
 				String[] fields = row.split("\\|");
 
 				UUID uuid = UUID.fromString(fields[0]);
 				LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[1])), ZoneId.systemDefault());
 				String type = fields[2];
 				String reason = fields[3];
-
-				Punishment punishment = new Punishment(uuid, date, type, reason);
+				UUID appliedBy = null;
+				if (!fields[4].equals("CONSOLE")) {
+					appliedBy = UUID.fromString(fields[4]);
+				}
+				Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy);
 				AranarthUtils.addPunishment(uuid, punishment);
 			}
 			Bukkit.getLogger().info("All punishments have been initialized");
@@ -1083,16 +1086,23 @@ public class PersistenceUtils {
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#uuid|date|type|reason\n");
+					writer.write("#uuid|date|type|reason|appliedBy\n");
 
 					for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
 						for (Punishment punishment : AranarthUtils.getPunishments(uuid)) {
 							String uuidString = uuid.toString();
-							String date = punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toString();
+							String date = punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
 							String type = punishment.getType();
 							String reason = punishment.getReason();
+							UUID appliedByUuid = punishment.getAppliedBy();
+							String appliedBy = "";
+							if (appliedByUuid == null) {
+								appliedBy = "CONSOLE";
+							} else {
+								appliedBy = appliedByUuid.toString();
+							}
 
-							String row = uuidString + "|" + date + "|" + type + "|" + reason + "\n";
+							String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + "\n";
 							writer.write(row);
 						}
 					}

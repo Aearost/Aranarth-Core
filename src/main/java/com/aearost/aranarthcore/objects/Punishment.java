@@ -11,12 +11,14 @@ public class Punishment {
 	private LocalDateTime date;
 	private String type;
 	private String reason;
+	private UUID appliedBy;
 
-	public Punishment(UUID uuid, LocalDateTime date, String type, String reason) {
+	public Punishment(UUID uuid, LocalDateTime date, String type, String reason, UUID appliedBy) {
 		this.uuid = uuid;
 		this.date = date;
 		this.type = type;
 		this.reason = reason;
+		this.appliedBy = appliedBy;
 	}
 
 	/**
@@ -79,6 +81,21 @@ public class Punishment {
 	 */
 	public void setReason(String reason) {
 		this.reason = reason;
+	}
+
+	/**
+	 * Provides the UUID of the council member that applied the punishment.
+	 */
+	public UUID getAppliedBy() {
+		return appliedBy;
+	}
+
+	/**
+	 * Updates the UUID of the council member that applied the punishment.
+	 * @param appliedBy The UUID of the council member that applied the punishment.
+	 */
+	public void setAppliedBy(UUID appliedBy) {
+		this.appliedBy = appliedBy;
 	}
 
 }
