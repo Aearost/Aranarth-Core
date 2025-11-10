@@ -12,6 +12,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 /**
@@ -999,6 +1002,104 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the warps");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the punishments list based on the contents of punishments.txt.
+	 */
+	public static void loadPunishments() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "punishments.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the punishments file...");
+			HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|date|type|reason
+				String[] fields = row.split("\\|");
+
+				UUID uuid = UUID.fromString(fields[0]);
+				LocalDateTime date = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[1])), ZoneId.systemDefault());
+				String type = fields[2];
+				String reason = fields[3];
+
+				Punishment punishment = new Punishment(uuid, date, type, reason);
+				AranarthUtils.addPunishment(uuid, punishment);
+			}
+			Bukkit.getLogger().info("All punishments have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the punishments!");
+		}
+	}
+
+	/**
+	 * Saves the contents of the punishments list to the punishments.txt file.
+	 */
+	public static void savePunishments() {
+		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
+		if (playerShops != null) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "punishments.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new warps.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of punishments.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					writer.write("#uuid|date|type|reason\n");
+
+					for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
+						for (Punishment punishment : AranarthUtils.getPunishments(uuid)) {
+							String uuidString = uuid.toString();
+							String date = punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toString();
+							String type = punishment.getType();
+							String reason = punishment.getReason();
+
+							String row = uuidString + "|" + date + "|" + type + "|" + reason + "\n";
+							writer.write(row);
+						}
+					}
+
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the punishments");
 				}
 			}
 		}

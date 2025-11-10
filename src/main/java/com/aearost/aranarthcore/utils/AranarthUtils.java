@@ -5,10 +5,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Home;
-import com.aearost.aranarthcore.objects.LockedContainer;
-import com.aearost.aranarthcore.objects.Shop;
+import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -62,6 +59,7 @@ public class AranarthUtils {
 	private static Weather weather;
 	private static final List<UUID> mutedPlayers = new ArrayList<>();
 	private static List<Home> warps = new ArrayList<>();
+	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -1618,6 +1616,44 @@ public class AranarthUtils {
 	 */
 	public static void removeWarp(Home warp) {
 		warps.remove(warp);
+	}
+
+	/**
+	 * Provides the HashMap of all punishments for all players.
+	 * @return The HashMap of all punishments for all players.
+	 */
+	public static HashMap<UUID, List<Punishment>> getAllPunishments() {
+		return punishments;
+	}
+
+	/**
+	 * Provides the HashMap of all punishments for a given player's UUID.
+	 * @param uuid The player's UUID.
+	 * @return The HashMap of all punishments for a given player's UUID.
+	 */
+	public static List<Punishment> getPunishments(UUID uuid) {
+		return punishments.get(uuid);
+	}
+
+	/**
+	 * Adds a new punishment to the player's List.
+	 * @param uuid The player's UUID.
+	 * @param punishment The new punishment.
+	 */
+	public static void addPunishment(UUID uuid, Punishment punishment) {
+		if (punishments.get(uuid) == null) {
+			punishments.put(uuid, new ArrayList<>());
+		}
+		punishments.get(uuid).add(punishment);
+	}
+
+	/**
+	 * Removes an existing punishment from the player.
+	 * @param uuid The player's UUID.
+	 * @param punishment The punishment being removed.
+	 */
+	public static void removePunishment(UUID uuid, Punishment punishment) {
+		punishments.get(uuid).remove(punishment);
 	}
 
 }
