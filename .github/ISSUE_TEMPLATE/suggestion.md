@@ -1,7 +1,7 @@
 ---
 name: Suggestion
 about: Suggest an idea for the Server
-title: "[IDEA]"
+title: "[IDEA] "
 labels: ''
 assignees: Aearost
 
