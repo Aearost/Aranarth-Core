@@ -8,16 +8,16 @@ assignees: Aearost
 ---
 
 **Detailed Description:**
-_[With as much information as possible, explain the issue]_
+[With as much information as possible, explain the issue]
 
 **Expected vs Actual Behaviour**:
-_[What is expected to happen, compared to what is actually happening]_
+[What is expected to happen, compared to what is actually happening]
 
 **Steps to Reproduce:**
-_[What is done to cause the issue to occur?]_
+[What is done to cause the issue to occur?]
 
 **Proposed Fix (if applicable):**
-_[Any suggestions on how to implement a fix?]_
+[Any suggestions on how to implement a fix?]
 
 **Additional context**
-_[Add any other context about the problem here]_
+[Add any other context about the problem here]
