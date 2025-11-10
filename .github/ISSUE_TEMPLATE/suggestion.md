@@ -8,16 +8,16 @@ assignees: Aearost
 ---
 
 **Explanation of Suggestion**
-_[A clear and concise description of what you want to happen]_
+[A clear and concise description of what you want to happen]
 
 **Purpose of Suggestion**
-_[What will adding this suggestion do for the server? Who will benefit from it?]_
+[What will adding this suggestion do for the server? Who will benefit from it?]
 
 **Suggestion Related to an Issue**
-_[Is your suggestion meant to address an issue/a bug with the server?]_
+[Is your suggestion meant to address an issue/a bug with the server?]
 
 **Proposed Way to Implement**
-_[How would you suggest this is implemented?]_
+[How would you suggest this is implemented?]
 
 **Additional context**
-_[Add any other context or screenshots about the feature request here]_
+[Add any other context or screenshots about the feature request here]
