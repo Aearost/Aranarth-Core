@@ -19,5 +19,8 @@ assignees: Aearost
 **Proposed Way to Implement**
 [How would you suggest this is implemented?]
 
+**Suggested By**
+[Who made the suggestion?]
+
 **Additional context**
 [Add any other context or screenshots about the feature request here]
