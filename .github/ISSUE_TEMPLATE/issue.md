@@ -19,5 +19,8 @@ assignees: Aearost
 **Proposed Fix (if applicable):**
 [Any suggestions on how to implement a fix?]
 
+**Reported By**
+[Who reported the issue?]
+
 **Additional context**
 [Add any other context about the problem here]
