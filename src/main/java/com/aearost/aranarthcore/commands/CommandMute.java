@@ -135,7 +135,7 @@ public class CommandMute {
 			}
 
 			Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
-					ZoneId.systemDefault()), "mute", reason.toString(), senderUuid);
+					ZoneId.systemDefault()), "MUTE", reason.toString(), senderUuid);
 			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
 
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

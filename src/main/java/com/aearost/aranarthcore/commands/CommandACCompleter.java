@@ -637,9 +637,18 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
 			displayedOptions.add("give");
-		} else if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
-			displayedOptions.add("whereis");
-		} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("w")) {
+			if (args[0].equals("w")) {
+				displayedOptions.add("whereis");
+				displayedOptions.add("warn");
+			} else {
+				if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
+					displayedOptions.add("whereis");
+				} else if (!args[0].isEmpty() && "warn".startsWith(args[0])) {
+					displayedOptions.add("warn");
+				}
+			}
+		}else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
 			displayedOptions.add("mute");
 		} else if (!args[0].isEmpty() && "ban".startsWith(args[0])) {
 			displayedOptions.add("ban");
@@ -676,7 +685,7 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
-			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy" -> {
+			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy", "warn" -> {
 				// List of online players
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
@@ -714,6 +723,15 @@ public class CommandACCompleter implements TabCompleter {
 									displayedOptions.add("1d");
 									displayedOptions.add("1w");
 								}
+							} else if (args.length == 4) {
+								if (args[3].isEmpty()) {
+									displayedOptions.add("reason");
+								}
+							}
+						}
+						case "warn" -> {
+							if (args[2].isEmpty()) {
+								displayedOptions.add("reason");
 							}
 						}
 					}
@@ -739,6 +757,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("unban");
 		displayedOptions.add("invsee");
 		displayedOptions.add("spy");
+		displayedOptions.add("warn");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}
