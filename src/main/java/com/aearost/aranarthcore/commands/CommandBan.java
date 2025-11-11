@@ -69,10 +69,10 @@ public class CommandBan {
 					// Additionally will ban the player's IP
 					if (player.isOnline()) {
 						Player bannedOnlinePlayer = Bukkit.getPlayer(player.getUniqueId());
+						bannedOnlinePlayer.banIp("You have been banned from Aranarth", (Duration) null, null, true);
 						Punishment punishment = new Punishment(bannedOnlinePlayer.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 								ZoneId.systemDefault()), "ban", "Permanent ban", senderUuid);
-						AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment);
-						bannedOnlinePlayer.banIp("You have been banned from Aranarth", (Duration) null, null, true);
+						AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment, false);
 						for (Player online : Bukkit.getOnlinePlayers()) {
 							if (online.getAddress().getAddress().equals(bannedOnlinePlayer.getAddress().getAddress())) {
 								if (online.equals(bannedOnlinePlayer)) {
@@ -80,15 +80,16 @@ public class CommandBan {
 								}
 								Punishment otherOnlinePlayerPunishment = new Punishment(online.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 										ZoneId.systemDefault()), "ban", "Permanent ban", senderUuid);
-								AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment);
+								AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment, false);
 								online.kickPlayer("You have been banned from Aranarth due to " + bannedOnlinePlayer.getName() + "'s actions!");
 							}
 						}
 					} else {
+						player.ban("You have been banned from Aranarth", (Duration) null, null);
 						Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 								ZoneId.systemDefault()), "ban", "Permanent ban", senderUuid);
-						AranarthUtils.addPunishment(player.getUniqueId(), punishment);
-						player.ban("You have been banned from Aranarth", (Duration) null, null);
+						AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
+
 					}
 
 				}
@@ -138,26 +139,29 @@ public class CommandBan {
 
 						if (player.isOnline()) {
 							Player bannedOnlinePlayer = Bukkit.getPlayer(player.getUniqueId());
+							bannedOnlinePlayer.ban("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
 							Punishment punishment = new Punishment(bannedOnlinePlayer.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 									ZoneId.systemDefault()), "ban", reason.toString(), senderUuid);
-							AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment);
-							bannedOnlinePlayer.banIp("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
+							AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment, false);
 							for (Player online : Bukkit.getOnlinePlayers()) {
 								if (online.getAddress().getAddress().equals(bannedOnlinePlayer.getAddress().getAddress())) {
 									if (online.equals(bannedOnlinePlayer)) {
 										continue;
 									}
+									online.ban("You have been banned from Aranarth due to " + bannedOnlinePlayer.getName() + "'s actions!",
+											date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
 									Punishment otherOnlinePlayerPunishment = new Punishment(online.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 											ZoneId.systemDefault()), "ban", reason.toString(), senderUuid);
-									AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment);
-									online.kickPlayer("You have been banned from Aranarth due to " + bannedOnlinePlayer.getName() + "'s actions!");
+									AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment, false);
 								}
 							}
+							bannedOnlinePlayer.banIp("You have been IP banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
 						} else {
+							player.ban("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null);
 							Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
 									ZoneId.systemDefault()), "ban", reason.toString(), senderUuid);
-							AranarthUtils.addPunishment(player.getUniqueId(), punishment);
-							player.ban("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null);
+							AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
+
 						}
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a duration and a reason for the ban!"));

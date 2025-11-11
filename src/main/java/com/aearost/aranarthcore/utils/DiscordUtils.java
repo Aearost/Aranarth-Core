@@ -1,14 +1,21 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Punishment;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.ban.ProfileBanList;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import java.awt.*;
@@ -18,6 +25,18 @@ import java.util.UUID;
  * Provides a variety of utility methods for everything related to Discord integration.
  */
 public class DiscordUtils {
+
+	private static final String punishmentHistoryChannelId = "1436931398501138552";
+	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+
+	/**
+	 * Provides the Discord Guild.
+	 * @return The Discord Guild.
+	 */
+	public static Guild getGuild() {
+		JDA jda = DiscordSRV.getPlugin().getJda();
+		return jda.getGuildById("664319732446396416");
+	}
 
 	/**
 	 * Updates the player's in-game rank accordingly in Discord's roles.
@@ -32,8 +51,7 @@ public class DiscordUtils {
 			return;
 		}
 
-		JDA jda = DiscordSRV.getPlugin().getJda();
-		Guild guild = jda.getGuildById("664319732446396416");
+		Guild guild = getGuild();
 		Role roleToAdd = switch (newRankNum) {
 			case 1 -> guild.getRoleById("1436839935964352543"); // Esquire
 			case 2 -> guild.getRoleById("1436840295768784928"); // Knight
@@ -75,8 +93,8 @@ public class DiscordUtils {
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor(player.getName() + " has become " + aOrAn + " " + rankName + "!", null, url)
 					.setColor(Color.CYAN);
-			TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-			channel.sendMessageEmbeds(embed.build()).queue();
+
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 		}
     }
 
@@ -93,8 +111,7 @@ public class DiscordUtils {
 			return;
 		}
 
-		JDA jda = DiscordSRV.getPlugin().getJda();
-		Guild guild = jda.getGuildById("664319732446396416");
+		Guild guild = getGuild();
 		boolean isSaint = false;
 
 		// If they are a Saint
@@ -113,8 +130,7 @@ public class DiscordUtils {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
 						.setColor(Color.MAGENTA);
-				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-				channel.sendMessageEmbeds(embed.build()).queue();
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			}
 		}
 	}
@@ -132,8 +148,7 @@ public class DiscordUtils {
 			return;
 		}
 
-		JDA jda = DiscordSRV.getPlugin().getJda();
-		Guild guild = jda.getGuildById("664319732446396416");
+		Guild guild = getGuild();
 		boolean isArchitect = false;
 
 		// If they are an Architect
@@ -152,8 +167,7 @@ public class DiscordUtils {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has become an Architect!", null, url)
 						.setColor(Color.YELLOW);
-				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-				channel.sendMessageEmbeds(embed.build()).queue();
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			}
 		}
 	}
@@ -171,8 +185,7 @@ public class DiscordUtils {
 			return;
 		}
 
-		JDA jda = DiscordSRV.getPlugin().getJda();
-		Guild guild = jda.getGuildById("664319732446396416");
+		Guild guild = getGuild();
 		boolean isHelper = false;
 		boolean isModerator = false;
 		boolean isAdmin = false;
@@ -215,8 +228,7 @@ public class DiscordUtils {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has become " + rankName + "!", null, url)
 						.setColor(Color.YELLOW);
-				TextChannel channel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
-				channel.sendMessageEmbeds(embed.build()).queue();
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			}
 		}
 	}
@@ -227,11 +239,84 @@ public class DiscordUtils {
 	public static void updateAllDiscordRoles() {
 		for (UUID uuid : DiscordSRV.getPlugin().getAccountLinkManager().getLinkedAccounts().values()) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+			// Strange bug where a player links their account but they do not have an AranarthPlayer
+			if (aranarthPlayer == null) {
+				continue;
+			}
 			updateRank(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getRank(), false);
 			updateSaint(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getSaintRank(), false);
 			updateArchitect(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getArchitectRank(), false);
 			updateCouncil(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getCouncilRank(), false);
 		}
+	}
+
+	/**
+	 * Adds a message in #punishment-history in Discord to reflect a punishment.
+	 * @param punishment The punishment being listed.
+	 */
+	public static void addPunishmentToDiscord(Punishment punishment) {
+		Guild guild = getGuild();
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(punishment.getUuid());
+		String uuidNoDashes = punishment.getUuid().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		EmbedBuilder embed = new EmbedBuilder();
+		String appliedBy = "Console";
+		if (punishment.getAppliedBy() != null) {
+			appliedBy = Bukkit.getOfflinePlayer(punishment.getAppliedBy()).getName();
+		}
+
+        switch (punishment.getType()) {
+            case "warn" -> {
+                embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
+                embed.setColor(Color.YELLOW);
+                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Warned by:** " + appliedBy + "\n" +
+                        "**Reason:** " + punishment.getReason());
+            }
+            case "mute" -> {
+                embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
+                embed.setColor(Color.PINK);
+                LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+                String year = endDate.getYear() + "";
+                String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+                String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+                String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+                String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+                String formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Muted by:** " + appliedBy + "\n" +
+                        "**Mute ends:** " + formattedEndDate + "\n" +
+                        "**Reason:** " + punishment.getReason());
+            }
+            case "ban" -> {
+				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
+				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+				if (profileBanList.getBanEntry(player.getPlayerProfile()) != null) {
+
+				}
+				Instant banEndInstant = profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration().toInstant();
+				String formattedEndDate = null;
+				if (banEndInstant != null) {
+					LocalDateTime endDate = LocalDateTime.ofInstant(banEndInstant, ZoneId.systemDefault());
+					String year = endDate.getYear() + "";
+					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+					String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+				}
+
+                embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
+                embed.setColor(Color.RED);
+                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Banned by:** " + appliedBy + "\n" +
+                        "**Ban ends:** " + formattedEndDate + "\n" +
+                        "**Reason:** " + punishment.getReason());
+            }
+        }
+		TextChannel punishmentChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
+		punishmentChannel.sendMessageEmbeds(embed.build()).queue();
 	}
 
 }

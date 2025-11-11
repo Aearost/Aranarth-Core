@@ -17,6 +17,8 @@ Features
 [+] Added in /ac warp functionality and warp persistence
 [+] Added in /ac msg command
 [+] Added in /ac rules
+[+] Added in /ac warn to give and track a warning provided to a player
+[+] Added in /ac punishments to track all warnings, mutes, and bans a player has had
 [+] Updated chat format to support ranks and pronouns
 [+] Added discord role auto-assignment when rank is changed (rankup or by command)
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)

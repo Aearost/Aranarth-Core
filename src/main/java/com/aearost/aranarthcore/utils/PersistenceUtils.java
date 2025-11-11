@@ -1048,7 +1048,7 @@ public class PersistenceUtils {
 					appliedBy = UUID.fromString(fields[4]);
 				}
 				Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy);
-				AranarthUtils.addPunishment(uuid, punishment);
+				AranarthUtils.addPunishment(uuid, punishment, true);
 			}
 			Bukkit.getLogger().info("All punishments have been initialized");
 			reader.close();
