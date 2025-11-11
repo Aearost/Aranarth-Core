@@ -1638,11 +1638,18 @@ public class AranarthUtils {
 	 * Adds a new punishment to the player's List.
 	 * @param uuid The player's UUID.
 	 * @param punishment The new punishment.
+	 * @param isFromStartup Whether the punishment is added from server startup or a true new punishment.
 	 */
-	public static void addPunishment(UUID uuid, Punishment punishment) {
+	public static void addPunishment(UUID uuid, Punishment punishment, boolean isFromStartup) {
 		if (punishments.get(uuid) == null) {
 			punishments.put(uuid, new ArrayList<>());
 		}
+
+		// Send message to #punishment-history in Discord if it's a new punishment being added
+		if (!isFromStartup) {
+			DiscordUtils.addPunishmentToDiscord(punishment);
+		}
+
 		punishments.get(uuid).add(punishment);
 	}
 

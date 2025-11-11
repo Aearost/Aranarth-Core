@@ -323,6 +323,19 @@ public class ChatUtils {
 		}
 
 		LocalDateTime currentDate = LocalDateTime.now();
+		LocalDateTime definedMuteDate = getMuteEndAsLocalDateTime(aranarthPlayer);
+
+		return definedMuteDate.isBefore(currentDate);
+	}
+
+	/**
+	 * Provides the AranarthPlayer's mute end date as a LocalDateTime object.
+	 * @param aranarthPlayer The player.
+	 * @return The player's mute end date as a LocalDateTime object.
+	 */
+	public static LocalDateTime getMuteEndAsLocalDateTime(AranarthPlayer aranarthPlayer) {
+		String muteEndDate = aranarthPlayer.getMuteEndDate();
+
 		LocalDateTime definedMuteDate = null;
 		try {
 			int year = Integer.parseInt(muteEndDate.substring(0, 2));
@@ -333,10 +346,9 @@ public class ChatUtils {
 			definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
 		} catch (NumberFormatException e) {
 			Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
-			return false;
+			return null;
 		}
-
-		return definedMuteDate.isBefore(currentDate);
+		return definedMuteDate;
 	}
 
 	/**

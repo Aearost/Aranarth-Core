@@ -114,18 +114,6 @@ public class CommandMute {
 						unmuteDate += appendZero(hour);
 						unmuteDate += appendZero(minute);
 						aranarthPlayer.setMuteEndDate(unmuteDate);
-						StringBuilder reason = new StringBuilder();
-						for (int i = 3; i < args.length; i++) {
-							reason.append(args[i]);
-							if (i < args.length - 1) {
-								reason.append(" ");
-							}
-						}
-
-						Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-								ZoneId.systemDefault()), "mute", reason.toString(), senderUuid);
-						AranarthUtils.addPunishment(player.getUniqueId(), punishment);
-
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a duration and a reason for the mute!"));
 						return;
@@ -138,6 +126,18 @@ public class CommandMute {
 
 		if (wasPlayerMuted) {
 			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
+			StringBuilder reason = new StringBuilder();
+			for (int i = 3; i < args.length; i++) {
+				reason.append(args[i]);
+				if (i < args.length - 1) {
+					reason.append(" ");
+				}
+			}
+
+			Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
+					ZoneId.systemDefault()), "mute", reason.toString(), senderUuid);
+			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
+
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been muted!"));
