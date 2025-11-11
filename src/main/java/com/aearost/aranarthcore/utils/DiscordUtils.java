@@ -269,14 +269,14 @@ public class DiscordUtils {
         switch (punishment.getType()) {
             case "warn" -> {
                 embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
-                embed.setColor(Color.YELLOW);
+                embed.setColor(Color.PINK);
                 embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
             case "mute" -> {
                 embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
-                embed.setColor(Color.PINK);
+                embed.setColor(Color.YELLOW);
                 LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
                 String year = endDate.getYear() + "";
                 String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";

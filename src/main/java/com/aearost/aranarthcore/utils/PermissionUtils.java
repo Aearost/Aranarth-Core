@@ -107,6 +107,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.rankset", false);
 		perms.setPermission("aranarth.protect.bypass", false);
 		perms.setPermission("aranarth.warp.modify", false);
+		perms.setPermission("aranarth.warn", false);
 	}
 
 	/**
@@ -240,6 +241,7 @@ public class PermissionUtils {
 
 		if (councilRank >= 1) {
 			perms.setPermission("aranarth.mute", true);
+			perms.setPermission("aranarth.warn", true);
 		} else {
 			return;
 		}

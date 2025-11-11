@@ -168,6 +168,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandParticles.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("itemname")) {
 			commandResult = CommandItemName.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("warn")) {
+			commandResult = CommandWarn.onCommand(sender, args);
 		}
 		return commandResult;
 	}
