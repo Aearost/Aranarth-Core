@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -38,13 +37,14 @@ public class GuiPotionClose {
                     if (inventoryPotion.getType() == Material.AIR) {
                         continue;
                     }
+
                     if (potions.containsKey(inventoryPotion)) {
-                        Bukkit.getLogger().info("Potion found in hashmap");
                         int amount = potions.get(inventoryPotion);
                         potions.put(inventoryPotion, amount + 1);
                         potionAmountAdded++;
                     } else {
-                        Bukkit.getLogger().info("Potion not found in hashmap");
+                        potions.put(inventoryPotion, 1);
+                        potionAmountAdded++;
                     }
                 }
             }
