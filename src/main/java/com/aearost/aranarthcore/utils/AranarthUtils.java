@@ -840,31 +840,6 @@ public class AranarthUtils {
 		}
 	}
 
-//	/**
-//	 * Returns a HashMap containing the quantity of a given potion that a player has.
-//	 * @param player The player running the command.
-//	 * @return The HashMap of the potions the player has, as well as the quantity of the potion.
-//	 */
-//	public static HashMap<ItemStack, Integer> getPotionsAndAmounts(Player player) {
-//		List<ItemStack> potions = getPlayer(player.getUniqueId()).getPotions();
-//		HashMap<ItemStack, Integer> potionsAndAmounts = new HashMap<>();
-//
-//		// Counts how many potions of the same type there are
-//		for (ItemStack potionToCount : potions) {
-//			// Add the potion if it doesn't exist
-//			if (potionsAndAmounts.get(potionToCount) == null) {
-//				potionsAndAmounts.put(potionToCount, 1);
-//				continue;
-//			}
-//
-//			int amount = potionsAndAmounts.get(potionToCount);
-//			amount++;
-//			potionsAndAmounts.put(potionToCount, amount);
-//		}
-//
-//		return potionsAndAmounts;
-//	}
-
 	/**
 	 * Provides the current state of the weather.
 	 * @return The current state of the weather.

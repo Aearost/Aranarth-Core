@@ -178,19 +178,21 @@ public class PersistenceUtils {
 				String creativeInventory = fields[4];
 
 				HashMap<ItemStack, Integer> potions = new HashMap<>();
-				String[] potionAsArray = fields[5].split("___");
-				for (String potionInArray : potionAsArray) {
-					String[] parts = potionInArray.split("_");
-					ItemStack[] potionType = new ItemStack[1];
-					try {
-						potionType = ItemUtils.itemStackArrayFromBase64(parts[0]);
-					} catch (IOException e) {
-						Bukkit.getLogger().info("There was an issue loading the player's potions!");
-						reader.close();
-						return;
+				if (!fields[5].isEmpty()) {
+					String[] potionAsArray = fields[5].split("___");
+					for (String potionInArray : potionAsArray) {
+						String[] parts = potionInArray.split("_");
+						ItemStack[] potionType = new ItemStack[1];
+						try {
+							potionType = ItemUtils.itemStackArrayFromBase64(parts[0]);
+						} catch (IOException e) {
+							Bukkit.getLogger().info("There was an issue loading the player's potions!");
+							reader.close();
+							return;
+						}
+						int amount = Integer.parseInt(parts[1]);
+						potions.put(potionType[0], amount);
 					}
-					int amount = Integer.parseInt(parts[1]);
-					potions.put(potionType[0], amount);
 				}
 
 				List<ItemStack> arrows = null;
@@ -268,7 +270,10 @@ public class PersistenceUtils {
 					pronouns = Pronouns.NEUTRAL;
 				}
 
-				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname, survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist, isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes, muteEndDate, particles, pronouns));
+				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
+						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
+						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
+						muteEndDate, particles, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -324,17 +329,19 @@ public class PersistenceUtils {
 						String arenaInventory = aranarthPlayer.getArenaInventory();
 						String creativeInventory = aranarthPlayer.getCreativeInventory();
 
-
-
 						String potions = "";
-						if (Objects.nonNull(aranarthPlayer.getPotions())) {
+						if (aranarthPlayer.getPotions() != null && !aranarthPlayer.getPotions().isEmpty()) {
 							for (ItemStack potion : aranarthPlayer.getPotions().keySet()) {
 								int amount = aranarthPlayer.getPotions().get(potion);
 								String part = ItemUtils.itemStackArrayToBase64(new ItemStack[] { potion });
 								part += "_" + amount + "___";
+								potions += part;
+							}
+
+							if (potions.endsWith("___")) {
+								potions = potions.substring(0, potions.length() - 2); // Remove the last three characters
 							}
 						}
-						potions = potions.substring(0, potions.length() - 2); // Remove the last three characters
 
 						String arrows = "";
 						if (Objects.nonNull(aranarthPlayer.getArrows())) {

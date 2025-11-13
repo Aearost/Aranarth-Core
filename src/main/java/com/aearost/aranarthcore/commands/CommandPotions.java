@@ -9,6 +9,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashMap;
+
 /**
  * Allows players to add to and view their potion inventory.
  */
@@ -99,6 +101,12 @@ public class CommandPotions {
                     case "remove" -> {
 						if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
 							if (args.length >= 3) {
+								HashMap<ItemStack, Integer> potions = AranarthUtils.getPlayer(player.getUniqueId()).getPotions();
+								if (potions == null || potions.isEmpty()) {
+									player.sendMessage(ChatUtils.chatMessage("&7You do not have any potions"));
+									return true;
+								}
+
 								try {
 									int quantity = Integer.parseInt(args[2]);
 									if (quantity > 0) {
