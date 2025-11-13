@@ -8,8 +8,11 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 
 import java.util.HashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * Allows players to add to and view their potion inventory.
@@ -29,72 +32,61 @@ public class CommandPotions {
 			}
 
             if (args.length == 1) {
-				player.sendMessage(
-						ChatUtils.chatMessage("&cYou must specify a sub-command! /ac potion <sub-command>"));
+				GuiPotions gui = new GuiPotions(player, 0);
+				gui.openGui();
 				return true;
 			} else {
                 switch (args[1]) {
                     case "list" -> {
+                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-						// Likely will be removing this sub-command in favor of /ac potions with a GUI
+                        if (aranarthPlayer.getPotions() != null) {
+							HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 
-//                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-//
-//                        if (Objects.nonNull(aranarthPlayer.getPotions())) {
-//                            HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
-//                            if (potions.isEmpty()) {
-//                                player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
-//                                return true;
-//                            }
-//
-//                            // Counts how many of each potion there is
-//							// Logic differs too much for using the helper method AranarthUtils.getPotionsAndAmounts()
-//							HashMap<String, Integer> amountOfPotions = new HashMap<>();
-//							for (ItemStack potionToCount : potions.keySet()) {
-//								String potionName = null;
-//								if (potionToCount.getType() == Material.AIR) {
-//									potions.remove(potionToCount);
-//									continue;
-//								}
-//
-//								// If it is an mcMMO potion
-//								if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
-//									potionName = potionToCount.getItemMeta().getItemName();
-//								} else {
-//									PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
-//									if (Objects.nonNull(meta)) {
-//										potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
-//									}
-//								}
-//
-//								if (amountOfPotions.containsKey(potionName)) {
-//									Integer newAmount = amountOfPotions.get(potionName) + 1;
-//									amountOfPotions.put(potionName, newAmount);
-//								} else {
-//									amountOfPotions.put(potionName, 1);
-//								}
-//							}
-//                            aranarthPlayer.setPotions(potions);
-//                            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-//
-//                            // Sorts all potion names alphabetically
-//                            SortedSet<String> sortedMap = new TreeSet<>(amountOfPotions.keySet());
-//
-//                            // Displays the potions
-//                            player.sendMessage(ChatUtils.chatMessage("&7Below are the potions you have stored:"));
-//                            // Iterate over sortedMap but display values from amountOfPotions
-//                            for (String potionName : sortedMap) {
-//                                player.sendMessage(
-//                                        ChatUtils.chatMessage("&e" + potionName + " x" + amountOfPotions.get(potionName)));
-//                            }
-//							return true;
-//                        } else {
-//                            player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
-//							return true;
-//                        }
+                            if (potions.isEmpty()) {
+                                player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
+                                return true;
+                            }
+
+							HashMap<String, Integer> amountOfPotions = new HashMap<>();
+							for (ItemStack potion : potions.keySet()) {
+								String potionName = null;
+								if (potion.getType() == Material.AIR) {
+									potions.remove(potion);
+									continue;
+								}
+
+								// If it is an mcMMO potion
+								if (potion.hasItemMeta() && potion.getItemMeta().hasItemName()) {
+									potionName = potion.getItemMeta().getItemName();
+								} else {
+									PotionMeta meta = (PotionMeta) potion.getItemMeta();
+									if (meta != null) {
+										potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+									}
+								}
+
+								amountOfPotions.put(potionName, potions.get(potion));
+							}
+
+                            // Sorts all potion names alphabetically
+                            SortedSet<String> sortedMap = new TreeSet<>(amountOfPotions.keySet());
+
+                            // Displays the potions
+                            player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lYour Potions &8- - -"));
+                            // Iterate over sortedMap but display values from amountOfPotions
+                            for (String potionName : sortedMap) {
+                                player.sendMessage(
+                                        ChatUtils.translateToColor("&e" + potionName + " &6x" + amountOfPotions.get(potionName)));
+                            }
+							return true;
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
+							return true;
+                        }
                     }
                     case "add" -> {
-                        GuiPotions gui = new GuiPotions(player, true);
+                        GuiPotions gui = new GuiPotions(player, 1);
                         gui.openGui();
 						return true;
                     }
@@ -113,7 +105,7 @@ public class CommandPotions {
 										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 										aranarthPlayer.setPotionQuantityToRemove(quantity);
 										AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-										GuiPotions gui = new GuiPotions(player, false);
+										GuiPotions gui = new GuiPotions(player, -1);
 										gui.openGui();
 									} else {
 										player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
