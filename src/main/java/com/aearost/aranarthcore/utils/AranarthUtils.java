@@ -1679,4 +1679,86 @@ public class AranarthUtils {
 		}
 	}
 
+	/**
+	 * Provides the names for the potions that a player has.
+	 * Note the inner HashMap reflects only one single potion per outer HashMap.
+	 * @param player The player.
+	 * @return The HashMap of names and the quantities of the associated potion.
+	 */
+	public static HashMap<String, HashMap<ItemStack, Integer>> getPlayerPotionNames(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
+		HashMap<String, HashMap<ItemStack, Integer>> nameToPotionAmount = new HashMap<>();
+
+		for (ItemStack potion : potions.keySet()) {
+			String potionName = null;
+			if (potion.getType() == Material.AIR) {
+				potions.remove(potion);
+				continue;
+			}
+
+			// If it is an mcMMO potion
+			if (potion.hasItemMeta() && potion.getItemMeta().hasItemName()) {
+				potionName = potion.getItemMeta().getItemName();
+			} else {
+				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				if (meta != null) {
+					potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+				}
+			}
+			HashMap<ItemStack, Integer> potionToAdd = new HashMap<>();
+			potionToAdd.put(potion, potions.get(potion));
+			nameToPotionAmount.put(potionName, potionToAdd);
+		}
+		return nameToPotionAmount;
+	}
+
+	/**
+	 * Provides the formatted name for a given potion.
+	 * @param potion The potion item.
+	 * @param potionName The base name for the potion.
+	 * @return The formatted name for a given potion.
+	 */
+	private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
+		String[] partsOfName = potionName.split(" ");
+		StringBuilder finalName = new StringBuilder();
+
+		if (potionName.startsWith("Long")) {
+			if (potion.getType() == Material.POTION) {
+				finalName = new StringBuilder("Extended Potion of ");
+			} else if (potion.getType() == Material.SPLASH_POTION) {
+				finalName = new StringBuilder("Extended Splash Potion of ");
+			} else if (potion.getType() == Material.LINGERING_POTION) {
+				finalName = new StringBuilder("Extended Lingering Potion of ");
+			}
+		} else {
+			if (potion.getType() == Material.POTION) {
+				finalName = new StringBuilder("Potion of ");
+			} else if (potion.getType() == Material.SPLASH_POTION) {
+				finalName = new StringBuilder("Splash Potion of ");
+			} else if (potion.getType() == Material.LINGERING_POTION) {
+				finalName = new StringBuilder("Lingering Potion of ");
+			}
+		}
+
+		// Handles formatting the actual potion name
+		for (int i = 0; i < partsOfName.length; i++) {
+			if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
+				continue;
+			} else {
+				if (i == partsOfName.length - 1) {
+					finalName.append(partsOfName[i]);
+				} else {
+					finalName.append(partsOfName[i]).append(" ");
+				}
+			}
+		}
+
+		if (potionName.startsWith("Strong")) {
+			finalName.append(" II");
+		}
+
+		return finalName.toString();
+	}
+
 }

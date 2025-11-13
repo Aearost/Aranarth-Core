@@ -4,11 +4,9 @@ import com.aearost.aranarthcore.gui.GuiPotions;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.PotionMeta;
 
 import java.util.HashMap;
 import java.util.SortedSet;
@@ -32,6 +30,12 @@ public class CommandPotions {
 			}
 
             if (args.length == 1) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (aranarthPlayer.getPotions() == null || aranarthPlayer.getPotions().isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&7You don't have any stored potions!"));
+					return true;
+				}
+
 				GuiPotions gui = new GuiPotions(player, 0);
 				gui.openGui();
 				return true;
@@ -48,36 +52,19 @@ public class CommandPotions {
                                 return true;
                             }
 
-							HashMap<String, Integer> amountOfPotions = new HashMap<>();
-							for (ItemStack potion : potions.keySet()) {
-								String potionName = null;
-								if (potion.getType() == Material.AIR) {
-									potions.remove(potion);
-									continue;
-								}
-
-								// If it is an mcMMO potion
-								if (potion.hasItemMeta() && potion.getItemMeta().hasItemName()) {
-									potionName = potion.getItemMeta().getItemName();
-								} else {
-									PotionMeta meta = (PotionMeta) potion.getItemMeta();
-									if (meta != null) {
-										potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
-									}
-								}
-
-								amountOfPotions.put(potionName, potions.get(potion));
-							}
+							HashMap<String, HashMap<ItemStack, Integer>> amountOfPotions = AranarthUtils.getPlayerPotionNames(player);
 
                             // Sorts all potion names alphabetically
                             SortedSet<String> sortedMap = new TreeSet<>(amountOfPotions.keySet());
 
-                            // Displays the potions
                             player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lYour Potions &8- - -"));
                             // Iterate over sortedMap but display values from amountOfPotions
                             for (String potionName : sortedMap) {
-                                player.sendMessage(
-                                        ChatUtils.translateToColor("&e" + potionName + " &6x" + amountOfPotions.get(potionName)));
+								// Should only ever be one value in here
+								for (ItemStack potion : amountOfPotions.get(potionName).keySet()) {
+									player.sendMessage(
+											ChatUtils.translateToColor("&e" + potionName + " &6x" + amountOfPotions.get(potionName).get(potion)));
+								}
                             }
 							return true;
                         } else {
@@ -95,7 +82,7 @@ public class CommandPotions {
 							if (args.length >= 3) {
 								HashMap<ItemStack, Integer> potions = AranarthUtils.getPlayer(player.getUniqueId()).getPotions();
 								if (potions == null || potions.isEmpty()) {
-									player.sendMessage(ChatUtils.chatMessage("&7You do not have any potions"));
+									player.sendMessage(ChatUtils.chatMessage("&7You do not have any stored potions"));
 									return true;
 								}
 
@@ -128,48 +115,6 @@ public class CommandPotions {
 			return true;
 		}
 		return false;
-	}
-
-	private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
-		String[] partsOfName = potionName.split(" ");
-		StringBuilder finalName = new StringBuilder();
-		
-		if (potionName.startsWith("Long")) {
-			if (potion.getType() == Material.POTION) {
-				finalName = new StringBuilder("Extended Potion of ");
-			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = new StringBuilder("Extended Splash Potion of ");
-			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = new StringBuilder("Extended Lingering Potion of ");
-			}
-		} else {
-			if (potion.getType() == Material.POTION) {
-				finalName = new StringBuilder("Potion of ");
-			} else if (potion.getType() == Material.SPLASH_POTION) {
-				finalName = new StringBuilder("Splash Potion of ");
-			} else if (potion.getType() == Material.LINGERING_POTION) {
-				finalName = new StringBuilder("Lingering Potion of ");
-			}
-		}
-		
-		// Handles formatting the actual potion name
-		for (int i = 0; i < partsOfName.length; i++) {
-			if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
-				continue;
-			} else {
-				if (i == partsOfName.length - 1) {
-					finalName.append(partsOfName[i]);
-				} else {
-					finalName.append(partsOfName[i]).append(" ");
-				}
-			}
-		}
-		
-		if (potionName.startsWith("Strong")) {
-			finalName.append(" II");
-		}
-		
-		return finalName.toString();
 	}
 
 }
