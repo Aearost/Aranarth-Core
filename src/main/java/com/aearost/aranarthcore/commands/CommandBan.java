@@ -9,10 +9,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Date;
 import java.util.UUID;
 
 /**
@@ -44,8 +44,8 @@ public class CommandBan {
 	 * @param args The arguments of the command.
 	 */
 	private static void banPlayer(CommandSender sender, String[] args) {
-		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to ban!"));
+		if (args.length < 4) {
+			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac mute <player> <duration> <reason>"));
 			return;
 		}
 
@@ -54,128 +54,86 @@ public class CommandBan {
 			senderUuid = senderPlayer.getUniqueId();
 		}
 
-		boolean wasPlayerBanned = false;
-		String playerName = args[1];
-		String nickname = "";
-		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (player.getName().equalsIgnoreCase(args[1])) {
-				wasPlayerBanned = true;
-				playerName = player.getName();
-				nickname = AranarthUtils.getNickname(player);
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
-				// Permanent ban
-				if (args.length == 2) {
-					// Additionally will ban the player's IP
-					if (player.isOnline()) {
-						Player bannedOnlinePlayer = Bukkit.getPlayer(player.getUniqueId());
-						bannedOnlinePlayer.banIp("You have been banned from Aranarth", (Duration) null, null, true);
-						Punishment punishment = new Punishment(bannedOnlinePlayer.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-								ZoneId.systemDefault()), "BAN", "Permanent ban", senderUuid);
-						AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment, false);
-						for (Player online : Bukkit.getOnlinePlayers()) {
-							if (online.getAddress().getAddress().equals(bannedOnlinePlayer.getAddress().getAddress())) {
-								if (online.equals(bannedOnlinePlayer)) {
-									continue;
-								}
-								Punishment otherOnlinePlayerPunishment = new Punishment(online.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-										ZoneId.systemDefault()), "BAN", "Permanent ban", senderUuid);
-								AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment, false);
-								online.kickPlayer("You have been banned from Aranarth due to " + bannedOnlinePlayer.getName() + "'s actions!");
-							}
-						}
-					} else {
-						player.ban("You have been banned from Aranarth", (Duration) null, null);
-						Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-								ZoneId.systemDefault()), "BAN", "Permanent ban", senderUuid);
-						AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
-
-					}
-
-				}
-				// Temporary ban
-				else {
-					char last = args[2].charAt(args[2].length() - 1);
-					String timeAsString = args[2].substring(0, args[2].length() - 1);
-					int time = 0;
-					try {
-						time = Integer.parseInt(timeAsString);
-					} catch (NumberFormatException e) {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
-						return;
-					}
-
-					LocalDateTime date = LocalDateTime.now();
-
-					// Minute
-					if (last == 'm') {
-						date = date.plusMinutes(time);
-					}
-					// Hour
-					else if (last == 'h') {
-						date = date.plusHours(time);
-					}
-					// Day
-					else if (last == 'd') {
-						date = date.plusDays(time);
-					}
-					// Week
-					else if (last == 'w') {
-						date = date.plusWeeks(time);
-					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
-						return;
-					}
-
-					// Duration and reason was specified
-					if (args.length >= 4) {
-						StringBuilder reason = new StringBuilder();
-						for (int i = 3; i < args.length; i++) {
-							reason.append(args[i]);
-							if (i < args.length - 1) {
-								reason.append(" ");
-							}
-						}
-
-						if (player.isOnline()) {
-							Player bannedOnlinePlayer = Bukkit.getPlayer(player.getUniqueId());
-							bannedOnlinePlayer.ban("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
-							Punishment punishment = new Punishment(bannedOnlinePlayer.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-									ZoneId.systemDefault()), "BAN", reason.toString(), senderUuid);
-							AranarthUtils.addPunishment(bannedOnlinePlayer.getUniqueId(), punishment, false);
-							for (Player online : Bukkit.getOnlinePlayers()) {
-								if (online.getAddress().getAddress().equals(bannedOnlinePlayer.getAddress().getAddress())) {
-									if (online.equals(bannedOnlinePlayer)) {
-										continue;
-									}
-									online.ban("You have been banned from Aranarth due to " + bannedOnlinePlayer.getName() + "'s actions!",
-											date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
-									Punishment otherOnlinePlayerPunishment = new Punishment(online.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-											ZoneId.systemDefault()), "BAN", reason.toString(), senderUuid);
-									AranarthUtils.addPunishment(online.getUniqueId(), otherOnlinePlayerPunishment, false);
-								}
-							}
-							bannedOnlinePlayer.banIp("You have been IP banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null, true);
-						} else {
-							player.ban("You have been banned from Aranarth", date.atZone(ZoneId.systemDefault()).toInstant(), null);
-							Punishment punishment = new Punishment(player.getUniqueId(), LocalDateTime.ofInstant(Instant.now(),
-									ZoneId.systemDefault()), "BAN", reason.toString(), senderUuid);
-							AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
-
-						}
-					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a duration and a reason for the ban!"));
-						return;
-					}
-				}
+		StringBuilder reasonBuilder = new StringBuilder();
+		for (int i = 3; i < args.length; i++) {
+			reasonBuilder.append(args[i]);
+			if (i < args.length - 1) {
+				reasonBuilder.append(" ");
 			}
 		}
+		String reason = reasonBuilder.toString();
 
-		if (wasPlayerBanned) {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned"));
+		boolean wasPlayerBanned = false;
+		String nickname = "";
+		OfflinePlayer player = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[1]));
+		if (player != null) {
+			wasPlayerBanned = true;
+			nickname = AranarthUtils.getNickname(player);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			Date unbanDate = null;
+			// If it is not a permanent ban
+			if (!args[2].equals("-1")) {
+				LocalDateTime localDateTime = getEndDateOfBan(args[2], sender);
+				// If the date could not be determined
+				if (localDateTime == null) {
+					return;
+				} else {
+					unbanDate = Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+				}
+			}
+
+			LocalDateTime currentTime =  LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+			player.ban(reason, unbanDate, null);
+			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
+			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
+			return;
 		}
+
+		sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned"));
+	}
+
+	/**
+	 * Provides the end date of a ban.
+	 * @param duration The duration of the ban.
+	 * @param sender The sender of the command.
+	 * @return The end date of the ban.
+	 */
+	private static LocalDateTime getEndDateOfBan(String duration, CommandSender sender) {
+		char last = duration.charAt(duration.length() - 1);
+		String timeAsString = duration.substring(0, duration.length() - 1);
+		int time = 0;
+		try {
+			time = Integer.parseInt(timeAsString);
+		} catch (NumberFormatException e) {
+			sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+			return null;
+		}
+
+		LocalDateTime date = LocalDateTime.now();
+		// Minute
+		if (last == 'm') {
+			date = date.plusMinutes(time);
+		}
+		// Hour
+		else if (last == 'h') {
+			date = date.plusHours(time);
+		}
+		// Day
+		else if (last == 'd') {
+			date = date.plusDays(time);
+		}
+		// Week
+		else if (last == 'w') {
+			date = date.plusWeeks(time);
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+			return null;
+		}
+
+		return date;
 	}
 
 	/**

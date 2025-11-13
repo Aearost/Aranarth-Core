@@ -7,11 +7,9 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
-import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
-import org.bukkit.ban.IpBanList;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -50,10 +48,6 @@ public class PlayerServerJoinListener implements Listener {
 				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
 			}
 		}
-
-		// Unbans the player's IP if it was previously banned
-		IpBanList ipBanList = Bukkit.getBanList(BanList.Type.IP);
-		ipBanList.pardon(player.getAddress().getAddress());
 
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;

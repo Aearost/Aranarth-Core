@@ -1384,8 +1384,8 @@ public class AranarthUtils {
 						return;
 					}
 				} else {
-					// Always will be before the current date if "none" is the end date
-					definedMuteDate = LocalDateTime.of(2000, 1, 1, 1, 1);
+					// Always will be after the current date if "none" is the end date
+					definedMuteDate = LocalDateTime.of(9999, 1, 1, 1, 1);
 				}
 
 				if (definedMuteDate.isBefore(currentDate)) {
@@ -1421,13 +1421,18 @@ public class AranarthUtils {
 		for (BanEntry<PlayerProfile> entry : profileBanList.getEntries()) {
 			PlayerProfile profile = entry.getBanTarget();
 			UUID uuid = profile.getUniqueId();
-			// If they are no longer banned
-			if (entry.getExpiration().before(new Date())) {
-				Punishment punishment = new Punishment(
-						uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
-				DiscordUtils.addPunishmentToDiscord(punishment);
-				entry.remove();
+			// If the player's ban is temporary
+			if (entry.getExpiration() != null) {
+				// If they are no longer banned
+				if (entry.getExpiration().before(new Date())) {
+					Punishment punishment = new Punishment(
+							uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+					DiscordUtils.addPunishmentToDiscord(punishment);
+					entry.remove();
+				}
 			}
+
+
 		}
 	}
 

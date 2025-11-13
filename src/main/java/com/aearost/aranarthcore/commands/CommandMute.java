@@ -43,8 +43,8 @@ public class CommandMute {
 	 * @param args The arguments of the command.
 	 */
 	private static void mutePlayer(CommandSender sender, String[] args) {
-		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to mute!"));
+		if (args.length < 4) {
+			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac mute <player> <duration> <reason>"));
 			return;
 		}
 
@@ -54,78 +54,76 @@ public class CommandMute {
 		}
 
 		boolean wasPlayerMuted = false;
-		String playerName = args[1];
 		String nickname = "";
-		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
-			if (player.getName().equalsIgnoreCase(args[1])) {
-				wasPlayerMuted = true;
-				playerName = player.getName();
-				nickname = AranarthUtils.getNickname(player);
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
-				// Permanent mute
-				if (args.length == 2) {
-					aranarthPlayer.setMuteEndDate("none");
-				} else {
-					if (args.length >= 4) {
-						char last = args[2].charAt(args[2].length() - 1);
-						String timeAsString = args[2].substring(0, args[2].length() - 1);
-						int time = 0;
-						try {
-							time = Integer.parseInt(timeAsString);
-						} catch (NumberFormatException e) {
-							sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
-							return;
-						}
-
-						LocalDateTime date = LocalDateTime.now();
-
-						// Minute
-						if (last == 'm') {
-							date = date.plusMinutes(time);
-						}
-						// Hour
-						else if (last == 'h') {
-							date = date.plusHours(time);
-						}
-						// Day
-						else if (last == 'd') {
-							date = date.plusDays(time);
-						}
-						// Week
-						else if (last == 'w') {
-							date = date.plusWeeks(time);
-						} else {
-							sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
-							return;
-						}
-
-						int year = date.getYear();
-						int month = date.getMonthValue();
-						int day = date.getDayOfMonth();
-						int hour = date.getHour();
-						int minute = date.getMinute();
-
-						// Format of yymmddhhmm
-						String unmuteDate = "";
-						unmuteDate += (year + "").substring(2); // Gets last 2 digits
-						unmuteDate += appendZero(month);
-						unmuteDate += appendZero(day);
-						unmuteDate += appendZero(hour);
-						unmuteDate += appendZero(minute);
-						aranarthPlayer.setMuteEndDate(unmuteDate);
-					} else {
-						sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a duration and a reason for the mute!"));
-						return;
-					}
-				}
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-				AranarthUtils.addMutedPlayer(player.getUniqueId());
+		OfflinePlayer player = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[1]));
+		if (player != null) {
+			wasPlayerMuted = true;
+			nickname = AranarthUtils.getNickname(player);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
+				sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already muted!"));
+				return;
 			}
+
+			String unmuteDate = "";
+
+			// Permanent mute
+			if (args[2].equals("-1")) {
+				unmuteDate = "none";
+			} else {
+				char last = args[2].charAt(args[2].length() - 1);
+				String timeAsString = args[2].substring(0, args[2].length() - 1);
+				int time = 0;
+				try {
+					time = Integer.parseInt(timeAsString);
+				} catch (NumberFormatException e) {
+					sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
+					return;
+				}
+
+				LocalDateTime date = LocalDateTime.now();
+
+				// Minute
+				if (last == 'm') {
+					date = date.plusMinutes(time);
+				}
+				// Hour
+				else if (last == 'h') {
+					date = date.plusHours(time);
+				}
+				// Day
+				else if (last == 'd') {
+					date = date.plusDays(time);
+				}
+				// Week
+				else if (last == 'w') {
+					date = date.plusWeeks(time);
+				} else {
+					sender.sendMessage(ChatUtils.chatMessage("&cThat is not a valid variable of time!"));
+					return;
+				}
+
+				int year = date.getYear();
+				int month = date.getMonthValue();
+				int day = date.getDayOfMonth();
+				int hour = date.getHour();
+				int minute = date.getMinute();
+
+				// Format of yymmddhhmm
+				unmuteDate += (year + "").substring(2); // Gets last 2 digits
+				unmuteDate += appendZero(month);
+				unmuteDate += appendZero(day);
+				unmuteDate += appendZero(hour);
+				unmuteDate += appendZero(minute);
+			}
+			aranarthPlayer.setMuteEndDate(unmuteDate);
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			AranarthUtils.addMutedPlayer(player.getUniqueId());
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
 		}
 
 		if (wasPlayerMuted) {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
 			StringBuilder reason = new StringBuilder();
 			for (int i = 3; i < args.length; i++) {
 				reason.append(args[i]);
@@ -137,14 +135,13 @@ public class CommandMute {
 			Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
 					ZoneId.systemDefault()), "MUTE", reason.toString(), senderUuid);
 			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
+			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
 
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId())) {
+				if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(args[1]).getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been muted!"));
 				}
 			}
-		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
 		}
 	}
 
