@@ -1417,6 +1417,7 @@ public class AranarthUtils {
 	 */
 	public static void refreshBans() {
 		ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+		List<BanEntry<PlayerProfile>> toRemove = new ArrayList<>();
 		for (BanEntry<PlayerProfile> entry : profileBanList.getEntries()) {
 			PlayerProfile profile = entry.getBanTarget();
 			UUID uuid = profile.getUniqueId();
@@ -1425,6 +1426,7 @@ public class AranarthUtils {
 				Punishment punishment = new Punishment(
 						uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
 				DiscordUtils.addPunishmentToDiscord(punishment);
+				entry.remove();
 			}
 		}
 	}
