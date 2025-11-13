@@ -37,6 +37,7 @@
     <inspection_tool class="SameParameterValue" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SameReturnValue" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SequencedCollectionMethodCanBeUsed" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="StringConcatenationInLoops" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="StringTemplateMigration" enabled="false" level="WARNING" enabled_by_default="false" />
     <inspection_tool class="SwitchStatementWithTooFewBranches" enabled="false" level="WARNING" enabled_by_default="false">
       <option name="m_limit" value="2" />
