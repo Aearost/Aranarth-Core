@@ -1692,4 +1692,16 @@ public class AranarthUtils {
 		punishments.get(uuid).remove(punishment);
 	}
 
+	/**
+	 * Applies passive effects to all players that are in Spawn.
+	 */
+	public static void applySpawnBuffs() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (isSpawnLocation(player.getLocation())) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+			}
+		}
+	}
+
 }
