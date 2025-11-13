@@ -274,22 +274,22 @@ public class DiscordUtils {
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
-            case "MUTE" -> {
-                embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
-                embed.setColor(Color.YELLOW);
-                LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
-                String year = endDate.getYear() + "";
-                String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
-                String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
-                String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
-                String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
-                String formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
-                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+			case "MUTE" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
+				embed.setColor(Color.YELLOW);
+				LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+				String year = endDate.getYear() + "";
+				String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+				String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+				String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+				String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+				String formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Muted by:** " + appliedBy + "\n" +
-                        "**Mute ends:** " + formattedEndDate + "\n" +
-                        "**Reason:** " + punishment.getReason());
-            }
-            case "BAN" -> {
+						"**Mute ends:** " + formattedEndDate + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "BAN" -> {
 				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
 				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
 				if (profileBanList.getBanEntry(player.getPlayerProfile()) != null) {
@@ -307,13 +307,27 @@ public class DiscordUtils {
 					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
 				}
 
-                embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
-                embed.setColor(Color.RED);
-                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
+				embed.setColor(Color.RED);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Banned by:** " + appliedBy + "\n" +
-                        "**Ban ends:** " + formattedEndDate + "\n" +
-                        "**Reason:** " + punishment.getReason());
-            }
+						"**Ban ends:** " + formattedEndDate + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "UNMUTE" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been unmuted", null, url);
+				embed.setColor(Color.GREEN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unmuted by:** " + appliedBy + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "UNBAN" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been unbanned", null, url);
+				embed.setColor(Color.GREEN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unbanned by:** " + appliedBy + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
         }
 		TextChannel punishmentChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
 		punishmentChannel.sendMessageEmbeds(embed.build()).queue();
