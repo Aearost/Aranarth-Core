@@ -21,6 +21,8 @@ public class Dominion {
 	private double balance;
 
 	public Dominion(String name, UUID owner, List<UUID> members, List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
+		name = name.replaceAll("\\|", "");
+		name = name.replaceAll("_", "");
 		this.name = name;
 		this.owner = owner;
 		this.members = members;
@@ -31,6 +33,8 @@ public class Dominion {
 	}
 
 	public Dominion(String name, UUID owner, List<UUID> members, String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch, double balance) {
+		name = name.replaceAll("\\|", "");
+		name = name.replaceAll("_", "");
 		this.name = name;
 		this.owner = owner;
 		this.members = members;

@@ -186,6 +186,7 @@ public class AranarthPlayer {
 	 * @param nickname The new nickname.
 	 */
 	public void setNickname(String nickname) {
+		nickname = nickname.replaceAll("\\|", "");
 		this.nickname = nickname;
 	}
 
