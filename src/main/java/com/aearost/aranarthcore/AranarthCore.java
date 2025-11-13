@@ -70,6 +70,7 @@ public class AranarthCore extends JavaPlugin {
 			public void run() {
 				AranarthUtils.applyArmourEffects();
 				AranarthUtils.refreshMutes();
+				AranarthUtils.refreshBans();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
