@@ -46,7 +46,7 @@ Features
 [~] Decreased Resistance cap to 3 levels
 [~] Fixed bug where % would cause errors
 [~] Prevented pipe and underscore characters from being input to persisting files
-[+] Added in potion formatting for /ac potions and /ac potions remove to show proper display names
+[+] Added in potion name formatting for /ac potions to show proper display names
 
 Miscellaneous
 - Removed redundant logs from weather
