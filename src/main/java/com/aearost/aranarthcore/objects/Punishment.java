@@ -17,6 +17,8 @@ public class Punishment {
 		this.uuid = uuid;
 		this.date = date;
 		this.type = type;
+		reason = reason.replaceAll("\\|", "");
+		reason = reason.replaceAll("_", "");
 		this.reason = reason;
 		this.appliedBy = appliedBy;
 	}

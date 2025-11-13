@@ -13,6 +13,8 @@ public class Home {
 	private final Material icon;
 	
 	public Home(String homeName, Location location, Material icon) {
+		homeName = homeName.replaceAll("\\|", "");
+		homeName = homeName.replaceAll("_", "");
 		this.name = homeName;
 		this.location = location;
 		this.icon = icon;

@@ -44,6 +44,7 @@ Features
 [~] Fixed bug where vines were still growing in the arena world
 [~] Decreased Resistance cap to 3 levels
 [~] Fixed bug where % would cause errors
+[~] Prevented pipe and underscore characters from being input to persisting files
 
 Miscellaneous
 - Removed redundant logs from weather
