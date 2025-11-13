@@ -267,14 +267,14 @@ public class DiscordUtils {
 		}
 
         switch (punishment.getType()) {
-            case "warn" -> {
+            case "WARN" -> {
                 embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
-                embed.setColor(Color.PINK);
+                embed.setColor(Color.LIGHT_GRAY);
                 embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
-            case "mute" -> {
+            case "MUTE" -> {
                 embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
                 embed.setColor(Color.YELLOW);
                 LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
@@ -289,7 +289,7 @@ public class DiscordUtils {
                         "**Mute ends:** " + formattedEndDate + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
-            case "ban" -> {
+            case "BAN" -> {
 				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
 				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
 				if (profileBanList.getBanEntry(player.getPlayerProfile()) != null) {
