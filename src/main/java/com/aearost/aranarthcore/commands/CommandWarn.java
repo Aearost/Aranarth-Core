@@ -15,7 +15,7 @@ import java.time.ZoneId;
 import java.util.UUID;
 
 /**
- * Mutes the specified player.
+ * Warns the specified player.
  */
 public class CommandWarn {
 
@@ -38,7 +38,7 @@ public class CommandWarn {
     }
 
 	/**
-	 * Helper method to mute the input player.
+	 * Helper method to warn the input player.
 	 * @param sender The user that entered the command.
 	 * @param args The arguments of the command.
 	 */
