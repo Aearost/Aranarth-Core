@@ -20,8 +20,10 @@ Features
 [+] Added in /ac warn to give and track a warning provided to a player
 [+] Added in /ac punishments to track all warnings, mutes, and bans a player has had
 [+] Added a GUI for /ac potions
+[+] Added in hard caps to the number of available potions and quiver slots a player has access to
 [+] Updated chat format to support ranks and pronouns
 [+] Added discord role auto-assignment when rank is changed (rankup or by command)
+[+] Added discord punishment logging when any change is made to the player's punishment history
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
 [-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases
 [~] Restricted the crafting and placing of homepads to only SMP

@@ -1761,4 +1761,88 @@ public class AranarthUtils {
 		return finalName.toString();
 	}
 
+	/**
+	 * Provides the combined total number of potions that a given player has.
+	 * Includes potion from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of potions that a given player has.
+	 */
+	public static int getMaxPotionNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankPotionNum = 0;
+		int saintPotionNum = 0;
+
+		if (aranarthPlayer.getRank() == 1) {
+			rankPotionNum = 50;
+		} else if (aranarthPlayer.getRank() == 2) {
+			rankPotionNum = 100;
+		} else if (aranarthPlayer.getRank() == 3) {
+			rankPotionNum = 200;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankPotionNum = 300;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankPotionNum = 400;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankPotionNum = 600;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankPotionNum = 750;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankPotionNum = 1000;
+		} else {
+			rankPotionNum = 25;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintPotionNum = 100;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintPotionNum = 250;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintPotionNum = 500;
+		}
+
+		return rankPotionNum + saintPotionNum;
+	}
+
+	/**
+	 * Provides the combined total number of Quiver slots that a given player has.
+	 * Includes quiver slots from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of Quiver slots that a given player has.
+	 */
+	public static int getMaxQuiverSize(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankQuiverSlotNum = 0;
+		int saintQuiverSlotNum = 0;
+
+		if (aranarthPlayer.getRank() == 1) {
+			rankQuiverSlotNum = 5;
+		} else if (aranarthPlayer.getRank() == 2) {
+			rankQuiverSlotNum = 9;
+		} else if (aranarthPlayer.getRank() == 3) {
+			rankQuiverSlotNum = 12;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankQuiverSlotNum = 18;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankQuiverSlotNum = 25;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankQuiverSlotNum = 30;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankQuiverSlotNum = 36;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankQuiverSlotNum = 45;
+		} else {
+			rankQuiverSlotNum = 3;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintQuiverSlotNum = 6;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintQuiverSlotNum = 9;
+		}
+
+		return rankQuiverSlotNum + saintQuiverSlotNum;
+	}
+
 }
