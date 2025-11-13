@@ -4,12 +4,15 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Lists the punishments of the specified player.
@@ -24,7 +27,16 @@ public class CommandPunishments {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (player.hasPermission("aranarth.punishments")) {
-				listPunishments(sender, args);
+				if (args.length == 1) {
+					sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+					return true;
+				}
+				// List the punishments
+				if (args.length == 2) {
+					listPunishments(sender, args);
+				} else {
+					removePunishment(sender, args);
+				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 			}
@@ -40,11 +52,6 @@ public class CommandPunishments {
 	 * @param args The arguments of the command.
 	 */
 	private static void listPunishments(CommandSender sender, String[] args) {
-		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player>"));
-			return;
-		}
-
 		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
 			if (player.getName().equalsIgnoreCase(args[1])) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -57,15 +64,15 @@ public class CommandPunishments {
 					for (int i = 0; i < punishments.size(); i++) {
 						Punishment punishment = punishments.get(i);
 						String type = switch (punishment.getType()) {
-                            case "WARN" -> "Warned";
-                            case "MUTE" -> "Muted";
+							case "WARN" -> "Warned";
+							case "MUTE" -> "Muted";
 							case "BAN" -> "Banned";
 							case "UNMUTE" -> "Unmuted";
 							case "UNBAN" -> "Unbanned";
-                            default -> "Punished";
-                        };
+							default -> "Punished";
+						};
 
-                        String appliedBy = "Console";
+						String appliedBy = "Console";
 						if (punishment.getAppliedBy() != null) {
 							appliedBy = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(punishment.getAppliedBy()));
 						}
@@ -91,17 +98,70 @@ public class CommandPunishments {
 
 						sender.sendMessage(ChatUtils.translateToColor(
 								"&8&l[&6&l" + (i + 1) + "&8&l] &e" // Prefix and number of warnings
-								+ type + " &7by &e" + appliedBy // Type of punishment and who applied it
-								+ " &7| &e" + dayOfYear + " " + time // The date and time of the punishment
-								+ " &7| &e" + punishment.getReason())); // The reason for the punishment
+										+ type + " &7by &e" + appliedBy // Type of punishment and who applied it
+										+ " &7| &e" + dayOfYear + " " + time // The date and time of the punishment
+										+ " &7| &e" + punishment.getReason())); // The reason for the punishment
 					}
 					return;
 				}
 			}
 		}
-
-		sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
 	}
 
+	/**
+	 * Helper method to remove a punishment from the input player.
+	 * @param sender The user that entered the command.
+	 * @param args The arguments of the command.
+	 */
+	private static void removePunishment(CommandSender sender, String[] args) {
+		for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
+			if (player.getName().equalsIgnoreCase(args[1])) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				List<Punishment> punishments = AranarthUtils.getPunishments(player.getUniqueId());
+				if (punishments == null || punishments.isEmpty()) {
+					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has no logged punishments"));
+					return;
+				} else {
+					if (args.length < 4) {
+						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						return;
+					}
+
+					if (!args[2].equals("remove")) {
+						sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac punishments <player> [<remove> <number>]"));
+						return;
+					}
+
+					int slotToRemove = 0;
+					try {
+						slotToRemove = Integer.parseInt(args[3]);
+						if (slotToRemove > 0) {
+							if (punishments.size() >= slotToRemove) {
+								String type = punishments.get(slotToRemove - 1).getType();
+								UUID senderUuid = null;
+								if (sender instanceof Player playerSender) {
+									senderUuid = playerSender.getUniqueId();
+								}
+								Punishment punishmentBeingRemoved = punishments.get(slotToRemove - 1);
+
+								Punishment punishment = new Punishment(
+										player.getUniqueId(), LocalDateTime.now(), "REMOVE_" + type, punishmentBeingRemoved.getReason(), senderUuid);
+								DiscordUtils.addPunishmentToDiscord(punishment);
+								AranarthUtils.removePunishment(player.getUniqueId(), punishmentBeingRemoved);
+								sender.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + aranarthPlayer.getNickname() + "&e's &7punishment successfully"));
+							} else {
+								throw new NumberFormatException();
+							}
+						} else {
+							throw new NumberFormatException();
+						}
+					} catch (NumberFormatException e) {
+						sender.sendMessage(ChatUtils.chatMessage("&cThat punishment number is invalid"));
+						return;
+					}
+				}
+			}
+		}
+	}
 
 }
