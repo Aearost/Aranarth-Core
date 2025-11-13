@@ -68,6 +68,7 @@ public class CommandUnmute {
 				}
 				aranarthPlayer.setMuteEndDate("");
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+				AranarthUtils.removeMutedPlayer(uuid);
 
 				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNMUTE", reason.toString(), senderUuid);
 				AranarthUtils.addPunishment(uuid, punishment, false);

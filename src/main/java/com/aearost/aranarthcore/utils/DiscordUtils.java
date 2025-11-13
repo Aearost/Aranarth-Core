@@ -277,28 +277,10 @@ public class DiscordUtils {
 			case "MUTE" -> {
 				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
 				embed.setColor(Color.YELLOW);
-				LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
-				String year = endDate.getYear() + "";
-				String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
-				String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
-				String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
-				String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
-				String formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
-				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
-						"**Muted by:** " + appliedBy + "\n" +
-						"**Mute ends:** " + formattedEndDate + "\n" +
-						"**Reason:** " + punishment.getReason());
-			}
-			case "BAN" -> {
-				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
-				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
-				if (profileBanList.getBanEntry(player.getPlayerProfile()) != null) {
 
-				}
-				Instant banEndInstant = profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration().toInstant();
-				String formattedEndDate = null;
-				if (banEndInstant != null) {
-					LocalDateTime endDate = LocalDateTime.ofInstant(banEndInstant, ZoneId.systemDefault());
+				String formattedEndDate = "None";
+				if (!aranarthPlayer.getMuteEndDate().equals("none")) {
+					LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
 					String year = endDate.getYear() + "";
 					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
 					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
@@ -307,11 +289,32 @@ public class DiscordUtils {
 					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
 				}
 
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Muted by:** " + appliedBy + "\n" +
+						"**Mute end date:** " + formattedEndDate + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "BAN" -> {
+				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
+				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+				String formattedEndDate = "None";
+
+				// If it's a temporary ban
+				if (profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration() != null) {
+					Instant banEndInstant = profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration().toInstant();
+					LocalDateTime endDate = LocalDateTime.ofInstant(banEndInstant, ZoneId.systemDefault());
+					String year = endDate.getYear() + "";
+					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+					String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+				}
 				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
 				embed.setColor(Color.RED);
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Banned by:** " + appliedBy + "\n" +
-						"**Ban ends:** " + formattedEndDate + "\n" +
+						"**Ban end date:** " + formattedEndDate + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
 			case "UNMUTE" -> {
