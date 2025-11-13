@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
@@ -20,6 +21,7 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.profile.PlayerProfile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -1397,11 +1399,32 @@ public class AranarthUtils {
 				aranarthPlayer.setMuteEndDate("");
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
+				Punishment punishment = new Punishment(
+						uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
+				DiscordUtils.addPunishmentToDiscord(punishment);
+
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 				if (offlinePlayer.isOnline()) {
 					Player player = Bukkit.getPlayer(uuid);
 					player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
 				}
+			}
+		}
+	}
+
+	/**
+	 * Refreshes all banned players.
+	 */
+	public static void refreshBans() {
+		ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+		for (BanEntry<PlayerProfile> entry : profileBanList.getEntries()) {
+			PlayerProfile profile = entry.getBanTarget();
+			UUID uuid = profile.getUniqueId();
+			// If they are no longer banned
+			if (entry.getExpiration().before(new Date())) {
+				Punishment punishment = new Punishment(
+						uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+				DiscordUtils.addPunishmentToDiscord(punishment);
 			}
 		}
 	}
