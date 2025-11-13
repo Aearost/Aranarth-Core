@@ -39,45 +39,29 @@ public class GuiPotionRemove {
 
 					Player player = (Player) e.getWhoClicked();
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-//					HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
 					HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 					int toBeRemoved = aranarthPlayer.getPotionQuantityToRemove();
-//					List<Integer> indexesToRemove = new ArrayList<>();
 
 					List<ItemStack> potionsToRemove = new ArrayList<>();
 					int amountRemoved = 0;
 					// While there is still quantity in the pouch for that potion
 					while (potions.get(clickedItem) > 0) {
+						if (toBeRemoved == 0) {
+							break;
+						}
 						potionsToRemove.add(clickedItem);
 						amountRemoved++;
+						toBeRemoved--;
 						potions.put(clickedItem, potions.get(clickedItem) - 1);
 					}
+
 					if (potions.get(clickedItem) == 0) {
 						potions.remove(clickedItem);
 					}
 
-//					// Finds which potions in the list will be removed
-//					for (int i = 0; i < potions.size(); i++) {
-//						if (toBeRemoved == 0) {
-//							break;
-//						}
-//
-//						if (potions.get(i).(clickedItem)) {
-//							indexesToRemove.add(i);
-//							toBeRemoved--;
-//						}
-//					}
-//
-//
-//					// Removes the potions that were selected
-//					for (int index : indexesToRemove.reversed()) {
-//						potions.remove(index);
-//					}
-
 					e.setCancelled(true);
 					player.closeInventory();
 
-//					int amountToAddToInventory = aranarthPlayer.getPotionQuantityToRemove();
 					aranarthPlayer.setPotions(potions);
 					aranarthPlayer.setPotionQuantityToRemove(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

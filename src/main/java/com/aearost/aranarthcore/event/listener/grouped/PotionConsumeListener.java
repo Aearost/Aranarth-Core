@@ -96,15 +96,19 @@ public class PotionConsumeListener implements Listener {
 							}
 							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							potion.setAmount(2);
-							player.getInventory().setItem(slot, potion);
+
+							// Temporarily adds a potion to allow for auto-replacement
+							ItemStack potionCopy = potion.clone();
+							potionCopy.setAmount(2);
+							player.getInventory().setItem(slot, potionCopy);
 						} else {
 							potions.put(potion, potions.get(potion) - 1);
-							aranarthPlayer.setPotions(potions);
 							if (potions.get(potion) == 0) {
 								potions.remove(potion);
 							}
+							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 							final int finalSlot = slot;
 							
 							// Required to add potion to inventory after consumption
