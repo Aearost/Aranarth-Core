@@ -64,7 +64,7 @@ public class Punishment {
 	 * @param type The type of the punishment.
 	 */
 	public void setType(String type) {
-		this.type = type;
+		this.type = type.toUpperCase();
 	}
 
 	/**
