@@ -19,6 +19,7 @@ Features
 [+] Added in /ac rules
 [+] Added in /ac warn to give and track a warning provided to a player
 [+] Added in /ac punishments to track all warnings, mutes, and bans a player has had
+[+] Added a GUI for /ac potions
 [+] Updated chat format to support ranks and pronouns
 [+] Added discord role auto-assignment when rank is changed (rankup or by command)
 [-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
@@ -45,6 +46,7 @@ Features
 [~] Decreased Resistance cap to 3 levels
 [~] Fixed bug where % would cause errors
 [~] Prevented pipe and underscore characters from being input to persisting files
+[+] Added in potion formatting for /ac potions and /ac potions remove to show proper display names
 
 Miscellaneous
 - Removed redundant logs from weather
