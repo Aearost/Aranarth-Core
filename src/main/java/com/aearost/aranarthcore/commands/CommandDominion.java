@@ -232,6 +232,11 @@ public class CommandDominion {
 									}
 								}
 
+								if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+									player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion here!"));
+									return;
+								}
+
 								List<UUID> members = new ArrayList<>();
 								members.add(player.getUniqueId());
 								Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
