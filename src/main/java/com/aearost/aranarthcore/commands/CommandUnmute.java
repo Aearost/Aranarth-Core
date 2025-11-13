@@ -1,12 +1,14 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -39,20 +41,45 @@ public class CommandUnmute {
 	 */
 	private static void unmutePlayer(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to unmute!"));
+			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac unmute <player> <reason>"));
 			return;
+		}
+
+		UUID senderUuid = null;
+		if (sender instanceof Player senderPlayer) {
+			senderUuid = senderPlayer.getUniqueId();
 		}
 
 		UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 		if (uuid != null) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			aranarthPlayer.setMuteEndDate("");
-			AranarthUtils.setPlayer(uuid, aranarthPlayer);
-			sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has been unmuted"));
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				if (player.getUniqueId().equals(uuid)) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have been unmuted"));
+			if (args.length >= 3) {
+				StringBuilder reason = new StringBuilder();
+				for (int i = 2; i < args.length; i++) {
+					reason.append(args[i]);
+					if (i < args.length - 1) {
+						reason.append(" ");
+					}
 				}
+
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+				if (aranarthPlayer.getMuteEndDate().isEmpty()) {
+					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not currently muted!"));
+					return;
+				}
+				aranarthPlayer.setMuteEndDate("");
+				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+				Punishment punishment = new Punishment(uuid, LocalDateTime.now(), "UNMUTE", reason.toString(), senderUuid);
+				AranarthUtils.addPunishment(uuid, punishment, false);
+				sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has been unmuted"));
+
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					if (player.getUniqueId().equals(uuid)) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have been unmuted"));
+					}
+				}
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify an unmute reason"));
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));

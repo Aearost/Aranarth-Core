@@ -59,7 +59,9 @@ public class CommandPunishments {
 						String type = switch (punishment.getType()) {
                             case "WARN" -> "Warned";
                             case "MUTE" -> "Muted";
-                            case "BAN" -> "Banned";
+							case "BAN" -> "Banned";
+							case "UNMUTE" -> "Unmuted";
+							case "UNBAN" -> "Unbanned";
                             default -> "Punished";
                         };
 
