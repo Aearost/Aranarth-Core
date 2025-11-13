@@ -724,6 +724,7 @@ public class CommandACCompleter implements TabCompleter {
 									displayedOptions.add("1h");
 									displayedOptions.add("1d");
 									displayedOptions.add("1w");
+									displayedOptions.add("-1");
 								}
 							} else if (args.length == 4) {
 								if (args[3].isEmpty()) {
@@ -734,6 +735,19 @@ public class CommandACCompleter implements TabCompleter {
 						case "warn" -> {
 							if (args[2].isEmpty()) {
 								displayedOptions.add("reason");
+							}
+						}
+						case "punishments" -> {
+							if (args.length == 3) {
+								if (!args[2].isEmpty() && "remove".startsWith(args[2])) {
+									displayedOptions.add("remove");
+								} else {
+									displayedOptions.add("remove");
+								}
+							} else if (args.length == 4) {
+								if (args[3].isEmpty()) {
+									displayedOptions.add("number");
+								}
 							}
 						}
 					}
