@@ -13,12 +13,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.ban.ProfileBanList;
 
+import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-
-import java.awt.*;
 import java.util.UUID;
 
 /**

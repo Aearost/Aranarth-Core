@@ -16,7 +16,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class PotionConsumeListener implements Listener {
@@ -63,10 +63,10 @@ public class PotionConsumeListener implements Listener {
 			return;
 		}
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		
-		List<ItemStack> potions = aranarthPlayer.getPotions();
+
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 		if (Objects.nonNull(potions)) {
-			for (ItemStack potion : potions) {
+			for (ItemStack potion : potions.keySet()) {
 				PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 				if (consumedPotion.getType() == potion.getType()) {
 					
@@ -90,14 +90,20 @@ public class PotionConsumeListener implements Listener {
 						}
 						
 						if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
-							potion.setAmount(2);
-							player.getInventory().setItem(slot, potion);
-							potions.remove(potion);
+							potions.put(potion, potions.get(potion) - 1);
+							if (potions.get(potion) == 0) {
+								potions.remove(potion);
+							}
 							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							potion.setAmount(2);
+							player.getInventory().setItem(slot, potion);
 						} else {
-							potions.remove(potion);
+							potions.put(potion, potions.get(potion) - 1);
 							aranarthPlayer.setPotions(potions);
+							if (potions.get(potion) == 0) {
+								potions.remove(potion);
+							}
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							final int finalSlot = slot;
 							
