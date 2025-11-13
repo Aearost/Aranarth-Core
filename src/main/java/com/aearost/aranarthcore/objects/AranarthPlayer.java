@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,7 +23,7 @@ public class AranarthPlayer {
 	private String arenaInventory;
 	private String creativeInventory;
 	private boolean isDeletingBlacklistedItems;
-	private List<ItemStack> potions;
+	private HashMap<ItemStack, Integer> potions;
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
 	private boolean isHitByTippedArrow;
@@ -88,7 +89,7 @@ public class AranarthPlayer {
 		this.particleNum = 100;
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, int particleNum, Pronouns pronouns) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, int particleNum, Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -258,7 +259,7 @@ public class AranarthPlayer {
 	 * Provides the List of potions that the player currently has in their potion inventory.
 	 * @return The List of the player's potions.
 	 */
-	public List<ItemStack> getPotions() {
+	public HashMap<ItemStack, Integer> getPotions() {
 		return potions;
 	}
 
@@ -266,7 +267,7 @@ public class AranarthPlayer {
 	 * Updates the player's current List of potions.
 	 * @param potions The new List of potions.
 	 */
-	public void setPotions(List<ItemStack> potions) {
+	public void setPotions(HashMap<ItemStack, Integer> potions) {
 		this.potions = potions;
 	}
 

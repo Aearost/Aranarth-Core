@@ -8,7 +8,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class GuiPotions {
 
@@ -35,10 +34,10 @@ public class GuiPotions {
 
 	private Inventory initializeRemoveGui(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<ItemStack> potions = aranarthPlayer.getPotions();
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 
-		HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
-		int size = potionsAndAmounts.size();
+//		HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
+		int size = potions.size();
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row
@@ -47,7 +46,7 @@ public class GuiPotions {
 		}
 
 		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions");
-		for (ItemStack storedPotion : potionsAndAmounts.keySet()) {
+		for (ItemStack storedPotion : potions.keySet()) {
 			inventory.addItem(storedPotion);
 		}
 		return inventory;

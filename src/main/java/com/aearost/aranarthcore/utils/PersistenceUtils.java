@@ -177,17 +177,20 @@ public class PersistenceUtils {
 				String arenaInventory = fields[3];
 				String creativeInventory = fields[4];
 
-				List<ItemStack> potions = null;
-				ItemStack[] potionsAsItemStackArray;
-				if (!fields[5].isEmpty()) {
+				HashMap<ItemStack, Integer> potions = new HashMap<>();
+				String[] potionAsArray = fields[5].split("___");
+				for (String potionInArray : potionAsArray) {
+					String[] parts = potionInArray.split("_");
+					ItemStack[] potionType = new ItemStack[1];
 					try {
-						potionsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[5]);
+						potionType = ItemUtils.itemStackArrayFromBase64(parts[0]);
 					} catch (IOException e) {
 						Bukkit.getLogger().info("There was an issue loading the player's potions!");
 						reader.close();
 						return;
 					}
-					potions = new LinkedList<>(Arrays.asList(potionsAsItemStackArray));
+					int amount = Integer.parseInt(parts[1]);
+					potions.put(potionType[0], amount);
 				}
 
 				List<ItemStack> arrows = null;
@@ -320,10 +323,19 @@ public class PersistenceUtils {
 						String survivalInventory = aranarthPlayer.getSurvivalInventory();
 						String arenaInventory = aranarthPlayer.getArenaInventory();
 						String creativeInventory = aranarthPlayer.getCreativeInventory();
+
+
+
 						String potions = "";
 						if (Objects.nonNull(aranarthPlayer.getPotions())) {
-							potions = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getPotions().toArray(new ItemStack[0]));
+							for (ItemStack potion : aranarthPlayer.getPotions().keySet()) {
+								int amount = aranarthPlayer.getPotions().get(potion);
+								String part = ItemUtils.itemStackArrayToBase64(new ItemStack[] { potion });
+								part += "_" + amount + "___";
+							}
 						}
+						potions = potions.substring(0, potions.length() - 2); // Remove the last three characters
+
 						String arrows = "";
 						if (Objects.nonNull(aranarthPlayer.getArrows())) {
 							arrows = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getArrows().toArray(new ItemStack[0]));
