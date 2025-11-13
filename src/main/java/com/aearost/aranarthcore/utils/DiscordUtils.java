@@ -331,6 +331,41 @@ public class DiscordUtils {
 						"**Unbanned by:** " + appliedBy + "\n" +
 						"**Reason:** " + punishment.getReason());
 			}
+			case "REMOVE_WARN" -> {
+				embed.setAuthor("A warning has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Warning removed by:** " + appliedBy + "\n" +
+						"**Original Warn Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_MUTE" -> {
+				embed.setAuthor("A mute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Mute removed by:** " + appliedBy + "\n" +
+						"**Original Mute Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_BAN" -> {
+				embed.setAuthor("A ban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Ban removed by:** " + appliedBy + "\n" +
+						"**Original Ban Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_UNMUTE" -> {
+				embed.setAuthor("An unmute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unmute removed by:** " + appliedBy + "\n" +
+						"**Original Unmute Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_UNBAN" -> {
+				embed.setAuthor("An unban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unban removed by:** " + appliedBy + "\n" +
+						"**Original Unban Reason:** " + punishment.getReason());
+			}
         }
 		TextChannel punishmentChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
 		punishmentChannel.sendMessageEmbeds(embed.build()).queue();
