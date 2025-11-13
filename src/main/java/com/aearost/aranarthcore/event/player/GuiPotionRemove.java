@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Removes an input quantity of a potion from the player's stored potions.
@@ -32,7 +31,7 @@ public class GuiPotionRemove {
 				// Clicking in the potions inventory
 				else {
 					ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-					if (Objects.isNull(clickedItem)) {
+					if (clickedItem == null) {
 						e.setCancelled(true);
 						return;
 					}
