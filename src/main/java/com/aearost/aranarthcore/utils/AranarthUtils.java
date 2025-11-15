@@ -1773,34 +1773,48 @@ public class AranarthUtils {
 		int saintPotionNum = 0;
 
 		if (aranarthPlayer.getRank() == 1) {
-			rankPotionNum = 50;
-		} else if (aranarthPlayer.getRank() == 2) {
 			rankPotionNum = 100;
-		} else if (aranarthPlayer.getRank() == 3) {
+		} else if (aranarthPlayer.getRank() == 2) {
 			rankPotionNum = 200;
+		} else if (aranarthPlayer.getRank() == 3) {
+			rankPotionNum = 350;
 		} else if (aranarthPlayer.getRank() == 4) {
-			rankPotionNum = 300;
+			rankPotionNum = 500;
 		} else if (aranarthPlayer.getRank() == 5) {
-			rankPotionNum = 400;
-		} else if (aranarthPlayer.getRank() == 6) {
-			rankPotionNum = 600;
-		} else if (aranarthPlayer.getRank() == 7) {
 			rankPotionNum = 750;
-		} else if (aranarthPlayer.getRank() == 8) {
+		} else if (aranarthPlayer.getRank() == 6) {
 			rankPotionNum = 1000;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankPotionNum = 1500;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankPotionNum = 2500;
 		} else {
-			rankPotionNum = 25;
+			rankPotionNum = 50;
 		}
 
 		if (aranarthPlayer.getSaintRank() == 1) {
-			saintPotionNum = 100;
-		} else if (aranarthPlayer.getSaintRank() == 2) {
-			saintPotionNum = 250;
-		} else if (aranarthPlayer.getSaintRank() == 3) {
 			saintPotionNum = 500;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintPotionNum = 1000;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintPotionNum = 2500;
 		}
 
 		return rankPotionNum + saintPotionNum;
+	}
+
+	/**
+	 * Provides the current number of potions that the player has stored in their potions pouch.
+	 * @param player The player.
+	 * @return The number of potions that the player has stored in their potions pouch.
+	 */
+	public static int getPlayerStoredPotionNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int storedPotionNum = 0;
+		for (int amount : aranarthPlayer.getPotions().values()) {
+			storedPotionNum += amount;
+		}
+		return storedPotionNum;
 	}
 
 	/**

@@ -31,6 +31,9 @@ public class GuiPotionClose {
             }
 
             int potionAmountAdded = 0;
+            int potionAmountUnableToAdd = 0;
+            int storedPotionNum = AranarthUtils.getPlayerStoredPotionNum(player);
+
             for (ItemStack inventoryPotion : inventoryPotions) {
                 if (Objects.nonNull(inventoryPotion)) {
                     // Rare chance that inventory glitches and stores air
@@ -38,13 +41,26 @@ public class GuiPotionClose {
                         continue;
                     }
 
-                    if (potions.containsKey(inventoryPotion)) {
-                        int amount = potions.get(inventoryPotion);
-                        potions.put(inventoryPotion, amount + 1);
-                        potionAmountAdded++;
-                    } else {
-                        potions.put(inventoryPotion, 1);
-                        potionAmountAdded++;
+                    // If they are not yet exceeding the limit
+                    // +1 as it is attempting to be added but may not add successfully
+                    if (storedPotionNum + potionAmountAdded + 1 <= AranarthUtils.getMaxPotionNum(player)) {
+                        if (potions.containsKey(inventoryPotion)) {
+                            int amount = potions.get(inventoryPotion);
+                            potions.put(inventoryPotion, amount + 1);
+                            potionAmountAdded++;
+                        } else {
+                            potions.put(inventoryPotion, 1);
+                            potionAmountAdded++;
+                        }
+                    }
+                    // The limit has been exceeded
+                    else {
+                        potionAmountUnableToAdd++;
+                        HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(inventoryPotion);
+                        // If the player's inventory was full, drop it to the ground
+                        if (!leftover.isEmpty()) {
+                            player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+                        }
                     }
                 }
             }
@@ -53,6 +69,9 @@ public class GuiPotionClose {
 
             if (potionAmountAdded > 0) {
                 player.sendMessage(ChatUtils.chatMessage("&7You have added &e" + potionAmountAdded + " &7potions!"));
+            }
+            if (potionAmountUnableToAdd > 0) {
+                player.sendMessage(ChatUtils.chatMessage("&7You could not add &e" + potionAmountUnableToAdd + " &7potions"));
             }
         }
 	}

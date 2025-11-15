@@ -40,10 +40,9 @@ public class CommandPotions {
 				gui.openGui();
 				return true;
 			} else {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 switch (args[1]) {
                     case "list" -> {
-                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-
                         if (aranarthPlayer.getPotions() != null) {
 							HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 
@@ -73,6 +72,14 @@ public class CommandPotions {
                         }
                     }
                     case "add" -> {
+						// Prevents adding potions when already at the limit
+						if (aranarthPlayer.getPotions() != null && !aranarthPlayer.getPotions().isEmpty()) {
+							if (AranarthUtils.getPlayerStoredPotionNum(player) >= AranarthUtils.getMaxPotionNum(player)) {
+								player.sendMessage(ChatUtils.chatMessage("&cYour potions pouch is full!"));
+								return true;
+							}
+						}
+
                         GuiPotions gui = new GuiPotions(player, 1);
                         gui.openGui();
 						return true;
@@ -89,7 +96,6 @@ public class CommandPotions {
 								try {
 									int quantity = Integer.parseInt(args[2]);
 									if (quantity > 0) {
-										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 										aranarthPlayer.setPotionQuantityToRemove(quantity);
 										AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 										GuiPotions gui = new GuiPotions(player, -1);
