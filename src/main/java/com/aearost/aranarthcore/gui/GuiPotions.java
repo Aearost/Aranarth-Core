@@ -71,8 +71,9 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
+		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
 
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Your Potions");
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Your Potions (" + potionStats + ")");
 
 		HashMap<String, HashMap<ItemStack, Integer>> formattedPotions = AranarthUtils.getPlayerPotionNames(player);
 		for (String formattedName : formattedPotions.keySet()) {
