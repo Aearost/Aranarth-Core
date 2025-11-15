@@ -80,6 +80,8 @@ public class GuiRanks {
 		peasantLore.add(ChatUtils.translateToColor("&f&o- &3&oIcebending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- 3 quiver slots"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- 50 potion slots"));
 		peasantMeta.setLore(peasantLore);
 		peasant.setItemMeta(peasantMeta);
 
@@ -98,6 +100,8 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac dominion home"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- 5 quiver slots"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- 100 potion slots"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -114,6 +118,8 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
 		knightMeta.setLore(knightLore);
 		knight.setItemMeta(knightMeta);
 
@@ -139,6 +145,8 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
+		baronLore.add(ChatUtils.translateToColor("12 quiver slots"));
+		baronLore.add(ChatUtils.translateToColor("350 potion slots"));
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -164,6 +172,8 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&o- /ac back"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
+		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
+		countLore.add(ChatUtils.translateToColor("&f&o- 500 potion slots"));
 		countMeta.setLore(countLore);
 		count.setItemMeta(countMeta);
 
@@ -189,6 +199,8 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
 		dukeMeta.setLore(dukeLore);
 		duke.setItemMeta(dukeMeta);
 
@@ -215,6 +227,8 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 
@@ -240,6 +254,8 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- 1500 potion slots"));
 		kingMeta.setLore(kingLore);
 		king.setItemMeta(kingMeta);
 
@@ -267,6 +283,8 @@ public class GuiRanks {
 		emperorLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited chest shops"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 5 homes"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- 45 quiver slots"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- 2500 potion slots"));
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 
@@ -284,6 +302,8 @@ public class GuiRanks {
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac blacklist"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		saint1Lore.add(ChatUtils.translateToColor("&f&o- 2 additional homes"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- 3 additional quiver slots"));
+		saint1Lore.add(ChatUtils.translateToColor("&f&o- 500 additional potion slots"));
 		saint1Meta.setLore(saint1Lore);
 		saint1.setItemMeta(saint1Meta);
 
@@ -298,6 +318,8 @@ public class GuiRanks {
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (color)"));
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (hex)"));
 		saint2Lore.add(ChatUtils.translateToColor("&f&o- 5 additional homes"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- 6 additional quiver slots"));
+		saint2Lore.add(ChatUtils.translateToColor("&f&o- 1000 additional potion slots"));
 		saint2Meta.setLore(saint2Lore);
 		saint2.setItemMeta(saint2Meta);
 
@@ -311,6 +333,8 @@ public class GuiRanks {
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac itemname (gradient)"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (gradient)"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- 10 additional homes"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- 9 additional quiver slots"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- 2500 additional potion slots"));
 		saint3Meta.setLore(saint3Lore);
 		saint3.setItemMeta(saint3Meta);
 
