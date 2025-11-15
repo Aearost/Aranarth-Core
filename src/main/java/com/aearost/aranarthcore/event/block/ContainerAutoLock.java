@@ -22,6 +22,10 @@ import java.util.UUID;
 public class ContainerAutoLock {
 
     public void execute(BlockPlaceEvent e) {
+        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+            return;
+        }
+
         if (e.getBlock().getState() instanceof Chest) {
             List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
             Player player = e.getPlayer();
