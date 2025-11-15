@@ -55,8 +55,9 @@ public class CommandPotions {
 
                             // Sorts all potion names alphabetically
                             SortedSet<String> sortedMap = new TreeSet<>(amountOfPotions.keySet());
+							String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
 
-                            player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lYour Potions &8- - -"));
+                            player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lYour Potions &e(" + potionStats + ") &8- - -"));
                             // Iterate over sortedMap but display values from amountOfPotions
                             for (String potionName : sortedMap) {
 								// Should only ever be one value in here
