@@ -40,7 +40,7 @@ public class Punishment {
 	}
 
 	/**
-	 * Updates the date of the punishment.
+	 * Provides the date of the punishment.
 	 */
 	public LocalDateTime getDate() {
 		return date;
