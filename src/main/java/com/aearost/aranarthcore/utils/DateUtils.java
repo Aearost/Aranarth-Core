@@ -1012,10 +1012,11 @@ public class DateUtils {
 			// Loop over columns within an input block radius
 			for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
 				for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
+					Block surfaceBlock = world.getHighestBlockAt(x, z);
 					// Only add locations in loaded chunks
 					if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
 
-					if (AranarthUtils.isSpawnLocation(loc) && world.getName().equals("world")) {
+					if (AranarthUtils.isSpawnLocation(surfaceBlock.getLocation())) {
 						continue;
 					}
 
@@ -1024,7 +1025,6 @@ public class DateUtils {
 						continue;
 					}
 
-					Block surfaceBlock = world.getHighestBlockAt(x, z);
 					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 					int snowAmount = bigFlakeDensity;
 
@@ -1164,7 +1164,8 @@ public class DateUtils {
 			// Loop over columns within an input block radius
 			for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
 				for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
-					if (AranarthUtils.isSpawnLocation(loc) && world.getName().equals("world")) {
+					Block surfaceBlock = world.getHighestBlockAt(x, z);
+					if (AranarthUtils.isSpawnLocation(surfaceBlock.getLocation())) {
 						continue;
 					}
 
@@ -1173,7 +1174,6 @@ public class DateUtils {
 						continue;
 					}
 
-					Block surfaceBlock = world.getHighestBlockAt(x, z);
 					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
 					int freezeRate = bigFlakeDensity;
 					// Hot biomes do not get snow
