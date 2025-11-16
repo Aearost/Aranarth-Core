@@ -1496,9 +1496,9 @@ public class AranarthUtils {
 	public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
 		int councilRank = aranarthPlayer.getCouncilRank();
 		return switch (councilRank) {
-			case 1 -> "&3۞ &r";
-			case 2 -> "&6۞ &r";
-			case 3 -> "&4۞ &r";
+			case 1 -> "&3۞&r";
+			case 2 -> "&6۞&r";
+			case 3 -> "&4۞&r";
 			default -> "";
 		};
 	}
@@ -1511,7 +1511,7 @@ public class AranarthUtils {
 	public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
 		int architectRank = aranarthPlayer.getArchitectRank();
 		return switch (architectRank) {
-			case 1 -> "&a&l\uD83D\uDD28 &r"; // Hammer emoji
+			case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
 			default -> "";
 		};
 	}

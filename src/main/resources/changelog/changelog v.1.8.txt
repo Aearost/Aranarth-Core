@@ -51,6 +51,7 @@ Features
 [+] Added in potion name formatting for /ac potions to show proper display names
 [~] Fixed /ac give command showing the AranarthCore prefix twice
 [~] Made Quivers non-stackable items
+[~] Re-ordered the prefix symbols
 
 Miscellaneous
 - Removed redundant logs from weather
