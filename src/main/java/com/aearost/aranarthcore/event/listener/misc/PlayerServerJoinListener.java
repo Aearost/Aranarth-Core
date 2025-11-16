@@ -70,7 +70,7 @@ public class PlayerServerJoinListener implements Listener {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
-		PermissionUtils.evaluatePlayerPermissions(player);
+		PermissionUtils.evaluatePlayerPermissions(player, false);
 		playJoinSound();
 	}
 

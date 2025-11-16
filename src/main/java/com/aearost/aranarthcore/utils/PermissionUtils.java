@@ -16,8 +16,9 @@ public class PermissionUtils {
 	/**
 	 * Centralizes all permissions logic being set.
 	 * @param player The player.
+	 * @param isSecondCall If it was a recursive call from the same method for the sub-element fix.
 	 */
-	public static void evaluatePlayerPermissions(Player player) {
+	public static void evaluatePlayerPermissions(Player player, boolean isSecondCall) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 
@@ -28,12 +29,15 @@ public class PermissionUtils {
 
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+
 		if (bendingPlayer != null) {
 			for (Element element : bendingPlayer.getElements()) {
 				for (Element.SubElement subElement : Element.getSubElements(element)) {
 					if (bendingPlayer.hasSubElementPermission(subElement)) {
+						Bukkit.getLogger().info("Adding " + subElement.getName());
 						bendingPlayer.addSubElement(subElement);
 					} else {
+						Bukkit.getLogger().info("Removing " + subElement.getName());
 						bendingPlayer.getSubElements().remove(subElement);
 					}
 				}
@@ -41,7 +45,18 @@ public class PermissionUtils {
 			bendingPlayer.removeUnusableAbilities();
 		}
 
-		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+		if (isSecondCall) {
+			Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+		} else {
+			// Applies again as sub-elements do not update correctly unless command is re-executed
+			Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+				@Override
+				public void run() {
+					evaluatePlayerPermissions(player, true);
+				}
+			}, 10);
+
+		}
 	}
 
 	/**
