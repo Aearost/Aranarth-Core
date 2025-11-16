@@ -52,6 +52,7 @@ Features
 [~] Fixed /ac give command showing the AranarthCore prefix twice
 [~] Made Quivers non-stackable items
 [~] Re-ordered the prefix symbols
+[~] Limited access to SMP and Creative worlds to OG players only
 
 Miscellaneous
 - Removed redundant logs from weather
