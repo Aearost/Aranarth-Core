@@ -32,6 +32,7 @@ public class Quiver implements AranarthItem {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
+			meta.setMaxStackSize(1);
 			item.setItemMeta(meta);
 		}
 	    return item;

@@ -49,6 +49,8 @@ Features
 [~] Fixed bug where % would cause errors
 [~] Prevented pipe and underscore characters from being input to persisting files
 [+] Added in potion name formatting for /ac potions to show proper display names
+[~] Fixed /ac give command showing the AranarthCore prefix twice
+[~] Made Quivers non-stackable items
 
 Miscellaneous
 - Removed redundant logs from weather
