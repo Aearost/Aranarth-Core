@@ -7,6 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,6 +18,9 @@ import java.util.regex.Pattern;
  * Provides utility methods to facilitate the formatting of all chat related content.
  */
 public class ChatUtils {
+
+	private static final List<String> tips = new ArrayList<>();
+	private static int tipIndex = 0;
 
 	/**
 	 * Allows messages to contain color codes and begin with the AranarthCore prefix.
@@ -364,6 +370,34 @@ public class ChatUtils {
 			return value.substring(1);
 		} else {
 			return value;
+		}
+	}
+
+	/**
+	 * Handles sending the messages of automatic server tips.
+	 */
+	public static void sendServerTips() {
+		if (tips.isEmpty()) {
+			tips.add("&7&oNeed some materials? Gather them in the resource world at &e&o/ac resource");
+			tips.add("&7&oBe sure to link your Discord with &e&o/discord link &7&oto get your roles in Discord");
+			tips.add("&7&oConfused about Aranarth? Check out &e&o/ac warp tutorial &7&ofor some help");
+			tips.add("&7&oInterested in some special perks? Check out our server shop at &e&o/ac shop");
+			tips.add("&7&oDon't forget to use &e&o/vote &7&oto get your daily vote crate keys");
+			tips.add("&7&oFound a bug or have an idea? Add it to &e&o#bugs-and-suggestions &7&oin the Discord server");
+			tips.add("&7&oEarn money by selling your items at &e&o/ac warp market");
+			tips.add("&7&oView the available ranks at &e&o/ac ranks");
+			tips.add("&7&oBe sure to follow the rules at &e&o/ac rules");
+
+			Collections.shuffle(tips);
+		}
+
+		Bukkit.broadcastMessage(ChatUtils.chatMessage(tips.get(tipIndex)));
+		tipIndex++;
+
+		if (tipIndex == tips.size()) {
+			tipIndex = 0;
+
+			Collections.shuffle(tips);
 		}
 	}
 }

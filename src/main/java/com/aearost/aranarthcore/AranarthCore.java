@@ -9,10 +9,7 @@ import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.DateUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -63,6 +60,14 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Aranarth data has been saved");
 			}
 		}, 36000, 36000);
+
+		// Sends automatic server tip every 10 minutes
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				ChatUtils.sendServerTips();
+			}
+		}, 12000, 12000);
 
 		// Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
