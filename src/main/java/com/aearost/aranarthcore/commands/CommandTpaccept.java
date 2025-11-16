@@ -54,7 +54,7 @@ public class CommandTpaccept {
 				// If both players are still online
 				if (target != null) {
 					try {
-						AranarthUtils.switchInventory(player, target.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
+						AranarthUtils.switchInventory(target, target.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
 					} catch (IOException e) {
 						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 						return true;
