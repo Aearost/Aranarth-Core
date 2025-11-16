@@ -141,6 +141,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("blacklist");
 				displayedOptions.add("balance");
 				displayedOptions.add("baltop");
+				displayedOptions.add("back");
 			} else if ("blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
 			} else {
@@ -148,6 +149,7 @@ public class CommandACCompleter implements TabCompleter {
 					if (args[0].equals("ba")) {
 						displayedOptions.add("balance");
 						displayedOptions.add("baltop");
+						displayedOptions.add("back");
 					} else if (args[0].equals("bal")) {
 						displayedOptions.add("balance");
 						displayedOptions.add("baltop");
@@ -155,6 +157,8 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions.add("balance");
 					} else if ("baltop".startsWith(args[0])) {
 						displayedOptions.add("baltop");
+					} else if ("back".startsWith(args[0])) {
+						displayedOptions.add("back");
 					}
 				}
 			}
@@ -600,6 +604,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("warp");
 		displayedOptions.add("msg");
 		displayedOptions.add("rules");
+		displayedOptions.add("back");
 		return displayedOptions;
 	}
 
