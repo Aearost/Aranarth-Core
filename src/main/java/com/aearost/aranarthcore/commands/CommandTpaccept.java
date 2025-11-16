@@ -36,7 +36,7 @@ public class CommandTpaccept {
 					}
 
 					aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
-					player.teleport(target.getLocation());
+					player.teleport(AranarthUtils.getSolidBlockUnderneathPlayer(target));
 					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
 					player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
@@ -62,7 +62,7 @@ public class CommandTpaccept {
 
 					targetPlayer.setLastKnownTeleportLocation(target.getLocation());
 					AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-					target.teleport(player.getLocation());
+					target.teleport(AranarthUtils.getSolidBlockUnderneathPlayer(player));
 					target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
 					target.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 					player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &7has teleported to you"));
