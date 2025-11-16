@@ -268,15 +268,20 @@ public class AranarthUtils {
 	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-		if (currentWorld.equals(destinationWorld)
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))
-				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("smp"))
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("smp"))
-				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("world"))) {
+		// Include any world that should share the inventory of Survival
+		if (currentWorld.equals("smp") || currentWorld.equals("resource")) {
+			currentWorld = "world";
+		}
+		if (destinationWorld.equals("smp") || destinationWorld.equals("resource")) {
+			destinationWorld = "world";
+		}
+
+		// No need to change inventory
+		if (currentWorld.equals(destinationWorld)) {
 			return;
 		}
 
-		if (currentWorld.startsWith("world") || currentWorld.startsWith("smp")) {
+		if (currentWorld.startsWith("world")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 			if (destinationWorld.startsWith("arena")) {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
@@ -319,7 +324,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
-			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
+			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
@@ -348,7 +353,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
-			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
+			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));

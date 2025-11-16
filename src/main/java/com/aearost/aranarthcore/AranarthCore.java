@@ -286,6 +286,27 @@ public class AranarthCore extends JavaPlugin {
 			wc.createWorld();
 		}
 
+		if (Bukkit.getWorld("resource") == null) {
+			WorldCreator wc = new WorldCreator("resource");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("resource_nether") == null) {
+			WorldCreator wc = new WorldCreator("resource_nether");
+			wc.environment(World.Environment.NETHER);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("resource_the_end") == null) {
+			WorldCreator wc = new WorldCreator("resource_the_end");
+			wc.environment(World.Environment.THE_END);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
 		if (Bukkit.getWorld("arena") == null) {
 			WorldCreator wc = new WorldCreator("arena");
 			wc.environment(World.Environment.NORMAL);
