@@ -62,7 +62,7 @@ public class CommandRankSet {
 					if (sender instanceof Player senderPlayer) {
 						if (senderPlayer.getUniqueId().equals(player.getUniqueId())) {
 							isSamePlayer = true;
-							PermissionUtils.evaluatePlayerPermissions(senderPlayer);
+							PermissionUtils.evaluatePlayerPermissions(senderPlayer, false);
 						}
 					}
 
@@ -133,7 +133,7 @@ public class CommandRankSet {
 
 							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 								if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-									PermissionUtils.evaluatePlayerPermissions(onlinePlayer);
+									PermissionUtils.evaluatePlayerPermissions(onlinePlayer, false);
 									if (args[1].equals("rank")) {
 										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your rank has been updated"));
 									} else {
