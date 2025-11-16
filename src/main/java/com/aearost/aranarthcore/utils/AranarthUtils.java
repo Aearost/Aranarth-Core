@@ -62,6 +62,7 @@ public class AranarthUtils {
 	private static final List<UUID> mutedPlayers = new ArrayList<>();
 	private static List<Home> warps = new ArrayList<>();
 	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+	private static final List<UUID> originalPlayers = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -112,6 +113,25 @@ public class AranarthUtils {
 	 */
 	public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
 		players.put(uuid, aranarthPlayer);
+		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
+				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
+				|| uuid.equals(getUUIDFromUsername("AShiningSolo")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
+				|| uuid.equals(getUUIDFromUsername("im_Hazel"))) {
+			originalPlayers.add(uuid);
+		}
+	}
+
+	/**
+	 * Determines if the player is one of the original players of Aranarth.
+	 * @param uuid The player's UUID.
+	 * @return Confirmation whether the player is one of the original players of Aranarth.
+	 */
+	public static boolean isOriginalPlayer(UUID uuid) {
+		if (originalPlayers.contains(uuid)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**

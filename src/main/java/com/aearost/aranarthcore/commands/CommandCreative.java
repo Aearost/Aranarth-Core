@@ -28,6 +28,11 @@ public class CommandCreative {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
+					return true;
+				}
+
                 // Teleports you to the creative world spawn
 				try {
 					if (Objects.nonNull(player.getLocation().getWorld())) {
