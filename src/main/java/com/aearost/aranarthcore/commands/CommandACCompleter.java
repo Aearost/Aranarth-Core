@@ -191,13 +191,16 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("ranks");
 				displayedOptions.add("rankup");
 				displayedOptions.add("rules");
+				displayedOptions.add("resource");
 			} else {
 				if (args[0].equals("ra")) {
 					displayedOptions.add("randomizer");
 					displayedOptions.add("ranks");
 					displayedOptions.add("rankup");
 				} else {
-					if (args[0].equals("ran")) {
+					if ("resource".startsWith(args[0])) {
+						displayedOptions.add("resource");
+					} else if (args[0].equals("ran")) {
 						displayedOptions.add("randomizer");
 						displayedOptions.add("ranks");
 						displayedOptions.add("rankup");
@@ -605,6 +608,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("msg");
 		displayedOptions.add("rules");
 		displayedOptions.add("back");
+		displayedOptions.add("resource");
 		return displayedOptions;
 	}
 

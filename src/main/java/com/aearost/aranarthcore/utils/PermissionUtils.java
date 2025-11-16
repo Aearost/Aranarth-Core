@@ -34,10 +34,8 @@ public class PermissionUtils {
 			for (Element element : bendingPlayer.getElements()) {
 				for (Element.SubElement subElement : Element.getSubElements(element)) {
 					if (bendingPlayer.hasSubElementPermission(subElement)) {
-						Bukkit.getLogger().info("Adding " + subElement.getName());
 						bendingPlayer.addSubElement(subElement);
 					} else {
-						Bukkit.getLogger().info("Removing " + subElement.getName());
 						bendingPlayer.getSubElements().remove(subElement);
 					}
 				}

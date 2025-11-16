@@ -15,9 +15,9 @@ import org.bukkit.potion.PotionEffect;
 import java.io.IOException;
 
 /**
- * Teleports the player to the SMP world, sharing the SMP inventory.
+ * Teleports the player to the Resource world, sharing the Resource inventory.
  */
-public class CommandSMP {
+public class CommandResource {
 
 	/**
 	 * @param sender The user that entered the command.
@@ -40,18 +40,18 @@ public class CommandSMP {
 					return false;
 				}
 				// Only remove potion effects if changing from a non-survival world
-				if (!player.getLocation().getWorld().getName().startsWith("smp")) {
+				if (!player.getLocation().getWorld().getName().startsWith("resource")) {
 					for (PotionEffect effect : player.getActivePotionEffects()) {
 						player.removePotionEffect(effect.getType());
 					}
 				}
 
-				Location loc = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
+				Location loc = new Location(Bukkit.getWorld("resource"), 35.5, 124, -16.5, 90, 0);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSMP!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eResource!"));
 				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
