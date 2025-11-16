@@ -36,20 +36,24 @@ public class GuiQuiverClick {
 				return;
 			}
 
-			// If adding a new item to the arrows inventory
-			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-				// Ensures a non-empty slot is clicked
-				if (Objects.isNull(clickedItem)) {
+			ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
+			// Ensures a non-empty slot is clicked
+			if (clickedItem != null) {
+				// If adding a new item to the arrows inventory
+				if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 					// If placing potion back into player slots
 					if (Objects.nonNull(e.getCursor())) {
 						return;
 					}
 					e.setCancelled(true);
-				}
 
-				if (!isItemArrow(clickedItem)) {
-					e.setCancelled(true);
+					if (!isItemArrow(clickedItem)) {
+						e.setCancelled(true);
+					}
+				} else if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					if (clickedItem.getType() == Material.BLACK_STAINED_GLASS_PANE) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection") && e.getView().getType() == InventoryType.CHEST) {

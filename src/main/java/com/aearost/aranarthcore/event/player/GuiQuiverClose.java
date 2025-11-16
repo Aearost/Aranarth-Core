@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
@@ -27,9 +28,15 @@ public class GuiQuiverClose {
 			}
 
 			for (ItemStack inventoryArrow : inventoryArrows) {
-				if (Objects.nonNull(inventoryArrow)) {
-					arrows.add(inventoryArrow);
+				if (inventoryArrow == null) {
+					continue;
 				}
+
+				if (inventoryArrow.getType() == Material.BLACK_STAINED_GLASS_PANE) {
+					continue;
+				}
+
+				arrows.add(inventoryArrow);
 			}
 			aranarthPlayer.setArrows(inventoryArrows);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
