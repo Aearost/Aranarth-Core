@@ -15,7 +15,7 @@ public class CommandRules {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lAranarth Rules &8- - -"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&61&8] &7Be kind and respectful to everyone, regardless of race, orientation, gender, religion, etc."));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&62&8] &7Keep the topics of conversation appropriate for all ages"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&62&8] &7No inappropriate conversation topics or excessive swearing"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&63&8] &7No inappropriate skins, builds, item names or nicknames"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&64&8] &7Do not impersonate or disrespect Staff (the Council)"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&65&8] &7No advertising or mentioning other servers"));
