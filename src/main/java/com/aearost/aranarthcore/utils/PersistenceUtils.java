@@ -137,8 +137,7 @@ public class PersistenceUtils {
 			}
 		}
 	}
-	
-	
+
 	/**
 	 * Initializes the players HashMap based on the contents of aranarth_players.txt.
 	 */
@@ -1097,7 +1096,7 @@ public class PersistenceUtils {
 				try {
 					// If the file isn't already there
 					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new warps.txt file has been generated");
+						Bukkit.getLogger().info("A new punishments.txt file has been generated");
 					}
 				} catch (IOException e) {
 					Bukkit.getLogger().info("An error occurred in the creation of punishments.txt");
@@ -1134,6 +1133,99 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Initializes the avatars list based on the contents of avatars.txt.
+	 */
+	public static void loadAvatars() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "punishments.txt";
+		File file = new File(filePath);
 
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the avatars file...");
+			HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|start|end|element
+				String[] fields = row.split("\\|");
+
+				UUID uuid = UUID.fromString(fields[0]);
+				LocalDateTime start = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[1])), ZoneId.systemDefault());
+				LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[2])), ZoneId.systemDefault());
+				String element = fields[3];
+
+				Avatar avatar = new Avatar(uuid, start, end, element);
+				AranarthUtils.addAvatar(avatar);
+			}
+			Bukkit.getLogger().info("All avatars have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the avatars!");
+		}
+	}
+
+	/**
+	 * Saves the contents of the avatars list to the avatars.txt file.
+	 */
+	public static void saveAvatars() {
+		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
+		if (playerShops != null) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "avatars.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new avatars.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of avatars.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					writer.write("#uuid|start|end|element\n");
+
+					for (Avatar avatar : AranarthUtils.getAvatars()) {
+						String uuid = avatar.getUuid().toString();
+						String start = avatar.getStart().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
+						String end = avatar.getEnd().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
+						String element = avatar.getElement();
+
+						writer.write(uuid + "|" + start + "|" + end + "|" + element + "\n");
+					}
+
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the avatars");
+				}
+			}
+		}
+	}
 
 }
