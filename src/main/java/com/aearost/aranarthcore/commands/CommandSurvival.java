@@ -47,7 +47,7 @@ public class CommandSurvival {
 				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival"));
 				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());

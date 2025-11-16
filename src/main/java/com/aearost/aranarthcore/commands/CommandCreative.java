@@ -50,7 +50,7 @@ public class CommandCreative {
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
 				player.setGameMode(GameMode.CREATIVE);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());

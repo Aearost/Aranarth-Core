@@ -51,7 +51,7 @@ public class CommandResource {
 				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eResource!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
 				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());

@@ -45,7 +45,7 @@ public class CommandArena {
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 				player.teleport(new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2));
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena &7world"));
 				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
