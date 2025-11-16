@@ -53,6 +53,7 @@ Features
 [~] Made Quivers non-stackable items
 [~] Re-ordered the prefix symbols
 [~] Limited access to SMP and Creative worlds to OG players only
+[+] Added a resource world
 
 Miscellaneous
 - Removed redundant logs from weather

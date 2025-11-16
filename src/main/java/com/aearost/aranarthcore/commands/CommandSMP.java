@@ -51,7 +51,7 @@ public class CommandSMP {
 				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSMP!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
 				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
