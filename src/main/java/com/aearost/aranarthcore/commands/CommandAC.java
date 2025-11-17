@@ -174,6 +174,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandPunishments.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("resource")) {
 			commandResult = CommandResource.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("avatar")) {
+			commandResult = CommandAvatar.onCommand(sender, args);
 		}
 		return commandResult;
 	}

@@ -270,15 +270,18 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Include any world that should share the inventory of Survival
-		if (currentWorld.equals("smp") || currentWorld.equals("resource")) {
+		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource")) {
 			currentWorld = "world";
 		}
-		if (destinationWorld.equals("smp") || destinationWorld.equals("resource")) {
+		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource")) {
 			destinationWorld = "world";
 		}
 
+		boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
+		boolean isSameWorld = currentWorld.equals(destinationWorld);
+
 		// No need to change inventory
-		if (currentWorld.equals(destinationWorld)) {
+		if (isSurvivalToSurvival || isSameWorld) {
 			return;
 		}
 
@@ -1901,6 +1904,10 @@ public class AranarthUtils {
 		avatars = newAvatars;
 	}
 
+	/**
+	 * Adds a new avatar.
+	 * @param avatar The new avatar.
+	 */
 	public static void addAvatar(Avatar avatar) {
 		avatars.add(avatar);
 	}
