@@ -1170,8 +1170,8 @@ public class PersistenceUtils {
 				LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[2])), ZoneId.systemDefault());
 				String element = fields[3];
 
-				Avatar avatar = new Avatar(uuid, start, end, element);
-				AranarthUtils.addAvatar(avatar);
+//				Avatar avatar = new Avatar(uuid, start, end, element);
+//				AranarthUtils.addAvatar(avatar);
 			}
 			Bukkit.getLogger().info("All avatars have been initialized");
 			reader.close();
@@ -1213,11 +1213,11 @@ public class PersistenceUtils {
 
 					for (Avatar avatar : AranarthUtils.getAvatars()) {
 						String uuid = avatar.getUuid().toString();
-						String start = avatar.getStart().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
-						String end = avatar.getEnd().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
+//						String start = avatar.getStart().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
+//						String end = avatar.getEnd().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
 						String element = avatar.getElement();
 
-						writer.write(uuid + "|" + start + "|" + end + "|" + element + "\n");
+//						writer.write(uuid + "|" + start + "|" + end + "|" + element + "\n");
 					}
 
 					writer.close();

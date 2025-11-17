@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.objects;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -8,14 +7,18 @@ import java.util.UUID;
  */
 public class Avatar {
 	private UUID uuid;
-	private LocalDateTime start;
-	private LocalDateTime end;
+	private String startInGame;
+	private String endInGame;
+	private String startInRealLife;
+	private String endInRealLife;
 	private String element;
 
-	public Avatar(UUID uuid, LocalDateTime start, LocalDateTime end, String element) {
+	public Avatar(UUID uuid, String startInGame, String endInGame, String startInRealLife, String endInRealLife, String element) {
 		this.uuid = uuid;
-		this.start = start;
-		this.end = end;
+		this.startInGame = startInGame;
+		this.endInGame = endInGame;
+		this.startInRealLife = startInRealLife;
+		this.endInRealLife = endInRealLife;
 		this.element = element;
 	}
 
@@ -36,33 +39,63 @@ public class Avatar {
 	}
 
 	/**
-	 * Provides the start date of the avatar's reign.
+	 * Provides the start date from the in-game date of the avatar's reign.
 	 */
-	public LocalDateTime getStart() {
-		return start;
+	public String getStartInGame() {
+		return startInGame;
 	}
 
 	/**
-	 * Updates the start of the avatar's reign.
-	 * @param start The start date of the avatar's reign.
+	 * Updates the start date from the in-game date of the avatar's reign.
+	 * @param startInGame The start date from the in-game date of the avatar's reign.
 	 */
-	public void setStart(LocalDateTime start) {
-		this.start = start;
+	public void setStartInGame(String startInGame) {
+		this.startInGame = startInGame;
 	}
 
 	/**
-	 * Provides the end date of the avatar's reign.
+	 * Provides the end date from the in-game date of the avatar's reign.
 	 */
-	public LocalDateTime getEnd() {
-		return end;
+	public String getEndInGame() {
+		return endInGame;
 	}
 
 	/**
-	 * Updates the end of the avatar's reign.
-	 * @param end The end date of the avatar's reign.
+	 * Updates the end date from the in-game date of the avatar's reign.
+	 * @param endInGame The end date from the in-game date of the avatar's reign.
 	 */
-	public void setEnd(LocalDateTime end) {
-		this.end = end;
+	public void setEndInGame(String endInGame) {
+		this.endInGame = endInGame;
+	}
+
+	/**
+	 * Provides the start date from the in real life date of the avatar's reign.
+	 */
+	public String getStartInRealLife() {
+		return startInRealLife;
+	}
+
+	/**
+	 * Updates the start date from the in real life date of the avatar's reign.
+	 * @param startInRealLife The start date from the in real life date of the avatar's reign.
+	 */
+	public void setStartInRealLife(String startInRealLife) {
+		this.startInRealLife = startInRealLife;
+	}
+
+	/**
+	 * Provides the end date from the in real life date of the avatar's reign.
+	 */
+	public String getEndInRealLife() {
+		return endInRealLife;
+	}
+
+	/**
+	 * Updates the end date from the in real life date of the avatar's reign.
+	 * @param endInRealLife The end date from the in real life date of the avatar's reign.
+	 */
+	public void setEndInRealLife(String endInRealLife) {
+		this.endInRealLife = endInRealLife;
 	}
 
 	/**
