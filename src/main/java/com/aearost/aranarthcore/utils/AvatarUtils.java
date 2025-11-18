@@ -55,8 +55,13 @@ public class AvatarUtils {
 
 	/**
 	 * Selects a new Avatar from the list of online players.
+	 * @return Confirmation if a new Avatar was selected.
 	 */
-	public static void selectAvatar() {
+	public static boolean selectAvatar() {
+		if (Bukkit.getOnlinePlayers().isEmpty()) {
+			return false;
+		}
+
 		Random random = new Random();
 		int index = random.nextInt(Bukkit.getOnlinePlayers().size());
 		Avatar avatar = null;
@@ -71,7 +76,7 @@ public class AvatarUtils {
 			while (true) {
 				// Try again upon next execution
 				if (attempts == 500) {
-					return;
+					return false;
 				}
 
 				Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
@@ -90,7 +95,8 @@ public class AvatarUtils {
 							DateUtils.getRawInRealLifeDate(), "", element);
 
 					setNewAvatar(avatar);
-					return;
+					DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+					return true;
 				}
 			}
 		}
@@ -100,8 +106,9 @@ public class AvatarUtils {
 		// If there is currently a reigning avatar
 		if (previousAvatar != null) {
 			removeCurrentAvatar();
+			return true;
 		} else {
-			char previousAvatarElement = previousAvatar.getElement();
+			char previousAvatarElement = avatars.get(avatars.size() - 2).getElement();
 			char newAvatarElement = switch (previousAvatarElement) {
 				case 'A' -> 'W';
 				case 'W' -> 'E';
@@ -112,7 +119,7 @@ public class AvatarUtils {
 			while (true) {
 				// Try again upon next execution
 				if (attempts == 500) {
-					return;
+					return false;
 				}
 
 				Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
@@ -130,8 +137,10 @@ public class AvatarUtils {
 					if (playerElement == newAvatarElement) {
 						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 								DateUtils.getRawInRealLifeDate(), "", playerElement);
+						avatars.remove(avatars.size() - 1); // It is the null placeholder
 						setNewAvatar(avatar);
-						return;
+						DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+						return true;
 					} else {
 						attempts++;
 					}
@@ -147,7 +156,6 @@ public class AvatarUtils {
 	public static void setNewAvatar(Avatar avatar) {
 		avatars.add(avatar);
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe new Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas risen!"));
 //		PermissionUtils.assignAvatarPermissions(avatar); TODO
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
@@ -158,16 +166,12 @@ public class AvatarUtils {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be selected..."));
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe new Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas risen!"));
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.ENTITY_BREEZE_IDLE_AIR, 1F, 0.4F);
+					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 				}
 			}
-		}.runTaskLater(AranarthCore.getInstance(), 28);
-
-		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
-		}
+		}.runTaskLater(AranarthCore.getInstance(), 30);
 	}
 
 	/**
@@ -179,6 +183,7 @@ public class AvatarUtils {
 		oldAvatar.setEndInRealLife(DateUtils.getRawInRealLifeDate());
 		avatars.set(avatars.size() - 1, oldAvatar);
 		avatars.add(null);
+		DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas deceased..."));
@@ -190,22 +195,12 @@ public class AvatarUtils {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be selected..."));
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be found..."));
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					player.playSound(player.getLocation(), Sound.ENTITY_BREEZE_IDLE_AIR, 1F, 0.4F);
 				}
 			}
-		}.runTaskLater(AranarthCore.getInstance(), 40);
-	}
-
-
-
-	public String getDurationOfReign(Avatar avatar, boolean isInGameFormat) {
-
-		// Use numeric format of string to represent the in-game days
-		// i.e 0100100105 for Ignivor the 1st in year 105 (01 for the month, 001 for the day, 00105 for year 105)
-
-		return null;
+		}.runTaskLater(AranarthCore.getInstance(), 70);
 	}
 
 }

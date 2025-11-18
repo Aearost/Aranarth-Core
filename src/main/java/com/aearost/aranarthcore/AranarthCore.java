@@ -59,6 +59,14 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveAvatars();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
+
+				// Attempts to automatically assign an avatar if there currently is none
+				if (AvatarUtils.getCurrentAvatar() == null) {
+					boolean wasAvatarFound = AvatarUtils.selectAvatar();
+					if (!wasAvatarFound) {
+						Bukkit.getLogger().info("A new Avatar could not be selected");
+					}
+				}
 			}
 		}, 36000, 36000);
 

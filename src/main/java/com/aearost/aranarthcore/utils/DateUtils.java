@@ -382,9 +382,6 @@ public class DateUtils {
 		int dayNum = AranarthUtils.getDay();
 		Month month = AranarthUtils.getMonth();
 		int yearNum = AranarthUtils.getYear();
-		Bukkit.getLogger().info(dayNum + "");
-		Bukkit.getLogger().info(month.ordinal() + 1 + "");
-		Bukkit.getLogger().info(yearNum + "");
 
 		String dayString = dayNum + "";
 		if (dayString.length() == 1) {
@@ -416,9 +413,6 @@ public class DateUtils {
 		int dayNum = localDateTime.getDayOfMonth();
 		int month = localDateTime.getMonthValue();
 		int yearNum = localDateTime.getYear();
-		Bukkit.getLogger().info(dayNum + "");
-		Bukkit.getLogger().info(month + "");
-		Bukkit.getLogger().info(yearNum + "");
 
 		String dayString = dayNum + "";
 		if (dayString.length() == 1) {

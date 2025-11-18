@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Punishment;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -368,6 +369,43 @@ public class DiscordUtils {
         }
 		TextChannel punishmentChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
 		punishmentChannel.sendMessageEmbeds(embed.build()).queue();
+	}
+
+	/**
+	 * Adds a message in #server-chat in Discord to reflect changes to the Avatar.
+	 * @param isNewAvatar Confirmation whether the message is for a new avatar, and if not, a deceased one.
+	 */
+	public static void addAvatarMessageToDiscord(Avatar avatar, boolean isNewAvatar) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(avatar.getUuid());
+		String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(avatar.getUuid()));
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(username + "'s Discord roles could not be updated as they have not linked their Discord");
+			return;
+		}
+
+		Guild guild = getGuild();
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
+		String uuidNoDashes = avatar.getUuid().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		Role role = guild.getRoleById("1440165603687137461"); // Avatar
+
+		// If it is a player who has become the Avatar
+		if (isNewAvatar) {
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor("Avatar " + username + " has risen!", null, url)
+					.setColor(Color.MAGENTA);
+			guild.addRoleToMember(playerDiscordId, role).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		}
+		// If the avatar has deceased
+		else {
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor("Avatar " + username + " has deceased...", null, url)
+					.setColor(Color.MAGENTA);
+			guild.removeRoleFromMember(playerDiscordId, role).queue();
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		}
 	}
 
 }

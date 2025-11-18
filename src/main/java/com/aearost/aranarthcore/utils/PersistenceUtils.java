@@ -1156,7 +1156,10 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
-				Bukkit.getLogger().info(row);
+				if (row.equals("none")) {
+					AvatarUtils.addAvatar(null);
+					continue;
+				}
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
@@ -1215,15 +1218,19 @@ public class PersistenceUtils {
 					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
 
 					for (Avatar avatar : AvatarUtils.getAvatars()) {
-						String uuid = avatar.getUuid().toString();
-						String startInGame = avatar.getStartInGame();
-						String endInGame = avatar.getEndInGame();
-						String startInRealLife = avatar.getStartInRealLife();
-						String endInRealLife = avatar.getEndInRealLife();
-						char element = avatar.getElement();
+						if (avatar == null) {
+							writer.write("none\n");
+						} else {
+							String uuid = avatar.getUuid().toString();
+							String startInGame = avatar.getStartInGame();
+							String endInGame = avatar.getEndInGame();
+							String startInRealLife = avatar.getStartInRealLife();
+							String endInRealLife = avatar.getEndInRealLife();
+							char element = avatar.getElement();
 
-						writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
-								+ startInRealLife + "|" + endInRealLife + "|" + element + "\n");
+							writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
+									+ startInRealLife + "|" + endInRealLife + "|" + element + "\n");
+						}
 					}
 					writer.close();
 				} catch (IOException e) {
