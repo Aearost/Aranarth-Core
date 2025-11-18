@@ -1139,7 +1139,7 @@ public class PersistenceUtils {
 	public static void loadAvatars() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "punishments.txt";
+				+ "avatars.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -1156,22 +1156,25 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
+				Bukkit.getLogger().info(row);
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
 					continue;
 				}
 
-				// uuid|start|end|element
+				// uuid|startInGame|endInGame|startInRealLife|endInRealLife|element
 				String[] fields = row.split("\\|");
 
 				UUID uuid = UUID.fromString(fields[0]);
-				LocalDateTime start = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[1])), ZoneId.systemDefault());
-				LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(fields[2])), ZoneId.systemDefault());
-				String element = fields[3];
+				String startInGame = fields[1];
+				String endInGame = fields[2];
+				String startInRealLife = fields[3];
+				String endInRealLife = fields[4];
+				char element = fields[5].charAt(0);
 
-//				Avatar avatar = new Avatar(uuid, start, end, element);
-//				AranarthUtils.addAvatar(avatar);
+				Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
+				AvatarUtils.addAvatar(avatar);
 			}
 			Bukkit.getLogger().info("All avatars have been initialized");
 			reader.close();
@@ -1209,17 +1212,19 @@ public class PersistenceUtils {
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#uuid|start|end|element\n");
+					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
 
-					for (Avatar avatar : AranarthUtils.getAvatars()) {
+					for (Avatar avatar : AvatarUtils.getAvatars()) {
 						String uuid = avatar.getUuid().toString();
-//						String start = avatar.getStart().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
-//						String end = avatar.getEnd().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
-						String element = avatar.getElement();
+						String startInGame = avatar.getStartInGame();
+						String endInGame = avatar.getEndInGame();
+						String startInRealLife = avatar.getStartInRealLife();
+						String endInRealLife = avatar.getEndInRealLife();
+						char element = avatar.getElement();
 
-//						writer.write(uuid + "|" + start + "|" + end + "|" + element + "\n");
+						writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
+								+ startInRealLife + "|" + endInRealLife + "|" + element + "\n");
 					}
-
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the avatars");

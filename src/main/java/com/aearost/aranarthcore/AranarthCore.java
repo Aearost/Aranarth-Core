@@ -56,6 +56,7 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveDominions();
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
+				PersistenceUtils.saveAvatars();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
 			}
@@ -109,6 +110,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadDominions();
 		PersistenceUtils.loadWarps();
 		PersistenceUtils.loadPunishments();
+		PersistenceUtils.loadAvatars();
 	}
 
 	/**
@@ -347,6 +349,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveDominions();
 		PersistenceUtils.saveWarps();
 		PersistenceUtils.savePunishments();
+		PersistenceUtils.saveAvatars();
 
 		Bukkit.resetRecipes();
 	}

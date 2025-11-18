@@ -20,6 +20,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -185,7 +186,7 @@ public class DateUtils {
 
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
-					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 5f, 0.5f);
+					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
 				} else {
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
@@ -365,7 +366,86 @@ public class DateUtils {
 	 * @param yearNum The current server year.
 	 */
 	public static String[] determineServerDate(int dayNum, String weekdayName, String monthName, int yearNum) {
-		String dayNumAsString = dayNum + "";
+		String dayNumAsString = getDayNumWithSuffix(dayNum);
+		String[] messages = new String[3];
+		messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
+		messages[1] = ChatUtils.translateToColor("&e&l  " + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
+		messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
+		return messages;
+	}
+
+	/**
+	 * Provides the raw in game date, i.e 010100100 for Aquinvor 1st, 100
+	 * @return The raw in game date.
+	 */
+	public static String getRawInGameDate() {
+		int dayNum = AranarthUtils.getDay();
+		Month month = AranarthUtils.getMonth();
+		int yearNum = AranarthUtils.getYear();
+		Bukkit.getLogger().info(dayNum + "");
+		Bukkit.getLogger().info(month.ordinal() + 1 + "");
+		Bukkit.getLogger().info(yearNum + "");
+
+		String dayString = dayNum + "";
+		if (dayString.length() == 1) {
+			dayString = "00" + dayString;
+		} else if (dayString.length() == 2) {
+			dayString = "0" + dayString;
+		}
+
+		String monthString = month.ordinal() + 1 + "";
+		if (monthString.length() == 1) {
+			monthString = "0" + monthString;
+		}
+
+		String yearString = yearNum + "";
+		if (yearString.length() == 3) {
+			yearString = "00" + yearString;
+		} else if (yearString.length() == 4) {
+			yearString = "0" + yearString;
+		}
+		return monthString + dayString + yearString;
+	}
+
+	/**
+	 * Provides the raw in real life date, i.e 01012025 for January 1st, 2025
+	 * @return The raw in real life date.
+	 */
+	public static String getRawInRealLifeDate() {
+		LocalDateTime localDateTime = LocalDateTime.now();
+		int dayNum = localDateTime.getDayOfMonth();
+		int month = localDateTime.getMonthValue();
+		int yearNum = localDateTime.getYear();
+		Bukkit.getLogger().info(dayNum + "");
+		Bukkit.getLogger().info(month + "");
+		Bukkit.getLogger().info(yearNum + "");
+
+		String dayString = dayNum + "";
+		if (dayString.length() == 1) {
+			dayString = "0" + dayString;
+		}
+
+		String monthString = month + "";
+		if (monthString.length() == 1) {
+			monthString = "0" + monthString;
+		}
+
+		String yearString = yearNum + "";
+		if (yearString.length() == 3) {
+			yearString = "00" + yearString;
+		} else if (yearString.length() == 4) {
+			yearString = "0" + yearString;
+		}
+		return monthString + dayString + yearString;
+	}
+
+	/**
+	 * Provides the day number with the suffix.
+	 * @param day The day.
+	 * @return The day with the suffix.
+	 */
+	public static String getDayNumWithSuffix(int day) {
+		String dayNumAsString = day + "";
 		if (dayNumAsString.length() > 1) {
 			if (dayNumAsString.endsWith("11")) {
 				dayNumAsString += "th";
@@ -395,12 +475,88 @@ public class DateUtils {
 				dayNumAsString += "th";
 			}
 		}
+		return dayNumAsString;
+	}
 
-		String[] messages = new String[3];
-		messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
-		messages[1] = ChatUtils.translateToColor("&e&l  " + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
-		messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
-		return messages;
+	/**
+	 * Provides the formatted date based on the in game or in real life format.
+	 * @param date The unformatted date.
+	 * @param isInGameFormat Confirmation whether to use the in game format or the in real life format.
+	 * @return The formatted date.
+	 */
+	public static String getFormattedDate(String date, boolean isInGameFormat) {
+		if (isInGameFormat) {
+			// 0100100105
+			String month = date.substring(0, 1);
+			String day = date.substring(2, 4);
+			String year = date.substring(5, 9);
+			Bukkit.getLogger().info(month);
+			Bukkit.getLogger().info(day);
+			Bukkit.getLogger().info(year);
+
+			if (day.startsWith("00")) {
+				day = day.substring(2);
+			} else if (day.startsWith("0")) {
+				day = day.substring(1);
+			}
+			day = getDayNumWithSuffix(Integer.parseInt(day));
+
+			if (year.startsWith("0")) {
+				year = year.substring(1);
+			}
+
+			String monthName = switch (month) {
+                case "01" -> "Ignivór";
+                case "02" -> "Aquinvór";
+                case "03" -> "Ventivór";
+                case "04" -> "Florivór";
+                case "05" -> "Aestivór";
+                case "06" -> "Calorvór";
+                case "07" -> "Ardorvór";
+                case "08" -> "Solarvór";
+                case "09" -> "Fructivór";
+                case "10" -> "Follivór";
+                case "11" -> "Faunivór";
+                case "12" -> "Umbravór";
+                case "13" -> "Glacivór";
+                case "14" -> "Frigorvór";
+                case "15" -> "Obscurvór";
+                default -> "IGNIVOR";
+            };
+
+			return monthName + day + ", " + year;
+        } else {
+			// 01012025
+			String month = date.substring(0, 1);
+			String day = date.substring(2, 3);
+			String year = date.substring(4, 7);
+			Bukkit.getLogger().info(month);
+			Bukkit.getLogger().info(day);
+			Bukkit.getLogger().info(year);
+
+			if (day.startsWith("0")) {
+				day = day.substring(1);
+			}
+			day = getDayNumWithSuffix(Integer.parseInt(day));
+
+			String monthName = switch (month) {
+				case "01" -> "January";
+				case "02" -> "February";
+				case "03" -> "March";
+				case "04" -> "April";
+				case "05" -> "May";
+				case "06" -> "June";
+				case "07" -> "July";
+				case "08" -> "August";
+				case "09" -> "September";
+				case "10" -> "October";
+				case "11" -> "November";
+				case "12" -> "December";
+				default -> "JANUARY";
+			};
+
+			return monthName + day + ", " + year;
+		}
 	}
 
 	/**
