@@ -122,6 +122,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.warp.modify", false);
 		perms.setPermission("aranarth.warn", false);
 		perms.setPermission("aranarth.punishments", false);
+		perms.setPermission("aranarth.avatar.set", false);
 	}
 
 	/**
@@ -278,6 +279,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.rankset", true);
 			perms.setPermission("aranarth.protect.bypass", true);
 			perms.setPermission("aranarth.warp.modify", true);
+			perms.setPermission("aranarth.avatar.set", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {

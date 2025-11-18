@@ -63,7 +63,6 @@ public class AranarthUtils {
 	private static List<Home> warps = new ArrayList<>();
 	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 	private static final List<UUID> originalPlayers = new ArrayList<>();
-	private static List<Avatar> avatars = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -1886,30 +1885,6 @@ public class AranarthUtils {
 		}
 
 		return rankQuiverSlotNum + saintQuiverSlotNum;
-	}
-
-	/**
-	 * Provides the list of all avatars.
-	 * @return The list of all avatars.
-	 */
-	public static List<Avatar> getAvatars() {
-		return avatars;
-	}
-
-	/**
-	 * Updates the list of all avatars.
-	 * @param newAvatars The list of all avatars.
-	 */
-	public static void setAvatars(List<Avatar> newAvatars) {
-		avatars = newAvatars;
-	}
-
-	/**
-	 * Adds a new avatar.
-	 * @param avatar The new avatar.
-	 */
-	public static void addAvatar(Avatar avatar) {
-		avatars.add(avatar);
 	}
 
 }

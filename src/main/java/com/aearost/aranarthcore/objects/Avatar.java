@@ -11,9 +11,9 @@ public class Avatar {
 	private String endInGame;
 	private String startInRealLife;
 	private String endInRealLife;
-	private String element;
+	private char element;
 
-	public Avatar(UUID uuid, String startInGame, String endInGame, String startInRealLife, String endInRealLife, String element) {
+	public Avatar(UUID uuid, String startInGame, String endInGame, String startInRealLife, String endInRealLife, char element) {
 		this.uuid = uuid;
 		this.startInGame = startInGame;
 		this.endInGame = endInGame;
@@ -102,7 +102,7 @@ public class Avatar {
 	 * Provides the reason of the punishment.
 	 * @return The reason of the punishment.
 	 */
-	public String getElement() {
+	public char getElement() {
 		return element;
 	}
 
@@ -110,7 +110,7 @@ public class Avatar {
 	 * Updates the original element of the avatar.
 	 * @param element The original element of the avatar.
 	 */
-	public void setElement(String element) {
+	public void setElement(char element) {
 		this.element = element;
 	}
 

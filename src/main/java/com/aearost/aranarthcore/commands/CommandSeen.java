@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -75,44 +76,6 @@ public class CommandSeen {
         };
     }
 
-	/**
-	 * Provides the day number with the suffix.
-	 * @param day The day.
-	 * @return The day with the suffix.
-	 */
-	private static String getDayNumWithSuffix(int day) {
-		String dayNumAsString = day + "";
-		if (dayNumAsString.length() > 1) {
-			if (dayNumAsString.endsWith("11")) {
-				dayNumAsString += "th";
-			} else if (dayNumAsString.endsWith("12")) {
-				dayNumAsString += "th";
-			} else if (dayNumAsString.endsWith("13")) {
-				dayNumAsString += "th";
-			} else {
-				if (dayNumAsString.endsWith("1")) {
-					dayNumAsString += "st";
-				} else if (dayNumAsString.endsWith("2")) {
-					dayNumAsString += "nd";
-				} else if (dayNumAsString.endsWith("3")) {
-					dayNumAsString += "rd";
-				} else {
-					dayNumAsString += "th";
-				}
-			}
-		} else {
-			if (dayNumAsString.endsWith("1")) {
-				dayNumAsString += "st";
-			} else if (dayNumAsString.endsWith("2")) {
-				dayNumAsString += "nd";
-			} else if (dayNumAsString.endsWith("3")) {
-				dayNumAsString += "rd";
-			} else {
-				dayNumAsString += "th";
-			}
-		}
-		return dayNumAsString;
-	}
 
 	/**
 	 * Determines the date to display in the player's timezone.
@@ -130,7 +93,7 @@ public class CommandSeen {
 		localDateTime = LocalDateTime.ofInstant(lastPlayed, timezone);
 
 		String month = getMonthName(localDateTime.getMonthValue());
-		String dateWithSuffix = getDayNumWithSuffix(localDateTime.getDayOfMonth());
+		String dateWithSuffix = DateUtils.getDayNumWithSuffix(localDateTime.getDayOfMonth());
 		int year = localDateTime.getYear();
 
 		int hourAsInt = localDateTime.getHour();
