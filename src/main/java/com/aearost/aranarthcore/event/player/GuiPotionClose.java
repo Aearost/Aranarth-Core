@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -18,7 +19,9 @@ public class GuiPotionClose {
 
 	public void execute(final InventoryCloseEvent e) {
         Inventory inventory = e.getInventory();
+        Bukkit.getLogger().info("A");
         if (inventory.getContents().length > 0) {
+            Bukkit.getLogger().info("B");
             Player player = (Player) e.getPlayer();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -27,6 +30,7 @@ public class GuiPotionClose {
 
 
             if (Objects.isNull(potions)) {
+                Bukkit.getLogger().info("C");
                 potions = new HashMap<>();
             }
 
@@ -64,6 +68,7 @@ public class GuiPotionClose {
                     }
                 }
             }
+            Bukkit.getLogger().info("D");
             aranarthPlayer.setPotions(potions);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
