@@ -7,15 +7,16 @@ import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
@@ -65,6 +66,19 @@ public class AranarthCore extends JavaPlugin {
 					boolean wasAvatarFound = AvatarUtils.selectAvatar();
 					if (!wasAvatarFound) {
 						Bukkit.getLogger().info("A new Avatar could not be selected");
+					}
+				} else {
+					// Automatically removes an Avatar once they've been inactive for 7 days
+					Avatar avatar = AvatarUtils.getCurrentAvatar();
+					OfflinePlayer player = Bukkit.getOfflinePlayer(avatar.getUuid());
+					if (!player.isOnline()) {
+						Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
+						LocalDateTime playerLastPlayDate = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
+						LocalDateTime currentDate = LocalDateTime.now();
+						if (playerLastPlayDate.plusDays(7).isBefore(currentDate)) {
+							Bukkit.getLogger().info("Avatar " + player.getName() + " has been inactive for 7 days");
+							AvatarUtils.removeCurrentAvatar();
+						}
 					}
 				}
 			}
