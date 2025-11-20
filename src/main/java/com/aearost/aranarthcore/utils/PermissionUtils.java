@@ -2,11 +2,15 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
+
+import java.util.UUID;
 
 /**
  * Provides a large variety of utility methods for everything related to items and inventory.
@@ -26,6 +30,13 @@ public class PermissionUtils {
 		setRankPermissions(perms, aranarthPlayer.getRank());
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
+
+		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+		// If the player is the avatar
+		if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
+			updateAvatarPermissions(player.getUniqueId(), false);
+		}
+
 
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
@@ -63,6 +74,7 @@ public class PermissionUtils {
 	 * @param perms The permissions the player will have access to.
 	 */
 	private static void setDefaultPermissions(Player player, PermissionAttachment perms) {
+
 		perms.setPermission("bending.command.rechoose", true);
 
 		// Disable sub-elements
@@ -70,8 +82,11 @@ public class PermissionUtils {
 		perms.setPermission("bending.water.plantbending", false);
 		perms.setPermission("bending.fire.combustionbending", false);
 		perms.setPermission("bending.fire.lightningbending", false);
+		perms.setPermission("bending.fire.bluefire", false);
 		perms.setPermission("bending.earth.metalbending", false);
 		perms.setPermission("bending.earth.lavabending", false);
+		perms.setPermission("bending.earth.sandbending", false);
+		perms.setPermission("bending.air.flight", false);
 		perms.setPermission("bending.earth.sandbending", false);
 		perms.setPermission("bending.water.bloodbending", false);
 		perms.setPermission("bending.water.bloodbending.anytime", false);
@@ -123,6 +138,106 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.warn", false);
 		perms.setPermission("aranarth.punishments", false);
 		perms.setPermission("aranarth.avatar.set", false);
+	}
+
+	/**
+	 * Sets the permissions for either removing an avatar or for a new avatar.
+	 * @param uuid The player's UUID.
+	 */
+	public static void updateAvatarPermissions(UUID uuid, boolean isRemoval) {
+		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+
+		// Remove the old avatar's permissions
+		if (isRemoval) {
+			Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
+			Bukkit.getLogger().info("Old avatar, removing perms");
+			// Removes all elements and sub-elements
+			bendingPlayer.getSubElements().clear();
+			bendingPlayer.saveSubElements();
+			bendingPlayer.getElements().clear();
+			bendingPlayer.saveElements();
+
+			// Adds back their original element
+			char element = previousAvatar.getElement();
+			Element elementToAdd = null;
+			if (element == 'A') {
+				elementToAdd = Element.AIR;
+			} else if (element == 'W') {
+				elementToAdd = Element.WATER;
+			} else if (element == 'E') {
+				elementToAdd = Element.EARTH;
+			} else if (element == 'F') {
+				elementToAdd = Element.FIRE;
+			}
+			bendingPlayer.addElement(elementToAdd);
+			bendingPlayer.saveElements();
+
+			// Permissions will be reloaded once they join back if they are not online
+			if (player.isOnline()) {
+				Player onlinePlayer = (Player) player;
+				PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
+
+				// Do not allow manual element changes for the avatar
+				perms.setPermission("bending.command.choose", true);
+				perms.setPermission("bending.command.rechoose", true);
+
+				evaluatePlayerPermissions((Player) player, false);
+			}
+		}
+		// A new avatar
+		else {
+			Bukkit.getLogger().info("New avatar, adding perms");
+			if (!bendingPlayer.getElements().contains(Element.AIR)) {
+				bendingPlayer.addElement(Element.AIR);
+			}
+			if (!bendingPlayer.getElements().contains(Element.WATER)) {
+				bendingPlayer.addElement(Element.WATER);
+			}
+			if (!bendingPlayer.getElements().contains(Element.EARTH)) {
+				bendingPlayer.addElement(Element.EARTH);
+			}
+			if (!bendingPlayer.getElements().contains(Element.FIRE)) {
+				bendingPlayer.addElement(Element.FIRE);
+			}
+
+			for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
+				// Skips bloodbending, flight, and blue fire
+				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.BLUE_FIRE
+						&& subElement != Element.SubElement.FLIGHT) {
+					if (!bendingPlayer.hasSubElement(subElement)) {
+						bendingPlayer.addSubElement(subElement);
+					}
+				}
+			}
+			bendingPlayer.saveSubElements();
+			bendingPlayer.saveElements();
+
+			if (player.isOnline()) {
+				Player onlinePlayer = (Player) player;
+				PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
+
+				// Do not allow manual element changes for the avatar
+				perms.setPermission("bending.command.choose", false);
+				perms.setPermission("bending.command.rechoose", false);
+
+				// Enable all sub-elements
+				perms.setPermission("bending.water.healing", true);
+				perms.setPermission("bending.water.plantbending", true);
+				perms.setPermission("bending.fire.combustionbending", true);
+				perms.setPermission("bending.fire.lightningbending", true);
+				perms.setPermission("bending.earth.metalbending", true);
+				perms.setPermission("bending.earth.lavabending", true);
+				perms.setPermission("bending.earth.sandbending", true);
+
+				// Enable all abilities
+				perms.setPermission("bending.ability.waterarms", true);
+				perms.setPermission("bending.ability.firecomet", true);
+				perms.setPermission("bending.ability.metalclips", true);
+				perms.setPermission("bending.ability.sonicblast", true);
+				perms.setPermission("bending.ability.suffocate", true);
+			}
+		}
 	}
 
 	/**
