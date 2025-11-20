@@ -31,11 +31,13 @@ public class PlayerRespawnEventListener implements Listener {
     public void onPlayerDeath(final PlayerDeathEvent e) {
         String world = e.getEntity().getWorld().getName();
         Player player = e.getEntity();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+        aranarthPlayer.setLastKnownTeleportLocation(e.getEntity().getLastDeathLocation());
+
         if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setLevelBeforeDeath(player.getLevel());
             aranarthPlayer.setExpBeforeDeath(player.getExp());
-            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             e.getDrops().clear();
             e.setDroppedExp(0);
         } else {
@@ -43,12 +45,11 @@ public class PlayerRespawnEventListener implements Listener {
                 e.setKeepInventory(true);
                 e.getDrops().clear();
                 e.setDroppedExp(0);
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setLevelBeforeDeath(player.getLevel());
                 aranarthPlayer.setExpBeforeDeath(player.getExp());
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             }
         }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
         Avatar avatar = AvatarUtils.getCurrentAvatar();
         if (avatar != null) {
