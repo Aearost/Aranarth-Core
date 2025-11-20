@@ -116,14 +116,26 @@ public class AvatarUtils {
 				default -> 'A';
 			};
 
+			UUID recentAvatar = null;
 			while (true) {
+				Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
+				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+				char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
+
 				// Try again upon next execution
-				if (attempts == 500) {
+				if (attempts == 1000) {
+					if (recentAvatar != null) {
+						Bukkit.getLogger().info("No other avatar found, defaulting to this one");
+						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
+								DateUtils.getRawInRealLifeDate(), "", playerElement);
+						avatars.remove(avatars.size() - 1); // It is the null placeholder
+						setNewAvatar(avatar);
+						DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+						return true;
+					}
 					return false;
 				}
 
-				Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
-				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 				if (bendingPlayer == null) {
 					attempts++;
 					continue;
@@ -133,20 +145,45 @@ public class AvatarUtils {
 					attempts++;
 					continue;
 				} else {
-					char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
+					// Will select if not one of the last 5 avatars
+					// Otherwise search for another and default to them if none other is found
+
 					if (playerElement == newAvatarElement) {
-						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
-								DateUtils.getRawInRealLifeDate(), "", playerElement);
-						avatars.remove(avatars.size() - 1); // It is the null placeholder
-						setNewAvatar(avatar);
-						DiscordUtils.addAvatarMessageToDiscord(avatar, true);
-						return true;
+						if (!isOneOfLastFiveAvatars(player.getUniqueId())) {
+							avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
+									DateUtils.getRawInRealLifeDate(), "", playerElement);
+							avatars.remove(avatars.size() - 1); // It is the null placeholder
+							setNewAvatar(avatar);
+							DiscordUtils.addAvatarMessageToDiscord(avatar, true);
+							return true;
+						} else {
+							recentAvatar = player.getUniqueId();
+							attempts++;
+						}
 					} else {
 						attempts++;
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Determines if the player was one of the last five avatars.
+	 * @param uuid The player's UUID.
+	 * @return Confirmation if the player was one of the last five avatars.
+	 */
+	private static boolean isOneOfLastFiveAvatars(UUID uuid) {
+		List<UUID> lastFive = new ArrayList<>();
+		// Cycle from last to first
+		for (int i = avatars.size() - 1; i > 0; i--) {
+			if (avatars.get(i) == null) {
+				continue;
+			}
+			lastFive.add(avatars.get(i).getUuid());
+		}
+
+		return lastFive.contains(uuid);
 	}
 
 	/**
