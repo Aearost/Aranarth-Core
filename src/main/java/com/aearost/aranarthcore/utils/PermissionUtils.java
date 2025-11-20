@@ -151,7 +151,6 @@ public class PermissionUtils {
 		// Remove the old avatar's permissions
 		if (isRemoval) {
 			Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
-			Bukkit.getLogger().info("Old avatar, removing perms");
 			// Removes all elements and sub-elements
 			bendingPlayer.getSubElements().clear();
 			bendingPlayer.saveSubElements();
@@ -187,7 +186,6 @@ public class PermissionUtils {
 		}
 		// A new avatar
 		else {
-			Bukkit.getLogger().info("New avatar, adding perms");
 			if (!bendingPlayer.getElements().contains(Element.AIR)) {
 				bendingPlayer.addElement(Element.AIR);
 			}
