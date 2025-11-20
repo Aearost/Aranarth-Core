@@ -37,9 +37,13 @@ public class GuiPotions {
 		player.openInventory(initializedGui);
 	}
 
-	private Inventory initializeAddGui(Player player) {
+	public Inventory getInitializedGui() {
+		return initializedGui;
+	}
+
+	public Inventory initializeAddGui(Player player) {
 		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
-		return Bukkit.getServer().createInventory(player, 54, "Potions (" + potionStats + ")");
+		return Bukkit.getServer().createInventory(player, 54, "Add Potions (" + potionStats + ")");
 	}
 
 	private Inventory initializeRemoveGui(Player player) {

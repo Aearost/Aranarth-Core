@@ -51,6 +51,7 @@ public class AranarthPlayer {
 	private UUID teleportFromUuid;
 	private Location lastKnownTeleportLocation;
 	private int particleNum = 100;
+	private boolean isAddingPotions = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -87,6 +88,7 @@ public class AranarthPlayer {
 		this.teleportToUuid = null;
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
+		this.isAddingPotions = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, int particleNum, Pronouns pronouns) {
@@ -124,6 +126,7 @@ public class AranarthPlayer {
 		this.teleportToUuid = null;
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = particleNum;
+		this.isAddingPotions = false;
 	}
 
 	/**
@@ -705,6 +708,22 @@ public class AranarthPlayer {
 	 */
 	public void setParticleNum(int particleNum) {
 		this.particleNum = particleNum;
+	}
+
+	/**
+	 * Provides whether the player is adding potions to their potions pouch.
+	 * @return Whether the player is adding potions to their potions pouch
+	 */
+	public boolean isAddingPotions() {
+		return isAddingPotions;
+	}
+
+	/**
+	 * Updates whether the player is adding potions to their potions pouch.
+	 * @param isAddingPotions Whether the player is adding potions to their potions pouch.
+	 */
+	public void setIsAddingPotions(boolean isAddingPotions) {
+		this.isAddingPotions = isAddingPotions;
 	}
 
 }
