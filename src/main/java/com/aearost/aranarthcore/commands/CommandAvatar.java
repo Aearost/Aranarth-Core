@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -27,7 +26,7 @@ public class CommandAvatar {
 				return true;
 			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(currentAvatar.getUuid());
-			sender.sendMessage(ChatUtils.translateToColor("&5&l&oThe current Avatar is &d" + aranarthPlayer.getNickname()));
+			sender.sendMessage(ChatUtils.chatMessage("&5&l&oThe current Avatar is &d" + aranarthPlayer.getNickname()));
 			return true;
 		} else {
 			if (sender instanceof Player player) {

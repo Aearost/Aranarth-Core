@@ -37,7 +37,7 @@ public class CommandAC implements CommandExecutor {
 					commandResult = isValidCommand(sender, args);
 				}
 			} else {
-				commandResult = isValidCommand(sender, args);
+				commandResult = isCouncil(sender, args);
 			}
 
 			if (!commandResult) {
@@ -58,6 +58,22 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("dateset")) {
 			CommandDate.onCommand(sender, args);
 			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("mute")) {
+			commandResult = CommandMute.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unmute")) {
+			commandResult = CommandUnmute.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("ban")) {
+			commandResult = CommandBan.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unban")) {
+			commandResult = CommandUnban.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("spy")) {
+			commandResult = CommandSpy.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("invsee")) {
+			commandResult = CommandInvsee.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("warn")) {
+			commandResult = CommandWarn.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("punishments")) {
+			commandResult = CommandPunishments.onCommand(sender, args);
 		} else {
 			commandResult = isValidCommand(sender, args);
 		}
@@ -112,14 +128,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRankSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("pronouns")) {
 			commandResult = CommandPronouns.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("mute")) {
-			commandResult = CommandMute.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("unmute")) {
-			commandResult = CommandUnmute.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("ban")) {
-			commandResult = CommandBan.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("unban")) {
-			commandResult = CommandUnban.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("dominion")) {
 			commandResult = CommandDominion.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("sethome")) {
@@ -156,10 +164,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandTables.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("trash")) {
 			commandResult = CommandTrash.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("spy")) {
-			commandResult = CommandSpy.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("invsee")) {
-			commandResult = CommandInvsee.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tpaccept")) {
 			commandResult = CommandTpaccept.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tpdeny")) {
@@ -168,10 +172,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandParticles.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("itemname")) {
 			commandResult = CommandItemName.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("warn")) {
-			commandResult = CommandWarn.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("punishments")) {
-			commandResult = CommandPunishments.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("resource")) {
 			commandResult = CommandResource.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("avatar")) {
