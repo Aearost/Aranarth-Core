@@ -7,6 +7,8 @@ import com.projectkorra.projectkorra.Element;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -16,6 +18,7 @@ import java.util.*;
  */
 public class AvatarUtils {
 
+	private static final Logger log = LoggerFactory.getLogger(AvatarUtils.class);
 	private static List<Avatar> avatars = new ArrayList<>();
 
 	/**
@@ -89,7 +92,13 @@ public class AvatarUtils {
 				if (bendingPlayer.getElements().contains(Element.CHI)) {
 					attempts++;
 					continue;
-				} else {
+				}
+				// An avatar was selected
+				else {
+					if (bendingPlayer.getElements().isEmpty()) {
+						attempts++;
+						continue;
+					}
 					char element = bendingPlayer.getElements().get(0).getName().charAt(0);
 					avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 							DateUtils.getRawInRealLifeDate(), "", element);
@@ -120,11 +129,11 @@ public class AvatarUtils {
 			while (true) {
 				Player player = (Player) Bukkit.getOnlinePlayers().toArray()[index];
 				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-				char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
 
 				// Try again upon next execution
 				if (attempts == 1000) {
 					if (recentAvatar != null) {
+						char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
 						Bukkit.getLogger().info("No other avatar found, defaulting to this one");
 						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 								DateUtils.getRawInRealLifeDate(), "", playerElement);
@@ -136,7 +145,7 @@ public class AvatarUtils {
 					return false;
 				}
 
-				if (bendingPlayer == null) {
+				if (bendingPlayer == null || bendingPlayer.getElements().isEmpty()) {
 					attempts++;
 					continue;
 				}
@@ -145,14 +154,17 @@ public class AvatarUtils {
 					attempts++;
 					continue;
 				} else {
-					// Will select if not one of the last 5 avatars
-					// Otherwise search for another and default to them if none other is found
+					char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
 
 					if (playerElement == newAvatarElement) {
+						// An avatar was selected
 						if (!isOneOfLastFiveAvatars(player.getUniqueId())) {
+							Bukkit.getLogger().info("Currently has an avatar?" + (AvatarUtils.getCurrentAvatar() != null));
+
 							avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 									DateUtils.getRawInRealLifeDate(), "", playerElement);
 							avatars.remove(avatars.size() - 1); // It is the null placeholder
+							Bukkit.getLogger().info("Null placeholder avatar was removed");
 							setNewAvatar(avatar);
 							DiscordUtils.addAvatarMessageToDiscord(avatar, true);
 							return true;
@@ -191,9 +203,14 @@ public class AvatarUtils {
 	 * @param avatar The new Avatar.
 	 */
 	public static void setNewAvatar(Avatar avatar) {
-		avatars.add(avatar);
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
-//		PermissionUtils.assignAvatarPermissions(avatar); TODO
+		if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
+			Bukkit.getLogger().info("New avatar is online, updating their permissions");
+			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()), false);
+		}
+		Bukkit.getLogger().info("Playing sound effect for new avatar");
+		Bukkit.getLogger().info("This should not be called until permission evaluation is done");
+		avatars.add(avatar);
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.playSound(player.getLocation(), Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);
@@ -217,7 +234,6 @@ public class AvatarUtils {
 	public static void removeCurrentAvatar() {
 		Avatar oldAvatar = avatars.get(avatars.size() - 1);
 		if (oldAvatar == null) {
-			Bukkit.getLogger().info("Currently no a");
 			return;
 		}
 
@@ -225,6 +241,8 @@ public class AvatarUtils {
 		oldAvatar.setEndInRealLife(DateUtils.getRawInRealLifeDate());
 		avatars.set(avatars.size() - 1, oldAvatar);
 		avatars.add(null);
+		PermissionUtils.updateAvatarPermissions(oldAvatar.getUuid(), true);
+
 		DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
