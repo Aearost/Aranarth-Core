@@ -159,12 +159,10 @@ public class AvatarUtils {
 					if (playerElement == newAvatarElement) {
 						// An avatar was selected
 						if (!isOneOfLastFiveAvatars(player.getUniqueId())) {
-							Bukkit.getLogger().info("Currently has an avatar?" + (AvatarUtils.getCurrentAvatar() != null));
 
 							avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 									DateUtils.getRawInRealLifeDate(), "", playerElement);
 							avatars.remove(avatars.size() - 1); // It is the null placeholder
-							Bukkit.getLogger().info("Null placeholder avatar was removed");
 							setNewAvatar(avatar);
 							DiscordUtils.addAvatarMessageToDiscord(avatar, true);
 							return true;
@@ -205,11 +203,8 @@ public class AvatarUtils {
 	public static void setNewAvatar(Avatar avatar) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
 		if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
-			Bukkit.getLogger().info("New avatar is online, updating their permissions");
 			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()), false);
 		}
-		Bukkit.getLogger().info("Playing sound effect for new avatar");
-		Bukkit.getLogger().info("This should not be called until permission evaluation is done");
 		avatars.add(avatar);
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
