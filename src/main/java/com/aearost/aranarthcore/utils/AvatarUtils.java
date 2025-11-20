@@ -216,6 +216,11 @@ public class AvatarUtils {
 	 */
 	public static void removeCurrentAvatar() {
 		Avatar oldAvatar = avatars.get(avatars.size() - 1);
+		if (oldAvatar == null) {
+			Bukkit.getLogger().info("Currently no a");
+			return;
+		}
+
 		oldAvatar.setEndInGame(DateUtils.getRawInGameDate());
 		oldAvatar.setEndInRealLife(DateUtils.getRawInRealLifeDate());
 		avatars.set(avatars.size() - 1, oldAvatar);
