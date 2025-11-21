@@ -13,15 +13,17 @@ import org.bukkit.event.player.PlayerInteractEvent;
 public class PlayerShopChestOpen {
 	public void execute(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
-			Location chestLocation = e.getClickedBlock().getLocation();
-			Location locationAbove = new Location(chestLocation.getWorld(),
-					chestLocation.getBlockX(), chestLocation.getBlockY() + 1, chestLocation.getBlockZ());
-			if (isSign(locationAbove.getBlock().getType())) {
-				Shop playerShop = AranarthUtils.getShop(locationAbove);
-				if (playerShop != null) {
-					if (!playerShop.getUuid().toString().equals(e.getPlayer().getUniqueId().toString())) {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou do not own this player shop chest!"));
-						e.setCancelled(true);
+			if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {
+				Location chestLocation = e.getClickedBlock().getLocation();
+				Location locationAbove = new Location(chestLocation.getWorld(),
+						chestLocation.getBlockX(), chestLocation.getBlockY() + 1, chestLocation.getBlockZ());
+				if (isSign(locationAbove.getBlock().getType())) {
+					Shop playerShop = AranarthUtils.getShop(locationAbove);
+					if (playerShop != null) {
+						if (playerShop.getUuid() == null || !playerShop.getUuid().equals(e.getPlayer().getUniqueId())) {
+							e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou do not own this player shop chest!"));
+							e.setCancelled(true);
+						}
 					}
 				}
 			}
