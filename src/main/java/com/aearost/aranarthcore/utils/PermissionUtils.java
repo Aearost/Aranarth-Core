@@ -138,6 +138,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.warn", false);
 		perms.setPermission("aranarth.punishments", false);
 		perms.setPermission("aranarth.avatar.set", false);
+		perms.setPermission("aranarth.broadcast", false);
 	}
 
 	/**
@@ -382,6 +383,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.spy", true);
 			perms.setPermission("aranarth.unmute", true);
 			perms.setPermission("aranarth.whereis", true);
+			perms.setPermission("aranarth.broadcast", true);
 		} else {
 			return;
 		}
