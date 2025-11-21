@@ -6,6 +6,8 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Random;
+
 import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
 
 /**
@@ -18,7 +20,10 @@ public class ArrowHitBlock {
 			if (arrow.getPersistentDataContainer().has(ARROW)) {
 				arrow.setItem(AranarthUtils.getArrowFromType(arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING)));
 				if (arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING).equals("obsidian")) {
-					e.getEntity().remove();
+					// 60% chance of breaking
+					if (new Random().nextInt(10) >= 4) {
+						e.getEntity().remove();
+					}
 				}
 			}
 		}
