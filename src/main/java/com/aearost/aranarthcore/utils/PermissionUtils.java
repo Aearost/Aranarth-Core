@@ -149,6 +149,10 @@ public class PermissionUtils {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 
+		if (bendingPlayer == null) {
+			return;
+		}
+
 		// Remove the old avatar's permissions
 		if (isRemoval) {
 			Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
