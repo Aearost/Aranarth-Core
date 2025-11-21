@@ -29,15 +29,15 @@ public class GuiRanksClick {
 
 		// Saint ranks provide the URL to the server shop
 		if (slot == 47) {
-			player.sendMessage(ChatUtils.translateToColor("&3Saint I: &b________________"));
+			player.sendMessage(ChatUtils.translateToColor("&3Saint I: &bhttps://aranarth.craftingstore.net/package/493265"));
 			player.closeInventory();
 			return;
 		} else if (slot == 49) {
-			player.sendMessage(ChatUtils.translateToColor("&6Saint II: &e________________"));
+			player.sendMessage(ChatUtils.translateToColor("&6Saint II: &ehttps://aranarth.craftingstore.net/package/1474409"));
 			player.closeInventory();
 			return;
 		} else if (slot == 51) {
-			player.sendMessage(ChatUtils.translateToColor("&4Saint III: &c________________"));
+			player.sendMessage(ChatUtils.translateToColor("&4Saint III: &chttps://aranarth.craftingstore.net/package/1474412"));
 			player.closeInventory();
 			return;
 		}
@@ -51,8 +51,8 @@ public class GuiRanksClick {
 				"&6&lDuke", "&b&lPrince", "&9&lKing", "&4&lEmperor" };
 		String[] femaleRanks = new String[] { "&a&lPeasant", "&d&lEsquire", "&7&lKnight", "&5&lBaroness",
 				"&8&lCountess", "&6&lDuchess", "&b&lPrincess", "&9&lQueen", "&4&lEmpress" };
-		String[] rankupCosts = new String[] { "FREE", "$250", "$1,250", "$5,000", "$10,000", "$25,000", "$100,000",
-				"$500,000", "$2,500,000" };
+		String[] rankupCosts = new String[] { "FREE", "$250", "$1,250", "$5,000", "$25,000", "$100,000", "$500,000",
+				"$2,500,000", "$10,000,000" };
 		// Hardcoded indexes of all the upgradable ranks
 		// Peasant, Esquire, Knight, Baron, Count, Duke, Prince, King, Emperor
 		int[] positions = new int[] { 4, 12, 14, 20, 22, 24, 30, 32, 40 };
@@ -98,17 +98,17 @@ public class GuiRanksClick {
 				player.sendMessage(ChatUtils
 						.translateToColor("&cYou are already " + aOrAn + " " + maleRanks[clickedRank] + "&c!"));
 			} else {
-				player.sendMessage(ChatUtils.translateToColor(
+				player.sendMessage(ChatUtils.chatMessage(
 						"&cYou are already " + aOrAn + " " + femaleRanks[clickedRank] + "&c!"));
 			}
 			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
 			player.closeInventory();
 		} else if (isClickedRankLowerThanCurrent) {
 			if (pronouns == Pronouns.MALE) {
-				player.sendMessage(ChatUtils.translateToColor(
+				player.sendMessage(ChatUtils.chatMessage(
 						"&cYou cannot rank back down to " + aOrAn + " " + maleRanks[clickedRank] + "&c!"));
 			} else {
-				player.sendMessage(ChatUtils.translateToColor(
+				player.sendMessage(ChatUtils.chatMessage(
 						"&cYou cannot rank back down to " + aOrAn + " " + femaleRanks[clickedRank] + "&c!"));
 			}
 			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
@@ -116,10 +116,10 @@ public class GuiRanksClick {
 		} else if (isClickedRankHigherThanCurrent) {
 			if (pronouns == Pronouns.MALE) {
 				player.sendMessage(
-						ChatUtils.translateToColor("&cYou must rankup to " + maleRanks[rank + 1] + " &cfirst!"));
+						ChatUtils.chatMessage("&cYou must rankup to " + maleRanks[rank + 1] + " &cfirst!"));
 			} else {
 				player.sendMessage(
-						ChatUtils.translateToColor("&cYou must rankup to " + femaleRanks[rank + 1] + " &cfirst!"));
+						ChatUtils.chatMessage("&cYou must rankup to " + femaleRanks[rank + 1] + " &cfirst!"));
 			}
 			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
 			player.closeInventory();
