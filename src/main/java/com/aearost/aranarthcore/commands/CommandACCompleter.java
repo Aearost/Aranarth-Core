@@ -89,6 +89,9 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("a")) {
 				displayedOptions.add("arena");
 				displayedOptions.add("aranarthium");
+				displayedOptions.add("avatar");
+			} else if ("avatar".startsWith(args[0])) {
+				displayedOptions.add("avatar");
 			} else {
 				if (args[0].equals("ar")) {
 					displayedOptions.add("arena");
@@ -144,7 +147,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("back");
 			} else if ("blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
-			} else {
+			}  else {
 				if (args[0].startsWith("ba")) {
 					if (args[0].equals("ba")) {
 						displayedOptions.add("balance");
@@ -555,9 +558,7 @@ public class CommandACCompleter implements TabCompleter {
 							}
 						}
 					}
-
 				}
-
 			}
 		}
 		return displayedOptions;
@@ -609,6 +610,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("rules");
 		displayedOptions.add("back");
 		displayedOptions.add("resource");
+		displayedOptions.add("avatar");
 		return displayedOptions;
 	}
 
@@ -657,11 +659,20 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("warn");
 				}
 			}
-		}else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
 			displayedOptions.add("mute");
-		} else if (!args[0].isEmpty() && "ban".startsWith(args[0])) {
-			displayedOptions.add("ban");
-		} else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
+			if (args[0].equals("b")) {
+				displayedOptions.add("ban");
+				displayedOptions.add("broadcast");
+			} else if (!args[0].isEmpty() && "ban".startsWith(args[0])) {
+				displayedOptions.add("ban");
+			} else if (!args[0].isEmpty() && "broadcast".startsWith(args[0])) {
+				displayedOptions.add("broadcast");
+			}
+		}
+
+		else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
 			displayedOptions.add("spy");
 		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
 			displayedOptions.add("invsee");
@@ -762,6 +773,18 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "avatar" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("set");
+				} else if ("set".startsWith(args[1])) {
+					displayedOptions.add("set");
+				}
+			}
+			case "broadcast" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("msg");
+				}
+			}
 		}
 		displayedOptions = allArgs(sender, displayedOptions, args);
 		return displayedOptions;
@@ -783,6 +806,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("invsee");
 		displayedOptions.add("spy");
 		displayedOptions.add("warn");
+		displayedOptions.add("broadcast");
 		displayedOptions.add("punishments");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
