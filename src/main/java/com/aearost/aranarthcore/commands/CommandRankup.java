@@ -23,8 +23,8 @@ public class CommandRankup {
 					"&6&lDuke", "&b&lPrince", "&9&lKing", "&4&lEmperor" };
 			String[] femaleRanks = new String[] { "&a&lPeasant", "&d&lEsquire", "&7&lKnight", "&5&lBaroness",
 					"&8&lCountess", "&6&lDuchess", "&b&lPrincess", "&9&lQueen", "&4&lEmpress" };
-			String[] rankupCosts = new String[] { "FREE", "$250", "$1,250", "$5,000", "$10,000", "$25,000", "$100,000",
-					"$500,000", "$2,500,000" };
+			String[] rankupCosts = new String[] { "FREE", "$250", "$1,250", "$5,000", "$25,000", "$100,000", "$500,000",
+					"$2,500,000", "$10,000,000" };
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			int currentRank = aranarthPlayer.getRank();
