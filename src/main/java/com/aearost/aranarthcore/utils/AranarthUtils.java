@@ -1219,6 +1219,7 @@ public class AranarthUtils {
 	 */
 	public static ItemStack getArrowFromType(String arrowType) {
 		return switch (arrowType) {
+			case "arrowhead" -> new ItemStack(Material.ARROW, 4);
 			case "iron" -> new ArrowIron().getItem();
 			case "gold" -> new ArrowGold().getItem();
 			case "amethyst" -> new ArrowAmethyst().getItem();
