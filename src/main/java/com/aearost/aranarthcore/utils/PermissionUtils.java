@@ -141,6 +141,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.broadcast", false);
 		perms.setPermission("aranarth.shulker", false);
 		perms.setPermission("aranarth.inventory", false);
+		perms.setPermission("aranarth.invisible_item_frame", false);
 	}
 
 	/**
