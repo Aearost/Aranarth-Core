@@ -56,6 +56,8 @@ Features
 [+] Added a resource world
 [+] Made it so arrows must be crafted using arrowheads in a fletching table
 [+] Added wildflowers, leaf litter, bush, firefly bush, and pale hanging moss to list of invalid blocks for snow
+[+] Added restrictions to the shulker box and inventory assist functionality to only be used by specific permissions
+[+] Updated the permissions that certain perks are accessible at
 
 Miscellaneous
 - Removed redundant logs from weather

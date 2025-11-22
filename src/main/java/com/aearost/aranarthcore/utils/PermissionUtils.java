@@ -120,7 +120,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.itemname.gradient", false);
-		perms.setPermission("aranarth.compress", false);
+		perms.setPermission("aranarth.compact", false);
 		perms.setPermission("aranarth.mute", false);
 		perms.setPermission("aranarth.give", false);
 		perms.setPermission("aranarth.whereis", false);
@@ -139,6 +139,8 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.punishments", false);
 		perms.setPermission("aranarth.avatar.set", false);
 		perms.setPermission("aranarth.broadcast", false);
+		perms.setPermission("aranarth.shulker", false);
+		perms.setPermission("aranarth.inventory", false);
 	}
 
 	/**
@@ -339,15 +341,16 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.back", true);
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.blacklist", true);
+			perms.setPermission("aranarth.tables", true);
 		} else {
 			return;
 		}
 
 		if (saintRank >= 2) {
-			perms.setPermission("aranarth.tables", true);
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.chat.hex", true);
 			perms.setPermission("aranarth.nick.hex", true);
+			perms.setPermission("aranarth.shulker", true);
 		} else {
 			return;
 		}
@@ -355,8 +358,9 @@ public class PermissionUtils {
 		if (saintRank >= 3) {
 			perms.setPermission("aranarth.nick.gradient", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
-			perms.setPermission("aranarth.compress", true);
+			perms.setPermission("aranarth.compact", true);
 			perms.setPermission("aranarth.randomizer", true);
+			perms.setPermission("aranarth.inventory", true);
 		} else {
 			return;
 		}

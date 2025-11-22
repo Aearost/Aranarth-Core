@@ -24,6 +24,10 @@ public class ShulkerClick {
 					ItemStack is = e.getItem();
 					if (is.getItemMeta() instanceof BlockStateMeta im) {
 						if (im.getBlockState() instanceof ShulkerBox shulker) {
+							if (!player.hasPermission("aranarth.shulker")) {
+								return;
+							}
+
 							e.setCancelled(true);
 							player.playSound(player.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
 							Inventory shulkerInventory = shulker.getInventory();
