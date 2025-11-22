@@ -30,6 +30,7 @@ public class PermissionUtils {
 		setRankPermissions(perms, aranarthPlayer.getRank());
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
+		addPlayerPerks(perms, player);
 
 		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 		// If the player is the avatar
@@ -243,6 +244,81 @@ public class PermissionUtils {
 				perms.setPermission("bending.ability.sonicblast", true);
 				perms.setPermission("bending.ability.suffocate", true);
 			}
+		}
+	}
+
+	/**
+	 * Adds the permissions for a player's additional perks.
+	 * Parts: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+	 * Default: 0_0_0_0_0_0_0_0_0_0
+	 * @param perms The permissions the player will have access to.
+	 * @param player The player.
+	 */
+	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		// The default
+		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0")) {
+			return;
+		}
+
+		String[] parts = aranarthPlayer.getPerks().split("_");
+		// Compactor
+		if (parts[0].equals("1")) {
+			Bukkit.getLogger().info("Player has compact permission");
+			perms.setPermission("aranarth.compact", true);
+		}
+		// Randomizer
+		if (parts[1].equals("1")) {
+			Bukkit.getLogger().info("Player has randomizer permission");
+			perms.setPermission("aranarth.randomizer", true);
+		}
+		// Blacklist
+		if (parts[2].equals("1")) {
+			Bukkit.getLogger().info("Player has blacklist permission");
+			perms.setPermission("aranarth.blacklist", true);
+		}
+		// Tables
+		if (parts[3].equals("1")) {
+			Bukkit.getLogger().info("Player has tables permission");
+			perms.setPermission("aranarth.tables", true);
+		}
+		// Itemname
+		if (parts[4].equals("1")) {
+			Bukkit.getLogger().info("Player has itemname permission");
+			perms.setPermission("aranarth.itemname", true);
+			perms.setPermission("aranarth.itemname.gradient", true);
+		}
+		// Chat
+		if (parts[5].equals("1")) {
+			Bukkit.getLogger().info("Player has chat permission");
+			perms.setPermission("aranarth.chat.color", true);
+			perms.setPermission("aranarth.chat.hex", true);
+		}
+		// Shulker
+		if (parts[6].equals("1")) {
+			Bukkit.getLogger().info("Player has shulker permission");
+			perms.setPermission("aranarth.shulker", true);
+		}
+		// Inventory
+		if (parts[7].equals("1")) {
+			Bukkit.getLogger().info("Player has inventory permission");
+			perms.setPermission("aranarth.inventory", true);
+		}
+		// Homes
+		if (!parts[8].equals("0")) {
+			Bukkit.getLogger().info("Player has extra homes permission");
+            switch (parts[8]) {
+                case "6" -> perms.setPermission("aranarth.extrahomes.6", true);
+                case "9" -> perms.setPermission("aranarth.extrahomes.9", true);
+                case "12" -> perms.setPermission("aranarth.extrahomes.12", true);
+                case "15" -> perms.setPermission("aranarth.extrahomes.15", true);
+                default -> perms.setPermission("aranarth.extrahomes.3", true);
+            }
+		}
+		// Item Frame
+		if (parts[9].equals("1")) {
+			Bukkit.getLogger().info("Player has invisible_item_frame permission");
+			perms.setPermission("aranarth.invisible_item_frame", true);
 		}
 	}
 

@@ -166,7 +166,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -260,6 +260,8 @@ public class PersistenceUtils {
 				String muteEndDate = fields[15];
 				int particles = Integer.parseInt(fields[16]);
 
+				String perks = fields[17];
+
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
 				Pronouns pronouns = Pronouns.MALE;
@@ -272,7 +274,7 @@ public class PersistenceUtils {
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, pronouns));
+						muteEndDate, particles, perks, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -311,7 +313,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -390,6 +392,8 @@ public class PersistenceUtils {
 						String muteEndDate = aranarthPlayer.getMuteEndDate();
 						String particles = aranarthPlayer.getParticleNum() + "";
 
+						String perks = aranarthPlayer.getPerks();
+
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
 						if (aranarthPlayer.getPronouns() == Pronouns.FEMALE) {
@@ -401,7 +405,7 @@ public class PersistenceUtils {
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
-								+ allHomes + "|" + muteEndDate + "|" + particles + "|"
+								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);

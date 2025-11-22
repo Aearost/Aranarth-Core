@@ -52,6 +52,7 @@ public class AranarthPlayer {
 	private Location lastKnownTeleportLocation;
 	private int particleNum = 100;
 	private boolean isAddingPotions = false;
+	private String perks;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -89,9 +90,14 @@ public class AranarthPlayer {
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
 		this.isAddingPotions = false;
+		this.perks = "";
 	}
 
-	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory, String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank, int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate, int particleNum, Pronouns pronouns) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
+						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
+						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
+						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
+						  int particleNum, String perks, Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -121,12 +127,15 @@ public class AranarthPlayer {
 		this.pendingDominion = null;
 		this.homes = homes;
 		this.muteEndDate = "";
-		this.pronouns = pronouns;
 		this.teleportFromUuid = null;
 		this.teleportToUuid = null;
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = particleNum;
 		this.isAddingPotions = false;
+		this.perks = perks;
+
+		// Keep pronouns at the end
+		this.pronouns = pronouns;
 	}
 
 	/**
@@ -724,6 +733,22 @@ public class AranarthPlayer {
 	 */
 	public void setIsAddingPotions(boolean isAddingPotions) {
 		this.isAddingPotions = isAddingPotions;
+	}
+
+	/**
+	 * Provides the perks that the player has access to.
+	 * @return The perks that the player has access to.
+	 */
+	public String getPerks() {
+		return perks;
+	}
+
+	/**
+	 * Updates the perks that the player has access to.
+	 * @param perks The player's new perks.
+	 */
+	public void setPerks(String perks) {
+		this.perks = perks;
 	}
 
 }

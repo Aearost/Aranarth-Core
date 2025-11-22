@@ -59,6 +59,7 @@ Features
 [+] Added permission restrictions to the shulker assist functionality
 [+] Added permission restrictions to the inventory assist functionality
 [+] Added permission restrictions to crafting invisible item frames
+[+] Added functionality to persist player individually purchased perks from donations
 
 Miscellaneous
 - Removed redundant logs from weather
