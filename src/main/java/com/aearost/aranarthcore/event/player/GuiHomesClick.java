@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
@@ -31,7 +30,6 @@ public class GuiHomesClick {
 
 				for (int i = 0; i < aranarthPlayer.getHomes().size(); i++) {
 					if (e.getSlot() == i) {
-						Bukkit.getLogger().info("Current: " + player.getLocation().getWorld().getName());
 						// Teleports you to the survival world spawn
 						try {
 							AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
