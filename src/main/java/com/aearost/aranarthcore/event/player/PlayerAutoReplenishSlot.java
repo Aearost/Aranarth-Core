@@ -15,6 +15,11 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 public class PlayerAutoReplenishSlot {
 	public void execute(BlockPlaceEvent e) {
 		Player player = e.getPlayer();
+
+		if (!player.hasPermission("aranarth.inventory")) {
+			return;
+		}
+
 		if (e.getItemInHand().getAmount() - 1 == 0) {
 			PlayerInventory inventory = player.getInventory();
 			ItemStack[] contents = inventory.getContents();

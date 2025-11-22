@@ -26,7 +26,9 @@ public class ShulkerItemPickup {
 		if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
 			for (ItemStack blacklistedItem : aranarthPlayer.getBlacklist()) {
 				if (pickupItem.getType() == blacklistedItem.getType()) {
-					return;
+					if (player.hasPermission("aranarth.blacklist")) {
+						return;
+					}
 				}
 			}
 		}
@@ -52,6 +54,10 @@ public class ShulkerItemPickup {
 
 						if ((player.getOpenInventory().getTitle()).equals("Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
 							e.setCancelled(true);
+							return;
+						}
+
+						if (!player.hasPermission("aranarth.shulker")) {
 							return;
 						}
 
