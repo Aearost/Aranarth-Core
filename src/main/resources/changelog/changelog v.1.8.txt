@@ -54,6 +54,7 @@ Features
 [~] Re-ordered the prefix symbols
 [~] Limited access to SMP and Creative worlds to OG players only
 [+] Added a resource world
+[+] Made it so arrows must be crafted using arrowheads in a fletching table
 
 Miscellaneous
 - Removed redundant logs from weather
