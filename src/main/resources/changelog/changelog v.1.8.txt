@@ -55,6 +55,7 @@ Features
 [~] Limited access to SMP and Creative worlds to OG players only
 [+] Added a resource world
 [+] Made it so arrows must be crafted using arrowheads in a fletching table
+[+] Added wildflowers, leaf litter, bush, firefly bush, and pale hanging moss to list of invalid blocks for snow
 
 Miscellaneous
 - Removed redundant logs from weather
