@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.block.Block;
@@ -16,8 +17,11 @@ public class ContainerOpenPrevent {
         Player player = e.getPlayer();
         if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {
             if (!AranarthUtils.canOpenContainer(player, block)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
-                e.setCancelled(true);
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (!aranarthPlayer.getIsInAdminMode()) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
+                    e.setCancelled(true);
+                }
             }
         }
     }
