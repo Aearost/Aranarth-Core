@@ -35,7 +35,8 @@ public class CommandPay {
 					try {
 						amount = Double.parseDouble(args[2]);
 						formattedAmount = formatter.format(amount);
-						amount = Double.parseDouble(formattedAmount.substring(1)); // The actual value will be two decimals
+						String noCommas = (formattedAmount.substring(1)).replaceAll(",", "");
+						amount = Double.parseDouble(noCommas); // The actual value will be two decimals
 					} catch (NumberFormatException e) {
 						player.sendMessage(ChatUtils.chatMessage("&cThat is not a valid number!"));
 						return true;
