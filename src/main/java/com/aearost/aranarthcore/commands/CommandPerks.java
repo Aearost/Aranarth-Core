@@ -33,7 +33,6 @@ public class CommandPerks {
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				String[] perks = aranarthPlayer.getPerks().split("_");
-				// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
 				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
 				sender.sendMessage(ChatUtils.translateToColor("&6Compactor: &e" + perks[0]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks[1]));
@@ -45,6 +44,7 @@ public class CommandPerks {
 				sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks[7]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks[8]));
 				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks[9]));
+				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks[10]));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
@@ -59,7 +59,7 @@ public class CommandPerks {
 					if (AranarthUtils.getPlayer(uuid) != null) {
 						if (isValidPerk(args[2].toLowerCase())) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-							// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+							// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 							String[] perks = aranarthPlayer.getPerks().split("_");
                             switch (perks[8]) {
                                 case "0" -> perks[8] = "3";
@@ -73,7 +73,7 @@ public class CommandPerks {
 							String perksAsString = "";
 							for (String perk : perks) {
 								perksAsString += perk;
-								if (!perk.equals("itemframe")) {
+								if (!perk.equals("bluefire")) {
 									perksAsString += "_";
 								}
 							}
@@ -102,11 +102,12 @@ public class CommandPerks {
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+					// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 					String[] perks = aranarthPlayer.getPerks().split("_");
 					if (args[2].equals("compactor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
-							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")) {
+							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
+							|| args[2].equals("bluefire")) {
 						if (args[3].equals("0") || args[3].equals("1")) {
 							switch (args[2]) {
 								case "compactor" -> perks[0] = args[3];
@@ -118,12 +119,13 @@ public class CommandPerks {
 								case "shulker" -> perks[6] = args[3];
 								case "inventory" -> perks[7] = args[3];
 								case "itemframe" -> perks[9] = args[3];
+								case "bluefire" -> perks[10] = args[3];
 							}
 							// Updates the perk variable
 							String perksAsString = "";
 							for (String perk : perks) {
 								perksAsString += perk;
-								if (!perk.equals("itemframe")) {
+								if (!perk.equals("bluefire")) {
 									perksAsString += "_";
 								}
 							}
@@ -147,7 +149,7 @@ public class CommandPerks {
 							String perksAsString = "";
 							for (String perk : perks) {
 								perksAsString += perk;
-								if (!perk.equals("itemframe")) {
+								if (!perk.equals("bluefire")) {
 									perksAsString += "_";
 								}
 							}
@@ -181,7 +183,7 @@ public class CommandPerks {
 	private static boolean isValidPerk(String perk) {
 		return perk.equals("compactor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
 				|| perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
-				|| perk.equals("homes") || perk.equals("itemframe");
+				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire");
 	}
 
 }

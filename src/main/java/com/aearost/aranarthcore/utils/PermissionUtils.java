@@ -30,7 +30,9 @@ public class PermissionUtils {
 		setRankPermissions(perms, aranarthPlayer.getRank());
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
-		addPlayerPerks(perms, player);
+		if (!isSecondCall) {
+			addPlayerPerks(perms, player);
+		}
 
 		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 		// If the player is the avatar
@@ -38,9 +40,10 @@ public class PermissionUtils {
 			updateAvatarPermissions(player.getUniqueId(), false);
 		}
 
-
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		bendingPlayer.fixSubelements();
+		bendingPlayer.saveSubElements();
 
 		if (bendingPlayer != null) {
 			for (Element element : bendingPlayer.getElements()) {
@@ -249,15 +252,15 @@ public class PermissionUtils {
 
 	/**
 	 * Adds the permissions for a player's additional perks.
-	 * Parts: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
-	 * Default: 0_0_0_0_0_0_0_0_0_0
+	 * Parts: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * Default: 0_0_0_0_0_0_0_0_0_0_0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
 	 */
 	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		// The default
-		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0")) {
+		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0_0")) {
 			return;
 		}
 
@@ -309,6 +312,33 @@ public class PermissionUtils {
 		// Item Frame
 		if (parts[9].equals("1")) {
 			perms.setPermission("aranarth.invisible_item_frame", true);
+		}
+		// Blue Fire
+		if (parts[10].equals("1")) {
+			perms.setPermission("bending.fire.bluefire", true);
+			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			if (!bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+					@Override
+					public void run() {
+						Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
+					}
+				}, 50);
+			}
+		} else if (parts[10].equals("0")) {
+			perms.setPermission("bending.fire.bluefire", false);
+			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+					@Override
+					public void run() {
+						BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+						if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+							Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
+						}
+					}
+				}, 10);
+			}
 		}
 	}
 

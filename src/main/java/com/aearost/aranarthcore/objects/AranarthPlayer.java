@@ -740,7 +740,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Provides the perks that the player has access to.
-	 * Perks will be split as: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+	 * Perks will be split as: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 	 * @return The perks that the player has access to.
 	 */
 	public String getPerks() {
@@ -749,7 +749,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Updates the perks that the player has access to.
-	 * compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+	 * compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 	 * @param perks The player's new perks.
 	 */
 	public void setPerks(String perks) {
