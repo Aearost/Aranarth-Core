@@ -670,9 +670,7 @@ public class CommandACCompleter implements TabCompleter {
 			} else if (!args[0].isEmpty() && "broadcast".startsWith(args[0])) {
 				displayedOptions.add("broadcast");
 			}
-		}
-
-		else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
+		} else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
 			displayedOptions.add("spy");
 		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
 			displayedOptions.add("invsee");
@@ -692,8 +690,15 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-		} else if (!args[0].isEmpty() && "punishments".startsWith(args[0])) {
-			displayedOptions.add("punishments");
+		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
+			if (args[0].equals("p")) {
+				displayedOptions.add("punishments");
+				displayedOptions.add("perks");
+			} else if (!args[0].isEmpty() && "punishments".startsWith(args[0])) {
+				displayedOptions.add("punishments");
+			} else if (!args[0].isEmpty() && "perks".startsWith(args[0])) {
+				displayedOptions.add("perks");
+			}
 		}
 		displayedOptions = all(sender, displayedOptions, args);
 		return displayedOptions;
@@ -707,7 +712,7 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
-			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy", "warn", "punishments" -> {
+			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy", "warn", "punishments", "perks" -> {
 				// List of online players
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
@@ -770,6 +775,73 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 						}
+						case "perks" -> {
+							// /ac perks <player> <perk> <value>
+							// Specifying the perk
+							if (args.length == 3) {
+								if (args[2].isEmpty()) {
+									displayedOptions.add("compactor");
+									displayedOptions.add("randomizer");
+									displayedOptions.add("blacklist");
+									displayedOptions.add("tables");
+									displayedOptions.add("itemname");
+									displayedOptions.add("chat");
+									displayedOptions.add("shulker");
+									displayedOptions.add("inventory");
+									displayedOptions.add("homes");
+									displayedOptions.add("itemframe");
+								} else if ("randomizer".startsWith(args[2])) {
+									displayedOptions.add("randomizer");
+								} else if ("blacklist".startsWith(args[2])) {
+									displayedOptions.add("blacklist");
+								} else if ("tables".startsWith(args[2])) {
+									displayedOptions.add("tables");
+								} else if ("shulker".startsWith(args[2])) {
+									displayedOptions.add("shulker");
+								} else if ("homes".startsWith(args[2])) {
+									displayedOptions.add("homes");
+								} else if (args[2].startsWith("c")) {
+									if (args[2].equals("c")) {
+										displayedOptions.add("compactor");
+										displayedOptions.add("chat");
+									} else if ("chat".startsWith(args[2])) {
+										displayedOptions.add("chat");
+									} else if ("compactor".startsWith(args[2])) {
+										displayedOptions.add("compactor");
+									}
+								} else if (args[2].startsWith("i")) {
+									if (args[2].equals("i")) {
+										displayedOptions.add("inventory");
+										displayedOptions.add("itemname");
+										displayedOptions.add("itemframe");
+									} else if ("inventory".startsWith(args[2])) {
+										displayedOptions.add("inventory");
+									} else {
+										if ("item".startsWith(args[2])) {
+											displayedOptions.add("itemname");
+											displayedOptions.add("itemframe");
+										} else {
+											if ("itemname".startsWith(args[2])) {
+												displayedOptions.add("itemname");
+											} else if ("itemframe".startsWith(args[2])) {
+												displayedOptions.add("itemframe");
+											}
+										}
+									}
+								} else {
+									displayedOptions.add("compactor");
+									displayedOptions.add("randomizer");
+									displayedOptions.add("blacklist");
+									displayedOptions.add("tables");
+									displayedOptions.add("itemname");
+									displayedOptions.add("chat");
+									displayedOptions.add("shulker");
+									displayedOptions.add("inventory");
+									displayedOptions.add("homes");
+									displayedOptions.add("itemframe");
+								}
+							}
+						}
 					}
 				}
 			}
@@ -808,6 +880,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("warn");
 		displayedOptions.add("broadcast");
 		displayedOptions.add("punishments");
+		displayedOptions.add("perks");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}
