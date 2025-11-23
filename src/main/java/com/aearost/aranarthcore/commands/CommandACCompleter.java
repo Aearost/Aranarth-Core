@@ -648,6 +648,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
 			displayedOptions.add("give");
+		} else if (!args[0].isEmpty() && "admin".startsWith(args[0])) {
+			displayedOptions.add("admin");
 		} else if (!args[0].isEmpty() && args[0].startsWith("w")) {
 			if (args[0].equals("w")) {
 				displayedOptions.add("whereis");
@@ -881,6 +883,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("broadcast");
 		displayedOptions.add("punishments");
 		displayedOptions.add("perks");
+		displayedOptions.add("admin");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}

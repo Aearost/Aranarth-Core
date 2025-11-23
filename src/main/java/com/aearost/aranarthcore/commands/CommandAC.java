@@ -78,6 +78,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandBroadcast.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("perks")) {
 			commandResult = CommandPerks.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("admin")) {
+			commandResult = CommandAdmin.onCommand(sender, args);
 		} else {
 			commandResult = isValidCommand(sender, args);
 		}
