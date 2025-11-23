@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -24,6 +26,14 @@ public class ContainerAutoLock {
     public void execute(BlockPlaceEvent e) {
         if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
             return;
+        }
+
+        Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
+        Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+        if (blockDominion != null) {
+            if (playerDominion == null || !playerDominion.getOwner().equals(blockDominion.getOwner())) {
+                return;
+            }
         }
 
         if (e.getBlock().getState() instanceof Chest) {
