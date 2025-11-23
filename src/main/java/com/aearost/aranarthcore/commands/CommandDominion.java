@@ -89,7 +89,7 @@ public class CommandDominion {
 					for (Dominion dominionFromList : DominionUtils.getDominions()) {
 						i++;
 						player.sendMessage(ChatUtils.translateToColor("&7" + i + ". Dominion of &e" + dominionFromList.getName() + "&7, ruled by &e"
-								+ AranarthUtils.getNickname(Bukkit.getPlayer(dominionFromList.getOwner()))
+								+ AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getOwner()))
 								+ " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6$" + dominionFromList.getBalance()));
 					}
 				}
