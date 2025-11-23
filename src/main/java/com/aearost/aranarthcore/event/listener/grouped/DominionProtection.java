@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 
 /**
  * Prevents crops from being trampled by both players and other mobs
@@ -115,7 +116,24 @@ public class DominionProtection implements Listener {
 							e.setCancelled(true);
 						}
 					}
+				}
+			}
+		}
+	}
 
+	/**
+	 * Prevents players from opening containers and other functional blocks that are not in another dominion.
+	 */
+	@EventHandler
+	public void onInteract(PlayerInteractEvent e) {
+		Block block = e.getClickedBlock();
+		Player player = e.getPlayer();
+		if (AranarthUtils.isContainerBlock(block)) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (!aranarthPlayer.getIsInAdminMode()) {
+				boolean isActionPrevented = applyLogic(player, block, null);
+				if (isActionPrevented) {
+					e.setCancelled(true);
 				}
 			}
 		}
