@@ -417,6 +417,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.hat", true);
 			perms.setPermission("aranarth.trash", true);
 			perms.setPermission("aranarth.back", true);
+			perms.setPermission("aranarth.nick", true);
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.blacklist", true);
 			perms.setPermission("aranarth.tables", true);
@@ -458,6 +459,10 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.mute", true);
 			perms.setPermission("aranarth.warn", true);
 			perms.setPermission("aranarth.punishments", true);
+			perms.setPermission("aranarth.nick", true);
+			perms.setPermission("aranarth.nick.color", true);
+			perms.setPermission("aranarth.nick.hex", true);
+			perms.setPermission("aranarth.nick.gradient", true);
 		} else {
 			return;
 		}
