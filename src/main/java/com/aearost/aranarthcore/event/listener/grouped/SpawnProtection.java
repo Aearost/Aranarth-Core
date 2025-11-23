@@ -7,6 +7,8 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,10 +18,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.player.*;
 
 /**
  * Prevents crops from being trampled by both players and other mobs
@@ -109,6 +109,20 @@ public class SpawnProtection implements Listener {
 	}
 
 	/**
+	 * Prevents players from placing item frames and paintings at spawn.
+	 */
+	@EventHandler
+	public void onEntityPlace(HangingPlaceEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.getIsInAdminMode()) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+			}
+		}
+	}
+
+	/**
 	 * Prevents dynamic fire from spreading at spawn and prevents lightning fire from spawning.
 	 */
 	@EventHandler
@@ -125,6 +139,28 @@ public class SpawnProtection implements Listener {
 	public void onMobSpawn(CreatureSpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
 			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Prevents containers from being opened at spawn.
+	 */
+	@EventHandler
+	public void onContainerOpen(PlayerInteractEvent e) {
+		Block block = e.getClickedBlock();
+		if (block != null) {
+			if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+				if (AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
+						|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
+						|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
+						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+					if (!aranarthPlayer.getIsInAdminMode()) {
+						e.setCancelled(true);
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
+					}
+				}
+			}
 		}
 	}
 

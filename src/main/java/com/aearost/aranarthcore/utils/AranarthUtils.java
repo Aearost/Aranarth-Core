@@ -1068,6 +1068,10 @@ public class AranarthUtils {
 	 * @return Confirmation whether the input block is a container block.
 	 */
 	public static boolean isContainerBlock(Block block) {
+		if (block == null) {
+			return false;
+		}
+
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
 				|| block.getType() == Material.BARREL

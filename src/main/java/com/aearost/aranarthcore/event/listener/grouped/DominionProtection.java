@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -17,6 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -128,13 +130,35 @@ public class DominionProtection implements Listener {
 	public void onInteract(PlayerInteractEvent e) {
 		Block block = e.getClickedBlock();
 		Player player = e.getPlayer();
-		if (AranarthUtils.isContainerBlock(block)) {
+		if (block == null) {
+			return;
+		}
+
+		if (AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
+			|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
+			|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
+				|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON")
+				|| block.getType().name().endsWith("_GATE")) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				boolean isActionPrevented = applyLogic(player, block, null);
 				if (isActionPrevented) {
 					e.setCancelled(true);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from placing item frames and paintings in another dominion.
+	 */
+	@EventHandler
+	public void onEntityPlace(HangingPlaceEvent e) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+		if (!aranarthPlayer.getIsInAdminMode()) {
+			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
+			if (isActionPrevented) {
+				e.setCancelled(true);
 			}
 		}
 	}
