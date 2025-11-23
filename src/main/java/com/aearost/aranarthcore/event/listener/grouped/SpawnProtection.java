@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -12,7 +13,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
@@ -36,11 +36,10 @@ public class SpawnProtection implements Listener {
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-				if (e.getPlayer().getWorld().getName().equals("world")) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
-				}
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.getIsInAdminMode()) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 			}
 		}
 	}
@@ -51,11 +50,10 @@ public class SpawnProtection implements Listener {
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-				if (e.getPlayer().getWorld().getName().equals("world")) {
-					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
-				}
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.getIsInAdminMode()) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 			}
 		}
 	}
@@ -67,11 +65,10 @@ public class SpawnProtection implements Listener {
 	public void onInteractEntity(PlayerInteractEntityEvent e) {
 		if (e.getRightClicked() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
-				if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-					if (e.getPlayer().getWorld().getName().equals("world")) {
-						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
-					}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+				if (!aranarthPlayer.getIsInAdminMode()) {
+					e.setCancelled(true);
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 				}
 			}
 		}
@@ -84,11 +81,10 @@ public class SpawnProtection implements Listener {
 	public void onPlaceEntity(EntityPlaceEvent e) {
 		if (e.getEntity() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
-				if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
-					if (e.getPlayer().getWorld().getName().equals("world")) {
-						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
-					}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+				if (!aranarthPlayer.getIsInAdminMode()) {
+					e.setCancelled(true);
+					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 				}
 			}
 		}
@@ -102,11 +98,10 @@ public class SpawnProtection implements Listener {
 		if (e.getEntity() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
 				if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-					if (!player.hasPermission("aranarth.protect.bypass")) {
-						if (player.getWorld().getName().equals("world")) {
-							e.setCancelled(true);
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
-						}
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (!aranarthPlayer.getIsInAdminMode()) {
+						e.setCancelled(true);
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 					}
 				}
 			}
@@ -114,20 +109,10 @@ public class SpawnProtection implements Listener {
 	}
 
 	/**
-	 * Prevents fire from spreading at spawn.
-	 */
-	@EventHandler
-	public void onFireSpread(BlockSpreadEvent e) {
-		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
 	 * Prevents dynamic fire from spreading at spawn and prevents lightning fire from spawning.
 	 */
 	@EventHandler
-	public void onLightningStrike(BlockIgniteEvent e) {
+	public void onFireCreate(BlockIgniteEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			e.setCancelled(true);
 		}

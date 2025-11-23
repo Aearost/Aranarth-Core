@@ -134,7 +134,6 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.dominion.home", false);
 		perms.setPermission("aranarth.give", false);
 		perms.setPermission("aranarth.rankset", false);
-		perms.setPermission("aranarth.protect.bypass", false);
 		perms.setPermission("aranarth.warp.modify", false);
 		perms.setPermission("aranarth.warn", false);
 		perms.setPermission("aranarth.punishments", false);
@@ -473,7 +472,6 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.unban", true);
 			perms.setPermission("aranarth.give", true);
 			perms.setPermission("aranarth.rankset", true);
-			perms.setPermission("aranarth.protect.bypass", true);
 			perms.setPermission("aranarth.warp.modify", true);
 			perms.setPermission("aranarth.avatar.set", true);
 			perms.setPermission("aranarth.perk.modify", true);

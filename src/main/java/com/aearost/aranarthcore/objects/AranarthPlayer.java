@@ -53,6 +53,7 @@ public class AranarthPlayer {
 	private int particleNum = 100;
 	private boolean isAddingPotions = false;
 	private String perks;
+	private boolean isInAdminMode = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -91,6 +92,7 @@ public class AranarthPlayer {
 		this.particleNum = 100;
 		this.isAddingPotions = false;
 		this.perks = "";
+		this.isInAdminMode = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -133,6 +135,7 @@ public class AranarthPlayer {
 		this.particleNum = particleNum;
 		this.isAddingPotions = false;
 		this.perks = perks;
+		this.isInAdminMode = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -751,6 +754,22 @@ public class AranarthPlayer {
 	 */
 	public void setPerks(String perks) {
 		this.perks = perks;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is in admin mode.
+	 * @return Whether the player is in admin mode.
+	 */
+	public boolean getIsInAdminMode() {
+		return isInAdminMode;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is in admin mode.
+	 * @param isInAdminMode Whether the player is in admin mode.
+	 */
+	public void setIsInAdminMode(boolean isInAdminMode) {
+		this.isInAdminMode = isInAdminMode;
 	}
 
 }

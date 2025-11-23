@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
@@ -20,9 +22,9 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 /**
  * Prevents crops from being trampled by both players and other mobs
  */
-public class DominionInteract implements Listener {
+public class DominionProtection implements Listener {
 
-	public DominionInteract(AranarthCore plugin) {
+	public DominionProtection(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -31,12 +33,14 @@ public class DominionInteract implements Listener {
 	 */
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e) {
-		boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
-		if (isActionPrevented) {
-			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+		if (!aranarthPlayer.getIsInAdminMode()) {
+			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
+			if (isActionPrevented) {
 				e.setCancelled(true);
 			}
 		}
+
 	}
 
 	/**
@@ -44,9 +48,10 @@ public class DominionInteract implements Listener {
 	 */
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
-		boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
-		if (isActionPrevented) {
-			if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+		if (!aranarthPlayer.getIsInAdminMode()) {
+			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
+			if (isActionPrevented) {
 				e.setCancelled(true);
 			}
 		}
@@ -61,12 +66,14 @@ public class DominionInteract implements Listener {
 			EntityType type = e.getRightClicked().getType();
 			// Armor stands are considered alive
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
-				boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
-				if (isActionPrevented) {
-					if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+				if (!aranarthPlayer.getIsInAdminMode()) {
+					boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
+					if (isActionPrevented) {
 						e.setCancelled(true);
 					}
 				}
+
 			}
 		}
 	}
@@ -80,9 +87,10 @@ public class DominionInteract implements Listener {
 			EntityType type = e.getEntity().getType();
 			// Armor stands are considered alive
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
-				boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getEntity());
-				if (isActionPrevented) {
-					if (!e.getPlayer().hasPermission("aranarth.protect.bypass")) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+				if (!aranarthPlayer.getIsInAdminMode()) {
+					boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getEntity());
+					if (isActionPrevented) {
 						e.setCancelled(true);
 					}
 				}
@@ -100,12 +108,14 @@ public class DominionInteract implements Listener {
 			// Armor stands are considered alive
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
 				if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-					boolean isActionPrevented = applyLogic(player, null, e.getEntity());
-					if (isActionPrevented) {
-						if (!player.hasPermission("aranarth.protect.bypass")) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (!aranarthPlayer.getIsInAdminMode()) {
+						boolean isActionPrevented = applyLogic(player, null, e.getEntity());
+						if (isActionPrevented) {
 							e.setCancelled(true);
 						}
 					}
+
 				}
 			}
 		}
