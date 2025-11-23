@@ -53,6 +53,48 @@ public class CommandPerks {
 		}
 
 		if (args.length < 4) {
+			if (args.length == 3) {
+				if (args[2].equals("homes")) {
+					UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+					if (AranarthUtils.getPlayer(uuid) != null) {
+						if (isValidPerk(args[2].toLowerCase())) {
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+							// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe
+							String[] perks = aranarthPlayer.getPerks().split("_");
+                            switch (perks[8]) {
+                                case "0" -> perks[8] = "3";
+                                case "3" -> perks[8] = "6";
+                                case "6" -> perks[8] = "9";
+                                case "9" -> perks[8] = "12";
+                                case "12" -> perks[8] = "15";
+                            }
+
+							// Updates the perk variable
+							String perksAsString = "";
+							for (String perk : perks) {
+								perksAsString += perk;
+								if (!perk.equals("itemframe")) {
+									perksAsString += "_";
+								}
+							}
+							aranarthPlayer.setPerks(perksAsString);
+							AranarthUtils.setPlayer(uuid, aranarthPlayer);
+							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+								Player player = Bukkit.getPlayer(uuid);
+								PermissionUtils.evaluatePlayerPermissions(player, false);
+							}
+							sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
+							return true;
+						} else {
+							sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
+							return true;
+						}
+					} else {
+						sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+						return true;
+					}
+				}
+			}
 			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac perks <player> <perk> <value>"));
 			return true;
 		} else {

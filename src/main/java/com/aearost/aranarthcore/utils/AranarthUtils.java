@@ -1261,6 +1261,7 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
 		int rankHomeNum = 0;
 		int saintHomeNum = 0;
+		int perksHomeNum = 0;
 
 		if (aranarthPlayer.getRank() <= 2) {
 			rankHomeNum = 1;
@@ -1284,7 +1285,15 @@ public class AranarthUtils {
 			saintHomeNum = 10;
 		}
 
-		return rankHomeNum + saintHomeNum;
+		String perksHomeAmountAsString = aranarthPlayer.getPerks().split("_")[8];
+		int perksHomeAmount = 0;
+		try {
+			perksHomeAmount = Integer.parseInt(perksHomeAmountAsString);
+		} catch (NumberFormatException e) {
+			Bukkit.getLogger().info("Something went wrong parsing the number of perk homes the player has...");
+		}
+
+		return rankHomeNum + saintHomeNum + perksHomeAmount;
 	}
 
 	/**
