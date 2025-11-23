@@ -22,7 +22,7 @@ public class CommandRules {
 		sender.sendMessage(ChatUtils.translateToColor("&8[&66&8] &7No glitch abuse, hacking, lag machines, or any sort of abuse of the game"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&67&8] &7Do not spam chat, use caps lock, etc."));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&68&8] &7Do not grief the world's terrain unnecessarily - use the resource world instead"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&69&8] &7Ask Staff (the Council) before using mods - only client-side cosmetic mods are permitted (OptiFine, Shaders, minimaps are permitted)"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&69&8] &7Ask Staff (the Council) before using mods - only client-side cosmetic mods are permitted (OptiFine, Shaders, MiniHUD, etc.)"));
 		return true;
 	}
 

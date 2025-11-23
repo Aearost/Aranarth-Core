@@ -143,6 +143,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.shulker", false);
 		perms.setPermission("aranarth.inventory", false);
 		perms.setPermission("aranarth.invisible_item_frame", false);
+		perms.setPermission("aranarth.perk.modify", false);
 	}
 
 	/**
@@ -480,6 +481,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.protect.bypass", true);
 			perms.setPermission("aranarth.warp.modify", true);
 			perms.setPermission("aranarth.avatar.set", true);
+			perms.setPermission("aranarth.perk.modify", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {
