@@ -22,15 +22,19 @@ public class CommandTp {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
 				return true;
 			} else {
-				Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsername(args[1]));
-				if (target != null) {
-					AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-					AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					targetPlayer.setTeleportFromUuid(player.getUniqueId());
-					AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-					player.sendMessage(ChatUtils.chatMessage("&7You have sent a teleport request to &e" + targetPlayer.getNickname()));
-					target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested to teleport to you"));
-					target.sendMessage(ChatUtils.chatMessage("&7Use &e/ac tpaccept &7or &e/ac tpdeny"));
+				if (AranarthUtils.getUUIDFromUsername(args[1]) != null) {
+					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsername(args[1]));
+					if (target != null) {
+						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						targetPlayer.setTeleportFromUuid(player.getUniqueId());
+						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
+						player.sendMessage(ChatUtils.chatMessage("&7You have sent a teleport request to &e" + targetPlayer.getNickname()));
+						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested to teleport to you"));
+						target.sendMessage(ChatUtils.chatMessage("&7Use &e/ac tpaccept &7or &e/ac tpdeny"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 				}
