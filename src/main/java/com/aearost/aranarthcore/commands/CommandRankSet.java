@@ -10,6 +10,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.time.Instant;
+
 /**
  * Allows for the manual assignment of a player's rank.
  * Functions for the rank, saint rank, and council rank.
@@ -32,7 +34,8 @@ public class CommandRankSet {
 		// /ac rankset rank Aearost 4
 		if (args.length == 4) {
 			if (args[1].equalsIgnoreCase("rank") || args[1].equalsIgnoreCase("saint")
-					|| args[1].equalsIgnoreCase("council") || args[1].equalsIgnoreCase("architect")) {
+					|| args[1].equalsIgnoreCase("council") || args[1].equalsIgnoreCase("architect")
+					|| args[1].equalsIgnoreCase("saintmonth")) {
 				OfflinePlayer player = null;
 
 				// Does the player exist
@@ -113,10 +116,30 @@ public class CommandRankSet {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
 						}
 					}
+					// Limited from 0 to 3
+					else if (args[1].equals("saintmonth")) {
+						if (rank <= 3) {
+							aranarthPlayer.setSaintRank(rank);
+							if (rank == 0) {
+								aranarthPlayer.setSaintExpireDate(0);
+							} else {
+								Instant end = Instant.now().plusSeconds(2592000);
+								aranarthPlayer.setSaintExpireDate(end.toEpochMilli());
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							}
+							DiscordUtils.updateSaint(player, rank, true);
+							isSuccessful = true;
+						} else {
+							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));
+						}
+					}
 
 					if (isSuccessful) {
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						String rankName = Character.toUpperCase(args[1].charAt(0)) + args[1].substring(1);
+						if (rankName.equals("Saintmonth")) {
+							rankName = "Saint";
+						}
 
 						if (isSamePlayer) {
 							if (args[1].equals("rank")) {
