@@ -54,6 +54,7 @@ public class AranarthPlayer {
 	private boolean isAddingPotions = false;
 	private String perks;
 	private boolean isInAdminMode = false;
+	private long saintExpireDate;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -93,13 +94,14 @@ public class AranarthPlayer {
 		this.isAddingPotions = false;
 		this.perks = "";
 		this.isInAdminMode = false;
+		this.saintExpireDate = 0;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, String perks, Pronouns pronouns) {
+						  int particleNum, String perks, long saintExpireDate, Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -136,6 +138,7 @@ public class AranarthPlayer {
 		this.isAddingPotions = false;
 		this.perks = perks;
 		this.isInAdminMode = false;
+		this.saintExpireDate = saintExpireDate;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -770,6 +773,22 @@ public class AranarthPlayer {
 	 */
 	public void setIsInAdminMode(boolean isInAdminMode) {
 		this.isInAdminMode = isInAdminMode;
+	}
+
+	/**
+	 * Provides the expiration date of the player's temporary saint rank.
+	 * @return The expiration date of the player's temporary saint rank.
+	 */
+	public long getSaintExpireDate() {
+		return saintExpireDate;
+	}
+
+	/**
+	 * Updates the expiration date of the player's temporary saint rank.
+	 * @param saintExpireDate The expiration date of the player's temporary saint rank.
+	 */
+	public void setSaintExpireDate(long saintExpireDate) {
+		this.saintExpireDate = saintExpireDate;
 	}
 
 }

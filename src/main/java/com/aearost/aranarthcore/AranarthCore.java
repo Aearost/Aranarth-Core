@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Instant;
@@ -60,6 +61,14 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveAvatars();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
+			}
+		}, 36000, 36000);
+
+		// Run every 10 minutes
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				ChatUtils.sendServerTips();
 
 				// Attempts to automatically assign an avatar if there currently is none
 				if (AvatarUtils.getCurrentAvatar() == null) {
@@ -81,14 +90,10 @@ public class AranarthCore extends JavaPlugin {
 						}
 					}
 				}
-			}
-		}, 36000, 36000);
 
-		// Sends automatic server tip every 10 minutes
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			@Override
-			public void run() {
-				ChatUtils.sendServerTips();
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					PermissionUtils.reEvaluteMonthlySaints(player);
+				}
 			}
 		}, 12000, 12000);
 

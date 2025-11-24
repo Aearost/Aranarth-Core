@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
+import java.time.Instant;
 import java.util.UUID;
 
 /**
@@ -28,6 +29,7 @@ public class PermissionUtils {
 
 		setDefaultPermissions(player, perms);
 		setRankPermissions(perms, aranarthPlayer.getRank());
+		reEvaluteMonthlySaints(player);
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
 		if (!isSecondCall) {
@@ -458,6 +460,23 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 		} else {
 			return;
+		}
+	}
+
+	/**
+	 * Re-evaluates the player's temporary saint status.
+	 * @param player The player.
+	 */
+	public static void reEvaluteMonthlySaints(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer.getSaintExpireDate() != 0) {
+			Instant now = Instant.now();
+			if (now.isAfter(Instant.ofEpochMilli(aranarthPlayer.getSaintExpireDate()))) {
+				aranarthPlayer.setSaintExpireDate(0);
+				aranarthPlayer.setSaintRank(0);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				player.sendMessage(ChatUtils.chatMessage("&7Your monthly &dSaint &7rank has expired!"));
+			}
 		}
 	}
 
