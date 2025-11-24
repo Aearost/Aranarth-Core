@@ -42,8 +42,6 @@ public class PermissionUtils {
 
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-		bendingPlayer.fixSubelements();
-		bendingPlayer.saveSubElements();
 
 		if (bendingPlayer != null) {
 			for (Element element : bendingPlayer.getElements()) {
@@ -189,9 +187,20 @@ public class PermissionUtils {
 				Player onlinePlayer = (Player) player;
 				PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
 
-				// Do not allow manual element changes for the avatar
+				// Allow manual element changes for the avatar
 				perms.setPermission("bending.command.choose", true);
 				perms.setPermission("bending.command.rechoose", true);
+
+				// Removing avatar-exclusive permissions
+				perms.setPermission("bending.avatar", false);
+				perms.setPermission("bending.ability.avatarstate", false);
+				perms.setPermission("bending.ability.elementsphere", false);
+				perms.setPermission("bending.ability.elementsphere.air", false);
+				perms.setPermission("bending.ability.elementsphere.earth", false);
+				perms.setPermission("bending.ability.elementsphere.fire", false);
+				perms.setPermission("bending.ability.elementsphere.water", false);
+				perms.setPermission("bending.ability.elementsphere.stream", false);
+				perms.setPermission("bending.ability.spiritbeam", false);
 
 				evaluatePlayerPermissions((Player) player, false);
 			}
@@ -246,6 +255,17 @@ public class PermissionUtils {
 				perms.setPermission("bending.ability.metalclips", true);
 				perms.setPermission("bending.ability.sonicblast", true);
 				perms.setPermission("bending.ability.suffocate", true);
+
+				// Adding avatar-exclusive permissions
+				perms.setPermission("bending.avatar", true);
+				perms.setPermission("bending.ability.avatarstate", true);
+				perms.setPermission("bending.ability.elementsphere", true);
+				perms.setPermission("bending.ability.spiritbeam", true);
+				perms.setPermission("bending.ability.elementsphere.air", true);
+				perms.setPermission("bending.ability.elementsphere.earth", true);
+				perms.setPermission("bending.ability.elementsphere.fire", true);
+				perms.setPermission("bending.ability.elementsphere.water", true);
+				perms.setPermission("bending.ability.elementsphere.stream", true);
 			}
 		}
 	}
@@ -261,6 +281,7 @@ public class PermissionUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		// The default
 		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0_0")) {
+			perms.setPermission("bending.donor", false);
 			return;
 		}
 
@@ -268,36 +289,44 @@ public class PermissionUtils {
 		// Compactor
 		if (parts[0].equals("1")) {
 			perms.setPermission("aranarth.compact", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Randomizer
 		if (parts[1].equals("1")) {
 			perms.setPermission("aranarth.randomizer", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Blacklist
 		if (parts[2].equals("1")) {
 			perms.setPermission("aranarth.blacklist", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Tables
 		if (parts[3].equals("1")) {
 			perms.setPermission("aranarth.tables", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Itemname
 		if (parts[4].equals("1")) {
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Chat
 		if (parts[5].equals("1")) {
 			perms.setPermission("aranarth.chat.color", true);
 			perms.setPermission("aranarth.chat.hex", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Shulker
 		if (parts[6].equals("1")) {
 			perms.setPermission("aranarth.shulker", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Inventory
 		if (parts[7].equals("1")) {
 			perms.setPermission("aranarth.inventory", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Homes
 		if (!parts[8].equals("0")) {
@@ -308,15 +337,21 @@ public class PermissionUtils {
                 case "15" -> perms.setPermission("aranarth.extrahomes.15", true);
                 default -> perms.setPermission("aranarth.extrahomes.3", true);
             }
+			perms.setPermission("bending.donor", true);
 		}
 		// Item Frame
 		if (parts[9].equals("1")) {
 			perms.setPermission("aranarth.invisible_item_frame", true);
+			perms.setPermission("bending.donor", true);
 		}
 		// Blue Fire
 		if (parts[10].equals("1")) {
 			perms.setPermission("bending.fire.bluefire", true);
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			if (bendingPlayer == null) {
+				return;
+			}
+
 			if (!bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
 				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
 					@Override
@@ -325,9 +360,14 @@ public class PermissionUtils {
 					}
 				}, 50);
 			}
+			perms.setPermission("bending.donor", true);
 		} else if (parts[10].equals("0")) {
 			perms.setPermission("bending.fire.bluefire", false);
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			if (bendingPlayer == null) {
+				return;
+			}
+
 			if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
 				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
 					@Override
@@ -440,6 +480,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.blacklist", true);
 			perms.setPermission("aranarth.tables", true);
+			perms.setPermission("bending.donor", true);
 		} else {
 			return;
 		}
