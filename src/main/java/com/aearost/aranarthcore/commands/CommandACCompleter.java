@@ -73,7 +73,13 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> all(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && args[0].startsWith("h")) {
-			if ("home".startsWith(args[0])) {
+			if (args[0].equals("h")) {
+				displayedOptions.add("homepad");
+				displayedOptions.add("home");
+				displayedOptions.add("hat");
+			} else if ("hat".startsWith(args[0])) {
+				displayedOptions.add("hat");
+			} else if ("home".startsWith(args[0])) {
 				displayedOptions.add("homepad");
 				displayedOptions.add("home");
 			} else {
@@ -615,6 +621,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("resource");
 		displayedOptions.add("avatar");
 		displayedOptions.add("tables");
+		displayedOptions.add("hat");
 		return displayedOptions;
 	}
 
