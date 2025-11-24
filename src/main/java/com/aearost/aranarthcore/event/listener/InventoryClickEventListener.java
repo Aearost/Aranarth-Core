@@ -50,6 +50,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiHomesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
                 new GuiWarpClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Tables")) {
+                new GuiTablesClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

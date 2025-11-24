@@ -578,7 +578,13 @@ public class PermissionUtils {
 	 * @param architectRank The player's Architect rank.
 	 */
 	private static void setArchitectPermissions(PermissionAttachment perms, int architectRank) {
+		if (architectRank == 0) {
+			return;
+		}
 
+		if (architectRank == 1) {
+			perms.setPermission("worldedit.*", true);
+		}
 	}
 
 }

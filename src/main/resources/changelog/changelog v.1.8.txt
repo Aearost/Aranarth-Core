@@ -21,6 +21,7 @@ Features
 [+] Added in /ac punishments to track all warnings, mutes, and bans a player has had
 [+] Added in /ac perks
 [+] Added in /ac admin functionality and updated protection bypasses based on it
+[+] Added in /ac tables
 [+] Added a GUI for /ac potions
 [+] Added in hard caps to the number of available potions and quiver slots a player has access to
 [+] Updated chat format to support ranks and pronouns
