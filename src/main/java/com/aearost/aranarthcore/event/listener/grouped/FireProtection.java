@@ -21,7 +21,10 @@ public class FireProtection implements Listener {
 	 */
 	@EventHandler
 	public void onFireSpread(BlockSpreadEvent e) {
-		e.setCancelled(true);
+		String worldName = e.getBlock().getWorld().getName();
+		if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -29,7 +32,10 @@ public class FireProtection implements Listener {
 	 */
 	@EventHandler
 	public void onFireBurn(BlockBurnEvent e) {
-		e.setCancelled(true);
+		String worldName = e.getBlock().getWorld().getName();
+		if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+			e.setCancelled(true);
+		}
 	}
 
 }
