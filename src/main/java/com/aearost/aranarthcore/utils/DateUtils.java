@@ -1375,7 +1375,7 @@ public class DateUtils {
 	 */
 	private void meltSnow(int meltMultiplier) {
 		Month month = AranarthUtils.getMonth();
-		if (!isWinterMonth(month)) {
+		if (!isWinterMonth(month) || month == Month.UMBRAVOR) {
 			new BukkitRunnable() {
 				int runs = 0;
 				boolean isPlayingWindSound = AranarthUtils.getIsPlayingWindSound();
