@@ -248,6 +248,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("tphere");
 				displayedOptions.add("tpaccept");
 				displayedOptions.add("tpdeny");
+				displayedOptions.add("tables");
 			} else {
 				if (args[0].startsWith("tp")) {
 					if (args[0].equals("tp")) {
@@ -265,6 +266,8 @@ public class CommandACCompleter implements TabCompleter {
 				} else {
 					if ("trust".startsWith(args[0])) {
 						displayedOptions.add("trust");
+					} else if ("tables".startsWith(args[0])) {
+						displayedOptions.add("tables");
 					}
 				}
 			}
@@ -611,6 +614,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("back");
 		displayedOptions.add("resource");
 		displayedOptions.add("avatar");
+		displayedOptions.add("tables");
 		return displayedOptions;
 	}
 
