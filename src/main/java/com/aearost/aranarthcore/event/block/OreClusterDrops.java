@@ -21,7 +21,7 @@ public class OreClusterDrops {
 		World world = e.getBlock().getWorld();
 		Location loc = e.getBlock().getLocation();
 		// Only apply in the survival worlds
-		if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp")) {
+		if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp") || loc.getWorld().getName().startsWith("resource")) {
 			ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
 			if (!heldItem.containsEnchantment(Enchantment.SILK_TOUCH)) {
 				// Increased drop rate with fortune
@@ -68,7 +68,7 @@ public class OreClusterDrops {
 							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					} else {
-						double calculation = 40 * fortuneBonus * dwarvenReduction;
+						double calculation = 50 * fortuneBonus * dwarvenReduction;
 						if (calculation <= 0) {
 							return;
 						}
