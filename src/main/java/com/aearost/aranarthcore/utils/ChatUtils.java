@@ -30,7 +30,7 @@ public class ChatUtils {
 	 */
 	public static String chatMessage(String msg) {
 		msg = checkForHex(msg);
-		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAranarthCore&8&l] &r" + msg);
+		return ChatColor.translateAlternateColorCodes('&', "&8&l[&6&lAC&8&l] &r" + msg);
 	}
 
 	/**
