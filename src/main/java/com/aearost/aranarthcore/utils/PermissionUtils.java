@@ -32,9 +32,7 @@ public class PermissionUtils {
 		reEvaluteMonthlySaints(player);
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
-		if (!isSecondCall) {
-			addPlayerPerks(perms, player);
-		}
+		addPlayerPerks(perms, player, isSecondCall);
 
 		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 		// If the player is the avatar
@@ -278,8 +276,9 @@ public class PermissionUtils {
 	 * Default: 0_0_0_0_0_0_0_0_0_0_0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
+	 * @param isSecondCall If it was a recursive call from the same method for the sub-element fix.
 	 */
-	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
+	private static void addPlayerPerks(PermissionAttachment perms, Player player, boolean isSecondCall) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		// The default
 		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0_0")) {
@@ -354,15 +353,19 @@ public class PermissionUtils {
 				return;
 			}
 
-			if (!bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-					@Override
-					public void run() {
-						Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
+			if (bendingPlayer.getElements().contains(Element.FIRE)) {
+				if (!bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+					if (!isSecondCall) {
+						Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+							@Override
+							public void run() {
+								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
+							}
+						}, 50);
 					}
-				}, 50);
+				}
+				perms.setPermission("bending.donor", true);
 			}
-			perms.setPermission("bending.donor", true);
 		} else if (parts[10].equals("0")) {
 			perms.setPermission("bending.fire.bluefire", false);
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
@@ -371,15 +374,17 @@ public class PermissionUtils {
 			}
 
 			if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-				Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-					@Override
-					public void run() {
-						BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-						if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-							Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
+				if (!isSecondCall) {
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+						@Override
+						public void run() {
+							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+							if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
+							}
 						}
-					}
-				}, 10);
+					}, 10);
+				}
 			}
 		}
 	}
