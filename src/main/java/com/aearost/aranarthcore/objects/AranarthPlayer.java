@@ -92,7 +92,7 @@ public class AranarthPlayer {
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
 		this.isAddingPotions = false;
-		this.perks = "";
+		this.perks = "0_0_0_0_0_0_0_0_0_0_0";
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
 	}
