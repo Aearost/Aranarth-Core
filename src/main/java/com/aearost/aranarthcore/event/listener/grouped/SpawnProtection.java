@@ -39,7 +39,6 @@ public class SpawnProtection implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 			}
 		}
 	}
@@ -53,7 +52,6 @@ public class SpawnProtection implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 			}
 		}
 	}
@@ -68,7 +66,6 @@ public class SpawnProtection implements Listener {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 				if (!aranarthPlayer.getIsInAdminMode()) {
 					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 				}
 			}
 		}
@@ -84,7 +81,6 @@ public class SpawnProtection implements Listener {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 				if (!aranarthPlayer.getIsInAdminMode()) {
 					e.setCancelled(true);
-					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 				}
 			}
 		}
@@ -101,7 +97,6 @@ public class SpawnProtection implements Listener {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (!aranarthPlayer.getIsInAdminMode()) {
 						e.setCancelled(true);
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 					}
 				}
 			}
@@ -117,7 +112,6 @@ public class SpawnProtection implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 			}
 		}
 	}
@@ -162,7 +156,6 @@ public class SpawnProtection implements Listener {
 						}
 
 						e.setCancelled(true);
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 					}
 				}
 			}
