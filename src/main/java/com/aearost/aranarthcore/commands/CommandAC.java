@@ -142,8 +142,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandHome.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("delhome")) {
 			commandResult = CommandDelhome.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("compress")) {
-			commandResult = CommandCompress.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("compact")) {
+			commandResult = CommandCompact.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tp")) {
 			commandResult = CommandTp.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tphere")) {

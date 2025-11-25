@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 /**
  * Compresses the player's current inventory.
  */
-public class CommandCompress {
+public class CommandCompact {
 
 	/**
 	 * @param sender The user that entered the command.

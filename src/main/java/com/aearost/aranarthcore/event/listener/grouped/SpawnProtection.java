@@ -156,6 +156,11 @@ public class SpawnProtection implements Listener {
 						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 					if (!aranarthPlayer.getIsInAdminMode()) {
+						// Allow server shops to be used at spawn
+						if (block.getType().name().endsWith("_SIGN") && AranarthUtils.getShop(block.getLocation()) != null) {
+							return;
+						}
+
 						e.setCancelled(true);
 						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot do this at Spawn!"));
 					}
