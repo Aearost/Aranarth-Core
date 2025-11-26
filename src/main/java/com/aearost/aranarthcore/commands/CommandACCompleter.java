@@ -114,13 +114,13 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("c")) {
 				displayedOptions.add("creative");
 				displayedOptions.add("calendar");
-				displayedOptions.add("compress");
+				displayedOptions.add("compact");
 			} else if ("creative".startsWith(args[0])) {
 				displayedOptions.add("creative");
 			} else if ("calendar".startsWith(args[0])) {
 				displayedOptions.add("calendar");
-			} else if ("compress".startsWith(args[0])) {
-				displayedOptions.add("compress");
+			} else if ("compact".startsWith(args[0])) {
+				displayedOptions.add("compact");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
