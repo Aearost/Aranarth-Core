@@ -166,7 +166,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|isCompactingItems|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -261,6 +261,10 @@ public class PersistenceUtils {
 				int particles = Integer.parseInt(fields[16]);
 				String perks = fields[17];
 				long saintExpireDate = Long.parseLong(fields[18]);
+				boolean isCompactingItems = false;
+				if (fields[19].equals("1")) {
+					isCompactingItems = true;
+				}
 
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
@@ -274,7 +278,7 @@ public class PersistenceUtils {
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, perks, saintExpireDate, pronouns));
+						muteEndDate, particles, perks, saintExpireDate, isCompactingItems, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -313,7 +317,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpireDate|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpireDate|isCompactingItems|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -393,6 +397,10 @@ public class PersistenceUtils {
 						String particles = aranarthPlayer.getParticleNum() + "";
 						String perks = aranarthPlayer.getPerks();
 						long saintExpireDate = aranarthPlayer.getSaintExpireDate();
+						String isCompactingItems = "0";
+						if (aranarthPlayer.getIsCompactingItems()) {
+							isCompactingItems = "1";
+						}
 
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
@@ -405,7 +413,8 @@ public class PersistenceUtils {
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
-								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate + "|"
+								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
+								+ "|" + isCompactingItems + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);

@@ -55,6 +55,7 @@ public class AranarthPlayer {
 	private String perks;
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
+	private boolean isCompactingItems = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -95,13 +96,15 @@ public class AranarthPlayer {
 		this.perks = "0_0_0_0_0_0_0_0_0_0_0";
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
+		this.isCompactingItems = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, String perks, long saintExpireDate, Pronouns pronouns) {
+						  int particleNum, String perks, long saintExpireDate, boolean isCompactingItems,
+						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
@@ -139,6 +142,7 @@ public class AranarthPlayer {
 		this.perks = perks;
 		this.isInAdminMode = false;
 		this.saintExpireDate = saintExpireDate;
+		this.isCompactingItems = isCompactingItems;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -789,6 +793,22 @@ public class AranarthPlayer {
 	 */
 	public void setSaintExpireDate(long saintExpireDate) {
 		this.saintExpireDate = saintExpireDate;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is compacting items or not.
+	 * @return Whether the player is compacting items or not.
+	 */
+	public boolean getIsCompactingItems() {
+		return isCompactingItems;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is compacting items or not.
+	 * @param isCompactingItems Whether the player is compacting items or not.
+	 */
+	public void setIsCompactingItems(boolean isCompactingItems) {
+		this.isCompactingItems = isCompactingItems;
 	}
 
 }
