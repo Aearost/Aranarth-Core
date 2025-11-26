@@ -30,7 +30,6 @@ public class TippedArrowDamagePrevent {
 									aranarthPlayer.setIsHitByTippedArrow(true);
 									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 									player.addPotionEffect(newEffect);
-									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								}
 								e.getDamageSource().getDirectEntity().remove();
 							}
@@ -47,11 +46,8 @@ public class TippedArrowDamagePrevent {
 	 * @return Confirmation of whether the potion would do damage.
 	 */
 	private boolean checkIfPotionShouldDamage(PotionType type) {
-		return (type == PotionType.AWKWARD || type == PotionType.HARMING || type == PotionType.MUNDANE
-				|| type == PotionType.OOZING || type == PotionType.POISON || type == PotionType.SLOWNESS
-				|| type == PotionType.THICK || type == PotionType.WATER || type == PotionType.WEAKNESS
-				|| type == PotionType.TURTLE_MASTER || type == PotionType.WIND_CHARGED || type == PotionType.WEAVING
-				|| type == PotionType.INFESTED
-		);
+		return type.name().contains("AWKWARD") || type.name().contains("HARMING") ||type.name().contains("MUNDANE") || type.name().contains("TURTLE_MASTER") ||
+				type.name().contains("OOZING") || type.name().contains("POISON") ||type.name().contains("SLOWNESS") || type.name().contains("WIND_CHARGED") ||
+				type.name().contains("THICK") || type.name().contains("WEAKNESS") || type.name().contains("WEAVING") || type.name().contains("INFESTED");
 	}
 }
