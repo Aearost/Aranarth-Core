@@ -22,16 +22,13 @@ public class CommandWhereIs {
 				return true;
 			}
 		}
-		Bukkit.getLogger().info("A");
 
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
 			return true;
 		} else {
-			Bukkit.getLogger().info("B");
 			boolean isPlayerFound = false;
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				Bukkit.getLogger().info("C");
 				if (args[1].equalsIgnoreCase(onlinePlayer.getName())) {
 					Location location = onlinePlayer.getLocation();
 					sender.sendMessage(ChatUtils.chatMessage(onlinePlayer.getDisplayName()
