@@ -36,7 +36,6 @@ public class PotionEffectStackListener implements Listener {
 		}
 
 		if (e.getEntity() instanceof LivingEntity entity) {
-
 			if (e.getCause() == Cause.PLUGIN && DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 				if (e.getEntity() instanceof Player player) {
 					if (AranarthUtils.isWearingArmorType(player, "scorched")) {
@@ -79,6 +78,7 @@ public class PotionEffectStackListener implements Listener {
 					if (entity instanceof Player player) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						if (aranarthPlayer.getIsHitByTippedArrow()) {
+							Bukkit.getLogger().info("Hit by tipped arrow");
 							aranarthPlayer.setIsHitByTippedArrow(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						} else {
@@ -92,6 +92,33 @@ public class PotionEffectStackListener implements Listener {
 				stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
 				// This will call the event recursively
 				entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
+			}
+			// It is a new potion effect, only needed to disable the hit by tipped arrow variable
+			else {
+				if (entity instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer.getIsHitByTippedArrow()) {
+						aranarthPlayer.setIsHitByTippedArrow(false);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+						// Must be applied manually
+						if (e.getNewEffect().getType() == PotionEffectType.INSTANT_HEALTH) {
+							if (e.getNewEffect().getAmplifier() == 0) {
+								double newHealth = player.getHealth() + 4;
+								if (newHealth > 20) {
+									newHealth = 20;
+								}
+								player.setHealth(newHealth);
+							} else {
+								double newHealth = player.getHealth() + 8;
+								if (newHealth > 20) {
+									newHealth = 20;
+								}
+								player.setHealth(newHealth);
+							}
+						}
+					}
+				}
 			}
 		}
 	}

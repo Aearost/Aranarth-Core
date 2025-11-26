@@ -23,6 +23,7 @@ Features
 [+] Added in /ac admin functionality and updated protection bypasses based on it
 [+] Added in /ac tables
 [+] Added in /ac hat
+[+] Added in /ac compact and compactor functionality
 [+] Added a GUI for /ac potions
 [+] Added in hard caps to the number of available potions and quiver slots a player has access to
 [+] Updated chat format to support ranks and pronouns
@@ -64,6 +65,7 @@ Features
 [+] Added permission restrictions to the inventory assist functionality
 [+] Added permission restrictions to crafting invisible item frames
 [+] Added functionality to persist player individually purchased perks from donations
+[~] Fixed bugs involving tipped arrows not applying effects or damaging as expected
 
 Miscellaneous
 - Removed redundant logs from weather
