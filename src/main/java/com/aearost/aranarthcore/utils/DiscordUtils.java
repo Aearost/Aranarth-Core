@@ -260,6 +260,33 @@ public class DiscordUtils {
 			updateSaint(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getSaintRank(), false);
 			updateArchitect(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getArchitectRank(), false);
 			updateCouncil(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getCouncilRank(), false);
+			updateAvatar(Bukkit.getOfflinePlayer(uuid));
+		}
+	}
+
+	/**
+	 * Updates the player's Avatar role in Discord. Not done automatically in addAvatarMessageToDiscord.
+	 * @param player The player being verified.
+	 */
+	private static void updateAvatar(OfflinePlayer player) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		Role role = guild.getRoleById("1440165603687137461"); // Avatar
+		List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
+		if (playerDiscordRoles.contains(role)) {
+			// If the player is the current Avatar
+			if (AvatarUtils.getCurrentAvatar() == null || !AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				guild.removeRoleFromMember(playerDiscordId,role).queue();
+			}
+		} else {
+			// If the player is the current Avatar
+			if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				guild.addRoleToMember(playerDiscordId, role).queue();
+			}
 		}
 	}
 
