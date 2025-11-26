@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -37,7 +38,7 @@ public class OreClusterDrops {
 					}
 				}
 
-				double dwarvenReduction = 0;
+				double dwarvenReduction = 1;
 				if (AranarthUtils.isWearingArmorType(e.getPlayer(), "dwarven")) {
 					dwarvenReduction = 0.9;
 				}
@@ -51,11 +52,14 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new DiamondCluster().getItem());
 					}
 				} else if (material == Material.EMERALD_ORE || material == Material.DEEPSLATE_EMERALD_ORE) {
+					Bukkit.getLogger().info("Emerald");
 					double calculation = 7 * fortuneBonus * dwarvenReduction;
+					Bukkit.getLogger().info("calculation: " + calculation);
 					if (calculation <= 0) {
 						return;
 					}
 					else if (random.nextInt((int) (calculation)) == 0) {
+						Bukkit.getLogger().info("selected cluster to drop");
 						world.dropItemNaturally(loc, new EmeraldCluster().getItem());
 					}
 				} else if (material.name().endsWith("GOLD_ORE")) {
