@@ -26,8 +26,10 @@ public class PlayerServerQuitListener implements Listener {
 		Player player = e.getPlayer();
 
 		// Called to save the Avatar's abilities to prevent loss of avatar abilities
-		if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-			PersistenceUtils.saveAvatars();
+		if (AvatarUtils.getCurrentAvatar() != null) {
+			if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				PersistenceUtils.saveAvatars();
+			}
 		}
 
 		DateUtils dateUtils = new DateUtils();
