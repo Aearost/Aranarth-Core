@@ -66,6 +66,7 @@ Features
 [+] Added permission restrictions to crafting invisible item frames
 [+] Added functionality to persist player individually purchased perks from donations
 [~] Fixed bugs involving tipped arrows not applying effects or damaging as expected
+[~] Added limitation to only replenish inventory from shulkers if the player has both the inventory and shulker permissions
 
 Miscellaneous
 - Removed redundant logs from weather
