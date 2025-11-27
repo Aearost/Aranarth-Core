@@ -219,6 +219,7 @@ public class AvatarUtils {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 				}
+				PersistenceUtils.saveAvatarBinds();
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 30);
 	}
