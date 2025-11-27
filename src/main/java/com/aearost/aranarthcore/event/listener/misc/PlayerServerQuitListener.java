@@ -2,9 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -26,6 +24,12 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+
+		// Called to save the Avatar's abilities to prevent loss of avatar abilities
+		if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+			PersistenceUtils.saveAvatars();
+		}
+
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
 		if (!AranarthUtils.getNickname(player).isEmpty()) {

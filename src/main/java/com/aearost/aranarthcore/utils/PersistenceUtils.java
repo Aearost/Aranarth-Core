@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.*;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
@@ -1176,6 +1177,18 @@ public class PersistenceUtils {
 
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
+					// Applies the avatar's binds to ensure they are not reset upon relogging
+					if (row.contains("_")) {
+						String noHashtag = row.substring(1);
+						String[] parts = noHashtag.split("_");
+
+						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+						if (currentAvatar != null) {
+							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+							bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
+						}
+					}
+
 					continue;
 				}
 
@@ -1228,6 +1241,16 @@ public class PersistenceUtils {
 
 				try {
 					FileWriter writer = new FileWriter(filePath);
+
+					// Saving the avatar's binds to ensure they are not reset upon relogging
+					Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+					if (currentAvatar != null) {
+						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
+							writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+						}
+					}
+
 					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
 
 					for (Avatar avatar : AvatarUtils.getAvatars()) {
