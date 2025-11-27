@@ -204,22 +204,86 @@ public class CompressorItemPickup {
 					}
 				}
 			}
+
 			if (totalAmountOfCompressedItem > 0) {
-				HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(compressedItemToAdd);
-				// If the player's inventory was full, drop it to the ground
-				if (!leftover.isEmpty()) {
-					player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
-				}
+				addResultsToInventory(player, compressedItemToAdd);
+
 			}
 		}
 
 		if (remainder > 0) {
 			ItemStack remainderItemToAdd = new ItemStack(type, remainder);
-			HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(remainderItemToAdd);
-			// If the player's inventory was full, drop it to the ground
-			if (!leftover.isEmpty()) {
-				player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
+			addResultsToInventory(player, remainderItemToAdd);
+		}
+	}
+
+	/**
+	 * Adds the results of the compressed and remaining items to the inventory, prioritizing the inventory before the hotbar.
+	 * @param player The player that picked up the item.
+	 * @param item The compressed or remaining item being added to the inventory.
+	 */
+	private void addResultsToInventory(Player player, ItemStack item) {
+		int remainingToAdd = item.getAmount();
+
+		// Stacks the added items together
+		for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
+			ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+			if (inventoryItem != null && inventoryItem.getType() != Material.AIR) {
+				while (remainingToAdd > 0) {
+					if (inventoryItem.getType() == item.getType()) {
+						if (inventoryItem.getAmount() < inventoryItem.getMaxStackSize()) {
+							inventoryItem.setAmount(inventoryItem.getAmount() + 1);
+							remainingToAdd--;
+						} else {
+							break;
+						}
+					} else {
+						break;
+					}
+				}
+
+				if (remainingToAdd == 0) {
+					player.getInventory().setItem(i, inventoryItem);
+					break;
+				}
 			}
+		}
+
+		// Will then prioritize empty slots in inventory but not hotbar
+		for (int i = 9; i < player.getInventory().getStorageContents().length; i++) {
+			ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+			if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+				while (remainingToAdd > 0) {
+					if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+						inventoryItem = new ItemStack(item.getType(), 1);
+						remainingToAdd--;
+					} else {
+						inventoryItem.setAmount(inventoryItem.getAmount() + 1);
+						remainingToAdd--;
+					}
+
+					if (inventoryItem.getAmount() == inventoryItem.getMaxStackSize()) {
+						player.getInventory().setItem(i, inventoryItem);
+						break;
+					}
+				}
+
+				if (remainingToAdd == 0) {
+					player.getInventory().setItem(i, inventoryItem);
+					break;
+				}
+			} else {
+				continue;
+			}
+		}
+
+		item.setAmount(remainingToAdd);
+
+		// Will finally prioritize empty slots in hotbar (remaining slots) and will drop leftovers to the ground
+		HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
+		// If the player's inventory was full, drop it to the ground
+		if (!leftover.isEmpty()) {
+			player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
 		}
 	}
 
