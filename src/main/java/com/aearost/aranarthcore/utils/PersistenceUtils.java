@@ -1187,7 +1187,11 @@ public class PersistenceUtils {
 							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 							if (bendingPlayer != null) {
 								bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
+							} else {
+								Bukkit.getLogger().info("Null bending player when loading");
 							}
+						} else {
+							Bukkit.getLogger().info("null avatar when loading");
 						}
 					}
 
@@ -1248,9 +1252,16 @@ public class PersistenceUtils {
 					Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 					if (currentAvatar != null) {
 						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-							writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+						if (currentAvatarBendingPlayer != null) {
+							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
+								Bukkit.getLogger().info("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+								writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+							}
+						} else {
+							Bukkit.getLogger().info("Null bending player when saving");
 						}
+					} else {
+						Bukkit.getLogger().info("null avatar when saving");
 					}
 
 					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
@@ -1273,6 +1284,95 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the avatars");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the avatar's binds' based on the contents of avatar_binds.txt.
+	 */
+	public static void loadAvatarBinds() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "avatar_binds.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the avatar_binds file...");
+			HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Applies the avatar's binds to ensure they are not reset upon relogging
+				String[] parts = row.split("_");
+				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+				if (currentAvatar != null) {
+					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+					if (bendingPlayer != null) {
+						bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
+					}
+				}
+			}
+			Bukkit.getLogger().info("The avatar's binds have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the avatar's binds!");
+		}
+	}
+
+	/**
+	 * Saves the avatar's binds to the avatar_binds.txt file.
+	 */
+	public static void saveAvatarBinds() {
+		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
+		if (playerShops != null) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "avatar_binds.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new avatar_binds.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of avatar_binds.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+
+					// Saving the avatar's binds to ensure they are not reset upon relogging
+					Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+					if (currentAvatar != null) {
+						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+						if (currentAvatarBendingPlayer != null) {
+							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
+								writer.write( index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+							}
+						}
+					}
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the avatar binds");
 				}
 			}
 		}
