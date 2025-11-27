@@ -55,7 +55,7 @@ public class AranarthPlayer {
 	private String perks;
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
-	private boolean isCompactingItems = false;
+	private boolean isCompressingItems = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -96,14 +96,14 @@ public class AranarthPlayer {
 		this.perks = "0_0_0_0_0_0_0_0_0_0_0";
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
-		this.isCompactingItems = false;
+		this.isCompressingItems = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, String perks, long saintExpireDate, boolean isCompactingItems,
+						  int particleNum, String perks, long saintExpireDate, boolean isCompressingItems,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -142,7 +142,7 @@ public class AranarthPlayer {
 		this.perks = perks;
 		this.isInAdminMode = false;
 		this.saintExpireDate = saintExpireDate;
-		this.isCompactingItems = isCompactingItems;
+		this.isCompressingItems = isCompressingItems;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -747,7 +747,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Provides the perks that the player has access to.
-	 * Perks will be split as: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * Perks will be split as: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 	 * @return The perks that the player has access to.
 	 */
 	public String getPerks() {
@@ -756,7 +756,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Updates the perks that the player has access to.
-	 * compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 	 * @param perks The player's new perks.
 	 */
 	public void setPerks(String perks) {
@@ -796,19 +796,19 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the variable tracking whether the player is compacting items or not.
-	 * @return Whether the player is compacting items or not.
+	 * Provides the variable tracking whether the player is compressing items or not.
+	 * @return Whether the player is compressing items or not.
 	 */
-	public boolean getIsCompactingItems() {
-		return isCompactingItems;
+	public boolean getIsCompressingItems() {
+		return isCompressingItems;
 	}
 
 	/**
-	 * Updates the variable tracking whether the player is compacting items or not.
-	 * @param isCompactingItems Whether the player is compacting items or not.
+	 * Updates the variable tracking whether the player is compressing items or not.
+	 * @param isCompressingItems Whether the player is compressing items or not.
 	 */
-	public void setIsCompactingItems(boolean isCompactingItems) {
-		this.isCompactingItems = isCompactingItems;
+	public void setIsCompressingItems(boolean isCompressingItems) {
+		this.isCompressingItems = isCompressingItems;
 	}
 
 }
