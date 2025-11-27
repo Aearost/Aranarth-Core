@@ -47,21 +47,24 @@ public class PlayerAutoReplenishSlot {
 				}
 
 				// If that slot is a shulker box, cycle through it as well
+
 				if (itemStack.getItemMeta() instanceof BlockStateMeta im) {
 					if (im.getBlockState() instanceof ShulkerBox shulker) {
-						Inventory shulkerInventory = shulker.getInventory();
-						ItemStack[] shulkerContents = shulkerInventory.getContents();
-						for (int j = 0; j < shulkerInventory.getSize(); j++) {
-							if (shulkerContents[j] != null) {
-								if (shulkerContents[j].isSimilar(e.getItemInHand())) {
-									contents[placedSlot] = shulkerContents[j].clone();
-									shulkerContents[j].setAmount(0);
-									shulkerInventory.setContents(shulkerContents);
-									im.setBlockState(shulker);
-									contents[i].setItemMeta(im);
-									player.getInventory().setContents(contents);
-									player.updateInventory();
-									return;
+						if (player.hasPermission("aranarth.shulker")) {
+							Inventory shulkerInventory = shulker.getInventory();
+							ItemStack[] shulkerContents = shulkerInventory.getContents();
+							for (int j = 0; j < shulkerInventory.getSize(); j++) {
+								if (shulkerContents[j] != null) {
+									if (shulkerContents[j].isSimilar(e.getItemInHand())) {
+										contents[placedSlot] = shulkerContents[j].clone();
+										shulkerContents[j].setAmount(0);
+										shulkerInventory.setContents(shulkerContents);
+										im.setBlockState(shulker);
+										contents[i].setItemMeta(im);
+										player.getInventory().setContents(contents);
+										player.updateInventory();
+										return;
+									}
 								}
 							}
 						}
