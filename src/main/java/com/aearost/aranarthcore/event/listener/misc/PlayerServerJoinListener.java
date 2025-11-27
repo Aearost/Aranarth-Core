@@ -3,10 +3,8 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DateUtils;
-import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.*;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -29,6 +27,23 @@ public class PlayerServerJoinListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
+
+		// Called to bind the Avatar's abilities to prevent loss of avatar abilities
+		if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+			PersistenceUtils.loadAvatars();
+
+			// Adds a 2-second delay
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+					if (bendingPlayer != null) {
+						player.performCommand("b board");
+						player.performCommand("b board");
+					}
+				}
+			}.runTaskLater(AranarthCore.getInstance(), 30);
+		}
 
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
