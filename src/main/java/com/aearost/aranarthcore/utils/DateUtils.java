@@ -1677,9 +1677,9 @@ public class DateUtils {
 														continue;
 													}
 
-													// 5% chance of turning the dirt into grass blocks to spread during warm months
+													// 12% chance of turning the dirt into grass blocks to spread during warm months
 													if (surfaceBlock.getType() == Material.DIRT) {
-														if ((random.nextInt(100) + 1) <= 5) {
+														if ((random.nextInt(100) + 1) <= 12) {
 															surfaceBlock.setType(Material.GRASS_BLOCK);
 														}
 													}
