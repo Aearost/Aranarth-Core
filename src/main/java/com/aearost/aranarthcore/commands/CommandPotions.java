@@ -24,7 +24,8 @@ public class CommandPotions {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")) {
+			if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")
+					&& !player.getLocation().getWorld().getName().startsWith("resource")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
 				return true;
 			}
@@ -86,32 +87,30 @@ public class CommandPotions {
 						return true;
                     }
                     case "remove" -> {
-						if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
-							if (args.length >= 3) {
-								HashMap<ItemStack, Integer> potions = AranarthUtils.getPlayer(player.getUniqueId()).getPotions();
-								if (potions == null || potions.isEmpty()) {
-									player.sendMessage(ChatUtils.chatMessage("&7You do not have any stored potions"));
-									return true;
-								}
+						if (args.length >= 3) {
+							HashMap<ItemStack, Integer> potions = AranarthUtils.getPlayer(player.getUniqueId()).getPotions();
+							if (potions == null || potions.isEmpty()) {
+								player.sendMessage(ChatUtils.chatMessage("&7You do not have any stored potions"));
+								return true;
+							}
 
-								try {
-									int quantity = Integer.parseInt(args[2]);
-									if (quantity > 0) {
-										aranarthPlayer.setPotionQuantityToRemove(quantity);
-										AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-										GuiPotions gui = new GuiPotions(player, -1);
-										gui.openGui();
-									} else {
-										player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
-									}
-								} catch (NumberFormatException e) {
-									player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+							try {
+								int quantity = Integer.parseInt(args[2]);
+								if (quantity > 0) {
+									aranarthPlayer.setPotionQuantityToRemove(quantity);
+									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+									GuiPotions gui = new GuiPotions(player, -1);
+									gui.openGui();
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
 								}
-							} else {
+							} catch (NumberFormatException e) {
 								player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
 							}
-							return true;
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
 						}
+						return true;
                     }
                     default ->
                             player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid potion sub-command!"));
