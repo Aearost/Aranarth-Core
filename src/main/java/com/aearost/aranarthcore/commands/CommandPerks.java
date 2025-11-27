@@ -34,7 +34,7 @@ public class CommandPerks {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				String[] perks = aranarthPlayer.getPerks().split("_");
 				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
-				sender.sendMessage(ChatUtils.translateToColor("&6Compactor: &e" + perks[0]));
+				sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks[0]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks[1]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks[2]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Tables: &e" + perks[3]));
@@ -59,7 +59,7 @@ public class CommandPerks {
 					if (AranarthUtils.getPlayer(uuid) != null) {
 						if (isValidPerk(args[2].toLowerCase())) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-							// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+							// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 							String[] perks = aranarthPlayer.getPerks().split("_");
                             switch (perks[8]) {
                                 case "0" -> perks[8] = "3";
@@ -102,15 +102,15 @@ public class CommandPerks {
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					// compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 					String[] perks = aranarthPlayer.getPerks().split("_");
-					if (args[2].equals("compactor") || args[2].equals("randomizer") || args[2].equals("blacklist")
+					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
 							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
 							|| args[2].equals("bluefire")) {
 						if (args[3].equals("0") || args[3].equals("1")) {
 							switch (args[2]) {
-								case "compactor" -> perks[0] = args[3];
+								case "compressor" -> perks[0] = args[3];
 								case "randomizer" -> perks[1] = args[3];
 								case "blacklist" -> perks[2] = args[3];
 								case "tables" -> perks[3] = args[3];
@@ -181,7 +181,7 @@ public class CommandPerks {
 	}
 
 	private static boolean isValidPerk(String perk) {
-		return perk.equals("compactor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
+		return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
 				|| perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
 				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire");
 	}

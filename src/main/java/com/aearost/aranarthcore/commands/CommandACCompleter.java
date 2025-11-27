@@ -114,13 +114,13 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("c")) {
 				displayedOptions.add("creative");
 				displayedOptions.add("calendar");
-				displayedOptions.add("compact");
+				displayedOptions.add("compress");
 			} else if ("creative".startsWith(args[0])) {
 				displayedOptions.add("creative");
 			} else if ("calendar".startsWith(args[0])) {
 				displayedOptions.add("calendar");
-			} else if ("compact".startsWith(args[0])) {
-				displayedOptions.add("compact");
+			} else if ("compress".startsWith(args[0])) {
+				displayedOptions.add("compress");
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
@@ -793,7 +793,7 @@ public class CommandACCompleter implements TabCompleter {
 							// Specifying the perk
 							if (args.length == 3) {
 								if (args[2].isEmpty()) {
-									displayedOptions.add("compactor");
+									displayedOptions.add("compressor");
 									displayedOptions.add("randomizer");
 									displayedOptions.add("blacklist");
 									displayedOptions.add("tables");
@@ -815,12 +815,12 @@ public class CommandACCompleter implements TabCompleter {
 									displayedOptions.add("homes");
 								} else if (args[2].startsWith("c")) {
 									if (args[2].equals("c")) {
-										displayedOptions.add("compactor");
+										displayedOptions.add("compress");
 										displayedOptions.add("chat");
 									} else if ("chat".startsWith(args[2])) {
 										displayedOptions.add("chat");
-									} else if ("compactor".startsWith(args[2])) {
-										displayedOptions.add("compactor");
+									} else if ("compressor".startsWith(args[2])) {
+										displayedOptions.add("compressor");
 									}
 								} else if (args[2].startsWith("i")) {
 									if (args[2].equals("i")) {
@@ -842,7 +842,7 @@ public class CommandACCompleter implements TabCompleter {
 										}
 									}
 								} else {
-									displayedOptions.add("compactor");
+									displayedOptions.add("compressor");
 									displayedOptions.add("randomizer");
 									displayedOptions.add("blacklist");
 									displayedOptions.add("tables");

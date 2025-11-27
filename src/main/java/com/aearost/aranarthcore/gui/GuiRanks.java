@@ -330,7 +330,7 @@ public class GuiRanks {
 		saint3Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint III - $29.99"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&lPerks"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- Inventory Assist"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Compactor"));
+		saint3Lore.add(ChatUtils.translateToColor("&f&o- Compressor"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- Randomizer"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- Item Name (gradient)"));
 		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (gradient)"));

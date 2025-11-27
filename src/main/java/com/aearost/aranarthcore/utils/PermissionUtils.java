@@ -122,7 +122,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.itemname.gradient", false);
-		perms.setPermission("aranarth.compact", false);
+		perms.setPermission("aranarth.compress", false);
 		perms.setPermission("aranarth.mute", false);
 		perms.setPermission("aranarth.give", false);
 		perms.setPermission("aranarth.whereis", false);
@@ -272,7 +272,7 @@ public class PermissionUtils {
 
 	/**
 	 * Adds the permissions for a player's additional perks.
-	 * Parts: compactor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * Parts: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
 	 * Default: 0_0_0_0_0_0_0_0_0_0_0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
@@ -287,9 +287,9 @@ public class PermissionUtils {
 		}
 
 		String[] parts = aranarthPlayer.getPerks().split("_");
-		// Compactor
+		// Compressor
 		if (parts[0].equals("1")) {
-			perms.setPermission("aranarth.compact", true);
+			perms.setPermission("aranarth.compress", true);
 			perms.setPermission("bending.donor", true);
 		}
 		// Randomizer
@@ -521,7 +521,7 @@ public class PermissionUtils {
 		if (saintRank >= 3) {
 			perms.setPermission("aranarth.nick.gradient", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
-			perms.setPermission("aranarth.compact", true);
+			perms.setPermission("aranarth.compress", true);
 			perms.setPermission("aranarth.randomizer", true);
 			perms.setPermission("aranarth.inventory", true);
 		} else {

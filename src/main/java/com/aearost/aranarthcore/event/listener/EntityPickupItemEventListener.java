@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.EntityEggPickupCancel;
 import com.aearost.aranarthcore.event.player.BlacklistItemPickupPrevent;
+import com.aearost.aranarthcore.event.player.CompressorItemPickup;
 import com.aearost.aranarthcore.event.player.ShulkerItemPickup;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
@@ -24,6 +25,7 @@ public class EntityPickupItemEventListener implements Listener {
     public void onItemPickup(EntityPickupItemEvent e) {
 
         if (e.getEntity() instanceof Player player) {
+            new CompressorItemPickup().execute(e);
             new ShulkerItemPickup().execute(e);
             new BlacklistItemPickupPrevent().execute(e);
         } else if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.ZOMBIE_VILLAGER) {
