@@ -1185,7 +1185,9 @@ public class PersistenceUtils {
 						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 						if (currentAvatar != null) {
 							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-							bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
+							if (bendingPlayer != null) {
+								bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
+							}
 						}
 					}
 

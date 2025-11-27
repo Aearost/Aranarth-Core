@@ -28,21 +28,23 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
-		// Called to bind the Avatar's abilities to prevent loss of avatar abilities
-		if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-			PersistenceUtils.loadAvatars();
+		if (AvatarUtils.getCurrentAvatar() != null) {
+			// Called to bind the Avatar's abilities to prevent loss of avatar abilities
+			if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				PersistenceUtils.loadAvatars();
 
-			// Adds a 2-second delay
-			new BukkitRunnable() {
-				@Override
-				public void run() {
-					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-					if (bendingPlayer != null) {
-						player.performCommand("b board");
-						player.performCommand("b board");
+				// Adds a 2-second delay
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+						if (bendingPlayer != null) {
+							player.performCommand("b board");
+							player.performCommand("b board");
+						}
 					}
-				}
-			}.runTaskLater(AranarthCore.getInstance(), 30);
+				}.runTaskLater(AranarthCore.getInstance(), 30);
+			}
 		}
 
 		if (!AranarthUtils.hasPlayedBefore(player)) {
