@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -157,6 +158,24 @@ public class DominionProtection implements Listener {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 		if (!aranarthPlayer.getIsInAdminMode()) {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
+			if (isActionPrevented) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from using villagers that are in a different Dominion.
+	 */
+	@EventHandler
+	public void onVillagerClick(PlayerInteractEntityEvent e) {
+		if (!(e.getRightClicked() instanceof Villager)) {
+			return;
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+		if (!aranarthPlayer.getIsInAdminMode()) {
+			boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
 			if (isActionPrevented) {
 				e.setCancelled(true);
 			}
