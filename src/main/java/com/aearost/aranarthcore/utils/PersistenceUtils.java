@@ -1187,11 +1187,7 @@ public class PersistenceUtils {
 							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 							if (bendingPlayer != null) {
 								bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
-							} else {
-								Bukkit.getLogger().info("Null bending player when loading");
 							}
-						} else {
-							Bukkit.getLogger().info("null avatar when loading");
 						}
 					}
 
@@ -1254,7 +1250,6 @@ public class PersistenceUtils {
 						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 						if (currentAvatarBendingPlayer != null) {
 							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-								Bukkit.getLogger().info("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 								writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 							}
 						} else {
