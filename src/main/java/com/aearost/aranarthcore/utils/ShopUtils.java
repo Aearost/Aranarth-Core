@@ -2,6 +2,11 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -57,6 +62,63 @@ public class ShopUtils {
         }
         uuidShops.add(newShop);
         shops.put(uuid, uuidShops);
+    }
+
+    /**
+     * Handles the logic of creating or updating a shop.
+     * @param e The event.
+     * @param player The player who created the shop.
+     * @param shopItem The item being bought or sold in the shop.
+     * @param quantity The quantity of the item being bought or sold in the shop.
+     * @param buyPrice The price to buy the item from the shop.
+     * @param sellPrice The price to sell the item to the shop.
+     */
+    public static void createOrUpdateShop(SignChangeEvent e, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
+        HashMap<UUID, List<Shop>> shops = ShopUtils.getShops();
+        if (shops == null) {
+            shops = new HashMap<>();
+        }
+
+        List<Shop> playerShops = null;
+        UUID uuid = null;
+        if (player != null) {
+            uuid = player.getUniqueId();
+        }
+
+        playerShops = shops.get(uuid);
+        if (playerShops == null) {
+            playerShops = new ArrayList<>();
+        }
+
+        Block sign = e.getBlock();
+        Shop existingShop = ShopUtils.getShopFromLocation(sign.getLocation());
+        Shop newShop = null;
+        newShop = new Shop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
+
+        // If the shop exists, remove it
+        if (existingShop != null) {
+            ShopUtils.removeShop(uuid, sign.getLocation());
+        }
+
+        ShopUtils.addShop(uuid, newShop);
+        if (player != null) {
+            e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
+            e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1].toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2].toUpperCase()));
+            e.setLine(3, ChatUtils.translateToColor("&0" + e.getLines()[3].toUpperCase()));
+        } else {
+            e.setLine(0, ChatUtils.translateToColor("&6&l[Server Shop]"));
+            e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1].toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2].toUpperCase()));
+            e.setLine(3, ChatUtils.getFormattedItemName(shopItem.getType().name()));
+        }
+
+        if (existingShop == null) {
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+        } else {
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
+        }
+        e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
     }
 
     /**
