@@ -15,14 +15,14 @@ public class CreeperExtraChargedSpawn {
 		if (e.getLocation().getWorld().isThundering()) {
 
 			if (AranarthUtils.getMonth() == Month.AESTIVOR) {
-				// 12.5% chance of it being charged
-				if (new Random().nextInt(8) == 0) {
+				// 20% chance of it being charged
+				if (new Random().nextInt(5) == 0) {
 					Creeper creeper = (Creeper) e.getEntity();
 					creeper.setPowered(true);
 				}
 			} else {
-				// 50% chance of it being charged in any other month
-				if (new Random().nextInt(50) == 0) {
+				// 5% chance of it being charged in any other month
+				if (new Random().nextInt(20) == 0) {
 					Creeper creeper = (Creeper) e.getEntity();
 					creeper.setPowered(true);
 				}
