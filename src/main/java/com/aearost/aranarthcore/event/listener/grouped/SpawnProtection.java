@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -151,7 +152,7 @@ public class SpawnProtection implements Listener {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 					if (!aranarthPlayer.getIsInAdminMode()) {
 						// Allow server shops to be used at spawn
-						if (block.getType().name().endsWith("_SIGN") && AranarthUtils.getShop(block.getLocation()) != null) {
+						if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
 							return;
 						}
 

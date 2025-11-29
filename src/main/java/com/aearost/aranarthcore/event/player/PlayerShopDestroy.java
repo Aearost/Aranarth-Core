@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.Shop;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -30,7 +30,7 @@ public class PlayerShopDestroy {
 
 		if (isSign(e.getBlock().getType())) {
 			destroyedSignLocation = e.getBlock().getLocation();
-			Shop playerShop = AranarthUtils.getShop(destroyedSignLocation);
+			Shop playerShop = ShopUtils.getShopFromLocation(destroyedSignLocation);
 			if (playerShop != null) {
 				deletionResult = deleteShopIfPossible(player, destroyedSignLocation);
 			}
@@ -69,7 +69,7 @@ public class PlayerShopDestroy {
 		Block[] relativeBlocks = new Block[] { up, down, north, east, south, west};
 		for (Block relativeBlock : relativeBlocks) {
 			if (relativeBlock.getType().name().toLowerCase().endsWith("sign")) {
-				if (AranarthUtils.getShop(relativeBlock.getLocation()) != null) {
+				if (ShopUtils.getShopFromLocation(relativeBlock.getLocation()) != null) {
 					return true;
 				}
 			}
@@ -106,7 +106,7 @@ public class PlayerShopDestroy {
 	 * @return The result of whether the shop was able to be deleted.
 	 */
 	private int deleteShopIfPossible(Player player, Location destroyedSignLocation) {
-		Shop shop = AranarthUtils.getShop(destroyedSignLocation);
+		Shop shop = ShopUtils.getShopFromLocation(destroyedSignLocation);
 
 		if (shop == null) {
 			return -1;
@@ -114,13 +114,13 @@ public class PlayerShopDestroy {
 
 		// If it is the player's shop
 		if (shop.getUuid() == player.getUniqueId()) {
-			AranarthUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
+			ShopUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
 			return 1;
 		}
 		// If it is a server shop
 		else if (shop.getUuid() == null) {
 			if (player.getName().equals("Aearost")) {
-				AranarthUtils.removeShop(null, destroyedSignLocation);
+				ShopUtils.removeShop(null, destroyedSignLocation);
 				return 1;
 			} else {
 				return 0;

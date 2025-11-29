@@ -2,8 +2,8 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Shop;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,6 +49,7 @@ public class PlayerShopCreateListener implements Listener {
 
 			// Verifies that the sign follows the shop format
 			if (isValidSignFormat(lines, player, true)) {
+
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
 					if (ChatUtils.stripColorFormatting(lines[3]).startsWith("Buy")) {
@@ -80,8 +81,8 @@ public class PlayerShopCreateListener implements Listener {
 		}
 		else {
 			// Remove if the shop previously existed and now was changed
-			if (AranarthUtils.getShop(e.getBlock().getLocation()) != null) {
-				AranarthUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
+			if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
+				ShopUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
 				player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
 				e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));
 				e.setLine(1, ChatUtils.stripColorFormatting(e.getLine(1)));
@@ -350,7 +351,7 @@ public class PlayerShopCreateListener implements Listener {
 	 * @param sellPrice The price to sell the item to the shop.
 	 */
 	private void createOrUpdateShop(SignChangeEvent e, Player player, ItemStack shopItem, int quantity, double buyPrice, double sellPrice) {
-		HashMap<UUID, List<Shop>> shops = AranarthUtils.getShops();
+		HashMap<UUID, List<Shop>> shops = ShopUtils.getShops();
 		if (shops == null) {
 			shops = new HashMap<>();
 		}
@@ -367,16 +368,16 @@ public class PlayerShopCreateListener implements Listener {
 		}
 
 		Block sign = e.getBlock();
-		Shop existingShop = AranarthUtils.getShop(sign.getLocation());
+		Shop existingShop = ShopUtils.getShopFromLocation(sign.getLocation());
 		Shop newShop = null;
 		newShop = new Shop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
 
 		// If the shop exists, remove it
 		if (existingShop != null) {
-			AranarthUtils.removeShop(uuid, sign.getLocation());
+			ShopUtils.removeShop(uuid, sign.getLocation());
 		}
 
-		AranarthUtils.addShop(uuid, newShop);
+		ShopUtils.addShop(uuid, newShop);
 		if (player != null) {
 			e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
 			e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1]));

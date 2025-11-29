@@ -479,7 +479,7 @@ public class PersistenceUtils {
 
 				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
 				Shop playerShop = new Shop(uuid, location, item, quantity, buyPrice, sellPrice);
-				AranarthUtils.addShop(uuid, playerShop);
+				ShopUtils.addShop(uuid, playerShop);
 			}
 			Bukkit.getLogger().info("All shops have been initialized");
 			reader.close();
@@ -492,7 +492,7 @@ public class PersistenceUtils {
 	 * Saves the contents of the shops HashMap to the shops.txt file.
 	 */
 	public static void saveShops() {
-		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
+		HashMap<UUID, List<Shop>> playerShops = ShopUtils.getShops();
 		if (playerShops != null) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
@@ -520,7 +520,7 @@ public class PersistenceUtils {
 					writer.write("#uuid|worldName|x|y|z|item|quantity|buyPrice|sellPrice\n");
 
 					for (UUID uuid : playerShops.keySet()) {
-						for (Shop shop : AranarthUtils.getShops().get(uuid)) {
+						for (Shop shop : ShopUtils.getShops().get(uuid)) {
 
 							String uuidString = "";
 							if (uuid != null) {
@@ -989,8 +989,8 @@ public class PersistenceUtils {
 	 * Saves the contents of the warps list to the warps.txt file.
 	 */
 	public static void saveWarps() {
-		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
-		if (playerShops != null) {
+		List<Home> warps = AranarthUtils.getWarps();
+		if (warps != null) {
 			String currentPath = System.getProperty("user.dir");
 			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
 					+ File.separator + "warps.txt";
@@ -1093,56 +1093,53 @@ public class PersistenceUtils {
 	 * Saves the contents of the punishments list to the punishments.txt file.
 	 */
 	public static void savePunishments() {
-		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
-		if (playerShops != null) {
-			String currentPath = System.getProperty("user.dir");
-			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "punishments.txt";
-			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-			File file = new File(filePath);
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "punishments.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
 
-			// If the directory exists
-			boolean isDirectoryCreated = true;
-			if (!pluginDirectory.isDirectory()) {
-				isDirectoryCreated = pluginDirectory.mkdir();
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new punishments.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of punishments.txt");
 			}
-			if (isDirectoryCreated) {
-				try {
-					// If the file isn't already there
-					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new punishments.txt file has been generated");
-					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of punishments.txt");
-				}
 
-				try {
-					FileWriter writer = new FileWriter(filePath);
-					writer.write("#uuid|date|type|reason|appliedBy\n");
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|date|type|reason|appliedBy\n");
 
-					for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
-						for (Punishment punishment : AranarthUtils.getPunishments(uuid)) {
-							String uuidString = uuid.toString();
-							String date = punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
-							String type = punishment.getType();
-							String reason = punishment.getReason();
-							UUID appliedByUuid = punishment.getAppliedBy();
-							String appliedBy = "";
-							if (appliedByUuid == null) {
-								appliedBy = "CONSOLE";
-							} else {
-								appliedBy = appliedByUuid.toString();
-							}
-
-							String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + "\n";
-							writer.write(row);
+				for (UUID uuid : AranarthUtils.getAllPunishments().keySet()) {
+					for (Punishment punishment : AranarthUtils.getPunishments(uuid)) {
+						String uuidString = uuid.toString();
+						String date = punishment.getDate().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "";
+						String type = punishment.getType();
+						String reason = punishment.getReason();
+						UUID appliedByUuid = punishment.getAppliedBy();
+						String appliedBy = "";
+						if (appliedByUuid == null) {
+							appliedBy = "CONSOLE";
+						} else {
+							appliedBy = appliedByUuid.toString();
 						}
-					}
 
-					writer.close();
-				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the punishments");
+						String row = uuidString + "|" + date + "|" + type + "|" + reason + "|" + appliedBy + "\n";
+						writer.write(row);
+					}
 				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the punishments");
 			}
 		}
 	}
@@ -1218,64 +1215,61 @@ public class PersistenceUtils {
 	 * Saves the contents of the avatars list to the avatars.txt file.
 	 */
 	public static void saveAvatars() {
-		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
-		if (playerShops != null) {
-			String currentPath = System.getProperty("user.dir");
-			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "avatars.txt";
-			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-			File file = new File(filePath);
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "avatars.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
 
-			// If the directory exists
-			boolean isDirectoryCreated = true;
-			if (!pluginDirectory.isDirectory()) {
-				isDirectoryCreated = pluginDirectory.mkdir();
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new avatars.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of avatars.txt");
 			}
-			if (isDirectoryCreated) {
-				try {
-					// If the file isn't already there
-					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new avatars.txt file has been generated");
-					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of avatars.txt");
-				}
 
-				try {
-					FileWriter writer = new FileWriter(filePath);
+			try {
+				FileWriter writer = new FileWriter(filePath);
 
-					// Saving the avatar's binds to ensure they are not reset upon relogging
-					Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-					if (currentAvatar != null) {
-						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-						if (currentAvatarBendingPlayer != null) {
-							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-								writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
-							}
+				// Saving the avatar's binds to ensure they are not reset upon relogging
+				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+				if (currentAvatar != null) {
+					BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+					if (currentAvatarBendingPlayer != null) {
+						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
+							writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 						}
 					}
-
-					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
-
-					for (Avatar avatar : AvatarUtils.getAvatars()) {
-						if (avatar == null) {
-							writer.write("none\n");
-						} else {
-							String uuid = avatar.getUuid().toString();
-							String startInGame = avatar.getStartInGame();
-							String endInGame = avatar.getEndInGame();
-							String startInRealLife = avatar.getStartInRealLife();
-							String endInRealLife = avatar.getEndInRealLife();
-							char element = avatar.getElement();
-
-							writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
-									+ startInRealLife + "|" + endInRealLife + "|" + element + "\n");
-						}
-					}
-					writer.close();
-				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the avatars");
 				}
+
+				writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
+
+				for (Avatar avatar : AvatarUtils.getAvatars()) {
+					if (avatar == null) {
+						writer.write("none\n");
+					} else {
+						String uuid = avatar.getUuid().toString();
+						String startInGame = avatar.getStartInGame();
+						String endInGame = avatar.getEndInGame();
+						String startInRealLife = avatar.getStartInRealLife();
+						String endInRealLife = avatar.getEndInRealLife();
+						char element = avatar.getElement();
+
+						writer.write(uuid + "|" + startInGame + "|" + endInGame + "|"
+								+ startInRealLife + "|" + endInRealLife + "|" + element + "\n");
+					}
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the avatars");
 			}
 		}
 	}
@@ -1325,46 +1319,43 @@ public class PersistenceUtils {
 	 * Saves the avatar's binds to the avatar_binds.txt file.
 	 */
 	public static void saveAvatarBinds() {
-		HashMap<UUID, List<Shop>> playerShops = AranarthUtils.getShops();
-		if (playerShops != null) {
-			String currentPath = System.getProperty("user.dir");
-			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-					+ File.separator + "avatar_binds.txt";
-			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-			File file = new File(filePath);
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "avatar_binds.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
 
-			// If the directory exists
-			boolean isDirectoryCreated = true;
-			if (!pluginDirectory.isDirectory()) {
-				isDirectoryCreated = pluginDirectory.mkdir();
-			}
-			if (isDirectoryCreated) {
-				try {
-					// If the file isn't already there
-					if (file.createNewFile()) {
-						Bukkit.getLogger().info("A new avatar_binds.txt file has been generated");
-					}
-				} catch (IOException e) {
-					Bukkit.getLogger().info("An error occurred in the creation of avatar_binds.txt");
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new avatar_binds.txt file has been generated");
 				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of avatar_binds.txt");
+			}
 
-				try {
-					FileWriter writer = new FileWriter(filePath);
+			try {
+				FileWriter writer = new FileWriter(filePath);
 
-					// Saving the avatar's binds to ensure they are not reset upon relogging
-					Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-					if (currentAvatar != null) {
-						BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
-						if (currentAvatarBendingPlayer != null) {
-							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-								writer.write( index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
-							}
+				// Saving the avatar's binds to ensure they are not reset upon relogging
+				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+				if (currentAvatar != null) {
+					BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+					if (currentAvatarBendingPlayer != null) {
+						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
+							writer.write( index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 						}
 					}
-					writer.close();
-				} catch (IOException e) {
-					Bukkit.getLogger().info("There was an error in saving the avatar binds");
 				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the avatar binds");
 			}
 		}
 	}
