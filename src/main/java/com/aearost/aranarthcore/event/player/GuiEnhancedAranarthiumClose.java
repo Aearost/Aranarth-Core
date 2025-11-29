@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Puts items in the player's inventory if they were in the Enhanced Aranarthium anvil GUI.
@@ -19,7 +19,7 @@ public class GuiEnhancedAranarthiumClose {
 			ItemMeta meta = null;
 			if (inventory.getItem(0).hasItemMeta()) {
 				meta = inventory.getItem(0).getItemMeta();
-				if (meta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+				if (!meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
 					e.getPlayer().getInventory().addItem(inventory.getItem(0));
 				}
 			} else if (hasNetheriteArmour(inventory.getItem(0))) {
@@ -31,7 +31,7 @@ public class GuiEnhancedAranarthiumClose {
 			ItemMeta meta = null;
 			if (inventory.getItem(1).hasItemMeta()) {
 				meta = inventory.getItem(1).getItemMeta();
-				if (meta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+				if (!meta.getPersistentDataContainer().has(ARMOR_TYPE)) {
 					e.getPlayer().getInventory().addItem(inventory.getItem(1));
 				}
 			} else if (hasNetheriteArmour(inventory.getItem(1))) {
