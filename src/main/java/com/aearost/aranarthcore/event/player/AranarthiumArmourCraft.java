@@ -90,6 +90,20 @@ public class AranarthiumArmourCraft {
 //
 //				}
 			}
+			else if (e.getClickedInventory().getType() == InventoryType.SMITHING) {
+				if (e.getSlot() == 3) {
+					ItemStack result = e.getClickedInventory().getItem(e.getSlot());
+					if (result != null) {
+						if (result.hasItemMeta()) {
+							if (result.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE)) {
+								e.setCancelled(true);
+								player.closeInventory();
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot apply armor trims to Aranarthium armor!"));
+							}
+						}
+					}
+				}
+			}
 //			else {
 				// Switching items from the player inventory to the anvil inventory
 //				if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
