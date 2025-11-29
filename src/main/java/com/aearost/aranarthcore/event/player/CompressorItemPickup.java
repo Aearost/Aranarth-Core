@@ -23,7 +23,7 @@ public class CompressorItemPickup {
 			}
 
 			// Only attempts to compress if the item being picked up is compressible
-			if (!isCompressible(e.getItem().getItemStack().getType())) {
+			if (!isCompressible(e.getItem().getItemStack())) {
 				return;
 			}
 
@@ -51,8 +51,8 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									Material type = shulkerItem.getType();
-									if (isCompressible(type)) {
+									if (isCompressible(shulkerItem)) {
+										Material type = shulkerItem.getType();
 										if (compressibleItems.containsKey(type)) {
 											List<ItemStack> stacksOfItems = compressibleItems.get(type);
 											stacksOfItems.add(shulkerItem.clone());
@@ -74,8 +74,8 @@ public class CompressorItemPickup {
 				}
 				// Normal item, not a shulker box
 				else {
-					Material type = inventoryItem.getType();
-					if (isCompressible(type)) {
+					if (isCompressible(inventoryItem)) {
+						Material type = inventoryItem.getType();
 						if (compressibleItems.containsKey(type)) {
 							List<ItemStack> stacksOfItems = compressibleItems.get(type);
 							stacksOfItems.add(inventoryItem.clone());
@@ -92,8 +92,8 @@ public class CompressorItemPickup {
 			}
 
 			// Include the actual item being picked up
-			Material pickedUpType = pickupClone.getType();
-			if (isCompressible(pickedUpType)) {
+			if (isCompressible(pickupClone)) {
+				Material pickedUpType = pickupClone.getType();
 				if (compressibleItems.containsKey(pickedUpType)) {
 					List<ItemStack> stacksOfItems = compressibleItems.get(pickedUpType);
 					stacksOfItems.add(pickupClone);
@@ -103,6 +103,11 @@ public class CompressorItemPickup {
 					stacksOfItems.add(pickupClone);
 					compressibleItems.put(pickedUpType, stacksOfItems);
 				}
+			}
+			// Fallback method to pick up normally if it's a non-compressible item that's picked up
+			else {
+				player.getInventory().addItem(pickupClone);
+				return;
 			}
 
 			// Compresses each item that is in the player's inventory that is compressible
@@ -185,6 +190,10 @@ public class CompressorItemPickup {
 										continue;
 									}
 
+									if (!isCompressible(shulkerItem)) {
+										continue;
+									}
+
 									// Increases non-full stacks within the shulker first
 									if (shulkerItem.getType() == compressedType) {
 										while (shulkerItem.getAmount() < shulkerItem.getMaxStackSize()) {
@@ -207,7 +216,6 @@ public class CompressorItemPickup {
 
 			if (totalAmountOfCompressedItem > 0) {
 				addResultsToInventory(player, compressedItemToAdd);
-
 			}
 		}
 
@@ -229,6 +237,11 @@ public class CompressorItemPickup {
 		for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
 			ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
 			if (inventoryItem != null && inventoryItem.getType() != Material.AIR) {
+
+				if (!isCompressible(inventoryItem)) {
+					continue;
+				}
+
 				while (remainingToAdd > 0) {
 					if (inventoryItem.getType() == item.getType()) {
 						if (inventoryItem.getAmount() < inventoryItem.getMaxStackSize()) {
@@ -288,11 +301,16 @@ public class CompressorItemPickup {
 	}
 
 	/**
-	 * Confirms if the input Material is a compressible item.
-	 * @param type The Material of the item being iterated.
-	 * @return Confirmation if the input Material is a compressible item.
+	 * Confirms if the input ItemStack is a compressible item.
+	 * @param item The item that is being verified.
+	 * @return Confirmation if the input item is compressible.
 	 */
-	private boolean isCompressible(Material type) {
+	private boolean isCompressible(ItemStack item) {
+		if (item.hasItemMeta()) {
+			return false;
+		}
+
+		Material type = item.getType();
 		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_INGOT
 				|| type == Material.RAW_IRON || type == Material.IRON_NUGGET || type == Material.IRON_INGOT
 				|| type == Material.RAW_GOLD || type == Material.GOLD_NUGGET || type == Material.GOLD_INGOT

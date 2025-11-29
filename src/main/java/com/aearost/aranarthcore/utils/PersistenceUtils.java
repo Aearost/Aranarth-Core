@@ -1252,11 +1252,7 @@ public class PersistenceUtils {
 							for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
 								writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 							}
-						} else {
-							Bukkit.getLogger().info("Null bending player when saving");
 						}
-					} else {
-						Bukkit.getLogger().info("null avatar when saving");
 					}
 
 					writer.write("#uuid|startInGame|endInGame|startInRealLife|endInRealLife|element\n");
