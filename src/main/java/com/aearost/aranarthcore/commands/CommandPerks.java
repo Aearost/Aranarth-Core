@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -45,6 +46,7 @@ public class CommandPerks {
 				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks[8]));
 				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks[9]));
 				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks[10]));
+				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks[11]));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
@@ -53,13 +55,14 @@ public class CommandPerks {
 		}
 
 		if (args.length < 4) {
+			// To increase the amount of homes by 3
 			if (args.length == 3) {
 				if (args[2].equals("homes")) {
 					UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 					if (AranarthUtils.getPlayer(uuid) != null) {
 						if (isValidPerk(args[2].toLowerCase())) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-							// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+							// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 							String[] perks = aranarthPlayer.getPerks().split("_");
                             switch (perks[8]) {
                                 case "0" -> perks[8] = "3";
@@ -71,9 +74,9 @@ public class CommandPerks {
 
 							// Updates the perk variable
 							String perksAsString = "";
-							for (String perk : perks) {
-								perksAsString += perk;
-								if (!perk.equals("bluefire")) {
+							for (int i = 0; i < perks.length; i++) {
+								perksAsString += perks[i];
+								if (i < perks.length - 1) {
 									perksAsString += "_";
 								}
 							}
@@ -102,7 +105,7 @@ public class CommandPerks {
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 					String[] perks = aranarthPlayer.getPerks().split("_");
 					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
@@ -120,12 +123,13 @@ public class CommandPerks {
 								case "inventory" -> perks[7] = args[3];
 								case "itemframe" -> perks[9] = args[3];
 								case "bluefire" -> perks[10] = args[3];
+								case "discord" -> perks[11] = args[3];
 							}
 							// Updates the perk variable
 							String perksAsString = "";
-							for (String perk : perks) {
-								perksAsString += perk;
-								if (!perk.equals("bluefire")) {
+							for (int i = 0; i < perks.length; i++) {
+								perksAsString += perks[i];
+								if (i < perks.length - 1) {
 									perksAsString += "_";
 								}
 							}
@@ -147,9 +151,9 @@ public class CommandPerks {
 
 							// Updates the perk variable
 							String perksAsString = "";
-							for (String perk : perks) {
-								perksAsString += perk;
-								if (!perk.equals("bluefire")) {
+							for (int i = 0; i < perks.length; i++) {
+								perksAsString += perks[i];
+								if (i < perks.length - 1) {
 									perksAsString += "_";
 								}
 							}
@@ -164,6 +168,23 @@ public class CommandPerks {
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
 						}
+						return true;
+					} else if (args[2].equals("discord")) {
+						perks[11] = args[3];
+
+						// Updates the perk variable
+						String perksAsString = "";
+						for (int i = 0; i < perks.length; i++) {
+							perksAsString += perks[i];
+							if (i < perks.length - 1) {
+								perksAsString += "_";
+							}
+						}
+						aranarthPlayer.setPerks(perksAsString);
+						AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+						DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
+						sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
 						return true;
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this sub-command..."));
@@ -183,7 +204,7 @@ public class CommandPerks {
 	private static boolean isValidPerk(String perk) {
 		return perk.equals("compressor") || perk.equals("randomizer") || perk.equals("blacklist") || perk.equals("tables")
 				|| perk.equals("itemname") || perk.equals("chat") || perk.equals("shulker") || perk.equals("inventory")
-				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire");
+				|| perk.equals("homes") || perk.equals("itemframe") || perk.equals("bluefire") || perk.equals("discord");
 	}
 
 }
