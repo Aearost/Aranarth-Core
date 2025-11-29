@@ -68,6 +68,8 @@ Features
 [~] Fixed bugs involving tipped arrows not applying effects or damaging as expected
 [~] Added limitation to only replenish inventory from shulkers if the player has both the inventory and shulker permissions
 [~] Increased grass block spawn rates after snow melts from 5% to 12%
+[+] Armor trims are no longer able to be applied to Aranarthium armor
+[~] Fixed issue where escaping the aranarthium anvil wouldn't return the armour piece if it had an armor trim or an enchantment
 
 Miscellaneous
 - Removed redundant logs from weather
