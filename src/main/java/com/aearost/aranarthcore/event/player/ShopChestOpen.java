@@ -11,7 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 /**
  * Prevents a player from opening a player shop chest that is not theirs.
  */
-public class PlayerShopChestOpen {
+public class ShopChestOpen {
 	public void execute(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null) {
 			if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {

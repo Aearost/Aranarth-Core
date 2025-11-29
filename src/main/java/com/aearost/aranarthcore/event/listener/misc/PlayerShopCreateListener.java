@@ -60,10 +60,7 @@ public class PlayerShopCreateListener implements Listener {
 							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
 						}
 					} else {
-						// Only selling
-						if (getDecimalShopPrice(priceParts[1]) == 0) {
-							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
-						}
+						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 					}
 				} else {
 					// Forceful display of the shop in error
@@ -80,31 +77,29 @@ public class PlayerShopCreateListener implements Listener {
 				int[] validSignFormatResult = validSignFormat(lines, player, false);
 				// If all the lines were entered correctly
 				if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
-					if (player.getItemInUse() != null) {
+					ItemStack heldItem = player.getInventory().getItemInMainHand();
+					if (heldItem != null && heldItem.getType() != Material.AIR) {
 						String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
 						// Price check
 						if (priceParts[0].equalsIgnoreCase("B")) {
 							// Only buying
 							if (priceParts.length == 2) {
-								ShopUtils.createOrUpdateShop(e, null, player.getItemInUse(), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
+								ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
 							}
 							// Both buying and selling
 							else if (priceParts.length == 5) {
-								ShopUtils.createOrUpdateShop(e, null, player.getItemInUse(), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+								ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
 							}
 						} else {
-							// Only selling
-							if (getDecimalShopPrice(priceParts[1]) == 0) {
-								ShopUtils.createOrUpdateShop(e, null, player.getItemInUse(), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
-							}
+							ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 						}
 					} else {
 						// Forceful display of the shop in error
-						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
+						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
 						player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
 					}
 				} else {
-					displayInvalidFields(e, validSignFormatResult, true);
+					displayInvalidFields(e, validSignFormatResult, false);
 				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a server shop!"));
@@ -135,141 +130,73 @@ public class PlayerShopCreateListener implements Listener {
 	 */
 	private int[] validSignFormat(String[] lines, Player player, boolean isPlayerShop) {
 		int[] invalidLines = new int[] { 0, 0, 0, 0 };
-		if (isPlayerShop) {
-			// Quantity check
-			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
-			if (shopQuantityResult == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
-				invalidLines[2] = 1;
-			} else if (shopQuantityResult == -1) {
-				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
-				invalidLines[2] = 1;
-			}
 
-			String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
-			String incorrectPrice = "&cIncorrect syntax for the price!";
-			// Price check
-			if (priceParts[0].equalsIgnoreCase("B")) {
-				// Only buying
-				if (priceParts.length == 2) {
-					if (getDecimalShopPrice(priceParts[1]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-				}
-				// Both buying and selling
-				else if (priceParts.length == 5) {
-					// Verify buy price
-					if (getDecimalShopPrice(priceParts[1]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
+		// Quantity check
+		int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[1]));
+		if (shopQuantityResult == 0) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
+			invalidLines[1] = 1;
+		} else if (shopQuantityResult == -1) {
+			player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
+			invalidLines[1] = 1;
+		}
 
-					// Verify separator character
-					if (!priceParts[2].equals("|")) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-
-					// Verify keyword to Sell
-					if (!priceParts[3].equalsIgnoreCase("S")) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-
-					// Verify sell price
-					if (getDecimalShopPrice(priceParts[4]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-				}
-				else {
-					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-					invalidLines[2] = 1;
-				}
-			} else if (priceParts[0].equalsIgnoreCase("S")) {
-				// Only selling
+		String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
+		String incorrectPrice = "&cIncorrect syntax for the price!";
+		// Price check
+		if (priceParts[0].equalsIgnoreCase("B")) {
+			// Only buying
+			if (priceParts.length == 2) {
 				if (getDecimalShopPrice(priceParts[1]) == 0) {
 					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
 					invalidLines[2] = 1;
 				}
-			} else {
+			}
+			// Both buying and selling
+			else if (priceParts.length == 5) {
+				// Verify buy price
+				if (getDecimalShopPrice(priceParts[1]) == 0) {
+					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+					invalidLines[2] = 1;
+				}
+
+				// Verify separator character
+				if (!priceParts[2].equals("|")) {
+					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+					invalidLines[2] = 1;
+				}
+
+				// Verify keyword to Sell
+				if (!priceParts[3].equalsIgnoreCase("S")) {
+					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+					invalidLines[2] = 1;
+				}
+
+				// Verify sell price
+				if (getDecimalShopPrice(priceParts[4]) == 0) {
+					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+					invalidLines[2] = 1;
+				}
+			}
+			else {
 				player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
 				invalidLines[2] = 1;
 			}
+		} else if (priceParts[0].equalsIgnoreCase("S")) {
+			// Only selling
+			if (getDecimalShopPrice(priceParts[1]) == 0) {
+				player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+				invalidLines[2] = 1;
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
+			invalidLines[2] = 1;
+		}
 
-			// Username check
+		// Username check
+		if (isPlayerShop) {
 			if (!ChatUtils.stripColorFormatting(lines[3]).equalsIgnoreCase(player.getName())) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat is not your username!"));
-				invalidLines[3] = 1;
-			}
-		}
-		// This is a server shop being created
-		else {
-			// Quantity check
-			int shopQuantityResult = getShopQuantity(ChatUtils.stripColorFormatting(lines[2]));
-			if (shopQuantityResult == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat is an invalid quantity!"));
-				invalidLines[2] = 1;
-			} else if (shopQuantityResult == -1) {
-				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax for quantity!"));
-				invalidLines[2] = 1;
-			}
-
-			String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
-			String incorrectPrice = "&cIncorrect syntax for the price!";
-			// Price check
-			if (priceParts[0].equalsIgnoreCase("B")) {
-				// Only buying
-				if (priceParts.length == 2) {
-					if (getDecimalShopPrice(priceParts[1]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-				}
-				// Both buying and selling
-				else if (priceParts.length == 5) {
-					// Verify buy price
-					if (getDecimalShopPrice(priceParts[1]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-
-					// Verify separator character
-					if (!priceParts[2].equals("|")) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-
-					// Verify keyword to Sell
-					if (!priceParts[3].equals("S")) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-
-					// Verify sell price
-					if (getDecimalShopPrice(priceParts[4]) == 0) {
-						player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-						invalidLines[2] = 1;
-					}
-				}
-				else {
-					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-					invalidLines[2] = 1;
-				}
-			} else if (priceParts[0].equalsIgnoreCase("S")) {
-				// Only selling
-				if (getDecimalShopPrice(priceParts[1]) == 0) {
-					player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-					invalidLines[2] = 1;
-				}
-			} else {
-				player.sendMessage(ChatUtils.chatMessage(incorrectPrice));
-				invalidLines[2] = 1;
-			}
-
-			if (!lines[3].isEmpty()) {
-				player.sendMessage(ChatUtils.chatMessage("&cThe last line must be left empty!"));
 				invalidLines[3] = 1;
 			}
 		}
@@ -315,15 +242,12 @@ public class PlayerShopCreateListener implements Listener {
 	 */
 	private double getDecimalShopPrice(String price) {
 		try {
-			Bukkit.getLogger().info("Price: " + price);
 			double priceAsDouble = Double.parseDouble(price);
-			Bukkit.getLogger().info("Price as double: " + priceAsDouble);
 			if (priceAsDouble <= 0) {
 				throw new NumberFormatException();
 			}
 			DecimalFormat df = new DecimalFormat("0.00");
-			Bukkit.getLogger().info("Formatted double: " + Double.parseDouble(df.format(price)));
-			return Double.parseDouble(df.format(price));
+			return Double.parseDouble(df.format(priceAsDouble));
 		} catch (NumberFormatException ex) {
 			return 0;
 		}
@@ -388,34 +312,6 @@ public class PlayerShopCreateListener implements Listener {
 		}
 	}
 
-//	private ItemStack getShopItemFromLine(String line) {
-//		Material materialForShop = null;
-//		int matchingCriteriaCounter = 0;
-//		try {
-//			// Only supports vanilla items with no metadata
-//			for (Material material : Material.values()) {
-//				// If the name is identical
-//				if (material.name().toLowerCase().equals(ChatUtils.stripColorFormatting(line.toLowerCase()))) {
-//					return new ItemStack(material, 1);
-//				}
-//				// If the name isn't fully defined, make sure there's only one item matching it
-//				else if (material.name().toLowerCase().startsWith(ChatUtils.stripColorFormatting(line.toLowerCase()))) {
-//					materialForShop = material;
-//					matchingCriteriaCounter++;
-//				}
-//			}
-//
-//			// Validates that only one item matches the line content
-//			if (matchingCriteriaCounter == 1) {
-//				return new ItemStack(materialForShop, 1);
-//			} else {
-//				return new ItemStack(Material.AIR);
-//			}
-//		} catch (IllegalArgumentException ex) {
-//			return null;
-//		}
-//	}
-
 	/**
 	 * Handles the logic to highlight the parts of the lines of the sign if incorrect input is provided.
 	 * @param e The event.
@@ -433,13 +329,11 @@ public class PlayerShopCreateListener implements Listener {
 			e.setLine(1, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(1))));
 		}
 		if (incorrectLines[2] == 1) {
-			e.setLine(1, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(2))));
+			e.setLine(2, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(2))));
 		}
 		if (incorrectLines[3] == 1) {
-			e.setLine(1, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(3))));
+			e.setLine(3, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(3))));
 		}
 	}
-
-
 
 }

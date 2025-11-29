@@ -39,10 +39,6 @@ public class PermissionUtils {
 		if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
 			updateAvatarPermissions(player.getUniqueId(), false);
 		}
-		// If the player is not the avatar but has the avatar permissions
-//		else if (currentAvatar != null && !currentAvatar.getUuid().equals(player.getUniqueId())) {
-//			updateAvatarPermissions(player.getUniqueId(), true);
-//		}
 
 		// Updates the sub-elements and abilities according to their current rank
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);

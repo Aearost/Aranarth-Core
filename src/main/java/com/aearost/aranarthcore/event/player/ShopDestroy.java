@@ -14,7 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 /**
  * Handles the deletion of a player shop.
  */
-public class PlayerShopDestroy {
+public class ShopDestroy {
 	public void execute(BlockBreakEvent e) {
 		Player player = e.getPlayer();
 
