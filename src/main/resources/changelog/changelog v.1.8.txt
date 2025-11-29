@@ -70,6 +70,7 @@ Features
 [~] Increased grass block spawn rates after snow melts from 5% to 12%
 [+] Armor trims are no longer able to be applied to Aranarthium armor
 [~] Fixed issue where escaping the aranarthium anvil wouldn't return the armour piece if it had an armor trim or an enchantment
+[~] Increased charged creeper spawn rates during Aestivor and normal thunderstorms as well
 
 Miscellaneous
 - Removed redundant logs from weather
