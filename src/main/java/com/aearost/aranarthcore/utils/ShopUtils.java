@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,13 +104,13 @@ public class ShopUtils {
         ShopUtils.addShop(uuid, newShop);
         if (player != null) {
             e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
-            e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1].toUpperCase()));
-            e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2].toUpperCase()));
-            e.setLine(3, ChatUtils.translateToColor("&0" + e.getLines()[3].toUpperCase()));
+            e.setLine(1, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[1]).toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor("&0&l" + fixPriceLine(ChatUtils.stripColorFormatting(e.getLines()[2])).toUpperCase()));
+            e.setLine(3, ChatUtils.translateToColor("&0" + player.getName()));
         } else {
             e.setLine(0, ChatUtils.translateToColor("&6&l[Server Shop]"));
-            e.setLine(1, ChatUtils.translateToColor("&0&l" + e.getLines()[1].toUpperCase()));
-            e.setLine(2, ChatUtils.translateToColor("&0&l" + e.getLines()[2].toUpperCase()));
+            e.setLine(1, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[1]).toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[2]).toUpperCase()));
             e.setLine(3, ChatUtils.getFormattedItemName(shopItem.getType().name()));
         }
 
@@ -119,6 +120,33 @@ public class ShopUtils {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
         }
         e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+    }
+
+    /**
+     * Removes redundant decimal values from the price line.
+     * @param line The line.
+     * @return The line without the extra decimal values.
+     */
+    private static String fixPriceLine(String line) {
+        String[] parts = line.split(" ");
+        DecimalFormat df = new DecimalFormat("0.00");
+        if (parts[0].equalsIgnoreCase("B")) {
+            if (parts.length == 2) {
+                double priceAsDouble = Double.parseDouble(parts[1]);
+                double trimmedPrice = Double.parseDouble(df.format(priceAsDouble));
+                return "B " + trimmedPrice;
+            } else {
+                double buyPriceAsDouble = Double.parseDouble(parts[1]);
+                double trimmedBuyPrice = Double.parseDouble(df.format(buyPriceAsDouble));
+                double sellPriceAsDouble = Double.parseDouble(parts[1]);
+                double trimmedSellPrice = Double.parseDouble(df.format(sellPriceAsDouble));
+                return "B " + trimmedBuyPrice + " | S " + trimmedSellPrice;
+            }
+        } else {
+            double priceAsDouble = Double.parseDouble(parts[1]);
+            double trimmedPrice = Double.parseDouble(df.format(priceAsDouble));
+            return "S " + trimmedPrice;
+        }
     }
 
     /**

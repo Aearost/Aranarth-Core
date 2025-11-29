@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.HomepadBreak;
-import com.aearost.aranarthcore.event.player.PlayerShopDestroy;
+import com.aearost.aranarthcore.event.player.ShopDestroy;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -43,7 +43,7 @@ public class BlockBreakEventListener implements Listener {
                 new OreClusterDrops().execute(e);
                 new DwarvenAranarthiumOreDrops().execute(e);
             }
-            new PlayerShopDestroy().execute(e);
+            new ShopDestroy().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
