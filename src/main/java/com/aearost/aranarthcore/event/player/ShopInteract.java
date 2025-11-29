@@ -9,6 +9,7 @@ import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -50,7 +51,12 @@ public class ShopInteract {
 					} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 						handleSellLogic(player, clickUser, shopUser, playerShop, locationBelow);
 					}
-
+				} else {
+					if (player.isSneaking()) {
+						if (e.getClickedBlock().getState() instanceof Sign sign) {
+							player.openSign(sign);
+						}
+					}
 				}
 			}
 			// Server shop
@@ -64,13 +70,21 @@ public class ShopInteract {
 						if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 							// If editing a server shop
 							if (aranarthPlayer.getCouncilRank() == 3 && player.isSneaking()) {
-								e.setCancelled(false);
+								if (e.getClickedBlock().getState() instanceof Sign sign) {
+									player.openSign(sign);
+								}
 								return;
 							}
 
 							handleBuyLogic(player, clickUser, null, playerShop, null);
 						} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 							handleSellLogic(player, clickUser, null, playerShop, null);
+						}
+					}
+				} else {
+					if (player.isSneaking()) {
+						if (e.getClickedBlock().getState() instanceof Sign sign) {
+							player.openSign(sign);
 						}
 					}
 				}

@@ -111,9 +111,7 @@ public class PlayerShopCreateListener implements Listener {
 						player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
 					}
 				} else {
-					Bukkit.getLogger().info("G");
 					if (canShopBeRemoved(e)) {
-						Bukkit.getLogger().info("H");
 						displayInvalidFields(e, validSignFormatResult, false);
 					}
 				}
@@ -121,11 +119,8 @@ public class PlayerShopCreateListener implements Listener {
 		}
 		// Remove if the shop previously existed and now was changed
 		else {
-			Bukkit.getLogger().info("I");
 			if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
-				Bukkit.getLogger().info("J");
 				if (canShopBeRemoved(e)) {
-					Bukkit.getLogger().info("K");
 					player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
 				}
 			}
