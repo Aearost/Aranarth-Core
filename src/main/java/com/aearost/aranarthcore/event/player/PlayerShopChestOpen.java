@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -18,7 +19,7 @@ public class PlayerShopChestOpen {
 				Location locationAbove = new Location(chestLocation.getWorld(),
 						chestLocation.getBlockX(), chestLocation.getBlockY() + 1, chestLocation.getBlockZ());
 				if (isSign(locationAbove.getBlock().getType())) {
-					Shop playerShop = AranarthUtils.getShop(locationAbove);
+					Shop playerShop = ShopUtils.getShopFromLocation(locationAbove);
 					if (playerShop != null) {
 						if (playerShop.getUuid() == null || !playerShop.getUuid().equals(e.getPlayer().getUniqueId())) {
 							e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou do not own this player shop chest!"));

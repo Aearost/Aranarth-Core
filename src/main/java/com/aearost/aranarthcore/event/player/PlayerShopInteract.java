@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.*;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
@@ -29,7 +30,7 @@ public class PlayerShopInteract {
 			Location locationBelow = new Location(signLocation.getWorld(),
 					signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
 			if (isChest(locationBelow.getBlock().getType())) {
-				Shop playerShop = AranarthUtils.getShop(signLocation);
+				Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
 				if (playerShop != null) {
 					if (!playerShop.getUuid().toString().equals(e.getPlayer().getUniqueId().toString())) {
 						e.setCancelled(true);
@@ -161,7 +162,7 @@ public class PlayerShopInteract {
 			}
 			// If the clicked block is a sign but the block below is not a chest
 			else {
-				Shop playerShop = AranarthUtils.getShop(signLocation);
+				Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
 				if (playerShop != null) {
 					if (playerShop.getUuid() == null) {
 						e.setCancelled(true);
@@ -190,7 +191,7 @@ public class PlayerShopInteract {
 											+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice())));
 								} else {
 									player.sendMessage(ChatUtils.chatMessage("&7This server shop has been deleted"));
-									AranarthUtils.removeShop(null, playerShop.getLocation());
+									ShopUtils.removeShop(null, playerShop.getLocation());
 									e.setCancelled(false);
 									player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 								}
@@ -222,7 +223,7 @@ public class PlayerShopInteract {
 								}
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&7This server shop has been deleted"));
-								AranarthUtils.removeShop(null, playerShop.getLocation());
+								ShopUtils.removeShop(null, playerShop.getLocation());
 								e.setCancelled(false);
 								player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
 							}
@@ -235,7 +236,7 @@ public class PlayerShopInteract {
 				}
 			}
 		} else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
-			Shop playerShop = AranarthUtils.getShop(e.getClickedBlock().getLocation());
+			Shop playerShop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
 			if (playerShop != null) {
 				Player player = e.getPlayer();
 				AranarthPlayer shopAranarthPlayer = AranarthUtils.getPlayer(playerShop.getUuid());

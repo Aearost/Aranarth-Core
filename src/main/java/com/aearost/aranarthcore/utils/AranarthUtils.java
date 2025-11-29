@@ -44,7 +44,6 @@ public class AranarthUtils {
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
-	private static final HashMap<UUID, List<Shop>> shops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static List<LockedContainer> lockedContainers;
 	private static int day;
@@ -531,67 +530,6 @@ public class AranarthUtils {
 	public static void decrementDragonHeadFuelAmount(Location location) {
 		Integer newAmount = dragonHeads.get(location) - 1;
 		dragonHeads.put(location, newAmount);
-	}
-
-	/**
-	 * Provides the current list of player shops.
-	 * @return The list of player shops.
-	 */
-	public static HashMap<UUID, List<Shop>> getShops() {
-		return shops;
-	}
-
-	/**
-	 * Provides the shop at the input sign location.
-	 * @param location The location of the sign.
-	 * @return The player shop if it exists.
-	 */
-	public static Shop getShop(Location location) {
-		if (getShops() != null) {
-			for (UUID uuid : shops.keySet()) {
-				for (Shop shop : shops.get(uuid)) {
-					if (shop.getLocation().equals(location)) {
-						return shop;
-					}
-				}
-			}
-
-		}
-		return null;
-	}
-
-	/**
-	 * Adding the input shop by the associated UUID.
-	 * @param uuid The UUID. Null if it is a server shop.
-	 * @param newShop The new player shop.
-	 */
-	public static void addShop(UUID uuid, Shop newShop) {
-		List<Shop> shops = AranarthUtils.shops.get(uuid);
-		if (shops == null) {
-			shops = new ArrayList<>();
-		}
-		shops.add(newShop);
-		AranarthUtils.shops.put(uuid, shops);
-	}
-
-	/**
-	 * Removes the player shop at the associated location for the input UUID.
-	 * @param uuid The UUID.
-	 * @param location The location of the sign of the shop.
-	 */
-	public static void removeShop(UUID uuid, Location location) {
-		List<Shop> shops = AranarthUtils.shops.get(uuid);
-		int shopSlotToDelete = -1;
-		for (int i = 0; i < shops.size(); i++) {
-			if (shops.get(i).getLocation().equals(location)) {
-				shopSlotToDelete = i;
-				break;
-			}
-		}
-		// Only delete if a shop was found
-		if (shopSlotToDelete != -1) {
-			shops.remove(shopSlotToDelete);
-		}
 	}
 
 	/**
