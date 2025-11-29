@@ -121,10 +121,12 @@ public class DiscordUtils {
 			isSaint = true;
 			if (playerDiscordId != null) {
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 			}
 		} else {
 			if (playerDiscordId != null) {
 				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 			}
 		}
 
@@ -260,7 +262,29 @@ public class DiscordUtils {
 			updateSaint(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getSaintRank(), false);
 			updateArchitect(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getArchitectRank(), false);
 			updateCouncil(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getCouncilRank(), false);
+			updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
 			updateAvatar(Bukkit.getOfflinePlayer(uuid));
+		}
+	}
+
+	/**
+	 * Updates the player's Discord role accordingly in Discord's roles.
+	 * @param player The player whose Discord role is changing.
+	 * @param aranarthPlayer The AranarthPlayer object of the player.
+	 */
+	public static void updateDiscordRole(OfflinePlayer player, AranarthPlayer aranarthPlayer) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord role could not be updated as they have not linked their Discord");
+			return;
+		}
+
+		Guild guild = getGuild();
+		String discordPerk = aranarthPlayer.getPerks().split("_")[11];
+		if (discordPerk.equals("1")) {
+			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+		} else {
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 		}
 	}
 

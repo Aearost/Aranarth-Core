@@ -93,7 +93,7 @@ public class AranarthPlayer {
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
 		this.isAddingPotions = false;
-		this.perks = "0_0_0_0_0_0_0_0_0_0_0";
+		this.perks = "0_0_0_0_0_0_0_0_0_0_0_0";
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
@@ -747,7 +747,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Provides the perks that the player has access to.
-	 * Perks will be split as: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * Perks will be split as: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 	 * @return The perks that the player has access to.
 	 */
 	public String getPerks() {
@@ -756,7 +756,7 @@ public class AranarthPlayer {
 
 	/**
 	 * Updates the perks that the player has access to.
-	 * compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire
+	 * compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 	 * @param perks The player's new perks.
 	 */
 	public void setPerks(String perks) {
