@@ -63,11 +63,19 @@ public class PlayerShopCreateListener implements Listener {
 						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 					}
 				} else {
+					Bukkit.getLogger().info("A");
 					// Forceful display of the shop in error
-					displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
+					if (canShopBeRemoved(e)) {
+						Bukkit.getLogger().info("B");
+						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
+					}
 				}
 			} else {
-				displayInvalidFields(e, validSignFormatResult, true);
+				Bukkit.getLogger().info("C");
+				if (canShopBeRemoved(e)) {
+					Bukkit.getLogger().info("D");
+					displayInvalidFields(e, validSignFormatResult, true);
+				}
 			}
 		}
 		// If placing a Server Shop
@@ -94,29 +102,32 @@ public class PlayerShopCreateListener implements Listener {
 							ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 						}
 					} else {
+						Bukkit.getLogger().info("E");
 						// Forceful display of the shop in error
-						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
+						if (canShopBeRemoved(e)) {
+							Bukkit.getLogger().info("F");
+							displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
+						}
 						player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
 					}
 				} else {
-					displayInvalidFields(e, validSignFormatResult, false);
+					Bukkit.getLogger().info("G");
+					if (canShopBeRemoved(e)) {
+						Bukkit.getLogger().info("H");
+						displayInvalidFields(e, validSignFormatResult, false);
+					}
 				}
-			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a server shop!"));
-				e.setLine(1, "");
-				e.setLine(2, "");
-				e.setLine(3, "");
 			}
 		}
+		// Remove if the shop previously existed and now was changed
 		else {
-			// Remove if the shop previously existed and now was changed
+			Bukkit.getLogger().info("I");
 			if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
-				ShopUtils.removeShop(player.getUniqueId(), e.getBlock().getLocation());
-				player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
-				e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));
-				e.setLine(1, ChatUtils.stripColorFormatting(e.getLine(1)));
-				e.setLine(2, ChatUtils.stripColorFormatting(e.getLine(2)));
-				e.setLine(3, ChatUtils.stripColorFormatting(e.getLine(3)));
+				Bukkit.getLogger().info("J");
+				if (canShopBeRemoved(e)) {
+					Bukkit.getLogger().info("K");
+					player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+				}
 			}
 		}
 	}
@@ -333,6 +344,27 @@ public class PlayerShopCreateListener implements Listener {
 		}
 		if (incorrectLines[3] == 1) {
 			e.setLine(3, ChatUtils.translateToColor("&4&l" + ChatUtils.stripColorFormatting(e.getLine(3))));
+		}
+	}
+
+	/**
+	 * Removes the shop at the location if it was previously a shop before making a change to the sign.
+	 * @param e The event.
+	 * @return Confirmation whether the shop was successfully removed.
+	 */
+	private boolean canShopBeRemoved(SignChangeEvent e) {
+		if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
+			ShopUtils.removeShop(ShopUtils.getShopFromLocation(e.getBlock().getLocation()).getUuid(), e.getBlock().getLocation());
+
+			// Clears lines of all color formatting
+			e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));
+			e.setLine(1, ChatUtils.stripColorFormatting(e.getLine(1)));
+			e.setLine(2, ChatUtils.stripColorFormatting(e.getLine(2)));
+			e.setLine(3, ChatUtils.stripColorFormatting(e.getLine(3)));
+
+			return true;
+		} else {
+			return false;
 		}
 	}
 
