@@ -36,15 +36,15 @@ public class BlockBreakEventListener implements Listener {
             new TorchflowerBreak().execute(e);
         } else if (type == Material.PITCHER_PLANT || type == Material.PITCHER_CROP || hasLightCropAbove(e.getBlock(), "PITCHER_PLANT")) {
             new PitcherPlantBreak().execute(e);
-        } else if (AranarthUtils.isContainerBlock(e.getBlock())) {
-            new ContainerBreak().execute(e);
         } else {
             if (e.getBlock().getType().name().endsWith("_ORE")) {
                 new OreClusterDrops().execute(e);
                 new DwarvenAranarthiumOreDrops().execute(e);
             }
-            new ShopDestroy().execute(e);
         }
+
+        new ShopDestroy().execute(e);
+        new ContainerBreak().execute(e);
 
         if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
             new LogExtraDrops().execute(e);

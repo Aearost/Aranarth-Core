@@ -5,11 +5,10 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
-import org.bukkit.*;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.block.Sign;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -26,6 +25,7 @@ import java.util.HashMap;
 public class ShopInteract {
 
 	public void execute(PlayerInteractEvent e) {
+		// Left or right-clicking the sign, including placing and breaking
 		if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
 			Player player = e.getPlayer();
 			AranarthPlayer clickUser = AranarthUtils.getPlayer(player.getUniqueId());
@@ -89,17 +89,37 @@ public class ShopInteract {
 					}
 				}
 			}
-		} else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
-			Bukkit.getLogger().info("What?");
-			Shop playerShop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
-			if (playerShop != null) {
-				Player player = e.getPlayer();
-				AranarthPlayer shopAranarthPlayer = AranarthUtils.getPlayer(playerShop.getUuid());
-				AranarthPlayer clickedAranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		}
+		// Left or right-clicking the chest, including opening and breaking
+		else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
+			// Gets both locations if it is a double chest
+			BlockState state = e.getClickedBlock().getState();
+			Container container = (Container) state;
+			Location[] locations = new Location[2];
+			if (container.getInventory().getHolder() instanceof DoubleChest doubleChest) {
+				Chest leftChest = (Chest) doubleChest.getLeftSide();
+				Chest rightChest = (Chest) doubleChest.getRightSide();
+				locations[0] = leftChest.getLocation();
+				locations[1] = rightChest.getLocation();
+			} else {
+				locations[0] = e.getClickedBlock().getLocation();
+			}
 
-				if (!shopAranarthPlayer.getUsername().equals(clickedAranarthPlayer.getUsername())) {
+			Shop location1Shop = ShopUtils.getShopFromLocation(locations[0].getBlock().getRelative(BlockFace.UP).getLocation());
+			Shop location2Shop = null;
+			if (ShopUtils.getShopFromLocation(locations[1]) != null) {
+				location2Shop = ShopUtils.getShopFromLocation(locations[1].getBlock().getRelative(BlockFace.UP).getLocation());
+			}
+
+			if (location1Shop != null || (locations[1] != null && location2Shop != null)) {
+				if (!location1Shop.getUuid().equals(e.getPlayer().getUniqueId()) || (location2Shop != null && !location2Shop.getUuid().equals(e.getPlayer().getUniqueId()))) {
 					// Prevents other players from destroying or opening the chest
 					e.setCancelled(true);
+					if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+					} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open someone else's player shop chest!"));
+					}
 				}
 			}
 		}
@@ -268,7 +288,7 @@ public class ShopInteract {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
 			}
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this shop..."));
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
 		}
 	}
 

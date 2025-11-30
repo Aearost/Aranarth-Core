@@ -3,7 +3,9 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -19,8 +21,11 @@ public class ContainerOpenPrevent {
             if (!AranarthUtils.canOpenContainer(player, block)) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 if (!aranarthPlayer.getIsInAdminMode()) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
-                    e.setCancelled(true);
+                    // Player shop opening logic is handled elsewhere
+                    if (ShopUtils.getShopFromLocation(e.getClickedBlock().getRelative(BlockFace.UP).getLocation()) == null) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this!"));
+                        e.setCancelled(true);
+                    }
                 }
             }
         }

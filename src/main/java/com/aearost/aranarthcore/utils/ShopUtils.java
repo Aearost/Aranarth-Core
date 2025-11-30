@@ -105,12 +105,12 @@ public class ShopUtils {
         if (player != null) {
             e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
             e.setLine(1, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[1]).toUpperCase()));
-            e.setLine(2, ChatUtils.translateToColor("&0&l" + fixPriceLine(ChatUtils.stripColorFormatting(e.getLines()[2])).toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor(fixPriceLine(ChatUtils.stripColorFormatting(e.getLines()[2])).toUpperCase()));
             e.setLine(3, ChatUtils.translateToColor("&0" + player.getName()));
         } else {
             e.setLine(0, ChatUtils.translateToColor("&6&l[Server Shop]"));
             e.setLine(1, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[1]).toUpperCase()));
-            e.setLine(2, ChatUtils.translateToColor("&0&l" + ChatUtils.stripColorFormatting(e.getLines()[2]).toUpperCase()));
+            e.setLine(2, ChatUtils.translateToColor(fixPriceLine(ChatUtils.stripColorFormatting(e.getLines()[2]).toUpperCase())));
             e.setLine(3, ChatUtils.getFormattedItemName(shopItem.getType().name()));
         }
 
@@ -134,18 +134,52 @@ public class ShopUtils {
             if (parts.length == 2) {
                 double priceAsDouble = Double.parseDouble(parts[1]);
                 double trimmedPrice = Double.parseDouble(df.format(priceAsDouble));
-                return "B " + trimmedPrice;
+                String asString = (trimmedPrice + "");
+                if (asString.contains(".")) {
+                    String decimalAmount = asString.split("\\.")[1];
+                    if (decimalAmount.equals("0") || decimalAmount.equals("00")) {
+                        return "&0&lB &r" + asString.split("\\.")[0];
+                    }
+                }
+                return "&0&lB &r" + trimmedPrice;
             } else {
                 double buyPriceAsDouble = Double.parseDouble(parts[1]);
                 double trimmedBuyPrice = Double.parseDouble(df.format(buyPriceAsDouble));
-                double sellPriceAsDouble = Double.parseDouble(parts[1]);
+                double sellPriceAsDouble = Double.parseDouble(parts[4]);
                 double trimmedSellPrice = Double.parseDouble(df.format(sellPriceAsDouble));
-                return "B " + trimmedBuyPrice + " | S " + trimmedSellPrice;
+                String buyAsString = (trimmedBuyPrice + "");
+                if (buyAsString.contains(".")) {
+                    String decimalAmount = buyAsString.split("\\.")[1];
+                    if (decimalAmount.equals("0") || decimalAmount.equals("00")) {
+                        buyAsString = "&0&lB &r" + buyAsString.split("\\.")[0];
+                    } else {
+                        buyAsString = "&0&lB &r" + buyAsString;
+                    }
+                }
+                String sellAsString = (trimmedSellPrice + "");
+                if (sellAsString.contains(".")) {
+                    String decimalAmount = sellAsString.split("\\.")[1];
+                    if (decimalAmount.equals("0") || decimalAmount.equals("00")) {
+                        sellAsString = "&0&lS &r" + sellAsString.split("\\.")[0];
+                    } else {
+                        sellAsString = "&0&lS &r" + sellAsString;
+                    }
+                }
+
+
+                return buyAsString + " | " + sellAsString;
             }
         } else {
             double priceAsDouble = Double.parseDouble(parts[1]);
             double trimmedPrice = Double.parseDouble(df.format(priceAsDouble));
-            return "S " + trimmedPrice;
+            String asString = (trimmedPrice + "");
+            if (asString.contains(".")) {
+                String decimalAmount = asString.split("\\.")[1];
+                if (decimalAmount.equals("0") || decimalAmount.equals("00")) {
+                    return "&0&lS &r" + asString.split("\\.")[0];
+                }
+            }
+            return "&0&lS &r" + trimmedPrice;
         }
     }
 
