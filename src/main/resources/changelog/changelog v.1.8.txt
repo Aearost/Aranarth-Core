@@ -72,6 +72,7 @@ Features
 [~] Fixed issue where escaping the aranarthium anvil wouldn't return the armour piece if it had an armor trim or an enchantment
 [~] Increased charged creeper spawn rates during Aestivor and normal thunderstorms as well
 [~] Re-wrote and changed the logic and the formatting for player and server shop creation
+[~] Added centralized teleport logic
 
 Miscellaneous
 - Removed redundant logs from weather

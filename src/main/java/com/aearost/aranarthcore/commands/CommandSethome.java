@@ -24,7 +24,11 @@ public class CommandSethome {
 			int playerMaxHomeCount = AranarthUtils.getMaxHomeNum(player);
 			if (aranarthPlayer.getHomes().size() < playerMaxHomeCount) {
 				if (args.length >= 2) {
-					Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
+					Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
+					if (loc == null) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
+						return true;
+					}
 
 					// Construct the home name from args
 					StringBuilder homeNameBuilder = new StringBuilder();

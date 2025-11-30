@@ -239,7 +239,11 @@ public class CommandDominion {
 
 								List<UUID> members = new ArrayList<>();
 								members.add(player.getUniqueId());
-								Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
+								Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
+								if (loc == null) {
+									player.sendMessage(ChatUtils.chatMessage("&cThe Dominion home could not be set here!"));
+									return;
+								}
 								List<Chunk> chunks = new ArrayList<>();
 								chunks.add(player.getLocation().getChunk());
 								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
@@ -349,7 +353,11 @@ public class CommandDominion {
 		if (dominion.getOwner().equals(player.getUniqueId())) {
 			List<Chunk> chunks = dominion.getChunks();
 			if (chunks.contains(player.getLocation().getChunk())) {
-				Location loc = AranarthUtils.getSolidBlockUnderneathPlayer(player);
+				Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
+				if (loc == null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot set the dominion's home here!"));
+					return;
+				}
 				dominion.setDominionHome(loc);
 				DominionUtils.updateDominion(dominion);
 				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's home has been updated"));

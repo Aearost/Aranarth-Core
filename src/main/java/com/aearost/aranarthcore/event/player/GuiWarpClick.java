@@ -37,7 +37,7 @@ public class GuiWarpClick {
 
 						player.teleport(warp.getLocation());
 						player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
-						AranarthUtils.playTeleportSound(player);
+//						AranarthUtils.playTeleportSound(player);
 						player.closeInventory();
 						return;
 					}

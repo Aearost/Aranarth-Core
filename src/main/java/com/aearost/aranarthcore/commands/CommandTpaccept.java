@@ -4,11 +4,8 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
-import java.io.IOException;
 
 /**
  * Allows the player to accept a pending teleport request.
@@ -22,24 +19,19 @@ public class CommandTpaccept {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			// Prioritize teleporting to other players if both requests exist
+			// Player is accepting somebody's /ac tphere request
 			if (aranarthPlayer.getTeleportToUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
-					try {
-						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), target.getLocation().getWorld().getName());
-					} catch (IOException e) {
-						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-						return true;
+					boolean wasSuccessful = AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation());
+					if (wasSuccessful) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
+						target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with teleporting..."));
 					}
-
-					aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
-					player.teleport(AranarthUtils.getSolidBlockUnderneathPlayer(target));
-					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
-					player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 				}
@@ -48,24 +40,20 @@ public class CommandTpaccept {
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
-			} else if (aranarthPlayer.getTeleportFromUuid() != null) {
+			}
+			// Player is accepting somebody's /ac tp request
+			else if (aranarthPlayer.getTeleportFromUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportFromUuid());
 				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 				// If both players are still online
 				if (target != null) {
-					try {
-						AranarthUtils.switchInventory(target, target.getLocation().getWorld().getName(), player.getLocation().getWorld().getName());
-					} catch (IOException e) {
-						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-						return true;
+					boolean wasSuccessful = AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation());
+					if (wasSuccessful) {
+						target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
+						player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &7has teleported to you"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with teleporting..."));
 					}
-
-					targetPlayer.setLastKnownTeleportLocation(target.getLocation());
-					AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-					target.teleport(AranarthUtils.getSolidBlockUnderneathPlayer(player));
-					target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
-					target.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-					player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &7has teleported to you"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis no longer online"));
 				}

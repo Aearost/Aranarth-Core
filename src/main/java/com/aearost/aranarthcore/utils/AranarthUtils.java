@@ -1265,11 +1265,10 @@ public class AranarthUtils {
 
 	/**
 	 * Provides the Location with a solid block that is directly underneath the player.
-	 * @param player The player.
+	 * @param loc The teleport location.
 	 * @return The Location.
 	 */
-	public static Location getSolidBlockUnderneathPlayer(Player player) {
-		Location loc = player.getLocation();
+	public static Location getSafeTeleportLocation(Location loc) {
 		World world = loc.getWorld();
 
 		// Start from the player's current Y position and go downward
@@ -1297,7 +1296,7 @@ public class AranarthUtils {
 			surfaceLoc.setYaw(loc.getYaw());
 			surfaceLoc.setPitch(loc.getPitch());
 		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
+			return null;
 		}
 		return surfaceLoc;
 	}
@@ -1523,9 +1522,24 @@ public class AranarthUtils {
 	/**
 	 * Plays the teleport sound effect.
 	 * @param player The player to play the sound for.
+	 * @return Confirmation that the teleport was successful
 	 */
-	public static void playTeleportSound(Player player) {
+	public static boolean teleportPlayer(Player player, Location from, Location to) {
+		player.teleport(getSafeTeleportLocation(to));
 		player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+
+		// Saves the player's last location for /ac back
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		aranarthPlayer.setLastKnownTeleportLocation(from);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+
+		try {
+			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
+			return true;
+		} catch (IOException e) {
+			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+			return false;
+		}
 	}
 
 	/**
