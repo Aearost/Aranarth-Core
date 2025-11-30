@@ -123,6 +123,8 @@ public class ShopUtils {
             initializeHologramAtLocation(e.getBlock().getLocation());
         } else {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
+            removeHologramFromLocation(e.getBlock().getLocation());
+            initializeHologramAtLocation(e.getBlock().getLocation());
         }
         e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
     }

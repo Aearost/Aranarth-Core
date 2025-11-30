@@ -176,14 +176,18 @@ public class ShopInteract {
 				for (Integer index : remainder.keySet()) {
 					player.getWorld().dropItemNaturally(player.getLocation(), remainder.get(index));
 				}
+				String itemname = ChatUtils.getFormattedItemName(playerShop.getItem().getType().name());
+				if (playerShop.getItem().hasItemMeta()) {
+					if (playerShop.getItem().getItemMeta().hasDisplayName()) {
+						itemname = playerShop.getItem().getItemMeta().getDisplayName();
+					}
+				}
 
 				player.sendMessage(ChatUtils.chatMessage(
-						"&7You have purchased &e" + playerShop.getQuantity()
-								+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
+						"&7You have purchased &e" + playerShop.getQuantity() + " " + itemname
 								+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
 				if (!remainder.isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&e" + remainder.size() + " "
-							+ ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
+					player.sendMessage(ChatUtils.chatMessage("&e" + remainder.size() + " " + itemname
 							+ ChatUtils.translateToColor(" &7was dropped on the ground!")));
 				}
 
@@ -193,8 +197,7 @@ public class ShopInteract {
 						Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
 						shopPlayer.sendMessage(
 								ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased &e" + playerShop.getQuantity() + " "
-										+ ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
-										+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
+										+ itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
 					}
 				}
 			} else {
@@ -269,10 +272,16 @@ public class ShopInteract {
 				playerInventory.clear();
 				playerInventory.setContents(result.get(true));
 
+				String itemname = ChatUtils.getFormattedItemName(playerShop.getItem().getType().name());
+				if (playerShop.getItem().hasItemMeta()) {
+					if (playerShop.getItem().getItemMeta().hasDisplayName()) {
+						itemname = playerShop.getItem().getItemMeta().getDisplayName();
+					}
+				}
+
 				player.sendMessage(ChatUtils.chatMessage(
-						"&7You have sold &e" + playerShop.getQuantity()
-								+ " " + ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase()))
-						+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice())));
+						"&7You have sold &e" + playerShop.getQuantity() + " " + itemname
+						+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
 
 				// If the shop owner is online
 				if (isPlayerShop) {
@@ -280,8 +289,7 @@ public class ShopInteract {
 						Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
 						shopPlayer.sendMessage(
 								ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + playerShop.getQuantity() + " "
-										+ ChatUtils.getFormattedItemName(playerShop.getItem().getType().name().toLowerCase())
-										+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
+										+  itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
 					}
 				}
 			} else {
