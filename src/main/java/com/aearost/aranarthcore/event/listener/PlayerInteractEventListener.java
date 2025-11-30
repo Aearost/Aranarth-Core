@@ -38,7 +38,6 @@ public class PlayerInteractEventListener implements Listener {
             new MangroveRootShear().execute(e);
             new DoubleDoorOpen().execute(e);
             new EnderChestOpenPrevent().execute(e);
-            new ShopChestOpen().execute(e);
             new FletchingTableClick().execute(e);
             new ContainerInteract().execute(e);
             new ContainerOpenPrevent().execute(e);
@@ -49,7 +48,7 @@ public class PlayerInteractEventListener implements Listener {
             new ExpStore().execute(e);
         }
 
-        if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
+        if (e.getClickedBlock() != null) {
             new ShopInteract().execute(e);
         }
     }

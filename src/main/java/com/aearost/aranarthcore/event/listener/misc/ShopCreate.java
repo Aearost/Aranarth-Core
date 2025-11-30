@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.LockedContainer;
+import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
@@ -9,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
@@ -43,6 +46,16 @@ public class ShopCreate implements Listener {
 
 		// If placing a Player Shop
 		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
+			if (!canCreateShop(e)) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
+				canShopBeRemoved(e);
+				e.setLine(0, "");
+				e.setLine(1, "");
+				e.setLine(2, "");
+				e.setLine(3, "");
+				return;
+			}
+
 			int[] validSignFormatResult = validSignFormat(lines, player, true);
 			// If all the lines were entered correctly
 			if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
@@ -118,6 +131,37 @@ public class ShopCreate implements Listener {
 					player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
 				}
 			}
+		}
+	}
+
+	/**
+	 * Determines if a shop can be created in the particular location.
+	 * @param e The event.
+	 * @return Confirmation if the shop can be created.
+	 */
+	private boolean canCreateShop(SignChangeEvent e) {
+		Block signBlock = e.getBlock();
+		// If no chest is below, no need to verify further
+		if (!isBlockBelowChest(signBlock)) {
+			return true;
+		}
+
+		LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(signBlock.getRelative(BlockFace.DOWN));
+		Location[] locations = AranarthUtils.getLocationsOfContainer(signBlock.getRelative(BlockFace.DOWN));
+
+		// Double chest
+		if (locations[1] != null) {
+			Shop shop1 = ShopUtils.getShopFromLocation(locations[0].getBlock().getRelative(BlockFace.UP).getLocation());
+			Shop shop2 = ShopUtils.getShopFromLocation(locations[1].getBlock().getRelative(BlockFace.UP).getLocation());
+			if ((shop1 != null && e.getPlayer().getUniqueId().equals(shop1.getUuid()))
+				|| (shop2 != null && e.getPlayer().getUniqueId().equals(shop2.getUuid()))) {
+				return true;
+			}
+			return shop1 == null && shop2 == null && (lockedContainer == null || lockedContainer.getOwner().equals(e.getPlayer().getUniqueId()));
+		}
+		// Can always place if it's a single chest
+		else {
+			return true;
 		}
 	}
 
