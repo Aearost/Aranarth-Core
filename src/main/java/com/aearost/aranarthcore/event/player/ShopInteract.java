@@ -49,6 +49,12 @@ public class ShopInteract {
 
 						handleBuyLogic(player, clickUser, shopUser, playerShop, locationBelow);
 					} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+						// If editing your own shop
+						if (playerShop.getUuid().equals(player.getUniqueId())) {
+							e.setCancelled(false);
+							return;
+						}
+
 						handleSellLogic(player, clickUser, shopUser, playerShop, locationBelow);
 					}
 				} else {
