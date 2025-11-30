@@ -22,9 +22,10 @@ public class AvatarAbilityChange {
             if (parts[0].startsWith("/b")) {
                 if (parts[1].equals("b") || parts[1].equals("bind") || parts[1].equals("c") || parts[1].equals("clear")
                         || parts[1].equals("p") || parts[1].equals("preset") || parts[1].equals("copy")) {
-
                     for (String name : bendingPlayer.getAbilities().values()) {
                         if (isSubAbility(ChatUtils.stripColorFormatting(name))) {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command while using this ability!"));
+                            e.setCancelled(true);
                             return;
                         }
                     }
