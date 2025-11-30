@@ -56,6 +56,9 @@ public class PlayerServerJoinListener implements Listener {
 			AranarthUtils.setUsername(player);
 		}
 
+		// Permissions must be applied before nickname check is done
+		PermissionUtils.evaluatePlayerPermissions(player, false);
+
 		// Clears a player's nickname if they do not have permission for one
 		if (!player.hasPermission("aranarth.nick")) {
 			if (!AranarthUtils.getNickname(player).isEmpty()) {
@@ -87,7 +90,6 @@ public class PlayerServerJoinListener implements Listener {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
-		PermissionUtils.evaluatePlayerPermissions(player, false);
 		playJoinSound();
 	}
 
