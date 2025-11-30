@@ -19,9 +19,9 @@ import org.bukkit.inventory.ItemStack;
 
 import java.text.DecimalFormat;
 
-public class PlayerShopCreateListener implements Listener {
+public class ShopCreate implements Listener {
 
-	public PlayerShopCreateListener(AranarthCore plugin) {
+	public ShopCreate(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -63,17 +63,13 @@ public class PlayerShopCreateListener implements Listener {
 						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 					}
 				} else {
-					Bukkit.getLogger().info("A");
 					// Forceful display of the shop in error
 					if (canShopBeRemoved(e)) {
-						Bukkit.getLogger().info("B");
 						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
 					}
 				}
 			} else {
-				Bukkit.getLogger().info("C");
 				if (canShopBeRemoved(e)) {
-					Bukkit.getLogger().info("D");
 					displayInvalidFields(e, validSignFormatResult, true);
 				}
 			}
@@ -102,10 +98,8 @@ public class PlayerShopCreateListener implements Listener {
 							ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 						}
 					} else {
-						Bukkit.getLogger().info("E");
 						// Forceful display of the shop in error
 						if (canShopBeRemoved(e)) {
-							Bukkit.getLogger().info("F");
 							displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
 						}
 						player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
