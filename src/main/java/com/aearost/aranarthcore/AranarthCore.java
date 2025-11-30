@@ -55,6 +55,8 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
 				PersistenceUtils.saveShops();
+				ShopUtils.removeAllHolograms();
+				ShopUtils.initializeAllHolograms();
 				PersistenceUtils.saveDominions();
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
@@ -133,6 +135,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadHomepads();
 		PersistenceUtils.loadAranarthPlayers();
 		PersistenceUtils.loadShops();
+		ShopUtils.initializeAllHolograms();
 		PersistenceUtils.loadLockedContainers();
 		PersistenceUtils.loadDominions();
 		PersistenceUtils.loadWarps();
@@ -370,6 +373,7 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
+		ShopUtils.removeAllHolograms();
 		PersistenceUtils.saveServerDate();
 		PersistenceUtils.saveHomepads();
 		PersistenceUtils.saveAranarthPlayers();

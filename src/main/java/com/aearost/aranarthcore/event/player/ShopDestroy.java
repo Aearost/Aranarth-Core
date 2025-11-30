@@ -65,7 +65,9 @@ public class ShopDestroy {
 			// Prevents breaking a block that has a shop on it
 			Block signBlock = isRelativeBlockShop(e.getBlock());
 			if (signBlock != null) {
-				if (ShopUtils.getShopFromLocation(signBlock.getLocation()).getUuid().equals(player.getUniqueId())) {
+				Shop shop = ShopUtils.getShopFromLocation(signBlock.getLocation());
+
+				if (shop.getUuid() == null || shop.getUuid().equals(player.getUniqueId())) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou must destroy the shop's sign first!"));
 					e.setCancelled(true);
 					return;
