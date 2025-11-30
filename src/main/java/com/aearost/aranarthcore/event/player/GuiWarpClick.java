@@ -32,12 +32,8 @@ public class GuiWarpClick {
 				for (int i = 0; i < warps.size(); i++) {
 					if (e.getSlot() == i) {
 						Home warp = warps.get(i);
-						aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
-						player.teleport(warp.getLocation());
+						AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation());
 						player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
-//						AranarthUtils.playTeleportSound(player);
 						player.closeInventory();
 						return;
 					}

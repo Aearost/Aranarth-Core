@@ -1,19 +1,13 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.potion.PotionEffect;
-
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * Teleports the player to the creative world, using the creative inventory.
@@ -32,26 +26,9 @@ public class CommandCreative {
 					player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
 					return true;
 				}
-
-                // Teleports you to the creative world spawn
-				try {
-					if (Objects.nonNull(player.getLocation().getWorld())) {
-						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
-					}
-				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					return false;
-				}
-				for (PotionEffect effect : player.getActivePotionEffects()) {
-					player.removePotionEffect(effect.getType());
-				}
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
-				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
+				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
-				player.setGameMode(GameMode.CREATIVE);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 				perms.setPermission("worldedit.*", true);
@@ -64,5 +41,4 @@ public class CommandCreative {
 		}
 		return false;
 	}
-
 }
