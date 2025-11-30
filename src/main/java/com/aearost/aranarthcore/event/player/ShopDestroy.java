@@ -36,7 +36,7 @@ public class ShopDestroy {
 			else {
 				return;
 			}
-		} else if (type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL) {
+		} else if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
 			Location signLocation = e.getBlock().getRelative(BlockFace.UP).getLocation();
 			Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
 			if (playerShop != null) {
@@ -131,7 +131,7 @@ public class ShopDestroy {
 		}
 
 		// If it is the player's shop
-		if (shop.getUuid() == player.getUniqueId()) {
+		if (shop.getUuid().equals(player.getUniqueId())) {
 			ShopUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
 			return 1;
 		}

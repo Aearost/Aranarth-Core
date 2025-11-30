@@ -354,12 +354,12 @@ public class ShopInteract {
 
 
 	/**
-	 * Determines if the clicked block is a chest, trapped chest, or barrel.
+	 * Determines if the clicked block is a chest OR A trapped chest.
 	 * @param type The type of material.
-	 * @return Confirmation of whether the block is a chest, trapped chest, or barrel.
+	 * @return Confirmation of whether the block is a chest OR A trapped chest.
 	 */
 	private boolean isChest(Material type) {
-		return type == Material.CHEST || type == Material.TRAPPED_CHEST || type == Material.BARREL;
+		return type == Material.CHEST || type == Material.TRAPPED_CHEST;
 	}
 
 
