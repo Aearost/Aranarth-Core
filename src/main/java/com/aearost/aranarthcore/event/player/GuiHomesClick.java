@@ -44,7 +44,7 @@ public class GuiHomesClick {
 
 						player.teleport(home.getLocation());
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
-						AranarthUtils.playTeleportSound(player);
+//						AranarthUtils.playTeleportSound(player);
 						player.closeInventory();
 						return;
 					}

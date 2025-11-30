@@ -30,7 +30,7 @@ public class CommandBack {
 				}
 
 				player.teleport(aranarthPlayer.getLastKnownTeleportLocation());
-				AranarthUtils.playTeleportSound(player);
+//				AranarthUtils.playTeleportSound(player);
 				player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
 				aranarthPlayer.setLastKnownTeleportLocation(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
