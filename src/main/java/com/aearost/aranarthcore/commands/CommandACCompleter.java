@@ -803,16 +803,27 @@ public class CommandACCompleter implements TabCompleter {
 									displayedOptions.add("inventory");
 									displayedOptions.add("homes");
 									displayedOptions.add("itemframe");
+									displayedOptions.add("bluefire");
+									displayedOptions.add("discord");
 								} else if ("randomizer".startsWith(args[2])) {
 									displayedOptions.add("randomizer");
-								} else if ("blacklist".startsWith(args[2])) {
-									displayedOptions.add("blacklist");
+								} else if (args[2].startsWith("b")) {
+									if (args[2].equals("b") || args[2].equals("bl")) {
+										displayedOptions.add("blacklist");
+										displayedOptions.add("bluefire");
+									} else if ("blacklist".startsWith(args[2])) {
+										displayedOptions.add("blacklist");
+									} else if ("bluefire".startsWith(args[2])) {
+										displayedOptions.add("bluefire");
+									}
 								} else if ("tables".startsWith(args[2])) {
 									displayedOptions.add("tables");
 								} else if ("shulker".startsWith(args[2])) {
 									displayedOptions.add("shulker");
 								} else if ("homes".startsWith(args[2])) {
 									displayedOptions.add("homes");
+								} else if ("discord".startsWith(args[2])) {
+									displayedOptions.add("discord");
 								} else if (args[2].startsWith("c")) {
 									if (args[2].equals("c")) {
 										displayedOptions.add("compress");
@@ -852,6 +863,8 @@ public class CommandACCompleter implements TabCompleter {
 									displayedOptions.add("inventory");
 									displayedOptions.add("homes");
 									displayedOptions.add("itemframe");
+									displayedOptions.add("bluefire");
+									displayedOptions.add("discord");
 								}
 							}
 						}
