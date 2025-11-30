@@ -222,7 +222,14 @@ public class ShopUtils {
             item.setAmount(1);
 
             loc = loc.clone();
-            loc.add(0.5, -0.1, 0.5);
+            // Player shop
+            if (shop.getUuid() != null) {
+                loc.add(0.5, -0.1, 0.5);
+            }
+            // Server shop
+            else {
+                loc.add(0.5, 0.8, 0.5);
+            }
 
             Item hologram = loc.getWorld().spawn(loc, Item.class, entity -> {
                 entity.setItemStack(item);

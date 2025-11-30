@@ -319,9 +319,9 @@ public class ShopCreate implements Listener {
 	}
 
 	/**
-	 * Determines if the block below is a chest, trapped chest, or barrel.
+	 * Determines if the block below is a chest or a trapped chest.
 	 * @param sign The sign above the block.
-	 * @return Confirmation of whether the block is a chest, trapped chest, or barrel.
+	 * @return Confirmation of whether the block is a chest or a trapped chest.
 	 */
 	private boolean isBlockBelowChest(Block sign) {
 		Location signLocation = sign.getLocation();
@@ -329,7 +329,6 @@ public class ShopCreate implements Listener {
 				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
 
 		return signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.CHEST
-				|| signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.BARREL
 				|| signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.TRAPPED_CHEST;
 	}
 
