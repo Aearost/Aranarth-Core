@@ -8,7 +8,6 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
-import org.bukkit.block.data.type.Leaves;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
@@ -716,11 +715,15 @@ public class DateUtils {
 	 * Apply the effects during the seventh month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
-		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
-		applyEffectToAllPlayers(effects);meltSnow(4);
-		applyForestFire();
+		meltSnow(4);
 		applyRain();
+
+		if (new Random().nextInt(15) == 0) {
+			List<PotionEffect> effects = new ArrayList<>();
+			effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
+			effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
+			applyEffectToAllPlayers(effects);
+		}
 	}
 
 	/**
@@ -728,7 +731,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getArdorvorDescription() {
-		return "The month of Ardorvór is the month of flames. Forest fires start at random throughout the month, and all sources of fire deal more damage.";
+		return "The month of Ardorvór is the month of flames. All sources of fire deal more damage, and random bursts of weakness and mining fatigue are felt.";
 	}
 
 	/**
@@ -879,7 +882,6 @@ public class DateUtils {
 	 */
 	private void applyObscurvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
 		applyEffectToAllPlayers(effects);
 
@@ -897,7 +899,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getObscurvorDescription() {
-		return "The month of Obscurvór is the month of rest. You will harvest blocks at a slower rate, and be hunted more frequently and aggressively by phantoms.";
+		return "The month of Obscurvór is the month of rest. You will still feel the slowness of Winter, and are also hunted more frequently and aggressively by phantoms.";
 	}
 
 	/**
@@ -1977,46 +1979,7 @@ public class DateUtils {
 		Bukkit.broadcastMessage(message);
 	}
 
-	/**
-	 * Applies chances of forest fires at a very low chance during the month of Ardorvor.
-	 */
-	private void applyForestFire() {
-		boolean shouldApplyForestFire = new Random().nextInt(200) == 0;
-		if (shouldApplyForestFire) {
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				Location loc = player.getLocation();
-				// Only apply logic in the survival world
-				if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
-					continue;
-				}
 
-				// Do not proceed if the chunk is not yet loaded
-				if (!loc.getChunk().isLoaded()) {
-					continue;
-				}
-
-				int radius = 50;
-				for (int x = loc.getBlockX() - radius; x < loc.getBlockX() + radius; x++) {
-					for (int z = loc.getBlockZ() - radius; z < loc.getBlockZ() + radius; z++) {
-						if (AranarthUtils.isSpawnLocation(loc) && loc.getWorld().getName().equals("world")) {
-							continue;
-						}
-						Block block = loc.getWorld().getHighestBlockAt(x, z);
-						if (isBiomeForForestFire(loc.getBlock().getBiome())) {
-							if (block.getBlockData() instanceof Leaves leaves) {
-								// Only apply to naturally generated trees
-								if (!leaves.isPersistent()) {
-									Bukkit.broadcastMessage(ChatUtils.chatMessage("&7There is a &c&oforest fire &7nearby " + AranarthUtils.getNickname(player)));
-									loc.getWorld().getHighestBlockAt(x, z).setType(Material.FIRE);
-									return;
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	}
 
 	/**
 	 * Applies a gradually fading in and fading out wind sound effect during the month of Ventivor.
