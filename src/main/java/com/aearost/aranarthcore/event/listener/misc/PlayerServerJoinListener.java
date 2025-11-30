@@ -49,7 +49,7 @@ public class PlayerServerJoinListener implements Listener {
 
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
-			player.teleport(new Location(Bukkit.getWorld("world"), -30.5, 78, -55.5, 0, 0));
+			player.teleport(new Location(Bukkit.getWorld("world"), -29.5, 74, -73.5, 0, 0));
 		}
 		// If the player changed their username
 		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {

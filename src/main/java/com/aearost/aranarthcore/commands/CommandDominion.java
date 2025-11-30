@@ -6,13 +6,14 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.potion.PotionEffect;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -145,29 +146,8 @@ public class CommandDominion {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (dominion != null) {
 			if (player.hasPermission("aranarth.dominion.home")) {
-				// Teleports you to the survival world spawn
-				try {
-					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
-				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					return;
-				}
-
-				// Only remove potion effects if changing from a non-survival world
-				if (!player.getLocation().getWorld().getName().startsWith("world")) {
-					for (PotionEffect effect : player.getActivePotionEffects()) {
-						player.removePotionEffect(effect.getType());
-					}
-				}
-
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
-				player.teleport(dominion.getDominionHome());
-				player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome());
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
-				player.setGameMode(GameMode.SURVIVAL);
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 				perms.setPermission("worldedit.*", false);

@@ -127,29 +127,27 @@ public class GuiHomepadClick {
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
 								player.leaveVehicle();
 								mount.teleport(home.getLocation());
-								player.teleport(home.getLocation());
+								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
 								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 								try {
 									Thread.sleep(20);
 								} catch (InterruptedException ex) {
 									Bukkit.getLogger().info("Something went wrong with the teleportation...");
 								}
-								player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
-								player.sendMessage(ChatUtils
-										.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+
+								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 								mount.addPassenger(player);
 							}
 						} else {
-							player.teleport(home.getLocation());
 							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 							try {
 								Thread.sleep(20);
 							} catch (InterruptedException ex) {
 								Bukkit.getLogger().info("Something went wrong with the teleportation...");
 							}
+							AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
 							player.sendMessage(ChatUtils
 									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
-							player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
 						}
 					}
 					player.closeInventory();

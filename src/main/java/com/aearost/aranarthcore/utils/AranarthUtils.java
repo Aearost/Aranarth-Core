@@ -5,7 +5,10 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
-import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.objects.LockedContainer;
+import com.aearost.aranarthcore.objects.Punishment;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.Block;
@@ -281,6 +284,11 @@ public class AranarthUtils {
 		// No need to change inventory
 		if (isSurvivalToSurvival || isSameWorld) {
 			return;
+		} else {
+			// Remove potion effects when changing the world
+			for (PotionEffect effect : player.getActivePotionEffects()) {
+				player.removePotionEffect(effect.getType());
+			}
 		}
 
 		if (currentWorld.startsWith("world")) {
@@ -289,12 +297,6 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 				player.getInventory().clear();
@@ -304,23 +306,11 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
-				// Only remove potion effects if changing from a non-survival world
-				if (!player.getLocation().getWorld().getName().startsWith("world")) {
-					for (PotionEffect effect : player.getActivePotionEffects()) {
-						player.removePotionEffect(effect.getType());
-					}
-				}
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
 					player.setGameMode(GameMode.CREATIVE);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 			}
@@ -331,12 +321,6 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 			} else if (destinationWorld.startsWith("creative")) {
@@ -344,12 +328,6 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
 					player.setGameMode(GameMode.CREATIVE);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 			}
@@ -360,12 +338,6 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 			} else if (destinationWorld.startsWith("arena")) {
@@ -373,12 +345,6 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					// Only remove potion effects if changing from a non-survival world
-					if (!player.getLocation().getWorld().getName().startsWith("world")) {
-						for (PotionEffect effect : player.getActivePotionEffects()) {
-							player.removePotionEffect(effect.getType());
-						}
-					}
 					return;
 				}
 				player.getInventory().clear();
@@ -388,12 +354,6 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
-				// Only remove potion effects if changing from a non-survival world
-				if (!player.getLocation().getWorld().getName().startsWith("world")) {
-					for (PotionEffect effect : player.getActivePotionEffects()) {
-						player.removePotionEffect(effect.getType());
-					}
-				}
 				return;
 			}
 			player.getInventory().clear();
