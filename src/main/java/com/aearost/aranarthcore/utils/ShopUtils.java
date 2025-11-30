@@ -4,9 +4,11 @@ import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -14,9 +16,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
+
 public class ShopUtils {
 
     private static final HashMap<UUID, List<Shop>> shops = new HashMap<>();
+    private static final HashMap<Shop, Item> shopToHologram = new HashMap<>();
 
     /**
      * Confirms whether the location (a sign) is a player or server shop or not.
@@ -116,6 +120,7 @@ public class ShopUtils {
 
         if (existingShop == null) {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
+            initializeHologramAtLocation(e.getBlock().getLocation());
         } else {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
         }
@@ -199,7 +204,71 @@ public class ShopUtils {
         }
         // Only delete if a shop was found
         if (shopSlotToDelete != -1) {
+            removeHologramFromLocation(shops.get(shopSlotToDelete).getLocation());
             shops.remove(shopSlotToDelete);
+        }
+    }
+
+    /**
+     * Creates a hologram of the shop item at the sign's location.
+     * @param loc The location of the shop.
+     */
+    public static void initializeHologramAtLocation(Location loc) {
+        Shop shop = getShopFromLocation(loc);
+        if (shop != null) {
+            ItemStack item = shop.getItem().clone();
+            item.setAmount(1);
+
+            loc = loc.clone();
+            loc.add(0.5, -0.1, 0.5);
+
+            Item hologram = loc.getWorld().spawn(loc, Item.class, entity -> {
+                entity.setItemStack(item);
+                entity.setGravity(false);
+                entity.setVelocity(new Vector(0, 0, 0));
+                entity.setPickupDelay(Integer.MAX_VALUE);
+                entity.setUnlimitedLifetime(true);
+                entity.setPersistent(true);
+            });
+
+            shopToHologram.put(shop, hologram);
+        }
+    }
+
+    /**
+     * Removes a hologram of the shop item at the sign's location.
+     * @param loc The location of the shop.
+     */
+    public static void removeHologramFromLocation(Location loc) {
+        Shop shop = getShopFromLocation(loc);
+        if (shop != null) {
+            Item hologram = shopToHologram.get(shop);
+            if (hologram != null) {
+                hologram.remove();
+                shopToHologram.remove(shop);
+            }
+        }
+    }
+
+    /**
+     * Creates all holograms for all shops.
+     */
+    public static void initializeAllHolograms() {
+        for (UUID uuid : shops.keySet()) {
+            for (Shop shop : shops.get(uuid)) {
+                initializeHologramAtLocation(shop.getLocation());
+            }
+        }
+    }
+
+    /**
+     * Removes all holograms for all shops.
+     */
+    public static void removeAllHolograms() {
+        for (UUID uuid : shops.keySet()) {
+            for (Shop shop : shops.get(uuid)) {
+                removeHologramFromLocation(shop.getLocation());
+            }
         }
     }
 
