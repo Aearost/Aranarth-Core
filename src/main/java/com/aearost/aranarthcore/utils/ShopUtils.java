@@ -4,17 +4,16 @@ import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class ShopUtils {
@@ -96,15 +95,15 @@ public class ShopUtils {
         }
 
         Block sign = e.getBlock();
-        Shop existingShop = ShopUtils.getShopFromLocation(sign.getLocation());
-        Shop newShop = null;
-        newShop = new Shop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
+        Location loc = sign.getLocation();
+        Shop existingShop = ShopUtils.getShopFromLocation(loc);
 
         // If the shop exists, remove it
         if (existingShop != null) {
-            ShopUtils.removeShop(uuid, sign.getLocation());
+            ShopUtils.removeShop(existingShop);
         }
 
+        Shop newShop = new Shop(uuid, e.getBlock().getLocation(), shopItem, quantity, buyPrice, sellPrice);
         ShopUtils.addShop(uuid, newShop);
         if (player != null) {
             e.setLine(0, ChatUtils.translateToColor("&6&l[Shop]"));
@@ -120,12 +119,11 @@ public class ShopUtils {
 
         if (existingShop == null) {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have created a new shop!"));
-            initializeHologramAtLocation(e.getBlock().getLocation());
         } else {
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have updated this shop!"));
-            removeHologramFromLocation(e.getBlock().getLocation());
-            initializeHologramAtLocation(e.getBlock().getLocation());
         }
+
+        initializeShopHologram(newShop);
         e.getPlayer().playSound(e.getPlayer(), Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
     }
 
@@ -191,37 +189,37 @@ public class ShopUtils {
     }
 
     /**
-     * Removes the player shop at the associated location for the input UUID.
-     * @param uuid The UUID.
-     * @param location The location of the sign of the shop.
+     * Removes the shop from the shops hashmap.
+     * @param shop The shop.
      */
-    public static void removeShop(UUID uuid, Location location) {
-        List<Shop> shops = ShopUtils.shops.get(uuid);
+    public static void removeShop(Shop shop) {
+        List<Shop> uuidShops = shops.get(shop.getUuid());
         int shopSlotToDelete = -1;
-        for (int i = 0; i < shops.size(); i++) {
-            if (shops.get(i).getLocation().equals(location)) {
+        for (int i = 0; i < uuidShops.size(); i++) {
+            if (uuidShops.get(i).equals(shop)) {
                 shopSlotToDelete = i;
                 break;
             }
         }
+
         // Only delete if a shop was found
         if (shopSlotToDelete != -1) {
-            removeHologramFromLocation(shops.get(shopSlotToDelete).getLocation());
-            shops.remove(shopSlotToDelete);
+            removeShopHologram(shop);
+            uuidShops.remove(shopSlotToDelete);
+            shops.put(shop.getUuid(), uuidShops);
         }
     }
 
     /**
-     * Creates a hologram of the shop item at the sign's location.
-     * @param loc The location of the shop.
+     * Creates a hologram of the shop item.
+     * @param shop The shop.
      */
-    public static void initializeHologramAtLocation(Location loc) {
-        Shop shop = getShopFromLocation(loc);
+    public static void initializeShopHologram(Shop shop) {
         if (shop != null) {
             ItemStack item = shop.getItem().clone();
             item.setAmount(1);
 
-            loc = loc.clone();
+            Location loc = shop.getLocation().clone();
             // Player shop
             if (shop.getUuid() != null) {
                 loc.add(0.5, -0.1, 0.5);
@@ -245,15 +243,27 @@ public class ShopUtils {
     }
 
     /**
-     * Removes a hologram of the shop item at the sign's location.
-     * @param loc The location of the shop.
+     * Removes a hologram of the shop item.
+     * @param shop The shop.
      */
-    public static void removeHologramFromLocation(Location loc) {
-        Shop shop = getShopFromLocation(loc);
+    public static void removeShopHologram(Shop shop) {
         if (shop != null) {
             Item hologram = shopToHologram.get(shop);
             if (hologram != null) {
                 hologram.remove();
+
+                // Bug when server is restarted that holograms are created and orphaned
+                // This cleans them up
+                Location loc = hologram.getLocation();
+                BoundingBox box = BoundingBox.of(loc, 0, 1, 0);
+                Collection<Entity> nearby = loc.getWorld().getNearbyEntities(box);
+                for (Entity entity : nearby) {
+                    if (entity instanceof Item) {
+                        entity.remove();
+                    }
+                }
+
+                shopToHologram.put(shop, hologram);
                 shopToHologram.remove(shop);
             }
         }
@@ -265,7 +275,7 @@ public class ShopUtils {
     public static void initializeAllHolograms() {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
-                initializeHologramAtLocation(shop.getLocation());
+                initializeShopHologram(shop);
             }
         }
     }
@@ -276,7 +286,7 @@ public class ShopUtils {
     public static void removeAllHolograms() {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
-                removeHologramFromLocation(shop.getLocation());
+                removeShopHologram(shop);
             }
         }
     }

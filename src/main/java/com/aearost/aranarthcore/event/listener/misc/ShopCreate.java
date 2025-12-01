@@ -385,8 +385,10 @@ public class ShopCreate implements Listener {
 	 * @return Confirmation whether the shop was successfully removed.
 	 */
 	private boolean canShopBeRemoved(SignChangeEvent e) {
-		if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
-			ShopUtils.removeShop(ShopUtils.getShopFromLocation(e.getBlock().getLocation()).getUuid(), e.getBlock().getLocation());
+		Location loc = e.getBlock().getLocation();
+		Shop shop = ShopUtils.getShopFromLocation(loc);
+		if (shop != null) {
+			ShopUtils.removeShop(shop);
 
 			// Clears lines of all color formatting
 			e.setLine(0, ChatUtils.stripColorFormatting(e.getLine(0)));

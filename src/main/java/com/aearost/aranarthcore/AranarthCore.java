@@ -55,8 +55,8 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
 				PersistenceUtils.saveShops();
-				ShopUtils.removeAllHolograms();
-				ShopUtils.initializeAllHolograms();
+//				ShopUtils.removeAllHolograms();
+//				ShopUtils.initializeAllHolograms();
 				PersistenceUtils.saveDominions();
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
