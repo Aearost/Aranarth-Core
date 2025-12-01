@@ -28,6 +28,15 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
+		if (!AranarthUtils.hasPlayedBefore(player)) {
+			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
+			player.teleport(new Location(Bukkit.getWorld("world"), -29.5, 74, -73.5, 0, 0));
+		}
+		// If the player changed their username
+		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
+			AranarthUtils.setUsername(player);
+		}
+
 		if (AvatarUtils.getCurrentAvatar() != null) {
 			// Called to bind the Avatar's abilities to prevent loss of avatar abilities
 			if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
@@ -45,15 +54,6 @@ public class PlayerServerJoinListener implements Listener {
 					}
 				}.runTaskLater(AranarthCore.getInstance(), 30);
 			}
-		}
-
-		if (!AranarthUtils.hasPlayedBefore(player)) {
-			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
-			player.teleport(new Location(Bukkit.getWorld("world"), -29.5, 74, -73.5, 0, 0));
-		}
-		// If the player changed their username
-		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
-			AranarthUtils.setUsername(player);
 		}
 
 		// Permissions must be applied before nickname check is done

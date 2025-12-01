@@ -34,11 +34,7 @@ public class PlayerServerQuitListener implements Listener {
 
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
-		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDisplay = "&7" + AranarthUtils.getNickname(player);
-		} else {
-			nameToDisplay = "&7" + AranarthUtils.getUsername(player);
-		}
+		nameToDisplay = "&7" + AranarthUtils.getNickname(player);
 		
 		if (dateUtils.isValentinesDay()) {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
