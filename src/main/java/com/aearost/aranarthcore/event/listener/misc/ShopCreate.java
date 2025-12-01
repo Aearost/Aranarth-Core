@@ -61,6 +61,11 @@ public class ShopCreate implements Listener {
 			if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
+					if (getShopItem(sign).getType() == Material.AIR) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+						return;
+					}
+
 					String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
 					// Price check
 					if (priceParts[0].equalsIgnoreCase("B")) {
@@ -97,6 +102,11 @@ public class ShopCreate implements Listener {
 					ItemStack heldItem = player.getInventory().getItemInMainHand();
 
 					if (heldItem != null && heldItem.getType() != Material.AIR) {
+						if (getShopItem(sign).getType() == Material.AIR) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+							return;
+						}
+
 						String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
 						// Price check
 						if (priceParts[0].equalsIgnoreCase("B")) {
@@ -348,6 +358,10 @@ public class ShopCreate implements Listener {
 		Container container = (Container) state;
 		ItemStack firstItem = container.getInventory().getContents()[0];
 		if (firstItem != null) {
+			if (firstItem.getType() == Material.AIR || firstItem.getType().name().contains("SHULKER_BOX") || firstItem.getType().name().contains("BUNDLE")) {
+				return new ItemStack(Material.AIR);
+			}
+
 			ItemStack shopItem = firstItem.clone();
 			shopItem.setAmount(1);
 			return shopItem;
