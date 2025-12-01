@@ -1,16 +1,17 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.Shop;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
+import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -19,7 +20,7 @@ import java.util.*;
 public class ShopUtils {
 
     private static final HashMap<UUID, List<Shop>> shops = new HashMap<>();
-    private static final HashMap<Shop, Item> shopToHologram = new HashMap<>();
+    private static final HashMap<Shop, ItemDisplay> shopToHologram = new HashMap<>();
 
     /**
      * Confirms whether the location (a sign) is a player or server shop or not.
@@ -222,21 +223,25 @@ public class ShopUtils {
             Location loc = shop.getLocation().clone();
             // Player shop
             if (shop.getUuid() != null) {
-                loc.add(0.5, -0.1, 0.5);
+                loc.add(0.5, 0.15, 0.5);
             }
             // Server shop
             else {
-                loc.add(0.5, 0.8, 0.5);
+                loc.add(0.5, 1, 0.5);
             }
 
-            Item hologram = loc.getWorld().spawn(loc, Item.class, entity -> {
-                entity.setItemStack(item);
-                entity.setGravity(false);
-                entity.setVelocity(new Vector(0, 0, 0));
-                entity.setPickupDelay(Integer.MAX_VALUE);
-                entity.setUnlimitedLifetime(true);
-                entity.setPersistent(true);
-            });
+            ItemDisplay hologram = loc.getWorld().spawn(loc, ItemDisplay.class);
+            hologram.setItemStack(item);
+            hologram.setBillboard(Display.Billboard.CENTER);
+            hologram.setGravity(false);
+            hologram.setVelocity(new Vector(0, 0, 0));
+            hologram.setInvulnerable(true);
+            hologram.setPersistent(true);
+
+            // Decreases the size of the display
+            Transformation t = hologram.getTransformation();
+            t.getScale().set(new Vector3f(0.35F, 0.35F, 0.35F));
+            hologram.setTransformation(t);
 
             shopToHologram.put(shop, hologram);
         }
@@ -248,17 +253,17 @@ public class ShopUtils {
      */
     public static void removeShopHologram(Shop shop) {
         if (shop != null) {
-            Item hologram = shopToHologram.get(shop);
+            ItemDisplay hologram = shopToHologram.get(shop);
             if (hologram != null) {
                 hologram.remove();
 
                 // Bug when server is restarted that holograms are created and orphaned
                 // This cleans them up
                 Location loc = hologram.getLocation();
-                BoundingBox box = BoundingBox.of(loc, 0, 1, 0);
+                BoundingBox box = BoundingBox.of(loc, 0.5, 3, 0.5);
                 Collection<Entity> nearby = loc.getWorld().getNearbyEntities(box);
                 for (Entity entity : nearby) {
-                    if (entity instanceof Item) {
+                    if (entity instanceof ItemDisplay) {
                         entity.remove();
                     }
                 }
@@ -287,6 +292,19 @@ public class ShopUtils {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
                 removeShopHologram(shop);
+            }
+        }
+    }
+
+    /**
+     * Prevents all movement to the holograms from sources such as bending.
+     */
+    public static void preventHologramMovement() {
+        for (Shop shop : shopToHologram.keySet()) {
+            Vector velocity = shopToHologram.get(shop).getVelocity();
+            if (velocity.getX() != 0 || velocity.getY() != 0 || velocity.getZ() != 0) {
+                Bukkit.getLogger().info("Canceling velocity");
+                shopToHologram.get(shop).setVelocity(new Vector(0, 0, 0));
             }
         }
     }

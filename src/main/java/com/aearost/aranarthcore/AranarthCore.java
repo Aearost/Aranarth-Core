@@ -55,8 +55,8 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
 				PersistenceUtils.saveShops();
-//				ShopUtils.removeAllHolograms();
-//				ShopUtils.initializeAllHolograms();
+				ShopUtils.removeAllHolograms();
+				ShopUtils.initializeAllHolograms();
 				PersistenceUtils.saveDominions();
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
@@ -117,9 +117,10 @@ public class AranarthCore extends JavaPlugin {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
+//				ShopUtils.preventHologramMovement();
 				AranarthUtils.applyWaterfallEffect();
 			}
-		}, 0, 1);
+		}, 1, 1);
 
 	}
 
