@@ -154,7 +154,7 @@ public class AranarthUtils {
 	 */
 	public static String getNickname(OfflinePlayer player) {
 		String nickname = players.get(player.getUniqueId()).getNickname();
-		return nickname.isEmpty() ? getUsername(player) : nickname;
+		return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
 	}
 
 	/**

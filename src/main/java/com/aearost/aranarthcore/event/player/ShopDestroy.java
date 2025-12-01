@@ -132,14 +132,14 @@ public class ShopDestroy {
 
 		// If it is the player's shop
 		if (shop.getUuid().equals(player.getUniqueId())) {
-			ShopUtils.removeShop(player.getUniqueId(), destroyedSignLocation);
+			ShopUtils.removeShop(shop);
 			return 1;
 		}
 		// If it is a server shop
 		else if (shop.getUuid() == null) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getCouncilRank() == 3) {
-				ShopUtils.removeShop(null, destroyedSignLocation);
+				ShopUtils.removeShop(shop);
 				return 1;
 			}
 		}
