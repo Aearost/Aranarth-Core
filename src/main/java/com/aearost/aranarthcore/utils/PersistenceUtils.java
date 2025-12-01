@@ -752,11 +752,8 @@ public class PersistenceUtils {
 				FileWriter writer = new FileWriter(filePath);
 				writer.write("#owner|trusted|worldName|x1|y1|z1|x2|y2|z2\n");
 
-				Bukkit.getLogger().info("A");
 				if (lockedContainers != null && !lockedContainers.isEmpty()) {
-					Bukkit.getLogger().info("B");
 					for (LockedContainer container : lockedContainers) {
-						Bukkit.getLogger().info("C");
 						String owner = container.getOwner().toString();
 						StringBuilder trusted = new StringBuilder();
 						for (UUID trustedUuid : container.getTrusted()) {

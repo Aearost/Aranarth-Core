@@ -120,12 +120,16 @@ public class ShopInteract {
 
 			if (location1Shop != null || (locations[1] != null && location2Shop != null)) {
 				if (!location1Shop.getUuid().equals(e.getPlayer().getUniqueId()) || (location2Shop != null && !location2Shop.getUuid().equals(e.getPlayer().getUniqueId()))) {
-					// Prevents other players from destroying or opening the chest
-					e.setCancelled(true);
-					if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
-					} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open someone else's player shop chest!"));
+
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+					if (!aranarthPlayer.getIsInAdminMode()) {
+						// Prevents other players from destroying or opening the chest
+						e.setCancelled(true);
+						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+							e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+						} else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+							e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open someone else's player shop chest!"));
+						}
 					}
 				}
 			}

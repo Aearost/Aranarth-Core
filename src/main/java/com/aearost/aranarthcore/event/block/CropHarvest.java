@@ -1,8 +1,11 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
@@ -11,6 +14,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -25,10 +29,24 @@ import java.util.Random;
 public class CropHarvest {
 
 	public void execute(BlockBreakEvent e) {
+		Player player = e.getPlayer();
+		Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+
+		if (blockDominion != null) {
+			if (playerDominion == null || !playerDominion.getOwner().equals(blockDominion.getOwner())) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (!aranarthPlayer.getIsInAdminMode()) {
+					e.setCancelled(true);
+					return;
+				}
+			}
+		}
+
 		Block block = e.getBlock();
 
 		// Prevent block destruction if sneaking
-		if (e.getPlayer().isSneaking()) {
+		if (player.isSneaking()) {
 			e.setCancelled(true);
 		}
 
@@ -56,7 +74,7 @@ public class CropHarvest {
 		}
 
 		Material cropType = drops.get(0).getType();
-		ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+		ItemStack heldItem = player.getInventory().getItemInMainHand();
 		int fortuneLevel = 0;
 
 		// Calculates crop yields including fortune and winter yields
@@ -121,7 +139,7 @@ public class CropHarvest {
 		Ageable crop = (Ageable) block.getBlockData();
 
 		// Auto-replant functionality
-		if (e.getPlayer().isSneaking()) {
+		if (player.isSneaking()) {
 			e.setCancelled(true);
 
 			// Manually reducing the seed used to replant the crop
@@ -140,7 +158,7 @@ public class CropHarvest {
 			crop.setAge(0);
 
 			// mcMMO Herbalism XP gain is lost because of this
-			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
 			if (mcmmoPlayer != null) {
 				HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
 				HashSet<Block> brokenBlocks = new HashSet<>();
@@ -161,7 +179,7 @@ public class CropHarvest {
 			}
 
 			// mcMMO Herbalism XP gain is lost because of this
-			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(e.getPlayer());
+			McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
 			if (mcmmoPlayer != null) {
 				HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
 				HashSet<Block> brokenBlocks = new HashSet<>();
