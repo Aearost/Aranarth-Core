@@ -18,6 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Handles the interacting with a player shop.
@@ -308,14 +309,27 @@ public class ShopInteract {
 
 	/**
 	 * Verifies if the contents contains the full amount needed from the shop.
-	 * @param contents The contents to be verified.
+	 * @param inventory The contents to be verified.
 	 * @param playerShop The player shop being interacted with.
 	 * @return Confirmation if the contents contain the full amount from the shop.
 	 */
-	private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] contents, Shop playerShop) {
+	private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] inventory, Shop playerShop) {
 		boolean hasInventory = false;
 		int summedQuantityOfItem = 0;
 		ArrayList<Integer> indexesWithItem = new ArrayList<>();
+
+		// Avoids reference errors
+		List<ItemStack> items = new ArrayList<>();
+		for (ItemStack is : inventory) {
+			if (is == null) {
+				items.add(null);
+				continue;
+			} else {
+				ItemStack clone = is.clone();
+				items.add(clone);
+			}
+		}
+		ItemStack[] contents = items.toArray(new ItemStack[0]);
 
 		for (int i = contents.length - 1; i >= 0; i--) {
 			if (contents[i] != null && contents[i].isSimilar(playerShop.getItem())) {

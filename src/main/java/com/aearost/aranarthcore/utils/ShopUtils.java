@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.Shop;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -292,19 +291,6 @@ public class ShopUtils {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
                 removeShopHologram(shop);
-            }
-        }
-    }
-
-    /**
-     * Prevents all movement to the holograms from sources such as bending.
-     */
-    public static void preventHologramMovement() {
-        for (Shop shop : shopToHologram.keySet()) {
-            Vector velocity = shopToHologram.get(shop).getVelocity();
-            if (velocity.getX() != 0 || velocity.getY() != 0 || velocity.getZ() != 0) {
-                Bukkit.getLogger().info("Canceling velocity");
-                shopToHologram.get(shop).setVelocity(new Vector(0, 0, 0));
             }
         }
     }
