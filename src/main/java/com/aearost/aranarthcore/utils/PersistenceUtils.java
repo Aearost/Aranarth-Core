@@ -696,6 +696,9 @@ public class PersistenceUtils {
 				int z2 = 0;
 				boolean isLoc2Null = false;
 				try {
+					if (fields.length == 6) {
+						throw new NumberFormatException();
+					}
 					x2 = Integer.parseInt(fields[6]);
 					y2 = Integer.parseInt(fields[7]);
 					z2 = Integer.parseInt(fields[8]);
@@ -749,8 +752,11 @@ public class PersistenceUtils {
 				FileWriter writer = new FileWriter(filePath);
 				writer.write("#owner|trusted|worldName|x1|y1|z1|x2|y2|z2\n");
 
+				Bukkit.getLogger().info("A");
 				if (lockedContainers != null && !lockedContainers.isEmpty()) {
+					Bukkit.getLogger().info("B");
 					for (LockedContainer container : lockedContainers) {
+						Bukkit.getLogger().info("C");
 						String owner = container.getOwner().toString();
 						StringBuilder trusted = new StringBuilder();
 						for (UUID trustedUuid : container.getTrusted()) {
@@ -776,6 +782,7 @@ public class PersistenceUtils {
 						}
 
 						String row = owner + "|" + trustedString + "|" + worldName + "|" + x1 + "|" + y1 + "|" + z1 + "|" + x2 + "|" + y2 + "|" + z2 + "\n";
+						writer.write(row);
 					}
 				}
 				writer.close();
