@@ -25,6 +25,11 @@ public class CommandTphere {
 				if (AranarthUtils.getUUIDFromUsername(args[1]) != null) {
 					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsername(args[1]));
 					if (target != null) {
+						if (player.getUniqueId().equals(target.getUniqueId())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
+							return true;
+						}
+
 						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						targetPlayer.setTeleportToUuid(player.getUniqueId());
