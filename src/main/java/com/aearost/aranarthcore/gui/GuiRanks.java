@@ -143,10 +143,11 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&o- &b&oWaterArms"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
-		baronLore.add(ChatUtils.translateToColor("12 quiver slots"));
-		baronLore.add(ChatUtils.translateToColor("350 potion slots"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -225,7 +226,6 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
@@ -253,6 +253,7 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 1500 potion slots"));
@@ -280,8 +281,7 @@ public class GuiRanks {
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustionbending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited chest shops"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 5 homes"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 45 quiver slots"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 2500 potion slots"));
