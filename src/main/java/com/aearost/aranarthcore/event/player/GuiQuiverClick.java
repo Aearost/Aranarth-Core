@@ -41,11 +41,10 @@ public class GuiQuiverClick {
 			if (clickedItem != null) {
 				// If adding a new item to the arrows inventory
 				if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-					// If placing potion back into player slots
-					if (Objects.nonNull(e.getCursor())) {
+					// If placing an arrow back into player slots
+					if (Objects.nonNull(e.getCursor()) && isItemArrow(e.getCursor())) {
 						return;
 					}
-					e.setCancelled(true);
 
 					if (!isItemArrow(clickedItem)) {
 						e.setCancelled(true);
