@@ -95,6 +95,7 @@ public class ShopCreate implements Listener {
 				// If all the lines were entered correctly
 				if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
 					ItemStack heldItem = player.getInventory().getItemInMainHand();
+
 					if (heldItem != null && heldItem.getType() != Material.AIR) {
 						String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
 						// Price check
@@ -263,7 +264,7 @@ public class ShopCreate implements Listener {
 			return -1;
 		}
 
-		if (ChatUtils.stripColorFormatting(quantityLineParts[0]).equalsIgnoreCase("qty")) {
+		if (ChatUtils.stripColorFormatting(quantityLineParts[0]).equalsIgnoreCase("QTY")) {
 			int quantity = 0;
 			try {
 				quantity = Integer.parseInt(quantityLineParts[1]);

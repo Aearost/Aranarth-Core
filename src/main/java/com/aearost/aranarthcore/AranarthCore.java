@@ -117,7 +117,6 @@ public class AranarthCore extends JavaPlugin {
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
-//				ShopUtils.preventHologramMovement();
 				AranarthUtils.applyWaterfallEffect();
 			}
 		}, 1, 1);

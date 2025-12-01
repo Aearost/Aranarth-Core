@@ -201,7 +201,7 @@ public class AranarthPlayer {
 	 * @return The current nickname.
 	 */
 	public String getNickname() {
-		return nickname.isEmpty() ? username : nickname;
+		return (nickname == null || nickname.isEmpty()) ? username : nickname;
 	}
 
 	/**
