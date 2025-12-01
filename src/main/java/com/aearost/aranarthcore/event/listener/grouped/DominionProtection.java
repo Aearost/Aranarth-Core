@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -142,9 +143,12 @@ public class DominionProtection implements Listener {
 				|| block.getType().name().endsWith("_GATE")) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
-				boolean isActionPrevented = applyLogic(player, block, null);
-				if (isActionPrevented) {
-					e.setCancelled(true);
+				// Only show the error if it is not a shop
+				if (ShopUtils.getShopFromLocation(block.getLocation()) == null) {
+					boolean isActionPrevented = applyLogic(player, block, null);
+					if (isActionPrevented) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
