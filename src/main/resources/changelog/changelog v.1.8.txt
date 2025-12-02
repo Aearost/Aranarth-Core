@@ -74,6 +74,7 @@ Features
 [~] Re-wrote and changed the logic and the formatting for player and server shop creation
 [~] Added centralized teleport logic
 [+] Added holograms to shops
+[+] Added in Breeze spawns during the month of Ventivor
 
 Miscellaneous
 - Removed redundant logs from weather
