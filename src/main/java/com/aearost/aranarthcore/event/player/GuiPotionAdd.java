@@ -111,14 +111,18 @@ public class GuiPotionAdd {
 		} else {
 			// Adding potion by shift-clicking it into the potion inventory
 			if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-				String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) + 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
-				// If there are too many potions in the pouch
-				if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
-					potionStats = "&c" + potionStats;
-				}
+				if (hasSpaceInPotionGui) {
+					String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) + 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
+					// If there are too many potions in the pouch
+					if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
+						potionStats = "&c" + potionStats;
+					}
 
-				addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
-				e.getView().setTitle("Add Potions " + potionStats);
+					addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
+					e.getView().setTitle("Add Potions " + potionStats);
+				} else {
+
+				}
 			}
 		}
 	}
