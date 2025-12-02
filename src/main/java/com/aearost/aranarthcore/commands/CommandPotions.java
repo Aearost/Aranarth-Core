@@ -115,12 +115,12 @@ public class CommandPotions {
                     default ->
                             player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid potion sub-command!"));
                 }
+				return true;
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
 			return true;
 		}
-		return false;
 	}
 
 }
