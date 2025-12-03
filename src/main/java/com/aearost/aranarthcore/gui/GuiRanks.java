@@ -36,7 +36,7 @@ public class GuiRanks {
 	}
 
 	private Inventory initializeGui(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 54,
+		Inventory gui = Bukkit.getServer().createInventory(player, 45,
 				ChatUtils.translateToColor("&8&lAranarth Ranks"));
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -47,17 +47,14 @@ public class GuiRanks {
 		ItemStack yellowPane = new ItemStack(Material.YELLOW_STAINED_GLASS_PANE);
 		ItemStack blackPane = new ItemStack(Material.BLACK_STAINED_GLASS_PANE);
 		ItemStack peasant = new ItemStack(Material.LIME_CONCRETE_POWDER);
-		ItemStack esquire = new ItemStack(Material.LIGHT_GRAY_CONCRETE_POWDER);
+		ItemStack esquire = new ItemStack(Material.PINK_CONCRETE_POWDER);
 		ItemStack knight = new ItemStack(Material.WHITE_CONCRETE_POWDER);
-		ItemStack baron = new ItemStack(Material.CYAN_CONCRETE_POWDER);
+		ItemStack baron = new ItemStack(Material.MAGENTA_CONCRETE_POWDER);
 		ItemStack count = new ItemStack(Material.GRAY_CONCRETE_POWDER);
 		ItemStack duke = new ItemStack(Material.YELLOW_CONCRETE_POWDER);
 		ItemStack prince = new ItemStack(Material.LIGHT_BLUE_CONCRETE_POWDER);
 		ItemStack king = new ItemStack(Material.BLUE_CONCRETE_POWDER);
 		ItemStack emperor = new ItemStack(Material.RED_CONCRETE_POWDER);
-		ItemStack saint1 = new ItemStack(Material.PINK_CONCRETE_POWDER);
-		ItemStack saint2 = new ItemStack(Material.MAGENTA_CONCRETE_POWDER);
-		ItemStack saint3 = new ItemStack(Material.PURPLE_CONCRETE_POWDER);
 
 		// Removing name of panes
 		ItemMeta yellowPaneMeta = yellowPane.getItemMeta();
@@ -288,58 +285,6 @@ public class GuiRanks {
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 
-		// Saint 1
-		ItemMeta saint1Meta = saint1.getItemMeta();
-		ArrayList<String> saint1Lore = new ArrayList<>();
-		saint1Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint I - $9.99"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Blacklist"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Tables"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Basic colored chat"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- Free element changes"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac hat"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac trash"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac back"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 2 additional homes"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 3 additional quiver slots"));
-		saint1Lore.add(ChatUtils.translateToColor("&f&o- 500 additional potion slots"));
-		saint1Meta.setLore(saint1Lore);
-		saint1.setItemMeta(saint1Meta);
-
-		// Saint 2
-		ItemMeta saint2Meta = saint2.getItemMeta();
-		ArrayList<String> saint2Lore = new ArrayList<>();
-		saint2Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint II - $19.99"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- Shulker Assist"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- Item Name (color)"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- Full colored chat"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac ignore"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (hex)"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 5 additional homes"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 6 additional quiver slots"));
-		saint2Lore.add(ChatUtils.translateToColor("&f&o- 1000 additional potion slots"));
-		saint2Meta.setLore(saint2Lore);
-		saint2.setItemMeta(saint2Meta);
-
-		// Saint 3
-		ItemMeta saint3Meta = saint3.getItemMeta();
-		ArrayList<String> saint3Lore = new ArrayList<>();
-		saint3Meta.setDisplayName(ChatUtils.translateToColor("&d&l&nSaint III - $29.99"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&lPerks"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Inventory Assist"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Compressor"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Randomizer"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- Item Name (gradient)"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- /ac nick (gradient)"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 10 additional homes"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 9 additional quiver slots"));
-		saint3Lore.add(ChatUtils.translateToColor("&f&o- 2500 additional potion slots"));
-		saint3Meta.setLore(saint3Lore);
-		saint3.setItemMeta(saint3Meta);
-
 		// Initialize GUI
 		// Line 1
 		gui.setItem(0, yellowPane);
@@ -382,7 +327,7 @@ public class GuiRanks {
 		gui.setItem(34, yellowPane);
 		gui.setItem(35, blackPane);
 		// Line 5
-		gui.setItem(36, blackPane);
+		gui.setItem(36, yellowPane);
 		gui.setItem(37, yellowPane);
 		gui.setItem(38, blackPane);
 		gui.setItem(39, blackPane);
@@ -390,17 +335,7 @@ public class GuiRanks {
 		gui.setItem(41, blackPane);
 		gui.setItem(42, blackPane);
 		gui.setItem(43, yellowPane);
-		gui.setItem(44, blackPane);
-		// Line 6
-		gui.setItem(45, yellowPane);
-		gui.setItem(46, yellowPane);
-		gui.setItem(47, saint1);
-		gui.setItem(48, blackPane);
-		gui.setItem(49, saint2);
-		gui.setItem(50, blackPane);
-		gui.setItem(51, saint3);
-		gui.setItem(52, yellowPane);
-		gui.setItem(53, yellowPane);
+		gui.setItem(44, yellowPane);
 
 		return gui;
 	}

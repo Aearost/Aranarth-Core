@@ -383,7 +383,6 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveWarps();
 		PersistenceUtils.savePunishments();
 		PersistenceUtils.saveAvatars();
-		DiscordUtils.updateAllDiscordRoles();
 
 		Bukkit.resetRecipes();
 	}
