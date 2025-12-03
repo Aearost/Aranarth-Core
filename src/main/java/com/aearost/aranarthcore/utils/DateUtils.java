@@ -13,6 +13,7 @@ import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.Animals;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -892,6 +893,7 @@ public class DateUtils {
 			AranarthUtils.setStormDelay(new Random().nextInt(36000) + 12000);
 		}
 		applySnow(35, 700);
+		attemptSpawnExtraPhantoms();
 	}
 
 	/**
@@ -1979,8 +1981,6 @@ public class DateUtils {
 		Bukkit.broadcastMessage(message);
 	}
 
-
-
 	/**
 	 * Applies a gradually fading in and fading out wind sound effect during the month of Ventivor.
 	 * @param runs The current number of runs within the runnable, one every 1/4 second up to 20 runs.
@@ -2051,6 +2051,49 @@ public class DateUtils {
 				|| biome == Biome.FLOWER_FOREST || biome == Biome.MEADOW;
 	}
 
+	/**
+	 * Spawns phantoms at an increased rate during the month of Obscurvor.
+	 */
+	private void attemptSpawnExtraPhantoms() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Location loc = player.getLocation();
+			String name = loc.getWorld().getName();
+			if (name.equals("world") || name.equals("smp") || name.equals("resource")) {
+				// Skip if the player is below sea level
+				if (loc.getBlockY() < loc.getWorld().getSeaLevel()) {
+					continue;
+				}
 
+				long time = loc.getWorld().getTime();
+				if (time > 0 && time < 13000) {
+					continue;
+				}
+
+				// Every 60s allow for spawn to occur
+				if (AranarthUtils.getPhantomSpawnDelay() >= 11) {
+					// 25% chance to spawn every 5 seconds after 45 seconds
+					if (new Random().nextInt(4) == 0) {
+						// Spawn after 1 day of no sleep instead of 3
+						if (!player.isSleeping() && player.getStatistic(Statistic.TIME_SINCE_REST) > 24000) {
+							int amount = 1 + new Random().nextInt(3);
+							for (int i = 0; i < amount; i++) {
+								Location spawnLoc = loc.clone().add(
+										(Math.random() - 0.5) * 30,
+										15 + Math.random() * 10,
+										(Math.random() - 0.5) * 30
+								);
+
+								loc.getWorld().spawnEntity(spawnLoc, EntityType.PHANTOM);
+								AranarthUtils.setPhantomSpawnDelay(0);
+							}
+						}
+					}
+					return;
+				} else {
+					AranarthUtils.setPhantomSpawnDelay(AranarthUtils.getPhantomSpawnDelay() + 1);
+				}
+			}
+		}
+	}
 
 }

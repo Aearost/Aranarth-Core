@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.world;
+package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;

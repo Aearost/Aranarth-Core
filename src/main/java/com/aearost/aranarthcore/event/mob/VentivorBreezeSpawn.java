@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.world;
+package com.aearost.aranarthcore.event.mob;
 
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
