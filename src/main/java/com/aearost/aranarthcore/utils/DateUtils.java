@@ -659,7 +659,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getVentivorDescription() {
-		return "The month of Ventivór brings a wind behind your tail. The sound of wind is heard flying through the air, granting players with the passive effect of Speed I.";
+		return "The month of Ventivór brings a wind behind your tail. The sound of wind is heard flying through the air, spawning Breezes on occasion, granting passive effect of Speed I.";
 	}
 
 	/**

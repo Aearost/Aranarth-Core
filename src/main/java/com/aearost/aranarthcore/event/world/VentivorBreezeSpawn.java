@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.event.world;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntitySpawnEvent;
@@ -18,8 +17,6 @@ public class VentivorBreezeSpawn {
 				Location loc = e.getLocation().clone();
 				e.setCancelled(true);
 				loc.getWorld().spawnEntity(loc, EntityType.BREEZE);
-
-				Bukkit.getLogger().info(loc.getBlockX() + "|" + loc.getBlockY() + "|" + loc.getBlockZ());
 			}
 		}
 	}

@@ -27,21 +27,6 @@ public class GuiRanksClick {
 
 		int slot = e.getSlot();
 
-		// Saint ranks provide the URL to the server shop
-		if (slot == 47) {
-			player.sendMessage(ChatUtils.translateToColor("&3Saint I: &bhttps://aranarth.craftingstore.net/package/493265"));
-			player.closeInventory();
-			return;
-		} else if (slot == 49) {
-			player.sendMessage(ChatUtils.translateToColor("&6Saint II: &ehttps://aranarth.craftingstore.net/package/1474409"));
-			player.closeInventory();
-			return;
-		} else if (slot == 51) {
-			player.sendMessage(ChatUtils.translateToColor("&4Saint III: &chttps://aranarth.craftingstore.net/package/1474412"));
-			player.closeInventory();
-			return;
-		}
-
 		boolean isRankup = false;
 		boolean isClickedRankSameAsCurrent = false;
 		boolean isClickedRankLowerThanCurrent = false;

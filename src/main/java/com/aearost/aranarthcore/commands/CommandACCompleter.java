@@ -129,6 +129,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("shulker");
 				displayedOptions.add("smp");
 				displayedOptions.add("seen");
+				displayedOptions.add("store");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("shulker".startsWith(args[0])) {
@@ -143,6 +144,8 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("sethome");
 				} else if ("seen".startsWith(args[0])) {
 					displayedOptions.add("seen");
+				} else if ("store".startsWith(args[0])) {
+					displayedOptions.add("store");
 				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
@@ -622,6 +625,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("avatar");
 		displayedOptions.add("tables");
 		displayedOptions.add("hat");
+		displayedOptions.add("store");
 		return displayedOptions;
 	}
 
