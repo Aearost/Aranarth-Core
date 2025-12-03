@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.text.DecimalFormat;
@@ -238,9 +239,10 @@ public class ShopUtils {
             hologram.setPersistent(true);
 
             // Decreases the size of the display
-            Transformation t = hologram.getTransformation();
-            t.getScale().set(new Vector3f(0.35F, 0.35F, 0.35F));
-            hologram.setTransformation(t);
+            Vector3f scale = new Vector3f(0.4F, 0.4F, 0.4F);
+            Quaternionf rotate180 = new Quaternionf().rotateY((float) Math.PI);
+            Transformation transformation = new Transformation(new Vector3f(0, 0, 0), rotate180, scale, new Quaternionf());
+            hologram.setTransformation(transformation);
 
             shopToHologram.put(shop, hologram);
         }
