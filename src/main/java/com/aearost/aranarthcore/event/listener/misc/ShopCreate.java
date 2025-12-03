@@ -102,7 +102,7 @@ public class ShopCreate implements Listener {
 					ItemStack heldItem = player.getInventory().getItemInMainHand();
 
 					if (heldItem != null && heldItem.getType() != Material.AIR) {
-						if (getShopItem(sign).getType() == Material.AIR) {
+						if (heldItem.getType().name().endsWith("BUNDLE") || heldItem.getType().name().endsWith("SHULKER_BOX")) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
 							return;
 						}
@@ -352,6 +352,11 @@ public class ShopCreate implements Listener {
 		Location signLocation = sign.getLocation();
 		Location blockBelowSign = new Location(signLocation.getWorld(),
 				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
+
+		// If it is a server shop
+		if (!isBlockBelowChest(blockBelowSign.getBlock())) {
+			return new ItemStack(Material.AIR);
+		}
 
 		// Gets the first item in the chest and uses this as the item
 		BlockState state = blockBelowSign.getBlock().getState();
