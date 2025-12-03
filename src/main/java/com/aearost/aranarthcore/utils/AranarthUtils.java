@@ -65,6 +65,7 @@ public class AranarthUtils {
 	private static List<Home> warps = new ArrayList<>();
 	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 	private static final List<UUID> originalPlayers = new ArrayList<>();
+	private static int phantomSpawnDelay = 0;
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -1872,6 +1873,22 @@ public class AranarthUtils {
 			}
 		}
 		return -1;
+	}
+
+	/**
+	 * Provides the value for the manual spawning of phantoms during the month of Obscurvor.
+	 * @return The value for the manual spawning of phantoms during the month of Obscurvor.
+	 */
+	public static int getPhantomSpawnDelay() {
+		return phantomSpawnDelay;
+	}
+
+	/**
+	 * Updates the value for the manual spawning of phantoms during the month of Obscurvor.
+	 * @param newPhantomSpawnDelay The new value for the manual spawning of phantoms during the month of Obscurvor.
+	 */
+	public static void setPhantomSpawnDelay(int newPhantomSpawnDelay) {
+		phantomSpawnDelay = newPhantomSpawnDelay;
 	}
 
 }
