@@ -4,9 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -20,15 +18,11 @@ public class BlacklistItemPickupPrevent {
 			return;
 		}
 		if (!aranarthPlayer.getBlacklist().isEmpty()) {
-			List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
-			for (ItemStack is : blacklistedItems) {
-				if (is.isSimilar(e.getItem().getItemStack())) {
-					e.setCancelled(true);
-					if (aranarthPlayer.getIsDeletingBlacklistedItems()) {
-						// Trash the items
-						e.getItem().remove();
-					}
-				}
+			int result = AranarthUtils.isBlacklistingItem(aranarthPlayer, e.getItem().getItemStack());
+			if (result == 0) {
+				e.getItem().remove();
+			} else if (result == 1) {
+				e.setCancelled(true);
 			}
 		}
 	}
