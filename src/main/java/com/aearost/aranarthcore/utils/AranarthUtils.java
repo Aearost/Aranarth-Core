@@ -1813,4 +1813,28 @@ public class AranarthUtils {
 		return rankQuiverSlotNum + saintQuiverSlotNum;
 	}
 
+	/**
+	 * Determines if the player is currently blacklisting the given item.
+	 * @param aranarthPlayer The aranarth player.
+	 * @param item The item that is attempting to be picked up.
+	 * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
+	 */
+	public static int isBlacklistingItem(AranarthPlayer aranarthPlayer, ItemStack item) {
+		List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
+		if (blacklistedItems == null || blacklistedItems.isEmpty()) {
+			return -1;
+		}
+
+		for (ItemStack is : blacklistedItems) {
+			if (is.isSimilar(item)) {
+				if (aranarthPlayer.getIsDeletingBlacklistedItems()) {
+					return 0;
+				} else {
+					return 1;
+				}
+			}
+		}
+		return -1;
+	}
+
 }

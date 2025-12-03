@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Material;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -29,14 +31,19 @@ public class CompressorItemPickup {
 
 			e.setCancelled(true);
 			ItemStack pickupClone = e.getItem().getItemStack().clone();
-			e.getItem().setItemStack(null);
 
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			boolean isIncludingShulkers = (player.hasPermission("aranarth.shulker"));
 			// Identifies all contents of compressible items in the player's inventory
 			HashMap<Material, List<ItemStack>> compressibleItems = new HashMap<>();
 			for (ItemStack inventoryItem : player.getInventory().getContents()) {
 				// Ignore if it is empty
 				if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+					continue;
+				}
+
+				int result = AranarthUtils.isBlacklistingItem(aranarthPlayer, inventoryItem);
+				if (result >= 0) {
 					continue;
 				}
 
@@ -48,6 +55,11 @@ public class CompressorItemPickup {
 								for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
 									// Ignore if it is empty
 									if (shulkerItem == null || shulkerItem.getType() == Material.AIR) {
+										continue;
+									}
+
+									int shulkerResult = AranarthUtils.isBlacklistingItem(aranarthPlayer, shulkerItem);
+									if (shulkerResult >= 0) {
 										continue;
 									}
 
@@ -93,15 +105,25 @@ public class CompressorItemPickup {
 
 			// Include the actual item being picked up
 			if (isCompressible(pickupClone)) {
-				Material pickedUpType = pickupClone.getType();
-				if (compressibleItems.containsKey(pickedUpType)) {
-					List<ItemStack> stacksOfItems = compressibleItems.get(pickedUpType);
-					stacksOfItems.add(pickupClone);
-					compressibleItems.put(pickedUpType, stacksOfItems);
+				int result = AranarthUtils.isBlacklistingItem(aranarthPlayer, pickupClone);
+				if (result == 0) {
+					e.getItem().setItemStack(null);
+					e.getItem().remove();
+				} else if (result == 1) {
+					// Do not pick up whatsoever
+					e.setCancelled(true);
 				} else {
-					List<ItemStack> stacksOfItems = new ArrayList<>();
-					stacksOfItems.add(pickupClone);
-					compressibleItems.put(pickedUpType, stacksOfItems);
+					e.getItem().setItemStack(null);
+					Material pickedUpType = pickupClone.getType();
+					if (compressibleItems.containsKey(pickedUpType)) {
+						List<ItemStack> stacksOfItems = compressibleItems.get(pickedUpType);
+						stacksOfItems.add(pickupClone);
+						compressibleItems.put(pickedUpType, stacksOfItems);
+					} else {
+						List<ItemStack> stacksOfItems = new ArrayList<>();
+						stacksOfItems.add(pickupClone);
+						compressibleItems.put(pickedUpType, stacksOfItems);
+					}
 				}
 			}
 			// Fallback method to pick up normally if it's a non-compressible item that's picked up

@@ -46,7 +46,7 @@ public class GuiQuiver {
 		List<ItemStack> arrows = new ArrayList<>();
 		if (aranarthPlayer.getArrows() != null) {
 			for (ItemStack is : aranarthPlayer.getArrows()) {
-				if (is != null) {
+				if (is != null && is.getType() != Material.BLACK_STAINED_GLASS_PANE) {
 					ItemStack clone = is.clone();
 					arrows.add(clone);
 				}
