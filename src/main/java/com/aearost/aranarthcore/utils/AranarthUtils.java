@@ -1814,6 +1814,43 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Provides the total number of player shops that a given player can create.
+	 * @param player The player.
+	 * @return The total number of player shops that a given player can create.
+	 */
+	public static int getMaxShopNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankQuiverSlotNum = 0;
+		int saintQuiverSlotNum = 0;
+
+		if (aranarthPlayer.getRank() == 3) {
+			rankQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankQuiverSlotNum = 7;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankQuiverSlotNum = 15;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankQuiverSlotNum = 30;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankQuiverSlotNum = 50;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankQuiverSlotNum = -1;
+		} else {
+			rankQuiverSlotNum = 0;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintQuiverSlotNum = 6;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintQuiverSlotNum = 9;
+		}
+
+		return rankQuiverSlotNum + saintQuiverSlotNum;
+	}
+
+	/**
 	 * Determines if the player is currently blacklisting the given item.
 	 * @param aranarthPlayer The aranarth player.
 	 * @param item The item that is attempting to be picked up.
