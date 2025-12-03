@@ -56,12 +56,27 @@ public class ShopCreate implements Listener {
 				return;
 			}
 
+			int playerShopNum = 0;
+			if (ShopUtils.getShops().get(player.getUniqueId()) != null) {
+				playerShopNum = ShopUtils.getShops().get(player.getUniqueId()).size();
+			}
+
+			int maxShopNum = AranarthUtils.getMaxShopNum(player);
+			if (playerShopNum >= maxShopNum) {
+				if (maxShopNum == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
+				}
+				return;
+			}
+
 			int[] validSignFormatResult = validSignFormat(lines, player, true);
 			// If all the lines were entered correctly
 			if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
 				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
 				if (isValidChestFormat(player, sign)) {
-					if (getShopItem(sign).getType() == Material.AIR) {
+					if (getShopItem(sign, true).getType() == Material.AIR) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
 						return;
 					}
@@ -71,14 +86,14 @@ public class ShopCreate implements Listener {
 					if (priceParts[0].equalsIgnoreCase("B")) {
 						// Only buying
 						if (priceParts.length == 2) {
-							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
+							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
 						}
 						// Both buying and selling
 						else if (priceParts.length == 5) {
-							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
 						}
 					} else {
-						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
+						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 					}
 				} else {
 					// Forceful display of the shop in error
@@ -102,7 +117,7 @@ public class ShopCreate implements Listener {
 					ItemStack heldItem = player.getInventory().getItemInMainHand();
 
 					if (heldItem != null && heldItem.getType() != Material.AIR) {
-						if (heldItem.getType().name().endsWith("BUNDLE") || heldItem.getType().name().endsWith("SHULKER_BOX")) {
+						if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
 							return;
 						}
@@ -320,7 +335,7 @@ public class ShopCreate implements Listener {
 			return false;
 		}
 
-		if (getShopItem(sign) == null) {
+		if (getShopItem(sign, true) == null) {
 			player.sendMessage(ChatUtils.chatMessage("&cThe first slot of the chest must contain an item!"));
 			return false;
 		}
@@ -346,15 +361,16 @@ public class ShopCreate implements Listener {
 	/**
 	 * Provides a single quantity of the item of the shop.
 	 * @param sign The sign of the shop.
+	 * @param isPlayerShop Whether the shop is a player shop.
 	 * @return The single quantity of the item for the shop.
 	 */
-	private ItemStack getShopItem(Block sign) {
+	private ItemStack getShopItem(Block sign, boolean isPlayerShop) {
 		Location signLocation = sign.getLocation();
 		Location blockBelowSign = new Location(signLocation.getWorld(),
 				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
 
 		// If it is a server shop
-		if (!isBlockBelowChest(blockBelowSign.getBlock())) {
+		if (!isBlockBelowChest(blockBelowSign.getBlock()) && !isPlayerShop) {
 			return new ItemStack(Material.AIR);
 		}
 

@@ -239,7 +239,7 @@ public class ShopUtils {
             hologram.setPersistent(true);
 
             // Decreases the size of the display
-            Vector3f scale = new Vector3f(0.4F, 0.4F, 0.4F);
+            Vector3f scale = new Vector3f(0.35F, 0.35F, 0.35F);
             Quaternionf rotate180 = new Quaternionf().rotateY((float) Math.PI);
             Transformation transformation = new Transformation(new Vector3f(0, 0, 0), rotate180, scale, new Quaternionf());
             hologram.setTransformation(transformation);
