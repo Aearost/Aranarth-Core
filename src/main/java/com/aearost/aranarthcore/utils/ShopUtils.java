@@ -1,11 +1,14 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
+import org.bukkit.block.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
@@ -297,4 +300,141 @@ public class ShopUtils {
         }
     }
 
+    /**
+     * Provides the shop with its quantities and prices maxed out, tailored to the player making the transaction.
+     * @param shop The original shop object.
+     * @param player The player that is interacting with the shop.
+     * @param isBuying Whether the player is buying or not from the shop.
+     * @return The bulk variant of the shop.
+     */
+    public static Shop getBulkShop(Shop shop, Player player, boolean isBuying) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+        int playerFreeInventorySpace = 0;
+        int playerQuantityOfShopItem = 0;
+
+        // Calculates the available space for the item, and the quantity already in the player's inventory
+        for (ItemStack inventoryItem : player.getInventory().getStorageContents().clone()) {
+            if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+                playerFreeInventorySpace += 64;
+                continue;
+            }
+
+            if (inventoryItem.isSimilar(shop.getItem())) {
+                playerQuantityOfShopItem += inventoryItem.getAmount();
+                int extraSpaceInStack = inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
+                if (extraSpaceInStack > 0) {
+                    playerFreeInventorySpace += extraSpaceInStack;
+                }
+            }
+        }
+
+        int chestFreeInventorySpace = 0;
+        int chestQuantityOfShopItem = 0;
+
+        // Calculates the available space for the item, and the quantity already in the chest's inventory
+        // Only for player shops
+        if (shop.getUuid() != null) {
+            Inventory chestInventory = null;
+            BlockState chestBlockState = shop.getLocation().getBlock().getRelative(BlockFace.DOWN).getState();
+            Container container = (Container) chestBlockState;
+            chestInventory = container.getInventory();
+            if (chestInventory.getHolder() instanceof DoubleChest doubleChest) {
+                chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
+            }
+
+            for (ItemStack chestItem : chestInventory.getContents()) {
+                if (chestItem == null || chestItem.getType() == Material.AIR) {
+                    chestFreeInventorySpace += 64;
+                    continue;
+                }
+
+                if (chestItem.isSimilar(shop.getItem())) {
+                    chestQuantityOfShopItem += chestItem.getAmount();
+                    int extraSpaceInStack = chestItem.getMaxStackSize() - chestItem.getAmount();
+                    if (extraSpaceInStack > 0) {
+                        chestFreeInventorySpace += extraSpaceInStack;
+                    }
+                }
+            }
+        }
+
+        // Buying
+        if (isBuying) {
+            int bulkQuantity = shop.getQuantity();
+            double bulkBuyPrice = shop.getBuyPrice();
+            boolean canPurchaseMore = true;
+            int multiplier = 2;
+
+            // Calculate if the quantity can be purchased with the new multiplier
+            while (canPurchaseMore) {
+                int newQuantity = shop.getQuantity() * multiplier;
+                double newBuyPrice = shop.getBuyPrice() * multiplier;
+
+                // Verifies the player will have enough balance
+                if (aranarthPlayer.getBalance() < newBuyPrice) {
+                    canPurchaseMore = false;
+                }
+
+                // Verifies the player will have enough inventory space
+                if (playerFreeInventorySpace < newQuantity) {
+                    canPurchaseMore = false;
+                }
+
+                // If a player shop, verify the chest has enough of the item
+                if (shop.getUuid() != null) {
+                    if (chestQuantityOfShopItem < newQuantity) {
+                        canPurchaseMore = false;
+                    }
+                }
+
+                // Increase to the next multiplier to see if it can be purchased
+                if (canPurchaseMore) {
+                    bulkBuyPrice = newBuyPrice;
+                    bulkQuantity = newQuantity;
+                    multiplier++;
+                }
+            }
+            return new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(), bulkQuantity, bulkBuyPrice, 0);
+        }
+        // Selling
+        else {
+            int bulkQuantity = shop.getQuantity();
+            double bulkSellPrice = shop.getSellPrice();
+            boolean canSellMore = true;
+            int multiplier = 2;
+
+            // Calculate if the quantity can be sold with the new multiplier
+            while (canSellMore) {
+                int newQuantity = shop.getQuantity() * multiplier;
+                double newSellPrice = shop.getSellPrice() * multiplier;
+
+                // Verifies the player has enough of the item to sell
+                if (playerQuantityOfShopItem < newQuantity) {
+                    canSellMore = false;
+                }
+
+                // If a player shop
+                if (shop.getUuid() != null) {
+                    // Verifies there is enough space in the chest for the items to be sold
+                    if (chestFreeInventorySpace < newQuantity) {
+                        canSellMore = false;
+                    }
+
+                    // Verifies the owner of the shop will have enough balance
+                    if (AranarthUtils.getPlayer(shop.getUuid()).getBalance() < newSellPrice) {
+                        canSellMore = false;
+                    }
+                }
+
+                // Increase to the next multiplier to see if it can be sold
+                if (canSellMore) {
+                    bulkSellPrice = newSellPrice;
+                    bulkQuantity = newQuantity;
+                    multiplier++;
+                }
+            }
+            return new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(), bulkQuantity, 0, bulkSellPrice);
+        }
+    }
 }
