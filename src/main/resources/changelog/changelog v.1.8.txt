@@ -80,6 +80,7 @@ Features
 [+] Added in custom server join message for new players
 [+] Added in MOTD to display when players join the server
 [~] Fixed bug where sugarcane blocks were being uncrafted into bamboo instead of sugarcane
+[+] Fixed issue where flowing water was freezing during winter months
 
 Miscellaneous
 - Removed redundant logs from weather
