@@ -24,7 +24,7 @@ public class CommandDate {
 
 			String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
 			sender.sendMessage(messages[0]);
-			sender.sendMessage(messages[1]);
+			sender.sendMessage("  " + messages[1]);
 			sender.sendMessage(messages[2]);
 			return true;
 		} else if (args[0].equals("dateset")) {
