@@ -69,6 +69,9 @@ public class CommandSethome {
 					AranarthUtils.addPlayerHome(player, home);
 					player.sendMessage(ChatUtils.chatMessage("&7You have added the home &e" + homeName));
 					return true;
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac sethome <name>"));
+					return true;
 				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou cannot set more than &e" + playerMaxHomeCount + " &chomes!"));
@@ -78,8 +81,6 @@ public class CommandSethome {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
 			return true;
 		}
-
-		return false;
 	}
 
 }

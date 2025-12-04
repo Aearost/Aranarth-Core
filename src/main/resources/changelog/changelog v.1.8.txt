@@ -87,3 +87,4 @@ Miscellaneous
 - Restructured the logic of prefix and message formatting into ChatUtils
 - Added support for all admin council ranks to use /ac balance to update a player's balance
 - Centralized all arena logic in one grouped event listener class
+- Updated all underscore characters of field separators in persisting files

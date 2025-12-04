@@ -280,7 +280,7 @@ public class DiscordUtils {
 		}
 
 		Guild guild = getGuild();
-		String discordPerk = aranarthPlayer.getPerks().split("_")[11];
+		String discordPerk = aranarthPlayer.getPerks().split("\\*")[11];
 		if (discordPerk.equals("1")) {
 			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 		} else {
