@@ -8,7 +8,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 /**
  * Overrides behaviour of custom arrows hitting blocks.
