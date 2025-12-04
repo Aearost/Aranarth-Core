@@ -159,9 +159,17 @@ public class DateUtils {
 			}
 
 			String[] messages = determineServerDate(dayNum, weekdayName, monthName, yearNum);
-			Bukkit.broadcastMessage(messages[0]);
-			Bukkit.broadcastMessage(messages[1]);
-			Bukkit.broadcastMessage(messages[2]);
+
+			String dayNumAsString = getDayNumWithSuffix(dayNum);
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
+				String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
+				player.sendTitle(mainTitle, subTitle);
+			}
+
+			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[0]));
+			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[1]));
+			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[2]));
 
 			if (isNewMonth) {
 				String description = "";
@@ -369,7 +377,7 @@ public class DateUtils {
 		String dayNumAsString = getDayNumWithSuffix(dayNum);
 		String[] messages = new String[3];
 		messages[0] = ChatUtils.translateToColor("&6&l---------------------------------");
-		messages[1] = ChatUtils.translateToColor("&e&l  " + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
+		messages[1] = ChatUtils.translateToColor("&e&l" + weekdayName + " &f&lthe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum + "  ");
 		messages[2] = ChatUtils.translateToColor("&6&l---------------------------------");
 		return messages;
 	}
