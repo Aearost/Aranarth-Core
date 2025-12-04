@@ -16,7 +16,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of an Aquatic Aranarthium Helmet item.

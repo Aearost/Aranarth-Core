@@ -7,8 +7,8 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.CHORUS_DIAMOND;
-import static com.aearost.aranarthcore.items.CustomItemKeys.HOMEPAD;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.CHORUS_DIAMOND;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.HOMEPAD;
 
 /**
  * Handles the overrides when crafting involving a Chorus Diamond.

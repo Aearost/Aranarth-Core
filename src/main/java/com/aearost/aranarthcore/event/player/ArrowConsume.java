@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.QUIVER;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.QUIVER;
 
 /**
  * Handles the auto-refill functionality when consuming of arrows.

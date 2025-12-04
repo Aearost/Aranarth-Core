@@ -7,8 +7,8 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW_HEAD;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW_HEAD;
 
 /**
  * Handles the overrides when crafting involving God Apple Fragments.

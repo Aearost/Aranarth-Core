@@ -120,7 +120,6 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.applyWaterfallEffect();
 			}
 		}, 1, 1);
-
 	}
 
 	public static AranarthCore getInstance() {
@@ -184,6 +183,7 @@ public class AranarthCore extends JavaPlugin {
 		new PortalEventListener(this);
 		new ArenaProtection(this);
 		new FireProtection(this);
+		new SleepSkipListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

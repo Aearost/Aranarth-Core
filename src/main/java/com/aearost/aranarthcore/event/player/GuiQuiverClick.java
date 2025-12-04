@@ -17,7 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 /**
  * Prevents players from adding non-arrow items to the arrows inventory.

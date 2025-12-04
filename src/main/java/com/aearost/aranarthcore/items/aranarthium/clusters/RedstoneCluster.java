@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.CLUSTER;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.CLUSTER;
 
 /**
  * Provides the necessary components of an Redstone Cluster item.
