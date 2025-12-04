@@ -8,6 +8,7 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Bisected;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
@@ -1332,6 +1333,11 @@ public class DateUtils {
 						continue;
 					}
 
+					// If the surface block is invalid, skip this column
+					if (surfaceBlock.getType() != Material.WATER) {
+						continue;
+					}
+
 					// Check that the column is within circle
 					if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
 						continue;
@@ -1363,11 +1369,12 @@ public class DateUtils {
 						continue;
 					}
 
-					// If the surface block is invalid, skip this column
-					if (surfaceBlock.getType() != Material.WATER) {
-						continue;
+					// Verifies that the block is a source water block and not flowing
+					if (surfaceBlock.getBlockData() instanceof Levelled levelled) {
+						if (levelled.getLevel() == 0) {
+							toFreeze.add(surfaceBlock);
+						}
 					}
-					toFreeze.add(surfaceBlock);
 				}
 			}
 
