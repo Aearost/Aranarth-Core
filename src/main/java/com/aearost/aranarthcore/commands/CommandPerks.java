@@ -33,7 +33,7 @@ public class CommandPerks {
 			UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				String[] perks = aranarthPlayer.getPerks().split("_");
+				String[] perks = aranarthPlayer.getPerks().split("\\*");
 				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
 				sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks[0]));
 				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks[1]));
@@ -63,7 +63,7 @@ public class CommandPerks {
 						if (isValidPerk(args[2].toLowerCase())) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 							// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-							String[] perks = aranarthPlayer.getPerks().split("_");
+							String[] perks = aranarthPlayer.getPerks().split("\\*");
                             switch (perks[8]) {
                                 case "0" -> perks[8] = "3";
                                 case "3" -> perks[8] = "6";
@@ -77,7 +77,7 @@ public class CommandPerks {
 							for (int i = 0; i < perks.length; i++) {
 								perksAsString += perks[i];
 								if (i < perks.length - 1) {
-									perksAsString += "_";
+									perksAsString += "*";
 								}
 							}
 							aranarthPlayer.setPerks(perksAsString);
@@ -106,7 +106,7 @@ public class CommandPerks {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-					String[] perks = aranarthPlayer.getPerks().split("_");
+					String[] perks = aranarthPlayer.getPerks().split("\\*");
 					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
 							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
@@ -130,7 +130,7 @@ public class CommandPerks {
 							for (int i = 0; i < perks.length; i++) {
 								perksAsString += perks[i];
 								if (i < perks.length - 1) {
-									perksAsString += "_";
+									perksAsString += "*";
 								}
 							}
 							aranarthPlayer.setPerks(perksAsString);
@@ -154,7 +154,7 @@ public class CommandPerks {
 							for (int i = 0; i < perks.length; i++) {
 								perksAsString += perks[i];
 								if (i < perks.length - 1) {
-									perksAsString += "_";
+									perksAsString += "*";
 								}
 							}
 							aranarthPlayer.setPerks(perksAsString);
@@ -177,7 +177,7 @@ public class CommandPerks {
 						for (int i = 0; i < perks.length; i++) {
 							perksAsString += perks[i];
 							if (i < perks.length - 1) {
-								perksAsString += "_";
+								perksAsString += "*";
 							}
 						}
 						aranarthPlayer.setPerks(perksAsString);
