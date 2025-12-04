@@ -6,7 +6,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.*;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.ItemDisplay;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -138,6 +141,7 @@ public class ShopUtils {
      */
     private static String fixPriceLine(String line) {
         String[] parts = line.split(" ");
+        // Cannot use the Currency formatter as it would take up extra characters
         DecimalFormat df = new DecimalFormat("0.00");
         if (parts[0].equalsIgnoreCase("B")) {
             if (parts.length == 2) {

@@ -14,7 +14,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -69,9 +69,9 @@ public class CommandDominion {
 				}
 				else if (args[1].equalsIgnoreCase("balance")) {
 					if (dominion != null) {
-						DecimalFormat df = new DecimalFormat("0.00");
-						String valueWithTwoDecimals = df.format(dominion.getBalance());
-						player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &e$" + valueWithTwoDecimals));
+						NumberFormat formatter = NumberFormat.getCurrencyInstance();
+						String valueWithTwoDecimals = formatter.format(dominion.getBalance());
+						player.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "&7's balance is &6" + valueWithTwoDecimals));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 					}
@@ -546,9 +546,9 @@ public class CommandDominion {
 		}
 		player.sendMessage(ChatUtils.translateToColor(membersBuilder.toString()));
 
-		DecimalFormat df = new DecimalFormat("0.00");
-		String valueWithTwoDecimals = df.format(dominion.getBalance());
-		player.sendMessage(ChatUtils.translateToColor("&7Balance: &6$" + valueWithTwoDecimals));
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		String valueWithTwoDecimals = formatter.format(dominion.getBalance());
+		player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
 		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + " chunks"));
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
 	}

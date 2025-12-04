@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
@@ -13,6 +14,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.text.NumberFormat;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -69,6 +72,34 @@ public class PlayerServerJoinListener implements Listener {
 				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been cleared"));
 			}
 		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
+		// Displays the MOTD when the player joins
+		int day = AranarthUtils.getDay();
+		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
+		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
+		int year = AranarthUtils.getYear();
+
+		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
+		player.sendMessage(messages[0]);
+
+		Avatar avatar = AvatarUtils.getCurrentAvatar();
+		if (avatar == null) {
+			player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
+		} else {
+			String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
+			player.sendMessage(ChatUtils.translateToColor("  &5&lThe current Avatar is &e" + avatarNickname));
+		}
+		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
+		player.sendMessage("  " + messages[1]); // Date message
+
+		// Once mail is added in, use the below format
+//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
+
+		player.sendMessage(messages[2]);
+		player.sendMessage("");
 
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;

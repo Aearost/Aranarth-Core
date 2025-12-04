@@ -10,7 +10,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * Handles toggling the bulk transaction variable.
@@ -40,7 +40,7 @@ public class ShopBulkTransaction {
 				itemName = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
 			}
 
-			DecimalFormat df = new DecimalFormat("0.00");
+			NumberFormat formatter = NumberFormat.getCurrencyInstance();
 			String saleOrPurchase = "";
 			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
@@ -49,7 +49,7 @@ public class ShopBulkTransaction {
 					return;
 				}
 				saleOrPurchase = "purchase";
-				player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &e$" + df.format(bulkShop.getBuyPrice()) + "?"));
+				player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &e$" + formatter.format(bulkShop.getBuyPrice()) + "?"));
 			} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
@@ -57,7 +57,7 @@ public class ShopBulkTransaction {
 					return;
 				}
 				saleOrPurchase = "sale";
-				player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &e$" + df.format(bulkShop.getSellPrice()) + "?"));
+				player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &e$" + formatter.format(bulkShop.getSellPrice()) + "?"));
 			}
 			player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
 			aranarthPlayer.setBulkTransactionNum(1);
