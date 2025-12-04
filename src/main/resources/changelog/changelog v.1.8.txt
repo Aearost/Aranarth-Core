@@ -75,6 +75,11 @@ Features
 [~] Added centralized teleport logic
 [+] Added holograms to shops
 [+] Added in Breeze spawns during the month of Ventivor
+[+] Added in bulk transaction mode
+[+] Added a custom sleep vote skip functionality to keep the survival, SMP, and resource worlds in alignment with time
+[+] Added in custom server join message for new players
+[+] Added in MOTD to display when players join the server
+[~] Fixed bug where sugarcane blocks were being uncrafted into bamboo instead of sugarcane
 
 Miscellaneous
 - Removed redundant logs from weather
