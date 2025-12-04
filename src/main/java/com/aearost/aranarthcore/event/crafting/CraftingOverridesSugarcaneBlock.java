@@ -20,7 +20,6 @@ public class CraftingOverridesSugarcaneBlock {
         int nullCounter = 0;
         int sugarcaneBlockCounter = 0;
         for (ItemStack is : e.getInventory().getMatrix()) {
-
             if (is == null) {
                 nullCounter++;
                 continue;
@@ -33,7 +32,7 @@ public class CraftingOverridesSugarcaneBlock {
             }
         }
 
-        if (nullCounter == 8 && sugarcaneBlockCounter == 1) {
+        if (nullCounter == e.getInventory().getMatrix().length - 1 && sugarcaneBlockCounter == 1) {
             e.getInventory().setResult(new ItemStack(Material.SUGAR_CANE, 9));
         }
     }
