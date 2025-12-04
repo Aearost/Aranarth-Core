@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.items.SugarcaneBlock;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Material;
@@ -195,7 +196,14 @@ public class CompressorItemPickup {
 		Material compressedType = getCompressedType(type);
 
 		if (totalAmountOfCompressedItem > 0) {
-			ItemStack compressedItemToAdd = new ItemStack(compressedType, totalAmountOfCompressedItem);
+			ItemStack compressedItemToAdd = null;
+			if (compressedType == Material.BAMBOO_BLOCK) {
+				compressedItemToAdd = new SugarcaneBlock().getItem();
+				compressedItemToAdd.setAmount(totalAmountOfCompressedItem);
+			} else {
+				compressedItemToAdd = new ItemStack(compressedType, totalAmountOfCompressedItem);
+			}
+
 			if (player.hasPermission("aranarth.shulker")) {
 				for (ItemStack inventoryItem : player.getInventory().getContents()) {
 					// Ignore if it is empty
@@ -289,7 +297,14 @@ public class CompressorItemPickup {
 			if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
 				while (remainingToAdd > 0) {
 					if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
-						inventoryItem = new ItemStack(item.getType(), 1);
+						// For sugarcane blocks
+						if (item.hasItemMeta()) {
+							inventoryItem = item.clone();
+							inventoryItem.setAmount(1);
+						} else {
+							inventoryItem = new ItemStack(item.getType(), 1);
+						}
+
 						remainingToAdd--;
 					} else {
 						inventoryItem.setAmount(inventoryItem.getAmount() + 1);
