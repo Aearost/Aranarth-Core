@@ -27,36 +27,55 @@ public class ShopInteract {
 
 	public void execute(PlayerInteractEvent e) {
 		// Left or right-clicking the sign, including placing and breaking
-		if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
+		if (e.getClickedBlock().getType().name().endsWith("_SIGN")) {
 			Player player = e.getPlayer();
 			AranarthPlayer clickUser = AranarthUtils.getPlayer(player.getUniqueId());
 			Location signLocation = e.getClickedBlock().getLocation();
 			Location locationBelow = new Location(signLocation.getWorld(),
 					signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
-			Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
+			Shop shop = ShopUtils.getShopFromLocation(signLocation);
 
 			// Player shop
 			if (isChest(locationBelow.getBlock().getType())) {
-				if (playerShop != null) {
+				if (shop != null) {
 					e.setCancelled(true);
-					AranarthPlayer shopUser = AranarthUtils.getPlayer(playerShop.getUuid());
+
+					AranarthPlayer shopUser = AranarthUtils.getPlayer(shop.getUuid());
 
 					if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 						// If editing your own shop
-						if (playerShop.getUuid().equals(player.getUniqueId())) {
+						if (shop.getUuid().equals(player.getUniqueId())) {
 							e.setCancelled(false);
 							return;
 						}
 
-						handleBuyLogic(player, clickUser, shopUser, playerShop, locationBelow);
+						// Enables bulk mode for the purchase
+						if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+							shop = ShopUtils.getBulkShop(shop, player, true);
+						}
+						// The user is just toggling the bulk purchase mode
+						else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+							return;
+						}
+
+						handleBuyLogic(player, clickUser, shopUser, shop, locationBelow);
 					} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
 						// If editing your own shop
-						if (playerShop.getUuid().equals(player.getUniqueId())) {
+						if (shop.getUuid().equals(player.getUniqueId())) {
 							e.setCancelled(false);
 							return;
 						}
 
-						handleSellLogic(player, clickUser, shopUser, playerShop, locationBelow);
+						// Enables bulk mode for the sale
+						if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+							shop = ShopUtils.getBulkShop(shop, player, false);
+						}
+						// The user is just toggling the bulk sale mode
+						else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+							return;
+						}
+
+						handleSellLogic(player, clickUser, shopUser, shop, locationBelow);
 					}
 				} else {
 					if (player.isSneaking()) {
@@ -69,8 +88,8 @@ public class ShopInteract {
 			// Server shop
 			// If the clicked block is a sign but the block below is not a chest
 			else {
-				if (playerShop != null) {
-					if (playerShop.getUuid() == null) {
+				if (shop != null) {
+					if (shop.getUuid() == null) {
 						e.setCancelled(true);
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -83,9 +102,27 @@ public class ShopInteract {
 								return;
 							}
 
-							handleBuyLogic(player, clickUser, null, playerShop, null);
+							// Enables bulk mode for the purchase
+							if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+								shop = ShopUtils.getBulkShop(shop, player, true);
+							}
+							// The user is just toggling the bulk purchase mode
+							else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+								return;
+							}
+
+							handleBuyLogic(player, clickUser, null, shop, null);
 						} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-							handleSellLogic(player, clickUser, null, playerShop, null);
+							// Enables bulk mode for the sale
+							if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+								shop = ShopUtils.getBulkShop(shop, player, false);
+							}
+							// The user is just toggling the bulk sale mode
+							else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
+								return;
+							}
+
+							handleSellLogic(player, clickUser, null, shop, null);
 						}
 					}
 				} else {
@@ -98,7 +135,7 @@ public class ShopInteract {
 			}
 		}
 		// Left or right-clicking the chest, including opening and breaking
-		else if (e.getClickedBlock() != null && isChest(e.getClickedBlock().getType())) {
+		else if (isChest(e.getClickedBlock().getType())) {
 			// Gets both locations if it is a double chest
 			BlockState state = e.getClickedBlock().getState();
 			Container container = (Container) state;
@@ -141,13 +178,13 @@ public class ShopInteract {
 	 * @param player The player buying from the shop.
 	 * @param clickUser The user that clicked the shop sign.
 	 * @param shopUser The user that owns the shop.
-	 * @param playerShop The shop.
+	 * @param shop The shop.
 	 * @param locationBelow The location below the shop sign.
 	 */
-	private void handleBuyLogic(Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop playerShop, Location locationBelow) {
+	private void handleBuyLogic(Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop shop, Location locationBelow) {
 		// Buy and edit logic
-		if (playerShop.getBuyPrice() > 0) {
-			if (clickUser.getBalance() >= playerShop.getBuyPrice()) {
+		if (shop.getBuyPrice() > 0) {
+			if (clickUser.getBalance() >= shop.getBuyPrice()) {
 				boolean isPlayerShop = locationBelow != null;
 				Inventory chestInventory = null;
 				if (isPlayerShop) {
@@ -162,7 +199,7 @@ public class ShopInteract {
 				if (isPlayerShop) {
 					// Verifies that there is enough quantity in the chest's inventory
 					// Cycles through the chest's inventory starting from end to beginning
-					HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), playerShop);
+					HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop);
 					if (result.containsKey(true)) {
 						chestInventory.clear();
 						chestInventory.setContents(result.get(true));
@@ -172,31 +209,53 @@ public class ShopInteract {
 					}
 				}
 
+				// Verifies there is enough space in the player's inventory to add the items
+				int spaceForShopItemInPlayerInventory = 0;
+				for (ItemStack inventoryItem : player.getInventory().getStorageContents()) {
+					if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+						spaceForShopItemInPlayerInventory += 64;
+						continue;
+					}
+
+					if (inventoryItem.isSimilar(shop.getItem())) {
+						spaceForShopItemInPlayerInventory += inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
+					}
+				}
+				if (spaceForShopItemInPlayerInventory < shop.getQuantity()) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough space for this!"));
+					clickUser.setBulkTransactionNum(-1);
+					AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+					return;
+				}
+
 				DecimalFormat df = new DecimalFormat("0.00");
 
 				// Logic to update balances and chest inventory
-				clickUser.setBalance(clickUser.getBalance() - playerShop.getBuyPrice());
+				clickUser.setBalance(clickUser.getBalance() - shop.getBuyPrice());
 				if (shopUser != null) {
-					shopUser.setBalance(shopUser.getBalance() + playerShop.getBuyPrice());
+					shopUser.setBalance(shopUser.getBalance() + shop.getBuyPrice());
 				}
 
 				// Logic to add items to player's inventory
-				ItemStack itemToAdd = playerShop.getItem().clone();
-				itemToAdd.setAmount(playerShop.getQuantity());
+				ItemStack itemToAdd = shop.getItem().clone();
+				itemToAdd.setAmount(shop.getQuantity());
 				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(itemToAdd);
 				for (Integer index : remainder.keySet()) {
 					player.getWorld().dropItemNaturally(player.getLocation(), remainder.get(index));
 				}
-				String itemname = ChatUtils.getFormattedItemName(playerShop.getItem().getType().name());
-				if (playerShop.getItem().hasItemMeta()) {
-					if (playerShop.getItem().getItemMeta().hasDisplayName()) {
-						itemname = playerShop.getItem().getItemMeta().getDisplayName();
+				String itemname = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
+				if (shop.getItem().hasItemMeta()) {
+					if (shop.getItem().getItemMeta().hasDisplayName()) {
+						itemname = shop.getItem().getItemMeta().getDisplayName();
 					}
 				}
 
 				player.sendMessage(ChatUtils.chatMessage(
-						"&7You have purchased &e" + playerShop.getQuantity() + " " + itemname
-								+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
+						"&7You have purchased &e" + shop.getQuantity() + " " + itemname
+								+ ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getBuyPrice()))));
+				clickUser.setBulkTransactionNum(-1);
+				AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+
 				if (!remainder.isEmpty()) {
 					player.sendMessage(ChatUtils.chatMessage("&e" + remainder.size() + " " + itemname
 							+ ChatUtils.translateToColor(" &7was dropped on the ground!")));
@@ -204,14 +263,17 @@ public class ShopInteract {
 
 				// If the shop owner is online
 				if (isPlayerShop) {
-					if (Bukkit.getPlayer(playerShop.getUuid()) != null) {
-						Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
+					if (Bukkit.getPlayer(shop.getUuid()) != null) {
+						Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
 						shopPlayer.sendMessage(
-								ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased &e" + playerShop.getQuantity() + " "
-										+ itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getBuyPrice()))));
+								ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased &e" + shop.getQuantity() + " "
+										+ itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getBuyPrice()))));
 					}
 				}
 			} else {
+				if (clickUser.getBulkTransactionNum() <= 0 && player.isSneaking()) {
+					return;
+				}
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to buy this!"));
 			}
 		}
@@ -222,15 +284,15 @@ public class ShopInteract {
 	 * @param player The player selling the shop.
 	 * @param clickUser The user that clicked the shop sign.
 	 * @param shopUser The user that owns the shop.
-	 * @param playerShop The shop.
+	 * @param shop The shop.
 	 * @param locationBelow The location below the shop sign.
 	 */
-	private void handleSellLogic(Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop playerShop, Location locationBelow) {
-		if (playerShop.getSellPrice() > 0) {
+	private void handleSellLogic(Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop shop, Location locationBelow) {
+		if (shop.getSellPrice() > 0) {
 			boolean isPlayerShop = locationBelow != null;
 
 			if (isPlayerShop) {
-				if (shopUser.getBalance() < playerShop.getSellPrice()) {
+				if (shopUser.getBalance() < shop.getSellPrice()) {
 					player.sendMessage(ChatUtils.chatMessage("&cThis player does not have enough money to sell this!"));
 					return;
 				}
@@ -238,7 +300,6 @@ public class ShopInteract {
 
 			Inventory chestInventory = null;
 			Container copyOfChest = null;
-			boolean chestHasSpace = false;
 
 			if (isPlayerShop) {
 				BlockState state = locationBelow.getBlock().getState();
@@ -249,33 +310,39 @@ public class ShopInteract {
 					chestInventory = doubleChest.getInventory(); // Get the full 54 slot inventory
 				}
 
-				// Verifies that there is enough quantity in the chest's inventory
-				HashMap<Integer, ItemStack> extraItems = copyOfChest.getInventory().addItem();
-				if (extraItems.isEmpty()) {
-					chestHasSpace = true;
+				// Verifies there is enough space in the chest's inventory to add the items
+				int spaceForShopItemInChestInventory = 0;
+				for (ItemStack chestItem : copyOfChest.getInventory().getStorageContents()) {
+					if (chestItem == null || chestItem.getType() == Material.AIR) {
+						spaceForShopItemInChestInventory += 64;
+						continue;
+					}
+
+					if (chestItem.isSimilar(shop.getItem())) {
+						spaceForShopItemInChestInventory += chestItem.getMaxStackSize() - chestItem.getAmount();
+					}
+				}
+				if (spaceForShopItemInChestInventory < shop.getQuantity()) {
+					player.sendMessage(ChatUtils.chatMessage("&cThere is no space remaining in the chest!"));
+					clickUser.setBulkTransactionNum(-1);
+					AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+					return;
 				}
 			}
 
 			// Verifies the player has the items
 			Inventory playerInventory = player.getInventory();
-			HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(playerInventory.getContents(), playerShop);
+			HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(playerInventory.getContents(), shop);
 
 			if (result.containsKey(true)) {
-				if (isPlayerShop) {
-					if (!chestHasSpace) {
-						player.sendMessage(ChatUtils.chatMessage("&cThere is no space remaining in the chest!"));
-						return;
-					}
-				}
-
 				DecimalFormat df = new DecimalFormat("0.00");
 
 				// Logic to update balances and chest inventory
-				clickUser.setBalance(clickUser.getBalance() + playerShop.getSellPrice());
+				clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
 				if (shopUser != null) {
-					shopUser.setBalance(shopUser.getBalance() - playerShop.getSellPrice());
-					ItemStack shopItem = playerShop.getItem().clone();
-					shopItem.setAmount(playerShop.getQuantity());
+					shopUser.setBalance(shopUser.getBalance() - shop.getSellPrice());
+					ItemStack shopItem = shop.getItem().clone();
+					shopItem.setAmount(shop.getQuantity());
 					chestInventory.addItem(shopItem);
 				}
 
@@ -283,30 +350,35 @@ public class ShopInteract {
 				playerInventory.clear();
 				playerInventory.setContents(result.get(true));
 
-				String itemname = ChatUtils.getFormattedItemName(playerShop.getItem().getType().name());
-				if (playerShop.getItem().hasItemMeta()) {
-					if (playerShop.getItem().getItemMeta().hasDisplayName()) {
-						itemname = playerShop.getItem().getItemMeta().getDisplayName();
+				String itemname = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
+				if (shop.getItem().hasItemMeta()) {
+					if (shop.getItem().getItemMeta().hasDisplayName()) {
+						itemname = shop.getItem().getItemMeta().getDisplayName();
 					}
 				}
 
 				player.sendMessage(ChatUtils.chatMessage(
-						"&7You have sold &e" + playerShop.getQuantity() + " " + itemname
-						+ ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
+						"&7You have sold &e" + shop.getQuantity() + " " + itemname
+						+ ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getSellPrice()))));
+				clickUser.setBulkTransactionNum(-1);
+				AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
 				// If the shop owner is online
 				if (isPlayerShop) {
-					if (Bukkit.getPlayer(playerShop.getUuid()) != null) {
-						Player shopPlayer = Bukkit.getPlayer(playerShop.getUuid());
+					if (Bukkit.getPlayer(shop.getUuid()) != null) {
+						Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
 						shopPlayer.sendMessage(
-								ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + playerShop.getQuantity() + " "
-										+  itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(playerShop.getSellPrice()))));
+								ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + shop.getQuantity() + " "
+										+  itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getSellPrice()))));
 					}
 				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
 			}
 		} else {
+			if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+				return;
+			}
 			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
 		}
 	}

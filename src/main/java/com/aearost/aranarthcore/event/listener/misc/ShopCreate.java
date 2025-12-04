@@ -65,10 +65,11 @@ public class ShopCreate implements Listener {
 			if (playerShopNum >= maxShopNum) {
 				if (maxShopNum == 0) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
-				} else {
+					return;
+				} else if (maxShopNum != -1) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
+					return;
 				}
-				return;
 			}
 
 			int[] validSignFormatResult = validSignFormat(lines, player, true);
