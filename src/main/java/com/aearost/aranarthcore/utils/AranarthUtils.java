@@ -284,6 +284,9 @@ public class AranarthUtils {
 
 		// No need to change inventory
 		if (isSurvivalToSurvival || isSameWorld) {
+			if (aranarthPlayer.getCouncilRank() != 3) {
+				player.setGameMode(GameMode.SURVIVAL);
+			}
 			return;
 		} else {
 			// Remove potion effects when changing the world
