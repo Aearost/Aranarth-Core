@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.HONEY_GLAZED_HAM;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.HONEY_GLAZED_HAM;
 
 /**
  * Provides the necessary components of a Honey Glazed Ham item.

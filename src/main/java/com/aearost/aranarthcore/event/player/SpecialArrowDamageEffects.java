@@ -7,7 +7,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 /**
  * Prevents damage from being taken from tipped arrows that apply a positive potion effect.

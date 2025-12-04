@@ -10,7 +10,7 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 /**
  * Handles adding the Persistent Data attributes to the custom special arrows.
