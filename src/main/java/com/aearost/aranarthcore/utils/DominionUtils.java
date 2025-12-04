@@ -84,23 +84,23 @@ public class DominionUtils {
 						List<Chunk> chunks = playerDominion.getChunks();
 						chunks.add(chunk);
 						updateDominion(playerDominion);
-						return ChatUtils.chatMessage("&7This chunk has been claimed for " + playerDominion.getName());
+						return "&7This chunk has been claimed for " + playerDominion.getName();
 					} else {
-						return ChatUtils.chatMessage("&cYour dominion cannot afford this!");
+						return "&cYour dominion cannot afford this!";
 					}
 				} else {
 					if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
-						return ChatUtils.chatMessage("&cThis chunk is already claimed by your dominion");
+						return "&cThis chunk is already claimed by your dominion";
 					} else {
-						return ChatUtils.chatMessage("&cThis chunk is already claimed by &e" + dominionOfChunk.getName());
+						return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
 					}
 				}
 
 			} else {
-				return ChatUtils.chatMessage("&cOnly the owner of the dominion can claim land!");
+				return "&cOnly the owner of the dominion can claim land!";
 			}
 		} else {
-			return ChatUtils.chatMessage("&cYou are not part of a dominion!");
+			return "&cYou are not part of a dominion!";
 		}
     }
 
