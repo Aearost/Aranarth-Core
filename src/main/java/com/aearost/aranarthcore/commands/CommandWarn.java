@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -80,6 +81,7 @@ public class CommandWarn {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 						if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId())) {
 							onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been warned!"));
+							onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
 						}
 					}
 				} else {
