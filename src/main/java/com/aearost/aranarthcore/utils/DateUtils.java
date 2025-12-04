@@ -901,7 +901,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getObscurvorDescription() {
-		return "The month of Obscurvór is the month of rest. You will still feel the slowness of Winter, and are also hunted more frequently and aggressively by phantoms.";
+		return "The month of Obscurvór is the month of rest. The slowness of Winter lingers, with more aggression from phantoms, and an increased amount of sleeping players to skip the night.";
 	}
 
 	/**
