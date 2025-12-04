@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -262,6 +263,50 @@ public class CompressorItemPickup {
 	 */
 	private void addResultsToInventory(Player player, ItemStack item) {
 		int remainingToAdd = item.getAmount();
+
+		// Fills shulker boxes with the compressed blocks
+		if (player.hasPermission("aranarth.shulker")) {
+			for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
+				ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
+				if (inventoryItem != null && inventoryItem.getType() != Material.AIR) {
+					if (inventoryItem.getType().name().contains("SHULKER_BOX")) {
+						ItemMeta meta = inventoryItem.getItemMeta();
+						if (meta instanceof BlockStateMeta im) {
+							if (im.getBlockState() instanceof ShulkerBox shulker) {
+								for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+									if (shulkerItem != null && shulkerItem.getType() != Material.AIR) {
+										if (shulkerItem.isSimilar(item)) {
+											while (remainingToAdd > 0) {
+												// Do not exceed stack size
+												if (shulkerItem.getAmount() == shulkerItem.getMaxStackSize()) {
+													break;
+												}
+
+												// Add to the amount and end if it is the amount needed to be added
+												shulkerItem.setAmount(shulkerItem.getAmount() + 1);
+												remainingToAdd--;
+												if (remainingToAdd == 0) {
+													break;
+												}
+											}
+											if (remainingToAdd == 0) {
+												break;
+											}
+										}
+									}
+								}
+								im.setBlockState(shulker);
+								inventoryItem.setItemMeta(im);
+								break;
+							}
+						}
+					} else {
+						break;
+					}
+				}
+			}
+		}
+
 		// Stacks the added items together
 		for (int i = 0; i < player.getInventory().getStorageContents().length; i++) {
 			ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
