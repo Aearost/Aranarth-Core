@@ -11,8 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
-import static com.aearost.aranarthcore.items.CustomItemKeys.CLUSTER;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARANARTHIUM_INGOT;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.CLUSTER;
 
 /**
  * Handles the overrides when crafting involving an Aranarthium Ingot.

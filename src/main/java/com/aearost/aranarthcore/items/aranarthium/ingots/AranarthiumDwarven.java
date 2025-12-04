@@ -12,7 +12,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARANARTHIUM_INGOT;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARANARTHIUM_INGOT;
 
 /**
  * Provides the necessary components of a Dwarven Aranarthium Ingot item.

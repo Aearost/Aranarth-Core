@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items;
+package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.NamespacedKey;
