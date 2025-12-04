@@ -1187,7 +1187,7 @@ public class AranarthUtils {
 			saintHomeNum = 10;
 		}
 
-		String perksHomeAmountAsString = aranarthPlayer.getPerks().split("_")[8];
+		String perksHomeAmountAsString = aranarthPlayer.getPerks().split("\\*")[8];
 		int perksHomeAmount = 0;
 		try {
 			perksHomeAmount = Integer.parseInt(perksHomeAmountAsString);
