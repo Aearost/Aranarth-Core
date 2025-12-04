@@ -31,10 +31,11 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
+		boolean isNewPlayer = false;
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
 			player.teleport(new Location(Bukkit.getWorld("world"), -29.5, 74, -73.5, 0, 0));
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7Welcome, &e" + player.getName() + "&7, to the &6&lRealm of Aranarth!"));
+			isNewPlayer = true;
 		}
 		// If the player changed their username
 		else if (AranarthUtils.getUsername(player) != null && !AranarthUtils.getUsername(player).equals(player.getName())) {
@@ -65,7 +66,7 @@ public class PlayerServerJoinListener implements Listener {
 
 		// Clears a player's nickname if they do not have permission for one
 		if (!player.hasPermission("aranarth.nick")) {
-			if (!AranarthUtils.getNickname(player).isEmpty()) {
+			if (!AranarthUtils.getNickname(player).equals(player.getName())) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setNickname("");
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -73,33 +74,9 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
-
-		// Displays the MOTD when the player joins
-		int day = AranarthUtils.getDay();
-		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
-		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
-		int year = AranarthUtils.getYear();
-
-		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
-		player.sendMessage(messages[0]);
-
-		Avatar avatar = AvatarUtils.getCurrentAvatar();
-		if (avatar == null) {
-			player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
-		} else {
-			String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
-			player.sendMessage(ChatUtils.translateToColor("  &5&lThe current Avatar is &e" + avatarNickname));
+		if (!isNewPlayer) {
+			displayMotd(player);
 		}
-		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
-		player.sendMessage("  " + messages[1]); // Date message
-
-		// Once mail is added in, use the below format
-//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
-
-		player.sendMessage(messages[2]);
-		player.sendMessage("");
 
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
@@ -122,7 +99,58 @@ public class PlayerServerJoinListener implements Listener {
 			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
 		}
 
+		boolean finalIsNewPlayer = isNewPlayer;
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				// Displays a welcome message after the join message
+				if (finalIsNewPlayer) {
+					Bukkit.broadcastMessage("");
+					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+					Bukkit.broadcastMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","
+							+ "\n                    &7to the &6&lRealm of Aranarth!"));
+					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+					Bukkit.broadcastMessage("");
+				}
+			}
+		}.runTaskLater(AranarthCore.getInstance(), 1L);
+
 		playJoinSound();
+	}
+
+	/**
+	 * Displays the MOTD to the player when they join.
+	 * @param player The player.
+	 */
+	private void displayMotd(Player player) {
+		// Displays the MOTD when the player joins
+		int day = AranarthUtils.getDay();
+		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
+		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
+		int year = AranarthUtils.getYear();
+
+		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
+		player.sendMessage(messages[0]);
+
+		Avatar avatar = AvatarUtils.getCurrentAvatar();
+		if (avatar == null) {
+			player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
+		} else {
+			String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
+			player.sendMessage(ChatUtils.translateToColor("  &5&lThe current Avatar is &e" + avatarNickname));
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
+		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
+		player.sendMessage("  " + messages[1]); // Date message
+
+		// Once mail is added in, use the below format
+//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
+
+		player.sendMessage(messages[2]);
+		player.sendMessage("");
 	}
 
 	/**
