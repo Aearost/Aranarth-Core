@@ -56,6 +56,7 @@ public class AranarthPlayer {
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
 	private boolean isCompressingItems = false;
+	private int bulkTransactionNum = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -97,6 +98,7 @@ public class AranarthPlayer {
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
+		this.bulkTransactionNum = 0;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -143,6 +145,7 @@ public class AranarthPlayer {
 		this.isInAdminMode = false;
 		this.saintExpireDate = saintExpireDate;
 		this.isCompressingItems = isCompressingItems;
+		this.bulkTransactionNum = 0;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -809,6 +812,22 @@ public class AranarthPlayer {
 	 */
 	public void setIsCompressingItems(boolean isCompressingItems) {
 		this.isCompressingItems = isCompressingItems;
+	}
+
+	/**
+	 * Provides the variable tracking which point of the bulk transaction the player is currently making.
+	 * 0 is none, 1 is actively making a bulk purchase, -1 is just finished making a bulk purchase.
+	 */
+	public int getBulkTransactionNum() {
+		return bulkTransactionNum;
+	}
+
+	/**
+	 * Updates the variable tracking which point of the bulk transaction the player is currently making
+	 * @param bulkTransactionNum Which point of the bulk transaction the player is currently making
+	 */
+	public void setBulkTransactionNum(int bulkTransactionNum) {
+		this.bulkTransactionNum = bulkTransactionNum;
 	}
 
 }

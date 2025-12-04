@@ -8,6 +8,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class PlayerInteractEventListener implements Listener {
 
@@ -48,8 +49,12 @@ public class PlayerInteractEventListener implements Listener {
             new ExpStore().execute(e);
         }
 
-        if (e.getClickedBlock() != null) {
-            new ShopInteract().execute(e);
+        // Ensures the event is only called once
+        if (e.getHand() == EquipmentSlot.HAND) {
+            if (e.getClickedBlock() != null) {
+                new ShopInteract().execute(e);
+                new ShopBulkTransaction().execute(e);
+            }
         }
     }
 }
