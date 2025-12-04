@@ -50,6 +50,7 @@ public class CommandSethome {
 						}
 					}
 
+					homeName = ChatUtils.removeSpecialCharacters(homeName);
 					String strippedName = ChatUtils.stripColorFormatting(homeName);
 					for (Home home : aranarthPlayer.getHomes()) {
 						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {

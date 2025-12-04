@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,8 +19,7 @@ public class Punishment {
 		this.uuid = uuid;
 		this.date = date;
 		this.type = type;
-		reason = reason.replaceAll("\\|", "");
-		reason = reason.replaceAll("_", "");
+		reason = ChatUtils.removeSpecialCharacters(reason);
 		this.reason = reason;
 		this.appliedBy = appliedBy;
 	}

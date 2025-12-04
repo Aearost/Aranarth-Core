@@ -179,9 +179,9 @@ public class PersistenceUtils {
 
 				HashMap<ItemStack, Integer> potions = new HashMap<>();
 				if (!fields[5].isEmpty()) {
-					String[] potionAsArray = fields[5].split("___");
+					String[] potionAsArray = fields[5].split("\\*\\*\\*");
 					for (String potionInArray : potionAsArray) {
-						String[] parts = potionInArray.split("_");
+						String[] parts = potionInArray.split("\\*");
 						ItemStack[] potionType = new ItemStack[1];
 						try {
 							potionType = ItemUtils.itemStackArrayFromBase64(parts[0]);
@@ -238,13 +238,13 @@ public class PersistenceUtils {
 				List<Home> homes = new ArrayList<>();
 				String[] homesStrings = null;
 				if (!fields[14].isEmpty()) {
-					homesStrings = fields[14].split("___");
+					homesStrings = fields[14].split("\\*\\*\\*");
 				}
 
 				// Only 1 empty index if no homes are set
 				if (homesStrings != null) {
 					for (String home : homesStrings) {
-						String[] homeParts = home.split("_");
+						String[] homeParts = home.split("\\*");
 						String homeName = homeParts[0];
 						String worldName = homeParts[1];
 						double x = Double.parseDouble(homeParts[2]);
@@ -340,11 +340,11 @@ public class PersistenceUtils {
 							for (ItemStack potion : aranarthPlayer.getPotions().keySet()) {
 								int amount = aranarthPlayer.getPotions().get(potion);
 								String part = ItemUtils.itemStackArrayToBase64(new ItemStack[] { potion });
-								part += "_" + amount + "___";
+								part += "*" + amount + "***";
 								potions += part;
 							}
 
-							if (potions.endsWith("___")) {
+							if (potions.endsWith("***")) {
 								potions = potions.substring(0, potions.length() - 2); // Remove the last three characters
 							}
 						}
@@ -379,9 +379,9 @@ public class PersistenceUtils {
 								float pitch = home.getLocation().getPitch();
 								Material type = home.getIcon();
 								if (i == aranarthPlayer.getHomes().size() - 1) {
-									homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name());
+									homes.add(name + "*" + worldName + "*" + x + "*" + y + "*" + z + "*" + yaw + "*" + pitch + "*" + type.name());
 								} else {
-									homes.add(name + "_" + worldName + "_" + x + "_" + y + "_" + z + "_" + yaw + "_" + pitch + "_" + type.name() + "___");
+									homes.add(name + "*" + worldName + "*" + x + "*" + y + "*" + z + "*" + yaw + "*" + pitch + "*" + type.name() + "***");
 								}
 							}
 						}
@@ -680,7 +680,7 @@ public class PersistenceUtils {
 				}
 
 				UUID owner = UUID.fromString(fields[0]);
-				String[] trustedUuids = fields[1].split("___");
+				String[] trustedUuids = fields[1].split("\\*\\*\\*");
 				List<UUID> trusted = new ArrayList<>();
 				for (String trustedUuid : trustedUuids) {
 					trusted.add(UUID.fromString(trustedUuid));
@@ -760,7 +760,7 @@ public class PersistenceUtils {
 							if (trusted.isEmpty()) {
 								trusted = new StringBuilder(trustedUuid.toString());
 							} else {
-								trusted.append("___").append(trustedUuid.toString());
+								trusted.append("***").append(trustedUuid.toString());
 							}
 						}
 						String trustedString = trusted.toString();
@@ -823,7 +823,7 @@ public class PersistenceUtils {
 				String name = fields[0];
 				UUID owner = UUID.fromString(fields[1]);
 				List<UUID> members = new ArrayList<>();
-				String[] memberParts = fields[2].split("___");
+				String[] memberParts = fields[2].split("\\*\\*\\*");
 				for (String member : memberParts) {
 					members.add(UUID.fromString(member));
 				}
@@ -832,7 +832,7 @@ public class PersistenceUtils {
 				World world = Bukkit.getWorld(worldName);
 
 				List<Chunk> chunks = new ArrayList<>();
-				String[] claimedChunks = fields[4].split("___");
+				String[] claimedChunks = fields[4].split("\\*\\*\\*");
 				for (String chunk : claimedChunks) {
 					String[] coordinates = chunk.split(",");
 					int x = Integer.parseInt(coordinates[0]);
@@ -898,7 +898,7 @@ public class PersistenceUtils {
 								if (members.isEmpty()) {
 									members = new StringBuilder(memberUuid.toString());
 								} else {
-									members.append("___").append(memberUuid.toString());
+									members.append("***").append(memberUuid.toString());
 								}
 							}
 							String membersString = members.toString();
@@ -910,7 +910,7 @@ public class PersistenceUtils {
 								if (chunks.isEmpty()) {
 									chunks = new StringBuilder(chunkXZ);
 								} else {
-									chunks.append("___").append(chunkXZ);
+									chunks.append("***").append(chunkXZ);
 								}
 							}
 							String chunksString = chunks.toString();
@@ -1179,9 +1179,9 @@ public class PersistenceUtils {
 				// Skip any commented out lines
 				if (row.startsWith("#")) {
 					// Applies the avatar's binds to ensure they are not reset upon relogging
-					if (row.contains("_")) {
+					if (row.contains("*")) {
 						String noHashtag = row.substring(1);
-						String[] parts = noHashtag.split("_");
+						String[] parts = noHashtag.split("\\*");
 
 						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 						if (currentAvatar != null) {
@@ -1249,7 +1249,7 @@ public class PersistenceUtils {
 					BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 					if (currentAvatarBendingPlayer != null) {
 						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-							writer.write("#" + index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+							writer.write("#" + index + "*" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 						}
 					}
 				}
@@ -1303,7 +1303,7 @@ public class PersistenceUtils {
 				String row = reader.nextLine();
 
 				// Applies the avatar's binds to ensure they are not reset upon relogging
-				String[] parts = row.split("_");
+				String[] parts = row.split("\\*");
 				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 				if (currentAvatar != null) {
 					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
@@ -1353,7 +1353,7 @@ public class PersistenceUtils {
 					BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 					if (currentAvatarBendingPlayer != null) {
 						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
-							writer.write( index + "_" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
+							writer.write( index + "*" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
 						}
 					}
 				}

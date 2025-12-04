@@ -273,7 +273,7 @@ public class PermissionUtils {
 	/**
 	 * Adds the permissions for a player's additional perks.
 	 * Parts: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-	 * Default: 0_0_0_0_0_0_0_0_0_0_0_0
+	 * Default: 0*0*0*0*0*0*0*0*0*0*0*0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
 	 * @param isSecondCall If it was a recursive call from the same method for the sub-element fix.
@@ -281,12 +281,12 @@ public class PermissionUtils {
 	private static void addPlayerPerks(PermissionAttachment perms, Player player, boolean isSecondCall) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		// The default
-		if (aranarthPlayer.getPerks().equals("0_0_0_0_0_0_0_0_0_0_0_0")) {
+		if (aranarthPlayer.getPerks().equals("0*0*0*0*0*0*0*0*0*0*0*0")) {
 			perms.setPermission("bending.donor", false);
 			return;
 		}
 
-		String[] parts = aranarthPlayer.getPerks().split("_");
+		String[] parts = aranarthPlayer.getPerks().split("\\*");
 		// Compressor
 		if (parts[0].equals("1")) {
 			perms.setPermission("aranarth.compress", true);

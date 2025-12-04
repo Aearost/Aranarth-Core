@@ -190,12 +190,9 @@ public class CommandDominion {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
 						return;
 					}
-				} else {
-					if (!dominionName.matches("^[A-Za-z ]*$")) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
-						return;
-					}
 				}
+
+				dominionName = ChatUtils.removeSpecialCharacters(dominionName);
 
 				// Ensures the player is not in a dominion
 				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {

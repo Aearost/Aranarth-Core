@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -13,8 +14,7 @@ public class Home {
 	private final Material icon;
 	
 	public Home(String homeName, Location location, Material icon) {
-		homeName = homeName.replaceAll("\\|", "");
-		homeName = homeName.replaceAll("_", "");
+		homeName = ChatUtils.removeSpecialCharacters(homeName);
 		this.name = homeName;
 		this.location = location;
 		this.icon = icon;

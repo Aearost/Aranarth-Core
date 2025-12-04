@@ -165,6 +165,15 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Removes all special characters from the input string.
+	 * @param value The input string.
+	 * @return The input string with all special characters removed.
+	 */
+	public static String removeSpecialCharacters(String value) {
+		return value.replaceAll("[^a-zA-Z0-9\\s]", "");
+	}
+
+	/**
 	 * Formats material names to properly capitalized strings.
 	 *
 	 * @param nameToFormat The item name to be formatted.
