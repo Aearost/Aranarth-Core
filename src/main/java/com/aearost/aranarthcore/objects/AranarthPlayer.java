@@ -94,7 +94,7 @@ public class AranarthPlayer {
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
 		this.isAddingPotions = false;
-		this.perks = "0_0_0_0_0_0_0_0_0_0_0_0";
+		this.perks = "0*0*0*0*0*0*0*0*0*0*0*0";
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
