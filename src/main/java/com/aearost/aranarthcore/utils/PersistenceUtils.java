@@ -1364,4 +1364,81 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Initializes the active server boosts based on the contents of boosts.txt.
+	 */
+	public static void loadBoosts() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "boosts.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the server boosts file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				String[] parts = row.split("\\|");
+
+				Boost boost = Boost.valueOf(parts[0]);
+				LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[1])), ZoneId.systemDefault());
+				AranarthUtils.addServerBoost(boost, end, null);
+			}
+			Bukkit.getLogger().info("The server boosts have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the server boosts");
+		}
+	}
+
+	/**
+	 * Saves the active server boosts to the boosts.txt file.
+	 */
+	public static void saveBoosts() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "boosts.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new boosts.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of boosts.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+
+				HashMap<Boost, LocalDateTime> boosts = AranarthUtils.getServerBoosts();
+				if (!boosts.isEmpty()) {
+					for (Boost boost : boosts.keySet()) {
+						LocalDateTime ldt = boosts.get(boost);
+						writer.write(boost.name() + "|" + ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+					}
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the server boosts");
+			}
+		}
+	}
+
 }

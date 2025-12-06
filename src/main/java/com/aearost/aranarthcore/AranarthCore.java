@@ -61,6 +61,7 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
 				PersistenceUtils.saveAvatars();
+				PersistenceUtils.saveBoosts();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
 			}
@@ -107,6 +108,7 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.applySpawnBuffs();
 				AranarthUtils.refreshMutes();
 				AranarthUtils.refreshBans();
+				AranarthUtils.refreshServerBoosts();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
@@ -140,6 +142,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadWarps();
 		PersistenceUtils.loadPunishments();
 		PersistenceUtils.loadAvatars();
+		PersistenceUtils.loadBoosts();
 	}
 
 	/**
@@ -383,6 +386,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveWarps();
 		PersistenceUtils.savePunishments();
 		PersistenceUtils.saveAvatars();
+		PersistenceUtils.saveBoosts();
 
 		Bukkit.resetRecipes();
 	}

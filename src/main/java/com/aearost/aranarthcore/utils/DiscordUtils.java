@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
+import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Punishment;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -94,7 +95,7 @@ public class DiscordUtils {
 			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 			EmbedBuilder embed = new EmbedBuilder()
 					.setAuthor(player.getName() + " has become " + aOrAn + " " + rankName + "!", null, url)
-					.setColor(Color.CYAN);
+					.setColor(Color.LIGHT_GRAY);
 
 			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
@@ -333,14 +334,14 @@ public class DiscordUtils {
         switch (punishment.getType()) {
             case "WARN" -> {
                 embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
-                embed.setColor(Color.LIGHT_GRAY);
+                embed.setColor(new Color(253, 233, 146));
                 embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Warned by:** " + appliedBy + "\n" +
                         "**Reason:** " + punishment.getReason());
             }
 			case "MUTE" -> {
 				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
-				embed.setColor(Color.YELLOW);
+				embed.setColor(new Color(255, 255, 0));
 
 				String formattedEndDate = "None";
 				if (!aranarthPlayer.getMuteEndDate().equals("none")) {
@@ -375,7 +376,7 @@ public class DiscordUtils {
 					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
 				}
 				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
-				embed.setColor(Color.RED);
+				embed.setColor(new Color(70, 0, 0));
 				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
 						"**Banned by:** " + appliedBy + "\n" +
 						"**Ban end date:** " + formattedEndDate + "\n" +
@@ -476,4 +477,71 @@ public class DiscordUtils {
 		}
 	}
 
+	/**
+	 * Adds a message in #server-chat in Discord to reflect the addition of a new server boost.
+	 * @param uuid The UUID of the player who purchased/is applying the boost.
+	 * @param boost The boost being applied.
+	 */
+	public static void addBoostToDiscord(UUID uuid, Boost boost) {
+		Guild guild = getGuild();
+
+		// If it was applied by a user
+		if (uuid != null) {
+			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
+
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+
+			String name = "";
+			Color color = null;
+			if (boost == Boost.MINER) {
+				name = "Boost of the Miner";
+				color = new Color(85, 85, 85);
+			} else if (boost == Boost.HARVEST) {
+				name = "Boost of the Harvest";
+				color = new Color(255, 170, 0);
+			} else if (boost == Boost.HUNTER) {
+				name = "Boost of the Hunter";
+				color = new Color(255, 85, 85);
+			} else if (boost == Boost.CHI) {
+				name = "Boost of Chi";
+				color = new Color(255, 255, 255);
+			} else {
+				name = "Unspecified Boost";
+				color = new Color(255, 85, 255);
+			}
+
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor(username + " has applied the " + name, null, url)
+					.setColor(color);
+
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		} else {
+			String name = "";
+			Color color = null;
+			if (boost == Boost.MINER) {
+				name = "Boost of the Miner";
+				color = new Color(85, 85, 85);
+			} else if (boost == Boost.HARVEST) {
+				name = "Boost of the Harvest";
+				color = new Color(255, 170, 0);
+			} else if (boost == Boost.HUNTER) {
+				name = "Boost of the Hunter";
+				color = new Color(255, 85, 85);
+			} else if (boost == Boost.CHI) {
+				name = "Boost of Chi";
+				color = new Color(255, 255, 255);
+			} else {
+				name = "Unspecified Boost";
+				color = new Color(255, 85, 255);
+			}
+
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor("The " + name + " has applied")
+					.setColor(color);
+
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		}
+	}
 }
