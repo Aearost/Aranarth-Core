@@ -138,7 +138,18 @@ public class PlayerServerJoinListener implements Listener {
 			player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
 		} else {
 			String avatarNickname = AranarthUtils.getPlayer(avatar.getUuid()).getNickname();
-			player.sendMessage(ChatUtils.translateToColor("  &5&lThe current Avatar is &e" + avatarNickname));
+			String element = "";
+			if (avatar.getElement() == 'W') {
+				element = "&b水";
+			} else if (avatar.getElement() == 'E') {
+				element = "&a土";
+			} else if (avatar.getElement() == 'F') {
+				element = "&c火";
+			} else {
+				element = "&7気";
+			}
+			player.sendMessage(ChatUtils.translateToColor(
+					"  &5&lThe current Avatar is " + element + " &d" + avatarNickname + " " + element));
 		}
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
