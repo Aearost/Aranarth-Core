@@ -481,8 +481,9 @@ public class DiscordUtils {
 	 * Adds a message in #server-chat in Discord to reflect the addition of a new server boost.
 	 * @param uuid The UUID of the player who purchased/is applying the boost.
 	 * @param boost The boost being applied.
+	 * @param isAdding Whether a boost is being added.
 	 */
-	public static void addBoostToDiscord(UUID uuid, Boost boost) {
+	public static void updateBoostInDiscord(UUID uuid, Boost boost, boolean isAdding) {
 		Guild guild = getGuild();
 
 		// If it was applied by a user
@@ -537,11 +538,17 @@ public class DiscordUtils {
 				color = new Color(255, 85, 255);
 			}
 
-			EmbedBuilder embed = new EmbedBuilder()
-					.setAuthor("The " + name + " has applied")
-					.setColor(color);
-
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			if (isAdding) {
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor("The " + name + " has applied")
+						.setColor(color);
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			} else {
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor("The " + name + " has expired")
+						.setColor(color);
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			}
 		}
 	}
 }
