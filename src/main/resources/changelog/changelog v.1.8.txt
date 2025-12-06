@@ -81,6 +81,7 @@ Features
 [+] Added in MOTD to display when players join the server
 [~] Fixed bug where sugarcane blocks were being uncrafted into bamboo instead of sugarcane
 [+] Fixed issue where flowing water was freezing during winter months
+[+] Implemented server boosts
 
 Miscellaneous
 - Removed redundant logs from weather
