@@ -6,6 +6,10 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
 import com.gmail.nossr50.events.experience.McMMOPlayerXpGainEvent;
 import com.gmail.nossr50.mcMMO;
+import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.Ability;
+import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
+import com.projectkorra.projectkorra.event.AbilityEndEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -14,7 +18,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -118,6 +121,9 @@ public class BoostEffectsListener implements Listener {
 		return false;
 	}
 
+	/**
+	 * Handles extra mob drops.
+	 */
 	@EventHandler
 	public void onEntityDeath(EntityDeathEvent e) {
 		if (e.getDamageSource().getCausingEntity() != null) {
@@ -139,9 +145,27 @@ public class BoostEffectsListener implements Listener {
 		}
 	}
 
-	private boolean isPlayerCausedDamage(EntityDamageEvent.DamageCause cause) {
-		return (cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) || (cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)
-				|| (cause == EntityDamageEvent.DamageCause.PROJECTILE);
+	/**
+	 * Handles increasing bending ability damage.
+	 */
+	@EventHandler
+	public void onBendAttack(AbilityDamageEntityEvent e) {
+		if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
+			e.setDamage(e.getDamage() * 1.5);
+		}
+	}
+
+	/**
+	 * Handles decreasing bending ability damage.
+	 */
+	@EventHandler
+	public void onAbilityEnd(AbilityEndEvent e) {
+		if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
+			Ability ability = e.getAbility();
+			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(e.getAbility().getPlayer());
+			bendingPlayer.removeCooldown(ability.getName());
+			bendingPlayer.addCooldown(ability, ability.getCooldown() / 2);
+		}
 	}
 
 }
