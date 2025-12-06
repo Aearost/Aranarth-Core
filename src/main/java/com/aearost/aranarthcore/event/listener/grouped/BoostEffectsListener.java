@@ -10,9 +10,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Random;
@@ -47,7 +50,8 @@ public class BoostEffectsListener implements Listener {
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.HUNTER)) {
 				if (e.getSkill() == PrimarySkillType.SWORDS || e.getSkill() == PrimarySkillType.AXES
 						|| e.getSkill() == PrimarySkillType.TRIDENTS || e.getSkill() == PrimarySkillType.MACES
-						|| e.getSkill() == PrimarySkillType.ARCHERY || e.getSkill() == PrimarySkillType.CROSSBOWS) {
+						|| e.getSkill() == PrimarySkillType.ARCHERY || e.getSkill() == PrimarySkillType.CROSSBOWS
+						|| e.getSkill() == PrimarySkillType.FISHING) {
 					e.setRawXpGained((float) (e.getRawXpGained() * 1.5));
 				}
 			}
@@ -112,6 +116,32 @@ public class BoostEffectsListener implements Listener {
 			return true;
 		}
 		return false;
+	}
+
+	@EventHandler
+	public void onEntityDeath(EntityDeathEvent e) {
+		if (e.getDamageSource().getCausingEntity() != null) {
+			if (e.getDamageSource().getCausingEntity() instanceof Player) {
+				if (!(e.getEntity() instanceof Player)) {
+					for (ItemStack drop : e.getDrops()) {
+						if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR")) {
+							continue;
+						}
+
+						int rand = new Random().nextInt(2);
+						// 50% chance to double the drop
+						if (rand == 0) {
+							drop.setAmount(drop.getAmount() * 2);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	private boolean isPlayerCausedDamage(EntityDamageEvent.DamageCause cause) {
+		return (cause == EntityDamageEvent.DamageCause.ENTITY_ATTACK) || (cause == EntityDamageEvent.DamageCause.ENTITY_SWEEP_ATTACK)
+				|| (cause == EntityDamageEvent.DamageCause.PROJECTILE);
 	}
 
 }
