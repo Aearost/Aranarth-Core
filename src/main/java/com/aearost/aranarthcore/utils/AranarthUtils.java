@@ -1939,11 +1939,11 @@ public class AranarthUtils {
 			// Handles messages
 			if (uuid == null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
-				DiscordUtils.addBoostToDiscord(null, boost);
+				DiscordUtils.updateBoostInDiscord(null, boost, true);
 			} else {Bukkit.broadcastMessage(ChatUtils.translateToColor(""));
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
-				DiscordUtils.addBoostToDiscord(uuid, boost);
+				DiscordUtils.updateBoostInDiscord(uuid, boost, true);
 			}
 		}
 		// Should only be called during server startup
@@ -1956,12 +1956,23 @@ public class AranarthUtils {
 	 * Removes the specified server boost.
 	 * @param boost The boost being removed.
 	 */
-	public static boolean removeServerBoost(Boost boost) {
+	public static void removeServerBoost(Boost boost) {
 		if (AranarthUtils.getServerBoosts().containsKey(boost)) {
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+			DiscordUtils.updateBoostInDiscord(null, boost, false);
 			serverBoosts.remove(boost);
-			return true;
-		} else {
-			return false;
 		}
 	}
 
@@ -2021,7 +2032,22 @@ public class AranarthUtils {
 	public static void refreshServerBoosts() {
 		List<Boost> toRemove = new ArrayList<>();
 		for (Boost boost : serverBoosts.keySet()) {
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+
 			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+				DiscordUtils.updateBoostInDiscord(null, boost, false);
 				serverBoosts.remove(boost);
 			}
 		}

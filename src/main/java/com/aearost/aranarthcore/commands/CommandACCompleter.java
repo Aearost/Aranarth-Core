@@ -154,8 +154,11 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("balance");
 				displayedOptions.add("baltop");
 				displayedOptions.add("back");
+				displayedOptions.add("boosts");
 			} else if ("blacklist".startsWith(args[0])) {
 				displayedOptions.add("blacklist");
+			} else if ("boosts".startsWith(args[0])) {
+				displayedOptions.add("boosts");
 			}  else {
 				if (args[0].startsWith("ba")) {
 					if (args[0].equals("ba")) {
@@ -626,6 +629,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("tables");
 		displayedOptions.add("hat");
 		displayedOptions.add("store");
+		displayedOptions.add("boosts");
 		return displayedOptions;
 	}
 
@@ -885,6 +889,45 @@ public class CommandACCompleter implements TabCompleter {
 			case "broadcast" -> {
 				if (args[1].isEmpty()) {
 					displayedOptions.add("msg");
+				}
+			}
+			case "boosts" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("add");
+						displayedOptions.add("remove");
+					} else if ("add".startsWith(args[1])) {
+						displayedOptions.add("add");
+					} else if ("remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
+					} else {
+						displayedOptions.add("add");
+						displayedOptions.add("remove");
+					}
+				} else if (args.length == 3) {
+					displayedOptions.add("MINER");
+					displayedOptions.add("HARVEST");
+					displayedOptions.add("HUNTER");
+					displayedOptions.add("CHI");
+				} else if (args.length == 4) {
+					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
+					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
+					boolean wasPlayerFound = false;
+					for (Player onlinePlayer : onlinePlayers) {
+						// Only display the name if it aligns with one that is currently online
+						if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+							displayedOptions.add(onlinePlayer.getName());
+							wasPlayerFound = true;
+						} else if (args[1].isEmpty()) {
+							displayedOptions.add(onlinePlayer.getName());
+							wasPlayerFound = true;
+						}
+					}
+					if (!wasPlayerFound) {
+						for (Player onlinePlayer : onlinePlayers) {
+							displayedOptions.add(onlinePlayer.getName());
+						}
+					}
 				}
 			}
 		}

@@ -74,12 +74,7 @@ public class CommandBoosts {
 						}
 						// Removing a boost
 						else {
-							boolean wasRemoved = AranarthUtils.removeServerBoost(applied);
-							if (wasRemoved) {
-								sender.sendMessage(ChatUtils.translateToColor("&7The boost has been removed"));
-							} else {
-								sender.sendMessage(ChatUtils.chatMessage("&cThe entered boost is not currently active"));
-							}
+							AranarthUtils.removeServerBoost(applied);
 							return true;
 						}
 					} else {
