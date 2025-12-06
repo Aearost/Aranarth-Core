@@ -2025,10 +2025,14 @@ public class AranarthUtils {
 				serverBoosts.remove(boost);
 			}
 		}
-		
+
 		if (serverBoosts.containsKey(Boost.MINER)) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
+			}
+		} else if (serverBoosts.containsKey(Boost.HUNTER)) {
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
 			}
 		}
 	}
