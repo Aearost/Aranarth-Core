@@ -51,6 +51,8 @@ public class CommandSethome {
 					}
 
 					homeName = ChatUtils.removeSpecialCharacters(homeName);
+
+					// Ensures the home name isn't already used
 					String strippedName = ChatUtils.stripColorFormatting(homeName);
 					for (Home home : aranarthPlayer.getHomes()) {
 						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {
@@ -59,6 +61,7 @@ public class CommandSethome {
 						}
 					}
 
+					// Ensures that more than just color codes were entered
 					if (strippedName.isEmpty()) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou must input a name!"));
 						return true;
