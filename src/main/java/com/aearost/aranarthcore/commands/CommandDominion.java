@@ -226,7 +226,7 @@ public class CommandDominion {
 								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
 
 								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
-								Bukkit.broadcastMessage(ChatUtils.chatMessage(AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
