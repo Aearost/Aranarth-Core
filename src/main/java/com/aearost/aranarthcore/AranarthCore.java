@@ -182,11 +182,12 @@ public class AranarthCore extends JavaPlugin {
 		new PotionConsumeListener(this);
 		new PlayerRespawnEventListener(this);
 		new DominionProtection(this);
-		new SpawnProtection(this);
+		new SpawnProtectionListener(this);
 		new PortalEventListener(this);
 		new ArenaProtection(this);
-		new FireProtection(this);
+		new FireProtectionListener(this);
 		new SleepSkipListener(this);
+		new BoostEffectsListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
@@ -204,7 +205,6 @@ public class AranarthCore extends JavaPlugin {
 		new SnowballHitListener(this);
 		new ArmorStandSwitchListener(this);
 		new TamingXPFromBreeding(this);
-		new BoostExpBuffsListener(this);
 	}
 
 	/**

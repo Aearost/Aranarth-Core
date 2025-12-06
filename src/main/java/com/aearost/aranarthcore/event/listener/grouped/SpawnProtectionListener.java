@@ -25,9 +25,9 @@ import org.bukkit.event.player.*;
 /**
  * Prevents crops from being trampled by both players and other mobs
  */
-public class SpawnProtection implements Listener {
+public class SpawnProtectionListener implements Listener {
 
-	public SpawnProtection(AranarthCore plugin) {
+	public SpawnProtectionListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
