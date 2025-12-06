@@ -1767,6 +1767,10 @@ public class AranarthUtils {
 	 */
 	public static int getPlayerStoredPotionNum(Player player) {
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		if (aranarthPlayer.getPotions() == null || aranarthPlayer.getPotions().isEmpty()) {
+			return 0;
+		}
+
 		int storedPotionNum = 0;
 		for (int amount : aranarthPlayer.getPotions().values()) {
 			storedPotionNum += amount;
