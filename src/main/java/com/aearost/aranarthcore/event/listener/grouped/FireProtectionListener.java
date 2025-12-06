@@ -11,9 +11,9 @@ import org.bukkit.event.block.BlockSpreadEvent;
 /**
  * Handles all logic regarding preventing fire spread and burning.
  */
-public class FireProtection implements Listener {
+public class FireProtectionListener implements Listener {
 
-	public FireProtection(AranarthCore plugin) {
+	public FireProtectionListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
