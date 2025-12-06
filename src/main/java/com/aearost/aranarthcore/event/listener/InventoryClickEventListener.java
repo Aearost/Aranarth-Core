@@ -54,6 +54,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiTablesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Aranarth Store - ")) {
                 new GuiStoreClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Compressible Items")) {
+                new GuiCompressorClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
