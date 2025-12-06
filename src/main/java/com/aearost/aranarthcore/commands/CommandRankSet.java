@@ -31,7 +31,6 @@ public class CommandRankSet {
 			}
 		}
 
-		// /ac rankset rank Aearost 4
 		if (args.length == 4) {
 			if (args[1].equalsIgnoreCase("rank") || args[1].equalsIgnoreCase("saint")
 					|| args[1].equalsIgnoreCase("council") || args[1].equalsIgnoreCase("architect")
@@ -89,6 +88,10 @@ public class CommandRankSet {
 					// Limited from 0 to 3
 					else if (args[1].equals("saint")) {
 						if (rank <= 3) {
+							if (rank == 3) {
+								AranarthUtils.compressAllMaterials(player.getUniqueId());
+							}
+
 							aranarthPlayer.setSaintRank(rank);
 							DiscordUtils.updateSaint(player, rank, true);
 							isSuccessful = true;
@@ -99,6 +102,10 @@ public class CommandRankSet {
 					// Limited from 0 to 3
 					else if (args[1].equals("council")) {
 						if (rank <= 3) {
+							if (rank == 3) {
+								AranarthUtils.compressAllMaterials(player.getUniqueId());
+							}
+
 							aranarthPlayer.setCouncilRank(rank);
 							DiscordUtils.updateCouncil(player, rank, true);
 							isSuccessful = true;
@@ -123,6 +130,9 @@ public class CommandRankSet {
 							if (rank == 0) {
 								aranarthPlayer.setSaintExpireDate(0);
 							} else {
+								if (rank == 3) {
+									AranarthUtils.compressAllMaterials(player.getUniqueId());
+								}
 								Instant end = Instant.now().plusSeconds(2592000);
 								aranarthPlayer.setSaintExpireDate(end.toEpochMilli());
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

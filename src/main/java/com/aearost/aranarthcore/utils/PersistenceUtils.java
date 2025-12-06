@@ -1441,4 +1441,92 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Initializes the compressible items lists based on the contents of compressible.txt.
+	 */
+	public static void loadCompressible() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "compressible.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the compressible items lists file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				String[] parts = row.split("\\*");
+				UUID uuid = UUID.fromString(parts[0]);
+				for (int i = 1; i < parts.length; i++) {
+					Material material = Material.valueOf(parts[i]);
+					AranarthUtils.addCompressibleItem(uuid, material);
+				}
+			}
+			Bukkit.getLogger().info("The compressible items lists have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the compressible items lists");
+		}
+	}
+
+	/**
+	 * Saves the compressible items lists to the compressible.txt file.
+	 */
+	public static void saveCompressible() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "compressible.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new compressible.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of compressible.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				HashMap<UUID, List<Material>> compressibleTypes = AranarthUtils.getCompressibleTypes();
+				for (UUID uuid : compressibleTypes.keySet()) {
+					String line = uuid.toString() + "*";
+					List<Material> materials = compressibleTypes.get(uuid);
+					if (materials.isEmpty()) {
+						continue;
+					} else {
+						for (int i = 0; i < materials.size(); i++) {
+							Material material = materials.get(i);
+							line += material.name();
+							if (i < materials.size() - 1) {
+								line += "*";
+							}
+						}
+					}
+					writer.write(line);
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the compressible items lists");
+			}
+		}
+	}
+
 }

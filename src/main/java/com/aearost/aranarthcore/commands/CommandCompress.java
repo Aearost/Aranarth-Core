@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.gui.GuiCompressor;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -24,16 +25,25 @@ public class CommandCompress {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getIsCompressingItems()) {
-				aranarthPlayer.setIsCompressingItems(false);
-				player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
-			} else {
-				aranarthPlayer.setIsCompressingItems(true);
-				player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
-			}
 
-			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-			return true;
+			if (args.length == 1) {
+				GuiCompressor gui = new GuiCompressor(player);
+				gui.openGui();
+				return true;
+			} else if (args[1].equalsIgnoreCase("toggle")) {
+				if (aranarthPlayer.getIsCompressingItems()) {
+					aranarthPlayer.setIsCompressingItems(false);
+					player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
+				} else {
+					aranarthPlayer.setIsCompressingItems(true);
+					player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
+				}
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac compress [toggle]"));
+				return true;
+			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed by a player!"));
 			return true;

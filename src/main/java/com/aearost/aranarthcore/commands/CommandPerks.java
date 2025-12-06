@@ -135,6 +135,11 @@ public class CommandPerks {
 							}
 							aranarthPlayer.setPerks(perksAsString);
 							AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+							if (args[2].equalsIgnoreCase("compressor") && args[3].equals("1")) {
+								AranarthUtils.compressAllMaterials(uuid);
+							}
+
 							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
 								Player player = Bukkit.getPlayer(uuid);
 								PermissionUtils.evaluatePlayerPermissions(player, false);

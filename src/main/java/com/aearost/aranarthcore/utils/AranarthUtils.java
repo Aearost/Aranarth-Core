@@ -65,6 +65,7 @@ public class AranarthUtils {
 	private static final List<UUID> originalPlayers = new ArrayList<>();
 	private static int phantomSpawnDelay = 0;
 	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
+	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2065,5 +2066,87 @@ public class AranarthUtils {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
 			}
 		}
+	}
+
+	/**
+	 * Provides the HashMap of all UUIDs and the lists of Materials that they are compressing.
+	 * @return The HashMap of all UUIDs and the lists of Materials that they are compressing.
+	 */
+	public static HashMap<UUID, List<Material>> getCompressibleTypes() {
+		return compressibleTypes;
+	}
+
+	/**
+	 * Adds the material to the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being added to their list.
+	 */
+	public static void addCompressibleItem(UUID uuid, Material material) {
+		List<Material> materials = new ArrayList<>();
+		if (compressibleTypes.containsKey(uuid)) {
+			materials = compressibleTypes.get(uuid);
+		}
+		materials.add(material);
+		compressibleTypes.put(uuid, materials);
+	}
+
+	/**
+	 * Removes the material from the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being removed to their list.
+	 */
+	public static void removeCompressibleItem(UUID uuid, Material material) {
+		if (compressibleTypes.containsKey(uuid)) {
+			List<Material> materials = compressibleTypes.get(uuid);
+            materials.remove(material);
+			compressibleTypes.put(uuid, materials);
+		}
+	}
+
+	/**
+	 * Determines if the Material is in the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being verified.
+	 */
+	public static boolean isItemBeingCompressed(UUID uuid, Material material) {
+		if (compressibleTypes.containsKey(uuid)) {
+			if (compressibleTypes.get(uuid).contains(material)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Enables the compressor for all Materials.
+	 * @param uuid The player's UUID.
+	 */
+	public static void compressAllMaterials(UUID uuid) {
+		addCompressibleItem(uuid, Material.COAL);
+		addCompressibleItem(uuid, Material.RAW_COPPER);
+		addCompressibleItem(uuid, Material.COPPER_INGOT);
+		addCompressibleItem(uuid, Material.RAW_IRON);
+		addCompressibleItem(uuid, Material.IRON_NUGGET);
+		addCompressibleItem(uuid, Material.IRON_INGOT);
+		addCompressibleItem(uuid, Material.RAW_GOLD);
+		addCompressibleItem(uuid, Material.GOLD_NUGGET);
+		addCompressibleItem(uuid, Material.GOLD_INGOT);
+		addCompressibleItem(uuid, Material.REDSTONE);
+		addCompressibleItem(uuid, Material.LAPIS_LAZULI);
+		addCompressibleItem(uuid, Material.DIAMOND);
+		addCompressibleItem(uuid, Material.EMERALD);
+		addCompressibleItem(uuid, Material.NETHERITE_INGOT);
+		addCompressibleItem(uuid, Material.AMETHYST_SHARD);
+		addCompressibleItem(uuid, Material.RESIN_CLUMP);
+		addCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+		addCompressibleItem(uuid, Material.WHEAT);
+		addCompressibleItem(uuid, Material.MELON_SLICE);
+		addCompressibleItem(uuid, Material.DRIED_KELP);
+		addCompressibleItem(uuid, Material.SUGAR_CANE);
+		addCompressibleItem(uuid, Material.HONEYCOMB);
+		addCompressibleItem(uuid, Material.SLIME_BALL);
+		addCompressibleItem(uuid, Material.BONE_MEAL);
+		addCompressibleItem(uuid, Material.SNOWBALL);
+		addCompressibleItem(uuid, Material.CLAY_BALL);
 	}
 }
