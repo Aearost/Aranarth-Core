@@ -22,11 +22,22 @@ public class CommandAvatar {
 		if (args.length == 1) {
 			Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 			if (currentAvatar == null) {
+
 				sender.sendMessage(ChatUtils.chatMessage("&7&oAranarth is currently without an Avatar..."));
 				return true;
 			}
+			String element = "";
+			if (currentAvatar.getElement() == 'W') {
+				element = "&b水";
+			} else if (currentAvatar.getElement() == 'E') {
+				element = "&a土";
+			} else if (currentAvatar.getElement() == 'F') {
+				element = "&c火";
+			} else {
+				element = "&7気";
+			}
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(currentAvatar.getUuid());
-			sender.sendMessage(ChatUtils.chatMessage("&5&l&oThe current Avatar is &d" + aranarthPlayer.getNickname()));
+			sender.sendMessage(ChatUtils.chatMessage("&5&l&oThe current Avatar is " + element + " &d" + aranarthPlayer.getNickname() + " " + element));
 			return true;
 		} else {
 			if (sender instanceof Player player) {
