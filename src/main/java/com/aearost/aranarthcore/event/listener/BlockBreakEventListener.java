@@ -39,7 +39,7 @@ public class BlockBreakEventListener implements Listener {
         } else {
             if (e.getBlock().getType().name().endsWith("_ORE")) {
                 new OreClusterDrops().execute(e);
-                new DwarvenAranarthiumOreDrops().execute(e);
+                new OreExtraDrops().execute(e);
             }
         }
 

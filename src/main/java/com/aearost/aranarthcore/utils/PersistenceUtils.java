@@ -1431,7 +1431,7 @@ public class PersistenceUtils {
 				if (!boosts.isEmpty()) {
 					for (Boost boost : boosts.keySet()) {
 						LocalDateTime ldt = boosts.get(boost);
-						writer.write(boost.name() + "|" + ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
+						writer.write(boost.name() + "|" + ldt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli() + "\n");
 					}
 				}
 				writer.close();

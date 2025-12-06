@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
+import java.util.HashMap;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -130,7 +131,7 @@ public class PlayerServerJoinListener implements Listener {
 		int year = AranarthUtils.getYear();
 
 		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
-		player.sendMessage(messages[0]);
+		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 
 		Avatar avatar = AvatarUtils.getCurrentAvatar();
 		if (avatar == null) {
@@ -144,12 +145,21 @@ public class PlayerServerJoinListener implements Listener {
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
+		HashMap<String, String> activeBoosts = AranarthUtils.getActiveServerBoostsMessages();
+		if (activeBoosts.isEmpty()) {
+			player.sendMessage(ChatUtils.translateToColor("  &7There are currently no active server boosts"));
+		} else {
+			for (String boost : activeBoosts.keySet()) {
+				player.sendMessage(ChatUtils.translateToColor("  " + boost + " &7is active for &e" + activeBoosts.get(boost)));
+			}
+		}
+
 		player.sendMessage("  " + messages[1]); // Date message
 
 		// Once mail is added in, use the below format
 //		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
 
-		player.sendMessage(messages[2]);
+		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 		player.sendMessage("");
 	}
 

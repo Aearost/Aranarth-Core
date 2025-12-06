@@ -204,6 +204,7 @@ public class AranarthCore extends JavaPlugin {
 		new SnowballHitListener(this);
 		new ArmorStandSwitchListener(this);
 		new TamingXPFromBreeding(this);
+		new BoostExpBuffsListener(this);
 	}
 
 	/**

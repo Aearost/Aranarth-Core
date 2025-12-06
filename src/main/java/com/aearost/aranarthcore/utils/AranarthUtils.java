@@ -2006,36 +2006,29 @@ public class AranarthUtils {
 		int remainingHours = hours % 24;
 		int remainingMinutes = minutes % 60;
 
-		String daysWord = "days";
-		if (days == 1) {
-			daysWord = "day";
-		}
-		String hoursWord = "hours";
-		if (hours == 1) {
-			hoursWord = "hour";
-		}
-		String minutesWord = "minutes";
-		if (minutes == 1) {
-			minutesWord = "minute";
-		}
-
 		if (days > 0) {
-			return "&e" + days + " " + daysWord + ", " + remainingHours + " " + hoursWord + " and " + remainingMinutes + " " + minutesWord;
+			return "&e" + days + "d " + remainingHours + "h " + remainingMinutes + "m";
 		} else if (hours > 0) {
-			return "&e" + remainingHours + " " + hoursWord + " and " + remainingMinutes + " " + minutesWord;
+			return "&e" + hours + "h " + remainingMinutes + "m";
 		} else {
-			return "&e" + remainingMinutes + " " + minutesWord;
+			return "&e" + minutes + "m";
 		}
 	}
 
 	/**
-	 * Refreshes server boosts and deactivates them once they are no longer active.
+	 * Refreshes server boost functionality and deactivates them once they are no longer active.
 	 */
 	public static void refreshServerBoosts() {
 		List<Boost> toRemove = new ArrayList<>();
 		for (Boost boost : serverBoosts.keySet()) {
 			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
 				serverBoosts.remove(boost);
+			}
+		}
+		
+		if (serverBoosts.containsKey(Boost.MINER)) {
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
 			}
 		}
 	}
