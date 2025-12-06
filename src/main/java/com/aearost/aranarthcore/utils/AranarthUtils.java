@@ -5,10 +5,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Home;
-import com.aearost.aranarthcore.objects.LockedContainer;
-import com.aearost.aranarthcore.objects.Punishment;
+import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.Block;
@@ -30,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -66,6 +64,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 	private static final List<UUID> originalPlayers = new ArrayList<>();
 	private static int phantomSpawnDelay = 0;
+	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -1894,4 +1893,150 @@ public class AranarthUtils {
 		phantomSpawnDelay = newPhantomSpawnDelay;
 	}
 
+	/**
+	 * Provides all server boosts that are currently active.
+	 * @return The HashMap of server boosts that are currently active.
+	 */
+	public static HashMap<Boost, LocalDateTime> getServerBoosts() {
+		return serverBoosts;
+	}
+
+	/**
+	 * Applies a new server boost or increases the duration of an existing server boost.
+	 * @param boost The type of boost being applied. A null value signifies 24 hours.
+	 * @param duration The duration of the boost being applied..
+	 * @param uuid The username of the player that is applying the boost.
+	 */
+	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid) {
+		String name = "";
+		if (boost == Boost.MINER) {
+			name = "&8&lBoost of the Miner";
+		} else if (boost == Boost.HARVEST) {
+			name = "&6&lBoost of the Harvest";
+		} else if (boost == Boost.HUNTER) {
+			name = "&c&lBoost of the Hunter";
+		} else if (boost == Boost.CHI) {
+			name = "&f&lBoost of Chi";
+		} else {
+			name = "&7&lUnspecified Boost";
+		}
+
+		// A new boost will automatically apply for 24 hours
+		if (duration == null) {
+			// Increase by 24 hours if it already exists i.e the same boost was purchased twice
+			if (serverBoosts.get(boost) != null) {
+				LocalDateTime currentBoostEnd = serverBoosts.get(boost);
+				LocalDateTime newBoostEnd = currentBoostEnd.plusDays(1);
+				serverBoosts.put(boost, newBoostEnd);
+			}
+			// Create a new boost as it doesn't exist yet
+			else {
+				LocalDateTime now = LocalDateTime.now();
+				LocalDateTime newBoostEnd = now.plusDays(1);
+				serverBoosts.put(boost, newBoostEnd);
+			}
+
+			// Handles messages
+			if (uuid == null) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+				DiscordUtils.addBoostToDiscord(null, boost);
+			} else {Bukkit.broadcastMessage(ChatUtils.translateToColor(""));
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+				DiscordUtils.addBoostToDiscord(uuid, boost);
+			}
+		}
+		// Should only be called during server startup
+		else {
+			serverBoosts.put(boost, duration);
+		}
+	}
+
+	/**
+	 * Removes the specified server boost.
+	 * @param boost The boost being removed.
+	 */
+	public static boolean removeServerBoost(Boost boost) {
+		if (AranarthUtils.getServerBoosts().containsKey(boost)) {
+			serverBoosts.remove(boost);
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Provides the messages for all active server boosts, specifying the name and the remaining duration of the boost
+	 * @return The formatted name of the boost as the key, and the remaining duration of the boost as the value.
+	 */
+	public static HashMap<String, String> getActiveServerBoostsMessages() {
+		HashMap<String, String> boostMessages = new HashMap<>();
+		for (Boost boost : serverBoosts.keySet()) {
+			LocalDateTime ldt = serverBoosts.get(boost);
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+			boostMessages.put(ChatUtils.translateToColor(name), getRemainingBoostDuration(boost));
+		}
+		return boostMessages;
+	}
+
+	/**
+	 * Provides a String containing the text value of the remaining amount of time for the currently applied boost.
+	 * @param boost The boost.
+	 * @return The String containing the text value of the remaining amount of time for the currently applied boost.
+	 */
+	private static String getRemainingBoostDuration(Boost boost) {
+		LocalDateTime expiry = AranarthUtils.getServerBoosts().get(boost);
+
+		Duration duration = Duration.between(LocalDateTime.now(), expiry);
+		int minutes = (int) duration.toMinutes();
+		int hours = minutes / 60;
+		int days = minutes / 1440;
+
+		int remainingHours = hours % 24;
+		int remainingMinutes = minutes % 60;
+
+		String daysWord = "days";
+		if (days == 1) {
+			daysWord = "day";
+		}
+		String hoursWord = "hours";
+		if (hours == 1) {
+			hoursWord = "hour";
+		}
+		String minutesWord = "minutes";
+		if (minutes == 1) {
+			minutesWord = "minute";
+		}
+
+		if (days > 0) {
+			return "&e" + days + " " + daysWord + ", " + remainingHours + " " + hoursWord + " and " + remainingMinutes + " " + minutesWord;
+		} else if (hours > 0) {
+			return "&e" + remainingHours + " " + hoursWord + " and " + remainingMinutes + " " + minutesWord;
+		} else {
+			return "&e" + remainingMinutes + " " + minutesWord;
+		}
+	}
+
+	/**
+	 * Refreshes server boosts and deactivates them once they are no longer active.
+	 */
+	public static void refreshServerBoosts() {
+		List<Boost> toRemove = new ArrayList<>();
+		for (Boost boost : serverBoosts.keySet()) {
+			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
+				serverBoosts.remove(boost);
+			}
+		}
+	}
 }

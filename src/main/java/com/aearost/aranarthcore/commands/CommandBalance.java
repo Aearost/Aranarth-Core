@@ -40,7 +40,7 @@ public class CommandBalance {
 						if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 							if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
-								sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "'s &7balance is &6" + formatter.format(aranarthPlayer.getBalance())));
+								sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance is &6" + formatter.format(aranarthPlayer.getBalance())));
 								isPlayerFound = true;
 								break;
 							}
@@ -70,7 +70,7 @@ public class CommandBalance {
 									double valueAsDouble = Double.parseDouble(args[2]);
 									String valueWithTwoDecimals = df.format(valueAsDouble);
 									aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
-									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "'s balance has been set to &6" + formatter.format(valueAsDouble)));
+									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
 									isPlayerFound = true;
 								} catch (NumberFormatException e) {
 									sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
