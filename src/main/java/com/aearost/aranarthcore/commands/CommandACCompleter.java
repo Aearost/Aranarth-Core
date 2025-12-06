@@ -575,6 +575,11 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "compress" -> {
+				if (args.length == 2) {
+					displayedOptions.add("toggle");
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -630,6 +635,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("hat");
 		displayedOptions.add("store");
 		displayedOptions.add("boosts");
+		displayedOptions.add("compress");
 		return displayedOptions;
 	}
 
