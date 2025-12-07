@@ -15,4 +15,5 @@ public class CustomItemKeys {
     public static final NamespacedKey SUGARCANE_BLOCK = new NamespacedKey(AranarthCore.getInstance(), "sugarcane_block");
     public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
     public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
+    public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
 }

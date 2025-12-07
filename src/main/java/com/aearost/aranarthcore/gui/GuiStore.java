@@ -191,7 +191,7 @@ public class GuiStore {
 	}
 
 	private Inventory initializeGuiPerks(Player player) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 45, "Aranarth Store - Miscellaneous Perks");
+		Inventory gui = Bukkit.getServer().createInventory(player, 45, "Aranarth Store - Perks");
 
 		// Set empty spaces
 		gui.setItem(0, blank);
@@ -406,13 +406,13 @@ public class GuiStore {
 
 		ItemStack epicKey = new ItemStack(Material.TRIPWIRE_HOOK);
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
-		epicKeyMeta.setDisplayName(ChatUtils.translateToColor("&5&lEpic Crate Key (x3)"));
+		epicKeyMeta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key (x3)"));
 		epicKey.setItemMeta(epicKeyMeta);
 		gui.setItem(13, epicKey);
 
 		ItemStack godlyKey = new ItemStack(Material.TRIPWIRE_HOOK);
 		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
-		godlyKeyMeta.setDisplayName(ChatUtils.translateToColor("&3&lGodly Crate Key (x3)"));
+		godlyKeyMeta.setDisplayName(ChatUtils.translateToColor("&5&lGodly Crate Key (x3)"));
 		godlyKey.setItemMeta(godlyKeyMeta);
 		gui.setItem(16, godlyKey);
 

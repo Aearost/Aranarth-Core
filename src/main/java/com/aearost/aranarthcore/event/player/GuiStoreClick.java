@@ -201,10 +201,10 @@ public class GuiStoreClick {
 			player.sendMessage(ChatUtils.chatMessage("&6&lRare Crate Key (x3): &ehttps://aranarth.craftingstore.net/package/492746"));
 			player.closeInventory();
 		} else if (slot == 13) {
-			player.sendMessage(ChatUtils.chatMessage("&5&lEpic Crate Key (x3): &dhttps://aranarth.craftingstore.net/package/1475091"));
+			player.sendMessage(ChatUtils.chatMessage("&3&lEpic Crate Key (x3): &bhttps://aranarth.craftingstore.net/package/1475091"));
 			player.closeInventory();
 		} else if (slot == 16) {
-			player.sendMessage(ChatUtils.chatMessage("&3&lGodly Crate Key (x3): &bhttps://aranarth.craftingstore.net/package/1475090"));
+			player.sendMessage(ChatUtils.chatMessage("&5&lGodly Crate Key (x3): &dhttps://aranarth.craftingstore.net/package/1475090"));
 			player.closeInventory();
 		}
 
