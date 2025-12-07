@@ -1,10 +1,8 @@
 package com.aearost.aranarthcore.items.aranarthium.ingots;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -26,8 +24,8 @@ public class AranarthiumElven implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven");
-			meta.setItemModel(key);
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven");
+//			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARANARTHIUM_INGOT, PersistentDataType.STRING, "elven");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
