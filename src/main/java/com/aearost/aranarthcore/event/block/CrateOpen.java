@@ -201,7 +201,6 @@ public class CrateOpen {
                 // End after a short delay
                 if (runs == 16) {
                     cancel();
-                    AranarthUtils.removeCrateFromUse(type);
 
                     // finish callback
                     Bukkit.getScheduler().runTask(AranarthCore.getInstance(), onFinish);
@@ -275,6 +274,7 @@ public class CrateOpen {
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
+                AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
@@ -358,6 +358,7 @@ public class CrateOpen {
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
+                AranarthUtils.removeCrateFromUse(CrateType.RARE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
