@@ -12,6 +12,12 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.gmail.nossr50.datatypes.player.McMMOPlayer;
+import com.gmail.nossr50.datatypes.player.PlayerProfile;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.util.EventUtils;
+import com.gmail.nossr50.util.skills.SkillTools;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -22,6 +28,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -49,6 +56,7 @@ public class CrateOpen {
                         int y = block.getY();
                         int z = block.getZ();
                         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                        int emptySlotNum = getEmptySlotNum(player);
 
                         // Vote Crate
                         if (x == 104 && y == 65 && z == -204) {
@@ -67,6 +75,11 @@ public class CrateOpen {
                                 }
 
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
+                                    // Compressible items require up to 2 empty slots
+                                    if (emptySlotNum < 2) {
+                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        return;
+                                    }
                                     determineVoteCrateReward(player);
                                 } else {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
@@ -78,19 +91,22 @@ public class CrateOpen {
                         else if (x == 104 && y == 65 && z == -202) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
+                                player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                                 List<Integer> index = new ArrayList<>();
+                                // Sets default value to display at first
                                 index.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.RARE, index);
                                 gui.openGui();
+                                // Updates to next slot so task can update it accordingly
                                 index.set(0, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
-                                            gui.updateRareCrateClusterItem(index.get(0));
+                                            gui.updateRareCrateItems(index.get(0));
 
                                             // Cycle through the next iteration
                                             if (index.get(0) < 7) {
@@ -113,6 +129,11 @@ public class CrateOpen {
                                 }
 
                                 if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
+                                    // Compressible items require up to 2 empty slots
+                                    if (emptySlotNum < 2) {
+                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        return;
+                                    }
                                     determineRareCrateReward(player);
                                 } else {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
@@ -124,14 +145,61 @@ public class CrateOpen {
                         else if (x == 104 && y == 65 && z == -200) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
-                                GuiCrate gui = new GuiCrate(player, CrateType.EPIC, null);
+                                player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
+                                aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                List<Integer> indexes = new ArrayList<>();
+                                // Sets default value to display at first
+                                indexes.add(0);
+                                indexes.add(0);
+                                GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
+                                // Updates to next slot so task can update it accordingly
+                                indexes.set(0, 1);
+                                indexes.set(1, 1);
+
+                                scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
+
+                                            // Cycle through the next trim iteration
+                                            if (indexes.get(0) < 18) {
+                                                indexes.set(0, indexes.get(0) + 1);
+                                            } else {
+                                                indexes.set(0, 0);
+                                            }
+
+                                            // Cycle through the next cluster iteration
+                                            if (indexes.get(1) < 7) {
+                                                indexes.set(1, indexes.get(1) + 1);
+                                            } else {
+                                                indexes.set(1, 0);
+                                            }
+                                        } else {
+                                            Bukkit.getScheduler().cancelTask(scheduledSkipTask);
+                                        }
+                                    }
+                                }, 20, 20);
                             }
                             // Attempts to open the crate
                             else {
                                 ItemStack epicKey = new KeyEpic().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(epicKey)) {
-                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding an &3Epic Crate Key &cto do this!"));
+                                    player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &3Epic Crate Key &cto do this!"));
+                                    return;
+                                }
+
+                                if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
+                                    // Clusters require up to 4 empty slots
+                                    if (emptySlotNum < 4) {
+                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 4 empty inventory slots to open this crate!"));
+                                        return;
+                                    }
+                                    determineEpicCrateReward(player);
+                                } else {
+                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
                                     return;
                                 }
                             }
@@ -140,6 +208,7 @@ public class CrateOpen {
                         else if (x == 104 && y == 65 && z == -198) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
+                                player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, null);
                                 gui.openGui();
                             }
@@ -156,6 +225,21 @@ public class CrateOpen {
                 }
             }
         }
+    }
+
+    /**
+     * Gets the number of empty inventory slots the player has.
+     * @param player The player.
+     * @return The number of empty inventory slots the player has.
+     */
+    private int getEmptySlotNum(Player player) {
+        int emptySlotNum = 0;
+        for (ItemStack item : player.getInventory().getStorageContents()) {
+            if (item == null || item.getType() == Material.AIR) {
+                emptySlotNum++;
+            }
+        }
+        return emptySlotNum;
     }
 
     /**
@@ -306,6 +390,8 @@ public class CrateOpen {
                 if (chance <= 12) {
                     player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 250);
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$250 In-Game Money &7from the &6Rare Crate"));
                     return;
@@ -340,21 +426,11 @@ public class CrateOpen {
                     reward = new ItemStack(Material.SNIFFER_EGG, 1);
                     name = "#4e9c70&lSniffer Egg x1";
                 } else if (chance <= 95) {
-                    int random = new Random().nextInt(8);
-                    switch (random) {
-                        case 1 -> reward = new IronCluster().getItem();
-                        case 2 -> reward = new GoldCluster().getItem();
-                        case 3 -> reward = new QuartzCluster().getItem();
-                        case 4 -> reward = new LapisCluster().getItem();
-                        case 5 -> reward = new RedstoneCluster().getItem();
-                        case 6 -> reward = new DiamondCluster().getItem();
-                        case 7 -> reward = new EmeraldCluster().getItem();
-                        default -> reward = new CopperCluster().getItem();
-                    }
+                    reward = getCycledCluster(new Random().nextInt(8));
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else {
                     reward = new KeyEpic().getItem();
-                    name = "&3&lEpic Crate Key x1";
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -363,6 +439,284 @@ public class CrateOpen {
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &6Rare Crate"));
+            });
+        }
+    }
+
+    /**
+     * Determines which reward the player will get from the Epic Crate.
+     * @param player The player opening the Epic Crate.
+     */
+    private void determineEpicCrateReward(Player player) {
+        if (AranarthUtils.getCratesInUse().contains(CrateType.EPIC)) {
+            player.sendMessage(ChatUtils.chatMessage("&cThe &3Epic Crate &cis currently in use"));
+        } else {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            aranarthPlayer.setCrateTypeBeingOpened(CrateType.EPIC);
+            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+            ItemStack heldItem = player.getInventory().getItemInMainHand();
+            heldItem.setAmount(heldItem.getAmount() - 1);
+
+            playCrateOpenSound(player, CrateType.EPIC, () -> {
+                ItemStack reward = null;
+                String name = "";
+                int chance = new Random().nextInt(100) + 1;
+
+                if (chance <= 12) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1500);
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 In-Game Money &7from the &3Epic Crate"));
+                    return;
+                } else if (chance <= 24) {
+                    reward = new ItemStack(Material.SHULKER_BOX, 1);
+                    name = "#956895&lShulker Box x1";
+                } else if (chance <= 36) {
+                    reward = getCycledArmorTrim(new Random().nextInt(18));
+                    String trimName = reward.getType().name().split("_")[0].toLowerCase();
+                    trimName = trimName.substring(0, 1).toUpperCase() + trimName.substring(1) + " Armor Trim";
+                    if (trimName.startsWith("Ward") || trimName.startsWith("Spire") || trimName.startsWith("Eye") || trimName.startsWith("Vex")) {
+                        trimName = "&b&l" + trimName;
+                    } else if (trimName.startsWith("Silence")) {
+                        trimName = "&d&l" + trimName;
+                    } else {
+                        trimName = "&e&l" + trimName;
+                    }
+                    name = trimName + " x1";
+                } else if (chance <= 48) {
+                    reward = new ItemStack(Material.DIAMOND, 32);
+                    name = "#a0f0ed&lDiamond x32";
+                } else if (chance <= 56) {
+                    reward = new ItemStack(Material.TRIDENT, 1);
+                    name = "#579b8c&lTrident x1";
+                } else if (chance <= 64) {
+                    reward = new ItemStack(Material.ELYTRA, 1);
+                    name = "#7d7d96&lElytra x1";
+                } else if (chance <= 72) {
+                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
+                    name = "#fcd34d&lEnchanted Golden Apple x6";
+                } else if (chance <= 80) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
+                    PlayerProfile profile = mcMMOPlayer.getProfile();
+
+                    for (PrimarySkillType type : PrimarySkillType.values()) {
+                        // Skip child skills as they do not have XP
+                        if (SkillTools.isChildSkill(type)) {
+                            continue;
+                        }
+
+                        int currentLevel = profile.getSkillLevel(type);
+                        float currentXP = profile.getSkillXpLevel(type);
+                        profile.modifySkill(type, currentLevel + 10);
+                        profile.setSkillXpLevel(type, currentXP); // Must re-apply or XP is lost
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 10 Levels from the &3Epic Crate"));
+                    return;
+                } else if (chance <= 85) {
+                    reward = new KeyEpic().getItem();
+                    reward.setAmount(2);
+                    name = reward.getItemMeta().getDisplayName() + " x2";
+                } else if (chance <= 90) {
+                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 10% Store Coupon");
+                    reward = new ItemStack(Material.PAPER);
+                    ItemMeta rewardMeta = reward.getItemMeta();
+                    rewardMeta.setMaxStackSize(1);
+                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l10% Store Coupon"));
+                    List<String> rewardLore = new ArrayList<>();
+                    rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
+                    rewardMeta.setLore(rewardLore);
+                    reward.setItemMeta(rewardMeta);
+                    name = rewardMeta.getDisplayName() + " x1";
+                } else if (chance <= 95) {
+                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
+
+                    for (int i = 0; i < combined.length; i++) {
+                        if (combined[i] != null) {
+                            if (i == combined.length - 1) {
+                                name += "&7and ";
+                            }
+
+                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
+                        } else {
+                            continue;
+                        }
+
+                        if (i < combined.length - 1) {
+                            name += ", ";
+                        }
+                    }
+                    for (ItemStack cluster : combined) {
+                        if (cluster != null) {
+                            player.getInventory().addItem(cluster);
+                        }
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &3Epic Crate"));
+                    return;
+                } else {
+                    reward = new KeyEpic().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x2";
+                }
+
+                aranarthPlayer.setCrateTypeBeingOpened(null);
+                AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.getInventory().addItem(reward);
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &3Epic Crate"));
+            });
+        }
+    }
+
+    /**
+     * Determines which reward the player will get from the Godly Crate.
+     * @param player The player opening the Godly Crate.
+     */
+    private void determineGodlyCrateReward(Player player) {
+        if (AranarthUtils.getCratesInUse().contains(CrateType.GODLY)) {
+            player.sendMessage(ChatUtils.chatMessage("&cThe &5Godly Crate &cis currently in use"));
+        } else {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            aranarthPlayer.setCrateTypeBeingOpened(CrateType.GODLY);
+            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+            ItemStack heldItem = player.getInventory().getItemInMainHand();
+            heldItem.setAmount(heldItem.getAmount() - 1);
+
+            playCrateOpenSound(player, CrateType.GODLY, () -> {
+                ItemStack reward = null;
+                String name = "";
+                int chance = new Random().nextInt(100) + 1;
+
+                if (chance <= 12) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1500);
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 In-Game Money &7from the &5Godly Crate"));
+                    return;
+                } else if (chance <= 24) {
+                    reward = new ItemStack(Material.SHULKER_BOX, 1);
+                    name = "#956895&lShulker Box x1";
+                } else if (chance <= 36) {
+                    reward = getCycledArmorTrim(new Random().nextInt(18));
+                    String trimName = reward.getType().name().split("_")[0].toLowerCase();
+                    trimName = trimName.substring(0, 1).toUpperCase() + trimName.substring(1) + " Armor Trim";
+                    if (trimName.startsWith("Ward") || trimName.startsWith("Spire") || trimName.startsWith("Eye") || trimName.startsWith("Vex")) {
+                        trimName = "&b&l" + trimName;
+                    } else if (trimName.startsWith("Silence")) {
+                        trimName = "&d&l" + trimName;
+                    } else {
+                        trimName = "&e&l" + trimName;
+                    }
+                    name = trimName + " x1";
+                } else if (chance <= 48) {
+                    reward = new ItemStack(Material.DIAMOND, 32);
+                    name = "#a0f0ed&lDiamond x32";
+                } else if (chance <= 56) {
+                    reward = new ItemStack(Material.TRIDENT, 1);
+                    name = "#579b8c&lTrident x1";
+                } else if (chance <= 64) {
+                    reward = new ItemStack(Material.ELYTRA, 1);
+                    name = "#7d7d96&lElytra x1";
+                } else if (chance <= 72) {
+                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
+                    name = "#fcd34d&lEnchanted Golden Apple x6";
+                } else if (chance <= 80) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
+                    PlayerProfile profile = mcMMOPlayer.getProfile();
+
+                    for (PrimarySkillType type : PrimarySkillType.values()) {
+                        // Skip child skills as they do not have XP
+                        if (SkillTools.isChildSkill(type)) {
+                            continue;
+                        }
+
+                        int currentLevel = profile.getSkillLevel(type);
+                        float currentXP = profile.getSkillXpLevel(type);
+                        profile.modifySkill(type, currentLevel + 10);
+                        profile.setSkillXpLevel(type, currentXP); // Must re-apply or XP is lost
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 10 Levels from the &3Epic Crate"));
+                    return;
+                } else if (chance <= 85) {
+                    reward = new KeyEpic().getItem();
+                    reward.setAmount(2);
+                    name = reward.getItemMeta().getDisplayName() + " x2";
+                } else if (chance <= 90) {
+                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 10% Store Coupon");
+                    reward = new ItemStack(Material.PAPER);
+                    ItemMeta rewardMeta = reward.getItemMeta();
+                    rewardMeta.setMaxStackSize(1);
+                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l10% Store Coupon"));
+                    List<String> rewardLore = new ArrayList<>();
+                    rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
+                    rewardMeta.setLore(rewardLore);
+                    reward.setItemMeta(rewardMeta);
+                    name = rewardMeta.getDisplayName() + " x1";
+                } else if (chance <= 95) {
+                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
+
+                    for (int i = 0; i < combined.length; i++) {
+                        if (combined[i] != null) {
+                            if (i == combined.length - 1) {
+                                name += "&7and ";
+                            }
+
+                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
+                        } else {
+                            continue;
+                        }
+
+                        if (i < combined.length - 1) {
+                            name += ", ";
+                        }
+                    }
+                    for (ItemStack cluster : combined) {
+                        if (cluster != null) {
+                            player.getInventory().addItem(cluster);
+                        }
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &5Godly Crate"));
+                    return;
+                } else {
+                    reward = new KeyEpic().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x2";
+                }
+
+                aranarthPlayer.setCrateTypeBeingOpened(null);
+                AranarthUtils.removeCrateFromUse(CrateType.GODLY);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.getInventory().addItem(reward);
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &5Godly Crate"));
             });
         }
     }
@@ -386,22 +740,107 @@ public class CrateOpen {
     }
 
     /**
-     * Provides the Cluster that is associated to the input index.
+     * Provides the cluster that is associated to the input index.
      * @param index The index of the cluster.
      * @return The cluster.
      */
     private ItemStack getCycledCluster(int index) {
         ItemStack cluster = null;
         switch (index) {
-            case 1: cluster = new IronCluster().getItem();
-            case 2: cluster = new GoldCluster().getItem();
-            case 3: cluster = new QuartzCluster().getItem();
-            case 4: cluster = new LapisCluster().getItem();
-            case 5: cluster = new RedstoneCluster().getItem();
-            case 6: cluster = new DiamondCluster().getItem();
-            case 7: cluster = new EmeraldCluster().getItem();
-            default: cluster = new CopperCluster().getItem();
+            case 1 -> cluster = new IronCluster().getItem();
+            case 2 -> cluster = new GoldCluster().getItem();
+            case 3 -> cluster = new QuartzCluster().getItem();
+            case 4 -> cluster = new LapisCluster().getItem();
+            case 5 -> cluster = new RedstoneCluster().getItem();
+            case 6 -> cluster = new DiamondCluster().getItem();
+            case 7 -> cluster = new EmeraldCluster().getItem();
+            default -> cluster = new CopperCluster().getItem();
         }
         return cluster;
+    }
+
+    /**
+     * Provides the armor trim that is associated to the input index.
+     * @param index The index of the armor trim.
+     * @return The armor trim.
+     */
+    private ItemStack getCycledArmorTrim(int index) {
+        ItemStack trim = null;
+        switch (index) {
+            case 1 -> trim = new ItemStack(Material.SILENCE_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 2 -> trim = new ItemStack(Material.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 3 -> trim = new ItemStack(Material.RAISER_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 4 -> trim = new ItemStack(Material.COAST_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 5 -> trim = new ItemStack(Material.VEX_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 6 -> trim = new ItemStack(Material.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 7 -> trim = new ItemStack(Material.SNOUT_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 8 -> trim = new ItemStack(Material.EYE_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 9 -> trim = new ItemStack(Material.HOST_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 10 -> trim = new ItemStack(Material.SHAPER_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 11 -> trim = new ItemStack(Material.WILD_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 12 -> trim = new ItemStack(Material.SPIRE_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 13 -> trim = new ItemStack(Material.TIDE_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 14 -> trim = new ItemStack(Material.DUNE_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 15 -> trim = new ItemStack(Material.WAYFINDER_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 16 -> trim = new ItemStack(Material.WARD_ARMOR_TRIM_SMITHING_TEMPLATE);
+            case 17 -> trim = new ItemStack(Material.RIB_ARMOR_TRIM_SMITHING_TEMPLATE);
+            default -> trim = new ItemStack(Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
+        }
+        return trim;
+    }
+
+    /**
+     * Combines the 4 clusters if they are for the same type.
+     * @param cluster1 The first cluster.
+     * @param cluster2 The second cluster.
+     * @param cluster3 The third cluster.
+     * @param cluster4 The fourth cluster.
+     * @return The combined clusters.
+     */
+    private ItemStack[] combineClusters(ItemStack cluster1, ItemStack cluster2, ItemStack cluster3, ItemStack cluster4) {
+        ItemStack[] combined = new ItemStack[4];
+
+        // Remove cluster 1
+        if (cluster1.isSimilar(cluster2)) {
+            cluster2.setAmount(cluster2.getAmount() + 1);
+            cluster1 = null;
+        } else if (cluster1.isSimilar(cluster3)) {
+            cluster3.setAmount(cluster3.getAmount() + 1);
+            cluster1 = null;
+        } else if (cluster1.isSimilar(cluster4)) {
+            cluster4.setAmount(cluster4.getAmount() + 1);
+            cluster1 = null;
+        }
+        combined[0] = cluster1;
+
+        // Remove cluster 2
+        if (cluster2.isSimilar(cluster3)) {
+            cluster3.setAmount(cluster3.getAmount() + 1);
+            cluster2 = null;
+        } else if (cluster2.isSimilar(cluster4)) {
+            cluster4.setAmount(cluster4.getAmount() + 1);
+            cluster2 = null;
+        }
+        combined[1] = cluster2;
+
+        // Remove cluster 3
+        if (cluster3.isSimilar(cluster4)) {
+            cluster4.setAmount(cluster4.getAmount() + 1);
+            cluster3 = null;
+        }
+        combined[2] = cluster3;
+
+        // Nothing to remove with cluster 4
+        combined[3] = cluster4;
+
+        for (ItemStack is : combined) {
+            if (is != null) {
+                Bukkit.getLogger().info(is.getItemMeta().getDisplayName() + " x" + is.getAmount());
+            } else {
+                Bukkit.getLogger().info("NULL");
+            }
+        }
+
+        return combined;
     }
 }
