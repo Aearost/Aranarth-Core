@@ -32,6 +32,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -227,7 +228,7 @@ public class CrateOpen {
                                             gui.updateGodlyCrateItems(index.get(0));
 
                                             // Cycle through the next iteration
-                                            if (index.get(0) < 7) {
+                                            if (index.get(0) < 5) {
                                                 index.set(0, index.get(0) + 1);
                                             } else {
                                                 index.set(0, 0);
@@ -357,7 +358,7 @@ public class CrateOpen {
                     player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 50);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$50 In-Game Money &7from the &aVote Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$50 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.BREAD, 16);
@@ -392,7 +393,7 @@ public class CrateOpen {
                     name = "#bdadc7&lBreeze Rod x8";
                 } else {
                     reward = new KeyRare().getItem();
-                    name = "&6&lRare Crate Key x1";
+                    name = "&l" + reward.getItemMeta().getDisplayName() + " x1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -400,7 +401,7 @@ public class CrateOpen {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &aVote Crate"));
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
     }
@@ -431,7 +432,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$250 In-Game Money &7from the &6Rare Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$250 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.ENCHANTED_BOOK, 1);
@@ -468,7 +469,7 @@ public class CrateOpen {
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else {
                     reward = new KeyEpic().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " x1";
+                    name = "&3&lEpic Crate Key x1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -476,7 +477,7 @@ public class CrateOpen {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &6Rare Crate"));
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
     }
@@ -492,6 +493,7 @@ public class CrateOpen {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.EPIC);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening an &3&lEpic Crate"));
 
             ItemStack heldItem = player.getInventory().getItemInMainHand();
             heldItem.setAmount(heldItem.getAmount() - 1);
@@ -507,7 +509,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 In-Game Money &7from the &3Epic Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.SHULKER_BOX, 1);
@@ -555,20 +557,22 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 10 Levels from the &3Epic Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e10 Levels"));
                     return;
                 } else if (chance <= 85) {
                     reward = new KeyEpic().getItem();
                     reward.setAmount(2);
-                    name = reward.getItemMeta().getDisplayName() + " x2";
+                    name = "&3&lEpic Crate Key x2";
                 } else if (chance <= 90) {
                     DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 10% Store Coupon");
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
-                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l10% Store Coupon"));
+                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&6&l10% Store Coupon"));
                     List<String> rewardLore = new ArrayList<>();
                     rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
+                    String dayCouponWasAcquired = getCurrentTime();
+                    rewardLore.add(ChatUtils.translateToColor("&7Acquired on " + dayCouponWasAcquired));
                     rewardMeta.setLore(rewardLore);
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
@@ -603,11 +607,11 @@ public class CrateOpen {
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &3Epic Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                     return;
                 } else {
-                    reward = new KeyEpic().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " x2";
+                    reward = new KeyGodly().getItem();
+                    name = "&5&lGodly Crate Key x1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -615,7 +619,7 @@ public class CrateOpen {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &3Epic Crate"));
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
     }
@@ -631,6 +635,7 @@ public class CrateOpen {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.GODLY);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening a &5&lGodly Crate"));
 
             ItemStack heldItem = player.getInventory().getItemInMainHand();
             heldItem.setAmount(heldItem.getAmount() - 1);
@@ -646,7 +651,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$7500 In-Game Money &7from the &5Godly Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$7500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
@@ -676,7 +681,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 30 Levels from the &5Godly Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e30 Levels"));
                     return;
                 } else if (chance <= 64) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
@@ -690,22 +695,24 @@ public class CrateOpen {
                 } else if (chance <= 85) {
                     reward = new KeyGodly().getItem();
                     reward.setAmount(2);
-                    name = reward.getItemMeta().getDisplayName() + " x2";
+                    name = "&5&lGodly Crate Key x2";
                 } else if (chance <= 90) {
                     DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 30% Store Coupon");
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
-                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l30% Store Coupon"));
+                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&6&l30% Store Coupon"));
                     List<String> rewardLore = new ArrayList<>();
                     rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
+                    String dayCouponWasAcquired = getCurrentTime();
+                    rewardLore.add(ChatUtils.translateToColor("&7Acquired on " + dayCouponWasAcquired));
                     rewardMeta.setLore(rewardLore);
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
                     reward = new KeyEpic().getItem();
                     reward.setAmount(3);
-                    name = reward.getItemMeta().getDisplayName() + " x3";
+                    name = "&3&lEpic Crate Key x3";
                 } else {
                     reward = new AranarthiumIngot().getItem();
                     name = reward.getItemMeta().getDisplayName() + " &f&lx1";
@@ -716,9 +723,24 @@ public class CrateOpen {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
-                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &5Godly Crate"));
+                player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
+    }
+
+    /**
+     * Provides the current time as a formatted String.
+     * @return The current time.
+     */
+    private String getCurrentTime() {
+        LocalDateTime ldt = LocalDateTime.now();
+        String month = ldt.getMonthValue() < 10 ? "0" + ldt.getMonthValue() : ldt.getMonthValue() + "";
+        String day = ldt.getDayOfMonth() < 10 ? "0" + ldt.getDayOfMonth() : ldt.getDayOfMonth() + "";
+        String year = ldt.getYear() < 10 ? "0" + ldt.getYear() : ldt.getYear() + "";
+        String hour = ldt.getHour() < 10 ? "0" + ldt.getHour() : ldt.getHour() + "";
+        String minute = ldt.getMinute() < 10 ? "0" + ldt.getMinute() : ldt.getMinute() + "";
+        String second = ldt.getSecond() < 10 ? "0" + ldt.getSecond() : ldt.getSecond() + "";
+        return month + "/" + day + "/" + year + " " + hour + ":" + minute + ":" + second;
     }
 
     /**

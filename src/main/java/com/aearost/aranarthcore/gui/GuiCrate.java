@@ -60,7 +60,7 @@ public class GuiCrate {
 
 		ItemStack money50 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money50Meta = money50.getItemMeta();
-		money50Meta.setDisplayName(ChatUtils.translateToColor("&6&l$50 In-Game Money"));
+		money50Meta.setDisplayName(ChatUtils.translateToColor("&6&l$50 of In-Game Currency"));
 		List<String> money50Lore = new ArrayList<>();
 		money50Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money50Meta.setLore(money50Lore);
@@ -190,7 +190,7 @@ public class GuiCrate {
 
 		ItemStack money250 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money250Meta = money250.getItemMeta();
-		money250Meta.setDisplayName(ChatUtils.translateToColor("&6&l$250 In-Game Money"));
+		money250Meta.setDisplayName(ChatUtils.translateToColor("&6&l$250 of In-Game Currency"));
 		List<String> money250Lore = new ArrayList<>();
 		money250Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money250Meta.setLore(money250Lore);
@@ -311,7 +311,7 @@ public class GuiCrate {
 
 		ItemStack money1500 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money1500Meta = money1500.getItemMeta();
-		money1500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1500 In-Game Money"));
+		money1500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1500 of In-Game Currency"));
 		List<String> money1500Lore = new ArrayList<>();
 		money1500Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money1500Meta.setLore(money1500Lore);
@@ -384,7 +384,7 @@ public class GuiCrate {
 
 		ItemStack discount10 = new ItemStack(Material.PAPER, 8);
 		ItemMeta discount10Meta = discount10.getItemMeta();
-		discount10Meta.setDisplayName(ChatUtils.translateToColor("&7&l10% Server Store Coupon"));
+		discount10Meta.setDisplayName(ChatUtils.translateToColor("&6&l10% Server Store Coupon"));
 		List<String> discount10Lore = new ArrayList<>();
 		discount10Lore.add(ChatUtils.translateToColor("&c5% Chance"));
 		discount10Meta.setLore(discount10Lore);
@@ -423,7 +423,7 @@ public class GuiCrate {
 
 		ItemStack money7500 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money7500Meta = money7500.getItemMeta();
-		money7500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$7500 In-Game Money"));
+		money7500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$7500 of In-Game Currency"));
 		List<String> money7500Lore = new ArrayList<>();
 		money7500Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money7500Meta.setLore(money7500Lore);
@@ -487,6 +487,7 @@ public class GuiCrate {
 		ItemStack epicKey = new KeyEpic().getItem();
 		epicKey.setAmount(3);
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
+		epicKeyMeta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key"));
 		List<String> epicKeyLore = new ArrayList<>();
 		epicKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
 		epicKeyMeta.setLore(epicKeyLore);
@@ -495,7 +496,7 @@ public class GuiCrate {
 
 		ItemStack discount30 = new ItemStack(Material.PAPER, 8);
 		ItemMeta discount30Meta = discount30.getItemMeta();
-		discount30Meta.setDisplayName(ChatUtils.translateToColor("&7&l30% Server Store Coupon"));
+		discount30Meta.setDisplayName(ChatUtils.translateToColor("&6&l30% Server Store Coupon"));
 		List<String> discount30Lore = new ArrayList<>();
 		discount30Lore.add(ChatUtils.translateToColor("&c5% Chance"));
 		discount30Meta.setLore(discount30Lore);
@@ -513,6 +514,7 @@ public class GuiCrate {
 		ItemStack godlyKey = new KeyGodly().getItem();
 		godlyKey.setAmount(2);
 		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
+		godlyKeyMeta.setDisplayName(ChatUtils.translateToColor("&5&lGodly Crate Key"));
 		List<String> godlyKeyLore = new ArrayList<>();
 		godlyKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
 		godlyKeyMeta.setLore(godlyKeyLore);
