@@ -72,7 +72,7 @@ public class SleepSkipListener implements Listener {
 
 		amountRequiredToSkip = (int) Math.ceil(onlinePlayersInSurvivalWorlds * percentRequiredToSkip);
 		int sleepingPlayerNum = sleepingPlayers.size();
-		String message = "Players sleeping: " + sleepingPlayerNum + "/" + amountRequiredToSkip;
+		String message = "Players sleeping - " + sleepingPlayerNum + "/" + amountRequiredToSkip;
 		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
 			// Displays the bar to all players in the survival worlds
 			for (Player player : Bukkit.getOnlinePlayers()) {
