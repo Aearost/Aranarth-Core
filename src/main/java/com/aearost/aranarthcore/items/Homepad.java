@@ -1,9 +1,7 @@
 package com.aearost.aranarthcore.items;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -23,8 +21,8 @@ public class Homepad implements AranarthItem {
 		ItemStack item = new ItemStack(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "homepad");
-			meta.setItemModel(key);
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "homepad");
+//			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(HOMEPAD, PersistentDataType.STRING, "homepad");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
