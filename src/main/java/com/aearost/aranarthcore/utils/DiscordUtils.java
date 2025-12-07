@@ -570,6 +570,7 @@ public class DiscordUtils {
 
 		TextChannel crateDrops = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("crate");
 		crateDrops.sendMessageEmbeds(embed.build()).queue();
-
+		// Server owner's Discord User ID
+		crateDrops.sendMessage("<@201812118981443584>").queue();
 	}
 }
