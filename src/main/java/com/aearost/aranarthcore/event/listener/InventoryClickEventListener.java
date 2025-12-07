@@ -56,6 +56,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiStoreClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Compressible Items")) {
                 new GuiCompressorClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
+                new GuiCrateClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

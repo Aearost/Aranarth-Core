@@ -27,6 +27,8 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiQuiverClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
                 new GuiShulkerClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
+                new GuiCrateClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {

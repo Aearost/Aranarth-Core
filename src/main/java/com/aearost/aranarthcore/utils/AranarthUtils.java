@@ -66,6 +66,7 @@ public class AranarthUtils {
 	private static int phantomSpawnDelay = 0;
 	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
+	private static final List<CrateType> cratesInUse = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2148,5 +2149,29 @@ public class AranarthUtils {
 		addCompressibleItem(uuid, Material.BONE_MEAL);
 		addCompressibleItem(uuid, Material.SNOWBALL);
 		addCompressibleItem(uuid, Material.CLAY_BALL);
+	}
+
+	/**
+	 * Provides the list of crates that are currently in use.
+	 * @return The list of crates that are currently in use.
+	 */
+	public static List<CrateType> getCratesInUse() {
+		return cratesInUse;
+	}
+
+	/**
+	 * Adds the crate to be in use.
+	 * @param type The type of crate.
+	 */
+	public static void addCrateInUse(CrateType type) {
+		cratesInUse.add(type);
+	}
+
+	/**
+	 * Removes the crate from being in use.
+	 * @param type The type of crate.
+	 */
+	public static void removeCrateFromUse(CrateType type) {
+		cratesInUse.remove(type);
 	}
 }

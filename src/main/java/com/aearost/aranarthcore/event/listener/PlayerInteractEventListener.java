@@ -43,6 +43,7 @@ public class PlayerInteractEventListener implements Listener {
             new ContainerInteract().execute(e);
             new ContainerOpenPrevent().execute(e);
             new ExpStore().execute(e);
+            new CrateOpen().execute(e);
         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
             new ChestSort().execute(e);
         } else if (e.getAction() == Action.RIGHT_CLICK_AIR) {
