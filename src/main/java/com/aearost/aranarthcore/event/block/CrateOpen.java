@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiCrate;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
+import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.crates.KeyEpic;
 import com.aearost.aranarthcore.items.crates.KeyGodly;
 import com.aearost.aranarthcore.items.crates.KeyRare;
@@ -209,14 +210,51 @@ public class CrateOpen {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
-                                GuiCrate gui = new GuiCrate(player, CrateType.GODLY, null);
+                                aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                List<Integer> index = new ArrayList<>();
+                                // Sets default value to display at first
+                                index.add(0);
+                                GuiCrate gui = new GuiCrate(player, CrateType.GODLY, index);
                                 gui.openGui();
+                                // Updates to next slot so task can update it accordingly
+                                index.set(0, 1);
+
+                                scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
+                                            gui.updateGodlyCrateItems(index.get(0));
+
+                                            // Cycle through the next iteration
+                                            if (index.get(0) < 7) {
+                                                index.set(0, index.get(0) + 1);
+                                            } else {
+                                                index.set(0, 0);
+                                            }
+                                        } else {
+                                            Bukkit.getScheduler().cancelTask(scheduledSkipTask);
+                                        }
+                                    }
+                                }, 20, 20);
                             }
                             // Attempts to open the crate
                             else {
                                 ItemStack godlyKey = new KeyGodly().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(godlyKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &5Godly Crate Key &cto do this!"));
+                                    return;
+                                }
+
+                                if (aranarthPlayer.getCrateTypeBeingOpened() == null) {
+                                    // Compressible items require up to 2 empty slots
+                                    if (emptySlotNum < 2) {
+                                        player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        return;
+                                    }
+                                    determineGodlyCrateReward(player);
+                                } else {
+                                    player.sendMessage(ChatUtils.chatMessage("&cYou are already opening the " + getCrateTypeBeingOpenedName(aranarthPlayer)));
                                     return;
                                 }
                             }
@@ -604,40 +642,22 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1500);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 7500);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 In-Game Money &7from the &5Godly Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$7500 In-Game Money &7from the &5Godly Crate"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.SHULKER_BOX, 1);
-                    name = "#956895&lShulker Box x1";
+                    reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
+                    name = "#a0f0ed&lDiamond Block x16";
                 } else if (chance <= 36) {
-                    reward = getCycledArmorTrim(new Random().nextInt(18));
-                    String trimName = reward.getType().name().split("_")[0].toLowerCase();
-                    trimName = trimName.substring(0, 1).toUpperCase() + trimName.substring(1) + " Armor Trim";
-                    if (trimName.startsWith("Ward") || trimName.startsWith("Spire") || trimName.startsWith("Eye") || trimName.startsWith("Vex")) {
-                        trimName = "&b&l" + trimName;
-                    } else if (trimName.startsWith("Silence")) {
-                        trimName = "&d&l" + trimName;
-                    } else {
-                        trimName = "&e&l" + trimName;
-                    }
-                    name = trimName + " x1";
+                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
+                    name = "#fcd34d&lEnchanted Golden Apple x8";
                 } else if (chance <= 48) {
-                    reward = new ItemStack(Material.DIAMOND, 32);
-                    name = "#a0f0ed&lDiamond x32";
+                    reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
+                    name = "#3a383a&lNetherite Block x1";
                 } else if (chance <= 56) {
-                    reward = new ItemStack(Material.TRIDENT, 1);
-                    name = "#579b8c&lTrident x1";
-                } else if (chance <= 64) {
-                    reward = new ItemStack(Material.ELYTRA, 1);
-                    name = "#7d7d96&lElytra x1";
-                } else if (chance <= 72) {
-                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
-                    name = "#fcd34d&lEnchanted Golden Apple x6";
-                } else if (chance <= 80) {
                     player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
                     PlayerProfile profile = mcMMOPlayer.getProfile();
@@ -650,65 +670,45 @@ public class CrateOpen {
 
                         int currentLevel = profile.getSkillLevel(type);
                         float currentXP = profile.getSkillXpLevel(type);
-                        profile.modifySkill(type, currentLevel + 10);
+                        profile.modifySkill(type, currentLevel + 30);
                         profile.setSkillXpLevel(type, currentXP); // Must re-apply or XP is lost
                     }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 10 Levels from the &3Epic Crate"));
+                    player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have gained 30 Levels from the &5Godly Crate"));
                     return;
+                } else if (chance <= 64) {
+                    reward = getCycledAranarthium(new Random().nextInt(6));
+                    name = reward.getItemMeta().getDisplayName() + " x1";
+                } else if (chance <= 72) {
+                    reward = new ItemStack(Material.NETHER_STAR, 1);
+                    name = "#d8d6fb&lNether Star x1";
+                } else if (chance <= 80) {
+                    reward = new ItemStack(Material.HEAVY_CORE, 1);
+                    name = "#4d5158&lHeavy Core x1";
                 } else if (chance <= 85) {
-                    reward = new KeyEpic().getItem();
+                    reward = new KeyGodly().getItem();
                     reward.setAmount(2);
                     name = reward.getItemMeta().getDisplayName() + " x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 10% Store Coupon");
+                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 30% Store Coupon");
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
-                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l10% Store Coupon"));
+                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&7&l30% Store Coupon"));
                     List<String> rewardLore = new ArrayList<>();
                     rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
                     rewardMeta.setLore(rewardLore);
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
-                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
-
-                    for (int i = 0; i < combined.length; i++) {
-                        if (combined[i] != null) {
-                            if (i == combined.length - 1) {
-                                name += "&7and ";
-                            }
-
-                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
-                        } else {
-                            continue;
-                        }
-
-                        if (i < combined.length - 1) {
-                            name += ", ";
-                        }
-                    }
-                    for (ItemStack cluster : combined) {
-                        if (cluster != null) {
-                            player.getInventory().addItem(cluster);
-                        }
-                    }
-                    aranarthPlayer.setCrateTypeBeingOpened(null);
-                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
-                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name + " &7from the &5Godly Crate"));
-                    return;
-                } else {
                     reward = new KeyEpic().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " x2";
+                    reward.setAmount(3);
+                    name = reward.getItemMeta().getDisplayName() + " x3";
+                } else {
+                    reward = new AranarthiumIngot().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " &f&lx1";
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -787,6 +787,24 @@ public class CrateOpen {
             default -> trim = new ItemStack(Material.SENTRY_ARMOR_TRIM_SMITHING_TEMPLATE);
         }
         return trim;
+    }
+
+    /**
+     * Provides the enhanced aranarthium ingot that is associated to the input index.
+     * @param index The index of the enhanced aranarthium ingot.
+     * @return The enhanced aranarthium ingot.
+     */
+    private ItemStack getCycledAranarthium(int index) {
+        ItemStack ingot = null;
+        switch (index) {
+            case 1 -> ingot = new AranarthiumAquatic().getItem();
+            case 2 -> ingot = new AranarthiumArdent().getItem();
+            case 3 -> ingot = new AranarthiumDwarven().getItem();
+            case 4 -> ingot = new AranarthiumElven().getItem();
+            case 5 -> ingot = new AranarthiumScorched().getItem();
+            default -> ingot = new AranarthiumSoulbound().getItem();
+        }
+        return ingot;
     }
 
     /**

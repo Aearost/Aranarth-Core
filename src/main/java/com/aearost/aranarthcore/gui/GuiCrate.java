@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
+import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.crates.KeyEpic;
 import com.aearost.aranarthcore.items.crates.KeyGodly;
 import com.aearost.aranarthcore.items.crates.KeyRare;
@@ -420,117 +421,106 @@ public class GuiCrate {
 	private Inventory initializeGodlyCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Godly");
 
-		ItemStack money50 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money50Meta = money50.getItemMeta();
-		money50Meta.setDisplayName(ChatUtils.translateToColor("&6&l$50 In-Game Money"));
-		List<String> money50Lore = new ArrayList<>();
-		money50Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money50Meta.setLore(money50Lore);
-		money50.setItemMeta(money50Meta);
-		gui.setItem(2, money50);
+		ItemStack money7500 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money7500Meta = money7500.getItemMeta();
+		money7500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$7500 In-Game Money"));
+		List<String> money7500Lore = new ArrayList<>();
+		money7500Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money7500Meta.setLore(money7500Lore);
+		money7500.setItemMeta(money7500Meta);
+		gui.setItem(2, money7500);
 
-		ItemStack bread = new ItemStack(Material.BREAD, 16);
-		ItemMeta breadMeta = bread.getItemMeta();
-		breadMeta.setDisplayName(ChatUtils.translateToColor("#ba8727&lBread"));
-		List<String> breadLore = new ArrayList<>();
-		breadLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		breadMeta.setLore(breadLore);
-		bread.setItemMeta(breadMeta);
-		gui.setItem(3, bread);
+		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 16);
+		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();
+		diamondBlockMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
+		List<String> diamondBlockLore = new ArrayList<>();
+		diamondBlockLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		diamondBlockMeta.setLore(diamondBlockLore);
+		diamondBlock.setItemMeta(diamondBlockMeta);
+		gui.setItem(3, diamondBlock);
 
-		ItemStack iron = new ItemStack(Material.IRON_INGOT, 16);
+		ItemStack iron = new ItemStack(Material.NETHERITE_BLOCK, 1);
 		ItemMeta ironMeta = iron.getItemMeta();
-		ironMeta.setDisplayName(ChatUtils.translateToColor("#eeeeee&lIron Ingot"));
+		ironMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Block"));
 		List<String> ironLore = new ArrayList<>();
 		ironLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		ironMeta.setLore(ironLore);
 		iron.setItemMeta(ironMeta);
 		gui.setItem(5, iron);
 
-		ItemStack gold = new ItemStack(Material.GOLD_INGOT, 16);
-		ItemMeta goldMeta = gold.getItemMeta();
-		goldMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lGold Ingot"));
-		List<String> goldLore = new ArrayList<>();
-		goldLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		goldMeta.setLore(goldLore);
-		gold.setItemMeta(goldMeta);
-		gui.setItem(6, gold);
+		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
+		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
+		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
+		List<String> enchantedGoldenAppleLore = new ArrayList<>();
+		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
+		enchantedGoldenApple.setItemMeta(enchantedGoldenAppleMeta);
+		gui.setItem(6, enchantedGoldenApple);
 
-		ItemStack diamond = new ItemStack(Material.DIAMOND, 4);
-		ItemMeta diamondMeta = diamond.getItemMeta();
-		diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond"));
-		List<String> diamondLore = new ArrayList<>();
-		diamondLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		diamondMeta.setLore(diamondLore);
-		diamond.setItemMeta(diamondMeta);
-		gui.setItem(10, diamond);
+		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 1);
+		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
+		mcmmo10Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +30"));
+		List<String> mcmmo10Lore = new ArrayList<>();
+		mcmmo10Lore.add(ChatUtils.translateToColor("&e8% Chance"));
+		mcmmo10Meta.setLore(mcmmo10Lore);
+		mcmmo10.setItemMeta(mcmmo10Meta);
+		gui.setItem(10, mcmmo10);
 
-		ItemStack exp = new ItemStack(Material.EXPERIENCE_BOTTLE, 16);
-		ItemMeta expMeta = exp.getItemMeta();
-		expMeta.setDisplayName(ChatUtils.translateToColor("#c1e377&lBottle o' Enchanting"));
-		List<String> expLore = new ArrayList<>();
-		expLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		expMeta.setLore(expLore);
-		exp.setItemMeta(expMeta);
-		gui.setItem(11, exp);
+		ItemStack netherStar = new ItemStack(Material.NETHER_STAR, 1);
+		ItemMeta netherStarMeta = netherStar.getItemMeta();
+		netherStarMeta.setDisplayName(ChatUtils.translateToColor("#d8d6fb&lNether Star"));
+		List<String> netherStarLore = new ArrayList<>();
+		netherStarLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		netherStarMeta.setLore(netherStarLore);
+		netherStar.setItemMeta(netherStarMeta);
+		gui.setItem(11, netherStar);
 
-		ItemStack godAppleFragment = new GodAppleFragment().getItem();
-		godAppleFragment.setAmount(4);
-		ItemMeta godAppleFragmentMeta = godAppleFragment.getItemMeta();
-		godAppleFragmentMeta.setDisplayName(ChatUtils.translateToColor("&6&lGod Apple Fragment"));
-		List<String> godAppleFragmentLore = new ArrayList<>();
-		godAppleFragmentLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		godAppleFragmentMeta.setLore(godAppleFragmentLore);
-		godAppleFragment.setItemMeta(godAppleFragmentMeta);
-		gui.setItem(15, godAppleFragment);
+		ItemStack heavyCore = new ItemStack(Material.HEAVY_CORE, 1);
+		ItemMeta heavyCoreMeta = heavyCore.getItemMeta();
+		heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("#4d5158&lHeavy Core"));
+		List<String> heavyCoreLore = new ArrayList<>();
+		heavyCoreLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		heavyCoreMeta.setLore(heavyCoreLore);
+		heavyCore.setItemMeta(heavyCoreMeta);
+		gui.setItem(16, heavyCore);
 
-		ItemStack emerald = new ItemStack(Material.EMERALD, 8);
-		ItemMeta emeraldMeta = emerald.getItemMeta();
-		emeraldMeta.setDisplayName(ChatUtils.translateToColor("#50c878&lEmerald"));
-		List<String> emeraldLore = new ArrayList<>();
-		emeraldLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		emeraldMeta.setLore(emeraldLore);
-		emerald.setItemMeta(emeraldMeta);
-		gui.setItem(16, emerald);
+		ItemStack epicKey = new KeyEpic().getItem();
+		epicKey.setAmount(3);
+		ItemMeta epicKeyMeta = epicKey.getItemMeta();
+		List<String> epicKeyLore = new ArrayList<>();
+		epicKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		epicKeyMeta.setLore(epicKeyLore);
+		epicKey.setItemMeta(epicKeyMeta);
+		gui.setItem(20, epicKey);
 
-		ItemStack trialKey = new ItemStack(Material.TRIAL_KEY, 1);
-		ItemMeta trialKeyMeta = trialKey.getItemMeta();
-		trialKeyMeta.setDisplayName(ChatUtils.translateToColor("#515950&lTrial Key"));
-		List<String> trialKeyLore = new ArrayList<>();
-		trialKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		trialKeyMeta.setLore(trialKeyLore);
-		trialKey.setItemMeta(trialKeyMeta);
-		gui.setItem(20, trialKey);
+		ItemStack discount30 = new ItemStack(Material.PAPER, 8);
+		ItemMeta discount30Meta = discount30.getItemMeta();
+		discount30Meta.setDisplayName(ChatUtils.translateToColor("&7&l30% Server Store Coupon"));
+		List<String> discount30Lore = new ArrayList<>();
+		discount30Lore.add(ChatUtils.translateToColor("&c5% Chance"));
+		discount30Meta.setLore(discount30Lore);
+		discount30.setItemMeta(discount30Meta);
+		gui.setItem(21, discount30);
 
-		ItemStack blazeRod = new ItemStack(Material.BLAZE_ROD, 8);
-		ItemMeta blazeRodMeta = blazeRod.getItemMeta();
-		blazeRodMeta.setDisplayName(ChatUtils.translateToColor("#fcbf00&lBlaze Rod"));
-		List<String> blazeRodLore = new ArrayList<>();
-		blazeRodLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		blazeRodMeta.setLore(blazeRodLore);
-		blazeRod.setItemMeta(blazeRodMeta);
-		gui.setItem(21, blazeRod);
+		ItemStack aranarthium = new AranarthiumIngot().getItem();
+		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
+		List<String> aranarthiumLore = new ArrayList<>();
+		aranarthiumLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		aranarthiumMeta.setLore(aranarthiumLore);
+		aranarthium.setItemMeta(aranarthiumMeta);
+		gui.setItem(23, aranarthium);
 
-		ItemStack breezeRod = new ItemStack(Material.BREEZE_ROD, 8);
-		ItemMeta breezeRodMeta = breezeRod.getItemMeta();
-		breezeRodMeta.setDisplayName(ChatUtils.translateToColor("#bdadc7&lBreeze Rod"));
-		List<String> breezeRodLore = new ArrayList<>();
-		breezeRodLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		breezeRodMeta.setLore(breezeRodLore);
-		breezeRod.setItemMeta(breezeRodMeta);
-		gui.setItem(23, breezeRod);
-
-		ItemStack rareKey = new KeyRare().getItem();
-		ItemMeta rareKeyMeta = rareKey.getItemMeta();
-		rareKeyMeta.setDisplayName(ChatUtils.translateToColor("&6&lRare Crate Key"));
-		List<String> rareKeyLore = new ArrayList<>();
-		rareKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		rareKeyMeta.setLore(rareKeyLore);
-		rareKey.setItemMeta(rareKeyMeta);
-		gui.setItem(24, rareKey);
+		ItemStack godlyKey = new KeyGodly().getItem();
+		godlyKey.setAmount(2);
+		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
+		List<String> godlyKeyLore = new ArrayList<>();
+		godlyKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		godlyKeyMeta.setLore(godlyKeyLore);
+		godlyKey.setItemMeta(godlyKeyMeta);
+		gui.setItem(24, godlyKey);
 
 		// Fill empty slots with the blank item
-		ItemStack blank = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+		ItemStack blank = new ItemStack(Material.PURPLE_STAINED_GLASS_PANE);
 		ItemMeta blankMeta = blank.getItemMeta();
 		blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
 		blank.setItemMeta(blankMeta);
@@ -567,7 +557,7 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the Cluster that is associated to the input index for a Rare Crate.
+	 * Provides the Cluster that is associated to the input index for an Epic Crate.
 	 * @param armorTrimIndex The index of the armor trim.
 	 * @param clusterIndex The index of the cluster.
 	 */
@@ -634,27 +624,25 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the Cluster that is associated to the input index for a Rare Crate.
+	 * Provides the Aranarthium Ingot that is associated to the input index for a Godly Crate.
 	 * @param index The index of the cluster.
 	 */
 	public void updateGodlyCrateItems(int index) {
-		ItemStack cluster = null;
+		ItemStack ingot = null;
 		switch (index) {
-			case 1 -> cluster = new IronCluster().getItem();
-			case 2 -> cluster = new GoldCluster().getItem();
-			case 3 -> cluster = new QuartzCluster().getItem();
-			case 4 -> cluster = new LapisCluster().getItem();
-			case 5 -> cluster = new RedstoneCluster().getItem();
-			case 6 -> cluster = new DiamondCluster().getItem();
-			case 7 -> cluster = new EmeraldCluster().getItem();
-			default -> cluster = new CopperCluster().getItem();
+			case 1 -> ingot = new AranarthiumAquatic().getItem();
+			case 2 -> ingot = new AranarthiumArdent().getItem();
+			case 3 -> ingot = new AranarthiumDwarven().getItem();
+			case 4 -> ingot = new AranarthiumElven().getItem();
+			case 5 -> ingot = new AranarthiumScorched().getItem();
+			default -> ingot = new AranarthiumSoulbound().getItem();
 		}
-		ItemMeta cycledClusterMeta = cluster.getItemMeta();
-		List<String> cycledClusterLore = new ArrayList<>();
-		cycledClusterLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		cycledClusterMeta.setLore(cycledClusterLore);
-		cluster.setItemMeta(cycledClusterMeta);
-		initializedGui.setItem(23, cluster);
+		ItemMeta cycledIngotMeta = ingot.getItemMeta();
+		List<String> cycledIngotLore = new ArrayList<>();
+		cycledIngotLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledIngotMeta.setLore(cycledIngotLore);
+		ingot.setItemMeta(cycledIngotMeta);
+		initializedGui.setItem(15, ingot);
 	}
 
 }
