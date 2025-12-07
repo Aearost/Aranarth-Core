@@ -14,6 +14,7 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.ban.ProfileBanList;
+import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
@@ -550,5 +551,25 @@ public class DiscordUtils {
 				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			}
 		}
+	}
+
+	/**
+	 * Sends a notification when a player receives a special drop from a crate.
+	 * @param player The player who got the special drop.
+	 * @param message The message to be sent specific to that drop.
+	 */
+	public static void crateItemNotification(Player player, String message) {
+		Guild guild = getGuild();
+
+		String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+
+		EmbedBuilder embed = new EmbedBuilder()
+				.setAuthor(message, null, url)
+				.setColor(Color.CYAN);
+
+		TextChannel crateDrops = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("crate");
+		crateDrops.sendMessageEmbeds(embed.build()).queue();
+
 	}
 }

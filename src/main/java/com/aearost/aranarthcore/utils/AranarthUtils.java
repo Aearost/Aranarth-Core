@@ -2086,8 +2086,6 @@ public class AranarthUtils {
 		List<Material> materials = new ArrayList<>();
 		if (compressibleTypes.containsKey(uuid)) {
 			materials = compressibleTypes.get(uuid);
-		} else {
-			Bukkit.getLogger().info("Doesn't contain UUID when adding");
 		}
 		// Avoid duplicate entry of materials
 		if (materials.contains(material)) {
@@ -2107,8 +2105,6 @@ public class AranarthUtils {
 			List<Material> materials = compressibleTypes.get(uuid);
             materials.remove(material);
 			compressibleTypes.put(uuid, materials);
-		} else {
-			Bukkit.getLogger().info("Doesn't contain UUID when removing");
 		}
 	}
 
