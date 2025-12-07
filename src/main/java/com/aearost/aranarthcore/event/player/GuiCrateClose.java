@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -10,6 +12,9 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 public class GuiCrateClose {
 	public void execute(InventoryCloseEvent e) {
 		Player player = (Player) e.getPlayer();
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		aranarthPlayer.setIsOpeningCrateWithCyclingItem(false);
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		player.playSound(e.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1, 0.6F);
 	}
 }

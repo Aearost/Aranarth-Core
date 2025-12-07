@@ -57,6 +57,8 @@ public class AranarthPlayer {
 	private long saintExpireDate;
 	private boolean isCompressingItems = false;
 	private int bulkTransactionNum = 0;
+	private boolean isOpeningCrateWithCyclingItem = false;
+	private CrateType crateTypeBeingOpened = null;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -823,11 +825,43 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Updates the variable tracking which point of the bulk transaction the player is currently making
-	 * @param bulkTransactionNum Which point of the bulk transaction the player is currently making
+	 * Updates the variable tracking which point of the bulk transaction the player is currently making.
+	 * @param bulkTransactionNum Which point of the bulk transaction the player is currently making.
 	 */
 	public void setBulkTransactionNum(int bulkTransactionNum) {
 		this.bulkTransactionNum = bulkTransactionNum;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is currently opening a crate with a cycling item.
+	 * @return The variable tracking whether the player is currently opening a crate with a cycling item.
+	 */
+	public boolean getIsOpeningCrateWithCyclingItem() {
+		return isOpeningCrateWithCyclingItem;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is currently opening a crate with a cycling item.
+	 * @param isOpeningCrateWithCyclingItem The variable tracking whether the player is currently opening a crate with a cycling item.
+	 */
+	public void setIsOpeningCrateWithCyclingItem(boolean isOpeningCrateWithCyclingItem) {
+		this.isOpeningCrateWithCyclingItem = isOpeningCrateWithCyclingItem;
+	}
+
+	/**
+	 * Provides the variable tracking what kind of crate is currently being opened by the player.
+	 * @return The crate type that is currently being opened by the player.
+	 */
+	public CrateType getCrateTypeBeingOpened() {
+		return crateTypeBeingOpened;
+	}
+
+	/**
+	 * Updates the variable tracking what kind of crate is currently being opened by the player.
+	 * @param crateTypeBeingOpened The crate type that is currently being opened by the player.
+	 */
+	public void setCrateTypeBeingOpened(CrateType crateTypeBeingOpened) {
+		this.crateTypeBeingOpened = crateTypeBeingOpened;
 	}
 
 }
