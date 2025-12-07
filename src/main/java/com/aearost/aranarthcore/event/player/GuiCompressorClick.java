@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 
 /**
  * Handles the page changing logic of the server store.
@@ -19,6 +20,10 @@ public class GuiCompressorClick {
 			return;
 		}
 
+		if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
+			return;
+		}
+
 		Player player = (Player) e.getWhoClicked();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
@@ -28,6 +33,10 @@ public class GuiCompressorClick {
 				player.closeInventory();
 				player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 			}
+			return;
+		}
+
+		if (!AranarthUtils.isCompressible(e.getClickedInventory().getItem(slot), false)) {
 			return;
 		}
 

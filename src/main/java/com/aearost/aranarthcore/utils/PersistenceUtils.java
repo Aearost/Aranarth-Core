@@ -1519,7 +1519,7 @@ public class PersistenceUtils {
 							}
 						}
 					}
-					writer.write(line);
+					writer.write(line + "\n");
 				}
 
 				writer.close();

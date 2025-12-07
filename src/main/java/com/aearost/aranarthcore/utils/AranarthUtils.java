@@ -2086,6 +2086,12 @@ public class AranarthUtils {
 		List<Material> materials = new ArrayList<>();
 		if (compressibleTypes.containsKey(uuid)) {
 			materials = compressibleTypes.get(uuid);
+		} else {
+			Bukkit.getLogger().info("Doesn't contain UUID when adding");
+		}
+		// Avoid duplicate entry of materials
+		if (materials.contains(material)) {
+			return;
 		}
 		materials.add(material);
 		compressibleTypes.put(uuid, materials);
@@ -2101,6 +2107,8 @@ public class AranarthUtils {
 			List<Material> materials = compressibleTypes.get(uuid);
             materials.remove(material);
 			compressibleTypes.put(uuid, materials);
+		} else {
+			Bukkit.getLogger().info("Doesn't contain UUID when removing");
 		}
 	}
 
@@ -2116,6 +2124,31 @@ public class AranarthUtils {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Confirms if the input ItemStack is a compressible item.
+	 * @param item The item that is being verified.
+	 * @param isFromClickEvent Whether the method is being called from the inventory click event of the compressor.
+	 * @return Confirmation if the input item is compressible.
+	 */
+	public static boolean isCompressible(ItemStack item, boolean isFromClickEvent) {
+		if (isFromClickEvent) {
+			if (item.hasItemMeta()) {
+				return false;
+			}
+		}
+
+		Material type = item.getType();
+		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_INGOT
+				|| type == Material.RAW_IRON || type == Material.IRON_NUGGET || type == Material.IRON_INGOT
+				|| type == Material.RAW_GOLD || type == Material.GOLD_NUGGET || type == Material.GOLD_INGOT
+				|| type == Material.REDSTONE || type == Material.LAPIS_LAZULI || type == Material.DIAMOND
+				|| type == Material.EMERALD || type == Material.NETHERITE_INGOT || type == Material.AMETHYST_SHARD
+				|| type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST || type == Material.WHEAT
+				|| type == Material.MELON_SLICE || type == Material.DRIED_KELP || type == Material.SUGAR_CANE
+				|| type == Material.HONEYCOMB || type == Material.SLIME_BALL || type == Material.BONE_MEAL
+				|| type == Material.SNOWBALL || type == Material.CLAY_BALL;
 	}
 
 	/**

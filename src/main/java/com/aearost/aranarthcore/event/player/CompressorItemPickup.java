@@ -27,7 +27,7 @@ public class CompressorItemPickup {
 			}
 
 			// Only attempts to compress if the item being picked up is compressible
-			if (!isCompressible(e.getItem().getItemStack())) {
+			if (!AranarthUtils.isCompressible(e.getItem().getItemStack(), false)) {
 				return;
 			}
 
@@ -68,7 +68,7 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									if (isCompressible(shulkerItem)) {
+									if (AranarthUtils.isCompressible(shulkerItem, false)) {
 										if (!AranarthUtils.isItemBeingCompressed(player.getUniqueId(), shulkerItem.getType())) {
 											continue;
 										}
@@ -95,7 +95,7 @@ public class CompressorItemPickup {
 				}
 				// Normal item, not a shulker box
 				else {
-					if (isCompressible(inventoryItem)) {
+					if (AranarthUtils.isCompressible(inventoryItem, false)) {
 						if (!AranarthUtils.isItemBeingCompressed(player.getUniqueId(), inventoryItem.getType())) {
 							continue;
 						}
@@ -117,7 +117,7 @@ public class CompressorItemPickup {
 			}
 
 			// Include the actual item being picked up
-			if (isCompressible(pickupClone)) {
+			if (AranarthUtils.isCompressible(pickupClone, false)) {
 				if (AranarthUtils.isItemBeingCompressed(player.getUniqueId(), pickupClone.getType())) {
 					int result = AranarthUtils.isBlacklistingItem(aranarthPlayer, pickupClone);
 					if (result == 0) {
@@ -239,7 +239,7 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									if (!isCompressible(shulkerItem)) {
+									if (!AranarthUtils.isCompressible(shulkerItem, true)) {
 										continue;
 									}
 
@@ -397,28 +397,6 @@ public class CompressorItemPickup {
 		if (!leftover.isEmpty()) {
 			player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
 		}
-	}
-
-	/**
-	 * Confirms if the input ItemStack is a compressible item.
-	 * @param item The item that is being verified.
-	 * @return Confirmation if the input item is compressible.
-	 */
-	private boolean isCompressible(ItemStack item) {
-		if (item.hasItemMeta()) {
-			return false;
-		}
-
-		Material type = item.getType();
-		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_INGOT
-				|| type == Material.RAW_IRON || type == Material.IRON_NUGGET || type == Material.IRON_INGOT
-				|| type == Material.RAW_GOLD || type == Material.GOLD_NUGGET || type == Material.GOLD_INGOT
-				|| type == Material.REDSTONE || type == Material.LAPIS_LAZULI || type == Material.DIAMOND
-				|| type == Material.EMERALD || type == Material.NETHERITE_INGOT || type == Material.AMETHYST_SHARD
-				|| type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST || type == Material.WHEAT
-				|| type == Material.MELON_SLICE || type == Material.DRIED_KELP || type == Material.SUGAR_CANE
-				|| type == Material.HONEYCOMB || type == Material.SLIME_BALL || type == Material.BONE_MEAL
-				|| type == Material.SNOWBALL || type == Material.CLAY_BALL;
 	}
 
 	/**
