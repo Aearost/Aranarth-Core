@@ -186,6 +186,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandStore.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("boosts")) {
 			commandResult = CommandBoosts.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("vote")) {
+			commandResult = CommandVote.onCommand(sender, args);
 		}
 		return commandResult;
 	}
