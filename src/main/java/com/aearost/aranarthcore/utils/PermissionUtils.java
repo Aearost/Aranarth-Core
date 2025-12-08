@@ -144,6 +144,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.inventory", false);
 		perms.setPermission("aranarth.invisible_item_frame", false);
 		perms.setPermission("aranarth.boost.modify", false);
+		perms.setPermission("aranarth.vote.test", false);
 	}
 
 	/**
@@ -570,6 +571,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.warp.modify", true);
 			perms.setPermission("aranarth.avatar.set", true);
 			perms.setPermission("aranarth.boosts.modify", true);
+			perms.setPermission("aranarth.vote.test", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {
