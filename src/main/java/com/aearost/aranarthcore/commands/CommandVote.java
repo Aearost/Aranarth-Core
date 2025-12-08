@@ -28,7 +28,7 @@ public class CommandVote {
 
 				if (args[1].equals("test")) {
 					Vote vote = new Vote(
-							"TestService",
+							"AranarthCore",
 							player.getName(),
 							"127.0.0.1",
 							Long.toString(System.currentTimeMillis())

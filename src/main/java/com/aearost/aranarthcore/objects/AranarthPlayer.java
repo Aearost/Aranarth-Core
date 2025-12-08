@@ -59,6 +59,8 @@ public class AranarthPlayer {
 	private int bulkTransactionNum = 0;
 	private boolean isOpeningCrateWithCyclingItem = false;
 	private CrateType crateTypeBeingOpened = null;
+	private int voteTotal;
+	private int votePoints;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -101,13 +103,16 @@ public class AranarthPlayer {
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
 		this.bulkTransactionNum = 0;
+		this.voteTotal = 0;
+		this.votePoints = 0;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, String perks, long saintExpireDate, boolean isCompressingItems,
+						  int particleNum, String perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
+						  int votePoints,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -148,6 +153,8 @@ public class AranarthPlayer {
 		this.saintExpireDate = saintExpireDate;
 		this.isCompressingItems = isCompressingItems;
 		this.bulkTransactionNum = 0;
+		this.voteTotal = voteTotal;
+		this.votePoints = votePoints;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -862,6 +869,38 @@ public class AranarthPlayer {
 	 */
 	public void setCrateTypeBeingOpened(CrateType crateTypeBeingOpened) {
 		this.crateTypeBeingOpened = crateTypeBeingOpened;
+	}
+
+	/**
+	 * Provides the number of times the player has voted.
+	 * @return The number of times the player has voted.
+	 */
+	public int getVoteTotal() {
+		return voteTotal;
+	}
+
+	/**
+	 * Updates the number of times the player has voted.
+	 * @param voteTotal The number of times the player has voted.
+	 */
+	public void setVoteTotal(int voteTotal) {
+		this.voteTotal = voteTotal;
+	}
+
+	/**
+	 * Provides the number of vote points the player has.
+	 * @return The number of vote points the player has.
+	 */
+	public int getVotePoints() {
+		return votePoints;
+	}
+
+	/**
+	 * Updates the number of vote points the player has.
+	 * @param votePoints The number of vote points the player has.
+	 */
+	public void setVotePoints(int votePoints) {
+		this.votePoints = votePoints;
 	}
 
 }

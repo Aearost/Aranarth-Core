@@ -119,7 +119,7 @@ public class AranarthUtils {
 		players.put(uuid, aranarthPlayer);
 		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
 				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
-				|| uuid.equals(getUUIDFromUsername("AShiningSolo")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
+				|| uuid.equals(getUUIDFromUsername("SachsiBua")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
 				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))) {
 			originalPlayers.add(uuid);
 		}

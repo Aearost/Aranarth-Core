@@ -279,7 +279,7 @@ public class PersistenceUtils {
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, pronouns));
+						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, 0, 0, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
