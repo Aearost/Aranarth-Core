@@ -296,7 +296,7 @@ public class ChatUtils {
 		}
 		prefix += AranarthUtils.getRank(aranarthPlayer);
 
-		if (!nickname.isEmpty()) {
+		if (nickname != null && !nickname.isEmpty()) {
 			prefix += nickname + "&r";
 		} else {
 			prefix += player.getName();

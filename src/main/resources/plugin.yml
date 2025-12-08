@@ -3,7 +3,7 @@ version: 1.8
 authors: [Aearost]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 1.21
-depend: [mcMMO, VotifierPlus]
+depend: [mcMMO, ProjectKorra, DiscordSRV, VotifierPlus]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [mcMMO]
 commands:
