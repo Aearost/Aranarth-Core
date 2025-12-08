@@ -534,39 +534,56 @@ public class CommandACCompleter implements TabCompleter {
 							for (Home warp : AranarthUtils.getWarps()) {
 								displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
 							}
-						}
-
-						if (player.hasPermission("aranarth.warp.modify")) {
-							if (args[1].isEmpty()) {
+							if (player.hasPermission("aranarth.warp.modify")) {
 								displayedOptions.add("create");
 								displayedOptions.add("delete");
-							} else if ("create".startsWith(args[1])) {
-								displayedOptions.add("create");
-							} else if ("delete".startsWith(args[1])) {
-								displayedOptions.add("delete");
-							} else {
+							}
+						} else {
+							boolean wasWarpFound = false;
+							for (Home warp : AranarthUtils.getWarps()) {
+								if (ChatUtils.stripColorFormatting(warp.getName()).toLowerCase().startsWith(args[1].toLowerCase())) {
+									displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+									wasWarpFound = true;
+								}
+							}
+							if (!wasWarpFound) {
 								for (Home warp : AranarthUtils.getWarps()) {
-									if (ChatUtils.stripColorFormatting(warp.getName()).startsWith(args[1])) {
-										displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
-									}
+									displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+								}
+							}
+
+							if (player.hasPermission("aranarth.warp.modify")) {
+								if ("create".startsWith(args[1].toLowerCase())) {
+									displayedOptions.add("create");
+								} else if ("delete".startsWith(args[1].toLowerCase())) {
+									displayedOptions.add("delete");
 								}
 							}
 						}
 					} else {
 						if (player.hasPermission("aranarth.warp.modify")) {
-							if (args[2].isEmpty()) {
-								if (args[1].equalsIgnoreCase("create")) {
-									displayedOptions.add("name");
-								} else if (args[1].equalsIgnoreCase("delete")) {
-									for (Home warp : AranarthUtils.getWarps()) {
-										displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
-									}
-								}
-							} else {
-								if (args[1].equalsIgnoreCase("delete")) {
-									for (Home warp : AranarthUtils.getWarps()) {
-										if (ChatUtils.stripColorFormatting(warp.getName()).startsWith(args[2])) {
+							if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("delete")) {
+								if (args[2].isEmpty()) {
+									if (args[1].equalsIgnoreCase("create")) {
+										displayedOptions.add("name");
+									} else if (args[1].equalsIgnoreCase("delete")) {
+										for (Home warp : AranarthUtils.getWarps()) {
 											displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+										}
+									}
+								} else {
+									if (args[1].equalsIgnoreCase("delete")) {
+										boolean wasWarpFound = false;
+										for (Home warp : AranarthUtils.getWarps()) {
+											if (ChatUtils.stripColorFormatting(warp.getName()).toLowerCase().startsWith(args[2].toLowerCase())) {
+												displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+												wasWarpFound = true;
+											}
+										}
+										if (!wasWarpFound) {
+											for (Home warp : AranarthUtils.getWarps()) {
+												displayedOptions.add(ChatUtils.stripColorFormatting(warp.getName()));
+											}
 										}
 									}
 								}
