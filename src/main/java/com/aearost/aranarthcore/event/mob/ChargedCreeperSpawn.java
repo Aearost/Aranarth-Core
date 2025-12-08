@@ -8,9 +8,9 @@ import org.bukkit.event.entity.EntitySpawnEvent;
 import java.util.Random;
 
 /**
- * Spawns creepers as charged with a 12.5% chance during a thunderstorm in the month of Aestivor.
+ * Spawns creepers as charged during thunderstorms and increased rates during Aestivor.
  */
-public class CreeperExtraChargedSpawn {
+public class ChargedCreeperSpawn {
 	public void execute(EntitySpawnEvent e) {
 		if (e.getLocation().getWorld().isThundering()) {
 

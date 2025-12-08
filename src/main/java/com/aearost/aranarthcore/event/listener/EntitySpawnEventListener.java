@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.mob.CreeperExtraChargedSpawn;
+import com.aearost.aranarthcore.event.mob.ChargedCreeperSpawn;
 import com.aearost.aranarthcore.event.mob.VentivorBreezeSpawn;
 import com.aearost.aranarthcore.event.mob.WanderingTraderSpawnAnnounce;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -26,7 +26,7 @@ public class EntitySpawnEventListener implements Listener {
         if (e.getEntityType() == EntityType.WANDERING_TRADER) {
             new WanderingTraderSpawnAnnounce().execute(e);
         } else if (e.getEntityType() == EntityType.CREEPER) {
-            new CreeperExtraChargedSpawn().execute(e);
+            new ChargedCreeperSpawn().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.VENTIVOR) {
