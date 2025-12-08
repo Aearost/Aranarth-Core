@@ -24,7 +24,7 @@ public class CommandAC implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &7/ac <sub-command>"));
+			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac <sub-command>"));
 			return false;
 		} else {
 			boolean commandResult = false;
