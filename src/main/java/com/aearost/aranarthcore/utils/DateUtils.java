@@ -702,7 +702,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getAestivorDescription() {
-		return "The month of Aestivór is ridden with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 5% chance that creepers will spawn as the charged variant.";
+		return "The month of Aestivór is ridden with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 20% chance that creepers will spawn as the charged variant.";
 	}
 
 	/**
