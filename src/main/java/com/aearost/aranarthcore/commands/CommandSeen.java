@@ -35,7 +35,7 @@ public class CommandSeen {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				if (offlinePlayer.isOnline()) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is currently online"));
+					sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7is currently online"));
 					return true;
 				} else {
 					ZoneId timezone = null;
@@ -116,7 +116,7 @@ public class CommandSeen {
 
 		}
 		String timezoneName = timezone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-		sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7was last seen &e"
+		sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen &e"
 				+ month + " " + dateWithSuffix + ", " + year + " &7at &e" + hour + ":" + minute + " " + timezoneName));
 	}
 
