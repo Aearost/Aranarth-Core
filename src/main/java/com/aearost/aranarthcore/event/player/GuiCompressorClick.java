@@ -28,10 +28,24 @@ public class GuiCompressorClick {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		int slot = e.getSlot();
-		if (slot < 9 || slot >= 36) {
+		if (slot < 9 || slot >= 35) {
 			if (slot == 40) {
 				player.closeInventory();
 				player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+			}
+			// Enable All
+			else if (slot == 36) {
+				AranarthUtils.compressAllMaterials(player.getUniqueId());
+				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
+				GuiCompressor gui = new GuiCompressor(player);
+				gui.openGui();
+			}
+			// Disable All
+			else if (slot == 44) {
+				AranarthUtils.stopCompressingAllMaterials(player.getUniqueId());
+				player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 0.5F, 1.75F);
+				GuiCompressor gui = new GuiCompressor(player);
+				gui.openGui();
 			}
 			return;
 		}
