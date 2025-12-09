@@ -46,7 +46,7 @@ public class VotifierListener implements Listener {
 			// If the player is online
 			if (player != null) {
 				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
-				player.sendMessage(ChatUtils.chatMessage("&7You have received a &e" + key.getItemMeta().getDisplayName() + "!"));
+				player.sendMessage(ChatUtils.chatMessage("&7You have voted and received a &e" + key.getItemMeta().getDisplayName() + "!"));
 				if (!remainder.isEmpty()) {
 					player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remainder.get(0));
 					player.sendMessage(ChatUtils.chatMessage("&7Your crate key was dropped to the ground"));

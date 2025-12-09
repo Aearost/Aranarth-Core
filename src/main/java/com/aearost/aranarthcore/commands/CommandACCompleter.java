@@ -303,6 +303,8 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("warp");
 		} else if (!args[0].isEmpty() && "msg".startsWith(args[0])) {
 			displayedOptions.add("msg");
+		} else if (!args[0].isEmpty() && "vote".startsWith(args[0])) {
+			displayedOptions.add("vote");
 		}
 		return displayedOptions;
 	}
@@ -597,6 +599,15 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("toggle");
 				}
 			}
+			case "vote" -> {
+				if (args.length == 2) {
+					if (!args[1].isEmpty() && "stats".startsWith(args[1])) {
+						displayedOptions.add("stats");
+					} else {
+						displayedOptions.add("stats");
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -653,6 +664,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("store");
 		displayedOptions.add("boosts");
 		displayedOptions.add("compress");
+		displayedOptions.add("vote");
 		return displayedOptions;
 	}
 
@@ -950,6 +962,15 @@ public class CommandACCompleter implements TabCompleter {
 						for (Player onlinePlayer : onlinePlayers) {
 							displayedOptions.add(onlinePlayer.getName());
 						}
+					}
+				}
+			}
+			case "vote" -> {
+				if (args.length == 2) {
+					if (!args[1].isEmpty() && "test".startsWith(args[1])) {
+						displayedOptions.add("test");
+					} else {
+						displayedOptions.add("test");
 					}
 				}
 			}
