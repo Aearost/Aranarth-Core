@@ -266,6 +266,8 @@ public class PersistenceUtils {
 				if (fields[19].equals("1")) {
 					isCompressingItems = true;
 				}
+				int voteTotal = Integer.parseInt(fields[20]);
+				int votePoints = Integer.parseInt(fields[21]);
 
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
@@ -279,7 +281,7 @@ public class PersistenceUtils {
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, 0, 0, pronouns));
+						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, voteTotal, votePoints, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -402,6 +404,8 @@ public class PersistenceUtils {
 						if (aranarthPlayer.getIsCompressingItems()) {
 							isCompressingItems = "1";
 						}
+						int voteTotal = aranarthPlayer.getVoteTotal();
+						int votePoints = aranarthPlayer.getVotePoints();
 
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
@@ -415,7 +419,7 @@ public class PersistenceUtils {
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
 								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
-								+ "|" + isCompressingItems + "|"
+								+ "|" + isCompressingItems + "|" + voteTotal + "|" + votePoints + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);
