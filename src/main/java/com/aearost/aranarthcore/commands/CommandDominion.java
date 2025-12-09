@@ -33,6 +33,11 @@ public class CommandDominion {
 		// Shorthand of /ac dominion home
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				if (!player.hasPermission("aranarth.dominion.home")) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+					return true;
+				}
+
 				teleportToDominionHome(player);
 				return true;
 			} else {
@@ -44,6 +49,10 @@ public class CommandDominion {
 				Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
 				if (args[1].equalsIgnoreCase("create")) {
+					if (!player.hasPermission("aranarth.dominion.create")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+						return true;
+					}
 					createDominion(args, player);
 				}
 				else if (args[1].equalsIgnoreCase("invite")) {
@@ -77,6 +86,10 @@ public class CommandDominion {
 					}
 				}
 				else if (args[1].equalsIgnoreCase("home")) {
+					if (!player.hasPermission("aranarth.dominion.home")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+						return true;
+					}
 					teleportToDominionHome(player);
 				}
 				else if (args[1].equalsIgnoreCase("sethome")) {
