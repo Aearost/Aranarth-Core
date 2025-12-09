@@ -22,7 +22,6 @@ public class CommandAvatar {
 		if (args.length == 1) {
 			Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 			if (currentAvatar == null) {
-
 				sender.sendMessage(ChatUtils.chatMessage("&7&oAranarth is currently without an Avatar..."));
 				return true;
 			}
