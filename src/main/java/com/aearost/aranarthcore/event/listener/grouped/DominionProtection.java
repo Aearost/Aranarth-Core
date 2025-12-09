@@ -140,7 +140,7 @@ public class DominionProtection implements Listener {
 			|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
 			|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
 				|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON")
-				|| block.getType().name().endsWith("_GATE")) {
+				|| block.getType().name().endsWith("_GATE") || block.getType() == Material.CRAFTER|| block.getType() == Material.HOPPER) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				// Only show the error if it is not a shop
