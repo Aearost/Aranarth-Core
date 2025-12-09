@@ -755,6 +755,8 @@ public class CommandACCompleter implements TabCompleter {
 			} else if (!args[0].isEmpty() && "perks".startsWith(args[0])) {
 				displayedOptions.add("perks");
 			}
+		} else if (!args[0].isEmpty() && "cmsg".startsWith(args[0])) {
+			displayedOptions.add("cmsg");
 		}
 		displayedOptions = all(sender, displayedOptions, args);
 		return displayedOptions;
@@ -974,6 +976,11 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "cmsg" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("message");
+				}
+			}
 		}
 		displayedOptions = allArgs(sender, displayedOptions, args);
 		return displayedOptions;
@@ -999,6 +1006,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("punishments");
 		displayedOptions.add("perks");
 		displayedOptions.add("admin");
+		displayedOptions.add("cmsg");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}
