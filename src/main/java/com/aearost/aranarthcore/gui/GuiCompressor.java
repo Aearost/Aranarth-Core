@@ -231,23 +231,26 @@ public class GuiCompressor {
 		gui.setItem(34, clayBall);
 
 		// Empty slot in row with items
-		gui.setItem(35, blank);
+//		gui.setItem(35, blank);
 
 		ItemStack exit = new ItemStack(Material.BARRIER);
-		exit = new ItemStack(Material.BARRIER);
 		ItemMeta exitMeta = exit.getItemMeta();
 		exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
 		exit.setItemMeta(exitMeta);
 
-		gui.setItem(36, blank);
-		gui.setItem(37, blank);
-		gui.setItem(38, blank);
-		gui.setItem(39, blank);
+		ItemStack enableAll = new ItemStack(Material.LIME_WOOL);
+		ItemMeta enableAllMeta = enableAll.getItemMeta();
+		enableAllMeta.setDisplayName(ChatUtils.translateToColor("&a&lEnable All"));
+		enableAll.setItemMeta(enableAllMeta);
+
+		ItemStack disableAll = new ItemStack(Material.RED_WOOL);
+		ItemMeta disableAllMeta = disableAll.getItemMeta();
+		disableAllMeta.setDisplayName(ChatUtils.translateToColor("&c&lDisable All"));
+		disableAll.setItemMeta(disableAllMeta);
+
+		gui.setItem(36, enableAll);
 		gui.setItem(40, exit);
-		gui.setItem(41, blank);
-		gui.setItem(42, blank);
-		gui.setItem(43, blank);
-		gui.setItem(44, blank);
+		gui.setItem(44, disableAll);
 
 		return gui;
 	}

@@ -2181,6 +2181,39 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Disables the compressor for all Materials.
+	 * @param uuid The player's UUID.
+	 */
+	public static void stopCompressingAllMaterials(UUID uuid) {
+		removeCompressibleItem(uuid, Material.COAL);
+		removeCompressibleItem(uuid, Material.RAW_COPPER);
+		removeCompressibleItem(uuid, Material.COPPER_INGOT);
+		removeCompressibleItem(uuid, Material.RAW_IRON);
+		removeCompressibleItem(uuid, Material.IRON_NUGGET);
+		removeCompressibleItem(uuid, Material.IRON_INGOT);
+		removeCompressibleItem(uuid, Material.RAW_GOLD);
+		removeCompressibleItem(uuid, Material.GOLD_NUGGET);
+		removeCompressibleItem(uuid, Material.GOLD_INGOT);
+		removeCompressibleItem(uuid, Material.REDSTONE);
+		removeCompressibleItem(uuid, Material.LAPIS_LAZULI);
+		removeCompressibleItem(uuid, Material.DIAMOND);
+		removeCompressibleItem(uuid, Material.EMERALD);
+		removeCompressibleItem(uuid, Material.NETHERITE_INGOT);
+		removeCompressibleItem(uuid, Material.AMETHYST_SHARD);
+		removeCompressibleItem(uuid, Material.RESIN_CLUMP);
+		removeCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+		removeCompressibleItem(uuid, Material.WHEAT);
+		removeCompressibleItem(uuid, Material.MELON_SLICE);
+		removeCompressibleItem(uuid, Material.DRIED_KELP);
+		removeCompressibleItem(uuid, Material.SUGAR_CANE);
+		removeCompressibleItem(uuid, Material.HONEYCOMB);
+		removeCompressibleItem(uuid, Material.SLIME_BALL);
+		removeCompressibleItem(uuid, Material.BONE_MEAL);
+		removeCompressibleItem(uuid, Material.SNOWBALL);
+		removeCompressibleItem(uuid, Material.CLAY_BALL);
+	}
+
+	/**
 	 * Provides the list of crates that are currently in use.
 	 * @return The list of crates that are currently in use.
 	 */
