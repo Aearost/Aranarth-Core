@@ -2203,4 +2203,46 @@ public class AranarthUtils {
 	public static void removeCrateFromUse(CrateType type) {
 		cratesInUse.remove(type);
 	}
+
+	/**
+	 * Updates the name, location, and/or icon of an existing warp.
+	 *
+	 * @param warpName The new name to be used for the warp.
+	 * @param direction The Location containing the direction of the warp to be used.
+	 * @param icon The Material that will be displayed for the warp.
+	 */
+	public static void updateWarp(String warpName, Location direction, Material icon) {
+		for (int i = 0; i < warps.size(); i++) {
+			if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
+					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
+					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+				Home updatedWarp = new Home(warpName, direction, icon);
+				warps.set(i, updatedWarp);
+			}
+		}
+	}
+
+	/**
+	 * Updates the name, location, and/or icon of an existing home.
+	 *
+	 * @param player The player updating the home.
+	 * @param homeName The new name to be used for the home.
+	 * @param direction The Location containing the direction of the home to be used.
+	 * @param icon The Material that will be displayed for the home.
+	 */
+	public static void updateHome(Player player, String homeName, Location direction, Material icon) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		List<Home> homes = aranarthPlayer.getHomes();
+		for (int i = 0; i < homes.size(); i++) {
+			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
+					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
+					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+				Home updatedWarp = new Home(homeName, direction, icon);
+				homes.set(i, updatedWarp);
+				aranarthPlayer.setHomes(homes);
+				setPlayer(player.getUniqueId(), aranarthPlayer);
+				return;
+			}
+		}
+	}
 }
