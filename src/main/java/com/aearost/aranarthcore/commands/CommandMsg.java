@@ -55,8 +55,8 @@ public class CommandMsg {
 						// Formats to color if the player sending has the permissions
 						String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
 
-						player.sendMessage(senderPrefix + formattedMsg);
-						target.sendMessage(targetPrefix + formattedMsg);
+						player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
+						target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
 
 						String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
 						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
