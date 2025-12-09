@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
@@ -1189,7 +1190,7 @@ public class PersistenceUtils {
 
 						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 						if (currentAvatar != null) {
-							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+							OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()).getName());
 							if (bendingPlayer != null) {
 								bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
 							}
@@ -1250,7 +1251,7 @@ public class PersistenceUtils {
 				// Saving the avatar's binds to ensure they are not reset upon relogging
 				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 				if (currentAvatar != null) {
-					BendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+					OfflineBendingPlayer currentAvatarBendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
 					if (currentAvatarBendingPlayer != null) {
 						for (int index : currentAvatarBendingPlayer.getAbilities().keySet()) {
 							writer.write("#" + index + "*" + currentAvatarBendingPlayer.getAbilities().get(index) + "\n");
@@ -1310,7 +1311,7 @@ public class PersistenceUtils {
 				String[] parts = row.split("\\*");
 				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 				if (currentAvatar != null) {
-					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()));
+					OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()).getName());
 					if (bendingPlayer != null) {
 						bendingPlayer.bindAbility(parts[1], Integer.parseInt(parts[0]));
 					}

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -153,7 +154,7 @@ public class PermissionUtils {
 	 */
 	public static void updateAvatarPermissions(UUID uuid, boolean isRemoval) {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
 
 		if (bendingPlayer == null) {
 			return;
