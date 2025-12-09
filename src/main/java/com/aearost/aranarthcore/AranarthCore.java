@@ -175,6 +175,7 @@ public class AranarthCore extends JavaPlugin {
 		new BlockPhysicsEventListener(this);
 		new ProjectileHitEventListener(this);
 		new PlayerCommandPreprocessEventListener(this);
+		new EntityBreedEventListener(this);
 
 		// Multi-event listeners for single purpose
 		new InvisibleItemFrameListener(this);
