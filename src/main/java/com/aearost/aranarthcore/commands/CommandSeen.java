@@ -26,6 +26,13 @@ public class CommandSeen {
 	 * @param args The arguments of the command.
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
+		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.seen")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
+				return true;
+			}
+		}
+
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
 			return true;
