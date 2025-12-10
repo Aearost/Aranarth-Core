@@ -79,12 +79,16 @@ public class DominionUtils {
 			if (playerDominion.getOwner().equals(player.getUniqueId())) {
 				if (dominionOfChunk == null) {
 					if (playerDominion.getBalance() >= 100) {
-						double newBalance = playerDominion.getBalance() - 100;
-						playerDominion.setBalance(newBalance);
-						List<Chunk> chunks = playerDominion.getChunks();
-						chunks.add(chunk);
-						updateDominion(playerDominion);
-						return "&7This chunk has been claimed for " + playerDominion.getName();
+						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25)) {
+							double newBalance = playerDominion.getBalance() - 100;
+							playerDominion.setBalance(newBalance);
+							List<Chunk> chunks = playerDominion.getChunks();
+							chunks.add(chunk);
+							updateDominion(playerDominion);
+							return "&7This chunk has been claimed for " + playerDominion.getName();
+						} else {
+							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25) + " chunks!";
+						}
 					} else {
 						return "&cYour dominion cannot afford this!";
 					}
