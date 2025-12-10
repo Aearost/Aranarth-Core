@@ -915,7 +915,7 @@ public class AranarthUtils {
 		List<UUID> trusted = null;
 		for (LockedContainer container : getLockedContainers()) {
 			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[1];
 			if (loc2 == null) {
 				if (isSameLocation(loc1, location)) {
 					trusted = container.getTrusted();
@@ -945,7 +945,7 @@ public class AranarthUtils {
 		List<UUID> trusted = null;
 		for (LockedContainer container : getLockedContainers()) {
 			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[1];
 			if (loc2 == null) {
 				if (isSameLocation(loc1, location)) {
 					trusted = container.getTrusted();
@@ -1032,23 +1032,24 @@ public class AranarthUtils {
 	 */
 	public static boolean canOpenContainer(Player player, Block block) {
 		List<LockedContainer> lockedContainers = getLockedContainers();
+
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return true;
 		}
 
 		if (isContainerBlock(block)) {
+			Bukkit.getLogger().info("A");
 			LockedContainer lockedContainer = getLockedContainerAtBlock(block);
 			if (lockedContainer != null) {
+				Bukkit.getLogger().info("B");
 				List<UUID> trusted = lockedContainer.getTrusted();
 				if (trusted.contains(player.getUniqueId())) {
+					Bukkit.getLogger().info("C");
 					return true;
 				}
 			}
-			// The container is not locked
-			else {
-				return true;
-			}
 		}
+		Bukkit.getLogger().info("D");
 		return false;
 	}
 

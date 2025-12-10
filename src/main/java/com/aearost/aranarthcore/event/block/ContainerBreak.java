@@ -6,7 +6,10 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Chest;
+import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -17,7 +20,8 @@ public class ContainerBreak {
 
     public void execute(BlockBreakEvent e) {
         Player player = e.getPlayer();
-        if (e.getBlock().getType() == Material.CHEST || e.getBlock().getType() == Material.TRAPPED_CHEST || e.getBlock().getType() == Material.BARREL) {
+        Block block = e.getBlock();
+        if (block.getState() instanceof Chest || block.getState() instanceof ShulkerBox || block.getType() == Material.BARREL) {
             if (AranarthUtils.getLockedContainers() != null) {
                 LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(e.getBlock());
                 if (lockedContainer == null) {
