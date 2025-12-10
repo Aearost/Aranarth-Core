@@ -21,6 +21,7 @@ public class CommandTrust {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to trust!"));
+			return true;
 		} else {
 			if (sender instanceof Player player) {
 				boolean isPlayerFound = false;

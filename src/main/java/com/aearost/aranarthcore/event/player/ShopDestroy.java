@@ -68,7 +68,7 @@ public class ShopDestroy {
 				Shop shop = ShopUtils.getShopFromLocation(signBlock.getLocation());
 
 				if (shop.getUuid() == null || shop.getUuid().equals(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou must destroy the shop's sign first!"));
+					player.sendMessage(ChatUtils.chatMessage("&cYou must destroy the shop first!"));
 					e.setCancelled(true);
 					return;
 				} else {
