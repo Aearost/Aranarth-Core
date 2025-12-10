@@ -255,6 +255,8 @@ public class CommandDominion {
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cYou are already in a Dominion!"));
 				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion create <name>"));
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create a Dominion!"));
