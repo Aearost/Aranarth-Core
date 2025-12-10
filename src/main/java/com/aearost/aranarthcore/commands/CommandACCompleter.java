@@ -1031,6 +1031,8 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("sethome");
 		displayedOptions.add("who");
 		displayedOptions.add("list");
+		displayedOptions.add("deposit");
+		displayedOptions.add("withdraw");
 		return displayedOptions;
 	}
 
@@ -1083,8 +1085,6 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				} else if ("remove".startsWith(args[1])) {
 					displayedOptions.add("remove");
-				} else if ("disband".startsWith(args[1])) {
-					displayedOptions.add("disband");
 				} else if ("unclaim".startsWith(args[1])) {
 					displayedOptions.add("unclaim");
 				} else if ("balance".startsWith(args[1])) {
@@ -1093,8 +1093,28 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("home");
 				} else if ("sethome".startsWith(args[1])) {
 					displayedOptions.add("sethome");
-				} else if ("who".startsWith(args[1])) {
-					displayedOptions.add("who");
+				} else if (args[1].startsWith("d")) {
+					if (args[1].equalsIgnoreCase("d")) {
+						displayedOptions.add("disband");
+						displayedOptions.add("deposit");
+					} else if ("disband".startsWith(args[1])) {
+						displayedOptions.add("disband");
+					} else if ("deposit".startsWith(args[1])) {
+						displayedOptions.add("deposit");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
+				} else if (args[1].startsWith("w")) {
+					if (args[1].equalsIgnoreCase("w")) {
+						displayedOptions.add("who");
+						displayedOptions.add("withdraw");
+					} else if ("who".startsWith(args[1])) {
+						displayedOptions.add("who");
+					} else if ("withdraw".startsWith(args[1])) {
+						displayedOptions.add("withdraw");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
 				} else {
 					displayedOptions = addDominionSubCommands(displayedOptions);
 				}
