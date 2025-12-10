@@ -117,12 +117,12 @@ public class AranarthCore extends JavaPlugin {
 			}
 		}, 0, 100);
 
-		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-			@Override
-			public void run() {
-				AranarthUtils.applyWaterfallEffect();
-			}
-		}, 1, 1);
+//		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+//			@Override
+//			public void run() {
+//				AranarthUtils.applyWaterfallEffect();
+//			}
+//		}, 1, 1);
 	}
 
 	public static AranarthCore getInstance() {
