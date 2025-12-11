@@ -20,6 +20,7 @@ public class CommandCMsg {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getCouncilRank() == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return false;
 			}
 

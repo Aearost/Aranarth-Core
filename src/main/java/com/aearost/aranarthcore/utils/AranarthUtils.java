@@ -13,6 +13,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -67,6 +68,7 @@ public class AranarthUtils {
 	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
+	private static final List<TextDisplay> textHolograms = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2281,4 +2283,6 @@ public class AranarthUtils {
 			}
 		}
 	}
+
+
 }
