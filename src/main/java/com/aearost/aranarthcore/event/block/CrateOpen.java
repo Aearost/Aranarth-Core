@@ -61,7 +61,7 @@ public class CrateOpen {
                         int emptySlotNum = getEmptySlotNum(player);
 
                         // Vote Crate
-                        if (x == -67 && y == 91 && z == 40) {
+                        if (x == -67 && y == 91 && z == 41) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -90,7 +90,7 @@ public class CrateOpen {
                             }
                         }
                         // Rare Crate
-                        else if (x == -56 && y == 94 && z == 45) {
+                        else if (x == -57 && y == 94 && z == 45) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -144,7 +144,7 @@ public class CrateOpen {
                             }
                         }
                         // Epic Crate
-                        else if (x == -63 && y == 99 && z == 49) {
+                        else if (x == -64 && y == 99 && z == 49) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -207,7 +207,7 @@ public class CrateOpen {
                             }
                         }
                         // Godly Crate
-                        else if (x == -74 && y == 105 && z == 52) {
+                        else if (x == -74 && y == 105 && z == 53) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);

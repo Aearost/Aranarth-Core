@@ -166,13 +166,15 @@ public class BoostEffectsListener implements Listener {
 	 */
 	@EventHandler
 	public void onBendAttack(AbilityDamageEntityEvent e) {
-		String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
-		if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
-			return;
-		}
+		if (e.getAbility().getPlayer() != null) {
+			String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
+			if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+				return;
+			}
 
-		if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
-			e.setDamage(e.getDamage() * 1.5);
+			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
+				e.setDamage(e.getDamage() * 1.5);
+			}
 		}
 	}
 
@@ -181,16 +183,18 @@ public class BoostEffectsListener implements Listener {
 	 */
 	@EventHandler
 	public void onAbilityEnd(AbilityEndEvent e) {
-		String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
-		if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
-			return;
-		}
+		if (e.getAbility().getPlayer() != null) {
+			String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
+			if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+				return;
+			}
 
-		if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
-			Ability ability = e.getAbility();
-			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(e.getAbility().getPlayer());
-			bendingPlayer.removeCooldown(ability.getName());
-			bendingPlayer.addCooldown(ability, ability.getCooldown() / 2);
+			if (AranarthUtils.getServerBoosts().containsKey(Boost.CHI)) {
+				Ability ability = e.getAbility();
+				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(e.getAbility().getPlayer());
+				bendingPlayer.removeCooldown(ability.getName());
+				bendingPlayer.addCooldown(ability, ability.getCooldown() / 2);
+			}
 		}
 	}
 

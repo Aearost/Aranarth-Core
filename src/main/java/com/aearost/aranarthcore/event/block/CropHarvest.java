@@ -10,7 +10,6 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
@@ -135,7 +134,6 @@ public class CropHarvest {
 		// Doubled crop and seed yields during the month of Fructivor
 		else if (AranarthUtils.getMonth() == Month.FRUCTIVOR) {
 			seed.setAmount(seed.getAmount() * 2);
-			Bukkit.getLogger().info("Fructivor amount: " + drops.get(0).getAmount());
 			if (drops.size() > 1) {
 				if (drops.get(0).getType() == Material.WHEAT || drops.get(0).getType() == Material.BEETROOT) {
 					drops.get(0).setAmount(drops.get(0).getAmount() * 2);
