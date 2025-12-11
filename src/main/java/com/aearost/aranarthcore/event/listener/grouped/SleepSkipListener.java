@@ -72,7 +72,7 @@ public class SleepSkipListener implements Listener {
 
 		amountRequiredToSkip = (int) Math.ceil(onlinePlayersInSurvivalWorlds * percentRequiredToSkip);
 		int sleepingPlayerNum = sleepingPlayers.size();
-		String message = "Players sleeping - " + sleepingPlayerNum + "/" + amountRequiredToSkip;
+		String message = "Players sleeping: " + sleepingPlayerNum + "/" + amountRequiredToSkip;
 		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
 			// Displays the bar to all players in the survival worlds
 			for (Player player : Bukkit.getOnlinePlayers()) {
@@ -112,9 +112,10 @@ public class SleepSkipListener implements Listener {
 			World world = Bukkit.getWorld("world");
 			World smp = Bukkit.getWorld("smp");
 			World resource = Bukkit.getWorld("resource");
-			world.setTime(0);
-			smp.setTime(0);
-			resource.setTime(0);
+			world.setTime(23980);
+			smp.setTime(23980);
+			resource.setTime(23980);
+
 			// Immediately end any storm, will be picked up by DateUtils logic within 5 seconds
 			if (AranarthUtils.getWeather() != Weather.CLEAR) {
 				AranarthUtils.setStormDuration(0);
