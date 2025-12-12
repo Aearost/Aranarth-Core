@@ -59,7 +59,7 @@ public class HologramUtils {
         int indexToRemove = -1;
         for (int i = 0; i < holograms.size(); i++) {
             int x = location.getBlockX();
-            int y = location.getBlockY();
+            double y = location.getY();
             int z = location.getBlockZ();
             TextDisplay hologram = holograms.get(i);
             if (x == hologram.getLocation().getBlockX() && y == hologram.getLocation().getBlockY()

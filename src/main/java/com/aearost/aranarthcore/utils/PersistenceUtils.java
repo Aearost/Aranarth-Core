@@ -1558,12 +1558,9 @@ public class PersistenceUtils {
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
 				String[] parts = row.split("\\|\\|");
-				for (String part : parts) {
-					Bukkit.getLogger().info("Part: " + part);
-				}
 				String worldName = parts[0];
 				int x = Integer.parseInt(parts[1]);
-				int y = Integer.parseInt(parts[2]);
+				double y = Double.parseDouble(parts[2]);
 				int z = Integer.parseInt(parts[3]);
 				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
 				String text = parts[4];
@@ -1607,7 +1604,7 @@ public class PersistenceUtils {
 				for (TextDisplay hologram : HologramUtils.getHolograms()) {
 					String worldName = hologram.getLocation().getWorld().getName();
 					int x = hologram.getLocation().getBlockX();
-					int y = hologram.getLocation().getBlockY();
+					double y = hologram.getLocation().getY();
 					int z = hologram.getLocation().getBlockZ();
 					String text = hologram.getText();
 					String textWithNewLines = text.replaceAll("\n", "\\\\n");
