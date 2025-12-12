@@ -73,6 +73,7 @@ public class CrateOpen {
                                 ItemStack voteKey = new KeyVote().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(voteKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &aVote Crate Key &cto do this!"));
+                                    player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
 
@@ -80,6 +81,7 @@ public class CrateOpen {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
                                         player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineVoteCrateReward(player);
@@ -127,6 +129,7 @@ public class CrateOpen {
                                 ItemStack rareKey = new KeyRare().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(rareKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &6Rare Crate Key &cto do this!"));
+                                    player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
 
@@ -134,6 +137,7 @@ public class CrateOpen {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
                                         player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineRareCrateReward(player);
@@ -190,6 +194,7 @@ public class CrateOpen {
                                 ItemStack epicKey = new KeyEpic().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(epicKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &3Epic Crate Key &cto do this!"));
+                                    player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
 
@@ -197,6 +202,7 @@ public class CrateOpen {
                                     // Clusters require up to 4 empty slots
                                     if (emptySlotNum < 4) {
                                         player.sendMessage(ChatUtils.chatMessage("&cYou need at least 4 empty inventory slots to open this crate!"));
+                                        player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineEpicCrateReward(player);
@@ -244,6 +250,7 @@ public class CrateOpen {
                                 ItemStack godlyKey = new KeyGodly().getItem();
                                 if (heldItem == null || !heldItem.isSimilar(godlyKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &5Godly Crate Key &cto do this!"));
+                                    player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                     return;
                                 }
 
@@ -251,6 +258,7 @@ public class CrateOpen {
                                     // Compressible items require up to 2 empty slots
                                     if (emptySlotNum < 2) {
                                         player.sendMessage(ChatUtils.chatMessage("&cYou need at least 2 empty inventory slots to open this crate!"));
+                                        player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
                                         return;
                                     }
                                     determineGodlyCrateReward(player);
