@@ -85,7 +85,7 @@ public class DominionUtils {
 							List<Chunk> chunks = playerDominion.getChunks();
 							chunks.add(chunk);
 							updateDominion(playerDominion);
-							return "&7This chunk has been claimed for " + playerDominion.getName();
+							return "&e" + playerDominion.getName() + " &7has claimed &e" + playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
 						} else {
 							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25) + " chunks!";
 						}
