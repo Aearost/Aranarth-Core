@@ -36,7 +36,7 @@ public class ShopInteract {
 			Shop shop = ShopUtils.getShopFromLocation(signLocation);
 
 			// Player shop
-			if (isChest(locationBelow.getBlock().getType())) {
+			if (isChest(locationBelow.getBlock().getType()) && shop != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
 				if (shop != null) {
 					e.setCancelled(true);
 

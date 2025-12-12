@@ -173,6 +173,11 @@ public class ShopCreateListener implements Listener {
 			return true;
 		}
 
+		String name = e.getBlock().getLocation().getWorld().getName();
+		if (!name.startsWith("world") && !name.startsWith("smp")) {
+			return false;
+		}
+
 		LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(signBlock.getRelative(BlockFace.DOWN));
 		Location[] locations = AranarthUtils.getLocationsOfContainer(signBlock.getRelative(BlockFace.DOWN));
 
