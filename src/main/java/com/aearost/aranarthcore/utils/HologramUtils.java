@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
 import org.bukkit.entity.TextDisplay;
@@ -32,6 +34,7 @@ public class HologramUtils {
             int z = location.getBlockZ();
             if (x == textDisplay.getLocation().getBlockX() && y == textDisplay.getLocation().getBlockY()
                     && z == textDisplay.getLocation().getBlockZ()) {
+                Bukkit.getLogger().info("Already used!!!");
                 isLocationAlreadyUsed = true;
                 break;
             }
@@ -75,5 +78,27 @@ public class HologramUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Removes all holograms from the world.
+     */
+    public static void removeAllHolograms() {
+        PersistenceUtils.saveTextHolograms();
+        // Manually remove holograms in case a server crash caused them to remain incorrectly
+        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "kill @e[type=minecraft:text_display]");
+        holograms.clear();
+    }
+
+    /**
+     * Adds all holograms to the world.
+     */
+    public static void initializeAllHolograms() {
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+            @Override
+            public void run() {
+                PersistenceUtils.loadTextHolograms();
+            }
+        }, 1);
     }
 }
