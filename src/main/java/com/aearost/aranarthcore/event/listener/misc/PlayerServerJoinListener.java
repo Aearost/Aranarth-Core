@@ -6,17 +6,17 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.Recipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -172,6 +172,18 @@ public class PlayerServerJoinListener implements Listener {
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 		player.sendMessage("");
+
+		// Adds all aranarth recipes
+		Iterator<Recipe> it = Bukkit.recipeIterator();
+        while (it.hasNext()) {
+			Recipe recipe = it.next();
+			if (recipe instanceof Keyed) {
+				NamespacedKey key = ((Keyed) recipe).getKey();
+				if (key.getNamespace().equalsIgnoreCase("aranarthcore")) {
+					player.discoverRecipe(key);
+				}
+			}
+		}
 	}
 
 	/**
