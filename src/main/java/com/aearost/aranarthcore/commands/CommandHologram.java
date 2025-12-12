@@ -50,7 +50,7 @@ public class CommandHologram {
 			String assembledMsg = msg.toString();
 
 			// Delete does not require text but the other sub-commands do
-			if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("edit")) {
+			if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("modify")) {
 				if (args.length == 3) {
 					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify the text contents!"));
 					return;
@@ -64,10 +64,11 @@ public class CommandHologram {
 
 			// Converts the coordinates to int variables
 			String[] coordinates = args[2].split(",");
-			int x, y, z = 0;
+			int x, z = 0;
+			double y = 0;
 			try {
 				x = Integer.parseInt(coordinates[0]);
-				y = Integer.parseInt(coordinates[1]);
+				y = Double.parseDouble(coordinates[1]);
 				z = Integer.parseInt(coordinates[2]);
 			} catch (Exception e) {
 				player.sendMessage(ChatUtils.chatMessage("&cThe entered coordinates are invalid!"));
@@ -83,7 +84,7 @@ public class CommandHologram {
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThe hologram could not be created!"));
 				}
-			} else if (args[1].equalsIgnoreCase("edit")) {
+			} else if (args[1].equalsIgnoreCase("modify")) {
 
 			} else if (args[1].equalsIgnoreCase("delete")) {
 				boolean wasDeleted = HologramUtils.removeHologram(location);
