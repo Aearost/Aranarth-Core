@@ -1610,7 +1610,6 @@ public class PersistenceUtils {
 					String textWithNewLines = text.replaceAll("\n", "\\\\n");
 					String line = worldName + "||" + x + "||" + y + "||" + z + "||" + textWithNewLines + "\n";
 					writer.write(line);
-					hologram.remove();
 				}
 
 				writer.close();
