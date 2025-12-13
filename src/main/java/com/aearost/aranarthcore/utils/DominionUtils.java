@@ -80,12 +80,17 @@ public class DominionUtils {
 				if (dominionOfChunk == null) {
 					if (playerDominion.getBalance() >= 100) {
 						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25)) {
-							double newBalance = playerDominion.getBalance() - 100;
-							playerDominion.setBalance(newBalance);
-							List<Chunk> chunks = playerDominion.getChunks();
-							chunks.add(chunk);
-							updateDominion(playerDominion);
-							return "&e" + playerDominion.getName() + " &7has claimed &e" + playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
+							if (isConnectedToClaims(playerDominion, chunk)) {
+								double newBalance = playerDominion.getBalance() - 100;
+								playerDominion.setBalance(newBalance);
+								List<Chunk> chunks = playerDominion.getChunks();
+								chunks.add(chunk);
+								updateDominion(playerDominion);
+								return "&e" + playerDominion.getName() + " &7has claimed &e" +
+										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
+							} else {
+								return "&cThis chunk is not connected to the rest of your Dominion!";
+							}
 						} else {
 							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25) + " chunks!";
 						}
@@ -99,7 +104,6 @@ public class DominionUtils {
 						return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
 					}
 				}
-
 			} else {
 				return "&cOnly the owner of the dominion can claim land!";
 			}
@@ -159,6 +163,32 @@ public class DominionUtils {
 	 */
 	public static void disbandDominion(Dominion dominion) {
 		dominions.remove(dominion);
+	}
+
+	/**
+	 * Determines if the input chunk is connected to the rest of the claims of the dominion.
+	 * @param dominion The Dominion.
+	 * @param chunk The chunk.
+	 * @return Confirmation if the input chunk is connected to the rest of the claims of the dominion.
+	 */
+	private static boolean isConnectedToClaims(Dominion dominion, Chunk chunk) {
+		List<Chunk> dominionChunks = dominion.getChunks();
+		int chunkX = chunk.getX();
+		int chunkZ = chunk.getZ();
+		for (Chunk dominionChunk : dominionChunks) {
+			if (!dominionChunk.getWorld().getName().equals(chunk.getWorld().getName())) {
+				continue;
+			}
+
+			int differenceX = Math.abs(dominionChunk.getX() - chunkX);
+			int differenceZ = Math.abs(dominionChunk.getZ() - chunkZ);
+
+			// Adjacent on one axis, same on the other
+			if ((differenceX == 1 && differenceZ == 0) || (differenceX == 0 && differenceZ == 1)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static void reEvaluateFoodChests() {
