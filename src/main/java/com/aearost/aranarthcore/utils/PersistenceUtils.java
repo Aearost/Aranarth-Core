@@ -823,7 +823,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|owner|members|world|chunks|power|x|y|z|yaw|pitch
+				// #name|owner|members|allied|truced|enemied|world|chunks|power|x|y|z|yaw|pitch
 				String[] fields = row.split("\\|");
 
 				String name = fields[0];
@@ -834,11 +834,35 @@ public class PersistenceUtils {
 					members.add(UUID.fromString(member));
 				}
 
-				String worldName = fields[3];
+				List<UUID> allies = new ArrayList<>();
+				String[] alliesParts = fields[3].split("\\*\\*\\*");
+				if (!alliesParts[0].isEmpty()) {
+					for (String ally : alliesParts) {
+						allies.add(UUID.fromString(ally));
+					}
+				}
+
+				List<UUID> truced = new ArrayList<>();
+				String[] trucedParts = fields[4].split("\\*\\*\\*");
+				if (!trucedParts[0].isEmpty()) {
+					for (String truce : trucedParts) {
+						truced.add(UUID.fromString(truce));
+					}
+				}
+
+				List<UUID> enemies = new ArrayList<>();
+				String[] enemyParts = fields[5].split("\\*\\*\\*");
+				if (!enemyParts[0].isEmpty()) {
+					for (String enemy : enemyParts) {
+						enemies.add(UUID.fromString(enemy));
+					}
+				}
+
+				String worldName = fields[6];
 				World world = Bukkit.getWorld(worldName);
 
 				List<Chunk> chunks = new ArrayList<>();
-				String[] claimedChunks = fields[4].split("\\*\\*\\*");
+				String[] claimedChunks = fields[7].split("\\*\\*\\*");
 				for (String chunk : claimedChunks) {
 					String[] coordinates = chunk.split(",");
 					int x = Integer.parseInt(coordinates[0]);
@@ -846,15 +870,15 @@ public class PersistenceUtils {
 					chunks.add(world.getChunkAt(x, z));
 				}
 
-				int power = Integer.parseInt(fields[5]);
-				double x = Double.parseDouble(fields[6]);
-				double y = Double.parseDouble(fields[7]);
-				double z = Double.parseDouble(fields[8]);
-				float yaw = Float.parseFloat(fields[9]);
-				float pitch = Float.parseFloat(fields[10]);
-				double balance = Double.parseDouble(fields[11]);
+				int power = Integer.parseInt(fields[8]);
+				double x = Double.parseDouble(fields[9]);
+				double y = Double.parseDouble(fields[10]);
+				double z = Double.parseDouble(fields[11]);
+				float yaw = Float.parseFloat(fields[12]);
+				float pitch = Float.parseFloat(fields[13]);
+				double balance = Double.parseDouble(fields[14]);
 
-				DominionUtils.createDominion(new Dominion(name, owner, members, worldName, chunks, power, x, y, z, yaw, pitch, balance));
+				DominionUtils.createDominion(new Dominion(name, owner, members, allies, truced, enemies, worldName, chunks, power, x, y, z, yaw, pitch, balance));
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
 			reader.close();
@@ -893,7 +917,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|owner|members|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
+					writer.write("#name|owner|members|allied|truced|enemied|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -908,6 +932,37 @@ public class PersistenceUtils {
 								}
 							}
 							String membersString = members.toString();
+
+							StringBuilder allies = new StringBuilder();
+							for (UUID alliedUuid : dominion.getAllied()) {
+								if (allies.isEmpty()) {
+									allies = new StringBuilder(alliedUuid.toString());
+								} else {
+									allies.append("***").append(alliedUuid.toString());
+								}
+							}
+							String alliesString = allies.toString();
+
+							StringBuilder truced = new StringBuilder();
+							for (UUID trucedUuid : dominion.getTruced()) {
+								if (truced.isEmpty()) {
+									truced = new StringBuilder(trucedUuid.toString());
+								} else {
+									truced.append("***").append(trucedUuid.toString());
+								}
+							}
+							String trucedString = truced.toString();
+
+							StringBuilder enemies = new StringBuilder();
+							for (UUID enemiedUuid : dominion.getEnemied()) {
+								if (enemies.isEmpty()) {
+									enemies = new StringBuilder(enemiedUuid.toString());
+								} else {
+									enemies.append("***").append(enemiedUuid.toString());
+								}
+							}
+							String enemiesString = enemies.toString();
+
 							String worldName = dominion.getDominionHome().getWorld().getName();
 
 							StringBuilder chunks = new StringBuilder();
@@ -930,7 +985,9 @@ public class PersistenceUtils {
 							String pitch = dominionHome.getPitch() + "";
 							String balance = dominion.getBalance() + "";
 
-							String row = name + "|" + owner + "|" + membersString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + balance + "\n";
+							String row = name + "|" + owner + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
+									+ enemiesString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|"
+									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + balance + "\n";
 							writer.write(row);
 						}
 					}

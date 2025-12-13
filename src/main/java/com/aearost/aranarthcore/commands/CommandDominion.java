@@ -117,7 +117,7 @@ public class CommandDominion {
 					int i = 0;
 					for (Dominion dominionFromList : DominionUtils.getDominions()) {
 						i++;
-						player.sendMessage(ChatUtils.translateToColor("&7" + i + ". Dominion of &e" + dominionFromList.getName() + "&7, ruled by &e"
+						player.sendMessage(ChatUtils.translateToColor("&7" + i + ". &e" + dominionFromList.getName() + "&7, ruled by &e"
 								+ AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getOwner()))
 								+ " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6$" + dominionFromList.getBalance()));
 					}
@@ -228,6 +228,10 @@ public class CommandDominion {
 
 								List<UUID> members = new ArrayList<>();
 								members.add(player.getUniqueId());
+								List<UUID> allies = new ArrayList<>();
+								List<UUID> truced = new ArrayList<>();
+								List<UUID> enemies = new ArrayList<>();
+
 								Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
 								if (loc == null) {
 									player.sendMessage(ChatUtils.chatMessage("&cThe Dominion home could not be set here!"));
@@ -237,7 +241,7 @@ public class CommandDominion {
 								chunks.add(player.getLocation().getChunk());
 								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
 
-								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
+								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
@@ -513,6 +517,10 @@ public class CommandDominion {
 		}
 	}
 
+	private static void allyDominion(Dominion dominion, Dominion dominionBeingAllied) {
+
+	}
+
 	/**
 	 * Displays the info for the input dominion.
 	 * @param player The player who executed the command.
@@ -556,6 +564,23 @@ public class CommandDominion {
 			}
 		}
 		player.sendMessage(ChatUtils.translateToColor(membersBuilder.toString()));
+
+		String allies = "";
+		if (dominion.getAllied().isEmpty()) {
+			allies = "&7None";
+		} else {
+			for (int i = 0; i < dominion.getAllied().size(); i++) {
+				UUID uuid = dominion.getAllied().get(i);
+				Dominion alliedDominion = DominionUtils.getPlayerDominion(uuid);
+				allies += "&e" + alliedDominion.getName();
+				if (i < dominion.getAllied().size() - 1) {
+					allies += "&e, ";
+				}
+			}
+		}
+
+		String truced = "";
+		String enemies = "";
 
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		String valueWithTwoDecimals = formatter.format(dominion.getBalance());

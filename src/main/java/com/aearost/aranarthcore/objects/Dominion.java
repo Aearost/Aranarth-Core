@@ -16,15 +16,22 @@ public class Dominion {
 	private String name;
 	private UUID owner;
 	private List<UUID> members;
+	private List<UUID> allied;
+	private List<UUID> truced;
+	private List<UUID> enemied;
 	private List<Chunk> chunks;
 	private int dominionPower;
 	private Location dominionHome;
 	private double balance;
 
-	public Dominion(String name, UUID owner, List<UUID> members, List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
+	public Dominion(String name, UUID owner, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+					List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
 		this.owner = owner;
+		this.allied = allied;
+		this.truced = truced;
+		this.enemied = enemied;
 		this.members = members;
 		this.chunks = chunks;
 		this.dominionPower = dominionPower;
@@ -32,10 +39,15 @@ public class Dominion {
 		this.balance = balance;
 	}
 
-	public Dominion(String name, UUID owner, List<UUID> members, String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch, double balance) {
+	public Dominion(String name, UUID owner, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+					String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch,
+					double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
 		this.owner = owner;
+		this.allied = allied;
+		this.truced = truced;
+		this.enemied = enemied;
 		this.members = members;
 		this.chunks = chunks;
 		this.dominionPower = dominionPower;
@@ -89,6 +101,54 @@ public class Dominion {
 	 */
 	public void setMembers(List<UUID> members) {
 		this.members = members;
+	}
+
+	/**
+	 * Provides the list of Dominion owners that are allies.
+	 * @return The list of Dominion owners that are allies.
+	 */
+	public List<UUID> getAllied() {
+		return allied;
+	}
+
+	/**
+	 * Updates the list of Dominion owners that are allies.
+	 * @param allied The list of Dominion owners that are allies.
+	 */
+	public void setAllied(List<UUID> allied) {
+		this.allied = allied;
+	}
+
+	/**
+	 * Provides the list of Dominion owners that are truced.
+	 * @return The list of Dominion owners that are truced.
+	 */
+	public List<UUID> getTruced() {
+		return truced;
+	}
+
+	/**
+	 * Updates the list of Dominion owners that are truced.
+	 * @param truced The list of Dominion owners that are truced.
+	 */
+	public void setTruced(List<UUID> truced) {
+		this.truced = truced;
+	}
+
+	/**
+	 * Provides the list of Dominion owners that are enemies.
+	 * @return The list of Dominion owners that are enemies.
+	 */
+	public List<UUID> getEnemied() {
+		return enemied;
+	}
+
+	/**
+	 * Updates the list of Dominion owners that are enemies.
+	 * @param enemied The list of Dominion owners that are enemies.
+	 */
+	public void setEnemied(List<UUID> enemied) {
+		this.enemied = enemied;
 	}
 
 	/**
