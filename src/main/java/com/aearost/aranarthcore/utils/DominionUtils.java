@@ -191,6 +191,36 @@ public class DominionUtils {
 		return false;
 	}
 
+	/**
+	 * Determines if the two Dominions are marked as allies of each other.
+	 * @param dominion1 The first Dominion.
+	 * @param dominion2 The second Dominion.
+	 * @return Confirmation if the two Dominions are marked as allies of each other.
+	 */
+	public static boolean areAllied(Dominion dominion1, Dominion dominion2) {
+		return dominion1.getAllied().contains(dominion2.getOwner()) && dominion2.getAllied().contains(dominion1.getOwner());
+	}
+
+	/**
+	 * Determines if the two Dominions are marked as enemies with each other.
+	 * @param dominion1 The first Dominion.
+	 * @param dominion2 The second Dominion.
+	 * @return Confirmation if the two Dominions are marked as enemies with each other.
+	 */
+	public static boolean areTruced(Dominion dominion1, Dominion dominion2) {
+		return dominion1.getTruced().contains(dominion2.getOwner()) && dominion2.getTruced().contains(dominion1.getOwner());
+	}
+
+	/**
+	 * Determines if the two Dominions are marked as enemies of each other.
+	 * @param dominion1 The first Dominion.
+	 * @param dominion2 The second Dominion.
+	 * @return Confirmation if the two Dominions are marked as enemies of each other.
+	 */
+	public static boolean areEnemied(Dominion dominion1, Dominion dominion2) {
+		return dominion1.getEnemied().contains(dominion2.getOwner()) && dominion2.getEnemied().contains(dominion1.getOwner());
+	}
+
 	public static void reEvaluateFoodChests() {
 
 	}
