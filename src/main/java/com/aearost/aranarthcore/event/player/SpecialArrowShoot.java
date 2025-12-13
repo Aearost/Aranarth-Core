@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.event.player;
 
-import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
@@ -23,7 +22,6 @@ public class SpecialArrowShoot {
             // Apply the value to the projectile entity
             if (arrowItem.hasItemMeta()) {
                 if (arrowItem.getItemMeta().getPersistentDataContainer().has(ARROW)) {
-                    Bukkit.getLogger().info("It's a special arrow: " + arrowItem.getAmount());
                     String arrowType = arrowItem.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
                     Entity projectile = e.getProjectile();
                     projectile.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, arrowType);

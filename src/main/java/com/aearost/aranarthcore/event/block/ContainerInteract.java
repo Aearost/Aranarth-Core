@@ -195,7 +195,7 @@ public class ContainerInteract {
         Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 
-        if (!playerDominion.getOwner().equals(chunkDominion.getOwner())) {
+        if (chunkDominion != null) {
             return;
         }
 
