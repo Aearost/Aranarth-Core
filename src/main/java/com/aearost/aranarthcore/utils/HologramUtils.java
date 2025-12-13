@@ -34,7 +34,6 @@ public class HologramUtils {
             int z = location.getBlockZ();
             if (x == textDisplay.getLocation().getBlockX() && y == textDisplay.getLocation().getBlockY()
                     && z == textDisplay.getLocation().getBlockZ()) {
-                Bukkit.getLogger().info("Already used!!!");
                 isLocationAlreadyUsed = true;
                 break;
             }
