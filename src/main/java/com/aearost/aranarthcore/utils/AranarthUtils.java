@@ -2130,11 +2130,11 @@ public class AranarthUtils {
 	/**
 	 * Confirms if the input ItemStack is a compressible item.
 	 * @param item The item that is being verified.
-	 * @param isFromClickEvent Whether the method is being called from the inventory click event of the compressor.
+	 * @param shouldCheckItemMeta Whether the method should be checking itemMeta.
 	 * @return Confirmation if the input item is compressible.
 	 */
-	public static boolean isCompressible(ItemStack item, boolean isFromClickEvent) {
-		if (isFromClickEvent) {
+	public static boolean isCompressible(ItemStack item, boolean shouldCheckItemMeta) {
+		if (shouldCheckItemMeta) {
 			if (item.hasItemMeta()) {
 				return false;
 			}
