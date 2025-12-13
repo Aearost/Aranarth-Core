@@ -27,7 +27,7 @@ public class CompressorItemPickup {
 			}
 
 			// Only attempts to compress if the item being picked up is compressible
-			if (!AranarthUtils.isCompressible(e.getItem().getItemStack(), false)) {
+			if (!AranarthUtils.isCompressible(e.getItem().getItemStack(), true)) {
 				return;
 			}
 
@@ -68,7 +68,7 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									if (AranarthUtils.isCompressible(shulkerItem, false)) {
+									if (AranarthUtils.isCompressible(shulkerItem, true)) {
 										if (!AranarthUtils.isItemBeingCompressed(player.getUniqueId(), shulkerItem.getType())) {
 											continue;
 										}
@@ -95,7 +95,7 @@ public class CompressorItemPickup {
 				}
 				// Normal item, not a shulker box
 				else {
-					if (AranarthUtils.isCompressible(inventoryItem, false)) {
+					if (AranarthUtils.isCompressible(inventoryItem, true)) {
 						if (!AranarthUtils.isItemBeingCompressed(player.getUniqueId(), inventoryItem.getType())) {
 							continue;
 						}
@@ -117,7 +117,7 @@ public class CompressorItemPickup {
 			}
 
 			// Include the actual item being picked up
-			if (AranarthUtils.isCompressible(pickupClone, false)) {
+			if (AranarthUtils.isCompressible(pickupClone, true)) {
 				if (AranarthUtils.isItemBeingCompressed(player.getUniqueId(), pickupClone.getType())) {
 					int result = AranarthUtils.isBlacklistingItem(aranarthPlayer, pickupClone);
 					if (result == 0) {

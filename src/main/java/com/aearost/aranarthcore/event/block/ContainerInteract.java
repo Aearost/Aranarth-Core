@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -190,6 +192,13 @@ public class ContainerInteract {
     private void attemptOpen(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
         Player player = e.getPlayer();
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+
+        if (!playerDominion.getOwner().equals(chunkDominion.getOwner())) {
+            return;
+        }
+
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container != null) {
