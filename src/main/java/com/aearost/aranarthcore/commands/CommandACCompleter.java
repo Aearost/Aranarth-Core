@@ -1064,6 +1064,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("list");
 		displayedOptions.add("deposit");
 		displayedOptions.add("withdraw");
+		displayedOptions.add("rename");
 		return displayedOptions;
 	}
 
@@ -1114,8 +1115,17 @@ public class CommandACCompleter implements TabCompleter {
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
-				} else if ("remove".startsWith(args[1])) {
-					displayedOptions.add("remove");
+				} else if (args[1].startsWith("r")) {
+					if (args[1].equalsIgnoreCase("r") || args[1].equalsIgnoreCase("re")) {
+						displayedOptions.add("remove");
+						displayedOptions.add("rename");
+					} else if ("remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
+					} else if ("rename".startsWith(args[1])) {
+						displayedOptions.add("rename");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
 				} else if ("unclaim".startsWith(args[1])) {
 					displayedOptions.add("unclaim");
 				} else if ("balance".startsWith(args[1])) {

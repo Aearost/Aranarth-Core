@@ -154,7 +154,22 @@ public class CommandDominion {
 					}
 				}
 				else if (args[1].equalsIgnoreCase("rename")) {
-
+					if (dominion != null) {
+						if (dominion.getOwner().equals(player.getUniqueId())) {
+							String dominionName = verifyDominionName(args, player);
+							if (dominionName != null) {
+								String oldName = dominion.getName();
+								dominion.setName(dominionName);
+								DominionUtils.updateDominion(dominion);
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
+								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
+								}
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
+						}
+					}
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -196,31 +211,7 @@ public class CommandDominion {
 	private static void createDominion(String[] args, Player player) {
 		if (player.hasPermission("aranarth.dominion.create")) {
 			if (args.length >= 3) {
-				StringBuilder parts = new StringBuilder();
-				for (int i = 2; i < args.length; i++) {
-					if (i == args.length - 1) {
-						parts.append(args[i]);
-					} else {
-						parts.append(args[i]).append(" ");
-					}
-				}
-				String dominionName = parts.toString();
-				if (dominionName.length() > 30) {
-					player.sendMessage(ChatUtils.chatMessage("&cThat Dominion name is too long!"));
-					return;
-				}
-
-				if (player.hasPermission("aranarth.chat.hex")) {
-					dominionName = ChatUtils.translateToColor(dominionName);
-				} else if (player.hasPermission("aranarth.chat.color")) {
-					dominionName = ChatUtils.playerColorChat(dominionName);
-					if (dominionName == null) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
-						return;
-					}
-				}
-
-				dominionName = ChatUtils.removeSpecialCharacters(dominionName);
+				String dominionName = verifyDominionName(args, player);
 
 				// Ensures the player is not in a dominion
 				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
@@ -230,13 +221,6 @@ public class CommandDominion {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						if (aranarthPlayer.getBalance() >= 5000) {
 							if (player.getWorld().getName().startsWith("world")) {
-								for (Dominion dominionInList : DominionUtils.getDominions()) {
-									if (ChatUtils.stripColorFormatting(dominionInList.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(dominionName))) {
-										player.sendMessage(ChatUtils.chatMessage("&cThis name is already used by another Dominion!"));
-										return;
-									}
-								}
-
 								if (AranarthUtils.isSpawnLocation(player.getLocation())) {
 									player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion here!"));
 									return;
@@ -652,5 +636,47 @@ public class CommandDominion {
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion withdraw <amount>"));
 		}
+	}
+
+	/**
+	 * Verifies that the input Dominion name is valid.
+	 * @param args The arguments of the command.
+	 * @param player The player executing the command.
+	 * @return The Dominion's name.
+	 */
+	private static String verifyDominionName(String[] args, Player player) {
+		StringBuilder parts = new StringBuilder();
+		for (int i = 2; i < args.length; i++) {
+			if (i == args.length - 1) {
+				parts.append(args[i]);
+			} else {
+				parts.append(args[i]).append(" ");
+			}
+		}
+		String dominionName = parts.toString();
+		if (dominionName.length() > 30) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion name is too long!"));
+			return null;
+		}
+
+		if (player.hasPermission("aranarth.chat.hex")) {
+			dominionName = ChatUtils.translateToColor(dominionName);
+		} else if (player.hasPermission("aranarth.chat.color")) {
+			dominionName = ChatUtils.playerColorChat(dominionName);
+			if (dominionName == null) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+				return null;
+			}
+		}
+
+		dominionName = ChatUtils.removeSpecialCharacters(dominionName);
+
+		for (Dominion dominionInList : DominionUtils.getDominions()) {
+			if (ChatUtils.stripColorFormatting(dominionInList.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(dominionName))) {
+				player.sendMessage(ChatUtils.chatMessage("&cThis name is already used by another Dominion!"));
+				return null;
+			}
+		}
+		return dominionName;
 	}
 }
