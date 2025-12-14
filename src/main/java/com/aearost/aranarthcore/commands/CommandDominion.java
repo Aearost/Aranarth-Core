@@ -544,12 +544,12 @@ public class CommandDominion {
 			List<Dominion> dominions = DominionUtils.getDominions();
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
-				// Skip if it's the same dominion
-				if (dominionFromList.getLeader().equals(dominion.getLeader())) {
-					continue;
-				}
-
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot ally yourself!"));
+						return;
+					}
+
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
 						// Send/accept an alliance request
@@ -611,12 +611,12 @@ public class CommandDominion {
 			List<Dominion> dominions = DominionUtils.getDominions();
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
-				// Skip if it's the same dominion
-				if (dominionFromList.getLeader().equals(dominion.getLeader())) {
-					continue;
-				}
-
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot truce yourself!"));
+						return;
+					}
+
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
 						// Send/accept an alliance request
