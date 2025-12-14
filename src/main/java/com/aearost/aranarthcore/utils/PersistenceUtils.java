@@ -823,11 +823,11 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|owner|members|allied|truced|enemied|world|chunks|power|x|y|z|yaw|pitch
+				// #name|leader|members|allied|truced|enemied|world|chunks|power|x|y|z|yaw|pitch
 				String[] fields = row.split("\\|");
 
 				String name = fields[0];
-				UUID owner = UUID.fromString(fields[1]);
+				UUID leader = UUID.fromString(fields[1]);
 				List<UUID> members = new ArrayList<>();
 				String[] memberParts = fields[2].split("\\*\\*\\*");
 				for (String member : memberParts) {
@@ -878,7 +878,7 @@ public class PersistenceUtils {
 				float pitch = Float.parseFloat(fields[13]);
 				double balance = Double.parseDouble(fields[14]);
 
-				DominionUtils.createDominion(new Dominion(name, owner, members, allies, truced, enemies, worldName, chunks, power, x, y, z, yaw, pitch, balance));
+				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks, power, x, y, z, yaw, pitch, balance));
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
 			reader.close();
@@ -917,12 +917,12 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|owner|members|allied|truced|enemied|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
+					writer.write("#name|leader|members|allied|truced|enemied|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
 							String name = dominion.getName();
-							String owner = dominion.getOwner().toString();
+							String leader = dominion.getLeader().toString();
 							StringBuilder members = new StringBuilder();
 							for (UUID memberUuid : dominion.getMembers()) {
 								if (members.isEmpty()) {
@@ -985,7 +985,7 @@ public class PersistenceUtils {
 							String pitch = dominionHome.getPitch() + "";
 							String balance = dominion.getBalance() + "";
 
-							String row = name + "|" + owner + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
+							String row = name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
 									+ enemiesString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|"
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + balance + "\n";
 							writer.write(row);

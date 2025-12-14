@@ -57,7 +57,7 @@ public class DominionUtils {
 	public static void updateDominion(Dominion dominion) {
 		int i = 0;
 		while (i < dominions.size()) {
-			if (dominions.get(i).getOwner().equals(dominion.getOwner())) {
+			if (dominions.get(i).getLeader().equals(dominion.getLeader())) {
 				break;
 			}
 			i++;
@@ -76,7 +76,7 @@ public class DominionUtils {
 
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
-			if (playerDominion.getOwner().equals(player.getUniqueId())) {
+			if (playerDominion.getLeader().equals(player.getUniqueId())) {
 				if (dominionOfChunk == null) {
 					if (playerDominion.getBalance() >= 100) {
 						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25)) {
@@ -98,7 +98,7 @@ public class DominionUtils {
 						return "&cYour dominion cannot afford this!";
 					}
 				} else {
-					if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
+					if (playerDominion.getLeader().equals(dominionOfChunk.getLeader())) {
 						return "&cThis chunk is already claimed by your dominion";
 					} else {
 						return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
@@ -137,7 +137,7 @@ public class DominionUtils {
 		if (dominionOfChunk != null) {
 			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
-				if (playerDominion.getOwner().equals(dominionOfChunk.getOwner())) {
+				if (playerDominion.getLeader().equals(dominionOfChunk.getLeader())) {
 					Chunk homeChunk = playerDominion.getDominionHome().getChunk();
 					if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
 						return "&cYou cannot unclaim the chunk that the home is in!";
@@ -198,7 +198,7 @@ public class DominionUtils {
 	 * @return Confirmation if the two Dominions are marked as allies of each other.
 	 */
 	public static boolean areAllied(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getAllied().contains(dominion2.getOwner()) && dominion2.getAllied().contains(dominion1.getOwner());
+		return dominion1.getAllied().contains(dominion2.getLeader()) && dominion2.getAllied().contains(dominion1.getLeader());
 	}
 
 	/**
@@ -208,7 +208,7 @@ public class DominionUtils {
 	 * @return Confirmation if the two Dominions are marked as enemies with each other.
 	 */
 	public static boolean areTruced(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getTruced().contains(dominion2.getOwner()) && dominion2.getTruced().contains(dominion1.getOwner());
+		return dominion1.getTruced().contains(dominion2.getLeader()) && dominion2.getTruced().contains(dominion1.getLeader());
 	}
 
 	/**
@@ -218,7 +218,7 @@ public class DominionUtils {
 	 * @return Confirmation if the two Dominions are marked as enemies of each other.
 	 */
 	public static boolean areEnemied(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getEnemied().contains(dominion2.getOwner()) && dominion2.getEnemied().contains(dominion1.getOwner());
+		return dominion1.getEnemied().contains(dominion2.getLeader()) && dominion2.getEnemied().contains(dominion1.getLeader());
 	}
 
 	public static void reEvaluateFoodChests() {

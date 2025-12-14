@@ -27,7 +27,7 @@ public class ContainerAutoLock {
         Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
         Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
         if (blockDominion != null) {
-            if (playerDominion == null || !playerDominion.getOwner().equals(blockDominion.getOwner())) {
+            if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
                 return;
             }
         }
