@@ -1065,6 +1065,10 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("deposit");
 		displayedOptions.add("withdraw");
 		displayedOptions.add("rename");
+		displayedOptions.add("ally");
+		displayedOptions.add("truce");
+		displayedOptions.add("enemy");
+		displayedOptions.add("neutral");
 		return displayedOptions;
 	}
 
@@ -1102,8 +1106,17 @@ public class CommandACCompleter implements TabCompleter {
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
-				} else if ("accept".startsWith(args[1])) {
-					displayedOptions.add("accept");
+				} else if (args[1].startsWith("a")) {
+					if (args[1].equals("a")) {
+						displayedOptions.add("accept");
+						displayedOptions.add("ally");
+					} else if ("accept".startsWith(args[1])) {
+						displayedOptions.add("accept");
+					} else if ("ally".startsWith(args[1])) {
+						displayedOptions.add("ally");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
 				} else if (args[1].startsWith("l")) {
 					if (args[1].equalsIgnoreCase("l")) {
 						displayedOptions.add("list");
@@ -1156,6 +1169,12 @@ public class CommandACCompleter implements TabCompleter {
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
+				} else if ("truce".startsWith(args[1])) {
+					displayedOptions.add("truce");
+				} else if ("enemy".startsWith(args[1])) {
+					displayedOptions.add("enemy");
+				} else if ("neutral".startsWith(args[1])) {
+					displayedOptions.add("neutral");
 				} else {
 					displayedOptions = addDominionSubCommands(displayedOptions);
 				}
@@ -1179,7 +1198,7 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 						}
-						case "info" -> {
+						case "info", "ally", "truce", "enemy", "neutral" -> {
 							List<Dominion> dominions = DominionUtils.getDominions();
 							for (Dominion dominionFromList : dominions) {
 								displayedOptions.add(ChatUtils.stripColorFormatting(dominionFromList.getName()));
@@ -1224,7 +1243,7 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 						}
-						case "info" -> {
+						case "info", "ally", "truce", "enemy", "neutral" -> {
 							StringBuilder dominionNameBuilder = new StringBuilder();
 							for (int i = 2; i < args.length; i++) {
 								dominionNameBuilder.append(args[i]);
