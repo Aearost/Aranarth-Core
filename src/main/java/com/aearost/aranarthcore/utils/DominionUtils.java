@@ -218,8 +218,13 @@ public class DominionUtils {
 	 * @return Confirmation if the two Dominions are marked as enemies of each other.
 	 */
 	public static boolean areEnemied(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getEnemied().contains(dominion2.getLeader()) && dominion2.getEnemied().contains(dominion1.getLeader());
+		//  Unlike ally and truced, if one of the two is enemied, both are considered enemies
+		return dominion1.getEnemied().contains(dominion2.getLeader()) || dominion2.getEnemied().contains(dominion1.getLeader());
 	}
+
+
+
+
 
 	public static void reEvaluateFoodChests() {
 
