@@ -202,7 +202,7 @@ public class DominionProtection implements Listener {
 		if (dominion != null) {
 			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			// If the player is not in the dominion of the block
-			if (playerDominion == null || !dominion.getOwner().equals(playerDominion.getOwner())) {
+			if (playerDominion == null || !dominion.getLeader().equals(playerDominion.getLeader())) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou are not in the Dominion of &e" + dominion.getName()));
 				return true;
 			}

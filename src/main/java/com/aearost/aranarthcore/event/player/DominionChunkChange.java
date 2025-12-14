@@ -37,7 +37,7 @@ public class DominionChunkChange {
 					player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
 				} else if (dominionFrom != null && dominionTo != null) {
 					// If you are changing chunk within the same dominion
-					if (dominionFrom.getOwner().equals(dominionTo.getOwner())) {
+					if (dominionFrom.getLeader().equals(dominionTo.getLeader())) {
 						return;
 					}
 					// If entering one dominion next to another

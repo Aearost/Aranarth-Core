@@ -14,7 +14,7 @@ import java.util.UUID;
 public class Dominion {
 
 	private String name;
-	private UUID owner;
+	private UUID leader;
 	private List<UUID> members;
 	private List<UUID> allied;
 	private List<UUID> truced;
@@ -24,11 +24,11 @@ public class Dominion {
 	private Location dominionHome;
 	private double balance;
 
-	public Dominion(String name, UUID owner, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
 					List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
-		this.owner = owner;
+		this.leader = leader;
 		this.allied = allied;
 		this.truced = truced;
 		this.enemied = enemied;
@@ -39,12 +39,12 @@ public class Dominion {
 		this.balance = balance;
 	}
 
-	public Dominion(String name, UUID owner, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
 					String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch,
 					double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
-		this.owner = owner;
+		this.leader = leader;
 		this.allied = allied;
 		this.truced = truced;
 		this.enemied = enemied;
@@ -72,19 +72,19 @@ public class Dominion {
 	}
 
 	/**
-	 * Provides the dominion's owner's UUID.
-	 * @return the dominion's owner's UUID.
+	 * Provides the dominion's leader's UUID.
+	 * @return the dominion's leader's UUID.
 	 */
-	public UUID getOwner() {
-		return owner;
+	public UUID getLeader() {
+		return leader;
 	}
 
 	/**
-	 * Updates the dominion's owner's UUID.
-	 * @param owner The dominion's owner's UUID.
+	 * Updates the dominion's leader's UUID.
+	 * @param leader The dominion's leader's UUID.
      */
-	public void setOwner(UUID owner) {
-		this.owner = owner;
+	public void setLeader(UUID leader) {
+		this.leader = leader;
 	}
 
 	/**
@@ -104,48 +104,48 @@ public class Dominion {
 	}
 
 	/**
-	 * Provides the list of Dominion owners that are allies.
-	 * @return The list of Dominion owners that are allies.
+	 * Provides the list of Dominion leaders that are allies.
+	 * @return The list of Dominion leaders that are allies.
 	 */
 	public List<UUID> getAllied() {
 		return allied;
 	}
 
 	/**
-	 * Updates the list of Dominion owners that are allies.
-	 * @param allied The list of Dominion owners that are allies.
+	 * Updates the list of Dominion leaders that are allies.
+	 * @param allied The list of Dominion leaders that are allies.
 	 */
 	public void setAllied(List<UUID> allied) {
 		this.allied = allied;
 	}
 
 	/**
-	 * Provides the list of Dominion owners that are truced.
-	 * @return The list of Dominion owners that are truced.
+	 * Provides the list of Dominion leaders that are truced.
+	 * @return The list of Dominion leaders that are truced.
 	 */
 	public List<UUID> getTruced() {
 		return truced;
 	}
 
 	/**
-	 * Updates the list of Dominion owners that are truced.
-	 * @param truced The list of Dominion owners that are truced.
+	 * Updates the list of Dominion leaders that are truced.
+	 * @param truced The list of Dominion leaders that are truced.
 	 */
 	public void setTruced(List<UUID> truced) {
 		this.truced = truced;
 	}
 
 	/**
-	 * Provides the list of Dominion owners that are enemies.
-	 * @return The list of Dominion owners that are enemies.
+	 * Provides the list of Dominion leaders that are enemies.
+	 * @return The list of Dominion leaders that are enemies.
 	 */
 	public List<UUID> getEnemied() {
 		return enemied;
 	}
 
 	/**
-	 * Updates the list of Dominion owners that are enemies.
-	 * @param enemied The list of Dominion owners that are enemies.
+	 * Updates the list of Dominion leaders that are enemies.
+	 * @param enemied The list of Dominion leaders that are enemies.
 	 */
 	public void setEnemied(List<UUID> enemied) {
 		this.enemied = enemied;
@@ -214,39 +214,5 @@ public class Dominion {
 	public void setBalance(double balance) {
 		this.balance = balance;
 	}
-
-//	@Override
-//	public String toString() {
-//		String divider = "---------------\n";
-//		String owner = "OWNER: " + Bukkit.getOfflinePlayer(getOwner()).getName() + " (" + getOwner() + ")";
-//		StringBuilder trustedSB = new StringBuilder();
-//		trustedSB.append("TRUSTED: ");
-//		for (int i = 0; i < getTrusted().size(); i++) {
-//			if (i == getTrusted().size() - 1) {
-//				trustedSB.append(Bukkit.getOfflinePlayer(getTrusted().get(i)).getName()).append(" (").append(getTrusted().get(i)).append(")");
-//			} else {
-//				trustedSB.append(Bukkit.getOfflinePlayer(getTrusted().get(i)).getName()).append(" (").append(getTrusted().get(i)).append(") | ");
-//			}
-//		}
-//		String trusted = trustedSB.toString();
-//		String x1 = "x1: " + locations[0].getBlockX() + " | ";
-//		String y1 = "y1: " + locations[0].getBlockY() + " | ";
-//		String z1 = "z1: " + locations[0].getBlockZ();
-//		String x2 = "";
-//		String y2 = "";
-//		String z2 = "";
-//		if (locations[1] != null) {
-//			x2 = "x2: " + locations[1].getBlockX() + " | ";
-//			y2 = "y2: " + locations[1].getBlockY() + " | ";
-//			z2 = "z2: " + locations[1].getBlockZ();
-//		}
-//		String loc1 = "LOC 1: " + x1 + y1 + z1;
-//		String loc2 = "LOC 2: " + x2 + y2 + z2;
-//		if (loc2.isEmpty()) {
-//			return divider + owner + "\n" + trusted + "\n" + loc1;
-//		} else {
-//			return divider + owner + "\n" + trusted + "\n" + loc1 + "\n" + loc2;
-//		}
-//	}
 
 }

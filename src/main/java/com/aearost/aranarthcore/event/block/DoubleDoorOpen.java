@@ -28,7 +28,7 @@ public class DoubleDoorOpen {
             Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
             Dominion blockDominion = DominionUtils.getDominionOfChunk(block.getChunk());
             if (blockDominion != null) {
-                if (playerDominion == null || !playerDominion.getOwner().equals(blockDominion.getOwner())) {
+                if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
                     if (!aranarthPlayer.getIsInAdminMode()) {
                         return;
