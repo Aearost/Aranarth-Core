@@ -177,7 +177,8 @@ public class CommandDominion {
 				} else if (args[1].equalsIgnoreCase("enemy")) {
 
 				} else if (args[1].equalsIgnoreCase("neutral")) {
-
+					// TO REMOVE ENEMIES YOU MUST BOTH UN-ENEMY EACH OTHER
+					// IF ONE IS STILL ENEMIED THEN BOTH WILL BE ENEMIED
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -666,7 +667,7 @@ public class CommandDominion {
 	 */
 	private static void displayInfoForDominion(Player player, Dominion dominion) {
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
-		player.sendMessage(ChatUtils.translateToColor("&7The Dominion of &e" + dominion.getName()));
+		player.sendMessage(ChatUtils.translateToColor("&8&lThe Dominion of &e" + dominion.getName()));
 
 		AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getLeader());
 		String leaderDisplayedName = "";
@@ -681,7 +682,7 @@ public class CommandDominion {
 		membersBuilder.append("&7Members: &e");
 		// If the only member is the ruler
 		if (dominion.getMembers().size() == 1) {
-			membersBuilder.append("&7There are no other members");
+			membersBuilder.append("&7&oNone");
 		} else {
 			for (int i = 0; i < dominion.getMembers().size(); i++) {
 				if (dominion.getMembers().get(i).equals(dominion.getLeader())) {
@@ -703,27 +704,64 @@ public class CommandDominion {
 		}
 		player.sendMessage(ChatUtils.translateToColor(membersBuilder.toString()));
 
-		String allies = "";
+		StringBuilder alliesBuilder = new StringBuilder();
+		alliesBuilder.append("&7Allies: ");
 		if (dominion.getAllied().isEmpty()) {
-			allies = "&7None";
+			alliesBuilder.append("&7&oNone");
 		} else {
 			for (int i = 0; i < dominion.getAllied().size(); i++) {
 				UUID uuid = dominion.getAllied().get(i);
 				Dominion alliedDominion = DominionUtils.getPlayerDominion(uuid);
-				allies += "&e" + alliedDominion.getName();
-				if (i < dominion.getAllied().size() - 1) {
-					allies += "&e, ";
+				if (DominionUtils.areAllied(dominion, alliedDominion)) {
+					alliesBuilder.append("&5").append(alliedDominion.getName());
+					if (i < dominion.getAllied().size() - 1) {
+						alliesBuilder.append("&5, ");
+					}
 				}
 			}
 		}
+		player.sendMessage(ChatUtils.translateToColor(alliesBuilder.toString()));
 
-		String truced = "";
-		String enemies = "";
+		StringBuilder trucedBuilder = new StringBuilder();
+		trucedBuilder.append("&7Truced: ");
+		if (dominion.getTruced().isEmpty()) {
+			trucedBuilder.append("&7&oNone");
+		} else {
+			for (int i = 0; i < dominion.getTruced().size(); i++) {
+				UUID uuid = dominion.getTruced().get(i);
+				Dominion trucedDominion = DominionUtils.getPlayerDominion(uuid);
+				if (DominionUtils.areTruced(dominion, trucedDominion)) {
+					trucedBuilder.append("&d").append(trucedDominion.getName());
+					if (i < dominion.getTruced().size() - 1) {
+						trucedBuilder.append("&d, ");
+					}
+				}
+			}
+		}
+		player.sendMessage(ChatUtils.translateToColor(trucedBuilder.toString()));
+
+		StringBuilder enemyBuilder = new StringBuilder();
+		enemyBuilder.append("&7Enemies: ");
+		if (dominion.getEnemied().isEmpty()) {
+			enemyBuilder.append("&7&oNone");
+		} else {
+			for (int i = 0; i < dominion.getEnemied().size(); i++) {
+				UUID uuid = dominion.getEnemied().get(i);
+				Dominion enemiedDominion = DominionUtils.getPlayerDominion(uuid);
+				if (DominionUtils.areEnemied(dominion, enemiedDominion)) {
+					enemyBuilder.append("&c").append(enemiedDominion.getName());
+					if (i < dominion.getEnemied().size() - 1) {
+						enemyBuilder.append("&c, ");
+					}
+				}
+			}
+		}
+		player.sendMessage(ChatUtils.translateToColor(enemyBuilder.toString()));
 
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		String valueWithTwoDecimals = formatter.format(dominion.getBalance());
 		player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
-		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + " chunks"));
+		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + (dominion.getMembers().size() * 25) + " chunks"));
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
 	}
 
