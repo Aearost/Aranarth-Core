@@ -173,12 +173,11 @@ public class CommandDominion {
 				} else if (args[1].equalsIgnoreCase("ally")) {
 					allyDominion(args, dominion, player);
 				} else if (args[1].equalsIgnoreCase("truce")) {
-
+					truceDominion(args, dominion, player);
 				} else if (args[1].equalsIgnoreCase("enemy")) {
-
+					enemyDominion(args, dominion, player);
 				} else if (args[1].equalsIgnoreCase("neutral")) {
-					// TO REMOVE ENEMIES YOU MUST BOTH UN-ENEMY EACH OTHER
-					// IF ONE IS STILL ENEMIED THEN BOTH WILL BE ENEMIED
+					neutralDominion(args, dominion, player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -221,6 +220,9 @@ public class CommandDominion {
 		if (player.hasPermission("aranarth.dominion.create")) {
 			if (args.length >= 3) {
 				String dominionName = verifyDominionName(args, player);
+				if (dominionName == null) {
+					return;
+				}
 
 				// Ensures the player is not in a dominion
 				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
@@ -620,16 +622,16 @@ public class CommandDominion {
 
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
-						// Send/accept an alliance request
+						// Send/accept a truce request
 						if (!dominion.getTruced().contains(dominionFromList.getLeader())) {
 							dominion.getTruced().add(dominionFromList.getLeader());
 							DominionUtils.updateDominion(dominion);
 							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.8F);
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1.6F);
 									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested a &dTruce &7with &e" + dominionFromList.getName()));
 								} else if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.8F);
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1.6F);
 									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has requested a &dTruce &7with &e" + dominionFromList.getName()));
 								}
 							}
@@ -643,6 +645,165 @@ public class CommandDominion {
 								player.sendMessage(ChatUtils.chatMessage("&cYou have already sent a &dTruce &7request to &e" + dominionFromList.getName()));
 							}
 							return;
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+						return;
+					}
+					break;
+				}
+			}
+
+			if (!wasDominionFound) {
+				player.sendMessage(ChatUtils.chatMessage("&cThat dominion could not be found!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+		}
+	}
+
+	/**
+	 * Handles setting another Dominion as an enemy.
+	 * @param args The arguments of the command.
+	 * @param dominion The dominion of the player executing the command.
+	 * @param player The player executing the command.
+	 */
+	private static void enemyDominion(String[] args, Dominion dominion, Player player) {
+		if (dominion != null) {
+			StringBuilder dominionNameBuilder = new StringBuilder();
+			for (int i = 2; i < args.length; i++) {
+				dominionNameBuilder.append(args[i]);
+				if (i < args.length - 1) {
+					dominionNameBuilder.append(" ");
+				}
+			}
+
+			List<Dominion> dominions = DominionUtils.getDominions();
+			boolean wasDominionFound = false;
+			for (Dominion dominionFromList : dominions) {
+				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot set yourself as an enemy!"));
+						return;
+					}
+
+					wasDominionFound = true;
+					if (dominion.getLeader().equals(player.getUniqueId())) {
+						// Enemy the opposing Dominion
+						if (!dominion.getEnemied().contains(dominionFromList.getLeader())) {
+							dominion.getEnemied().add(dominionFromList.getLeader());
+							DominionUtils.updateDominion(dominion);
+							boolean wereAlreadyEnemied = false;
+							// Only add to the other dominion if they are not already enemies
+							if (!dominionFromList.getEnemied().contains(dominion.getLeader())) {
+								dominionFromList.getEnemied().add(dominion.getLeader());
+								DominionUtils.updateDominion(dominionFromList);
+							}
+
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 0.8F);
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has &cEnemied &7your Dominion!"));
+								} else if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 0.8F);
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &cEnemied &e" + dominionFromList.getName()));
+								}
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&e" + dominionFromList.getName() + " &cis already an enemy of yours!"));
+							return;
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
+						return;
+					}
+					break;
+				}
+			}
+
+			if (!wasDominionFound) {
+				player.sendMessage(ChatUtils.chatMessage("&cThat dominion could not be found!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+		}
+	}
+
+	/**
+	 * Handles setting another Dominion as neutral.
+	 * @param args The arguments of the command.
+	 * @param dominion The dominion of the player executing the command.
+	 * @param player The player executing the command.
+	 */
+	private static void neutralDominion(String[] args, Dominion dominion, Player player) {
+		if (dominion != null) {
+			StringBuilder dominionNameBuilder = new StringBuilder();
+			for (int i = 2; i < args.length; i++) {
+				dominionNameBuilder.append(args[i]);
+				if (i < args.length - 1) {
+					dominionNameBuilder.append(" ");
+				}
+			}
+
+			List<Dominion> dominions = DominionUtils.getDominions();
+			boolean wasDominionFound = false;
+			for (Dominion dominionFromList : dominions) {
+				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this with your own Dominion!"));
+						return;
+					}
+
+					wasDominionFound = true;
+					if (dominion.getLeader().equals(player.getUniqueId())) {
+						dominion.getAllied().remove(dominionFromList.getLeader());
+						dominion.getTruced().remove(dominionFromList.getLeader());
+						dominion.getEnemied().remove(dominionFromList.getLeader());
+						DominionUtils.updateDominion(dominion);
+
+						boolean hasBecomeNeutral = false;
+						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+							if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+								onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+								if (dominionFromList.getEnemied().contains(dominion.getLeader())) {
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has requested neutrality with &e" + dominionFromList.getName()));
+								} else {
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become neutral to &e" + dominionFromList.getName()));
+									hasBecomeNeutral = true;
+								}
+							}
+						}
+
+						if (hasBecomeNeutral) {
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become neutral to &e" + dominionFromList.getName()));
+								}
+							}
+							return;
+						}
+
+						// Forcefully set to neutral
+						if (dominionFromList.getAllied().contains(dominion.getLeader()) || dominionFromList.getTruced().contains(dominion.getLeader())) {
+							dominionFromList.getAllied().remove(dominion.getLeader());
+							dominionFromList.getTruced().remove(dominion.getLeader());
+							DominionUtils.updateDominion(dominionFromList);
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has declared themselves neutral to your Dominion"));
+								}
+							}
+						} else if (dominionFromList.getEnemied().contains(dominion.getLeader())) {
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has requested neutrality with your Dominion"));
+								}
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&7Your Dominion is neutral to &e" + dominionFromList.getName()));
 						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can do this!"));
@@ -742,17 +903,27 @@ public class CommandDominion {
 
 		StringBuilder enemyBuilder = new StringBuilder();
 		enemyBuilder.append("&7Enemies: ");
-		if (dominion.getEnemied().isEmpty()) {
+		// Must search all Dominions as it is based on others as well
+		List<UUID> leadersEnemiedToThisDominion = new ArrayList<>();
+		for (Dominion otherDominion : DominionUtils.getDominions()) {
+			if (otherDominion.getEnemied().contains(dominion.getLeader())) {
+				leadersEnemiedToThisDominion.add(otherDominion.getLeader());
+			}
+		}
+		for (UUID enemied : dominion.getEnemied()) {
+			if (!leadersEnemiedToThisDominion.contains(enemied)) {
+				leadersEnemiedToThisDominion.add(enemied);
+			}
+		}
+
+		if (leadersEnemiedToThisDominion.isEmpty()) {
 			enemyBuilder.append("&7&oNone");
 		} else {
-			for (int i = 0; i < dominion.getEnemied().size(); i++) {
-				UUID uuid = dominion.getEnemied().get(i);
-				Dominion enemiedDominion = DominionUtils.getPlayerDominion(uuid);
-				if (DominionUtils.areEnemied(dominion, enemiedDominion)) {
-					enemyBuilder.append("&c").append(enemiedDominion.getName());
-					if (i < dominion.getEnemied().size() - 1) {
-						enemyBuilder.append("&c, ");
-					}
+			for (int i = 0; i < leadersEnemiedToThisDominion.size(); i++) {
+				Dominion enemiedDominion = DominionUtils.getPlayerDominion(leadersEnemiedToThisDominion.get(i));
+				enemyBuilder.append("&c").append(enemiedDominion.getName());
+				if (i < dominion.getEnemied().size() - 1) {
+					enemyBuilder.append("&c, ");
 				}
 			}
 		}
