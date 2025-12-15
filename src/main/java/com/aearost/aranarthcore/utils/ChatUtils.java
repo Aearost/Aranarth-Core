@@ -231,7 +231,7 @@ public class ChatUtils {
 			messages[3] = displayName + " &7is ready to scare the monsters...";
 		} else if (specialDay == SpecialDay.CHRISTMAS) {
 			messages[0] = displayName + " &7is looking for someone under the mistletoe!";
-			messages[1] = "The caroling is about to begin, thanks" + displayName + "&7!";
+			messages[1] = "The caroling is about to begin, thanks, " + displayName + "&7!";
 			messages[2] = displayName + " &7is on Santa's nice list...";
 			messages[3] = "Is that Santa? Nevermind, it's just " + displayName;
 		} else {
