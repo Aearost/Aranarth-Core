@@ -23,7 +23,7 @@ public class RecipeBell {
 
 		recipe.shape("CGC", "GGG", "GIG");
 
-		recipe.setIngredient('C', Material.CHAIN);
+		recipe.setIngredient('C', Material.IRON_CHAIN);
 		recipe.setIngredient('G', Material.GOLD_INGOT);
 		recipe.setIngredient('I', Material.IRON_NUGGET);
 		
