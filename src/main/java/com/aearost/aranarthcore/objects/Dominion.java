@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,8 +18,11 @@ public class Dominion {
 	private UUID leader;
 	private List<UUID> members;
 	private List<UUID> allied;
+	private List<UUID> allianceRequests;
 	private List<UUID> truced;
+	private List<UUID> truceRequests;
 	private List<UUID> enemied;
+	private List<UUID> neutralRequests;
 	private List<Chunk> chunks;
 	private int dominionPower;
 	private Location dominionHome;
@@ -30,8 +34,11 @@ public class Dominion {
 		this.name = name;
 		this.leader = leader;
 		this.allied = allied;
+		this.allianceRequests = new ArrayList<>();
 		this.truced = truced;
+		this.truceRequests = new ArrayList<>();
 		this.enemied = enemied;
+		this.neutralRequests = new ArrayList<>();
 		this.members = members;
 		this.chunks = chunks;
 		this.dominionPower = dominionPower;
@@ -46,8 +53,11 @@ public class Dominion {
 		this.name = name;
 		this.leader = leader;
 		this.allied = allied;
+		this.allianceRequests = new ArrayList<>();
 		this.truced = truced;
+		this.truceRequests = new ArrayList<>();
 		this.enemied = enemied;
+		this.neutralRequests = new ArrayList<>();
 		this.members = members;
 		this.chunks = chunks;
 		this.dominionPower = dominionPower;
@@ -120,6 +130,22 @@ public class Dominion {
 	}
 
 	/**
+	 * Provides the list of Dominion leaders that have sent Alliance requests.
+	 * @return The list of Dominion leaders that have sent Alliance requests.
+	 */
+	public List<UUID> getAllianceRequests() {
+		return allianceRequests;
+	}
+
+	/**
+	 * Updates the list of Dominion leaders that have sent Alliance requests.
+	 * @param allianceRequests The list of Dominion leaders that have sent Alliance requests.
+	 */
+	public void setAllianceRequests(List<UUID> allianceRequests) {
+		this.allianceRequests = allianceRequests;
+	}
+
+	/**
 	 * Provides the list of Dominion leaders that are truced.
 	 * @return The list of Dominion leaders that are truced.
 	 */
@@ -136,6 +162,22 @@ public class Dominion {
 	}
 
 	/**
+	 * Provides the list of Dominion leaders that have sent Truce requests.
+	 * @return The list of Dominion leaders that have sent Truce requests.
+	 */
+	public List<UUID> getTruceRequests() {
+		return truceRequests;
+	}
+
+	/**
+	 * Updates the list of Dominion leaders that have sent Truce requests.
+	 * @param truceRequests The list of Dominion leaders that have sent Truce requests.
+	 */
+	public void setTruceRequests(List<UUID> truceRequests) {
+		this.truceRequests = truceRequests;
+	}
+
+	/**
 	 * Provides the list of Dominion leaders that are enemies.
 	 * @return The list of Dominion leaders that are enemies.
 	 */
@@ -149,6 +191,22 @@ public class Dominion {
 	 */
 	public void setEnemied(List<UUID> enemied) {
 		this.enemied = enemied;
+	}
+
+	/**
+	 * Provides the list of Dominion leaders that have sent Neutrality requests.
+	 * @return The list of Dominion leaders that have sent Neutrality requests.
+	 */
+	public List<UUID> getNeutralRequests() {
+		return neutralRequests;
+	}
+
+	/**
+	 * Updates the list of Dominion leaders that have sent Neutrality requests.
+	 * @param neutralRequests The list of Dominion leaders that have sent Neutrality requests.
+	 */
+	public void setNeutralRequests(List<UUID> neutralRequests) {
+		this.neutralRequests = neutralRequests;
 	}
 
 	/**
