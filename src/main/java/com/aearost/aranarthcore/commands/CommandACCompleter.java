@@ -1069,6 +1069,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("truce");
 		displayedOptions.add("enemy");
 		displayedOptions.add("neutral");
+		displayedOptions.add("setleader");
 		return displayedOptions;
 	}
 
@@ -1145,8 +1146,17 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("balance");
 				} else if ("home".startsWith(args[1])) {
 					displayedOptions.add("home");
-				} else if ("sethome".startsWith(args[1])) {
-					displayedOptions.add("sethome");
+				} else if (args[1].startsWith("s")) {
+					if (args[1].equalsIgnoreCase("s") || args[1].equalsIgnoreCase("se") || args[1].equalsIgnoreCase("set")) {
+						displayedOptions.add("sethome");
+						displayedOptions.add("setleader");
+					} else if ("sethome".startsWith(args[1])) {
+						displayedOptions.add("sethome");
+					} else if ("setleader".startsWith(args[1])) {
+						displayedOptions.add("setleader");
+					} else {
+						displayedOptions = addDominionSubCommands(displayedOptions);
+					}
 				} else if (args[1].startsWith("d")) {
 					if (args[1].equalsIgnoreCase("d")) {
 						displayedOptions.add("disband");
@@ -1187,7 +1197,7 @@ public class CommandACCompleter implements TabCompleter {
 								displayedOptions.add(onlinePlayer.getName());
 							}
 						}
-						case "remove" -> {
+						case "remove", "setleader" -> {
 							if (sender instanceof Player player) {
 								boolean resultsFound = false;
 								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
@@ -1222,7 +1232,7 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 						}
-						case "remove" -> {
+						case "remove", "setleader" -> {
 							if (sender instanceof Player player) {
 								boolean resultsFound = false;
 								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
