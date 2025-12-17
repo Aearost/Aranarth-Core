@@ -86,7 +86,7 @@ public class GuiRanksClick {
 				player.sendMessage(ChatUtils.chatMessage(
 						"&cYou are already " + aOrAn + " " + femaleRanks[clickedRank] + "&c!"));
 			}
-			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
+			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
 			player.closeInventory();
 		} else if (isClickedRankLowerThanCurrent) {
 			if (pronouns == Pronouns.MALE) {
@@ -96,7 +96,7 @@ public class GuiRanksClick {
 				player.sendMessage(ChatUtils.chatMessage(
 						"&cYou cannot rank back down to " + aOrAn + " " + femaleRanks[clickedRank] + "&c!"));
 			}
-			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
+			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.5F, 0.5F);
 			player.closeInventory();
 		} else if (isClickedRankHigherThanCurrent) {
 			if (pronouns == Pronouns.MALE) {
@@ -106,7 +106,7 @@ public class GuiRanksClick {
 				player.sendMessage(
 						ChatUtils.chatMessage("&cYou must rankup to " + femaleRanks[rank + 1] + " &cfirst!"));
 			}
-			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
+			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
 			player.closeInventory();
 		} else if (isRankup) {
 			String rankupCost = rankupCosts[clickedRank];

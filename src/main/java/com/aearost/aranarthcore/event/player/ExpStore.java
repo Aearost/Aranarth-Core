@@ -30,9 +30,9 @@ public class ExpStore {
                             amountToReduce = amountToReduce * -1;
                             player.giveExp(amountToReduce);
 
-                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
-                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
-                            player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1F);
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 1.5F);
+                            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 1F, 2F);
                             HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(new ItemStack(Material.EXPERIENCE_BOTTLE));
                             // If the player's inventory was full, drop it to the ground
                             if (!leftover.isEmpty()) {

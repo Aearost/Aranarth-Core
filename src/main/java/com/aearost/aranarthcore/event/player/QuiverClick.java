@@ -20,7 +20,7 @@ public class QuiverClick {
 				if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 					if (e.getPlayer().getWorld().getName().startsWith("world") || e.getPlayer().getWorld().getName().startsWith("smp") || e.getPlayer().getWorld().getName().startsWith("resource")) {
 						e.setCancelled(true);
-						e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.ITEM_BUNDLE_REMOVE_ONE, 1F, 0.8F);
+						e.getPlayer().playSound(e.getPlayer(), Sound.ITEM_BUNDLE_REMOVE_ONE, 1F, 0.8F);
 						GuiQuiver gui = new GuiQuiver(e.getPlayer());
 						gui.openGui();
 					} else {

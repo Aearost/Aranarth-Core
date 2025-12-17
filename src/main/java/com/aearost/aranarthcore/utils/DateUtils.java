@@ -201,28 +201,28 @@ public class DateUtils {
 
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
-					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
+					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
 				} else {
-					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
-					player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
+					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
+					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
 
 					// 0.2s later
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.667f), 4L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.667f), 4L);
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.26f), 4L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.26f), 4L);
 
 					// 0.4s later
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.75f), 8L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.75f), 8L);
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f), 8L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.5f), 8L);
 
 					// 0.6s later
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f), 12L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f), 12L);
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
-							player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
+							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
 				}
 			}
 		}

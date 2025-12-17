@@ -326,7 +326,7 @@ public class CrateOpen {
 
                 // No sound
                 if (pitch != 0) {
-                    player.playSound(player.getLocation(), sound, 1F, pitch);
+                    player.playSound(player, sound, 1F, pitch);
                 }
 
                 // End after a short delay
@@ -363,7 +363,7 @@ public class CrateOpen {
                 int chance = new Random().nextInt(100) + 1;
 
                 if (chance <= 12) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 50);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
@@ -409,7 +409,7 @@ public class CrateOpen {
                 aranarthPlayer.setCrateTypeBeingOpened(null);
                 AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
@@ -437,7 +437,7 @@ public class CrateOpen {
                 int chance = new Random().nextInt(100) + 1;
 
                 if (chance <= 12) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 250);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
@@ -485,7 +485,7 @@ public class CrateOpen {
                 aranarthPlayer.setCrateTypeBeingOpened(null);
                 AranarthUtils.removeCrateFromUse(CrateType.RARE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
@@ -514,7 +514,7 @@ public class CrateOpen {
                 int chance = new Random().nextInt(100) + 1;
 
                 if (chance <= 12) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1500);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
@@ -549,7 +549,7 @@ public class CrateOpen {
                     reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
                     name = "#fcd34d&lEnchanted Golden Apple x6";
                 } else if (chance <= 80) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
                     PlayerProfile profile = mcMMOPlayer.getProfile();
 
@@ -616,7 +616,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                     return;
                 } else {
@@ -627,7 +627,7 @@ public class CrateOpen {
                 aranarthPlayer.setCrateTypeBeingOpened(null);
                 AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
@@ -656,7 +656,7 @@ public class CrateOpen {
                 int chance = new Random().nextInt(100) + 1;
 
                 if (chance <= 12) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 7500);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
@@ -673,7 +673,7 @@ public class CrateOpen {
                     reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
                     name = "#3a383a&lNetherite Block x1";
                 } else if (chance <= 56) {
-                    player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
                     PlayerProfile profile = mcMMOPlayer.getProfile();
 
@@ -731,7 +731,7 @@ public class CrateOpen {
                 aranarthPlayer.setCrateTypeBeingOpened(null);
                 AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                player.playSound(player.getLocation(), Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });

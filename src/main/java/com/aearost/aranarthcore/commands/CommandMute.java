@@ -141,7 +141,7 @@ public class CommandMute {
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(args[1]).getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been muted!"));
-					onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
+					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
 				}
 			}
 		}

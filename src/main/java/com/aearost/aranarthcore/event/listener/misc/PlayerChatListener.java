@@ -28,7 +28,7 @@ public class PlayerChatListener implements Listener {
 
         for (Player p : e.getRecipients()) {
             if (message.contains(p.getDisplayName()) && !player.getDisplayName().equals(p.getDisplayName())) {
-                p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+                p.playSound(p, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
 
