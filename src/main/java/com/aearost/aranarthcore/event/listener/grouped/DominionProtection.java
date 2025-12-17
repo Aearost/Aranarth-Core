@@ -66,7 +66,7 @@ public class DominionProtection implements Listener {
 	 * Prevents players from interacting with non-alive entities in another Dominion.
 	 */
 	@EventHandler
-	public void onInteractEntity(PlayerInteractEntityEvent e) {
+	public void onPlaceEntity(PlayerInteractEntityEvent e) {
 		if (e.getRightClicked() != null) {
 			EntityType type = e.getRightClicked().getType();
 			// Armor stands are considered alive
@@ -87,7 +87,7 @@ public class DominionProtection implements Listener {
 	 * Prevents players from placing non-alive entities in another Dominion.
 	 */
 	@EventHandler
-	public void onInteractEntity(EntityPlaceEvent e) {
+	public void onPlaceEntity(EntityPlaceEvent e) {
 		if (e.getEntity() != null) {
 			EntityType type = e.getEntity().getType();
 			// Armor stands are considered alive
@@ -122,6 +122,45 @@ public class DominionProtection implements Listener {
 					}
 				}
 			}
+			// Prevents PvP
+			else if (e.getEntity() instanceof Player target) {
+				if (e.getDamageSource().getCausingEntity() != null) {
+					if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+						Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+						Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
+						if (attackerDominion != null && targetDominion != null) {
+							// Prevent PvP within the same Dominion
+							if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
+								e.setCancelled(true);
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are both in &e" + attackerDominion.getName()));
+							}
+							// Prevent PvP between allies
+							else if (DominionUtils.areAllied(attackerDominion, targetDominion)) {
+								e.setCancelled(true);
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &5Allied"));
+							}
+							// Prevent PvP between truces
+							else if (DominionUtils.areTruced(attackerDominion, targetDominion)) {
+								e.setCancelled(true);
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &dTruced"));
+							} else {
+								Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
+								// Prevent damage if they're in their own Dominion's land and you are not allied, truced, or enemied
+								if (chunkDominion != null && chunkDominion.getLeader().equals(targetDominion.getLeader())) {
+									if (!DominionUtils.areEnemied(attackerDominion, targetDominion)) {
+										e.setCancelled(true);
+										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+										attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7in their lands as you are &fNeutral"));
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -136,22 +175,37 @@ public class DominionProtection implements Listener {
 			return;
 		}
 
-		if (AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
-			|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
-			|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
-				|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON")
-				|| block.getType().name().endsWith("_GATE") || block.getType() == Material.CRAFTER|| block.getType() == Material.HOPPER) {
+		if (isDominionProtectedBlock(block)) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (!aranarthPlayer.getIsInAdminMode()) {
 				// Only show the error if it is not a shop
 				if (ShopUtils.getShopFromLocation(block.getLocation()) == null) {
-					boolean isActionPrevented = applyLogic(player, block, null);
-					if (isActionPrevented) {
-						e.setCancelled(true);
+					Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+					Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+					// Allies can interact with all the blocks
+					if (playerDominion == null || chunkDominion == null
+							|| !DominionUtils.areAllied(playerDominion, chunkDominion)) {
+						boolean isActionPrevented = applyLogic(player, block, null);
+						if (isActionPrevented) {
+							e.setCancelled(true);
+						}
 					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Confirms if the input block is one of the Dominion-protected blocks from being interacted with.
+	 * @param block The block being interacted with.
+	 * @return Confirmation if the input block is one of the Dominion-protected blocks from being interacted with.
+	 */
+	private boolean isDominionProtectedBlock(Block block) {
+		return AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
+			|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
+			|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
+			|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON")
+			|| block.getType().name().endsWith("_GATE") || block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER;
 	}
 
 	/**
@@ -198,7 +252,7 @@ public class DominionProtection implements Listener {
 			dominion = DominionUtils.getDominionOfChunk(entity.getLocation().getChunk());
 		}
 
-		// If the block is in a dominion
+		// If the block/entity is in a dominion
 		if (dominion != null) {
 			Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			// If the player is not in the dominion of the block
