@@ -655,7 +655,7 @@ public class DateUtils {
 
 		if (new Random().nextInt(15) == 0) {
 			List<PotionEffect> effects = new ArrayList<>();
-			effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 320, 0));
+			effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
 			effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
 			applyEffectToAllPlayers(effects);
 		}

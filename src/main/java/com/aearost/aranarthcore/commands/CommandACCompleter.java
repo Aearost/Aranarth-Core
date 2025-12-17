@@ -1193,7 +1193,7 @@ public class CommandACCompleter implements TabCompleter {
 								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 								if (dominion != null) {
 									for (UUID uuid : dominion.getMembers()) {
-										displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+										displayedOptions.add(Bukkit.getOfflinePlayer(uuid).getName());
 									}
 								}
 							}
@@ -1228,8 +1228,8 @@ public class CommandACCompleter implements TabCompleter {
 								Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 								if (dominion != null) {
 									for (UUID uuid : dominion.getMembers()) {
-										if (Bukkit.getPlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-											displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+										if (Bukkit.getOfflinePlayer(uuid).getName().toLowerCase().startsWith(args[2].toLowerCase())) {
+											displayedOptions.add(Bukkit.getOfflinePlayer(uuid).getName());
 											resultsFound = true;
 										}
 									}
@@ -1237,7 +1237,7 @@ public class CommandACCompleter implements TabCompleter {
 									// If none were found, display all
 									if (!resultsFound) {
 										for (UUID uuid : dominion.getMembers()) {
-											displayedOptions.add(Bukkit.getPlayer(uuid).getName());
+											displayedOptions.add(Bukkit.getOfflinePlayer(uuid).getName());
 										}
 									}
 								}
