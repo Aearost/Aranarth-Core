@@ -1186,11 +1186,11 @@ public class AranarthUtils {
 		}
 
 		if (aranarthPlayer.getSaintRank() == 1) {
-			saintHomeNum = 2;
+			saintHomeNum = 1;
 		} else if (aranarthPlayer.getSaintRank() == 2) {
-			saintHomeNum = 5;
+			saintHomeNum = 3;
 		} else if (aranarthPlayer.getSaintRank() == 3) {
-			saintHomeNum = 10;
+			saintHomeNum = 5;
 		}
 
 		String perksHomeAmountAsString = aranarthPlayer.getPerks().split("\\*")[8];
