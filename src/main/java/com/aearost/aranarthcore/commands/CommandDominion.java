@@ -555,6 +555,11 @@ public class CommandDominion {
 
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
+						if (dominionFromList.getAllianceRequests().contains(dominion.getLeader())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already sent an &5Alliance &crequest to &e" + dominionFromList.getName()));
+							return;
+						}
+
 						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
 						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
 						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
@@ -648,6 +653,11 @@ public class CommandDominion {
 
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
+						if (dominionFromList.getTruceRequests().contains(dominion.getLeader())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already sent a &dTruce &crequest to &e" + dominionFromList.getName()));
+							return;
+						}
+
 						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
 						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
 						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
@@ -812,6 +822,11 @@ public class CommandDominion {
 
 					wasDominionFound = true;
 					if (dominion.getLeader().equals(player.getUniqueId())) {
+						if (dominionFromList.getNeutralRequests().contains(dominion.getLeader())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already sent a &fNeutrality &crequest to &e" + dominionFromList.getName()));
+							return;
+						}
+
 						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
 						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
 						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
