@@ -1107,7 +1107,7 @@ public class CommandDominion {
 			}
 		}
 		String dominionName = parts.toString();
-		if (dominionName.length() > 30) {
+		if (ChatUtils.stripColorFormatting(dominionName).length() > 30) {
 			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion name is too long!"));
 			return null;
 		}
