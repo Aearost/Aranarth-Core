@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 
 import java.util.List;
 
@@ -24,40 +25,43 @@ public class GuiWarpClick {
 			List<Home> warps = AranarthUtils.getWarps();
 
 			if (e.getWhoClicked() instanceof Player player) {
-				// Ensures the player is actually clicking a home
+				// Ensures the player is actually clicking a warp
 				if (e.getSlot() >= warps.size()) {
 					return;
 				}
 
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				for (int i = 0; i < warps.size(); i++) {
-					if (e.getSlot() == i) {
-						Home warp = warps.get(i);
+				if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					for (int i = 0; i < warps.size(); i++) {
+						if (e.getSlot() == i) {
+							Home warp = warps.get(i);
 
-						if (player.hasPermission("aranarth.warp.modify")) {
-							Material heldItem = e.getCursor().getType();
-							// If the user is trying to update the icon of a home
-							if (heldItem != Material.AIR) {
-								e.setCancelled(true);
-								if (heldItem == warp.getIcon()) {
-									player.sendMessage(ChatUtils.chatMessage("&cThis warp already uses that icon!"));
-								} else {
-									AranarthUtils.updateWarp(warp.getName(), warp.getLocation(), heldItem);
-									player.sendMessage(ChatUtils.chatMessage(warp.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+							if (player.hasPermission("aranarth.warp.modify")) {
+								Material heldItem = e.getCursor().getType();
+								// If the user is trying to update the icon of a warp
+
+								if (heldItem != Material.AIR) {
+									e.setCancelled(true);
+									if (heldItem == warp.getIcon()) {
+										player.sendMessage(ChatUtils.chatMessage("&cThis warp already uses that icon!"));
+									} else {
+										AranarthUtils.updateWarp(warp.getName(), warp.getLocation(), heldItem);
+										player.sendMessage(ChatUtils.chatMessage("&e" + warp.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+									}
+									player.closeInventory();
+									return;
 								}
-								player.closeInventory();
-								return;
 							}
-						}
 
-						AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation());
-						player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
-						player.closeInventory();
-						return;
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation());
+							player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+							player.closeInventory();
+							return;
+						}
 					}
+					player.closeInventory();
+					player.sendMessage(ChatUtils.chatMessage("&cSomething with wrong with teleporting to that warp..."));
 				}
-				player.closeInventory();
-				player.sendMessage(ChatUtils.chatMessage("&cSomething with wrong with teleporting to that warp..."));
 			}
 		}
 	}
