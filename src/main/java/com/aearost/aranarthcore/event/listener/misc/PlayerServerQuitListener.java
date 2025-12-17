@@ -61,17 +61,17 @@ public class PlayerServerQuitListener implements Listener {
 			public void run() {
 				if (runs == 0) {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
 					}
 					runs++;
 				} else if (runs == 1){
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
 					}
 					runs++;
 				} else {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
 					}
 					cancel();
 				}

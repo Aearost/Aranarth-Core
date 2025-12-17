@@ -98,7 +98,7 @@ public class ShulkerItemPickup {
 
 		// If there was quantity put in a shulker box and quantity remains
 		if (e.isCancelled()) {
-			player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
+			player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
 			pickupItem.setAmount(amountRemaining);
 			player.getInventory().addItem(pickupItem);
 		}

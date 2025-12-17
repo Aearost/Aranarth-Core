@@ -56,7 +56,7 @@ public class GuiRankupClick {
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
 				PermissionUtils.evaluatePlayerPermissions(player, false);
-				player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
+				player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 				player.closeInventory();
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough money to rankup!"));
@@ -66,7 +66,7 @@ public class GuiRankupClick {
 		// Cancel
 		else if (slot == 12) {
 			Player player = (Player) e.getWhoClicked();
-			player.playSound(player.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
+			player.playSound(player, Sound.ENTITY_ENDER_EYE_DEATH, 0.8F, 0.5F);
 			e.getWhoClicked().closeInventory();
 		}
 	}

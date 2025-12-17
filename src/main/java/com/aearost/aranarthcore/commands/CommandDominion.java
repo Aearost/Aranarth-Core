@@ -163,7 +163,7 @@ public class CommandDominion {
 								DominionUtils.updateDominion(dominion);
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
+									onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
 							}
 						} else {
@@ -255,7 +255,7 @@ public class CommandDominion {
 								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
+									onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
@@ -292,7 +292,7 @@ public class CommandDominion {
 				DominionUtils.disbandDominion(dominion);
 
 				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-					onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
+					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
 				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
@@ -449,7 +449,7 @@ public class CommandDominion {
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has joined the Dominion!"));
-					onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1F, 1.2F);
+					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1.2F);
 				}
 			}
 		} else {

@@ -29,7 +29,7 @@ public class ShulkerClick {
 							}
 
 							e.setCancelled(true);
-							player.playSound(player.getLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
+							player.playSound(player, Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
 							Inventory shulkerInventory = shulker.getInventory();
 							GuiShulker gui = new GuiShulker(player, shulkerInventory);
 							gui.openGui();

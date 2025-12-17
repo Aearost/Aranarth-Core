@@ -80,7 +80,7 @@ public class CommandHologram {
 				boolean wasCreated = HologramUtils.createHologram(location, assembledMsg);
 				if (wasCreated) {
 					player.sendMessage(ChatUtils.chatMessage("&7The hologram was created successfully"));
-					player.playSound(player.getLocation(), Sound.BLOCK_LAVA_POP, 1.5F, 2F);
+					player.playSound(player, Sound.BLOCK_LAVA_POP, 1.5F, 2F);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThe hologram could not be created!"));
 				}
@@ -90,7 +90,7 @@ public class CommandHologram {
 				boolean wasDeleted = HologramUtils.removeHologram(location);
 				if (wasDeleted) {
 					player.sendMessage(ChatUtils.chatMessage("&7The hologram was deleted successfully"));
-					player.playSound(player.getLocation(), Sound.BLOCK_LAVA_POP, 1.5F, 1.3F);
+					player.playSound(player, Sound.BLOCK_LAVA_POP, 1.5F, 1.3F);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThe hologram could not be removed!"));
 				}

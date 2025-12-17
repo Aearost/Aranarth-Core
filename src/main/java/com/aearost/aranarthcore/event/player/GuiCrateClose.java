@@ -15,6 +15,6 @@ public class GuiCrateClose {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		aranarthPlayer.setIsOpeningCrateWithCyclingItem(false);
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-		player.playSound(e.getPlayer().getLocation(), Sound.BLOCK_CHEST_CLOSE, 1, 0.6F);
+		player.playSound(e.getPlayer(), Sound.BLOCK_CHEST_CLOSE, 1, 0.6F);
 	}
 }

@@ -31,7 +31,7 @@ public class GuiCompressorClick {
 		if (slot < 9 || slot >= 35) {
 			if (slot == 40) {
 				player.closeInventory();
-				player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 			}
 			// Enable All
 			else if (slot == 36) {
@@ -65,7 +65,7 @@ public class GuiCompressorClick {
 		else {
 			AranarthUtils.addCompressibleItem(player.getUniqueId(), material);
 		}
-		player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+		player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 		GuiCompressor gui = new GuiCompressor(player);
 		gui.openGui();
 	}

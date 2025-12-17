@@ -213,7 +213,7 @@ public class AvatarUtils {
 		avatars.add(avatar);
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);
+			player.playSound(player, Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);
 		}
 
 		// Adds a 2-second delay
@@ -222,7 +222,7 @@ public class AvatarUtils {
 			public void run() {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe new Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas risen!"));
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
+					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 				}
 				PersistenceUtils.saveAvatarBinds();
 			}
@@ -249,7 +249,7 @@ public class AvatarUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(oldAvatar.getUuid());
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oThe Avatar &d" + aranarthPlayer.getNickname() + " &5&l&ohas deceased..."));
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			player.playSound(player.getLocation(), Sound.ENTITY_WITHER_DEATH, 1F, 1.5F);
+			player.playSound(player, Sound.ENTITY_WITHER_DEATH, 1F, 1.5F);
 		}
 
 		// Adds a 2-second delay
@@ -258,7 +258,7 @@ public class AvatarUtils {
 			public void run() {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&5&l&oA new Avatar must be found..."));
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					player.playSound(player.getLocation(), Sound.ENTITY_BREEZE_IDLE_AIR, 1F, 0.4F);
+					player.playSound(player, Sound.ENTITY_BREEZE_IDLE_AIR, 1F, 0.4F);
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 70);

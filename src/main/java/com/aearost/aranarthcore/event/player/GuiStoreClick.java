@@ -37,26 +37,26 @@ public class GuiStoreClick {
 
 		// To a new page
 		if (slot == 10) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.SAINT);
 			gui.openGui();
 		} else if (slot == 12) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.PERKS);
 			gui.openGui();
 		} else if (slot == 14) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.BOOSTS);
 			gui.openGui();
 		} else if (slot == 16) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.CRATES);
 			gui.openGui();
 		}
 
 		// Exit button
 		else if (slot == 22) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.UI_BUTTON_CLICK, 0.9F, 1F);
+			player.playSound(e.getWhoClicked(), Sound.UI_BUTTON_CLICK, 0.9F, 1F);
 			player.closeInventory();
 		}
 	}
@@ -93,7 +93,7 @@ public class GuiStoreClick {
 
 		// Return to main menu
 		else if (slot == 31) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.MAIN);
 			gui.openGui();
 		}
@@ -149,7 +149,7 @@ public class GuiStoreClick {
 
 		// Return to main menu
 		else if (slot == 40) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.MAIN);
 			gui.openGui();
 		}
@@ -181,7 +181,7 @@ public class GuiStoreClick {
 
 		// Return to main menu
 		else if (slot == 22) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.MAIN);
 			gui.openGui();
 		}
@@ -210,7 +210,7 @@ public class GuiStoreClick {
 
 		// Return to main menu
 		else if (slot == 22) {
-			player.playSound(e.getWhoClicked().getLocation(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
+			player.playSound(e.getWhoClicked(), Sound.ITEM_BOOK_PAGE_TURN, 1F, 1.3F);
 			GuiStore gui = new GuiStore(player, StorePage.MAIN);
 			gui.openGui();
 		}

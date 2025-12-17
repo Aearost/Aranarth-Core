@@ -1496,7 +1496,7 @@ public class AranarthUtils {
 	 */
 	public static boolean teleportPlayer(Player player, Location from, Location to) {
 		player.teleport(getSafeTeleportLocation(to));
-		player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 
 		// Saves the player's last location for /ac back
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
