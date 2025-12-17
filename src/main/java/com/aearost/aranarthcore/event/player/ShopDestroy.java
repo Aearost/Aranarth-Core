@@ -5,12 +5,14 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.block.sign.SignSide;
 import org.bukkit.entity.Player;
@@ -96,21 +98,31 @@ public class ShopDestroy {
 	 * @return The relative sign block.
 	 */
 	private Block isRelativeBlockShop(Block block) {
-		Block up = block.getRelative(BlockFace.UP);
-		Block down = block.getRelative(BlockFace.DOWN);
-		Block north = block.getRelative(BlockFace.NORTH);
-		Block east = block.getRelative(BlockFace.EAST);
-		Block south = block.getRelative(BlockFace.SOUTH);
-		Block west = block.getRelative(BlockFace.WEST);
+		for (BlockFace face : BlockFace.values()) {
+			if (!face.isCartesian()) {
+				continue;
+			}
 
-		Block[] relativeBlocks = new Block[] { up, down, north, east, south, west};
-		for (Block relativeBlock : relativeBlocks) {
-			if (relativeBlock.getType().name().toLowerCase().endsWith("sign")) {
-				if (ShopUtils.getShopFromLocation(relativeBlock.getLocation()) != null) {
-					return relativeBlock;
+			Block relative = block.getRelative(face);
+			Bukkit.getLogger().info("Face: " + face.name() + " | " + relative.getLocation().getBlockX() + "," + relative.getLocation().getBlockY() + "," + relative.getLocation().getBlockZ());
+
+			if (!(relative.getState() instanceof Sign signState)) {
+				Bukkit.getLogger().info("Is NOT sign");
+				continue;
+			} else {
+				if (signState.getBlockData() instanceof WallSign wallSign) {
+					BlockFace attachedFace = wallSign.getFacing().getOppositeFace();
+					Bukkit.getLogger().info("Attached Face: " + attachedFace.name() + " | " + relative.getLocation().getBlockX() + "," + relative.getLocation().getBlockY() + "," + relative.getLocation().getBlockZ());
+
+					if (relative.getRelative(attachedFace).equals(block)) {
+						if (ShopUtils.getShopFromLocation(relative.getLocation()) != null) {
+							return relative;
+						}
+					}
 				}
 			}
 		}
+
 		return null;
 	}
 
