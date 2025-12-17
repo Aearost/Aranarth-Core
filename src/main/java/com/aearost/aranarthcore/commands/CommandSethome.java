@@ -25,7 +25,8 @@ public class CommandSethome {
 			if (aranarthPlayer.getHomes().size() < playerMaxHomeCount) {
 				if (args.length >= 2) {
 					Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
-					if (loc == null) {
+					if (loc == null || loc.getWorld().getName().equals("arena") || loc.getWorld().getName().equals("creative")
+							|| loc.getWorld().getName().startsWith("resource")) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
 						return true;
 					}
