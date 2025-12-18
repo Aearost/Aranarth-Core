@@ -10,10 +10,8 @@ import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
+import org.bukkit.block.*;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,124 +36,134 @@ public class ShopCreateListener implements Listener {
 		Player player = e.getPlayer();
 		Block sign = e.getBlock();
 
-		// Only allow shop creation in Survival worlds
-		if (!player.getWorld().getName().startsWith("world") && !player.getWorld().getName().startsWith("smp")) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
-			return;
-		}
-
-		// If placing a Player Shop
-		if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
-			if (!canCreateShop(e)) {
+		if (sign.getState() instanceof Sign signState) {
+			// Only allow shop creation in Survival worlds
+			if (!player.getWorld().getName().startsWith("world") && !player.getWorld().getName().startsWith("smp")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
-				canShopBeRemoved(e);
-				e.setLine(0, "");
-				e.setLine(1, "");
-				e.setLine(2, "");
-				e.setLine(3, "");
 				return;
 			}
 
-			int playerShopNum = 0;
-			if (ShopUtils.getShops().get(player.getUniqueId()) != null) {
-				playerShopNum = ShopUtils.getShops().get(player.getUniqueId()).size();
-			}
-
-			int maxShopNum = AranarthUtils.getMaxShopNum(player);
-			if (playerShopNum >= maxShopNum) {
-				if (maxShopNum == 0) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
-					return;
-				} else if (maxShopNum != -1) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
-					return;
-				}
-			}
-
-			int[] validSignFormatResult = validSignFormat(lines, player, true);
-			// If all the lines were entered correctly
-			if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
-				// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
-				if (isValidChestFormat(player, sign)) {
-					if (getShopItem(sign, true).getType() == Material.AIR) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+			// If placing a Player Shop
+			if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
+				if (signState.getBlockData() instanceof WallSign wallSign) {
+					if (!canCreateShop(e)) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
+						canShopBeRemoved(e);
+						e.setLine(0, "");
+						e.setLine(1, "");
+						e.setLine(2, "");
+						e.setLine(3, "");
 						return;
 					}
 
-					String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
-					// Price check
-					if (priceParts[0].equalsIgnoreCase("B")) {
-						// Only buying
-						if (priceParts.length == 2) {
-							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
-						}
-						// Both buying and selling
-						else if (priceParts.length == 5) {
-							ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
-						}
-					} else {
-						ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
+					int playerShopNum = 0;
+					if (ShopUtils.getShops().get(player.getUniqueId()) != null) {
+						playerShopNum = ShopUtils.getShops().get(player.getUniqueId()).size();
 					}
-				} else {
-					// Forceful display of the shop in error
-					if (canShopBeRemoved(e)) {
-						displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
-					}
-				}
-			} else {
-				if (canShopBeRemoved(e)) {
-					displayInvalidFields(e, validSignFormatResult, true);
-				}
-			}
-		}
-		// If placing a Server Shop
-		else if (ChatUtils.stripColorFormatting(lines[0]).equals("[Server Shop]")) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 3) {
-				int[] validSignFormatResult = validSignFormat(lines, player, false);
-				// If all the lines were entered correctly
-				if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
-					ItemStack heldItem = player.getInventory().getItemInMainHand();
 
-					if (heldItem != null && heldItem.getType() != Material.AIR) {
-						if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+					int maxShopNum = AranarthUtils.getMaxShopNum(player);
+					if (playerShopNum >= maxShopNum) {
+						if (maxShopNum == 0) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
+							return;
+						} else if (maxShopNum != -1) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
 							return;
 						}
+					}
 
-						String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
-						// Price check
-						if (priceParts[0].equalsIgnoreCase("B")) {
-							// Only buying
-							if (priceParts.length == 2) {
-								ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
+					int[] validSignFormatResult = validSignFormat(lines, player, true);
+					// If all the lines were entered correctly
+					if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
+						// Verifies there is a sign on top, a chest underneath, and at least one item in the first slot of the chest
+						if (isValidChestFormat(player, sign)) {
+							if (getShopItem(sign, true).getType() == Material.AIR) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+								return;
 							}
-							// Both buying and selling
-							else if (priceParts.length == 5) {
-								ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+
+							String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
+							// Price check
+							if (priceParts[0].equalsIgnoreCase("B")) {
+								// Only buying
+								if (priceParts.length == 2) {
+									ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
+								}
+								// Both buying and selling
+								else if (priceParts.length == 5) {
+									ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+								}
+							} else {
+								ShopUtils.createOrUpdateShop(e, player, getShopItem(sign, true), getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
 							}
 						} else {
-							ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
+							// Forceful display of the shop in error
+							if (canShopBeRemoved(e)) {
+								displayInvalidFields(e, new int[] { 1, 0, 0, 0}, true);
+							}
 						}
 					} else {
-						// Forceful display of the shop in error
 						if (canShopBeRemoved(e)) {
-							displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
+							displayInvalidFields(e, validSignFormatResult, true);
 						}
-						player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
 					}
 				} else {
-					if (canShopBeRemoved(e)) {
-						displayInvalidFields(e, validSignFormatResult, false);
-					}
+					player.sendMessage(ChatUtils.chatMessage("&cYou must create the Shop using a Wall Sign!"));
 				}
 			}
-		}
-		// Remove if the shop previously existed and now was changed
-		else {
-			if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
-				if (canShopBeRemoved(e)) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+			// If placing a Server Shop
+			else if (ChatUtils.stripColorFormatting(lines[0]).equals("[Server Shop]")) {
+				if (signState.getBlockData() instanceof WallSign wallSign) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer.getCouncilRank() == 3) {
+						int[] validSignFormatResult = validSignFormat(lines, player, false);
+						// If all the lines were entered correctly
+						if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
+							ItemStack heldItem = player.getInventory().getItemInMainHand();
+
+							if (heldItem != null && heldItem.getType() != Material.AIR) {
+								if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
+									player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop using that item!"));
+									return;
+								}
+
+								String[] priceParts = ChatUtils.stripColorFormatting(lines[2]).split(" ");
+								// Price check
+								if (priceParts[0].equalsIgnoreCase("B")) {
+									// Only buying
+									if (priceParts.length == 2) {
+										ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), 0);
+									}
+									// Both buying and selling
+									else if (priceParts.length == 5) {
+										ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), getDecimalShopPrice(priceParts[1]), getDecimalShopPrice(priceParts[4]));
+									}
+								} else {
+									ShopUtils.createOrUpdateShop(e, null, heldItem, getShopQuantity(lines[1]), 0, getDecimalShopPrice(priceParts[1]));
+								}
+							} else {
+								// Forceful display of the shop in error
+								if (canShopBeRemoved(e)) {
+									displayInvalidFields(e, new int[] { 1, 0, 0, 0}, false);
+								}
+								player.sendMessage(ChatUtils.chatMessage("&cYou are not holding an item!"));
+							}
+						} else {
+							if (canShopBeRemoved(e)) {
+								displayInvalidFields(e, validSignFormatResult, false);
+							}
+						}
+					}
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou must create the Shop using a Wall Sign!"));
+				}
+			}
+			// Remove if the shop previously existed and now was changed
+			else {
+				if (ShopUtils.getShopFromLocation(e.getBlock().getLocation()) != null) {
+					if (canShopBeRemoved(e)) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+					}
 				}
 			}
 		}

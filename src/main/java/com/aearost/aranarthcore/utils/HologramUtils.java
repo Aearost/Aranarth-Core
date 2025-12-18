@@ -47,6 +47,7 @@ public class HologramUtils {
             hologram.setVelocity(new Vector(0, 0, 0));
             hologram.setInvulnerable(true);
             hologram.setPersistent(true);
+            hologram.setBackgroundColor(null);
             String coloredText = ChatUtils.translateToColor(text);
             String textWithNewLines = coloredText.replaceAll("\\\\n", "\n");
             hologram.setText(textWithNewLines);
