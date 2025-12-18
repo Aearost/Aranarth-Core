@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -104,15 +103,12 @@ public class ShopDestroy {
 			}
 
 			Block relative = block.getRelative(face);
-			Bukkit.getLogger().info("Face: " + face.name() + " | " + relative.getLocation().getBlockX() + "," + relative.getLocation().getBlockY() + "," + relative.getLocation().getBlockZ());
 
 			if (!(relative.getState() instanceof Sign signState)) {
-				Bukkit.getLogger().info("Is NOT sign");
 				continue;
 			} else {
 				if (signState.getBlockData() instanceof WallSign wallSign) {
 					BlockFace attachedFace = wallSign.getFacing().getOppositeFace();
-					Bukkit.getLogger().info("Attached Face: " + attachedFace.name() + " | " + relative.getLocation().getBlockX() + "," + relative.getLocation().getBlockY() + "," + relative.getLocation().getBlockZ());
 
 					if (relative.getRelative(attachedFace).equals(block)) {
 						if (ShopUtils.getShopFromLocation(relative.getLocation()) != null) {

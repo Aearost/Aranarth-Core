@@ -5,9 +5,7 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -75,7 +73,7 @@ public class ShopInteract {
 							return;
 						}
 
-						handleSellLogic(player, clickUser, shopUser, shop, locationBelow);
+						handleSellLogic(e, player, clickUser, shopUser, shop, locationBelow);
 					}
 				} else {
 					if (player.isSneaking()) {
@@ -121,8 +119,14 @@ public class ShopInteract {
 							else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
 								return;
 							}
-
-							handleSellLogic(player, clickUser, null, shop, null);
+							if (player.getGameMode() != GameMode.CREATIVE) {
+								handleSellLogic(e, player, clickUser, null, shop, null);
+							} else {
+								e.setCancelled(false);
+								ShopUtils.removeShop(shop);
+								player.sendMessage(ChatUtils.chatMessage("&7You have destroyed this shop"));
+								player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 0.1F);
+							}
 						}
 					}
 				} else {
@@ -281,13 +285,14 @@ public class ShopInteract {
 
 	/**
 	 * Handles all logic involving selling to a shop.
+	 * @param e The event.
 	 * @param player The player selling the shop.
 	 * @param clickUser The user that clicked the shop sign.
 	 * @param shopUser The user that owns the shop.
 	 * @param shop The shop.
 	 * @param locationBelow The location below the shop sign.
 	 */
-	private void handleSellLogic(Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop shop, Location locationBelow) {
+	private void handleSellLogic(PlayerInteractEvent e, Player player, AranarthPlayer clickUser, AranarthPlayer shopUser, Shop shop, Location locationBelow) {
 		if (shop.getSellPrice() > 0) {
 			boolean isPlayerShop = locationBelow != null;
 
@@ -379,7 +384,13 @@ public class ShopInteract {
 			if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
 				return;
 			}
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+			if (shop.getUuid() != null) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's shop!"));
+			} else {
+				if (AranarthUtils.getPlayer(player.getUniqueId()).getCouncilRank() < 3) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy a server shop!"));
+				}
+			}
 		}
 	}
 
