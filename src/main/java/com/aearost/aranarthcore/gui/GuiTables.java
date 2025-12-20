@@ -31,7 +31,7 @@ public class GuiTables {
 		ItemStack smithing = new ItemStack(Material.SMITHING_TABLE);
 		gui.setItem(2, smithing);
 		ItemStack cartography = new ItemStack(Material.CARTOGRAPHY_TABLE);
-		gui.setItem(3, crafting);
+		gui.setItem(3, cartography);
 		ItemStack loom = new ItemStack(Material.LOOM);
 		gui.setItem(4, loom);
 		ItemStack anvil = new ItemStack(Material.ANVIL);
