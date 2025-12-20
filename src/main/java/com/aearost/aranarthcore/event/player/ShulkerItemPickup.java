@@ -11,8 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-import java.util.Objects;
-
 /**
  * Automatically places picked up items that have incomplete stacks in a shulker
  * box into that stack. This only works when you have at least 1 free inventory slot.
@@ -23,14 +21,8 @@ public class ShulkerItemPickup {
 		Player player = (Player) e.getEntity();
 		ItemStack pickupItem = e.getItem().getItemStack();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
-			for (ItemStack blacklistedItem : aranarthPlayer.getBlacklist()) {
-				if (pickupItem.getType() == blacklistedItem.getType()) {
-					if (player.hasPermission("aranarth.blacklist")) {
-						return;
-					}
-				}
-			}
+		if (AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupItem) == -1) {
+			return;
 		}
 
 		int amountRemaining = pickupItem.getAmount();
