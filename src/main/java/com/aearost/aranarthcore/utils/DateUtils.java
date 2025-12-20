@@ -869,6 +869,26 @@ public class DateUtils {
 	}
 
 	/**
+	 * Determines and provides the radius of weather functionality proportional to the amount of online players.
+	 * @return The radius that weather should apply.
+	 */
+	private int getWeatherRadius() {
+		int onlinePlayers = Bukkit.getOnlinePlayers().size();
+		if (onlinePlayers <= 3) {
+			return 250;
+		} else if (onlinePlayers <= 5) {
+			return 200;
+		} else if (onlinePlayers <= 7) {
+			return 150;
+		} else if (onlinePlayers <= 9) {
+			return 100;
+		}
+
+		// Do not go lower than 50 blocks
+		return 50;
+	}
+
+	/**
 	 * Calculates the snowstorm duration and delays during the winter months of Aranarth.
 	 * Also applies the custom snow particle effects when it is snowing.
 	 * @param bigFlakeDensity The density of the larger snowflakes, being end rod particles.
@@ -1093,7 +1113,7 @@ public class DateUtils {
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
-		int snowRadius = 250;
+		int snowRadius = getWeatherRadius();
 
 		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
 			List<Block> toSnow = new ArrayList<>();
@@ -1246,7 +1266,7 @@ public class DateUtils {
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
 		World world = loc.getWorld();
-		int iceRadius = 250;
+		int iceRadius = getWeatherRadius();
 
 		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
 			List<Block> toFreeze = new ArrayList<>();
@@ -1366,7 +1386,7 @@ public class DateUtils {
 
 								int centerX = loc.getBlockX();
 								int centerZ = loc.getBlockZ();
-								int meltRadius = 250;
+								int meltRadius = getWeatherRadius();
 								World world = loc.getWorld();
 								Random random = new Random();
 
