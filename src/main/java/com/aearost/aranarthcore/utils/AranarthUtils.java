@@ -1342,8 +1342,8 @@ public class AranarthUtils {
 	public static void refreshBans() {
 		ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
 		List<BanEntry<PlayerProfile>> toRemove = new ArrayList<>();
-		for (BanEntry<PlayerProfile> entry : profileBanList.getEntries()) {
-			PlayerProfile profile = entry.getBanTarget();
+		for (BanEntry<? super com.destroystokyo.paper.profile.PlayerProfile> entry : profileBanList.getEntries()) {
+			PlayerProfile profile = (PlayerProfile) entry.getBanTarget();
 			UUID uuid = profile.getUniqueId();
 			// If the player's ban is temporary
 			if (entry.getExpiration() != null) {
