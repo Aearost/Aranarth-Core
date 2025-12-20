@@ -108,52 +108,55 @@ public class DominionProtection implements Listener {
 	 */
 	@EventHandler
 	public void onAttackEntity(EntityDamageEvent e) {
-		if (e.getEntity() != null) {
-			EntityType type = e.getEntity().getType();
-			// Armor stands are considered alive
-			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
-				if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (!aranarthPlayer.getIsInAdminMode()) {
-						boolean isActionPrevented = applyLogic(player, null, e.getEntity());
-						if (isActionPrevented) {
-							e.setCancelled(true);
+		String name = e.getEntity().getLocation().getWorld().getName();
+		if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+			if (e.getEntity() != null) {
+				EntityType type = e.getEntity().getType();
+				// Armor stands are considered alive
+				if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
+					if (e.getDamageSource().getCausingEntity() instanceof Player player) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						if (!aranarthPlayer.getIsInAdminMode()) {
+							boolean isActionPrevented = applyLogic(player, null, e.getEntity());
+							if (isActionPrevented) {
+								e.setCancelled(true);
+							}
 						}
 					}
 				}
-			}
-			// Prevents PvP
-			else if (e.getEntity() instanceof Player target) {
-				if (e.getDamageSource().getCausingEntity() != null) {
-					if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-						Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-						Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
-						if (attackerDominion != null && targetDominion != null) {
-							// Prevent PvP within the same Dominion
-							if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
-								e.setCancelled(true);
-								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are both in &e" + attackerDominion.getName()));
-							}
-							// Prevent PvP between allies
-							else if (DominionUtils.areAllied(attackerDominion, targetDominion)) {
-								e.setCancelled(true);
-								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &5Allied"));
-							}
-							// Prevent PvP between truces
-							else if (DominionUtils.areTruced(attackerDominion, targetDominion)) {
-								e.setCancelled(true);
-								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &dTruced"));
-							} else {
-								Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
-								// Prevent damage if they're in their own Dominion's land and you are not allied, truced, or enemied
-								if (chunkDominion != null && chunkDominion.getLeader().equals(targetDominion.getLeader())) {
-									if (!DominionUtils.areEnemied(attackerDominion, targetDominion)) {
-										e.setCancelled(true);
-										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-										attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7in their lands as you are &fNeutral"));
+				// Prevents PvP
+				else if (e.getEntity() instanceof Player target) {
+					if (e.getDamageSource().getCausingEntity() != null) {
+						if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+							Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+							Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
+							if (attackerDominion != null && targetDominion != null) {
+								// Prevent PvP within the same Dominion
+								if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
+									e.setCancelled(true);
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are both in &e" + attackerDominion.getName()));
+								}
+								// Prevent PvP between allies
+								else if (DominionUtils.areAllied(attackerDominion, targetDominion)) {
+									e.setCancelled(true);
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &5Allied"));
+								}
+								// Prevent PvP between truces
+								else if (DominionUtils.areTruced(attackerDominion, targetDominion)) {
+									e.setCancelled(true);
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &dTruced"));
+								} else {
+									Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
+									// Prevent damage if they're in their own Dominion's land and you are not allied, truced, or enemied
+									if (chunkDominion != null && chunkDominion.getLeader().equals(targetDominion.getLeader())) {
+										if (!DominionUtils.areEnemied(attackerDominion, targetDominion)) {
+											e.setCancelled(true);
+											AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+											attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7in their lands as you are &fNeutral"));
+										}
 									}
 								}
 							}
