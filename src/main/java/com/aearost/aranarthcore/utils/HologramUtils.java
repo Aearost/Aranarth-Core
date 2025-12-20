@@ -27,6 +27,10 @@ public class HologramUtils {
             return false;
         }
 
+        if (!location.getChunk().isLoaded()) {
+            return false;
+        }
+
         boolean isLocationAlreadyUsed = false;
         for (TextDisplay textDisplay : holograms) {
             int x = location.getBlockX();
