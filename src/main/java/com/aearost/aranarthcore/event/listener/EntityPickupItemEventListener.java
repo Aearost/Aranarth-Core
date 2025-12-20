@@ -13,7 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 
 /**
- * Centralizes all logic to be called by a change to a block by an entity.
+ * Centralizes all logic to be called by an entity picking up an item.
  */
 public class EntityPickupItemEventListener implements Listener {
 
@@ -25,9 +25,9 @@ public class EntityPickupItemEventListener implements Listener {
     public void onItemPickup(EntityPickupItemEvent e) {
 
         if (e.getEntity() instanceof Player player) {
+            new BlacklistItemPickupPrevent().execute(e);
             new CompressorItemPickup().execute(e);
             new ShulkerItemPickup().execute(e);
-            new BlacklistItemPickupPrevent().execute(e);
         } else if (e.getEntityType() == EntityType.ZOMBIE || e.getEntityType() == EntityType.ZOMBIE_VILLAGER) {
             new EntityEggPickupCancel().execute(e);
         }

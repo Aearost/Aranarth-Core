@@ -25,6 +25,8 @@ Features
 [+] Added in /ac hat
 [+] Added in /ac compress and compressor functionality
 [+] Added a GUI for /ac potions
+[+] Added in crates functionality
+[+] Added in voting functionality
 [+] Added in hard caps to the number of available potions and quiver slots a player has access to
 [+] Updated chat format to support ranks and pronouns
 [+] Added discord role auto-assignment when rank is changed (rankup or by command)
@@ -82,6 +84,23 @@ Features
 [~] Fixed bug where sugarcane blocks were being uncrafted into bamboo instead of sugarcane
 [+] Fixed issue where flowing water was freezing during winter months
 [+] Implemented server boosts
+[-] Pets can now be harmed so long as they are not in their Dominion territory
+[+] Pets will automatically un-sit once attacked
+[+] Twins born during Calorvor are now tamed by default if the parents were tamed
+[-] Removed the waterfall particles as they were a significant source of server lag
+[+] Added Dominion deposit and withdrawal functionality
+[+] Added in hologram creation
+[+] All AranarthCore recipes are added to players by default
+[+] Dominion chunks are required to be connected now
+[+] Dominion chunks are limited based on the number of players in it (25 chunks per player)
+[+] Dominions can now be renamed via /ac dominion rename
+[+] Leaders can be changed in a Dominion via /ac dominion setleader
+[+] Dominion relations have been implemented and prevent or allow different interactions such as PvP or door opening
+[-] Decreased the number of homes available to Saints
+[~] Dominion names are limited to 30 characters excluding color formatting
+[~] Fixed bug where you could not destroy the block in front of a shop
+[~] Added dynamic snow and ice melting/forming based on the number of online players due to major performance impacts
+[~] Corrected issues where blacklisted items were not being ignored or trashed
 
 Miscellaneous
 - Removed redundant logs from weather
@@ -95,3 +114,6 @@ Miscellaneous
 - Added support for all admin council ranks to use /ac balance to update a player's balance
 - Centralized all arena logic in one grouped event listener class
 - Updated all underscore characters of field separators in persisting files
+- Re-wrote chest locking functionality as it had several gaps and difficulties integrating with player shops
+- Updated plugin to be based on Paper 1.21.11 instead of Spigot
+- Updated all references to .playSound() to be at the player itself rather than the player's location
