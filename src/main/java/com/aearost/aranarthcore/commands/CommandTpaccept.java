@@ -25,6 +25,14 @@ public class CommandTpaccept {
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
+					if (target.getLocation().getWorld().getName().startsWith("smp")) {
+						if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
+							target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
+							return true;
+						}
+					}
+
 					boolean wasSuccessful = AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation());
 					if (wasSuccessful) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
@@ -47,6 +55,14 @@ public class CommandTpaccept {
 				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 				// If both players are still online
 				if (target != null) {
+					if (player.getLocation().getWorld().getName().startsWith("smp")) {
+						if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
+							target.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
+							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
+							return true;
+						}
+					}
+
 					boolean wasSuccessful = AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation());
 					if (wasSuccessful) {
 						target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
