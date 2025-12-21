@@ -101,6 +101,7 @@ Features
 [~] Fixed bug where you could not destroy the block in front of a shop
 [~] Added dynamic snow and ice melting/forming based on the number of online players due to major performance impacts
 [~] Corrected issues where blacklisted items were not being ignored or trashed
+[~] Players that are not OGs can no longer teleport to the SMP via /ac tpaccept
 
 Miscellaneous
 - Removed redundant logs from weather
