@@ -1594,8 +1594,9 @@ public class PersistenceUtils {
 
 	/**
 	 * Initializes the holograms based on the contents of holograms.txt.
+	 * @param isFromAutomaticRefresh Whether the method is run from the automatic plugin file refresh.
 	 */
-	public static void loadTextHolograms() {
+	public static void loadTextHolograms(boolean isFromAutomaticRefresh) {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
 				+ "holograms.txt";
@@ -1621,7 +1622,7 @@ public class PersistenceUtils {
 				int z = Integer.parseInt(parts[3]);
 				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
 				String text = parts[4];
-				HologramUtils.createHologram(location, text);
+				HologramUtils.createHologram(location, text, isFromAutomaticRefresh);
 			}
 			Bukkit.getLogger().info("The holograms have been initialized");
 			reader.close();
