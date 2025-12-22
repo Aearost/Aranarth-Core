@@ -107,6 +107,7 @@ Features
 [~] Fixed bug where snow was forming under blocks it shouldn't have been
 [~] Fixed bug where opening a container while holding a splash/lingering potion would add one from the potion inventory
 [~] Updated the mcmmo potion name check to be Paper-based
+[~] Fixed issues where end portals would teleport you to the incorrect location
 
 Miscellaneous
 - Removed redundant logs from weather
