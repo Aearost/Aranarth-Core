@@ -67,8 +67,10 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveCompressible();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
+
+				AranarthUtils.removeInactiveLockedContainers();
 			}
-		}, 36000, 36000);
+		}, 100, 100);
 
 		// Run every 10 minutes
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
