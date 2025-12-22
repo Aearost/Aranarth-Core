@@ -7,10 +7,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -41,12 +41,25 @@ public class PotionConsumeListener implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onPotionUse(final PlayerInteractEvent e) {
-		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (Objects.nonNull(e.getItem())) {
-				if (e.getItem().getType() == Material.SPLASH_POTION
-						|| e.getItem().getType() == Material.LINGERING_POTION) {
-                    replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
+	public void onPotionUse(final ProjectileLaunchEvent e) {
+		if (e.getEntity() instanceof ThrownPotion potion) {
+			if (potion.getShooter() instanceof Player player) {
+				int heldSlot = player.getInventory().getHeldItemSlot();
+
+				// Thrown from off-hand while holding nothing
+				ItemStack heldItem = player.getInventory().getStorageContents()[heldSlot];
+				if (heldItem == null) {
+					replacePotion(player, potion.getItem(), false);
+				} else {
+					Material heldType = heldItem.getType();
+					// Thrown from off-hand while holding an item that is not a splash or lingering potion
+					if (heldType != Material.SPLASH_POTION && heldType != Material.LINGERING_POTION) {
+						replacePotion(player, potion.getItem(), false);
+					}
+					// Thrown from main-hand
+					else {
+						replacePotion(player, potion.getItem(), true);
+					}
 				}
 			}
 		}
@@ -90,6 +103,9 @@ public class PotionConsumeListener implements Listener {
 						}
 						
 						if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
+							Bukkit.getLogger().info("Used potion");
+							ItemStack potionCopy = potion.clone();
+
 							potions.put(potion, potions.get(potion) - 1);
 							if (potions.get(potion) == 0) {
 								potions.remove(potion);
@@ -97,10 +113,14 @@ public class PotionConsumeListener implements Listener {
 							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-							// Temporarily adds a potion to allow for auto-replacement
-							ItemStack potionCopy = potion.clone();
-							potionCopy.setAmount(2);
-							player.getInventory().setItem(slot, potionCopy);
+							// Replaces the potion with the copy
+							potionCopy.setAmount(1);
+							Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+								@Override
+								public void run() {
+									player.getInventory().setItem(slot, potionCopy);
+								}
+							}, 1);
 						} else {
 							potions.put(potion, potions.get(potion) - 1);
 							if (potions.get(potion) == 0) {
