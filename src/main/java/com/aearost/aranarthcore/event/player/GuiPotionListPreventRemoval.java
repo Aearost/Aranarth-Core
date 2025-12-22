@@ -8,7 +8,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
  */
 public class GuiPotionListPreventRemoval {
 	public void execute(InventoryClickEvent e) {
-		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Potions")) {
+		if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Potions")) {
 			e.setCancelled(true);
 		}
 	}
