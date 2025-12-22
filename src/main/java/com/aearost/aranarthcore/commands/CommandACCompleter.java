@@ -492,6 +492,7 @@ public class CommandACCompleter implements TabCompleter {
 			case "particles" -> {
 				if (args.length == 2) {
 					if (args[1].isEmpty()) {
+						displayedOptions.add("200");
 						displayedOptions.add("100");
 						displayedOptions.add("10");
 						displayedOptions.add("0");
