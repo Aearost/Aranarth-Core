@@ -10,6 +10,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
 
 /**
  * Dynamically updates the number of potions that will be in the player's pouch as they add potions.
@@ -30,7 +32,6 @@ public class GuiPotionAdd {
 		}
 		boolean hasSpaceInPotionGui = filledPotionInventorySlotNum < 54;
 
-		// Clicking in the potions inventory
 		if (e.getClickedInventory().getType() == InventoryType.CHEST) {
 			// Adding potion by placing in potions inventory
 			if (e.getAction() == InventoryAction.PLACE_ALL) {
@@ -76,9 +77,13 @@ public class GuiPotionAdd {
 						}
 
 						ItemStack item = e.getView().getBottomInventory().getItem(e.getHotbarButton()).clone();
-						addPotion(player, top, item, potionGuiSlot, true);
-						e.getView().getBottomInventory().setItem(hotbarSlot, null);
-						e.getView().setTitle("Add Potions " + potionStats);
+						boolean wasAdded = addPotion(player, top, item, potionGuiSlot, true);
+						if (wasAdded) {
+							e.getView().getBottomInventory().setItem(hotbarSlot, null);
+							e.getView().setTitle("Add Potions " + potionStats);
+						} else {
+							e.setCancelled(true);
+						}
 					}
 				}
 				// Removing potion
@@ -118,10 +123,12 @@ public class GuiPotionAdd {
 						potionStats = "&c" + potionStats;
 					}
 
-					addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
-					e.getView().setTitle("Add Potions " + potionStats);
-				} else {
-
+					boolean wasAdded = addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
+					if (wasAdded) {
+						e.getView().setTitle("Add Potions " + potionStats);
+					} else {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
@@ -135,8 +142,8 @@ public class GuiPotionAdd {
 	 * @param slot The slot that the potion will be going into.
 	 * @param fromManualClick Whether the click was done manually.
 	 */
-	private void addPotion(Player player, Inventory top, ItemStack potion, int slot, boolean fromManualClick) {
-		if (isPotion(potion)) {
+	private boolean addPotion(Player player, Inventory top, ItemStack potion, int slot, boolean fromManualClick) {
+		if (isValidPotion(potion)) {
 			ItemStack potionCopy = potion.clone();
 
 			Inventory newInventory = new GuiPotions(player, 1).getInitializedGui();
@@ -160,7 +167,9 @@ public class GuiPotionAdd {
 
 			aranarthPlayer.setIsAddingPotions(false);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			return true;
 		}
+		return false;
 	}
 
 	/**
@@ -172,7 +181,7 @@ public class GuiPotionAdd {
 	 * @param fromManualClick Whether the click was done manually.
 	 */
 	private void removePotion(Player player, Inventory top, ItemStack potion, int slot, boolean fromManualClick) {
-		if (isPotion(potion)) {
+		if (isValidPotion(potion)) {
 			ItemStack potionCopy = potion.clone();
 
 			Inventory newInventory = new GuiPotions(player, 1).getInitializedGui();
@@ -205,13 +214,27 @@ public class GuiPotionAdd {
 	}
 
 	/**
-	 * Provides confirmation whether the item is a potion or not.
+	 * Provides confirmation whether the item is a valid potion or not.
 	 * @param item The item.
-	 * @return Confirmation whether the item is a potion or not.
+	 * @return Confirmation whether the item is a valid potion or not.
 	 */
-	private boolean isPotion(ItemStack item) {
-		return (item.getType() == Material.POTION
+	private boolean isValidPotion(ItemStack item) {
+		if (item.getType() == Material.POTION
 				|| item.getType() == Material.SPLASH_POTION
-				|| item.getType() == Material.LINGERING_POTION);
+				|| item.getType() == Material.LINGERING_POTION) {
+			PotionMeta meta = (PotionMeta) item.getItemMeta();
+			// Prevent potions without effects from being added
+			if (meta.getBasePotionType() == PotionType.AWKWARD || meta.getBasePotionType() == PotionType.MUNDANE
+					|| meta.getBasePotionType() == PotionType.THICK || meta.getBasePotionType() == PotionType.WATER) {
+				// Allows mcMMO potions
+				if (!meta.getCustomEffects().isEmpty()) {
+					return true;
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
 	}
+
 }
