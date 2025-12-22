@@ -100,6 +100,8 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.metalclips", false);
 		perms.setPermission("bending.ability.sonicblast", false);
 		perms.setPermission("bending.ability.suffocate", false);
+		perms.setPermission("bending.earth.lavaflux", false);
+		perms.setPermission("bending.earth.fissure", false);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);
@@ -203,6 +205,7 @@ public class PermissionUtils {
 				perms.setPermission("bending.ability.elementsphere.water", false);
 				perms.setPermission("bending.ability.elementsphere.stream", false);
 				perms.setPermission("bending.ability.spiritbeam", false);
+				perms.setPermission("bending.earth.lavaflux", true);
 
 				evaluatePlayerPermissions((Player) player, false);
 			}
@@ -350,27 +353,25 @@ public class PermissionUtils {
 		// Blue Fire
 		if (parts[10].equals("1")) {
 			perms.setPermission("bending.fire.bluefire", true);
-			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
 			if (bendingPlayer == null) {
 				return;
 			}
 
 			if (bendingPlayer.getElements().contains(Element.FIRE)) {
-				if (!bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-					if (!isSecondCall) {
-						Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-							@Override
-							public void run() {
-								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
-							}
-						}, 50);
-					}
+				if (!isSecondCall) {
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+						@Override
+						public void run() {
+							Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
+						}
+					}, 50);
 				}
 				perms.setPermission("bending.donor", true);
 			}
 		} else if (parts[10].equals("0")) {
 			perms.setPermission("bending.fire.bluefire", false);
-			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
 			if (bendingPlayer == null) {
 				return;
 			}
@@ -380,7 +381,7 @@ public class PermissionUtils {
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
 						@Override
 						public void run() {
-							BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+							OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
 							if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
 								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
 							}
@@ -458,6 +459,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.firecomet", true);
 			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("aranarth.nick.color", true);
+			perms.setPermission("bending.earth.lavaflux", true);
+			perms.setPermission("bending.earth.fissure", true);
 		} else {
 			return;
 		}

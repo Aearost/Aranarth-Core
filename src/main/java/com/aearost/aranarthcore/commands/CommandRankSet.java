@@ -88,6 +88,7 @@ public class CommandRankSet {
 					// Limited from 0 to 3
 					else if (args[1].equals("saint")) {
 						if (rank <= 3) {
+							// Enables all materials to be compressed by default
 							if (rank == 3) {
 								AranarthUtils.compressAllMaterials(player.getUniqueId());
 							}
