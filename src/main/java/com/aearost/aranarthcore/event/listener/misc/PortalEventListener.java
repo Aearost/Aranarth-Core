@@ -35,7 +35,8 @@ public class PortalEventListener implements Listener {
 		// No cause for entities, must get it from the environment
 		Entity entity = e.getEntity();
 		World fromWorld = e.getFrom().getWorld();
-		TeleportCause cause = determinePortalType(fromWorld);
+		World toWorld = e.getTo().getWorld();
+		TeleportCause cause = determinePortalType(fromWorld, toWorld);
 		Location destination = determinePortalDestinationLocation(e.getFrom(), entity, cause, e);
 		if (destination != null) {
 			e.setTo(destination);
@@ -45,14 +46,27 @@ public class PortalEventListener implements Listener {
 	/**
 	 * Determines the type of portal that was used.
 	 * @param fromWorld The world that the portal was used in.
+	 * @param toWorld The world that the portal is going to.
 	 * @return The cause of the teleportation.
 	 */
-	private TeleportCause determinePortalType(World fromWorld) {
+	private TeleportCause determinePortalType(World fromWorld, World toWorld) {
 		Environment environment = fromWorld.getEnvironment();
-		if (environment == Environment.THE_END) {
-			return TeleportCause.END_PORTAL;
+		if (fromWorld.getEnvironment() == Environment.NORMAL) {
+			if (toWorld.getEnvironment() == Environment.NETHER) {
+				return TeleportCause.NETHER_PORTAL;
+			} else if (toWorld.getEnvironment() == Environment.THE_END) {
+				return TeleportCause.END_PORTAL;
+			}
+		} else if (fromWorld.getEnvironment() == Environment.NETHER) {
+			if (toWorld.getEnvironment() == Environment.NORMAL) {
+				return TeleportCause.NETHER_PORTAL;
+			}
+		} else if (fromWorld.getEnvironment() == Environment.THE_END) {
+			if (toWorld.getEnvironment() == Environment.NORMAL) {
+				return TeleportCause.END_PORTAL;
+			}
 		}
-		return TeleportCause.NETHER_PORTAL;
+		return TeleportCause.UNKNOWN;
 	}
 
 	/**
@@ -123,8 +137,13 @@ public class PortalEventListener implements Listener {
 					}
 				}
 
+				// Consistently at this location
 				to.setWorld(targetWorld);
-				to = targetWorld.getSpawnLocation();
+				to.setX(100.5);
+				to.setY(49.1);
+				to.setZ(0.5);
+				to.setYaw(90);
+				to.setPitch(0);
 			}
 		}
 
