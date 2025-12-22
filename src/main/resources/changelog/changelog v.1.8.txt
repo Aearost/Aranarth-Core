@@ -103,6 +103,7 @@ Features
 [~] Corrected issues where blacklisted items were not being ignored or trashed
 [~] Players that are not OGs can no longer teleport to the SMP via /ac tpaccept
 [~] TnT explosion damage is only limited when the explosion is in a Dominion
+[~] Fixed issue where teleporting while bending was toggled would un-toggle it
 
 Miscellaneous
 - Removed redundant logs from weather

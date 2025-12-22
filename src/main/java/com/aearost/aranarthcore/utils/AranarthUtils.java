@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.objects.*;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.Block;
@@ -1495,6 +1496,13 @@ public class AranarthUtils {
 	 * @return Confirmation that the teleport was successful
 	 */
 	public static boolean teleportPlayer(Player player, Location from, Location to) {
+		// Teleporting seems to manually toggle on a player's bending when it was toggled off
+		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		boolean isToggled = false;
+		if (!bendingPlayer.isToggled()) {
+			isToggled = true;
+		}
+
 		player.teleport(getSafeTeleportLocation(to));
 		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 
@@ -1505,6 +1513,10 @@ public class AranarthUtils {
 
 		try {
 			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
+			// Toggles off the bending if it should be toggled off
+			if (isToggled) {
+				bendingPlayer.toggleBending();
+			}
 			return true;
 		} catch (IOException e) {
 			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
