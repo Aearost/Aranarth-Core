@@ -106,6 +106,7 @@ Features
 [~] Fixed issue where teleporting while bending was toggled would un-toggle it
 [~] Fixed bug where snow was forming under blocks it shouldn't have been
 [~] Fixed bug where opening a container while holding a splash/lingering potion would add one from the potion inventory
+[~] Updated the mcmmo potion name check to be Paper-based
 
 Miscellaneous
 - Removed redundant logs from weather

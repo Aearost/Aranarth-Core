@@ -1674,8 +1674,17 @@ public class AranarthUtils {
 			}
 
 			// If it is an mcMMO potion
-			if (potion.hasItemMeta() && potion.getItemMeta().hasItemName()) {
-				potionName = potion.getItemMeta().getItemName();
+			if (potion.hasItemMeta() && potion.getItemMeta().hasCustomName()) {
+				// customName() is in the following format by default
+				/*
+				TextComponentImpl{content="", style=StyleImpl{obfuscated=not_set, bold=not_set, strikethrough=not_set,
+					underlined=not_set, italic=not_set, color=null, shadowColor=null, clickEvent=null, hoverEvent=null,
+					insertion=null, font=null}, children=[TextComponentImpl{content="Potion Of Haste",
+					style=StyleImpl{obfuscated=false, bold=false, strikethrough=false, underlined=false, italic=false, color=null,
+					shadowColor=null, clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}]}
+				 */
+				String[] componentParts = (potion.getItemMeta().customName().children().get(0) + "").split("\"");
+				potionName = componentParts[1];
 			} else {
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				if (meta != null) {
