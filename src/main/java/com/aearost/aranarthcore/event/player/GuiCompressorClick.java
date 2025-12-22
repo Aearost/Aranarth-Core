@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiCompressor;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -29,7 +30,21 @@ public class GuiCompressorClick {
 
 		int slot = e.getSlot();
 		if (slot < 9 || slot >= 35) {
-			if (slot == 40) {
+			// Toggle compressor
+			if (slot == 4) {
+				player.closeInventory();
+				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
+				if (aranarthPlayer.getIsCompressingItems()) {
+					aranarthPlayer.setIsCompressingItems(false);
+					player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
+				} else {
+					aranarthPlayer.setIsCompressingItems(true);
+					player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
+				}
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			}
+			// Exit
+			else if (slot == 40) {
 				player.closeInventory();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
 			}

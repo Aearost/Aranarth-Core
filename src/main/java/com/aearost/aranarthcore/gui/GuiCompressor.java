@@ -38,15 +38,31 @@ public class GuiCompressor {
 		gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
 		ItemStack blank = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
+		ItemMeta blankMeta = blank.getItemMeta();
+		blankMeta.setDisplayName(ChatUtils.translateToColor("&f"));
+		blank.setItemMeta(blankMeta);
 		gui.setItem(0, blank);
 		gui.setItem(1, blank);
 		gui.setItem(2, blank);
 		gui.setItem(3, blank);
-		gui.setItem(4, blank);
 		gui.setItem(5, blank);
 		gui.setItem(6, blank);
 		gui.setItem(7, blank);
 		gui.setItem(8, blank);
+
+		Material toggledType = Material.LIME_STAINED_GLASS_PANE;
+		if (!aranarthPlayer.getIsCompressingItems()) {
+			toggledType = Material.RED_STAINED_GLASS_PANE;
+		}
+		ItemStack toggled = new ItemStack(toggledType);
+		ItemMeta toggledMeta = toggled.getItemMeta();
+		if (aranarthPlayer.getIsCompressingItems()) {
+			toggledMeta.setDisplayName(ChatUtils.translateToColor("&a&lCompressor is toggled on"));
+		} else {
+			toggledMeta.setDisplayName(ChatUtils.translateToColor("&c&lCompressor is toggled off"));
+		}
+		toggled.setItemMeta(toggledMeta);
+		gui.setItem(4, toggled);
 
 		ItemStack coal = new ItemStack(Material.COAL);
 		String coalActive = getStatusOfItem(uuid, coal.getType());
