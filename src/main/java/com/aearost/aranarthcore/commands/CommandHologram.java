@@ -77,7 +77,7 @@ public class CommandHologram {
 
 			Location location = new Location(player.getWorld(), x, y, z);
 			if (args[1].equalsIgnoreCase("create")) {
-				boolean wasCreated = HologramUtils.createHologram(location, assembledMsg);
+				boolean wasCreated = HologramUtils.createHologram(location, assembledMsg, false);
 				if (wasCreated) {
 					player.sendMessage(ChatUtils.chatMessage("&7The hologram was created successfully"));
 					player.playSound(player, Sound.BLOCK_LAVA_POP, 1.5F, 2F);

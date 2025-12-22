@@ -4,10 +4,14 @@ import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Display;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,14 +25,22 @@ public class HologramUtils {
         return holograms;
     }
 
-    public static boolean createHologram(Location location, String text) {
+    public static boolean createHologram(Location location, String text, boolean isFromAutomaticRefresh) {
         // Prevents use of the separator character
         if (text.contains("||")) {
             return false;
         }
 
-        if (!location.getChunk().isLoaded()) {
+        if (isFromAutomaticRefresh && !hasPlayerNearbyHologram(location)) {
             return false;
+        }
+
+        BoundingBox box = BoundingBox.of(location, 0.5, 3, 0.5);
+        Collection<Entity> nearby = location.getWorld().getNearbyEntities(box);
+        for (Entity entity : nearby) {
+            if (entity instanceof TextDisplay) {
+                entity.remove();
+            }
         }
 
         boolean isLocationAlreadyUsed = false;
@@ -86,23 +98,69 @@ public class HologramUtils {
 
     /**
      * Removes all holograms from the world.
+     * @param isFromAutomaticRefresh If the method was called by the automatic refresh of persisting files.
      */
-    public static void removeAllHolograms() {
+    public static void removeAllHolograms(boolean isFromAutomaticRefresh) {
         PersistenceUtils.saveTextHolograms();
-        // Manually remove holograms in case a server crash caused them to remain incorrectly
-        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "kill @e[type=minecraft:text_display]");
-        holograms.clear();
+
+        List<Integer> toRemove = new ArrayList<>();
+        for (int i = 0; i < holograms.size(); i++) {
+            TextDisplay hologram = holograms.get(i);
+            if (isFromAutomaticRefresh && !hasPlayerNearbyHologram(hologram.getLocation())) {
+                continue;
+            }
+
+            // Verifies there are no leftover holograms at the location
+            Location location = hologram.getLocation();
+            BoundingBox box = BoundingBox.of(location, 0.5, 3, 0.5);
+            Collection<Entity> nearby = location.getWorld().getNearbyEntities(box);
+            for (Entity entity : nearby) {
+                if (entity instanceof TextDisplay) {
+                    entity.remove();
+                }
+            }
+            toRemove.add(i);
+        }
+
+        // Remove from last to first
+        for (int i = holograms.size() - 1; i > 0; i--) {
+            if (toRemove.contains(i)) {
+                holograms.remove(i);
+            }
+        }
     }
 
     /**
-     * Adds all holograms to the world.
+     * Refreshes all holograms to the world.
      */
-    public static void initializeAllHolograms() {
+    public static void refreshHolograms() {
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
             @Override
             public void run() {
-                PersistenceUtils.loadTextHolograms();
+                PersistenceUtils.loadTextHolograms(true);
             }
         }, 1);
+    }
+
+    /**
+     * Determines if there are players nearby the hologram.
+     * @param location The location of the hologram.
+     * @return Confirmation if there are players nearby the hologram.
+     */
+    public static boolean hasPlayerNearbyHologram(Location location) {
+        BoundingBox box = BoundingBox.of(location, 200, 150, 200);
+        Collection<Entity> nearby = location.getWorld().getNearbyEntities(box);
+        int playerNum = 0;
+        for (Entity entity : nearby) {
+            if (entity instanceof Player) {
+                playerNum++;
+            }
+        }
+
+        if (playerNum == 0) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }
