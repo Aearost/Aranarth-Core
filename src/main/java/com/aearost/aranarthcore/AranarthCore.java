@@ -70,7 +70,7 @@ public class AranarthCore extends JavaPlugin {
 
 				AranarthUtils.removeInactiveLockedContainers();
 			}
-		}, 100, 100);
+		}, 36000, 36000);
 
 		// Run every 10 minutes
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
