@@ -1094,7 +1094,7 @@ public class DateUtils {
 				Material.OXEYE_DAISY, Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.CLOSED_EYEBLOSSOM, Material.OPEN_EYEBLOSSOM,
 				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH, Material.SNOW, Material.AIR,
 				Material.ICE, Material.PACKED_ICE, Material.BLUE_ICE, Material.LARGE_FERN, Material.SWEET_BERRY_BUSH, Material.WILDFLOWERS,
-				Material.LEAF_LITTER, Material.FIREFLY_BUSH, Material.BUSH, Material.PALE_HANGING_MOSS
+				Material.LEAF_LITTER, Material.FIREFLY_BUSH, Material.BUSH, Material.PALE_HANGING_MOSS, Material.TALL_GRASS
 		);
 
 		// Adding other variants
@@ -1210,14 +1210,30 @@ public class DateUtils {
 							if (block.getType().name().endsWith("LEAVES")) {
 								continue;
 							}
-							// If there is a space underneath the leaves
-							else if (block.getType() != Material.AIR && block.getType() != Material.SHORT_GRASS && block.getType() != Material.FERN && block.getType() != Material.SNOW) {
-								continue;
+							// Prevent from going underneath non-tree blocks
+							else if (block.getType() != Material.AIR && block.getType() != Material.SHORT_GRASS && block.getType() != Material.FERN && block.getType() != Material.SNOW && !block.getType().name().endsWith("_LOG")) {
+								break;
 							}
 							// The first solid block under the leaves
 							else {
 								Block blockUnderneath = location.getWorld().getBlockAt(surfaceBlock.getX(), i - 1, surfaceBlock.getZ());
+								// Do not attempt to generate below if it is the trunk of the tree
+								if (block.getType().name().endsWith("_LOG") && blockUnderneath.getType().name().endsWith("_LOG")) {
+									break;
+								}
 
+								// Ensures that snow only goes on flat parts of stairs/slabs
+								if (blockUnderneath.getBlockData() instanceof Stairs stairs) {
+									if (stairs.getHalf() == Bisected.Half.BOTTOM) {
+										continue;
+									}
+								} else if (blockUnderneath.getBlockData() instanceof Slab slab) {
+									if (slab.getType() == Slab.Type.BOTTOM) {
+										continue;
+									}
+								}
+
+								boolean addedSnow = false;
 								if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
 									// Places the snow or adds layer
 									if (block.getBlockData() instanceof Snow snow) {
@@ -1228,6 +1244,7 @@ public class DateUtils {
 										}
 									} else {
 										block.setType(Material.SNOW);
+										addedSnow = true;
 									}
 								}
 
@@ -1235,7 +1252,9 @@ public class DateUtils {
 								if (blockUnderneath.getType() == Material.GRASS_BLOCK || blockUnderneath.getType() == Material.DIRT
 										|| blockUnderneath.getType() == Material.PODZOL || blockUnderneath.getType() == Material.COARSE_DIRT
 										|| blockUnderneath.getType() == Material.STONE) {
-									break;
+									if (addedSnow) {
+										break;
+									}
 								}
 							}
 						}
