@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -2309,5 +2310,28 @@ public class AranarthUtils {
 		}
 	}
 
+	/**
+	 * Removes all LockedContainers for players that have been inactive for 90 days.
+	 */
+	public static void removeInactiveLockedContainers() {
+		List<Integer> toRemove = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		for (int i = 0; i < lockedContainers.size(); i++) {
+			LockedContainer locked = lockedContainers.get(i);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(locked.getOwner());
+			LocalDateTime localDateTime = null;
+			Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
+			localDateTime = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
+			if (!player.isOnline() && localDateTime.isBefore(now.minusDays(90))) {
+				toRemove.add(i);
+			}
+		}
 
+		// Going in reverse to avoid deleting incorrect ones
+		for (int i = lockedContainers.size() - 1; i > 0; i--) {
+			if (toRemove.contains(i)) {
+				lockedContainers.remove(i);
+			}
+		}
+	}
 }

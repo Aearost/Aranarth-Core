@@ -108,6 +108,7 @@ Features
 [~] Fixed bug where opening a container while holding a splash/lingering potion would add one from the potion inventory
 [~] Updated the mcmmo potion name check to be Paper-based
 [~] Fixed issues where end portals would teleport you to the incorrect location
+[+] Locked containers will automatically be unlocked if the player is inactive for 90 days
 
 Miscellaneous
 - Removed redundant logs from weather
