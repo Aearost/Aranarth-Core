@@ -21,7 +21,7 @@ public class ShulkerItemPickup {
 		Player player = (Player) e.getEntity();
 		ItemStack pickupItem = e.getItem().getItemStack();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupItem) == -1) {
+		if (AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupItem) != -1) {
 			return;
 		}
 
