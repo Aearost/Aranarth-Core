@@ -1071,6 +1071,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("enemy");
 		displayedOptions.add("neutral");
 		displayedOptions.add("setleader");
+		displayedOptions.add("map");
 		return displayedOptions;
 	}
 
@@ -1186,6 +1187,8 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("enemy");
 				} else if ("neutral".startsWith(args[1])) {
 					displayedOptions.add("neutral");
+				} else if ("map".startsWith(args[1])) {
+					displayedOptions.add("map");
 				} else {
 					displayedOptions = addDominionSubCommands(displayedOptions);
 				}
