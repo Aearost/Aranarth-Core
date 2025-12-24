@@ -177,6 +177,8 @@ public class CommandDominion {
 					neutralDominion(args, dominion, player);
 				} else if (args[1].equalsIgnoreCase("setleader")) {
 					setLeader(args, dominion, player);
+				} else if (args[1].equalsIgnoreCase("map")) {
+					showDominionMap(player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -1268,5 +1270,96 @@ public class CommandDominion {
 			}
 		}
 		return dominionName;
+	}
+
+	/**
+	 * Displays a map of the chunks nearby the player, highlighting Dominion Chunks.
+	 * @param player The player executing the command.
+	 */
+	private static void showDominionMap(Player player) {
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		Chunk playerChunk = player.getLocation().getChunk();
+
+		// Creates base empty map
+		String[][] map = new String[15][15];
+		for (int i = 0; i < 15; i++) {
+			for (int j = 0; j < 15; j++) {
+				map[i][j] = "&7[] ";
+			}
+		}
+
+		// To track what Dominions are in which chunks
+		Chunk[][] chunks = new Chunk[15][15];
+		int topX = playerChunk.getX() - 7;
+		int topZ = playerChunk.getZ() - 7;
+		List<Dominion> dominionsNearby = new ArrayList<>();
+
+		player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lDominion Map &8- - -"));
+
+		// Iterate row by row, instead of by column
+		for (int z = 0; z < 15; z++) {
+			String[] line = map[z];
+			StringBuilder lineBuilder = new StringBuilder();
+			for (int x = 0; x < 15; x++) {
+				// Verifies if the chunk is owned by a Dominion and colors it based on the relation with the Dominion
+				Chunk chunk = player.getWorld().getChunkAt(topX + x, topZ + z);
+				Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
+				if (chunkDominion != null) {
+					if (!dominionsNearby.contains(chunkDominion)) {
+						dominionsNearby.add(chunkDominion);
+					}
+
+					if (playerDominion != null) {
+						if (DominionUtils.areAllied(playerDominion, chunkDominion)) {
+							line[x] = "&5[] ";
+						} else if (DominionUtils.areTruced(playerDominion, chunkDominion)) {
+							line[x] = "&d[] ";
+						} else if (DominionUtils.areEnemied(playerDominion, chunkDominion)) {
+							line[x] = "&c[] ";
+						} else if (playerDominion.getLeader().equals(chunkDominion.getLeader())) {
+							line[x] = "&a[] ";
+						} else {
+							line[x] = "&f[] ";
+						}
+					} else {
+						line[x] = "&f[] ";
+					}
+				}
+
+				// Highlights the chunk the player is currently in
+				if (x == 7 && z == 7) {
+					map[7][7] = "&e[] ";
+				}
+
+				lineBuilder.append(line[x]);
+
+				if (x == 14) {
+					lineBuilder.append("\n");
+				}
+			}
+			player.sendMessage(ChatUtils.translateToColor(lineBuilder.toString()));
+		}
+		player.sendMessage(ChatUtils.translateToColor("&e[] &7- Your Location"));
+		if (playerDominion != null && dominionsNearby.contains(playerDominion)) {
+			player.sendMessage(ChatUtils.translateToColor("&a[] &7- Your Dominion"));
+			dominionsNearby.remove(playerDominion);
+		}
+
+		for (Dominion nearbyDominion : dominionsNearby) {
+			if (playerDominion != null) {
+				if (DominionUtils.areAllied(playerDominion, nearbyDominion)) {
+					player.sendMessage(ChatUtils.translateToColor("&5[] &7- &e" + nearbyDominion.getName()));
+				} else if (DominionUtils.areTruced(playerDominion, nearbyDominion)) {
+					player.sendMessage(ChatUtils.translateToColor("&d[] &7- &e" + nearbyDominion.getName()));
+				} else if (DominionUtils.areEnemied(playerDominion, nearbyDominion)) {
+					player.sendMessage(ChatUtils.translateToColor("&c[] &7- &e" + nearbyDominion.getName()));
+				} else {
+					player.sendMessage(ChatUtils.translateToColor("&f[] &7- &e" + nearbyDominion.getName()));
+				}
+			} else {
+				player.sendMessage(ChatUtils.translateToColor("&f[] &7- &e" + nearbyDominion.getName()));
+			}
+
+		}
 	}
 }
