@@ -393,7 +393,7 @@ public class ChatUtils {
 			tips.add("&7&oInterested in some special perks? Check out our server store at &e&o/ac store");
 			tips.add("&7&oDon't forget to use &e&o/ac vote &7&oto get your daily vote crate keys");
 			tips.add("&7&oFound a bug or have an idea? Report it in our Discord server");
-			tips.add("&7&oEarn money by selling your items at &e&o/ac warp market");
+			tips.add("&7&oEarn money by selling your items at &e&o/ac warp shop");
 			tips.add("&7&oView the available in-game ranks at &e&o/ac ranks");
 			tips.add("&7&oBe sure to follow the rules at &e&o/ac rules");
 

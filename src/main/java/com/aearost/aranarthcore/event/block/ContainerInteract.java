@@ -35,22 +35,18 @@ public class ContainerInteract {
 
             // Logic to trust a player to the container
             if (aranarthPlayer.getTrustedPlayerUUID() != null) {
-                Bukkit.getLogger().info("Will trust");
                 trust(e);
             }
             // Logic to untrust a player from the container
             else if (aranarthPlayer.getUntrustedPlayerUUID() != null) {
-                Bukkit.getLogger().info("Will untrust");
                 untrust(e);
             }
             // Logic to lock the container
             else if (aranarthPlayer.getIsLockingContainer()) {
-                Bukkit.getLogger().info("Will lock");
                 lock(e);
             }
             // Logic to unlock the container
             else if (aranarthPlayer.getIsUnlockingContainer()) {
-                Bukkit.getLogger().info("Will unlock");
                 unlock(e);
             }
             // Trying to open the container
