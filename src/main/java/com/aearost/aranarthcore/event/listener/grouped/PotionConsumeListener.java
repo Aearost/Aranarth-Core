@@ -103,7 +103,6 @@ public class PotionConsumeListener implements Listener {
 						}
 						
 						if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
-							Bukkit.getLogger().info("Used potion");
 							ItemStack potionCopy = potion.clone();
 
 							potions.put(potion, potions.get(potion) - 1);
