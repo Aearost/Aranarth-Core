@@ -131,6 +131,11 @@ public class DominionProtection implements Listener {
 							Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
 							Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
 							if (attackerDominion != null && targetDominion != null) {
+								// Do not display extra messages when at spawn
+								if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+									return;
+								}
+
 								// Prevent PvP within the same Dominion
 								if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
 									e.setCancelled(true);
