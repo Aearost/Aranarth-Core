@@ -109,6 +109,7 @@ Features
 [~] Updated the mcmmo potion name check to be Paper-based
 [~] Fixed issues where end portals would teleport you to the incorrect location
 [+] Locked containers will automatically be unlocked if the player is inactive for 90 days
+[~] Bypass fire ticks from Scorched Aranarthium when in the same or allied/truced Dominion
 
 Miscellaneous
 - Removed redundant logs from weather
