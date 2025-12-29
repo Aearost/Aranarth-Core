@@ -4,9 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.BreezeWindCharge;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.WindCharge;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -29,6 +27,12 @@ public class ExplosionListener implements Listener {
 	@EventHandler
 	public void onExplodeBlock(final EntityExplodeEvent e) {
 		if (!(e.getEntity() instanceof WindCharge) && !(e.getEntity() instanceof BreezeWindCharge)) {
+			// Always prevent these explosions
+			if (e.getEntity() instanceof Creeper) {
+				e.setCancelled(true);
+				return;
+			}
+
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
 			if (chunkDominion != null) {
 				e.setCancelled(true);
