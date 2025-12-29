@@ -1293,9 +1293,9 @@ public class CommandDominion {
 		int topX = playerChunk.getX() - 7;
 		int topZ = playerChunk.getZ() - 7;
 		List<Dominion> dominionsNearby = new ArrayList<>();
+		boolean hasSpawnChunks = false;
 
 		player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lDominion Map &8- - -"));
-
 		// Iterate row by row, instead of by column
 		for (int z = 0; z < 15; z++) {
 			String[] line = map[z];
@@ -1324,6 +1324,13 @@ public class CommandDominion {
 					} else {
 						line[x] = "&f[] ";
 					}
+				} else {
+					int chunkBaseX = chunk.getX() * 16;
+					int chunkBaseZ = chunk.getZ() * 16;
+					if (AranarthUtils.isSpawnLocation(new Location(player.getWorld(), chunkBaseX, player.getY(), chunkBaseZ))) {
+						hasSpawnChunks = true;
+						line[x] = "&6[] ";
+					}
 				}
 
 				// Highlights the chunk the player is currently in
@@ -1340,6 +1347,10 @@ public class CommandDominion {
 			player.sendMessage(ChatUtils.translateToColor(lineBuilder.toString()));
 		}
 		player.sendMessage(ChatUtils.translateToColor("&e[] &7- Your Location"));
+		if (hasSpawnChunks) {
+			player.sendMessage(ChatUtils.translateToColor("&6[] &7- Spawn"));
+		}
+
 		if (playerDominion != null && dominionsNearby.contains(playerDominion)) {
 			player.sendMessage(ChatUtils.translateToColor("&a[] &7- Your Dominion"));
 			dominionsNearby.remove(playerDominion);
