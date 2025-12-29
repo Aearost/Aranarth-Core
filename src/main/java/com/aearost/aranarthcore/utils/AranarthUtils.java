@@ -1473,10 +1473,10 @@ public class AranarthUtils {
 	 * @return Confirmation if the input coordinate is within the server Spawn.
 	 */
 	public static boolean isSpawnLocation(Location loc) {
-		int topRightX = 330;
-		int topRightZ = -450;
-		int bottomLeftX = -350;
-		int bottomLeftZ = 250;
+		int topRightX = 335;
+		int topRightZ = -447;
+		int bottomLeftX = -351;
+		int bottomLeftZ = 255;
 
 		if (!loc.getWorld().getName().equals("world")) {
 			return false;
