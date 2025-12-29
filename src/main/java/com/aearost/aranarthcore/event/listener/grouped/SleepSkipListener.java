@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
+import org.bukkit.event.world.TimeSkipEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,7 +79,10 @@ public class SleepSkipListener implements Listener {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				String worldName = player.getLocation().getWorld().getName();
 				if (worldName.equals("world") || worldName.equals("smp") || worldName.equals("resource")) {
-					player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+					long time = player.getLocation().getWorld().getTime();
+					if (time > 12500 && time <= 23980) {
+						player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+					}
 				}
 			}
 		}, 1L);
@@ -133,6 +137,17 @@ public class SleepSkipListener implements Listener {
 		if (scheduledSkipTask != -1) {
 			Bukkit.getScheduler().cancelTask(scheduledSkipTask);
 			scheduledSkipTask = -1;
+		}
+	}
+
+	/**
+	 * Bypasses the vanilla skipping of night to allow the plugin to handle the logic of setting the time to day.
+	 * @param e The skip event.
+	 */
+	@EventHandler
+	public void onTimeSkip(TimeSkipEvent e) {
+		if (e.getSkipReason() == TimeSkipEvent.SkipReason.NIGHT_SKIP) {
+			e.setCancelled(true);
 		}
 	}
 }
