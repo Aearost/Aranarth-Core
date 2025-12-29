@@ -28,7 +28,7 @@ public class FaunivorExtraDeathDrops {
 			}
 
 			// Avoids duplication of saddles and armor on mounts
-			if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR")) {
+			if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
 				continue;
 			}
 

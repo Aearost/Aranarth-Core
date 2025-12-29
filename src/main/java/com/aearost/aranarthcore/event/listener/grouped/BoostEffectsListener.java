@@ -133,27 +133,29 @@ public class BoostEffectsListener implements Listener {
 		if (e.getDamageSource().getCausingEntity() != null) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player) {
 				if (!(e.getEntity() instanceof Player)) {
-					EntityEquipment equipment = e.getEntity().getEquipment();
-					List<ItemStack> equipmentList = new ArrayList<>();
-                    equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
-					equipmentList.add(equipment.getItemInMainHand());
-					equipmentList.add(equipment.getItemInOffHand());
+					if (AranarthUtils.getServerBoosts().containsKey(Boost.HUNTER)) {
+						EntityEquipment equipment = e.getEntity().getEquipment();
+						List<ItemStack> equipmentList = new ArrayList<>();
+						equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
+						equipmentList.add(equipment.getItemInMainHand());
+						equipmentList.add(equipment.getItemInOffHand());
 
-					for (ItemStack drop : e.getDrops()) {
-						// Avoid duplication of held items or worn armor
-						if (equipmentList.contains(drop)) {
-							continue;
-						}
+						for (ItemStack drop : e.getDrops()) {
+							// Avoid duplication of held items or worn armor
+							if (equipmentList.contains(drop)) {
+								continue;
+							}
 
-						// Avoids duplication of saddles and armor on mounts
-						if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR")) {
-							continue;
-						}
+							// Avoids duplication of saddles and armor on mounts
+							if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
+								continue;
+							}
 
-						int rand = new Random().nextInt(2);
-						// 50% chance to double the drop
-						if (rand == 0) {
-							drop.setAmount(drop.getAmount() * 2);
+							int rand = new Random().nextInt(2);
+							// 50% chance to double the drop
+							if (rand == 0) {
+								drop.setAmount(drop.getAmount() * 2);
+							}
 						}
 					}
 				}
