@@ -521,12 +521,21 @@ public class CommandACCompleter implements TabCompleter {
 					} else if ("remove".startsWith(args[1])) {
 						displayedOptions.add("remove");
 					}
-				} else if (args.length > 2) {
-					if (args[1].startsWith("gradient")) {
-						if (args[2].isEmpty()) {
-							displayedOptions.add("name");
+				} else {
+					if (args.length == 3) {
+						if (args[1].startsWith("gradient")) {
+							if (args[2].isEmpty()) {
+								displayedOptions.add("color1,color2,color3");
+							}
+						}
+					} else if (args.length == 4) {
+						if (args[1].startsWith("gradient")) {
+							if (args[3].isEmpty()) {
+								displayedOptions.add("name");
+							}
 						}
 					}
+
 				}
 			}
 			case "warp" -> {
