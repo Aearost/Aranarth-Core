@@ -111,6 +111,7 @@ Features
 [+] Locked containers will automatically be unlocked if the player is inactive for 90 days
 [~] Bypass fire ticks from Scorched Aranarthium when in the same or allied/truced Dominion
 [~] Fixed issue where armor stands were dropping in double when destroyed
+[~] Fixed errors when not specifying colors or text in the itemname command
 
 Miscellaneous
 - Removed redundant logs from weather
