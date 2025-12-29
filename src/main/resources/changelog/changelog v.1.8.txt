@@ -110,6 +110,7 @@ Features
 [~] Fixed issues where end portals would teleport you to the incorrect location
 [+] Locked containers will automatically be unlocked if the player is inactive for 90 days
 [~] Bypass fire ticks from Scorched Aranarthium when in the same or allied/truced Dominion
+[~] Fixed issue where armor stands were dropping in double when destroyed
 
 Miscellaneous
 - Removed redundant logs from weather
