@@ -64,6 +64,11 @@ public class CommandItemName {
 
                         String itemName = itemNameSB.toString();
                         if (args[1].startsWith("gradient")) {
+                            if (args.length < 4) {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou must specify the colors and the text!"));
+                                return true;
+                            }
+
                             if (args[1].equalsIgnoreCase("gradient")) {
                                 itemName = ChatUtils.translateToGradient(args[2], itemName, false);
                             } else if (args[1].equalsIgnoreCase("gradientbold")) {
