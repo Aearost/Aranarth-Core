@@ -10,10 +10,7 @@ import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Villager;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -130,6 +127,7 @@ public class DominionProtection implements Listener {
 						if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
 							Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
 							Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 							if (attackerDominion != null && targetDominion != null) {
 								// Do not display extra messages when at spawn
 								if (AranarthUtils.isSpawnLocation(target.getLocation())) {
@@ -139,19 +137,16 @@ public class DominionProtection implements Listener {
 								// Prevent PvP within the same Dominion
 								if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
 									e.setCancelled(true);
-									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are both in &e" + attackerDominion.getName()));
 								}
 								// Prevent PvP between allies
 								else if (DominionUtils.areAllied(attackerDominion, targetDominion)) {
 									e.setCancelled(true);
-									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &5Allied"));
 								}
 								// Prevent PvP between truces
 								else if (DominionUtils.areTruced(attackerDominion, targetDominion)) {
 									e.setCancelled(true);
-									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 									attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7as you are &dTruced"));
 								} else {
 									Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
@@ -159,8 +154,57 @@ public class DominionProtection implements Listener {
 									if (chunkDominion != null && chunkDominion.getLeader().equals(targetDominion.getLeader())) {
 										if (!DominionUtils.areEnemied(attackerDominion, targetDominion)) {
 											e.setCancelled(true);
-											AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 											attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + " &7in their lands as you are &fNeutral"));
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				// Prevents PvP
+				else if (e.getEntity() instanceof Tameable pet) {
+					if (pet.isTamed()) {
+						if (e.getDamageSource().getCausingEntity() != null) {
+							if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+								Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+								Dominion targetDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
+
+								if (attackerDominion != null && targetDominion != null) {
+									// Do not display extra messages when at spawn
+									if (AranarthUtils.isSpawnLocation(pet.getLocation())) {
+										return;
+									}
+
+									// Message is already sent in PetTargetPrevent
+									if (pet.getOwner().getUniqueId().equals(attacker.getUniqueId())) {
+										return;
+									}
+
+									String petType = ChatUtils.getFormattedItemName(pet.getType().name());
+									// Prevent PvP within the same Dominion
+									if (attackerDominion.getLeader().equals(targetDominion.getLeader())) {
+										e.setCancelled(true);
+										attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + "'s &e" + petType + " &7as you are both in &e" + attackerDominion.getName()));
+									}
+									// Prevent PvP between allies
+									else if (DominionUtils.areAllied(attackerDominion, targetDominion)) {
+										e.setCancelled(true);
+										attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + "'s &e" + petType + " &7as you are &5Allied"));
+									}
+									// Prevent PvP between truces
+									else if (DominionUtils.areTruced(attackerDominion, targetDominion)) {
+										e.setCancelled(true);
+										attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + "'s &e" + petType + " &7as you are &dTruced"));
+									} else {
+										Dominion chunkDominion = DominionUtils.getDominionOfChunk(pet.getLocation().getChunk());
+										// Prevent damage if they're in their own Dominion's land and you are not allied, truced, or enemied
+										if (chunkDominion != null && chunkDominion.getLeader().equals(targetDominion.getLeader())) {
+											if (!DominionUtils.areEnemied(attackerDominion, targetDominion)) {
+												e.setCancelled(true);
+												attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthPlayer.getNickname() + "'s &e" + petType + " &7in their lands as you are &fNeutral"));
+											}
 										}
 									}
 								}
