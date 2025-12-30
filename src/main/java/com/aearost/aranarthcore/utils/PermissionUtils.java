@@ -423,6 +423,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.waterarms", true);
 			perms.setPermission("aranarth.dominion.create", true);
 			perms.setPermission("aranarth.tphere", true);
+			perms.setPermission("bending.command.preset.create.8", true);
 		} else {
 			return;
 		}
@@ -431,6 +432,7 @@ public class PermissionUtils {
 		if (rank >= 4) {
 			perms.setPermission("bending.ability.sonicblast", true);
 			perms.setPermission("aranarth.back", true);
+			perms.setPermission("bending.command.preset.create.10", true);
 		} else {
 			return;
 		}
@@ -440,6 +442,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.metalclips", true);
 			perms.setPermission("bending.ability.suffocate", true);
 			perms.setPermission("aranarth.nick", true);
+			perms.setPermission("bending.command.preset.create.12", true);
 		} else {
 			return;
 		}
@@ -449,6 +452,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.fire.lightningbending", true);
 			perms.setPermission("aranarth.toggle.msg", true);
 			perms.setPermission("aranarth.toggle.chat", true);
+			perms.setPermission("bending.command.preset.create.15", true);
+
 		} else {
 			return;
 		}
@@ -461,6 +466,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("bending.earth.lavaflux", true);
 			perms.setPermission("bending.earth.fissure", true);
+			perms.setPermission("bending.command.preset.create.20", true);
 		} else {
 			return;
 		}
@@ -468,6 +474,7 @@ public class PermissionUtils {
 		// Emperor
 		if (rank >= 8) {
 			perms.setPermission("bending.fire.combustionbending", true);
+			perms.setPermission("bending.command.preset.create.25", true);
 		} else {
 			return;
 		}
