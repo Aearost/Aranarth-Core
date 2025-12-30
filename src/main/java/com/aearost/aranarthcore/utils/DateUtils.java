@@ -1403,7 +1403,7 @@ public class DateUtils {
 								// Precompute candidate coordinates asynchronously
 								List<Location> toMelt = new ArrayList<>();
 
-								int amountToMelt = meltMultiplier * 25;
+								int amountToMelt = meltMultiplier * 50;
 
 								for (int count = 0; count < amountToMelt; count++) {
 									Location locToMelt = loc.clone();
