@@ -31,6 +31,7 @@ public class DateUtils {
 
 	private final int irlMonth;
 	private final int irlDay;
+	private final Random random = new Random();
 	
 	public DateUtils() {
 		this.irlMonth = getIrlMonth();
@@ -650,7 +651,7 @@ public class DateUtils {
 	 * Apply the effects during the seventh month of Ardorvor.
 	 */
 	private void applyArdorvorEffects() {
-		meltSnow(4);
+		meltSnow(5);
 		applyRain();
 
 		if (new Random().nextInt(15) == 0) {
@@ -1010,53 +1011,65 @@ public class DateUtils {
 				// Handle the snow effects
 				if (AranarthUtils.getWeather() == Weather.SNOW || AranarthUtils.getWeather() == Weather.CLEAR) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (player != null) {
-							Location loc = player.getLocation();
-							// Handles applying the snow functionality
-							if (AranarthUtils.getWeather() == Weather.SNOW) {
-								// Only apply logic in the survival world
-								if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
-									continue;
-								}
-								// Do not proceed if the chunk is not yet loaded
-								if (!loc.getChunk().isLoaded()) {
-									continue;
-								}
-								// Determines if the player is underground or not
-								boolean areAllBlocksAir = true;
-								Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-								if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-									areAllBlocksAir = false;
-								}
-								// If it is a warm biome, do not apply snow logic
-								if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
-									// Only apply particles if the player is exposed to air
-									if (areAllBlocksAir) {
-										// If it is a temperate or cold biome
-										if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-											int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
-											int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+						Location loc = player.getLocation();
+						// Handles applying the snow functionality
+						if (AranarthUtils.getWeather() == Weather.SNOW) {
+							// Only apply logic in the survival world
+							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
+								continue;
+							}
+							// Do not proceed if the chunk is not yet loaded
+							if (!loc.getChunk().isLoaded()) {
+								continue;
+							}
 
-											loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
-											loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
-										}
-									}
-								}
-								// Attempts to generate snow only once per second
-								if (runs % 5 == 0) {
-									generateSnow(player, loc, bigFlakeDensity);
-								}
-							}
-							// Generate ice regardless of if it is snowing
+							applySnowParticles(player, loc, bigFlakeDensity, smallFlakeDensity);
+
+							// Attempts to generate snow only once per second
 							if (runs % 5 == 0) {
-								generateIce(loc, bigFlakeDensity);
+								generateSnow(player, loc, bigFlakeDensity);
 							}
+						}
+
+						// Generate ice every second regardless of if it is snowing
+						if (runs % 5 == 0) {
+							generateIce(loc, bigFlakeDensity);
 						}
 					}
 				}
 				runs++;
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 0, 5); // Runs every 5 ticks
+	}
+
+	/**
+	 * Creates snow particles while the player is exposed to the outside.
+	 * @param player The player.
+	 * @param loc The location of the player.
+	 * @param bigFlakeDensity The density of the big snow flakes.
+	 * @param smallFlakeDensity The density of the small snow flakes.
+	 */
+	private void applySnowParticles(Player player, Location loc, int bigFlakeDensity, int smallFlakeDensity) {
+		// Determines if the player is underground or not
+		boolean areAllBlocksAir = true;
+		Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+		if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+			areAllBlocksAir = false;
+		}
+		// If it is a warm biome, do not apply snow logic
+		if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
+			// Only apply particles if the player is exposed to air
+			if (areAllBlocksAir) {
+				// If it is a temperate or cold biome
+				if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+					int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+					int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+
+					loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
+					loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
+				}
+			}
+		}
 	}
 
 	/**
@@ -1108,7 +1121,6 @@ public class DateUtils {
 			}
 		}
 
-		Random random = new Random();
 		// Adds snow to the surrounding blocks from the player
 		int centerX = loc.getBlockX();
 		int centerZ = loc.getBlockZ();
@@ -1117,72 +1129,62 @@ public class DateUtils {
 
 		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
 			List<Block> toSnow = new ArrayList<>();
+			int snowAmountToCreate = bigFlakeDensity * 2;
 
-			// Loop over columns within an input block radius
-			for (int x = centerX - snowRadius; x <= centerX + snowRadius; x++) {
-				for (int z = centerZ - snowRadius; z <= centerZ + snowRadius; z++) {
-					Block surfaceBlock = world.getHighestBlockAt(x, z);
-					// Only add locations in loaded chunks
-					if (!world.isChunkLoaded(x >> 4, z >> 4)) continue;
+			for (int count = 0; count < snowAmountToCreate; count++) {
+				Location locToCreateSnow = loc.clone();
 
-					if (AranarthUtils.isSpawnLocation(surfaceBlock.getLocation())) {
-						continue;
-					}
-
-					// Check that the column is within circle
-					if (loc.distance(new Location(world, x, loc.getY(), z)) > snowRadius) {
-						continue;
-					}
-
-					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-					int snowAmount = bigFlakeDensity;
-
-					// Hot biomes do not get snow
-					if (temperature >= 0.85) {
-						continue;
-					}
-					// Frozen biomes have the highest snow rates
-					else if (temperature <= 0) {
-						snowAmount = bigFlakeDensity / 2;
-					}
-					// Cold biomes have high snow rates
-					else if (temperature < 0.25) {
-						snowAmount = bigFlakeDensity / 5;
-					}
-					// Temperate biomes have standard snow rates
-					else {
-						snowAmount = bigFlakeDensity / 10;
-					}
-
-					// Determines if snow will generate at this block
-					int rand = random.nextInt(2000);
-					// Proportionate snow amount to the snow density
-					if (rand > snowAmount) {
-						continue;
-					}
-
-					// If the surface block is invalid, skip this column
-					if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
-						continue;
-					}
-
-					// Ensures that snow only goes on flat parts of stairs/slabs
-					if (surfaceBlock.getBlockData() instanceof Stairs stairs) {
-						if (stairs.getHalf() == Bisected.Half.BOTTOM) {
-							continue;
-						}
-					} else if (surfaceBlock.getBlockData() instanceof Slab slab) {
-						if (slab.getType() == Slab.Type.BOTTOM) {
-							continue;
-						}
-					}
-
-					Block above = surfaceBlock.getRelative(BlockFace.UP);
-					if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
-						continue;
-					}
-					toSnow.add(above);
+				// Selects a random block in the radius either positive or negative from the current location of the player
+				int randomX = random.nextInt(snowRadius);
+				if (random.nextBoolean()) {
+					randomX = randomX * -1;
 				}
+				locToCreateSnow.setX(locToCreateSnow.getX() + randomX);
+				int randomZ = random.nextInt(snowRadius);
+				if (random.nextBoolean()) {
+					randomZ = randomZ * -1;
+				}
+				locToCreateSnow.setZ(locToCreateSnow.getZ() + randomZ);
+
+				if (!locToCreateSnow.isChunkLoaded()) {
+					continue;
+				}
+
+				if (AranarthUtils.isSpawnLocation(locToCreateSnow)) {
+					continue;
+				}
+
+				Block surfaceBlock = world.getHighestBlockAt(locToCreateSnow.getBlockX(), locToCreateSnow.getBlockZ());
+
+				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+
+				// Hot biomes do not get snow
+				if (temperature >= 0.85) {
+					snowAmountToCreate--;
+					continue;
+				}
+
+				// If the surface block is invalid, skip this column
+				if (INVALID_SURFACE_BLOCKS.contains(surfaceBlock.getType())) {
+					continue;
+				}
+
+				// Ensures that snow only goes on flat parts of stairs/slabs
+				if (surfaceBlock.getBlockData() instanceof Stairs stairs) {
+					if (stairs.getHalf() == Bisected.Half.BOTTOM) {
+						continue;
+					}
+				} else if (surfaceBlock.getBlockData() instanceof Slab slab) {
+					if (slab.getType() == Slab.Type.BOTTOM) {
+						continue;
+					}
+				}
+
+				Block above = surfaceBlock.getRelative(BlockFace.UP);
+				if (above.getType() != Material.AIR && above.getType() != Material.SNOW && above.getType() != Material.SHORT_GRASS && above.getType() != Material.FERN) {
+					continue;
+				}
+				toSnow.add(above);
 			}
 
 			// --- SWITCH BACK TO SYNC ---
@@ -1289,55 +1291,44 @@ public class DateUtils {
 
 		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
 			List<Block> toFreeze = new ArrayList<>();
-			// Loop over columns within an input block radius
-			for (int x = centerX - iceRadius; x <= centerX + iceRadius; x++) {
-				for (int z = centerZ - iceRadius; z <= centerZ + iceRadius; z++) {
-					Block surfaceBlock = world.getHighestBlockAt(x, z);
-					if (AranarthUtils.isSpawnLocation(surfaceBlock.getLocation())) {
-						continue;
-					}
+			int iceAmountToCreate = bigFlakeDensity * 2;
 
-					// If the surface block is invalid, skip this column
-					if (surfaceBlock.getType() != Material.WATER) {
-						continue;
-					}
+			for (int count = 0; count < iceAmountToCreate; count++) {
+				Location locToCreateIce = loc.clone();
 
-					// Check that the column is within circle
-					if (loc.distance(new Location(world, x, loc.getY(), z)) > iceRadius) {
-						continue;
-					}
+				// Selects a random block in the radius either positive or negative from the current location of the player
+				int randomX = random.nextInt(iceRadius);
+				if (random.nextBoolean()) {
+					randomX = randomX * -1;
+				}
+				locToCreateIce.setX(locToCreateIce.getX() + randomX);
+				int randomZ = random.nextInt(iceRadius);
+				if (random.nextBoolean()) {
+					randomZ = randomZ * -1;
+				}
+				locToCreateIce.setZ(locToCreateIce.getZ() + randomZ);
 
-					double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-					int freezeRate = bigFlakeDensity;
-					// Hot biomes do not get snow
-					if (temperature > 0.85) {
-						continue;
-					}
-					// Frozen biomes have the highest snow rates
-					else if (temperature <= 0) {
-						freezeRate = bigFlakeDensity / 2;
-					}
-					// Cold biomes have high snow rates
-					else if (temperature < 0.25) {
-						freezeRate = bigFlakeDensity / 5;
-					}
-					// Temperate biomes have standard snow rates
-					else {
-						freezeRate = bigFlakeDensity / 10;
-					}
+				if (!locToCreateIce.isChunkLoaded()) {
+					continue;
+				}
 
-					// Determines if ice will generate at this block
-					int rand = random.nextInt(7500);
-					// Proportionate ice amount to the snow density of the month
-					if (rand > freezeRate) {
-						continue;
-					}
+				if (AranarthUtils.isSpawnLocation(locToCreateIce)) {
+					continue;
+				}
 
-					// Verifies that the block is a source water block and not flowing
-					if (surfaceBlock.getBlockData() instanceof Levelled levelled) {
-						if (levelled.getLevel() == 0) {
-							toFreeze.add(surfaceBlock);
-						}
+				Block surfaceBlock = world.getHighestBlockAt(locToCreateIce.getBlockX(), locToCreateIce.getBlockZ());
+
+				double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
+				// Hot biomes do not get snow
+				if (temperature > 0.85) {
+					iceAmountToCreate--;
+					continue;
+				}
+
+				// Verifies that the block is a source water block and not flowing
+				if (surfaceBlock.getBlockData() instanceof Levelled levelled) {
+					if (levelled.getLevel() == 0) {
+						toFreeze.add(surfaceBlock);
 					}
 				}
 			}
@@ -1412,19 +1403,32 @@ public class DateUtils {
 								// Precompute candidate coordinates asynchronously
 								List<Location> toMelt = new ArrayList<>();
 
-								for (int x = centerX - meltRadius; x <= centerX + meltRadius; x++) {
-									for (int z = centerZ - meltRadius; z <= centerZ + meltRadius; z++) {
-										double distance = loc.distance(new Location(world, x, loc.getY(), z));
-										if (distance > meltRadius) continue;
+								int amountToMelt = meltMultiplier * 25;
 
-										// Only add locations in loaded chunks (safe to check async)
-										if (!world.isChunkLoaded(x >> 4, z >> 4)) {
-											continue;
-										}
+								for (int count = 0; count < amountToMelt; count++) {
+									Location locToMelt = loc.clone();
 
-										// Collect this location for processing later
-										toMelt.add(new Location(world, x, loc.getY(), z));
+									// Selects a random block in the radius either positive or negative from the current location of the player
+									int randomX = random.nextInt(meltRadius);
+									if (random.nextBoolean()) {
+										randomX = randomX * -1;
 									}
+									locToMelt.setX(locToMelt.getX() + randomX);
+									int randomZ = random.nextInt(meltRadius);
+									if (random.nextBoolean()) {
+										randomZ = randomZ * -1;
+									}
+									locToMelt.setZ(locToMelt.getZ() + randomZ);
+
+									if (!locToMelt.isChunkLoaded()) {
+										continue;
+									}
+
+									if (AranarthUtils.isSpawnLocation(locToMelt)) {
+										continue;
+									}
+
+									toMelt.add(new Location(world, locToMelt.getBlockX(), loc.getY(), locToMelt.getBlockZ()));
 								}
 
 								// --- SWITCH BACK TO SYNC ---
@@ -1491,11 +1495,6 @@ public class DateUtils {
 												continue;
 											}
 
-											// Check that the column is within a circle
-											if (loc.distance(new Location(world, x, loc.getY(), z)) > meltRadius) {
-												continue;
-											}
-
 											Block surfaceBlock = world.getHighestBlockAt(x, z);
 											Block above = surfaceBlock.getRelative(BlockFace.UP);
 											if (above.getType() != Material.SNOW && surfaceBlock.getType() != Material.ICE) {
@@ -1503,7 +1502,6 @@ public class DateUtils {
 											}
 
 											double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-											int meltRate = 0;
 											int grassReplaceRate = 0;
 											String biome = surfaceBlock.getBiome().toString();
 
@@ -1513,39 +1511,6 @@ public class DateUtils {
 											}
 											// Frozen biomes never melt
 											else if (temperature <= 0) {
-												continue;
-											}
-											// Cold biomes have higher snow rates so it should melt slower
-											else if (temperature < 0.25) {
-												meltRate = 2;
-												grassReplaceRate = random.nextInt(100) + 1;
-											}
-											// Temperate biomes have standard melting rates
-											else {
-												meltRate = 6;
-												grassReplaceRate = random.nextInt(100) + 1;
-											}
-
-											// Determines if snow or ice will melt at this block
-											int rand = random.nextInt(8000);
-
-											// Ice should melt slightly slower than snow
-											if (surfaceBlock.getType() == Material.ICE) {
-												meltRate = (int) (meltRate / 1.5);
-											}
-
-											// Reduce snow melting rate if it is Ignivor or Umbravor
-											if (month == Month.IGNIVOR || month == Month.UMBRAVOR) {
-												meltRate = meltRate / 2;
-											}
-											// Increased snow melting rate if it is raining
-											else if (loc.getWorld().hasStorm()) {
-												meltRate = meltRate * 4;
-											}
-											meltRate = meltRate * meltMultiplier;
-
-											// Proportionate melting rate for the given temperature
-											if (rand > meltRate) {
 												continue;
 											}
 
