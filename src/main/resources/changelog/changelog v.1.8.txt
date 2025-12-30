@@ -114,6 +114,7 @@ Features
 [~] Fixed errors when not specifying colors or text in the itemname command
 [+] Prevented pets from targeting players when they're in a positive Dominion relation
 [~] Fixed /ac itemname sub-commands for gradient colors
+[~] Restructured weather functionality to apply fixed amounts of block updates rather than randomly in a radius of the player
 
 Miscellaneous
 - Removed redundant logs from weather
