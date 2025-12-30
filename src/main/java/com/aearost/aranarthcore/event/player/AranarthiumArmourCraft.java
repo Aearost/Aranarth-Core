@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -30,8 +29,6 @@ public class AranarthiumArmourCraft {
 			Inventory inventory = e.getClickedInventory();
 			if (e.getClickedInventory().getType() == InventoryType.ANVIL) {
 				int slot = e.getSlot();
-
-				Bukkit.getLogger().info("ANVIL Action: " + e.getAction().name());
 
 				// Placing on empty slot
 				if (e.getAction() == InventoryAction.PLACE_ALL || e.getAction() == InventoryAction.PLACE_ONE || e.getAction() == InventoryAction.PLACE_ALL) {
@@ -91,43 +88,107 @@ public class AranarthiumArmourCraft {
 				}
 			}
 			else if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-
-				Bukkit.getLogger().info("PLAYER Action: " + e.getAction().name());
-
+				if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")
+					&& e.getAction().name().startsWith("PICKUP")) {
+					// Prevents non-Aranarthium items from being added to the Aranarthium Anvil
+					if (!hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))
+							&& !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
+						e.setCancelled(true);
+						return;
+					}
+					// Prevents changing inventory if there is a result
+					else if (e.getView().getTopInventory().getItem(2) != null) {
+						e.setCancelled(true);
+					}
+				}
 				// Shift clicking into the anvil
-				if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+				else if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+					if (e.getView().getTopInventory().getItem(2) != null) {
+						e.setCancelled(true);
+						return;
+					}
+
 					ItemStack armor = null;
 					ItemStack ingot = null;
 					boolean isArmorFirst = false;
 
+					ItemStack clickedItem = inventory.getItem(e.getSlot());
 					ItemStack first = e.getView().getTopInventory().getStorageContents()[0];
 					ItemStack second = e.getView().getTopInventory().getStorageContents()[1];
 
+					// Prevents aranarthium from disappearing when it is the only item in the anvil
+					if (hasEnhancedAranarthium(clickedItem)) {
+						if (hasEnhancedAranarthium(first)) {
+							if (clickedItem.isSimilar(first)) {
+								int remainingSpace = first.getMaxStackSize() - first.getAmount();
+								// If it is not a full stack
+								if (remainingSpace > 0) {
+									int leftoverToBeAdded = clickedItem.getAmount() - remainingSpace;
+									// Can add everything
+									if (leftoverToBeAdded <= 0) {
+										inventory.setItem(e.getSlot(), null);
+										first.setAmount(first.getAmount() + clickedItem.getAmount());
+										return;
+									} else {
+										ItemStack clickedItemClone = clickedItem.clone();
+										clickedItemClone.setAmount(leftoverToBeAdded);
+										inventory.setItem(e.getSlot(), clickedItemClone);
+										first.setAmount(first.getMaxStackSize());
+										return;
+									}
+								} else {
+									e.setCancelled(true);
+								}
+							} else {
+								e.setCancelled(true);
+							}
+						} else if (hasEnhancedAranarthium(second)) {
+							if (clickedItem.isSimilar(second)) {
+								if (second.getAmount() < 64) {
+									inventory.setItem(e.getSlot(), null);
+									second.setAmount(second.getAmount() + 1);
+									return;
+								} else {
+									e.setCancelled(true);
+								}
+							} else {
+								e.setCancelled(true);
+							}
+						}
+					}
+
 					// Placing into the first slot
 					if (first == null && second != null) {
-						if (hasNetheriteArmour(second) && hasEnhancedAranarthium(inventory.getItem(e.getSlot()))) {
+						if (hasNetheriteArmour(second) && hasEnhancedAranarthium(clickedItem)) {
 							armor = second.clone();
-							ingot = inventory.getItem(e.getSlot()).clone();
+							ingot = clickedItem.clone();
 							isArmorFirst = true;
-						} else if (hasEnhancedAranarthium(second) && hasNetheriteArmour(inventory.getItem(e.getSlot()))) {
+						} else if (hasEnhancedAranarthium(second) && hasNetheriteArmour(clickedItem)) {
 							ingot = second.clone();
-							armor = inventory.getItem(e.getSlot()).clone();
+							armor = clickedItem.clone();
 						}
 					}
 					// Placing into the second slot
 					else if (first != null && second == null) {
-						if (hasNetheriteArmour(first) && hasEnhancedAranarthium(inventory.getItem(e.getSlot()))) {
+						if (hasNetheriteArmour(first) && hasEnhancedAranarthium(clickedItem)) {
 							armor = first.clone();
-							ingot = inventory.getItem(e.getSlot()).clone();
+							ingot = clickedItem.clone();
 							isArmorFirst = true;
-						} else if (hasEnhancedAranarthium(first) && hasNetheriteArmour(inventory.getItem(e.getSlot()))) {
+						} else if (hasEnhancedAranarthium(first) && hasNetheriteArmour(clickedItem)) {
 							ingot = first.clone();
-							armor = inventory.getItem(e.getSlot()).clone();
+							armor = clickedItem.clone();
 						}
 					}
-					// Safety to ensure no loss of items
-					else if (first != null && second != null) {
-						e.setCancelled(true);
+					else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
+						// Prevents non-Aranarthium items from being added to the Aranarthium Anvil
+						if (!hasNetheriteArmour(e.getClickedInventory().getItem(e.getSlot()))
+								&& !hasEnhancedAranarthium(e.getClickedInventory().getItem(e.getSlot()))) {
+							e.setCancelled(true);
+							return;
+						}
+
+						// Prevents loss of items when shift-clicking
+						e.getView().getTopInventory().setItem(0, e.getClickedInventory().getItem(e.getSlot()));
 					}
 
 					// Yield the enhanced armor
