@@ -225,7 +225,7 @@ public class GuiCrate {
 		diamond.setItemMeta(diamondMeta);
 		gui.setItem(6, diamond);
 
-		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 2);
+		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 4);
 		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
 		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
 		List<String> enchantedGoldenAppleLore = new ArrayList<>();
@@ -327,7 +327,7 @@ public class GuiCrate {
 		shulkerBox.setItemMeta(shulkerBoxMeta);
 		gui.setItem(3, shulkerBox);
 
-		ItemStack diamond = new ItemStack(Material.DIAMOND, 32);
+		ItemStack diamond = new ItemStack(Material.DIAMOND, 64);
 		ItemMeta diamondMeta = diamond.getItemMeta();
 		diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond"));
 		List<String> diamondLore = new ArrayList<>();
@@ -354,7 +354,7 @@ public class GuiCrate {
 		elytra.setItemMeta(elytraMeta);
 		gui.setItem(11, elytra);
 
-		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
+		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
 		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
 		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
 		List<String> enchantedGoldenAppleLore = new ArrayList<>();
