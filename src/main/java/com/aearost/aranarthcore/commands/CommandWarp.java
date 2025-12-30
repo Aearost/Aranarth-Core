@@ -50,14 +50,16 @@ public class CommandWarp {
 			} else {
 				if (args[1].equalsIgnoreCase("create")) {
 					if (player.hasPermission("aranarth.warp.modify")) {
+						String warpName = ChatUtils.translateToColor(args[2]);
+						warpName = ChatUtils.removeSpecialCharacters(warpName);
 						for (Home warp : AranarthUtils.getWarps()) {
-							if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(args[2])) {
-								player.sendMessage(ChatUtils.chatMessage("&cThe warp &e" + args[2] + " &calready exists!"));
+							if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(ChatUtils.stripColorFormatting(warpName))) {
+								player.sendMessage(ChatUtils.chatMessage("&cThe warp &e" + warpName + " &calready exists!"));
 								return true;
 							}
 						}
 
-						Home warp = new Home(args[2], player.getLocation(), Material.BARRIER);
+						Home warp = new Home(warpName, player.getLocation(), Material.BARRIER);
 						AranarthUtils.addWarp(warp);
 						player.sendMessage(ChatUtils.chatMessage("&7You have added the warp &e" + warp.getName()));
 						return true;
