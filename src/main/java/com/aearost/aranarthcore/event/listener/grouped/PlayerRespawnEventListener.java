@@ -33,7 +33,7 @@ public class PlayerRespawnEventListener implements Listener {
         Player player = e.getEntity();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-        aranarthPlayer.setLastKnownTeleportLocation(e.getEntity().getLastDeathLocation());
+        aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
 
         if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
             aranarthPlayer.setLevelBeforeDeath(player.getLevel());
