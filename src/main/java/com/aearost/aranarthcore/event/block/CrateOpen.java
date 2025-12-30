@@ -457,8 +457,8 @@ public class CrateOpen {
                     reward = new ItemStack(Material.DIAMOND, 16);
                     name = "#a0f0ed&lDiamond x16";
                 } else if (chance <= 56) {
-                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 2);
-                    name = "#fcd34d&lEnchanted Golden Apple x2";
+                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 4);
+                    name = "#fcd34d&lEnchanted Golden Apple x4";
                 } else if (chance <= 64) {
                     reward = new ItemStack(Material.OMINOUS_TRIAL_KEY, 1);
                     name = "#515950&lOminous Trial Key x1";
@@ -537,8 +537,8 @@ public class CrateOpen {
                     }
                     name = trimName + " x1";
                 } else if (chance <= 48) {
-                    reward = new ItemStack(Material.DIAMOND, 32);
-                    name = "#a0f0ed&lDiamond x32";
+                    reward = new ItemStack(Material.DIAMOND, 64);
+                    name = "#a0f0ed&lDiamond x64";
                 } else if (chance <= 56) {
                     reward = new ItemStack(Material.TRIDENT, 1);
                     name = "#579b8c&lTrident x1";
@@ -546,8 +546,8 @@ public class CrateOpen {
                     reward = new ItemStack(Material.ELYTRA, 1);
                     name = "#7d7d96&lElytra x1";
                 } else if (chance <= 72) {
-                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 6);
-                    name = "#fcd34d&lEnchanted Golden Apple x6";
+                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
+                    name = "#fcd34d&lEnchanted Golden Apple x8";
                 } else if (chance <= 80) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
