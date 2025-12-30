@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -29,6 +30,8 @@ public class AranarthiumArmourCraft {
 			Inventory inventory = e.getClickedInventory();
 			if (e.getClickedInventory().getType() == InventoryType.ANVIL) {
 				int slot = e.getSlot();
+
+				Bukkit.getLogger().info("ANVIL Action: " + e.getAction().name());
 
 				// Placing on empty slot
 				if (e.getAction() == InventoryAction.PLACE_ALL || e.getAction() == InventoryAction.PLACE_ONE || e.getAction() == InventoryAction.PLACE_ALL) {
@@ -64,7 +67,8 @@ public class AranarthiumArmourCraft {
 				}
 				// Picking up
 				else if (e.getAction() == InventoryAction.PICKUP_ALL || e.getAction() == InventoryAction.PICKUP_HALF
-						|| e.getAction() == InventoryAction.PICKUP_ONE || e.getAction() == InventoryAction.PICKUP_SOME) {
+						|| e.getAction() == InventoryAction.PICKUP_ONE || e.getAction() == InventoryAction.PICKUP_SOME
+						|| e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
 					if (slot == 0 || slot == 1) {
 						inventory.setItem(2, null);
 					} else if (slot == 2) {
@@ -85,10 +89,55 @@ public class AranarthiumArmourCraft {
 						}
 					}
 				}
-				// Switching items from the anvil inventory to the player inventory
-//				else if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
-//
-//				}
+			}
+			else if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
+
+				Bukkit.getLogger().info("PLAYER Action: " + e.getAction().name());
+
+				// Shift clicking into the anvil
+				if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
+					ItemStack armor = null;
+					ItemStack ingot = null;
+					boolean isArmorFirst = false;
+
+					ItemStack first = e.getView().getTopInventory().getStorageContents()[0];
+					ItemStack second = e.getView().getTopInventory().getStorageContents()[1];
+
+					// Placing into the first slot
+					if (first == null && second != null) {
+						if (hasNetheriteArmour(second) && hasEnhancedAranarthium(inventory.getItem(e.getSlot()))) {
+							armor = second.clone();
+							ingot = inventory.getItem(e.getSlot()).clone();
+							isArmorFirst = true;
+						} else if (hasEnhancedAranarthium(second) && hasNetheriteArmour(inventory.getItem(e.getSlot()))) {
+							ingot = second.clone();
+							armor = inventory.getItem(e.getSlot()).clone();
+						}
+					}
+					// Placing into the second slot
+					else if (first != null && second == null) {
+						if (hasNetheriteArmour(first) && hasEnhancedAranarthium(inventory.getItem(e.getSlot()))) {
+							armor = first.clone();
+							ingot = inventory.getItem(e.getSlot()).clone();
+							isArmorFirst = true;
+						} else if (hasEnhancedAranarthium(first) && hasNetheriteArmour(inventory.getItem(e.getSlot()))) {
+							ingot = first.clone();
+							armor = inventory.getItem(e.getSlot()).clone();
+						}
+					}
+					// Safety to ensure no loss of items
+					else if (first != null && second != null) {
+						e.setCancelled(true);
+					}
+
+					// Yield the enhanced armor
+					if (armor != null & ingot != null) {
+						e.getView().getTopInventory().clear();
+						inventory.clear(e.getSlot());
+						e.getCursor().setAmount(0);
+						new GuiEnhancedAranarthium(player, armor, ingot, determineArmourResult(armor, ingot), isArmorFirst).openGui();
+					}
+				}
 			}
 			else if (e.getClickedInventory().getType() == InventoryType.SMITHING) {
 				if (e.getSlot() == 3) {
@@ -104,12 +153,6 @@ public class AranarthiumArmourCraft {
 					}
 				}
 			}
-//			else {
-				// Switching items from the player inventory to the anvil inventory
-//				if (e.getAction() == InventoryAction.SWAP_WITH_CURSOR || e.getAction() == InventoryAction.HOTBAR_SWAP) {
-//
-//				}
-//			}
 		}
 	}
 
