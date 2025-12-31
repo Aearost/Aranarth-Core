@@ -17,7 +17,7 @@ public class GuiStoreClick {
 			saintPageLogic(e);
 		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Perks")) {
 			perksPageLogic(e);
-		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Server Boosts")) {
+		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Boosts")) {
 			boostsPageLogic(e);
 		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Store - Crate Keys")) {
 			cratesPageLogic(e);
