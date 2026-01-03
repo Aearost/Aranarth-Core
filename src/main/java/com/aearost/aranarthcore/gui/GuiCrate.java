@@ -35,11 +35,11 @@ public class GuiCrate {
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
 			// Updating the cluster and armor trim item here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1));
+			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
-			// Updating the cluster item here to allow for dynamic updates
-			updateGodlyCrateItems(indexes.get(0));
+			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
+			updateGodlyCrateItems(indexes.get(0), indexes.get(1));
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
 		}
@@ -354,14 +354,14 @@ public class GuiCrate {
 		elytra.setItemMeta(elytraMeta);
 		gui.setItem(11, elytra);
 
-		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
-		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
-		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
-		List<String> enchantedGoldenAppleLore = new ArrayList<>();
-		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
-		enchantedGoldenApple.setItemMeta(enchantedGoldenAppleMeta);
-		gui.setItem(15, enchantedGoldenApple);
+//		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
+//		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
+//		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
+//		List<String> enchantedGoldenAppleLore = new ArrayList<>();
+//		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&e8% Chance"));
+//		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
+//		enchantedGoldenApple.setItemMeta(enchantedGoldenAppleMeta);
+//		gui.setItem(15, enchantedGoldenApple);
 
 		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 8);
 		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
@@ -448,15 +448,6 @@ public class GuiCrate {
 		iron.setItemMeta(ironMeta);
 		gui.setItem(5, iron);
 
-		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
-		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
-		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
-		List<String> enchantedGoldenAppleLore = new ArrayList<>();
-		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
-		enchantedGoldenApple.setItemMeta(enchantedGoldenAppleMeta);
-		gui.setItem(6, enchantedGoldenApple);
-
 		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 1);
 		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
 		mcmmo10Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +30"));
@@ -482,7 +473,15 @@ public class GuiCrate {
 		heavyCoreLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		heavyCoreMeta.setLore(heavyCoreLore);
 		heavyCore.setItemMeta(heavyCoreMeta);
-		gui.setItem(16, heavyCore);
+		gui.setItem(15, heavyCore);
+
+		ItemStack aranarthium = new AranarthiumIngot().getItem();
+		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
+		List<String> aranarthiumLore = new ArrayList<>();
+		aranarthiumLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		aranarthiumMeta.setLore(aranarthiumLore);
+		aranarthium.setItemMeta(aranarthiumMeta);
+		gui.setItem(16, aranarthium);
 
 		ItemStack epicKey = new KeyEpic().getItem();
 		epicKey.setAmount(3);
@@ -502,14 +501,6 @@ public class GuiCrate {
 		discount30Meta.setLore(discount30Lore);
 		discount30.setItemMeta(discount30Meta);
 		gui.setItem(21, discount30);
-
-		ItemStack aranarthium = new AranarthiumIngot().getItem();
-		ItemMeta aranarthiumMeta = aranarthium.getItemMeta();
-		List<String> aranarthiumLore = new ArrayList<>();
-		aranarthiumLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		aranarthiumMeta.setLore(aranarthiumLore);
-		aranarthium.setItemMeta(aranarthiumMeta);
-		gui.setItem(23, aranarthium);
 
 		ItemStack godlyKey = new KeyGodly().getItem();
 		godlyKey.setAmount(2);
@@ -561,9 +552,10 @@ public class GuiCrate {
 	/**
 	 * Provides the Cluster that is associated to the input index for an Epic Crate.
 	 * @param armorTrimIndex The index of the armor trim.
+	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
 	 */
-	public void updateEpicCrateItems(int armorTrimIndex, int clusterIndex) {
+	public void updateEpicCrateItems(int armorTrimIndex, int eggIndex, int clusterIndex) {
 		// Cycle through the Armor Trims
 		ItemStack trim = null;
 		switch (armorTrimIndex) {
@@ -603,6 +595,32 @@ public class GuiCrate {
 		trim.setItemMeta(cycledArmorTrimMeta);
 		initializedGui.setItem(5, trim);
 
+		// Cycle through the spawn eggs
+		ItemStack egg = null;
+		switch (eggIndex) {
+			case 1 -> egg = new ItemStack(Material.SPIDER_SPAWN_EGG);
+			case 2 -> egg = new ItemStack(Material.SKELETON_SPAWN_EGG);
+			case 3 -> egg = new ItemStack(Material.CAVE_SPIDER_SPAWN_EGG);
+			default -> egg = new ItemStack(Material.ZOMBIE_SPAWN_EGG);
+		}
+		egg.setAmount(4);
+		ItemMeta cycledEggMeta = egg.getItemMeta();
+		if (egg.getType() == Material.SPIDER_SPAWN_EGG) {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg"));
+		} else if (egg.getType() == Material.SKELETON_SPAWN_EGG) {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg"));
+		} else if (egg.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg"));
+		} else {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#71915D&lZombie Spawn Egg"));
+		}
+		cycledEggMeta.setDisplayName(cycledEggMeta.getDisplayName());
+		List<String> cycledEggLore = new ArrayList<>();
+		cycledEggLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		cycledEggMeta.setLore(cycledEggLore);
+		egg.setItemMeta(cycledEggMeta);
+		initializedGui.setItem(15, egg);
+
 		// Cycle through the Clusters
 		ItemStack cluster = null;
 		switch (clusterIndex) {
@@ -627,11 +645,12 @@ public class GuiCrate {
 
 	/**
 	 * Provides the Aranarthium Ingot that is associated to the input index for a Godly Crate.
-	 * @param index The index of the cluster.
+	 * @param ingotIndex The index of the cluster.
+	 * @param eggIndex The index of the spawn egg.
 	 */
-	public void updateGodlyCrateItems(int index) {
+	public void updateGodlyCrateItems(int ingotIndex, int eggIndex) {
 		ItemStack ingot = null;
-		switch (index) {
+		switch (ingotIndex) {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
 			case 2 -> ingot = new AranarthiumArdent().getItem();
 			case 3 -> ingot = new AranarthiumDwarven().getItem();
@@ -641,10 +660,28 @@ public class GuiCrate {
 		}
 		ItemMeta cycledIngotMeta = ingot.getItemMeta();
 		List<String> cycledIngotLore = new ArrayList<>();
-		cycledIngotLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledIngotLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		cycledIngotMeta.setLore(cycledIngotLore);
 		ingot.setItemMeta(cycledIngotMeta);
-		initializedGui.setItem(15, ingot);
+		initializedGui.setItem(6, ingot);
+
+		ItemStack egg = null;
+		switch (eggIndex) {
+			case 1 -> egg = new ItemStack(Material.BLAZE_SPAWN_EGG);
+			default -> egg = new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG);
+		}
+
+		ItemMeta cycledEggMeta = egg.getItemMeta();
+		if (egg.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg"));
+		} else {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg"));
+		}
+		List<String> cycledEggLore = new ArrayList<>();
+		cycledEggLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledEggMeta.setLore(cycledEggLore);
+		egg.setItemMeta(cycledEggMeta);
+		initializedGui.setItem(23, egg);
 	}
 
 }
