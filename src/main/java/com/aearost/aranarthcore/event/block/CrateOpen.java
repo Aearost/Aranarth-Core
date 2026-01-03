@@ -74,7 +74,6 @@ public class CrateOpen {
                                 if (heldItem == null || !heldItem.isSimilar(voteKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &aVote Crate Key &cto do this!"));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
-                                    DiscordUtils.createNotification("This is a test", null);
                                     return;
                                 }
 
@@ -159,17 +158,19 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next trim iteration
                                             if (indexes.get(0) < 18) {
@@ -178,11 +179,18 @@ public class CrateOpen {
                                                 indexes.set(0, 0);
                                             }
 
-                                            // Cycle through the next cluster iteration
-                                            if (indexes.get(1) < 7) {
+                                            // Cycle through the next spawn egg iteration
+                                            if (indexes.get(1) < 3) {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
+                                            }
+
+                                            // Cycle through the next cluster iteration
+                                            if (indexes.get(2) < 7) {
+                                                indexes.set(2, indexes.get(2) + 1);
+                                            } else {
+                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -220,25 +228,34 @@ public class CrateOpen {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                                List<Integer> index = new ArrayList<>();
+                                List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
-                                index.add(0);
-                                GuiCrate gui = new GuiCrate(player, CrateType.GODLY, index);
+                                indexes.add(0);
+                                indexes.add(0);
+                                GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
-                                index.set(0, 1);
+                                indexes.set(0, 1);
+                                indexes.set(1, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
-                                            gui.updateGodlyCrateItems(index.get(0));
+                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1));
 
-                                            // Cycle through the next iteration
-                                            if (index.get(0) < 5) {
-                                                index.set(0, index.get(0) + 1);
+                                            // Cycle through the next enhanced aranarthium iteration
+                                            if (indexes.get(0) < 5) {
+                                                indexes.set(0, indexes.get(0) + 1);
                                             } else {
-                                                index.set(0, 0);
+                                                indexes.set(0, 0);
+                                            }
+
+                                            // Cycle through the next spawn egg iteration
+                                            if (indexes.get(1) < 1) {
+                                                indexes.set(1, indexes.get(1) + 1);
+                                            } else {
+                                                indexes.set(1, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -547,8 +564,16 @@ public class CrateOpen {
                     reward = new ItemStack(Material.ELYTRA, 1);
                     name = "#7d7d96&lElytra x1";
                 } else if (chance <= 72) {
-                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
-                    name = "#fcd34d&lEnchanted Golden Apple x8";
+                    reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
+                    if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
+                    } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
+                    } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
+                    } else {
+                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                    }
                 } else if (chance <= 80) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -665,11 +690,11 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$7500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
+                    reward = new ItemStack(Material.DIAMOND_BLOCK, 16);
                     name = "#a0f0ed&lDiamond Block x16";
                 } else if (chance <= 36) {
-                    reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
-                    name = "#fcd34d&lEnchanted Golden Apple x8";
+                    reward = getCycledAranarthium(new Random().nextInt(6));
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
                     name = "#3a383a&lNetherite Block x1";
@@ -695,8 +720,8 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e30 Levels"));
                     return;
                 } else if (chance <= 64) {
-                    reward = getCycledAranarthium(new Random().nextInt(6));
-                    name = reward.getItemMeta().getDisplayName() + " x1";
+                    reward = new AranarthiumIngot().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " &f&lx1";
                 } else if (chance <= 72) {
                     reward = new ItemStack(Material.NETHER_STAR, 1);
                     name = "#d8d6fb&lNether Star x1";
@@ -725,8 +750,12 @@ public class CrateOpen {
                     reward.setAmount(3);
                     name = "&3&lEpic Crate Key x3";
                 } else {
-                    reward = new AranarthiumIngot().getItem();
-                    name = reward.getItemMeta().getDisplayName() + " &f&lx1";
+                    reward = getCycledGodlySpawnEgg(new Random().nextInt(2));
+                    if (reward.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg");
+                    } else {
+                        name = ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg");
+                    }
                 }
 
                 aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -838,6 +867,36 @@ public class CrateOpen {
             default -> ingot = new AranarthiumSoulbound().getItem();
         }
         return ingot;
+    }
+
+    /**
+     * Provides the spawn egg that is associated to the input index for Epic crate rewards.
+     * @param index The index of the spawn egg.
+     * @return The spawn egg.
+     */
+    private ItemStack getCycledEpicSpawnEgg(int index) {
+        ItemStack egg = null;
+        switch (index) {
+            case 1 -> egg = new ItemStack(Material.SPIDER_SPAWN_EGG);
+            case 2 -> egg = new ItemStack(Material.SKELETON_SPAWN_EGG);
+            case 3 -> egg = new ItemStack(Material.CAVE_SPIDER_SPAWN_EGG);
+            default -> egg = new ItemStack(Material.ZOMBIE_SPAWN_EGG);
+        }
+        return egg;
+    }
+
+    /**
+     * Provides the spawn egg that is associated to the input index for Godly crate rewards.
+     * @param index The index of the spawn egg.
+     * @return The spawn egg.
+     */
+    private ItemStack getCycledGodlySpawnEgg(int index) {
+        ItemStack egg = null;
+        switch (index) {
+            case 1 -> egg = new ItemStack(Material.BLAZE_SPAWN_EGG);
+            default -> egg = new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG);
+        }
+        return egg;
     }
 
     /**
