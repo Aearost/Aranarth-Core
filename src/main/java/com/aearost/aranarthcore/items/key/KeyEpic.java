@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.crates;
+package com.aearost.aranarthcore.items.key;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
@@ -11,20 +11,20 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.*;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.CRATE_KEY;
 
-public class KeyVote implements AranarthItem {
+public class KeyEpic implements AranarthItem {
 
 	/**
-	 * @return The Vote Crate Key.
+	 * @return The Epic Crate Key.
 	 */
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.TRIAL_KEY, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "vote_crate_key");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "key_epic");
 			meta.setItemModel(key);
-			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "vote");
+			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "key_epic");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			item.setItemMeta(meta);
 		}
@@ -32,7 +32,7 @@ public class KeyVote implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "&aVote Crate Key";
+		return "&3Epic Crate Key";
 	}
 	
 }
