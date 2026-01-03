@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.crates;
+package com.aearost.aranarthcore.items.key;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
@@ -13,18 +13,18 @@ import java.util.Objects;
 
 import static com.aearost.aranarthcore.objects.CustomItemKeys.CRATE_KEY;
 
-public class KeyEpic implements AranarthItem {
+public class KeyRare implements AranarthItem {
 
 	/**
-	 * @return The Epic Crate Key.
+	 * @return The Rare Crate Key.
 	 */
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.TRIAL_KEY, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "epic_crate_key");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "key_rare");
 			meta.setItemModel(key);
-			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "epic");
+			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "key_rare");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			item.setItemMeta(meta);
 		}
@@ -32,7 +32,7 @@ public class KeyEpic implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "&3Epic Crate Key";
+		return "&6Rare Crate Key";
 	}
 	
 }

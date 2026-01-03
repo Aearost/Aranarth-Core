@@ -54,7 +54,7 @@ public class CommandGive {
 						fullPathName = "com.aearost.aranarthcore.items.arrow." + args[2];
 					}
 				} else if (args[2].startsWith("Key")) {
-					fullPathName = "com.aearost.aranarthcore.items.crates." + args[2];
+					fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
 				} else {
 					fullPathName = "com.aearost.aranarthcore.items." + args[2];
 				}

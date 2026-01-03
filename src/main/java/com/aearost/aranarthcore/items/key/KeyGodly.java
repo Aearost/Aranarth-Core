@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.crates;
+package com.aearost.aranarthcore.items.key;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
@@ -22,9 +22,9 @@ public class KeyGodly implements AranarthItem {
 		ItemStack item = new ItemStack(Material.TRIAL_KEY, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "godly_crate_key");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "key_godly");
 			meta.setItemModel(key);
-			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "godly");
+			meta.getPersistentDataContainer().set(CRATE_KEY, PersistentDataType.STRING, "key_godly");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			item.setItemMeta(meta);
 		}
