@@ -100,7 +100,7 @@ public class AranarthCore extends JavaPlugin {
 				}
 
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					PermissionUtils.reEvaluteMonthlySaints(player);
+					PermissionUtils.reEvaluateMonthlySaints(player);
 				}
 			}
 		}, 12000, 12000);

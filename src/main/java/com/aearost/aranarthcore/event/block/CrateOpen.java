@@ -74,6 +74,7 @@ public class CrateOpen {
                                 if (heldItem == null || !heldItem.isSimilar(voteKey)) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou must be holding a &aVote Crate Key &cto do this!"));
                                     player.playSound(block.getLocation(), Sound.ENTITY_ENDER_EYE_DEATH, 1, 0.7F);
+                                    DiscordUtils.createNotification("This is a test", null);
                                     return;
                                 }
 
@@ -574,7 +575,7 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&3&lEpic Crate Key x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 10% Store Coupon");
+                    DiscordUtils.createNotification(player.getName() + " has earned a 10% Store Coupon", player);
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
@@ -707,7 +708,7 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&5&lGodly Crate Key x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.crateItemNotification(player, player.getName() + " has earned a 30% Store Coupon");
+                    DiscordUtils.createNotification(player.getName() + " has earned a 30% Store Coupon", player);
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);

@@ -30,7 +30,7 @@ public class PermissionUtils {
 
 		setDefaultPermissions(player, perms);
 		setRankPermissions(perms, aranarthPlayer.getRank());
-		reEvaluteMonthlySaints(player);
+		reEvaluateMonthlySaints(player);
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
 		addPlayerPerks(perms, player, isSecondCall);
@@ -484,7 +484,7 @@ public class PermissionUtils {
 	 * Re-evaluates the player's temporary saint status.
 	 * @param player The player.
 	 */
-	public static void reEvaluteMonthlySaints(Player player) {
+	public static void reEvaluateMonthlySaints(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		if (aranarthPlayer.getSaintExpireDate() != 0) {
 			Instant now = Instant.now();
