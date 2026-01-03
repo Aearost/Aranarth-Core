@@ -554,23 +554,26 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Sends a notification when a player receives a special drop from a crate.
-	 * @param player The player who got the special drop.
-	 * @param message The message to be sent specific to that drop.
+	 * Sends a notification when desired to be sent to the notifications channel.
+	 * @param message The message to be sent.
+	 * @param player The player who is involved with the notification.
 	 */
-	public static void crateItemNotification(Player player, String message) {
+	public static void createNotification(String message, Player player) {
 		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
 
-		String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
-		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		if (player == null) {
+			embed.setAuthor(message).setColor(Color.CYAN);
+		} else {
+			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 
-		EmbedBuilder embed = new EmbedBuilder()
-				.setAuthor(message, null, url)
-				.setColor(Color.CYAN);
+			embed.setAuthor(message, null, url).setColor(Color.CYAN);
+		}
 
-		TextChannel crateDrops = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("crate");
-		crateDrops.sendMessageEmbeds(embed.build()).queue();
+		TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
+		notifications.sendMessageEmbeds(embed.build()).queue();
 		// Server owner's Discord User ID
-		crateDrops.sendMessage("<@201812118981443584>").queue();
+		notifications.sendMessage("<@201812118981443584>").queue();
 	}
 }
