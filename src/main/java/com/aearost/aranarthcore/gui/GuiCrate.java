@@ -279,7 +279,7 @@ public class GuiCrate {
 		snifferEgg.setItemMeta(snifferEggMeta);
 		gui.setItem(21, snifferEgg);
 
-		ItemStack epicKey = new KeyRare().getItem();
+		ItemStack epicKey = new KeyEpic().getItem();
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
 		epicKeyMeta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key"));
 		List<String> epicKeyLore = new ArrayList<>();
