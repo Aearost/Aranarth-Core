@@ -35,6 +35,7 @@ public class HologramUtils {
             return false;
         }
 
+        // Removes doubled holograms
         BoundingBox box = BoundingBox.of(location, 0.5, 3, 0.5);
         Collection<Entity> nearby = location.getWorld().getNearbyEntities(box);
         for (Entity entity : nearby) {
@@ -101,10 +102,10 @@ public class HologramUtils {
      * @param isFromAutomaticRefresh If the method was called by the automatic refresh of persisting files.
      */
     public static void removeAllHolograms(boolean isFromAutomaticRefresh) {
+        // Saves the current state of holograms
         PersistenceUtils.saveTextHolograms();
 
-        List<Integer> toRemove = new ArrayList<>();
-        for (int i = 0; i < holograms.size(); i++) {
+        for (int i = holograms.size() - 1; i >= 0; i--) {
             TextDisplay hologram = holograms.get(i);
             if (isFromAutomaticRefresh && !hasPlayerNearbyHologram(hologram.getLocation())) {
                 continue;
@@ -117,15 +118,10 @@ public class HologramUtils {
             for (Entity entity : nearby) {
                 if (entity instanceof TextDisplay) {
                     entity.remove();
+                    if (!holograms.isEmpty()) {
+                        holograms.remove(i);
+                    }
                 }
-            }
-            toRemove.add(i);
-        }
-
-        // Remove from last to first
-        for (int i = holograms.size() - 1; i > 0; i--) {
-            if (toRemove.contains(i)) {
-                holograms.remove(i);
             }
         }
     }
@@ -139,7 +135,7 @@ public class HologramUtils {
             public void run() {
                 PersistenceUtils.loadTextHolograms(true);
             }
-        }, 1);
+        }, 3);
     }
 
     /**
