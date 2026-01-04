@@ -2316,6 +2316,10 @@ public class AranarthUtils {
 	public static void removeInactiveLockedContainers() {
 		List<Integer> toRemove = new ArrayList<>();
 		LocalDateTime now = LocalDateTime.now();
+		if (lockedContainers == null) {
+			return;
+		}
+
 		for (int i = 0; i < lockedContainers.size(); i++) {
 			LockedContainer locked = lockedContainers.get(i);
 			OfflinePlayer player = Bukkit.getOfflinePlayer(locked.getOwner());
