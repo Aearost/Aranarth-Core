@@ -29,7 +29,7 @@ public class CommandBalance {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					player.sendMessage(ChatUtils.chatMessage("&7Your balance is &6" + formatter.format(aranarthPlayer.getBalance())));
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player! /ac balance <player>"));
+					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player! /ac balance [player]"));
 				}
 				return true;
 			} else {
@@ -54,7 +54,7 @@ public class CommandBalance {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						// Only Council admins can run this command
 						if (aranarthPlayer.getCouncilRank() != 3) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+							player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac balance [player]"));
 							return true;
 						}
 					}
@@ -67,10 +67,29 @@ public class CommandBalance {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
 								try {
 									DecimalFormat df = new DecimalFormat("0.00");
-									double valueAsDouble = Double.parseDouble(args[2]);
-									String valueWithTwoDecimals = df.format(valueAsDouble);
-									aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
-									sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
+
+									// If increasing the balance
+									if (args[2].charAt(0) == '+') {
+										double valueAsDouble = Double.parseDouble(args[2].substring(1));
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(aranarthPlayer.getBalance() + Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been increased by &6" + formatter.format(valueAsDouble)));
+									}
+									// If decreasing the balance
+									else if (args[2].charAt(0) == '-') {
+										double valueAsDouble = Double.parseDouble(args[2].substring(1));
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(aranarthPlayer.getBalance() - Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been decreased by &6" + formatter.format(valueAsDouble)));
+									}
+									// If overriding the balance
+									else {
+										double valueAsDouble = Double.parseDouble(args[2]);
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
+									}
+
 									isPlayerFound = true;
 								} catch (NumberFormatException e) {
 									sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
