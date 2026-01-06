@@ -98,25 +98,34 @@ public class CrateOpen {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
                                 aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                                List<Integer> index = new ArrayList<>();
+                                List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
-                                index.add(0);
-                                GuiCrate gui = new GuiCrate(player, CrateType.RARE, index);
+                                indexes.add(0);
+                                indexes.add(0);
+                                GuiCrate gui = new GuiCrate(player, CrateType.RARE, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
-                                index.set(0, 1);
+                                indexes.set(0, 1);
+                                indexes.set(1, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
-                                            gui.updateRareCrateItems(index.get(0));
+                                            gui.updateRareCrateItems(indexes.get(0), indexes.get(1));
+
+                                            // Cycle through the next trim iteration
+                                            if (indexes.get(0) < 17) {
+                                                indexes.set(0, indexes.get(0) + 1);
+                                            } else {
+                                                indexes.set(0, 0);
+                                            }
 
                                             // Cycle through the next iteration
-                                            if (index.get(0) < 7) {
-                                                index.set(0, index.get(0) + 1);
+                                            if (indexes.get(1) < 7) {
+                                                indexes.set(1, indexes.get(1) + 1);
                                             } else {
-                                                index.set(0, 0);
+                                                indexes.set(1, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -158,39 +167,30 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
-                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
 
-                                            // Cycle through the next trim iteration
-                                            if (indexes.get(0) < 18) {
+                                            // Cycle through the next spawn egg iteration
+                                            if (indexes.get(0) < 3) {
                                                 indexes.set(0, indexes.get(0) + 1);
                                             } else {
                                                 indexes.set(0, 0);
                                             }
 
-                                            // Cycle through the next spawn egg iteration
-                                            if (indexes.get(1) < 3) {
+                                            // Cycle through the next cluster iteration
+                                            if (indexes.get(1) < 7) {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
-                                            }
-
-                                            // Cycle through the next cluster iteration
-                                            if (indexes.get(2) < 7) {
-                                                indexes.set(2, indexes.get(2) + 1);
-                                            } else {
-                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -456,11 +456,11 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 250);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$250 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.ENCHANTED_BOOK, 1);
@@ -481,8 +481,17 @@ public class CrateOpen {
                     reward = new ItemStack(Material.OMINOUS_TRIAL_KEY, 1);
                     name = "#515950&lOminous Trial Key x1";
                 } else if (chance <= 72) {
-                    reward = new ItemStack(Material.NETHERITE_INGOT, 1);
-                    name = "#3a383a&lNetherite Ingot x1";
+                    reward = getCycledArmorTrim(new Random().nextInt(18));
+                    String trimName = reward.getType().name().split("_")[0].toLowerCase();
+                    trimName = trimName.substring(0, 1).toUpperCase() + trimName.substring(1) + " Armor Trim";
+                    if (trimName.startsWith("Ward") || trimName.startsWith("Spire") || trimName.startsWith("Eye") || trimName.startsWith("Vex")) {
+                        trimName = "&b&l" + trimName;
+                    } else if (trimName.startsWith("Silence")) {
+                        trimName = "&d&l" + trimName;
+                    } else {
+                        trimName = "&e&l" + trimName;
+                    }
+                    name = trimName + " x1";
                 } else if (chance <= 80) {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
                     name = "#f5eba3&lTotem of Undying x1";
@@ -543,17 +552,8 @@ public class CrateOpen {
                     reward = new ItemStack(Material.SHULKER_BOX, 1);
                     name = "#956895&lShulker Box x1";
                 } else if (chance <= 36) {
-                    reward = getCycledArmorTrim(new Random().nextInt(18));
-                    String trimName = reward.getType().name().split("_")[0].toLowerCase();
-                    trimName = trimName.substring(0, 1).toUpperCase() + trimName.substring(1) + " Armor Trim";
-                    if (trimName.startsWith("Ward") || trimName.startsWith("Spire") || trimName.startsWith("Eye") || trimName.startsWith("Vex")) {
-                        trimName = "&b&l" + trimName;
-                    } else if (trimName.startsWith("Silence")) {
-                        trimName = "&d&l" + trimName;
-                    } else {
-                        trimName = "&e&l" + trimName;
-                    }
-                    name = trimName + " x1";
+                    reward = new ItemStack(Material.NETHERITE_INGOT, 2);
+                    name = "#3a383a&lNetherite Ingot x2";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.DIAMOND, 64);
                     name = "#a0f0ed&lDiamond x64";
@@ -683,15 +683,15 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 7500);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 15000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$7500 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$15000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.DIAMOND_BLOCK, 16);
-                    name = "#a0f0ed&lDiamond Block x16";
+                    reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
+                    name = "#a0f0ed&lDiamond Block x32";
                 } else if (chance <= 36) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
                     name = reward.getItemMeta().getDisplayName() + " x1";
