@@ -121,6 +121,7 @@ Features
 [+] Added a Quantity field to /ac give
 [~] Increased the range of God Apple Fragment messages from 32 to 48
 [+] Added support for extra leaf drops when simply breaking leaves, using Tree Feller, or using Leaf Blower
+[+] Added functionality to increase or decrease from a player's balance via /ac balance
 
 Miscellaneous
 - Removed redundant logs from weather
@@ -137,3 +138,4 @@ Miscellaneous
 - Re-wrote chest locking functionality as it had several gaps and difficulties integrating with player shops
 - Updated plugin to be based on Paper 1.21.11 instead of Spigot
 - Updated all references to .playSound() to be at the player itself rather than the player's location
+- Updated README to be more reflective of the current state of the plugin
