@@ -214,7 +214,7 @@ public class SpawnProtectionListener implements Listener {
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
 			if (bPlayer != null) {
 				if (!bPlayer.isToggled()) {
-					bPlayer.toggleBending();
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> bPlayer.toggleBending(), 1L);
 					return;
 				}
 			}
