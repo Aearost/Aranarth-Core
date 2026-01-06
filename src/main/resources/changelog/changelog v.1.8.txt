@@ -119,6 +119,7 @@ Features
 [+] Fixed items disappearing when Aranarthium Anvil is empty
 [~] Fixed issues with incorrect potions being consumed from potions pouch
 [+] Added a Quantity field to /ac give
+[~] Increased the range of God Apple Fragment messages from 32 to 48
 
 Miscellaneous
 - Removed redundant logs from weather
