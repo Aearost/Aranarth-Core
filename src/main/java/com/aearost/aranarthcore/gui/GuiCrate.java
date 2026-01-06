@@ -30,12 +30,12 @@ public class GuiCrate {
 
 		if (type == CrateType.RARE) {
 			this.initializedGui = initializeRareCrate(player);
-			// Updating the cluster item here to allow for dynamic updates
-			updateRareCrateItems(indexes.get(0));
+			// Updating the armor trims and cluster item here to allow for dynamic updates
+			updateRareCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
-			// Updating the cluster and armor trim item here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+			// Updating the cluster and spawn eggs here to allow for dynamic updates
+			updateEpicCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
@@ -188,14 +188,14 @@ public class GuiCrate {
 	private Inventory initializeRareCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Rare");
 
-		ItemStack money250 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money250Meta = money250.getItemMeta();
-		money250Meta.setDisplayName(ChatUtils.translateToColor("&6&l$250 of In-Game Currency"));
-		List<String> money250Lore = new ArrayList<>();
-		money250Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money250Meta.setLore(money250Lore);
-		money250.setItemMeta(money250Meta);
-		gui.setItem(2, money250);
+		ItemStack money1000 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money1000Meta = money1000.getItemMeta();
+		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1000 of In-Game Currency"));
+		List<String> money1000Lore = new ArrayList<>();
+		money1000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money1000Meta.setLore(money1000Lore);
+		money1000.setItemMeta(money1000Meta);
+		gui.setItem(2, money1000);
 
 		ItemStack mending = new ItemStack(Material.ENCHANTED_BOOK, 16);
 		EnchantmentStorageMeta mendingMeta = (EnchantmentStorageMeta) mending.getItemMeta();
@@ -242,15 +242,6 @@ public class GuiCrate {
 		ominousTrialKeyMeta.setLore(ominousTrialKeyLore);
 		ominousTrialKey.setItemMeta(ominousTrialKeyMeta);
 		gui.setItem(11, ominousTrialKey);
-
-		ItemStack netheriteIngot = new ItemStack(Material.NETHERITE_INGOT, 1);
-		ItemMeta netheriteIngotMeta = netheriteIngot.getItemMeta();
-		netheriteIngotMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Ingot"));
-		List<String> netheriteIngotLore = new ArrayList<>();
-		netheriteIngotLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		netheriteIngotMeta.setLore(netheriteIngotLore);
-		netheriteIngot.setItemMeta(netheriteIngotMeta);
-		gui.setItem(15, netheriteIngot);
 
 		ItemStack totem = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
 		ItemMeta totemMeta = totem.getItemMeta();
@@ -309,14 +300,14 @@ public class GuiCrate {
 	private Inventory initializeEpicCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Epic");
 
-		ItemStack money1500 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money1500Meta = money1500.getItemMeta();
-		money1500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1500 of In-Game Currency"));
-		List<String> money1500Lore = new ArrayList<>();
-		money1500Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money1500Meta.setLore(money1500Lore);
-		money1500.setItemMeta(money1500Meta);
-		gui.setItem(2, money1500);
+		ItemStack money5000 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money5000Meta = money5000.getItemMeta();
+		money5000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$5000 of In-Game Currency"));
+		List<String> money5000Lore = new ArrayList<>();
+		money5000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money5000Meta.setLore(money5000Lore);
+		money5000.setItemMeta(money5000Meta);
+		gui.setItem(2, money5000);
 
 		ItemStack shulkerBox = new ItemStack(Material.SHULKER_BOX, 1);
 		ItemMeta shulkerBoxMeta = shulkerBox.getItemMeta();
@@ -326,6 +317,15 @@ public class GuiCrate {
 		shulkerBoxMeta.setLore(shulkerBoxLore);
 		shulkerBox.setItemMeta(shulkerBoxMeta);
 		gui.setItem(3, shulkerBox);
+
+		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 2);
+		ItemMeta netheriteMeta = netherite.getItemMeta();
+		netheriteMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Ingot"));
+		List<String> netheriteLore = new ArrayList<>();
+		netheriteLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		netheriteMeta.setLore(netheriteLore);
+		netherite.setItemMeta(netheriteMeta);
+		gui.setItem(5, netherite);
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND, 64);
 		ItemMeta diamondMeta = diamond.getItemMeta();
@@ -354,16 +354,7 @@ public class GuiCrate {
 		elytra.setItemMeta(elytraMeta);
 		gui.setItem(11, elytra);
 
-//		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 8);
-//		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
-//		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
-//		List<String> enchantedGoldenAppleLore = new ArrayList<>();
-//		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&e8% Chance"));
-//		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
-//		enchantedGoldenApple.setItemMeta(enchantedGoldenAppleMeta);
-//		gui.setItem(15, enchantedGoldenApple);
-
-		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 8);
+		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 1);
 		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
 		mcmmo10Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +10"));
 		List<String> mcmmo10Lore = new ArrayList<>();
@@ -382,7 +373,7 @@ public class GuiCrate {
 		epicKey.setItemMeta(epicKeyMeta);
 		gui.setItem(20, epicKey);
 
-		ItemStack discount10 = new ItemStack(Material.PAPER, 8);
+		ItemStack discount10 = new ItemStack(Material.PAPER, 1);
 		ItemMeta discount10Meta = discount10.getItemMeta();
 		discount10Meta.setDisplayName(ChatUtils.translateToColor("&6&l10% Server Store Coupon"));
 		List<String> discount10Lore = new ArrayList<>();
@@ -421,16 +412,16 @@ public class GuiCrate {
 	private Inventory initializeGodlyCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Godly");
 
-		ItemStack money7500 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money7500Meta = money7500.getItemMeta();
-		money7500Meta.setDisplayName(ChatUtils.translateToColor("&6&l$7500 of In-Game Currency"));
-		List<String> money7500Lore = new ArrayList<>();
-		money7500Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money7500Meta.setLore(money7500Lore);
-		money7500.setItemMeta(money7500Meta);
-		gui.setItem(2, money7500);
+		ItemStack money15000 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money15000Meta = money15000.getItemMeta();
+		money15000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$15000 of In-Game Currency"));
+		List<String> money15000Lore = new ArrayList<>();
+		money15000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money15000Meta.setLore(money15000Lore);
+		money15000.setItemMeta(money15000Meta);
+		gui.setItem(2, money15000);
 
-		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 16);
+		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 32);
 		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();
 		diamondBlockMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
 		List<String> diamondBlockLore = new ArrayList<>();
@@ -493,7 +484,7 @@ public class GuiCrate {
 		epicKey.setItemMeta(epicKeyMeta);
 		gui.setItem(20, epicKey);
 
-		ItemStack discount30 = new ItemStack(Material.PAPER, 8);
+		ItemStack discount30 = new ItemStack(Material.PAPER, 1);
 		ItemMeta discount30Meta = discount30.getItemMeta();
 		discount30Meta.setDisplayName(ChatUtils.translateToColor("&6&l30% Server Store Coupon"));
 		List<String> discount30Lore = new ArrayList<>();
@@ -527,35 +518,10 @@ public class GuiCrate {
 
 	/**
 	 * Provides the Cluster that is associated to the input index for a Rare Crate.
-	 * @param index The index of the cluster.
-	 */
-	public void updateRareCrateItems(int index) {
-		ItemStack cluster = null;
-		switch (index) {
-			case 1 -> cluster = new IronCluster().getItem();
-			case 2 -> cluster = new GoldCluster().getItem();
-			case 3 -> cluster = new QuartzCluster().getItem();
-			case 4 -> cluster = new LapisCluster().getItem();
-			case 5 -> cluster = new RedstoneCluster().getItem();
-			case 6 -> cluster = new DiamondCluster().getItem();
-			case 7 -> cluster = new EmeraldCluster().getItem();
-			default -> cluster = new CopperCluster().getItem();
-		}
-		ItemMeta cycledClusterMeta = cluster.getItemMeta();
-		List<String> cycledClusterLore = new ArrayList<>();
-		cycledClusterLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		cycledClusterMeta.setLore(cycledClusterLore);
-		cluster.setItemMeta(cycledClusterMeta);
-		initializedGui.setItem(23, cluster);
-	}
-
-	/**
-	 * Provides the Cluster that is associated to the input index for an Epic Crate.
 	 * @param armorTrimIndex The index of the armor trim.
-	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
 	 */
-	public void updateEpicCrateItems(int armorTrimIndex, int eggIndex, int clusterIndex) {
+	public void updateRareCrateItems(int armorTrimIndex, int clusterIndex) {
 		// Cycle through the Armor Trims
 		ItemStack trim = null;
 		switch (armorTrimIndex) {
@@ -590,11 +556,36 @@ public class GuiCrate {
 		}
 		cycledArmorTrimMeta.setDisplayName(ChatUtils.translateToColor(trimName));
 		List<String> cycledArmorTrimLore = new ArrayList<>();
-		cycledArmorTrimLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledArmorTrimLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		cycledArmorTrimMeta.setLore(cycledArmorTrimLore);
 		trim.setItemMeta(cycledArmorTrimMeta);
-		initializedGui.setItem(5, trim);
+		initializedGui.setItem(15, trim);
 
+		ItemStack cluster = null;
+		switch (clusterIndex) {
+			case 1 -> cluster = new IronCluster().getItem();
+			case 2 -> cluster = new GoldCluster().getItem();
+			case 3 -> cluster = new QuartzCluster().getItem();
+			case 4 -> cluster = new LapisCluster().getItem();
+			case 5 -> cluster = new RedstoneCluster().getItem();
+			case 6 -> cluster = new DiamondCluster().getItem();
+			case 7 -> cluster = new EmeraldCluster().getItem();
+			default -> cluster = new CopperCluster().getItem();
+		}
+		ItemMeta cycledClusterMeta = cluster.getItemMeta();
+		List<String> cycledClusterLore = new ArrayList<>();
+		cycledClusterLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledClusterMeta.setLore(cycledClusterLore);
+		cluster.setItemMeta(cycledClusterMeta);
+		initializedGui.setItem(23, cluster);
+	}
+
+	/**
+	 * Provides the Cluster that is associated to the input index for an Epic Crate.
+	 * @param eggIndex The index of the spawn egg.
+	 * @param clusterIndex The index of the cluster.
+	 */
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex) {
 		// Cycle through the spawn eggs
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -603,7 +594,7 @@ public class GuiCrate {
 			case 3 -> egg = new ItemStack(Material.CAVE_SPIDER_SPAWN_EGG);
 			default -> egg = new ItemStack(Material.ZOMBIE_SPAWN_EGG);
 		}
-		egg.setAmount(4);
+		egg.setAmount(1);
 		ItemMeta cycledEggMeta = egg.getItemMeta();
 		if (egg.getType() == Material.SPIDER_SPAWN_EGG) {
 			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg"));
