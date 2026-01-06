@@ -120,6 +120,7 @@ Features
 [~] Fixed issues with incorrect potions being consumed from potions pouch
 [+] Added a Quantity field to /ac give
 [~] Increased the range of God Apple Fragment messages from 32 to 48
+[+] Added support for extra leaf drops when simply breaking leaves, using Tree Feller, or using Leaf Blower
 
 Miscellaneous
 - Removed redundant logs from weather
