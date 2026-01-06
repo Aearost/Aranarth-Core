@@ -22,7 +22,7 @@ public class InventoryCloseEventListener implements Listener {
     public void onInventoryClose(InventoryCloseEvent e) {
         if (e.getView().getType() == InventoryType.CHEST) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Add Potions")) {
-                new GuiPotionClose().execute(e);
+                new GuiPotionAddClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
                 new GuiQuiverClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
