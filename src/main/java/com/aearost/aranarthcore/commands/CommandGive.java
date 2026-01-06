@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -26,8 +28,8 @@ public class CommandGive {
 			}
 		}
 
-		if (args.length != 3) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: /ac give <player> <item>"));
+		if (args.length < 3) {
+			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac give <player> <item> <quantity>"));
 			return;
 		} else {
 			Player player = null;
@@ -69,12 +71,36 @@ public class CommandGive {
 					return;
 				}
 
-				if (instance instanceof AranarthItem item) {
-					player.getInventory().addItem(item.getItem());
-					player.sendMessage(ChatUtils.chatMessage("&7You have been given a " + item.getName()));
+				if (instance instanceof AranarthItem aranarthItem) {
+					ItemStack item = aranarthItem.getItem();
+					int quantity = 1;
+					if (args.length >= 4) {
+						try {
+							quantity = Integer.parseInt(args[3]);
+							if (quantity <= 0 || quantity > item.getMaxStackSize()) {
+								throw new NumberFormatException();
+							}
+							item.setAmount(quantity);
+						} catch (Exception e) {
+							player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+							return;
+						}
+					}
+
+					player.getInventory().addItem(item);
+
+					ItemMeta meta = item.getItemMeta();
+					String itemName = ChatUtils.getFormattedItemName(item.getType().name());
+					if (meta != null) {
+						if (meta.hasDisplayName()) {
+							itemName = meta.getDisplayName();
+						}
+					}
+
+					player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
 					if (sender instanceof Player playerSender) {
 						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
-							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given a " + item.getName()));
+							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
 						}
 					}
 				} else {
