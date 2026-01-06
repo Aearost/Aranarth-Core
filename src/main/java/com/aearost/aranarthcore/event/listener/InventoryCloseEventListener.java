@@ -25,7 +25,7 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiPotionAddClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
                 new GuiQuiverClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Held Shulker")) {
                 new GuiShulkerClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
                 new GuiCrateClose().execute(e);

@@ -44,7 +44,7 @@ public class ShulkerItemPickup {
 							return;
 						}
 
-						if ((player.getOpenInventory().getTitle()).equals("Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
+						if ((player.getOpenInventory().getTitle()).equals("Held Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
 							e.setCancelled(true);
 							return;
 						}
