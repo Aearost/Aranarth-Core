@@ -357,6 +357,8 @@ public class CommandACCompleter implements TabCompleter {
 							if (aranarthPlayer.getCouncilRank() == 3) {
 								if (args[2].isEmpty()) {
 									displayedOptions.add("amount");
+									displayedOptions.add("+amount");
+									displayedOptions.add("-amount");
 								}
 							}
 						}
