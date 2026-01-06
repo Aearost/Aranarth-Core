@@ -117,6 +117,8 @@ Features
 [~] Restructured weather functionality to apply fixed amounts of block updates rather than randomly in a radius of the player
 [+] Added shift-click support for Aranarthium anvils
 [+] Fixed items disappearing when Aranarthium Anvil is empty
+[~] Fixed issues with incorrect potions being consumed from potions pouch
+[+] Added a Quantity field to /ac give
 
 Miscellaneous
 - Removed redundant logs from weather
