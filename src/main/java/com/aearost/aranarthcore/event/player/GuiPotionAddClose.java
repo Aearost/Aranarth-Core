@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * Adds the input potions to the player's potion inventory.
  */
-public class GuiPotionClose {
+public class GuiPotionAddClose {
 
 	public void execute(final InventoryCloseEvent e) {
         Inventory inventory = e.getInventory();

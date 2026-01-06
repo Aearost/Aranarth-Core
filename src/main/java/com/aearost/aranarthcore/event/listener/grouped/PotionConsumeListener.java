@@ -15,6 +15,8 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -86,9 +88,8 @@ public class PotionConsumeListener implements Listener {
 					PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
 					// Ensures that the potion is the same
 					if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
-						// If it's an mcMMO potion, ensure that it is the exact same potion
-						if (consumedPotionMeta.hasItemName()) {
-							if (!consumedPotionMeta.getItemName().equals(potionMeta.getItemName())) {
+						if (consumedPotionMeta.getBasePotionType() == PotionType.MUNDANE) {
+							if (!isSamePotion(consumedPotionMeta, potionMeta)) {
 								continue;
 							}
 						}
@@ -145,6 +146,28 @@ public class PotionConsumeListener implements Listener {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Confirms that the two potions are different.
+	 * @param metaA The first potion meta.
+	 * @param metaB The second potion meta.
+	 * @return Confirmation that the two potions are different.
+	 */
+	private boolean isSamePotion(PotionMeta metaA, PotionMeta metaB) {
+		// If one is a Mundane potion
+		if (metaA.hasCustomEffects() != metaB.hasCustomEffects()) {
+			return false;
+		}
+
+		for (PotionEffect potionEffectA : metaA.getCustomEffects()) {
+			if (metaB.getAllEffects().contains(potionEffectA)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
 	}
 
 }
