@@ -196,6 +196,7 @@ public class AranarthCore extends JavaPlugin {
 		new FireProtectionListener(this);
 		new SleepSkipListener(this);
 		new BoostEffectsListener(this);
+		new LeafDropsListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
@@ -208,7 +209,6 @@ public class AranarthCore extends JavaPlugin {
 		new PotionEffectStackListener(this);
 		new ShopCreateListener(this);
 		new WeatherChangeListener(this);
-		new LeafDecayDropsListener(this);
 		new LeavesPreventBurnListener(this);
 		new SnowballHitListener(this);
 		new ArmorStandSwitchListener(this);
