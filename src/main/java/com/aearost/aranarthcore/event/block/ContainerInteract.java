@@ -191,6 +191,7 @@ public class ContainerInteract {
         Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 
+        // Message is sent in DominionProtection already
         if (chunkDominion != null) {
             return;
         }
@@ -204,8 +205,11 @@ public class ContainerInteract {
                     return;
                 }
             }
-            e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (!aranarthPlayer.getIsInAdminMode()) {
+                e.setCancelled(true);
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
+            }
         }
     }
 }
