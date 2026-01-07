@@ -42,7 +42,7 @@ public class CommandHome {
 				return true;
 			} else {
 				if (aranarthPlayer.getHomes().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any homes!"));
+					player.sendMessage(ChatUtils.chatMessage("&7You do not have any homes"));
 					return true;
 				} else {
 					GuiHomes gui = new GuiHomes(player);

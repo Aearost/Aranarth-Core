@@ -2281,6 +2281,10 @@ public class AranarthUtils {
 			if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
 					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+				if (!homes.get(i).getName().equals(warpName)) {
+					continue;
+				}
+
 				Home updatedWarp = new Home(warpName, direction, icon);
 				warps.set(i, updatedWarp);
 			}
@@ -2302,11 +2306,16 @@ public class AranarthUtils {
 			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
 					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
-				Home updatedWarp = new Home(homeName, direction, icon);
-				homes.set(i, updatedWarp);
+
+				// Prevents bug where incorrect home icon updates when they share the same location
+				if (!homes.get(i).getName().equals(homeName)) {
+					continue;
+				}
+
+				Home updatedHome = new Home(homeName, direction, icon);
+				homes.set(i, updatedHome);
 				aranarthPlayer.setHomes(homes);
 				setPlayer(player.getUniqueId(), aranarthPlayer);
-				return;
 			}
 		}
 	}
