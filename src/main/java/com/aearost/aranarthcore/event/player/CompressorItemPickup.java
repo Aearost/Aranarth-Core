@@ -157,6 +157,7 @@ public class CompressorItemPickup {
 				switch (type) {
 					case Material.COAL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.RAW_COPPER -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
+					case Material.COPPER_NUGGET -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.COPPER_INGOT -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.RAW_IRON -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.IRON_NUGGET -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
@@ -407,7 +408,8 @@ public class CompressorItemPickup {
 	private Material getCompressedType(Material type) {
         return switch (type) {
             case Material.COAL -> Material.COAL_BLOCK;
-            case Material.RAW_COPPER -> Material.RAW_COPPER_BLOCK;
+			case Material.RAW_COPPER -> Material.RAW_COPPER_BLOCK;
+			case Material.COPPER_NUGGET -> Material.COPPER_INGOT;
             case Material.COPPER_INGOT -> Material.COPPER_BLOCK;
             case Material.RAW_IRON -> Material.RAW_IRON_BLOCK;
             case Material.IRON_NUGGET -> Material.IRON_INGOT;

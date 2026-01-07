@@ -2166,15 +2166,15 @@ public class AranarthUtils {
 		}
 
 		Material type = item.getType();
-		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_INGOT
-				|| type == Material.RAW_IRON || type == Material.IRON_NUGGET || type == Material.IRON_INGOT
-				|| type == Material.RAW_GOLD || type == Material.GOLD_NUGGET || type == Material.GOLD_INGOT
-				|| type == Material.REDSTONE || type == Material.LAPIS_LAZULI || type == Material.DIAMOND
-				|| type == Material.EMERALD || type == Material.NETHERITE_INGOT || type == Material.AMETHYST_SHARD
-				|| type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST || type == Material.WHEAT
-				|| type == Material.MELON_SLICE || type == Material.DRIED_KELP || type == Material.SUGAR_CANE
-				|| type == Material.HONEYCOMB || type == Material.SLIME_BALL || type == Material.BONE_MEAL
-				|| type == Material.SNOWBALL || type == Material.CLAY_BALL;
+		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_NUGGET
+				|| type ==  Material.COPPER_INGOT || type == Material.RAW_IRON || type == Material.IRON_NUGGET
+				|| type == Material.IRON_INGOT || type == Material.RAW_GOLD || type == Material.GOLD_NUGGET
+				|| type == Material.GOLD_INGOT || type == Material.REDSTONE || type == Material.LAPIS_LAZULI
+				|| type == Material.DIAMOND || type == Material.EMERALD || type == Material.NETHERITE_INGOT
+				|| type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
+				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
+				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
+				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL;
 	}
 
 	/**
@@ -2184,6 +2184,7 @@ public class AranarthUtils {
 	public static void compressAllMaterials(UUID uuid) {
 		addCompressibleItem(uuid, Material.COAL);
 		addCompressibleItem(uuid, Material.RAW_COPPER);
+		addCompressibleItem(uuid, Material.COPPER_NUGGET);
 		addCompressibleItem(uuid, Material.COPPER_INGOT);
 		addCompressibleItem(uuid, Material.RAW_IRON);
 		addCompressibleItem(uuid, Material.IRON_NUGGET);
@@ -2217,6 +2218,7 @@ public class AranarthUtils {
 	public static void stopCompressingAllMaterials(UUID uuid) {
 		removeCompressibleItem(uuid, Material.COAL);
 		removeCompressibleItem(uuid, Material.RAW_COPPER);
+		removeCompressibleItem(uuid, Material.COPPER_NUGGET);
 		removeCompressibleItem(uuid, Material.COPPER_INGOT);
 		removeCompressibleItem(uuid, Material.RAW_IRON);
 		removeCompressibleItem(uuid, Material.IRON_NUGGET);
