@@ -1173,18 +1173,17 @@ public class AranarthUtils {
 		int saintHomeNum = 0;
 		int perksHomeNum = 0;
 
-		if (aranarthPlayer.getRank() <= 2) {
+		int rank = aranarthPlayer.getRank();
+		if (rank == 0 || rank == 1) {
 			rankHomeNum = 1;
-		} else if (aranarthPlayer.getRank() <= 3) {
+		} else if (rank == 2 || rank == 3) {
 			rankHomeNum = 2;
-		} else if (aranarthPlayer.getRank() <= 4) {
+		} else if (rank == 4 || rank == 5) {
 			rankHomeNum = 3;
-		} else if (aranarthPlayer.getRank() <= 6) {
+		} else if (rank == 6 || rank == 7) {
 			rankHomeNum = 4;
-		} else if (aranarthPlayer.getRank() == 8) {
+		} else if (rank == 8) {
 			rankHomeNum = 5;
-		} else {
-			rankHomeNum = 1;
 		}
 
 		if (aranarthPlayer.getSaintRank() == 1) {
