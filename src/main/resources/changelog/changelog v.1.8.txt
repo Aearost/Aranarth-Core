@@ -122,6 +122,7 @@ Features
 [~] Increased the range of God Apple Fragment messages from 32 to 48
 [+] Added support for extra leaf drops when simply breaking leaves, using Tree Feller, or using Leaf Blower
 [+] Added functionality to increase or decrease from a player's balance via /ac balance
+[+] Fixed duplication bug involving shulker boxes in the off-hand
 
 Miscellaneous
 - Removed redundant logs from weather
