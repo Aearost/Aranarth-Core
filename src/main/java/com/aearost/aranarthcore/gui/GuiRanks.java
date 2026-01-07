@@ -115,6 +115,7 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
 		knightMeta.setLore(knightLore);
@@ -142,7 +143,6 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
 		baronMeta.setLore(baronLore);
