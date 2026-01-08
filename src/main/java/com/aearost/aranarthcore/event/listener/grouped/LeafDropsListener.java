@@ -100,6 +100,10 @@ public class LeafDropsListener implements Listener {
 				else if (new Random().nextInt(200) == 0) {
 					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
 					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (!block.getWorld().getName().equals(player.getWorld().getName())) {
+							continue;
+						}
+
 						// If the player is within 48 blocks of the spawn location
 						if (block.getLocation().distance(player.getLocation()) <= 48) {
 							player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
@@ -147,6 +151,10 @@ public class LeafDropsListener implements Listener {
 			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
 				block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
 				for (Player player : Bukkit.getOnlinePlayers()) {
+					if (!block.getWorld().getName().equals(player.getWorld().getName())) {
+						continue;
+					}
+
 					// If the player is within 48 blocks of the spawn location
 					if (block.getLocation().distance(player.getLocation()) <= 48) {
 						player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
