@@ -27,6 +27,7 @@ public class CommandItemName {
 
             if (args.length == 1) {
                 sender.sendMessage(ChatUtils.chatMessage("&cYou must enter an item name!"));
+                return true;
             } else {
                 ItemStack item = player.getInventory().getItemInMainHand();
                 if (item.getType() == Material.AIR) {

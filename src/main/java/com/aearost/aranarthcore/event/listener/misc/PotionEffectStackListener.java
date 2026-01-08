@@ -164,9 +164,13 @@ public class PotionEffectStackListener implements Listener {
 				calculatedAmplifier = 2;
 			}
 		} else if (type == PotionEffectType.WITHER) {
-			if (calculatedAmplifier >= 3) {
-				calculatedAmplifier = 2;
-			}
+			 if (calculatedAmplifier >= 3) {
+				 calculatedAmplifier = 2;
+			 }
+		} else if (type == PotionEffectType.DARKNESS) {
+			 if (calculatedAmplifier >= 5) {
+				 calculatedAmplifier = 4;
+			 }
 		} else {
 			if (calculatedAmplifier >= 10) {
 				calculatedAmplifier = 9;
