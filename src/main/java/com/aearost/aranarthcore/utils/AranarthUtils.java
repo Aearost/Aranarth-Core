@@ -1042,18 +1042,14 @@ public class AranarthUtils {
 		}
 
 		if (isContainerBlock(block)) {
-			Bukkit.getLogger().info("A");
 			LockedContainer lockedContainer = getLockedContainerAtBlock(block);
 			if (lockedContainer != null) {
-				Bukkit.getLogger().info("B");
 				List<UUID> trusted = lockedContainer.getTrusted();
 				if (trusted.contains(player.getUniqueId())) {
-					Bukkit.getLogger().info("C");
 					return true;
 				}
 			}
 		}
-		Bukkit.getLogger().info("D");
 		return false;
 	}
 
@@ -1503,7 +1499,13 @@ public class AranarthUtils {
 			isToggled = true;
 		}
 
-		player.teleport(getSafeTeleportLocation(to));
+		Location locToTeleportTo = getSafeTeleportLocation(to);
+		// If i.e over the void
+		if (locToTeleportTo == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
+			return false;
+		}
+		player.teleport(locToTeleportTo);
 		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 
 		// Saves the player's last location for /ac back

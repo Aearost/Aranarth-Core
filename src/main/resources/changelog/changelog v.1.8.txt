@@ -124,6 +124,8 @@ Features
 [+] Added functionality to increase or decrease from a player's balance via /ac balance
 [+] Fixed duplication bug involving shulker boxes in the off-hand
 [~] Changed recipe for Invisible Item Frames to use glow item frames rather than regular item frames
+[~] Fixed double error message when doing /ac itemname
+[~] Added limit to Darkness status effect
 
 Miscellaneous
 - Removed redundant logs from weather
