@@ -24,8 +24,10 @@ public class CommandBack {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getLastKnownTeleportLocation() != null) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation());
-				player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
+				boolean wasSuccessful = AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation());
+				if (wasSuccessful) {
+					player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
+				}
 				return true;
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have a previous location to teleport to!"));
