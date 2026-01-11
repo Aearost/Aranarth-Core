@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -32,6 +33,7 @@ public class CommandBroadcast {
 					}
 				}
 				Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
+				DiscordUtils.createNotification(ChatUtils.stripColorFormatting(messageBuilder.toString()), null);
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a message to broadcast!"));
