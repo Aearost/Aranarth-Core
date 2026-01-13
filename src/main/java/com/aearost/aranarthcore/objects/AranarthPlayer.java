@@ -61,6 +61,7 @@ public class AranarthPlayer {
 	private CrateType crateTypeBeingOpened = null;
 	private int voteTotal;
 	private int votePoints;
+	private boolean isClaimingToggled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -105,6 +106,7 @@ public class AranarthPlayer {
 		this.bulkTransactionNum = 0;
 		this.voteTotal = 0;
 		this.votePoints = 0;
+		this.isClaimingToggled = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -155,6 +157,7 @@ public class AranarthPlayer {
 		this.bulkTransactionNum = 0;
 		this.voteTotal = voteTotal;
 		this.votePoints = votePoints;
+		this.isClaimingToggled = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -901,6 +904,22 @@ public class AranarthPlayer {
 	 */
 	public void setVotePoints(int votePoints) {
 		this.votePoints = votePoints;
+	}
+
+	/**
+	 * Provides the value tracking whether the player is claiming chunks.
+	 * @return The value tracking whether the player is claiming chunks.
+	 */
+	public boolean getIsClaimingToggled() {
+		return isClaimingToggled;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is claiming chunks.
+	 * @param isClaimingToggled The value tracking whether the player is claiming chunks.
+	 */
+	public void setIsClaimingToggled(boolean isClaimingToggled) {
+		this.isClaimingToggled = isClaimingToggled;
 	}
 
 }

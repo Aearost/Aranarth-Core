@@ -126,6 +126,9 @@ Features
 [~] Changed recipe for Invisible Item Frames to use glow item frames rather than regular item frames
 [~] Fixed double error message when doing /ac itemname
 [~] Added limit to Darkness status effect
+[+] Added increased Spears damage to Elven armor
+[+] Included Spears in the Boost of the Hunter
+[+] Included Spears in the extra damage during Faunivor
 
 Miscellaneous
 - Removed redundant logs from weather

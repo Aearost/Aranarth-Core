@@ -58,7 +58,7 @@ public class BoostEffectsListener implements Listener {
 				if (e.getSkill() == PrimarySkillType.SWORDS || e.getSkill() == PrimarySkillType.AXES
 						|| e.getSkill() == PrimarySkillType.TRIDENTS || e.getSkill() == PrimarySkillType.MACES
 						|| e.getSkill() == PrimarySkillType.ARCHERY || e.getSkill() == PrimarySkillType.CROSSBOWS
-						|| e.getSkill() == PrimarySkillType.FISHING) {
+						|| e.getSkill() == PrimarySkillType.FISHING || e.getSkill() == PrimarySkillType.SPEARS) {
 					e.setRawXpGained((float) (e.getRawXpGained() * 1.5));
 				}
 			}

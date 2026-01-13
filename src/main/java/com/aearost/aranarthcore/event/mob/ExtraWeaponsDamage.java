@@ -56,6 +56,8 @@ public class ExtraWeaponsDamage {
 						// Arrow damage increase
 						if (e.getDamageSource().getDamageType() == DamageType.ARROW) {
 							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
+						} else if (e.getDamageSource().getDamageType() == DamageType.SPEAR) {
+							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 						}
 					} else if (AranarthUtils.isWearingArmorType(attacker, "scorched")) {
 						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
