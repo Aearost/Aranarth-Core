@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Chunk;
@@ -8,7 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
- * Handles Dominion enter and exit messages.
+ * Handles Dominion enter and exit messages, as well as auto-claim functionality.
  */
 public class DominionChunkChange {
 
@@ -34,7 +36,13 @@ public class DominionChunkChange {
 				}
 				// If exiting a dominion
 				else if (dominionFrom != null && dominionTo == null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer.getIsAutoClaimEnabled()) {
+						String result = DominionUtils.claimChunk(player, to);
+						player.sendMessage(ChatUtils.chatMessage(result));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+					}
 				} else if (dominionFrom != null && dominionTo != null) {
 					// If you are changing chunk within the same dominion
 					if (dominionFrom.getLeader().equals(dominionTo.getLeader())) {

@@ -61,7 +61,7 @@ public class AranarthPlayer {
 	private CrateType crateTypeBeingOpened = null;
 	private int voteTotal;
 	private int votePoints;
-	private boolean isClaimingToggled = false;
+	private boolean isAutoClaimEnabled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -106,7 +106,7 @@ public class AranarthPlayer {
 		this.bulkTransactionNum = 0;
 		this.voteTotal = 0;
 		this.votePoints = 0;
-		this.isClaimingToggled = false;
+		this.isAutoClaimEnabled = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -157,7 +157,7 @@ public class AranarthPlayer {
 		this.bulkTransactionNum = 0;
 		this.voteTotal = voteTotal;
 		this.votePoints = votePoints;
-		this.isClaimingToggled = false;
+		this.isAutoClaimEnabled = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -910,16 +910,16 @@ public class AranarthPlayer {
 	 * Provides the value tracking whether the player is claiming chunks.
 	 * @return The value tracking whether the player is claiming chunks.
 	 */
-	public boolean getIsClaimingToggled() {
-		return isClaimingToggled;
+	public boolean getIsAutoClaimEnabled() {
+		return isAutoClaimEnabled;
 	}
 
 	/**
 	 * Updates the value tracking whether the player is claiming chunks.
-	 * @param isClaimingToggled The value tracking whether the player is claiming chunks.
+	 * @param isAutoClaimEnabled The value tracking whether the player is claiming chunks.
 	 */
-	public void setIsClaimingToggled(boolean isClaimingToggled) {
-		this.isClaimingToggled = isClaimingToggled;
+	public void setIsAutoClaimEnabled(boolean isAutoClaimEnabled) {
+		this.isAutoClaimEnabled = isAutoClaimEnabled;
 	}
 
 }

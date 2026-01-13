@@ -68,11 +68,11 @@ public class DominionUtils {
 	/**
 	 * Claims the chunk for the dominion.
 	 * @param player The player attempting to claim the chunk.
+	 * @param chunkToClaim The chunk the player is attempting to claim.
 	 * @return The message of whether the chunk was claimed.
 	 */
-	public static String claimChunk(Player player) {
-		Chunk chunk = player.getLocation().getChunk();
-		Dominion dominionOfChunk = getDominionOfChunk(chunk);
+	public static String claimChunk(Player player, Chunk chunkToClaim) {
+		Dominion dominionOfChunk = getDominionOfChunk(chunkToClaim);
 
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
@@ -80,11 +80,11 @@ public class DominionUtils {
 				if (dominionOfChunk == null) {
 					if (playerDominion.getBalance() >= 100) {
 						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25)) {
-							if (isConnectedToClaims(playerDominion, chunk)) {
+							if (isConnectedToClaims(playerDominion, chunkToClaim)) {
 								double newBalance = playerDominion.getBalance() - 100;
 								playerDominion.setBalance(newBalance);
 								List<Chunk> chunks = playerDominion.getChunks();
-								chunks.add(chunk);
+								chunks.add(chunkToClaim);
 								updateDominion(playerDominion);
 								return "&e" + playerDominion.getName() + " &7has claimed &e" +
 										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
@@ -171,7 +171,7 @@ public class DominionUtils {
 	 * @param chunk The chunk.
 	 * @return Confirmation if the input chunk is connected to the rest of the claims of the dominion.
 	 */
-	private static boolean isConnectedToClaims(Dominion dominion, Chunk chunk) {
+	public static boolean isConnectedToClaims(Dominion dominion, Chunk chunk) {
 		List<Chunk> dominionChunks = dominion.getChunks();
 		int chunkX = chunk.getX();
 		int chunkZ = chunk.getZ();
