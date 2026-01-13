@@ -69,7 +69,7 @@ public class CommandDominion {
 					disbandDominion(dominion, player);
 				}
 				else if (args[1].equalsIgnoreCase("claim")) {
-					player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player)));
+					player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player, player.getChunk())));
 				}
 				else if (args[1].equalsIgnoreCase("unclaim")) {
 					player.sendMessage(ChatUtils.chatMessage(DominionUtils.unclaimChunk(player)));
@@ -1382,11 +1382,11 @@ public class CommandDominion {
 	 */
 	private static void claimToggle(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getIsClaimingToggled()) {
-			aranarthPlayer.setIsClaimingToggled(false);
+		if (aranarthPlayer.getIsAutoClaimEnabled()) {
+			aranarthPlayer.setIsAutoClaimEnabled(false);
 			player.sendMessage(ChatUtils.chatMessage("&7You have disabled auto-claim"));
 		} else {
-			aranarthPlayer.setIsClaimingToggled(true);
+			aranarthPlayer.setIsAutoClaimEnabled(true);
 			player.sendMessage(ChatUtils.chatMessage("&7You have enabled auto-claim"));
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
