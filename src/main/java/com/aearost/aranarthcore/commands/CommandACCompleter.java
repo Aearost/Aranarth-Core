@@ -1083,6 +1083,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("neutral");
 		displayedOptions.add("setleader");
 		displayedOptions.add("map");
+		displayedOptions.add("autoclaim");
 		return displayedOptions;
 	}
 
@@ -1124,10 +1125,13 @@ public class CommandACCompleter implements TabCompleter {
 					if (args[1].equals("a")) {
 						displayedOptions.add("accept");
 						displayedOptions.add("ally");
+						displayedOptions.add("autoclaim");
 					} else if ("accept".startsWith(args[1])) {
 						displayedOptions.add("accept");
 					} else if ("ally".startsWith(args[1])) {
 						displayedOptions.add("ally");
+					} else if ("autoclaim".startsWith(args[1])) {
+						displayedOptions.add("autoclaim");
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}

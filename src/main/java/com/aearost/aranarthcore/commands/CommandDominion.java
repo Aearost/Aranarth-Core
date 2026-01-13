@@ -179,6 +179,8 @@ public class CommandDominion {
 					setLeader(args, dominion, player);
 				} else if (args[1].equalsIgnoreCase("map")) {
 					showDominionMap(player);
+				} else if (args[1].equalsIgnoreCase("autoclaim")) {
+					claimToggle(player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -1373,4 +1375,21 @@ public class CommandDominion {
 
 		}
 	}
+
+	/**
+	 * Toggles whether the player will automatically be claiming chunks as they enter them.
+	 * @param player The player.
+	 */
+	private static void claimToggle(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer.getIsClaimingToggled()) {
+			aranarthPlayer.setIsClaimingToggled(false);
+			player.sendMessage(ChatUtils.chatMessage("&7You have disabled auto-claim"));
+		} else {
+			aranarthPlayer.setIsClaimingToggled(true);
+			player.sendMessage(ChatUtils.chatMessage("&7You have enabled auto-claim"));
+		}
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
 }
