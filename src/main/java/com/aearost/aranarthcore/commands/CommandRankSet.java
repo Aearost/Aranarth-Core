@@ -60,10 +60,8 @@ public class CommandRankSet {
 
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					String name = "";
-					boolean isSamePlayer = false;
 					if (sender instanceof Player senderPlayer) {
 						if (senderPlayer.getUniqueId().equals(player.getUniqueId())) {
-							isSamePlayer = true;
 							PermissionUtils.evaluatePlayerPermissions(senderPlayer, false);
 						}
 					}
@@ -153,24 +151,16 @@ public class CommandRankSet {
 							rankName = "Saint";
 						}
 
-						if (isSamePlayer) {
-							if (args[1].equals("rank")) {
-								sender.sendMessage(ChatUtils.chatMessage("&7Your rank has been updated"));
-							} else {
-								sender.sendMessage(ChatUtils.chatMessage("&7Your &e" + rankName + " &7rank has been updated"));
+						if (args[1].equals("council")) {
+							if (args[3].equals("1")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
+							} else if (args[3].equals("2")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
+							} else if (args[3].equals("3")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
 							}
-						} else {
-							if (args[1].equals("council")) {
-								if (args[3].equals("1")) {
-									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
-								} else if (args[3].equals("2")) {
-									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
-								} else if (args[3].equals("3")) {
-									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
-								}
-							} else if (args[1].equals("architect")) {
-								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
-							}
+						} else if (args[1].equals("architect")) {
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
 						}
 					}
 				} else {
