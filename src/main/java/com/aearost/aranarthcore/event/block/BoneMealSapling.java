@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.gmail.nossr50.mcMMO;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.TreeType;
@@ -66,6 +67,7 @@ public class BoneMealSapling {
                                 clicked.setType(Material.AIR);
                                 if (treeType != null) {
                                     boolean isSuccessfulGrowth = clicked.getLocation().getWorld().generateTree(clicked.getLocation(), treeType);
+                                    mcMMO.getChunkManager().setEligible(clicked);
                                     if (!isSuccessfulGrowth) {
                                         // Set the sapling back
                                         clicked.setType(clickedType);

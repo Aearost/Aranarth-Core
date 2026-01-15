@@ -130,6 +130,7 @@ Features
 [+] Included Spears in the Boost of the Hunter
 [+] Included Spears in the extra damage during Faunivor
 [~] Bone meal on saplings during Follivor will no longer take 2 Bone meal
+[~] Fixed issue where bone meal'd saplings during Follivor were not working with Tree Feller
 
 Miscellaneous
 - Removed redundant logs from weather
