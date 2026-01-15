@@ -131,6 +131,9 @@ Features
 [+] Included Spears in the extra damage during Faunivor
 [~] Bone meal on saplings during Follivor will no longer take 2 Bone meal
 [~] Fixed issue where bone meal'd saplings during Follivor were not working with Tree Feller
+[+] Made all store purchases broadcast donations in chat and display the nickname of the player
+[+] Added notifications for boosts and perks when added/purchased
+[+] Created notifications specific to donations and routed all donation messages to here
 
 Miscellaneous
 - Removed redundant logs from weather

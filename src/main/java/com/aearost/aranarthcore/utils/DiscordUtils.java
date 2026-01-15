@@ -14,7 +14,6 @@ import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.ban.ProfileBanList;
-import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
@@ -31,6 +30,7 @@ public class DiscordUtils {
 	private static final TextChannel punishmentHistoryChannelId = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
 	private static final TextChannel roleChangesChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("roles");
 	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+	private static final TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
 
 	/**
 	 * Provides the Discord Guild.
@@ -43,6 +43,7 @@ public class DiscordUtils {
 
 	/**
 	 * Updates the player's in-game rank accordingly in Discord's roles.
+	 * Updates #server-chat and #role-changes in Discord.
 	 * @param player The player whose rank is changing.
 	 * @param newRankNum The player's new rank number.
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
@@ -105,6 +106,7 @@ public class DiscordUtils {
 
 	/**
 	 * Updates the player's Saint rank accordingly in Discord's roles.
+	 * Only manually updates #role-changes, as the other updates are from donationNotification().
 	 * @param player The player whose Saint rank is changing.
 	 * @param newRankNum The player's new Saint rank number.
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
@@ -135,12 +137,14 @@ public class DiscordUtils {
 		// Only display intentional changes in Discord, not auto-assign
 		if (isIntentionalChange) {
 			if (isSaint) {
+				donationNotification(player.getName() + " has donated and become a Saint!", player.getUniqueId(), Color.MAGENTA);
+
+				// Must manually be sent for role changes
 				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
 				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
 						.setColor(Color.MAGENTA);
-				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
 			}
 		}
@@ -148,6 +152,7 @@ public class DiscordUtils {
 
 	/**
 	 * Updates the player's Architect rank accordingly in Discord's roles.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
 	 * @param player The player whose Architect rank is changing.
 	 * @param newRankNum The player's new Architect rank number.
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
@@ -183,12 +188,16 @@ public class DiscordUtils {
 						.setColor(Color.YELLOW);
 				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+				notifications.sendMessageEmbeds(embed.build()).queue();
+				// Server owner's Discord User ID
+				notifications.sendMessage("<@201812118981443584>").queue();
 			}
 		}
 	}
 
 	/**
 	 * Updates the player's Council rank accordingly in Discord's roles.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
 	 * @param player The player whose Council rank is changing.
 	 * @param newRankNum The player's new Council rank number.
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
@@ -213,18 +222,24 @@ public class DiscordUtils {
 
 			// If they are a Council member
 			if (newRankNum == 1) {
-				isHelper = true;
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue();
 			} else if (newRankNum == 2) {
-				isModerator = true;
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue();
 			} else if (newRankNum == 3) {
-				isAdmin = true;
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
 				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue();
 			}
+		}
+
+		// If they are a Council member
+		if (newRankNum == 1) {
+			isHelper = true;
+		} else if (newRankNum == 2) {
+			isModerator = true;
+		} else if (newRankNum == 3) {
+			isAdmin = true;
 		}
 
 		// Only display intentional changes in Discord, not auto-assign
@@ -246,6 +261,9 @@ public class DiscordUtils {
 						.setColor(Color.YELLOW);
 				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+				notifications.sendMessageEmbeds(embed.build()).queue();
+				// Server owner's Discord User ID
+				notifications.sendMessage("<@201812118981443584>").queue();
 			}
 		}
 	}
@@ -437,7 +455,8 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Adds a message in #server-chat in Discord to reflect changes to the Avatar.
+	 * Adds a message in Discord to reflect changes to the Avatar.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
 	 * @param isNewAvatar Confirmation whether the message is for a new avatar, and if not, a deceased one.
 	 */
 	public static void addAvatarMessageToDiscord(Avatar avatar, boolean isNewAvatar) {
@@ -464,6 +483,7 @@ public class DiscordUtils {
 			}
 			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			notifications.sendMessageEmbeds(embed.build()).queue();
 		}
 		// If the avatar has deceased
 		else {
@@ -480,6 +500,7 @@ public class DiscordUtils {
 
 	/**
 	 * Adds a message in #server-chat in Discord to reflect the addition of a new server boost.
+	 * Only updates #server-chat if a boost is expired.
 	 * @param uuid The UUID of the player who purchased/is applying the boost.
 	 * @param boost The boost being applied.
 	 * @param isAdding Whether a boost is being added.
@@ -487,63 +508,32 @@ public class DiscordUtils {
 	public static void updateBoostInDiscord(UUID uuid, Boost boost, boolean isAdding) {
 		Guild guild = getGuild();
 
+		String name = "";
+		Color color = null;
+		if (boost == Boost.MINER) {
+			name = "Boost of the Miner";
+			color = new Color(85, 85, 85);
+		} else if (boost == Boost.HARVEST) {
+			name = "Boost of the Harvest";
+			color = new Color(255, 170, 0);
+		} else if (boost == Boost.HUNTER) {
+			name = "Boost of the Hunter";
+			color = new Color(255, 85, 85);
+		} else if (boost == Boost.CHI) {
+			name = "Boost of Chi";
+			color = new Color(255, 255, 255);
+		} else {
+			name = "Unspecified Boost";
+			color = new Color(255, 85, 255);
+		}
+
 		// If it was applied by a user
 		if (uuid != null) {
 			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
-
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			String uuidNoDashes = uuid.toString().replaceAll("-", "");
-			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-
-			String name = "";
-			Color color = null;
-			if (boost == Boost.MINER) {
-				name = "Boost of the Miner";
-				color = new Color(85, 85, 85);
-			} else if (boost == Boost.HARVEST) {
-				name = "Boost of the Harvest";
-				color = new Color(255, 170, 0);
-			} else if (boost == Boost.HUNTER) {
-				name = "Boost of the Hunter";
-				color = new Color(255, 85, 85);
-			} else if (boost == Boost.CHI) {
-				name = "Boost of Chi";
-				color = new Color(255, 255, 255);
-			} else {
-				name = "Unspecified Boost";
-				color = new Color(255, 85, 255);
-			}
-
-			EmbedBuilder embed = new EmbedBuilder()
-					.setAuthor(username + " has applied the " + name, null, url)
-					.setColor(color);
-
-			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			donationNotification(username + " has applied the " + name, uuid, color);
 		} else {
-			String name = "";
-			Color color = null;
-			if (boost == Boost.MINER) {
-				name = "Boost of the Miner";
-				color = new Color(85, 85, 85);
-			} else if (boost == Boost.HARVEST) {
-				name = "Boost of the Harvest";
-				color = new Color(255, 170, 0);
-			} else if (boost == Boost.HUNTER) {
-				name = "Boost of the Hunter";
-				color = new Color(255, 85, 85);
-			} else if (boost == Boost.CHI) {
-				name = "Boost of Chi";
-				color = new Color(255, 255, 255);
-			} else {
-				name = "Unspecified Boost";
-				color = new Color(255, 85, 255);
-			}
-
 			if (isAdding) {
-				EmbedBuilder embed = new EmbedBuilder()
-						.setAuthor("The " + name + " has applied")
-						.setColor(color);
-				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+				donationNotification("The " + name + " has been applied", null, color);
 			} else {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor("The " + name + " has expired")
@@ -554,24 +544,54 @@ public class DiscordUtils {
 	}
 
 	/**
-	 * Sends a notification when desired to be sent to the notifications channel.
+	 * Sends a notification when a player donates.
+	 * Updates both #notifications and #role-changes in Discord.
 	 * @param message The message to be sent.
-	 * @param player The player who is involved with the notification.
+	 * @param uuid The UUID of the player who donated.
 	 */
-	public static void createNotification(String message, Player player) {
+	public static void donationNotification(String message, UUID uuid, Color color) {
 		Guild guild = getGuild();
 		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
 
-		if (player == null) {
+		if (uuid == null) {
+			embed.setAuthor(message);
+		} else {
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+
+			embed.setAuthor(message, null, url);
+		}
+		embed.setColor(color);
+
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		notifications.sendMessageEmbeds(embed.build()).queue();
+		// Server owner's Discord User ID
+		notifications.sendMessage("<@201812118981443584>").queue();
+	}
+
+	/**
+	 * Sends a miscellaneous notification when desired to be sent to the notifications channel.
+	 * Updates only #notifications in Discord.
+	 * @param message The message to be sent.
+	 * @param uuid The UUID of the player who is involved with the notification.
+	 */
+	public static void createNotification(String message, UUID uuid) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
+
+		if (uuid == null) {
 			embed.setAuthor(message).setColor(Color.CYAN);
 		} else {
-			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
 			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
 
 			embed.setAuthor(message, null, url).setColor(Color.CYAN);
 		}
 
-		TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
 		notifications.sendMessageEmbeds(embed.build()).queue();
 		// Server owner's Discord User ID
 		notifications.sendMessage("<@201812118981443584>").queue();

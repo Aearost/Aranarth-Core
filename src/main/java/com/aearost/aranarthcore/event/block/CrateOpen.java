@@ -600,7 +600,7 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&3&lEpic Crate Key x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.createNotification(player.getName() + " has earned a 10% Store Coupon", player);
+                    DiscordUtils.createNotification(player.getName() + " has earned a 10% Store Coupon", player.getUniqueId());
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);
@@ -733,7 +733,7 @@ public class CrateOpen {
                     reward.setAmount(2);
                     name = "&5&lGodly Crate Key x2";
                 } else if (chance <= 90) {
-                    DiscordUtils.createNotification(player.getName() + " has earned a 30% Store Coupon", player);
+                    DiscordUtils.createNotification(player.getName() + " has earned a 30% Store Coupon", player.getUniqueId());
                     reward = new ItemStack(Material.PAPER);
                     ItemMeta rewardMeta = reward.getItemMeta();
                     rewardMeta.setMaxStackSize(1);

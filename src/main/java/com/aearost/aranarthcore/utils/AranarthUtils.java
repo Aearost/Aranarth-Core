@@ -1942,7 +1942,7 @@ public class AranarthUtils {
 	/**
 	 * Applies a new server boost or increases the duration of an existing server boost.
 	 * @param boost The type of boost being applied. A null value signifies 24 hours.
-	 * @param duration The duration of the boost being applied..
+	 * @param duration The duration of the boost being applied.
 	 * @param uuid The username of the player that is applying the boost.
 	 */
 	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid) {
