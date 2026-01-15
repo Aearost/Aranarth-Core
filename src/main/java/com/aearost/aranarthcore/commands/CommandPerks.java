@@ -9,6 +9,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.awt.*;
 import java.util.UUID;
 
 /**
@@ -86,7 +87,13 @@ public class CommandPerks {
 								Player player = Bukkit.getPlayer(uuid);
 								PermissionUtils.evaluatePlayerPermissions(player, false);
 							}
-							sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
+
+							if (!args[3].equals("0")) {
+								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
+								DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+							}
+
 							return true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
@@ -112,18 +119,48 @@ public class CommandPerks {
 							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
 							|| args[2].equals("bluefire")) {
 						if (args[3].equals("0") || args[3].equals("1")) {
+							String perk = "";
 							switch (args[2]) {
-								case "compressor" -> perks[0] = args[3];
-								case "randomizer" -> perks[1] = args[3];
-								case "blacklist" -> perks[2] = args[3];
-								case "tables" -> perks[3] = args[3];
-								case "itemname" -> perks[4] = args[3];
-								case "chat" -> perks[5] = args[3];
-								case "shulker" -> perks[6] = args[3];
-								case "inventory" -> perks[7] = args[3];
-								case "itemframe" -> perks[9] = args[3];
-								case "bluefire" -> perks[10] = args[3];
-								case "discord" -> perks[11] = args[3];
+								case "compressor" -> {
+									perk = "&6&lCompressor";
+									perks[0] = args[3];
+								}
+								case "randomizer" -> {
+									perk = "&a&lRandomizer";
+									perks[1] = args[3];
+								}
+								case "blacklist" -> {
+									perk = "&8&lBlacklist";
+									perks[2] = args[3];
+								}
+								case "tables" -> {
+									perk = "&6&lTables";
+									perks[3] = args[3];
+								}
+								case "itemname" -> {
+									perk = "&c&lItem Name";
+									perks[4] = args[3];
+								}
+								case "chat" -> {
+									perk = "&e&lColored Chat";
+									perks[5] = args[3];
+								}
+								case "shulker" -> {
+									perk = "&5&lShulker Assist";
+									perks[6] = args[3];
+								}
+								case "inventory" -> {
+									perk = "&3&lInventory Assist";
+									perks[7] = args[3];
+								}
+								case "itemframe" -> {
+									perk = "&f&lInvisible Item Frames";
+									perks[9] = args[3];
+								}
+								case "bluefire" -> {
+									perk = "&b&lBlue Fire";
+									perks[10] = args[3];
+								}
 							}
 							// Updates the perk variable
 							String perksAsString = "";
@@ -145,7 +182,12 @@ public class CommandPerks {
 								Player player = Bukkit.getPlayer(uuid);
 								PermissionUtils.evaluatePlayerPermissions(player, false);
 							}
-							sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
+
+							if (!args[3].equals("0")) {
+								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
+								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
+								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							}
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
 						}
@@ -170,7 +212,11 @@ public class CommandPerks {
 								PermissionUtils.evaluatePlayerPermissions(player, false);
 							}
 
-							sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
+							if (!args[3].equals("0")) {
+								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
+								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
+								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							}
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
 						}
@@ -190,7 +236,13 @@ public class CommandPerks {
 						AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
 						DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
-						sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&7's perks have been updated"));
+
+						if (!args[3].equals("0")) {
+							String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
+							Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
+							DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+						}
+
 						return true;
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with this sub-command..."));

@@ -1,13 +1,17 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -41,6 +45,7 @@ public class CommandGive {
 			}
 
 			if (player != null) {
+				boolean isKey = false;
 				String fullPathName = "";
 				if (args[2].startsWith("Aranarthium")) {
 					fullPathName = "com.aearost.aranarthcore.items.aranarthium.ingots." + args[2];
@@ -56,6 +61,7 @@ public class CommandGive {
 						fullPathName = "com.aearost.aranarthcore.items.arrow." + args[2];
 					}
 				} else if (args[2].startsWith("Key")) {
+					isKey = true;
 					fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
 				} else {
 					fullPathName = "com.aearost.aranarthcore.items." + args[2];
@@ -102,6 +108,11 @@ public class CommandGive {
 						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
 							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
 						}
+					}
+
+					if (isKey) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						DiscordUtils.donationNotification(player.getName() + " has purchased " + item.getItemMeta().getDisplayName() + " x3", player.getUniqueId(), Color.CYAN);
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));

@@ -103,6 +103,7 @@ public class CommandRankSet {
 					// Limited from 0 to 3
 					else if (args[1].equals("council")) {
 						if (rank <= 3) {
+							// Enables all materials to be compressed by default
 							if (rank == 3) {
 								AranarthUtils.compressAllMaterials(player.getUniqueId());
 							}
@@ -159,21 +160,16 @@ public class CommandRankSet {
 								sender.sendMessage(ChatUtils.chatMessage("&7Your &e" + rankName + " &7rank has been updated"));
 							}
 						} else {
-							if (args[1].equals("rank")) {
-								sender.sendMessage(ChatUtils.chatMessage("&e" + name + "&7's rank has been updated!"));
-							} else {
-								sender.sendMessage(ChatUtils.chatMessage("&e" + name + "&7's &e" + rankName + " &7rank has been updated!"));
-							}
-
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-									PermissionUtils.evaluatePlayerPermissions(onlinePlayer, false);
-									if (args[1].equals("rank")) {
-										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your rank has been updated"));
-									} else {
-										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your &e" + rankName + " &7rank has been updated"));
-									}
+							if (args[1].equals("council")) {
+								if (args[3].equals("1")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
+								} else if (args[3].equals("2")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &6&lModerator &7of &e&lThe Council!"));
+								} else if (args[3].equals("3")) {
+									Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &4&lAdmin &7of &e&lThe Council!"));
 								}
+							} else if (args[1].equals("architect")) {
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become an &a&lArchitect &7of &6&lAranarth!"));
 							}
 						}
 					}
