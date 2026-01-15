@@ -50,10 +50,7 @@ public class BoneMealSapling {
                                     // Try to generate the big tree at top-left block
                                     boolean isSuccessfulGrowth = clicked.getLocation().getWorld().generateTree(saplings[0].getLocation(), treeType);
 
-                                    if (isSuccessfulGrowth) {
-                                        // Decrease the amount of bone meal by one
-                                        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
-                                    } else {
+                                    if (!isSuccessfulGrowth) {
                                         // Set the sapling back
                                         saplings[0].setType(sapling.getMaterial());
                                         saplings[1].setType(sapling.getMaterial());
@@ -69,10 +66,7 @@ public class BoneMealSapling {
                                 clicked.setType(Material.AIR);
                                 if (treeType != null) {
                                     boolean isSuccessfulGrowth = clicked.getLocation().getWorld().generateTree(clicked.getLocation(), treeType);
-                                    if (isSuccessfulGrowth) {
-                                        // Decrease the amount of bone meal by one
-                                        player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
-                                    } else {
+                                    if (!isSuccessfulGrowth) {
                                         // Set the sapling back
                                         clicked.setType(clickedType);
                                     }
