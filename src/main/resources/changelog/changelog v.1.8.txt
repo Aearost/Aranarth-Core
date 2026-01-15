@@ -129,6 +129,7 @@ Features
 [+] Added increased Spears damage to Elven armor
 [+] Included Spears in the Boost of the Hunter
 [+] Included Spears in the extra damage during Faunivor
+[~] Bone meal on saplings during Follivor will no longer take 2 Bone meal
 
 Miscellaneous
 - Removed redundant logs from weather
