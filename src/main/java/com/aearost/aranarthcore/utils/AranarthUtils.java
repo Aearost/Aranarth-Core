@@ -2283,7 +2283,9 @@ public class AranarthUtils {
 			if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
 					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
-				if (!homes.get(i).getName().equals(warpName)) {
+				if (!warps.get(i).getName().equals(warpName)) {
+					Bukkit.getLogger().info(warpName);
+					Bukkit.getLogger().info(warps.get(i).getName());
 					continue;
 				}
 
