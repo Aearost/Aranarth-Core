@@ -89,7 +89,6 @@ Features
 [+] Twins born during Calorvor are now tamed by default if the parents were tamed
 [-] Removed the waterfall particles as they were a significant source of server lag
 [+] Added Dominion deposit and withdrawal functionality
-[+] Added in text hologram creation
 [+] All AranarthCore recipes are added to players by default
 [+] Dominion chunks are required to be connected now
 [+] Dominion chunks are limited based on the number of players in it (25 chunks per player)

@@ -769,8 +769,6 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "cmsg".startsWith(args[0])) {
 			displayedOptions.add("cmsg");
-		} else if (!args[0].isEmpty() && "hologram".startsWith(args[0])) {
-			displayedOptions.add("hologram");
 		}
 		displayedOptions = all(sender, displayedOptions, args);
 		return displayedOptions;
@@ -995,34 +993,6 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("message");
 				}
 			}
-			case "hologram" -> {
-				if (args.length == 2) {
-					if (args[1].isEmpty()) {
-						displayedOptions.add("create");
-						displayedOptions.add("modify");
-						displayedOptions.add("delete");
-					} else if ("create".startsWith(args[1])) {
-						displayedOptions.add("create");
-					} else if ("modify".startsWith(args[1])) {
-						displayedOptions.add("modify");
-					} else if ("delete".startsWith(args[1])) {
-						displayedOptions.add("delete");
-					} else {
-						displayedOptions.add("create");
-						displayedOptions.add("modify");
-						displayedOptions.add("delete");
-					}
-				} else if (args.length == 3) {
-					displayedOptions.add("x,y,z");
-				} else {
-					if (!args[1].equalsIgnoreCase("delete")) {
-						if (args[3].isEmpty()) {
-							displayedOptions.add("text");
-						}
-					}
-				}
-
-			}
 		}
 		displayedOptions = allArgs(sender, displayedOptions, args);
 		return displayedOptions;
@@ -1049,7 +1019,6 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("perks");
 		displayedOptions.add("admin");
 		displayedOptions.add("cmsg");
-		displayedOptions.add("hologram");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}

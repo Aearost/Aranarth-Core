@@ -190,8 +190,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandVote.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("cmsg")) {
 			commandResult = CommandCMsg.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("hologram")) {
-			commandResult = CommandHologram.onCommand(sender, args);
 		}
 		return commandResult;
 	}
