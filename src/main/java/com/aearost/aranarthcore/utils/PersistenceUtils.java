@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
-import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1588,91 +1587,6 @@ public class PersistenceUtils {
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the compressible items lists");
-			}
-		}
-	}
-
-	/**
-	 * Initializes the holograms based on the contents of holograms.txt.
-	 * @param isFromAutomaticRefresh Whether the method is run from the automatic plugin file refresh.
-	 */
-	public static void loadTextHolograms(boolean isFromAutomaticRefresh) {
-		String currentPath = System.getProperty("user.dir");
-		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "holograms.txt";
-		File file = new File(filePath);
-
-		// First run of plugin
-		if (!file.exists()) {
-			return;
-		}
-
-		Scanner reader;
-		try {
-			reader = new Scanner(file);
-
-			Bukkit.getLogger().info("Attempting to read the holograms file...");
-
-			while (reader.hasNextLine()) {
-				String row = reader.nextLine();
-				String[] parts = row.split("\\|\\|");
-				String worldName = parts[0];
-				int x = Integer.parseInt(parts[1]);
-				double y = Double.parseDouble(parts[2]);
-				int z = Integer.parseInt(parts[3]);
-				Location location = new Location(Bukkit.getWorld(worldName), x, y, z);
-				String text = parts[4];
-				HologramUtils.createHologram(location, text, isFromAutomaticRefresh);
-			}
-			Bukkit.getLogger().info("The holograms have been initialized");
-			reader.close();
-		} catch (FileNotFoundException e) {
-			Bukkit.getLogger().info("Something went wrong with loading the holograms");
-		}
-	}
-
-	/**
-	 * Saves the holograms to the holograms.txt file.
-	 */
-	public static void saveTextHolograms() {
-		String currentPath = System.getProperty("user.dir");
-		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-				+ File.separator + "holograms.txt";
-		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-		File file = new File(filePath);
-
-		// If the directory exists
-		boolean isDirectoryCreated = true;
-		if (!pluginDirectory.isDirectory()) {
-			isDirectoryCreated = pluginDirectory.mkdir();
-		}
-		if (isDirectoryCreated) {
-			try {
-				// If the file isn't already there
-				if (file.createNewFile()) {
-					Bukkit.getLogger().info("A new holograms.txt file has been generated");
-				}
-			} catch (IOException e) {
-				Bukkit.getLogger().info("An error occurred in the creation of holograms.txt");
-			}
-
-			try {
-				FileWriter writer = new FileWriter(filePath);
-
-				for (TextDisplay hologram : HologramUtils.getHolograms()) {
-					String worldName = hologram.getLocation().getWorld().getName();
-					int x = hologram.getLocation().getBlockX();
-					double y = hologram.getLocation().getY();
-					int z = hologram.getLocation().getBlockZ();
-					String text = hologram.getText();
-					String textWithNewLines = text.replaceAll("\n", "\\\\n");
-					String line = worldName + "||" + x + "||" + y + "||" + z + "||" + textWithNewLines + "\n";
-					writer.write(line);
-				}
-
-				writer.close();
-			} catch (IOException e) {
-				Bukkit.getLogger().info("There was an error in saving the holograms");
 			}
 		}
 	}
