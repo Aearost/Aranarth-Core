@@ -451,7 +451,7 @@ public class PermissionUtils {
 		if (rank >= 6) {
 			perms.setPermission("bending.fire.lightningbending", true);
 			perms.setPermission("aranarth.toggle.msg", true);
-			perms.setPermission("aranarth.toggle.chat", true);
+			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("bending.command.preset.create.15", true);
 
 		} else {
@@ -462,7 +462,7 @@ public class PermissionUtils {
 		if (rank >= 7) {
 			perms.setPermission("bending.earth.lavabending", true);
 			perms.setPermission("bending.ability.firecomet", true);
-			perms.setPermission("aranarth.toggle.tp", true);
+			perms.setPermission("aranarth.toggle.chat", true);
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("bending.earth.lavaflux", true);
 			perms.setPermission("bending.earth.fissure", true);
