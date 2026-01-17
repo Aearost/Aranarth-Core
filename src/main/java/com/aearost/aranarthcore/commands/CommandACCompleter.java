@@ -130,22 +130,28 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("smp");
 				displayedOptions.add("seen");
 				displayedOptions.add("store");
+				displayedOptions.add("shop");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
-			} else if ("shulker".startsWith(args[0])) {
-				displayedOptions.add("shulker");
 			} else if ("smp".startsWith(args[0])) {
 				displayedOptions.add("smp");
 			} else {
 				if (args[0].equals("se")) {
 					displayedOptions.add("sethome");
 					displayedOptions.add("seen");
+				} else if (args[0].equals("sh")) {
+					displayedOptions.add("shulker");
+					displayedOptions.add("shop");
 				} else if ("sethome".startsWith(args[0])) {
 					displayedOptions.add("sethome");
 				} else if ("seen".startsWith(args[0])) {
 					displayedOptions.add("seen");
 				} else if ("store".startsWith(args[0])) {
 					displayedOptions.add("store");
+				} else if ("shulker".startsWith(args[0])) {
+					displayedOptions.add("shulker");
+				} else if ("shop".startsWith(args[0])) {
+					displayedOptions.add("shop");
 				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
@@ -609,6 +615,57 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "shop" -> {
+				// Should always be a player executing this command
+				if (sender instanceof Player player) {
+					if (args.length == 2) {
+						if (args[1].isEmpty()) {
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								displayedOptions.add(onlinePlayer.getName());
+							}
+							if (player.hasPermission("aranarth.shop.modify")) {
+								displayedOptions.add("create");
+								displayedOptions.add("delete");
+							}
+						} else {
+							boolean wasShopFound = false;
+							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+								if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
+									displayedOptions.add(onlinePlayer.getName());
+									wasShopFound = true;
+								}
+							}
+							if (!wasShopFound) {
+								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+									displayedOptions.add(onlinePlayer.getName());
+								}
+							}
+
+							if (player.hasPermission("aranarth.warp.modify")) {
+								if ("create".startsWith(args[1].toLowerCase())) {
+									displayedOptions.add("create");
+								} else if ("delete".startsWith(args[1].toLowerCase())) {
+									displayedOptions.add("delete");
+								}
+							}
+						}
+					} else {
+						if (player.hasPermission("aranarth.warp.modify")) {
+							if (args[1].equalsIgnoreCase("create") || args[1].equalsIgnoreCase("delete")) {
+								if (args[1].equalsIgnoreCase("create")) {
+									if (args[2].isEmpty()) {
+										displayedOptions.add("username");
+									}
+								} else if (args[1].equalsIgnoreCase("delete")) {
+									if (args[2].isEmpty()) {
+										displayedOptions.add("username");
+									}
+								}
+							}
+						}
+					}
+				}
+			}
 			case "compress" -> {
 				if (args.length == 2) {
 					displayedOptions.add("toggle");
@@ -714,6 +771,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("compress");
 		displayedOptions.add("vote");
 		displayedOptions.add("toggle");
+		displayedOptions.add("shop");
 		return displayedOptions;
 	}
 
