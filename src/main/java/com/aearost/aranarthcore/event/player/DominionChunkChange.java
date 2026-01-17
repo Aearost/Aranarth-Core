@@ -37,7 +37,7 @@ public class DominionChunkChange {
 				// If exiting a dominion
 				else if (dominionFrom != null && dominionTo == null) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (aranarthPlayer.getIsAutoClaimEnabled()) {
+					if (aranarthPlayer.isAutoClaimEnabled()) {
 						String result = DominionUtils.claimChunk(player, to);
 						player.sendMessage(ChatUtils.chatMessage(result));
 					} else {

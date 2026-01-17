@@ -361,7 +361,7 @@ public class PersistenceUtils {
 							blacklist = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getBlacklist().toArray(new ItemStack[0]));
 						}
 						String isDeletingBlacklistedItems = "0";
-						if (aranarthPlayer.getIsDeletingBlacklistedItems()) {
+						if (aranarthPlayer.isDeletingBlacklistedItems()) {
 							isDeletingBlacklistedItems = "1";
 						}
 						String balance = aranarthPlayer.getBalance() + "";
@@ -402,7 +402,7 @@ public class PersistenceUtils {
 						String perks = aranarthPlayer.getPerks();
 						long saintExpireDate = aranarthPlayer.getSaintExpireDate();
 						String isCompressingItems = "0";
-						if (aranarthPlayer.getIsCompressingItems()) {
+						if (aranarthPlayer.isCompressingItems()) {
 							isCompressingItems = "1";
 						}
 						int voteTotal = aranarthPlayer.getVoteTotal();

@@ -36,7 +36,7 @@ public class DominionProtection implements Listener {
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.getIsInAdminMode()) {
+		if (!aranarthPlayer.isInAdminMode()) {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
 			if (isActionPrevented) {
 				e.setCancelled(true);
@@ -51,7 +51,7 @@ public class DominionProtection implements Listener {
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.getIsInAdminMode()) {
+		if (!aranarthPlayer.isInAdminMode()) {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
 			if (isActionPrevented) {
 				e.setCancelled(true);
@@ -69,7 +69,7 @@ public class DominionProtection implements Listener {
 			// Armor stands are considered alive
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-				if (!aranarthPlayer.getIsInAdminMode()) {
+				if (!aranarthPlayer.isInAdminMode()) {
 					boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
 					if (isActionPrevented) {
 						e.setCancelled(true);
@@ -90,7 +90,7 @@ public class DominionProtection implements Listener {
 			// Armor stands are considered alive
 			if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-				if (!aranarthPlayer.getIsInAdminMode()) {
+				if (!aranarthPlayer.isInAdminMode()) {
 					boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getEntity());
 					if (isActionPrevented) {
 						e.setCancelled(true);
@@ -113,7 +113,7 @@ public class DominionProtection implements Listener {
 				if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
 					if (e.getDamageSource().getCausingEntity() instanceof Player player) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (!aranarthPlayer.getIsInAdminMode()) {
+						if (!aranarthPlayer.isInAdminMode()) {
 							boolean isActionPrevented = applyLogic(player, null, e.getEntity());
 							if (isActionPrevented) {
 								e.setCancelled(true);
@@ -229,7 +229,7 @@ public class DominionProtection implements Listener {
 
 		if (isDominionProtectedBlock(block)) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (!aranarthPlayer.getIsInAdminMode()) {
+			if (!aranarthPlayer.isInAdminMode()) {
 				// Only show the error if it is not a shop
 				if (ShopUtils.getShopFromLocation(block.getLocation()) == null) {
 					Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
@@ -266,7 +266,7 @@ public class DominionProtection implements Listener {
 	@EventHandler
 	public void onEntityPlace(HangingPlaceEvent e) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.getIsInAdminMode()) {
+		if (!aranarthPlayer.isInAdminMode()) {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), e.getBlock(), null);
 			if (isActionPrevented) {
 				e.setCancelled(true);
@@ -284,7 +284,7 @@ public class DominionProtection implements Listener {
 		}
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.getIsInAdminMode()) {
+		if (!aranarthPlayer.isInAdminMode()) {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
 			if (isActionPrevented) {
 				e.setCancelled(true);

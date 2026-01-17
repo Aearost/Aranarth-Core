@@ -13,7 +13,7 @@ public class GuiCrateClose {
 	public void execute(InventoryCloseEvent e) {
 		Player player = (Player) e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		aranarthPlayer.setIsOpeningCrateWithCyclingItem(false);
+		aranarthPlayer.setOpeningCrateWithCyclingItem(false);
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		player.playSound(e.getPlayer(), Sound.BLOCK_CHEST_CLOSE, 1, 0.6F);
 	}

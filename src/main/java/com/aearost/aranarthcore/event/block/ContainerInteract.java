@@ -42,11 +42,11 @@ public class ContainerInteract {
                 untrust(e);
             }
             // Logic to lock the container
-            else if (aranarthPlayer.getIsLockingContainer()) {
+            else if (aranarthPlayer.isLockingContainer()) {
                 lock(e);
             }
             // Logic to unlock the container
-            else if (aranarthPlayer.getIsUnlockingContainer()) {
+            else if (aranarthPlayer.isUnlockingContainer()) {
                 unlock(e);
             }
             // Trying to open the container
@@ -145,7 +145,7 @@ public class ContainerInteract {
             AranarthUtils.addLockedContainer(lockedContainer);
             player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
         }
-        aranarthPlayer.setIsLockingContainer(false);
+        aranarthPlayer.setLockingContainer(false);
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         e.setCancelled(true);
     }
@@ -176,7 +176,7 @@ public class ContainerInteract {
                 player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
             }
         }
-        aranarthPlayer.setIsUnlockingContainer(false);
+        aranarthPlayer.setUnlockingContainer(false);
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         e.setCancelled(true);
     }
@@ -206,7 +206,7 @@ public class ContainerInteract {
                 }
             }
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            if (!aranarthPlayer.getIsInAdminMode()) {
+            if (!aranarthPlayer.isInAdminMode()) {
                 e.setCancelled(true);
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to open this container!"));
             }

@@ -163,7 +163,7 @@ public class ShopInteract {
 				if (!location1Shop.getUuid().equals(e.getPlayer().getUniqueId()) || (location2Shop != null && !location2Shop.getUuid().equals(e.getPlayer().getUniqueId()))) {
 
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-					if (!aranarthPlayer.getIsInAdminMode()) {
+					if (!aranarthPlayer.isInAdminMode()) {
 						// Prevents other players from destroying or opening the chest
 						e.setCancelled(true);
 						if (e.getAction() == Action.LEFT_CLICK_BLOCK) {

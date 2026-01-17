@@ -32,7 +32,7 @@ public class CompressorItemPickup {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (!aranarthPlayer.getIsCompressingItems()) {
+			if (!aranarthPlayer.isCompressingItems()) {
 				return;
 			}
 

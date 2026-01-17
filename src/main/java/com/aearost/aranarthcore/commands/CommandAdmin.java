@@ -24,12 +24,12 @@ public class CommandAdmin {
 				return true;
 			}
 
-			if (aranarthPlayer.getIsInAdminMode()) {
+			if (aranarthPlayer.isInAdminMode()) {
 				player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7admin mode"));
-				aranarthPlayer.setIsInAdminMode(false);
+				aranarthPlayer.setInAdminMode(false);
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7admin mode"));
-				aranarthPlayer.setIsInAdminMode(true);
+				aranarthPlayer.setInAdminMode(true);
 			}
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;

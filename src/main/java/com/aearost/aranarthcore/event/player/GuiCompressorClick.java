@@ -34,11 +34,11 @@ public class GuiCompressorClick {
 			if (slot == 4) {
 				player.closeInventory();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 1F, 0.8F);
-				if (aranarthPlayer.getIsCompressingItems()) {
-					aranarthPlayer.setIsCompressingItems(false);
+				if (aranarthPlayer.isCompressingItems()) {
+					aranarthPlayer.setCompressingItems(false);
 					player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
 				} else {
-					aranarthPlayer.setIsCompressingItems(true);
+					aranarthPlayer.setCompressingItems(true);
 					player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

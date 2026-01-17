@@ -77,9 +77,9 @@ public class PotionEffectStackListener implements Listener {
 				if (e.getCause() == Cause.PLUGIN || e.getCause() == Cause.BEACON) {
 					if (entity instanceof Player player) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (aranarthPlayer.getIsHitByTippedArrow()) {
+						if (aranarthPlayer.isHitByTippedArrow()) {
 							Bukkit.getLogger().info("Hit by tipped arrow");
-							aranarthPlayer.setIsHitByTippedArrow(false);
+							aranarthPlayer.setHitByTippedArrow(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						} else {
 							return;
@@ -97,8 +97,8 @@ public class PotionEffectStackListener implements Listener {
 			else {
 				if (entity instanceof Player player) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					if (aranarthPlayer.getIsHitByTippedArrow()) {
-						aranarthPlayer.setIsHitByTippedArrow(false);
+					if (aranarthPlayer.isHitByTippedArrow()) {
+						aranarthPlayer.setHitByTippedArrow(false);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 						// Must be applied manually
