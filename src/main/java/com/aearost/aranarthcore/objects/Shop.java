@@ -58,54 +58,6 @@ public class Shop {
         this.location = location;
     }
 
-//    /**
-//     * Provides the shop's X-coordinate.
-//     * @return The shop's X-coordinate.
-//     */
-//    public int getX() {
-//        return x;
-//    }
-//
-//    /**
-//     * Sets the shop's X-coordinate.
-//     * @param x The shop's X-coordinate.
-//     */
-//    public void setX(int x) {
-//        this.x = x;
-//    }
-//
-//    /**
-//     * Provides the shop's Y-coordinate.
-//     * @return The shop's Y-coordinate.
-//     */
-//    public int getY() {
-//        return y;
-//    }
-//
-//    /**
-//     * Sets the shop's Y-coordinate.
-//     * @param y The shop's Y-coordinate.
-//     */
-//    public void setY(int y) {
-//        this.y = y;
-//    }
-//
-//    /**
-//     * Provides the shop's Z-coordinate.
-//     * @return The shop's Z-coordinate.
-//     */
-//    public int getZ() {
-//        return z;
-//    }
-//
-//    /**
-//     * Sets the shop's Z-coordinate.
-//     * @param z The shop's Z-coordinate.
-//     */
-//    public void setZ(int z) {
-//        this.z = z;
-//    }
-
     /**
      * Provides the shop's item.
      * @return The shop's item.
