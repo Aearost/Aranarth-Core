@@ -71,7 +71,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final List<TextDisplay> textHolograms = new ArrayList<>();
-	private static final HashMap<UUID, Location> shopLocations = new HashMap<>();
+	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.

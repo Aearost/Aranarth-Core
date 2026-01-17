@@ -1612,7 +1612,8 @@ public class PersistenceUtils {
 			Bukkit.getLogger().info("Attempting to read the shop locations file...");
 
 			while (reader.hasNextLine()) {
-				String[] parts = reader.nextLine().split("_");
+				String row = reader.nextLine();
+				String[] parts = row.split("_");
 				UUID uuid = UUID.fromString(parts[0]);
 				String world = parts[1];
 				double x = Double.parseDouble(parts[2]);
@@ -1666,7 +1667,7 @@ public class PersistenceUtils {
 					shopLocation += location.getY() + "_";
 					shopLocation += location.getZ() + "_";
 					shopLocation += location.getYaw() + "_";
-					shopLocation += location.getPitch();
+					shopLocation += location.getPitch() + "\n";
 					writer.write(shopLocation);
 				}
 
