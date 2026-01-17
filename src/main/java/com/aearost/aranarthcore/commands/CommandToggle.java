@@ -3,6 +3,9 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.Element;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -73,7 +76,22 @@ public class CommandToggle {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[1].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
-
+					String[] perks = aranarthPlayer.getPerks().split("\\*");
+					// The blue fire perk
+					if (perks[10].equals("1")) {
+						BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+						if (bendingPlayer.getElements().contains(Element.FIRE)) {
+							if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
+								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
+							} else {
+								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
+							}
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou are not currently a firebender!"));
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to the blue fire perk"));
+					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac toggle <option>"));
 				}
