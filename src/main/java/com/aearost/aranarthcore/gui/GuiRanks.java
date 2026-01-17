@@ -222,7 +222,7 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightningbending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
@@ -250,7 +250,7 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLavabending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 50 player shops"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
