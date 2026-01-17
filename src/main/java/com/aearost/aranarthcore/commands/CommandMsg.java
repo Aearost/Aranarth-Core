@@ -30,6 +30,10 @@ public class CommandMsg {
 					Player target = Bukkit.getPlayer(targetUuid);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
+					if (targetAranarthPlayer.isTogglingMessages()) {
+						player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &cis currently not receiving messages"));
+						return true;
+					}
 
 					// If the player is online
 					if (target != null) {
