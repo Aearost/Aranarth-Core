@@ -261,6 +261,7 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("tpaccept");
 				displayedOptions.add("tpdeny");
 				displayedOptions.add("tables");
+				displayedOptions.add("toggle");
 			} else {
 				if (args[0].startsWith("tp")) {
 					if (args[0].equals("tp")) {
@@ -280,6 +281,8 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions.add("trust");
 					} else if ("tables".startsWith(args[0])) {
 						displayedOptions.add("tables");
+					} else if ("toggle".startsWith(args[0])) {
+						displayedOptions.add("toggle");
 					}
 				}
 			}
@@ -620,6 +623,39 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "toggle" -> {
+				if (args.length == 2) {
+					if (!args[1].isEmpty() && "messages".startsWith(args[1])) {
+						displayedOptions.add("messages");
+					} else if (!args[1].isEmpty() && "teleport".startsWith(args[1])) {
+						displayedOptions.add("teleport");
+					} else if (!args[1].isEmpty() && "bluefire".startsWith(args[1])) {
+						displayedOptions.add("bluefire");
+					} else if (!args[1].isEmpty() && args[1].startsWith("c")) {
+						if (!args[1].isEmpty() && (args[1].equalsIgnoreCase("c")
+								|| args[1].equalsIgnoreCase("ch") || args[1].equalsIgnoreCase("cha"))) {
+							displayedOptions.add("chat");
+							displayedOptions.add("changeclaim");
+						} else if (!args[1].isEmpty() && "chat".startsWith(args[1])) {
+							displayedOptions.add("chat");
+						} else if (!args[1].isEmpty() && "changeclaim".startsWith(args[1])) {
+							displayedOptions.add("changeclaim");
+						} else {
+							displayedOptions.add("messages");
+							displayedOptions.add("chat");
+							displayedOptions.add("teleport");
+							displayedOptions.add("changeclaim");
+							displayedOptions.add("bluefire");
+						}
+					} else {
+						displayedOptions.add("messages");
+						displayedOptions.add("chat");
+						displayedOptions.add("teleport");
+						displayedOptions.add("changeclaim");
+						displayedOptions.add("bluefire");
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -677,6 +713,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("boosts");
 		displayedOptions.add("compress");
 		displayedOptions.add("vote");
+		displayedOptions.add("toggle");
 		return displayedOptions;
 	}
 
