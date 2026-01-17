@@ -58,6 +58,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCompressorClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
                 new GuiCrateClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
+                new GuiShopLocationClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

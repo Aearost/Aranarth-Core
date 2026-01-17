@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.gui.GuiShopLocation;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -25,7 +26,8 @@ public class CommandShop {
 		if (sender instanceof Player player) {
 			// Display the GUI to teleport
 			if (args.length == 1) {
-
+				GuiShopLocation gui = new GuiShopLocation(player, 0);
+				gui.openGui();
 				return true;
 			} else {
 				if (args[1].equalsIgnoreCase("create")) {
