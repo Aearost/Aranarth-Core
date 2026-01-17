@@ -31,6 +31,11 @@ public class CommandTphere {
 						}
 
 						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+						if (targetPlayer.isTogglingTp()) {
+							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis currently not accepting teleport requests"));
+							return true;
+						}
+
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						targetPlayer.setTeleportToUuid(player.getUniqueId());
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
