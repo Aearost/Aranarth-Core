@@ -30,17 +30,24 @@ public class DominionChunkChange {
 				Dominion dominionFrom = DominionUtils.getDominionOfChunk(from);
 				Dominion dominionTo = DominionUtils.getDominionOfChunk(to);
 				Player player = e.getPlayer();
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
 				// If entering a dominion
 				if (dominionFrom == null && dominionTo != null) {
+					if (aranarthPlayer.isTogglingChangeClaim()) {
+						return;
+					}
 					player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
 				}
 				// If exiting a dominion
 				else if (dominionFrom != null && dominionTo == null) {
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (aranarthPlayer.isAutoClaimEnabled()) {
 						String result = DominionUtils.claimChunk(player, to);
 						player.sendMessage(ChatUtils.chatMessage(result));
 					} else {
+						if (aranarthPlayer.isTogglingChangeClaim()) {
+							return;
+						}
 						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
 					}
 				} else if (dominionFrom != null && dominionTo != null) {
@@ -50,6 +57,9 @@ public class DominionChunkChange {
 					}
 					// If entering one dominion next to another
 					else {
+						if (aranarthPlayer.isTogglingChangeClaim()) {
+							return;
+						}
 						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
 						player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
 					}
