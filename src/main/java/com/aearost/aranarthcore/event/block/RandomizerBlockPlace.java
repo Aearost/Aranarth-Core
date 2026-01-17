@@ -22,7 +22,7 @@ public class RandomizerBlockPlace {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		List<RandomItem> randomItemList = aranarthPlayer.getRandomItems();
 		if (randomItemList != null && !randomItemList.isEmpty()) {
-			if (aranarthPlayer.getIsRandomizing()) {
+			if (aranarthPlayer.isRandomizing()) {
 				PlayerInventory inventory = player.getInventory();
 				ItemStack[] contents = inventory.getContents();
 
@@ -84,8 +84,8 @@ public class RandomizerBlockPlace {
 											contents[i] = tempStack;
 											player.getInventory().setContents(contents);
 											player.updateInventory();
-											if (aranarthPlayer.getIsMissingItemMessageSent()) {
-												aranarthPlayer.setIsMissingItemMessageSent(!aranarthPlayer.getIsMissingItemMessageSent());
+											if (aranarthPlayer.isMissingItemMessageSent()) {
+												aranarthPlayer.isMissingItemMessageSent(!aranarthPlayer.isMissingItemMessageSent());
 												AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 											}
 											return;
@@ -95,8 +95,8 @@ public class RandomizerBlockPlace {
 							}
 						}
 					} else {
-						if (!aranarthPlayer.getIsMissingItemMessageSent()) {
-							aranarthPlayer.setIsMissingItemMessageSent(!aranarthPlayer.getIsMissingItemMessageSent());
+						if (!aranarthPlayer.isMissingItemMessageSent()) {
+							aranarthPlayer.isMissingItemMessageSent(!aranarthPlayer.isMissingItemMessageSent());
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							player.sendMessage(ChatUtils.chatMessage("&cYou are missing one or more items from your pattern!"));
                         }

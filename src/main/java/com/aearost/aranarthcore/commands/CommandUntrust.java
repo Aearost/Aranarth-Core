@@ -36,8 +36,8 @@ public class CommandUntrust {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 								aranarthPlayer.setTrustedPlayerUUID(null);
 								aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
-								aranarthPlayer.setIsUnlockingContainer(false);
-								aranarthPlayer.setIsLockingContainer(false);
+								aranarthPlayer.setUnlockingContainer(false);
+								aranarthPlayer.setLockingContainer(false);
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to untrust &e" + offlinePlayer.getName()));
 								isPlayerFound = true;

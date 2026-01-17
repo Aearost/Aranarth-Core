@@ -61,7 +61,7 @@ public class CommandMsg {
 						String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
 						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 							AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-							if (onlineAranarthPlayer.getIsInAdminMode()) {
+							if (onlineAranarthPlayer.isInAdminMode()) {
 								onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
 							}
 						}

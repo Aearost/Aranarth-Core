@@ -31,12 +31,12 @@ public class CommandRandomizer {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (args.length == 1) {
-				if (aranarthPlayer.getIsRandomizing()) {
+				if (aranarthPlayer.isRandomizing()) {
 					player.sendMessage(ChatUtils.chatMessage("&7Blocks will no longer be randomized from the pattern"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&7Blocks will now be randomized from the pattern!"));
 				}
-				aranarthPlayer.setIsRandomizing(!aranarthPlayer.getIsRandomizing());
+				aranarthPlayer.isRandomizing(!aranarthPlayer.isRandomizing());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {

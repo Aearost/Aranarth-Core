@@ -18,7 +18,7 @@ public class HomepadStep {
 	public void execute(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		boolean isStandingOnHomePad = aranarthPlayer.getIsStandingOnHomePad();
+		boolean isStandingOnHomePad = aranarthPlayer.isStandingOnHomePad();
 
 		// When they step on the homepad
 		if (e.getTo().getBlock().getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
@@ -27,7 +27,7 @@ public class HomepadStep {
 				// If the current location is a home pad
 				if (Objects.nonNull(AranarthUtils.getHomepad(e.getTo()))) {
 					if (!AranarthUtils.getHomepad(e.getTo()).getName().equals("NEW")) {
-						aranarthPlayer.setIsStandingOnHomePad(true);
+						aranarthPlayer.setStandingOnHomePad(true);
 						aranarthPlayer.setCurrentGuiPageNum(0);
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						GuiTeleport gui = new GuiTeleport(player);
@@ -40,7 +40,7 @@ public class HomepadStep {
 		else if (e.getTo().getBlock().getType() != Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
 			if (isStandingOnHomePad) {
 				if (Objects.nonNull(AranarthUtils.getHomepad(e.getFrom()))) {
-					aranarthPlayer.setIsStandingOnHomePad(false);
+					aranarthPlayer.setStandingOnHomePad(false);
 					aranarthPlayer.setCurrentGuiPageNum(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				}

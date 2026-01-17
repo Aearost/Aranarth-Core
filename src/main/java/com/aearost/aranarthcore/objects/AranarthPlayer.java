@@ -62,6 +62,10 @@ public class AranarthPlayer {
 	private int voteTotal;
 	private int votePoints;
 	private boolean isAutoClaimEnabled = false;
+	private boolean isTogglingMessages = false;
+	private boolean isTogglingChat = false;
+	private boolean isTogglingTp = false;
+	private boolean isTogglingChangeClaim = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -107,6 +111,10 @@ public class AranarthPlayer {
 		this.voteTotal = 0;
 		this.votePoints = 0;
 		this.isAutoClaimEnabled = false;
+		this.isTogglingMessages = false;
+		this.isTogglingChat = false;
+		this.isTogglingTp = false;
+		this.isTogglingChangeClaim = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -158,6 +166,10 @@ public class AranarthPlayer {
 		this.voteTotal = voteTotal;
 		this.votePoints = votePoints;
 		this.isAutoClaimEnabled = false;
+		this.isTogglingMessages = false;
+		this.isTogglingChat = false;
+		this.isTogglingTp = false;
+		this.isTogglingChangeClaim = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -183,7 +195,7 @@ public class AranarthPlayer {
 	 * Provides confirmation whether the player is on a homepad.
 	 * @return Confirmation whether they are on a homepad.
 	 */
-	public boolean getIsStandingOnHomePad() {
+	public boolean isStandingOnHomePad() {
 		return isStandingOnHomePad;
 	}
 
@@ -191,7 +203,7 @@ public class AranarthPlayer {
 	 * Updates whether the player is on a homepad.
 	 * @param isStandingOnHomePad The new value.
 	 */
-	public void setIsStandingOnHomePad(boolean isStandingOnHomePad) {
+	public void setStandingOnHomePad(boolean isStandingOnHomePad) {
 		this.isStandingOnHomePad = isStandingOnHomePad;
 	}
 
@@ -280,7 +292,7 @@ public class AranarthPlayer {
 	 * Provides confirmation whether the player is deleting blacklisted items or not.
 	 * @return Confirmation of whether they are deleting the items or not.
 	 */
-	public boolean getIsDeletingBlacklistedItems() {
+	public boolean isDeletingBlacklistedItems() {
 		return isDeletingBlacklistedItems;
 	}
 
@@ -288,7 +300,7 @@ public class AranarthPlayer {
 	 * Updates whether the player will be deleting blacklisted items or not.
 	 * @param isDeletingBlacklistedItems The new value.
 	 */
-	public void setIsDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
+	public void setDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
 		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
 	}
 
@@ -344,7 +356,7 @@ public class AranarthPlayer {
 	 * Provides the current value confirming if they were hit by a tipped arrow.
 	 * @return The current value confirming if they were hit by a tipped arrow.
 	 */
-	public boolean getIsHitByTippedArrow() {
+	public boolean isHitByTippedArrow() {
 		return isHitByTippedArrow;
 	}
 
@@ -352,7 +364,7 @@ public class AranarthPlayer {
 	 * Updates the player's current value confirming if they were hit by a tipped arrow.
 	 * @param isHitByTippedArrow The new confirmation of if they were hit by a tipped arrow.
 	 */
-	public void setIsHitByTippedArrow(boolean isHitByTippedArrow) {
+	public void setHitByTippedArrow(boolean isHitByTippedArrow) {
 		this.isHitByTippedArrow = isHitByTippedArrow;
 	}
 
@@ -392,7 +404,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is actively adding to their shulker box.
 	 * @return Whether the player is adding to their shulker box.
 	 */
-	public boolean getIsAddingToShulker() {
+	public boolean isAddingToShulker() {
 		return isAddingToShulker;
 	}
 
@@ -400,7 +412,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is adding to their shulker box.
 	 * @param isAddingToShulker Whether the player is adding to their shulker box.
 	 */
-	public void setIsAddingToShulker(boolean isAddingToShulker) {
+	public void isAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
 	}
 
@@ -424,7 +436,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is actively randomizing items.
 	 * @return Whether the player is randomizing items.
 	 */
-	public boolean getIsRandomizing() {
+	public boolean isRandomizing() {
 		return isRandomizing;
 	}
 
@@ -432,7 +444,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is randomizing items.
 	 * @param isRandomizing Whether the player is randomizing items.
 	 */
-	public void setIsRandomizing(boolean isRandomizing) {
+	public void isRandomizing(boolean isRandomizing) {
 		this.isRandomizing = isRandomizing;
 	}
 
@@ -440,7 +452,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is missing items from the randomizer pattern.
 	 * @return Whether the player is missing items from the randomizer pattern.
 	 */
-	public boolean getIsMissingItemMessageSent() {
+	public boolean isMissingItemMessageSent() {
 		return isMissingItemMessageSent;
 	}
 
@@ -448,7 +460,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is missing items from the randomizer pattern.
 	 * @param isMissingItemMessageSent Whether the player is missing items from the randomizer pattern.
 	 */
-	public void setIsMissingItemMessageSent(boolean isMissingItemMessageSent) {
+	public void isMissingItemMessageSent(boolean isMissingItemMessageSent) {
 		this.isMissingItemMessageSent = isMissingItemMessageSent;
 	}
 
@@ -520,7 +532,7 @@ public class AranarthPlayer {
 	 * Provides the temporary variable tracking whether the player is attempting to unlock a container.
 	 * @return Whether the player is attempting to unlock a container.
 	 */
-	public boolean getIsUnlockingContainer() {
+	public boolean isUnlockingContainer() {
 		return isUnlockingContainer;
 	}
 
@@ -528,7 +540,7 @@ public class AranarthPlayer {
 	 * Updates the temporary variable tracking whether the player is attempting to unlock a container.
 	 * @param isUnlockingContainer The temporary variable of whether the player is attempting to unlock a container.
 	 */
-	public void setIsUnlockingContainer(boolean isUnlockingContainer) {
+	public void setUnlockingContainer(boolean isUnlockingContainer) {
 		this.isUnlockingContainer = isUnlockingContainer;
 	}
 
@@ -536,7 +548,7 @@ public class AranarthPlayer {
 	 * Provides the temporary variable tracking whether the player is attempting to lock a container.
 	 * @return Whether the player is attempting to lock a container.
 	 */
-	public boolean getIsLockingContainer() {
+	public boolean isLockingContainer() {
 		return isLockingContainer;
 	}
 
@@ -544,7 +556,7 @@ public class AranarthPlayer {
 	 * Updates the temporary variable tracking whether the player is attempting to lock a container.
 	 * @param isLockingContainer The temporary variable of whether the player is attempting to lock a container.
 	 */
-	public void setIsLockingContainer(boolean isLockingContainer) {
+	public void setLockingContainer(boolean isLockingContainer) {
 		this.isLockingContainer = isLockingContainer;
 	}
 
@@ -756,7 +768,7 @@ public class AranarthPlayer {
 	 * Updates whether the player is adding potions to their potions pouch.
 	 * @param isAddingPotions Whether the player is adding potions to their potions pouch.
 	 */
-	public void setIsAddingPotions(boolean isAddingPotions) {
+	public void setAddingPotions(boolean isAddingPotions) {
 		this.isAddingPotions = isAddingPotions;
 	}
 
@@ -782,7 +794,7 @@ public class AranarthPlayer {
 	 * Provides the variable tracking whether the player is in admin mode.
 	 * @return Whether the player is in admin mode.
 	 */
-	public boolean getIsInAdminMode() {
+	public boolean isInAdminMode() {
 		return isInAdminMode;
 	}
 
@@ -790,7 +802,7 @@ public class AranarthPlayer {
 	 * Updates the variable tracking whether the player is in admin mode.
 	 * @param isInAdminMode Whether the player is in admin mode.
 	 */
-	public void setIsInAdminMode(boolean isInAdminMode) {
+	public void setInAdminMode(boolean isInAdminMode) {
 		this.isInAdminMode = isInAdminMode;
 	}
 
@@ -814,7 +826,7 @@ public class AranarthPlayer {
 	 * Provides the variable tracking whether the player is compressing items or not.
 	 * @return Whether the player is compressing items or not.
 	 */
-	public boolean getIsCompressingItems() {
+	public boolean isCompressingItems() {
 		return isCompressingItems;
 	}
 
@@ -822,7 +834,7 @@ public class AranarthPlayer {
 	 * Updates the variable tracking whether the player is compressing items or not.
 	 * @param isCompressingItems Whether the player is compressing items or not.
 	 */
-	public void setIsCompressingItems(boolean isCompressingItems) {
+	public void setCompressingItems(boolean isCompressingItems) {
 		this.isCompressingItems = isCompressingItems;
 	}
 
@@ -846,7 +858,7 @@ public class AranarthPlayer {
 	 * Provides the variable tracking whether the player is currently opening a crate with a cycling item.
 	 * @return The variable tracking whether the player is currently opening a crate with a cycling item.
 	 */
-	public boolean getIsOpeningCrateWithCyclingItem() {
+	public boolean isOpeningCrateWithCyclingItem() {
 		return isOpeningCrateWithCyclingItem;
 	}
 
@@ -854,7 +866,7 @@ public class AranarthPlayer {
 	 * Updates the variable tracking whether the player is currently opening a crate with a cycling item.
 	 * @param isOpeningCrateWithCyclingItem The variable tracking whether the player is currently opening a crate with a cycling item.
 	 */
-	public void setIsOpeningCrateWithCyclingItem(boolean isOpeningCrateWithCyclingItem) {
+	public void setOpeningCrateWithCyclingItem(boolean isOpeningCrateWithCyclingItem) {
 		this.isOpeningCrateWithCyclingItem = isOpeningCrateWithCyclingItem;
 	}
 
@@ -910,7 +922,7 @@ public class AranarthPlayer {
 	 * Provides the value tracking whether the player is claiming chunks.
 	 * @return The value tracking whether the player is claiming chunks.
 	 */
-	public boolean getIsAutoClaimEnabled() {
+	public boolean isAutoClaimEnabled() {
 		return isAutoClaimEnabled;
 	}
 
@@ -918,8 +930,71 @@ public class AranarthPlayer {
 	 * Updates the value tracking whether the player is claiming chunks.
 	 * @param isAutoClaimEnabled The value tracking whether the player is claiming chunks.
 	 */
-	public void setIsAutoClaimEnabled(boolean isAutoClaimEnabled) {
+	public void setAutoClaimEnabled(boolean isAutoClaimEnabled) {
 		this.isAutoClaimEnabled = isAutoClaimEnabled;
 	}
 
+	/**
+	 * Provides the value tracking whether the player is toggling incoming messages.
+	 * @return The value tracking whether the player is toggling incoming messages.
+	 */
+	public boolean isTogglingMessages() {
+		return isTogglingMessages;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming messages.
+	 * @param togglingMessages The value tracking whether the player is toggling incoming messages.
+	 */
+	public void setTogglingMessages(boolean togglingMessages) {
+		isTogglingMessages = togglingMessages;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming chat messages.
+	 * @return The value tracking whether the player is toggling incoming chat messages.
+	 */
+	public boolean isTogglingChat() {
+		return isTogglingChat;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming chat messages.
+	 * @param togglingChat The value tracking whether the player is toggling incoming chat messages.
+	 */
+	public void setTogglingChat(boolean togglingChat) {
+		isTogglingChat = togglingChat;
+	}
+
+	/**
+	 * Provides the value tracking whether the player is toggling incoming teleport requests.
+	 * @return The value tracking whether the player is toggling incoming teleport requests.
+	 */
+	public boolean isTogglingTp() {
+		return isTogglingTp;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming teleport requests.
+	 * @param togglingTp The value tracking whether the player is toggling incoming teleport requests.
+	 */
+	public void setTogglingTp(boolean togglingTp) {
+		isTogglingTp = togglingTp;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling claim change messages.
+	 * @return The value tracking whether the player is toggling claim change messages.
+	 */
+	public boolean isTogglingChangeClaim() {
+		return isTogglingChangeClaim;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling claim change messages.
+	 * @param togglingChangeClaim The value tracking whether the player is toggling claim change messages.
+	 */
+	public void setTogglingChangeClaim(boolean togglingChangeClaim) {
+		isTogglingChangeClaim = togglingChangeClaim;
+	}
 }

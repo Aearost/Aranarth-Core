@@ -1382,11 +1382,11 @@ public class CommandDominion {
 	 */
 	private static void claimToggle(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getIsAutoClaimEnabled()) {
-			aranarthPlayer.setIsAutoClaimEnabled(false);
+		if (aranarthPlayer.isAutoClaimEnabled()) {
+			aranarthPlayer.setAutoClaimEnabled(false);
 			player.sendMessage(ChatUtils.chatMessage("&7You have disabled auto-claim"));
 		} else {
-			aranarthPlayer.setIsAutoClaimEnabled(true);
+			aranarthPlayer.setAutoClaimEnabled(true);
 			player.sendMessage(ChatUtils.chatMessage("&7You have enabled auto-claim"));
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

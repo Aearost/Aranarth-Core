@@ -20,7 +20,7 @@ public class DoubleDoorOpen {
         if (block.getBlockData() instanceof Door door) {
             if (AranarthUtils.isSpawnLocation(block.getLocation())) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                if (!aranarthPlayer.getIsInAdminMode()) {
+                if (!aranarthPlayer.isInAdminMode()) {
                     return;
                 }
             }
@@ -30,7 +30,7 @@ public class DoubleDoorOpen {
             if (blockDominion != null) {
                 if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
                     AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-                    if (!aranarthPlayer.getIsInAdminMode()) {
+                    if (!aranarthPlayer.isInAdminMode()) {
                         return;
                     }
                 }

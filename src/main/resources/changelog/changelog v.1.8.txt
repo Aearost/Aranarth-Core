@@ -134,6 +134,7 @@ Features
 [+] Added notifications for boosts and perks when added/purchased
 [+] Created notifications specific to donations and routed all donation messages to here
 [-] Removed check for rankset if the rank of the player executing the command changes their rank
+[+] Implemented /ac toggle
 
 Miscellaneous
 - Removed redundant logs from weather
@@ -151,3 +152,4 @@ Miscellaneous
 - Updated plugin to be based on Paper 1.21.11 instead of Spigot
 - Updated all references to .playSound() to be at the player itself rather than the player's location
 - Updated README to be more reflective of the current state of the plugin
+- Renamed all getters and setters for booleans in AranarthPlayer

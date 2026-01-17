@@ -96,7 +96,7 @@ public class CrateOpen {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
-                                aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
+                                aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                                 List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
@@ -111,7 +111,7 @@ public class CrateOpen {
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
+                                        if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
                                             gui.updateRareCrateItems(indexes.get(0), indexes.get(1));
 
                                             // Cycle through the next trim iteration
@@ -161,7 +161,7 @@ public class CrateOpen {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
-                                aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
+                                aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                                 List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
@@ -176,7 +176,7 @@ public class CrateOpen {
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
+                                        if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
                                             gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
 
                                             // Cycle through the next spawn egg iteration
@@ -226,7 +226,7 @@ public class CrateOpen {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
-                                aranarthPlayer.setIsOpeningCrateWithCyclingItem(true);
+                                aranarthPlayer.setOpeningCrateWithCyclingItem(true);
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                                 List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
@@ -241,7 +241,7 @@ public class CrateOpen {
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
-                                        if (aranarthPlayer.getIsOpeningCrateWithCyclingItem()) {
+                                        if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
                                             gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1));
 
                                             // Cycle through the next enhanced aranarthium iteration

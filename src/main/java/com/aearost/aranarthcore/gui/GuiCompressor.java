@@ -51,12 +51,12 @@ public class GuiCompressor {
 		gui.setItem(8, blank);
 
 		Material toggledType = Material.LIME_STAINED_GLASS_PANE;
-		if (!aranarthPlayer.getIsCompressingItems()) {
+		if (!aranarthPlayer.isCompressingItems()) {
 			toggledType = Material.RED_STAINED_GLASS_PANE;
 		}
 		ItemStack toggled = new ItemStack(toggledType);
 		ItemMeta toggledMeta = toggled.getItemMeta();
-		if (aranarthPlayer.getIsCompressingItems()) {
+		if (aranarthPlayer.isCompressingItems()) {
 			toggledMeta.setDisplayName(ChatUtils.translateToColor("&a&lCompressor is toggled on"));
 		} else {
 			toggledMeta.setDisplayName(ChatUtils.translateToColor("&c&lCompressor is toggled off"));

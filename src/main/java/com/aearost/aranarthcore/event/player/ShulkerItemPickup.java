@@ -40,7 +40,7 @@ public class ShulkerItemPickup {
 			if (is != null) {
 				if (is.getItemMeta() instanceof BlockStateMeta im) {
 					if (im.getBlockState() instanceof ShulkerBox shulker) {
-						if (!aranarthPlayer.getIsAddingToShulker()) {
+						if (!aranarthPlayer.isAddingToShulker()) {
 							return;
 						}
 

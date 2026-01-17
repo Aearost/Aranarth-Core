@@ -161,11 +161,11 @@ public class GuiPotionAdd {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			aranarthPlayer.setIsAddingPotions(true);
+			aranarthPlayer.setAddingPotions(true);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			player.openInventory(newInventory);
 
-			aranarthPlayer.setIsAddingPotions(false);
+			aranarthPlayer.setAddingPotions(false);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		}
@@ -199,7 +199,7 @@ public class GuiPotionAdd {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			aranarthPlayer.setIsAddingPotions(true);
+			aranarthPlayer.setAddingPotions(true);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			player.openInventory(newInventory);
 
@@ -208,7 +208,7 @@ public class GuiPotionAdd {
 				player.setItemOnCursor(potionCopy);
 			}
 
-			aranarthPlayer.setIsAddingPotions(false);
+			aranarthPlayer.setAddingPotions(false);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		}
 	}

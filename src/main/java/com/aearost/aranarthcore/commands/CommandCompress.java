@@ -31,11 +31,11 @@ public class CommandCompress {
 				gui.openGui();
 				return true;
 			} else if (args[1].equalsIgnoreCase("toggle")) {
-				if (aranarthPlayer.getIsCompressingItems()) {
-					aranarthPlayer.setIsCompressingItems(false);
+				if (aranarthPlayer.isCompressingItems()) {
+					aranarthPlayer.setCompressingItems(false);
 					player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
 				} else {
-					aranarthPlayer.setIsCompressingItems(true);
+					aranarthPlayer.setCompressingItems(true);
 					player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

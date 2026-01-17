@@ -22,8 +22,8 @@ public class CommandLock {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			aranarthPlayer.setTrustedPlayerUUID(null);
 			aranarthPlayer.setUntrustedPlayerUUID(null);
-			aranarthPlayer.setIsUnlockingContainer(false);
-			aranarthPlayer.setIsLockingContainer(true);
+			aranarthPlayer.setUnlockingContainer(false);
+			aranarthPlayer.setLockingContainer(true);
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         } else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));
