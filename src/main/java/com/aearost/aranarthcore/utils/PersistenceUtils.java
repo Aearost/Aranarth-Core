@@ -1591,4 +1591,90 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Loads the shop locations based on the contents of shop_locations.txt.
+	 */
+	public static void loadShopLocations() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "shop_locations.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the shop locations file...");
+
+			while (reader.hasNextLine()) {
+				String[] parts = reader.nextLine().split("_");
+				UUID uuid = UUID.fromString(parts[0]);
+				String world = parts[1];
+				double x = Double.parseDouble(parts[2]);
+				double y = Double.parseDouble(parts[3]);
+				double z = Double.parseDouble(parts[4]);
+				float yaw = Float.parseFloat(parts[5]);
+				float pitch = Float.parseFloat(parts[6]);
+				Location location = new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
+				AranarthUtils.createShopLocation(uuid, location);
+			}
+			Bukkit.getLogger().info("The shop locations have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the shop locations");
+		}
+	}
+
+	/**
+	 * Saves the shop locations to the shop_locations.txt file.
+	 */
+	public static void saveShopLocations() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "shop_locations.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new shop_locations.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of shop_locations.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
+				for (UUID uuid : shopLocations.keySet()) {
+					Location location = shopLocations.get(uuid);
+					String shopLocation = uuid + "_";
+					shopLocation += location.getWorld().getName() + "_";
+					shopLocation += location.getX() + "_";
+					shopLocation += location.getY() + "_";
+					shopLocation += location.getZ() + "_";
+					shopLocation += location.getYaw() + "_";
+					shopLocation += location.getPitch();
+					writer.write(shopLocation);
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the shop locations");
+			}
+		}
+	}
+
 }

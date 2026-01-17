@@ -148,6 +148,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.invisible_item_frame", false);
 		perms.setPermission("aranarth.boost.modify", false);
 		perms.setPermission("aranarth.vote.test", false);
+		perms.setPermission("aranarth.shop.modify", false);
 	}
 
 	/**
@@ -571,6 +572,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.unmute", true);
 			perms.setPermission("aranarth.whereis", true);
 			perms.setPermission("aranarth.broadcast", true);
+			perms.setPermission("aranarth.shop.modify", true);
 		} else {
 			return;
 		}

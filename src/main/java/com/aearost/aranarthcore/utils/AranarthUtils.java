@@ -71,6 +71,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final List<TextDisplay> textHolograms = new ArrayList<>();
+	private static final HashMap<UUID, Location> shopLocations = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2351,5 +2352,30 @@ public class AranarthUtils {
 				lockedContainers.remove(i);
 			}
 		}
+	}
+
+	/**
+	 * Provides the HashMap of Shop Locations.
+	 * @return The HashMap of Shop Locations.
+	 */
+	public static HashMap<UUID, Location> getShopLocations() {
+		return shopLocations;
+	}
+
+	/**
+	 * Creates a new Shop Location that can be teleported to.
+	 * @param uuid The shop owner's UUID.
+	 * @param location The location of the shop's home.
+	 */
+	public static void createShopLocation(UUID uuid, Location location) {
+		shopLocations.put(uuid, location);
+	}
+
+	/**
+	 * Deletes an existing Shop Location.
+	 * @param uuid The shop owner's UUID.
+	 */
+	public static void deleteShopLocation(UUID uuid) {
+		shopLocations.remove(uuid);
 	}
 }
