@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,30 +25,15 @@ public class Dominion {
 	private List<UUID> enemied;
 	private List<UUID> neutralRequests;
 	private List<Chunk> chunks;
-	private int dominionPower;
 	private Location dominionHome;
+	private ItemStack[] food;
+
+	// Keep balance at the end
 	private double balance;
 
 	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
-					List<Chunk> chunks, int dominionPower, Location dominionHome, double balance) {
-		name = ChatUtils.removeSpecialCharacters(name);
-		this.name = name;
-		this.leader = leader;
-		this.allied = allied;
-		this.allianceRequests = new ArrayList<>();
-		this.truced = truced;
-		this.truceRequests = new ArrayList<>();
-		this.enemied = enemied;
-		this.neutralRequests = new ArrayList<>();
-		this.members = members;
-		this.chunks = chunks;
-		this.dominionPower = dominionPower;
-		this.dominionHome = dominionHome;
-		this.balance = balance;
-	}
-
-	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
-					String worldName, List<Chunk> chunks, int dominionPower, double x, double y, double z, float yaw, float pitch,
+					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
+					// Keep balance at the end
 					double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
@@ -60,8 +46,10 @@ public class Dominion {
 		this.neutralRequests = new ArrayList<>();
 		this.members = members;
 		this.chunks = chunks;
-		this.dominionPower = dominionPower;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+		this.food = food;
+
+		// Keep balance at the end
 		this.balance = balance;
 	}
 
@@ -226,22 +214,6 @@ public class Dominion {
 	}
 
 	/**
-	 * Provides the current power of the dominion.
-	 * @return The current power of the dominion.
-	 */
-	public int getDominionPower() {
-		return dominionPower;
-	}
-
-	/**
-	 * Updates the current power of the dominion.
-	 * @param dominionPower The new value of the current power of the dominion.
-	 */
-	public void setDominionPower(int dominionPower) {
-		this.dominionPower = dominionPower;
-	}
-
-	/**
 	 * Provides the current Location of the dominion's home.
 	 * @return The current Location of the dominion's home.
 	 */
@@ -271,6 +243,22 @@ public class Dominion {
 	 */
 	public void setBalance(double balance) {
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the food that a dominion has stored.
+	 * @return The food that a dominion has stored.
+	 */
+	public ItemStack[] getFood() {
+		return food;
+	}
+
+	/**
+	 * Updates the food that a dominion has stored.
+	 * @param food The food that a dominion has stored.
+	 */
+	public void setFood(ItemStack[] food) {
+		this.food = food;
 	}
 
 }

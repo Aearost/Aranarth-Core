@@ -226,6 +226,8 @@ public class DateUtils {
 							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
 				}
 			}
+
+			DominionUtils.reEvaluateFoodInventory();
 		}
 		determineMonthEffects();
 	}
