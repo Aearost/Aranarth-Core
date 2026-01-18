@@ -137,6 +137,8 @@ Features
 [+] Implemented /ac toggle
 [+] Implemented /ac shop to teleport to player shop locations
 [+] Adding toggle to enable an armor stand's arms by right-clicking it with an empty hand
+[+] Started to implement custom bending abilities
+[+] Created the AstralProjection ability
 
 Miscellaneous
 - Removed redundant logs from weather
