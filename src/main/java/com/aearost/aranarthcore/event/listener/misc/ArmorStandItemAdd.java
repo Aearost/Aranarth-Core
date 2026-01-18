@@ -43,7 +43,6 @@ public class ArmorStandItemAdd implements Listener {
 									player.playSound(player, Sound.ENTITY_WITHER_BREAK_BLOCK, 0.2F, 1.8F);
 									armorStand.setArms(false);
 								}
-
 							}
 						}
 						// Enabling the armor stand's hands

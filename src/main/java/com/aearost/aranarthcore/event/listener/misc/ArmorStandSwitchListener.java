@@ -46,6 +46,8 @@ public class ArmorStandSwitchListener implements Listener {
 					ItemStack playerChestplate = player.getInventory().getArmorContents()[2];
 					ItemStack playerLeggings = player.getInventory().getArmorContents()[1];
 					ItemStack playerBoots = player.getInventory().getArmorContents()[0];
+					ItemStack playerMainHand = player.getInventory().getItemInMainHand();
+					ItemStack playerOffHand = player.getInventory().getItemInOffHand();
 
 					// Updates the player's armor to match what is on the armor stand
 					player.getInventory().setArmorContents(new ItemStack[] {
@@ -54,10 +56,14 @@ public class ArmorStandSwitchListener implements Listener {
 							armorStand.getEquipment().getChestplate(),
 							armorStand.getEquipment().getHelmet(),
 					});
+					player.getInventory().setItemInMainHand(armorStand.getEquipment().getItemInMainHand());
+					player.getInventory().setItemInOffHand(armorStand.getEquipment().getItemInOffHand());
 					// Updates the armor stand's armor to match what was on the player
 					armorStand.getEquipment().setArmorContents(new ItemStack[] {
 							playerBoots, playerLeggings, playerChestplate, playerHelmet
 					});
+					armorStand.getEquipment().setItemInMainHand(playerMainHand);
+					armorStand.getEquipment().setItemInOffHand(playerOffHand);
 
 					player.playSound(player, Sound.BLOCK_ANVIL_USE, 0.5F, 1.5F);
 					e.setCancelled(true);
