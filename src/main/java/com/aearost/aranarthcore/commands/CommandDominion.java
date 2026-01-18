@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -182,6 +183,8 @@ public class CommandDominion {
 					showDominionMap(player);
 				} else if (args[1].equalsIgnoreCase("autoclaim")) {
 					claimToggle(player);
+				} else if (args[1].equalsIgnoreCase("food")) {
+					foodStorage(player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -1397,4 +1400,15 @@ public class CommandDominion {
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
 
+	private static void foodStorage(Player player) {
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (dominion.getLeader().equals(player.getUniqueId())) {
+			// Open the GUI
+			GuiDominionFood gui = new GuiDominionFood(player);
+			gui.openGui();
+			player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cOnly the Dominion's leader can access this!"));
+		}
+	}
 }

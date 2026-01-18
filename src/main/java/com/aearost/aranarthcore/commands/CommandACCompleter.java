@@ -1148,6 +1148,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("setleader");
 		displayedOptions.add("map");
 		displayedOptions.add("autoclaim");
+		displayedOptions.add("food");
 		return displayedOptions;
 	}
 
@@ -1268,6 +1269,8 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("neutral");
 				} else if ("map".startsWith(args[1])) {
 					displayedOptions.add("map");
+				} else if ("food".startsWith(args[1])) {
+					displayedOptions.add("food");
 				} else {
 					displayedOptions = addDominionSubCommands(displayedOptions);
 				}
