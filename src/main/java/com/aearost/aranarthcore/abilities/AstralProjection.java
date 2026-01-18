@@ -38,6 +38,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility {
         duration = 30000;
         chargeDuration = 4000;
 
+        // Activates the ability
         start();
     }
 
