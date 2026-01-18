@@ -213,6 +213,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArmorStandSwitchListener(this);
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
+		new ArmorStandItemAdd(this);
 	}
 
 	/**

@@ -136,6 +136,7 @@ Features
 [-] Removed check for rankset if the rank of the player executing the command changes their rank
 [+] Implemented /ac toggle
 [+] Implemented /ac shop to teleport to player shop locations
+[+] Adding toggle to enable an armor stand's arms by right-clicking it with an empty hand
 
 Miscellaneous
 - Removed redundant logs from weather
