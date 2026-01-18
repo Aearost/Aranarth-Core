@@ -222,11 +222,10 @@ public class DominionUtils {
 		return dominion1.getEnemied().contains(dominion2.getLeader()) || dominion2.getEnemied().contains(dominion1.getLeader());
 	}
 
-
-
-
-
-	public static void reEvaluateFoodChests() {
+	/**
+	 * Consumes contents of a Dominion's designated food inventory.
+	 */
+	public static void reEvaluateFoodInventory() {
 
 	}
 
