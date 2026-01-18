@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.AstralProjection;
+import com.aearost.aranarthcore.abilities.VineWhip;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
@@ -43,6 +44,8 @@ public class AranarthCoreAbilityListener implements Listener {
 			if (abilityName.equalsIgnoreCase("astralprojection")) {
 				AstralProjection astralProjection = new AstralProjection(e.getPlayer());
 				activeProjections.put(player.getUniqueId(), astralProjection);
+			} else if (abilityName.equalsIgnoreCase("vinewhip")) {
+				new VineWhip(e.getPlayer());
 			}
 		}
 	}
