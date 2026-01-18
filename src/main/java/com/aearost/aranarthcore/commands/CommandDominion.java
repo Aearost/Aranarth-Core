@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.text.DecimalFormat;
@@ -255,7 +256,11 @@ public class CommandDominion {
 								chunks.add(player.getLocation().getChunk());
 								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
 
-								DominionUtils.createDominion(new Dominion(dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks, 50, loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), 5000));
+								DominionUtils.createDominion(new Dominion(
+										dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks,
+										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54],
+										// Keep the balance at the end
+										5000));
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 									onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);

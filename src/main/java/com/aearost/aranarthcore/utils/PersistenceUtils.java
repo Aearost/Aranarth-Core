@@ -822,7 +822,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|leader|members|allied|truced|enemied|world|chunks|power|x|y|z|yaw|pitch
+				// #name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|balance|food
 				String[] fields = row.split("\\|");
 
 				String name = fields[0];
@@ -868,23 +868,31 @@ public class PersistenceUtils {
 					int z = Integer.parseInt(coordinates[1]);
 					chunks.add(world.getChunkAt(x, z));
 				}
+				double x = Double.parseDouble(fields[8]);
+				double y = Double.parseDouble(fields[9]);
+				double z = Double.parseDouble(fields[10]);
+				float yaw = Float.parseFloat(fields[11]);
+				float pitch = Float.parseFloat(fields[12]);
+				ItemStack[] food = new ItemStack[54];
+				if (!fields[13].isEmpty()) {
+					food = ItemUtils.itemStackArrayFromBase64(fields[13]);
+				}
 
-				int power = Integer.parseInt(fields[8]);
-				double x = Double.parseDouble(fields[9]);
-				double y = Double.parseDouble(fields[10]);
-				double z = Double.parseDouble(fields[11]);
-				float yaw = Float.parseFloat(fields[12]);
-				float pitch = Float.parseFloat(fields[13]);
+				// Keep balance at the end
 				double balance = Double.parseDouble(fields[14]);
 
-				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks, power, x, y, z, yaw, pitch, balance));
+				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks, x, y, z, yaw, pitch, food,
+						// Keep balance at the end
+						balance));
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
 			Bukkit.getLogger().info("Something went wrong with loading the dominions!");
-		}
-	}
+		} catch (IOException e) {
+            Bukkit.getLogger().info("Something went wrong with instantiating a dominion's food");
+        }
+    }
 
 	/**
 	 * Saves the contents of the dominions list to the dominions.txt file.
@@ -916,7 +924,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|leader|members|allied|truced|enemied|worldName|chunks|power|x|y|z|yaw|pitch|balance\n");
+					writer.write("#name|leader|members|allied|truced|enemied|worldName|chunks|x|y|z|yaw|pitch|balance|inventory\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -975,7 +983,6 @@ public class PersistenceUtils {
 							}
 							String chunksString = chunks.toString();
 
-							String dominionPower = dominion.getDominionPower() + "";
 							Location dominionHome = dominion.getDominionHome();
 							String x = dominionHome.getX() + "";
 							String y = dominionHome.getY() + "";
@@ -983,10 +990,13 @@ public class PersistenceUtils {
 							String yaw = dominionHome.getYaw() + "";
 							String pitch = dominionHome.getPitch() + "";
 							String balance = dominion.getBalance() + "";
+							String foodString = ItemUtils.itemStackArrayToBase64(dominion.getFood());
 
 							String row = name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
-									+ enemiesString + "|" + worldName + "|" + chunksString + "|" + dominionPower + "|"
-									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + balance + "\n";
+									+ enemiesString + "|" + worldName + "|" + chunksString + "|"
+									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" +
+									// Keep balance at the end
+									balance + "\n";
 							writer.write(row);
 						}
 					}
