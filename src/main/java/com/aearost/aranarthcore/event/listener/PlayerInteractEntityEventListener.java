@@ -22,6 +22,7 @@ public class PlayerInteractEntityEventListener implements Listener {
      */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEntityEvent e) {
+        Bukkit.getLogger().info("Player Interact Entity Event");
         if (e.getRightClicked() != null) {
             if (e.getRightClicked() instanceof Villager) {
                 new VillagerTradeOverrides().execute(e);
