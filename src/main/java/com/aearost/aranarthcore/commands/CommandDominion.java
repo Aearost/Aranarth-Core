@@ -296,15 +296,8 @@ public class CommandDominion {
 	private static void disbandDominion(Dominion dominion, Player player) {
 		if (dominion != null) {
 			if (dominion.getLeader().equals(player.getUniqueId())) {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has been disbanded"));
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
-				player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
-				updateDominionLeader(dominion, null, true);
-
-				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
-				}
+				// Must update the relations between Dominions, and then will disband
+				DominionUtils.updateDominionLeader(dominion, null, true);
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
 			}
@@ -951,7 +944,7 @@ public class CommandDominion {
 										onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + oldLeader.getNickname() + " &7has transferred ownership of &e" + dominion.getName() + " &7to &e" + newLeader.getNickname()));
 									}
 								}
-								updateDominionLeader(dominion, uuid, false);
+								DominionUtils.updateDominionLeader(dominion, uuid, false);
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou cannot set yourself as the new leader!"));
 							}
@@ -969,85 +962,6 @@ public class CommandDominion {
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion setleader <username>"));
-		}
-	}
-
-	/**
-	 * Updates the leader of the Dominion by updating all references to the Dominion's Leader.
-	 * @param dominionBeingUpdated The Dominion that is being updated.
-	 * @param newLeader The UUID of the new leader of the Dominion.
-	 * @param isDeleting If the Dominion is being deleted.
-	 */
-	private static void updateDominionLeader(Dominion dominionBeingUpdated, UUID newLeader, boolean isDeleting) {
-		UUID oldLeader = dominionBeingUpdated.getLeader();
-		for (Dominion dominion : DominionUtils.getDominions()) {
-			for (int i = 0; i < dominion.getAllianceRequests().size(); i++) {
-				if (dominion.getAllianceRequests().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getAllianceRequests().set(i, newLeader);
-					} else {
-						dominion.getAllianceRequests().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			for (int i = 0; i < dominion.getTruceRequests().size(); i++) {
-				if (dominion.getTruceRequests().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getTruceRequests().set(i, newLeader);
-					} else {
-						dominion.getTruceRequests().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			for (int i = 0; i < dominion.getNeutralRequests().size(); i++) {
-				if (dominion.getNeutralRequests().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getNeutralRequests().set(i, newLeader);
-					} else {
-						dominion.getNeutralRequests().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			for (int i = 0; i < dominion.getAllied().size(); i++) {
-				if (dominion.getAllied().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getAllied().set(i, newLeader);
-					} else {
-						dominion.getAllied().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			for (int i = 0; i < dominion.getTruced().size(); i++) {
-				if (dominion.getTruced().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getTruced().set(i, newLeader);
-					} else {
-						dominion.getTruced().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			for (int i = 0; i < dominion.getEnemied().size(); i++) {
-				if (dominion.getEnemied().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getEnemied().set(i, newLeader);
-					} else {
-						dominion.getEnemied().remove(oldLeader);
-					}
-					break;
-				}
-			}
-			DominionUtils.updateDominion(dominion);
-		}
-		if (!isDeleting) {
-			dominionBeingUpdated.setLeader(newLeader);
-			DominionUtils.updateDominion(dominionBeingUpdated);
-		} else {
-			DominionUtils.disbandDominion(dominionBeingUpdated);
 		}
 	}
 
