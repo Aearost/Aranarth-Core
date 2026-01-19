@@ -25,11 +25,12 @@ public class GuiDominionFood {
 	private Inventory initializeGui(Player player) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
-		int size = 18;
-		if (dominion.getChunks().size() >= 50) {
+		int size = 0;
+		if (dominion.getChunks().size() <= 25) {
+			size = 18;
+		} else if (dominion.getChunks().size() <= 100) {
 			size = 36;
-		}
-		if (dominion.getChunks().size() >= 100) {
+		} else {
 			size = 54;
 		}
 

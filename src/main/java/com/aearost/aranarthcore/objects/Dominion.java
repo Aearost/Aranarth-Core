@@ -27,6 +27,7 @@ public class Dominion {
 	private List<Chunk> chunks;
 	private Location dominionHome;
 	private ItemStack[] food;
+	private int foodPowerBeingConsumed;
 
 	// Keep balance at the end
 	private double balance;
@@ -259,6 +260,22 @@ public class Dominion {
 	 */
 	public void setFood(ItemStack[] food) {
 		this.food = food;
+	}
+
+	/**
+	 * Provides the temporary variable tracking the power from the food item that is currently being consumed.
+	 * @return The temporary variable tracking the power from the food item that is currently being consumed.
+	 */
+	public int getFoodPowerBeingConsumed() {
+		return foodPowerBeingConsumed;
+	}
+
+	/**
+	 * Updates the temporary variable tracking the power from the food item that is currently being consumed.
+	 * @param foodPowerBeingConsumed The temporary variable tracking the power from the food item that is currently being consumed.
+	 */
+	public void setFoodPowerBeingConsumed(int foodPowerBeingConsumed) {
+		this.foodPowerBeingConsumed = foodPowerBeingConsumed;
 	}
 
 }
