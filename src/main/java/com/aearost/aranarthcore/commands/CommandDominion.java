@@ -1181,8 +1181,12 @@ public class CommandDominion {
 				amount = Double.parseDouble(args[2]);
 				String valueWithTwoDecimals = df.format(amount);
 				double trimmedAmount = Double.parseDouble(valueWithTwoDecimals);
+
 				dominion.setBalance(dominion.getBalance() + trimmedAmount);
 				DominionUtils.updateDominion(dominion);
+				aranarthPlayer.setBalance(aranarthPlayer.getBalance() - trimmedAmount);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 				NumberFormat formatter = NumberFormat.getCurrencyInstance();
 				player.sendMessage(ChatUtils.chatMessage("&7You have deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
 				for (UUID uuid : dominion.getMembers()) {
@@ -1217,8 +1221,12 @@ public class CommandDominion {
 					amount = Double.parseDouble(args[2]);
 					String valueWithTwoDecimals = df.format(amount);
 					double trimmedAmount = Double.parseDouble(valueWithTwoDecimals);
-					dominion.setBalance(dominion.getBalance() + trimmedAmount);
+
+					dominion.setBalance(dominion.getBalance() - trimmedAmount);
 					DominionUtils.updateDominion(dominion);
+					aranarthPlayer.setBalance(aranarthPlayer.getBalance() + trimmedAmount);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 					NumberFormat formatter = NumberFormat.getCurrencyInstance();
 					player.sendMessage(ChatUtils.chatMessage("&7You have withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
 					for (UUID uuid : dominion.getMembers()) {
