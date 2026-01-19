@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.objects.Dominion;
+import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -192,6 +194,28 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Determines if unclaiming the input claim would result in an unconnected claim.
+	 * @param dominion The dominion.
+	 * @param chunk The chunk attempting to be unclaimed.
+	 * @return Confirmation if unclaiming the input claim would result in an unconnected claim.
+	 */
+	public static boolean isAllClaimsConnectedAfterUnclaiming(Dominion dominion, Chunk chunk) {
+		for (Chunk dominionChunk : dominion.getChunks()) {
+			List<Chunk> chunksCopy = new ArrayList<>();
+			chunksCopy.addAll(dominion.getChunks());
+			chunksCopy.remove(dominionChunk);
+
+			for (Chunk copiedChunk : chunksCopy) {
+				if (!isConnectedToClaims(dominion, copiedChunk)) {
+					Bukkit.getLogger().info("Chunk is no longer claimed after unclaiming!!!");
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Determines if the two Dominions are marked as allies of each other.
 	 * @param dominion1 The first Dominion.
 	 * @param dominion2 The second Dominion.
@@ -226,7 +250,55 @@ public class DominionUtils {
 	 * Consumes contents of a Dominion's designated food inventory.
 	 */
 	public static void reEvaluateFoodInventory() {
+		// Close all inventories before evaluating
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			if (ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle()).endsWith("Food Storage")) {
+				onlinePlayer.closeInventory();
+			}
+		}
 
+		for (Dominion dominion : DominionUtils.getDominions()) {
+			int totalPower = 0;
+			for (ItemStack food : dominion.getFood()) {
+				if (food == null || food.getType() == Material.AIR) {
+					continue;
+				}
+
+				int powerOfFoodItem = getClaimFoodPower(food.getType());
+				totalPower += (powerOfFoodItem * food.getAmount());
+			}
+
+			int powerBeingConsumed = 0;
+			// Consume 100 power per day for <=25 chunks
+			if (dominion.getChunks().size() <= 25) {
+				powerBeingConsumed = 100;
+			} else if (dominion.getChunks().size() <= 100) {
+				powerBeingConsumed = 250;
+			} else {
+				powerBeingConsumed = 500;
+			}
+
+			if (totalPower >= powerBeingConsumed) {
+				consumeFood(dominion, powerBeingConsumed);
+				if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
+					Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
+					onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
+				}
+			} else {
+				boolean wasMoneyConsumed = consumeMoneyOrLand(dominion);
+				if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
+					Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
+					onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
+					String moneyOrLand = "&6$500 &7was consumed";
+					if (!wasMoneyConsumed) {
+						moneyOrLand = "a chunk was sold";
+					}
+					onlineLeader.sendMessage(ChatUtils.chatMessage("&7Instead, " + moneyOrLand + " to pay for the tax"));
+				}
+			}
+
+
+		}
 	}
 
 	/**
@@ -281,6 +353,76 @@ public class DominionUtils {
 	 */
 	public static boolean isFoodItem(Material type) {
 		return getClaimFoodPower(type) > 0;
+	}
+
+	/**
+	 * Consumes food from the Dominion's food reserve.
+	 * @param dominion The dominion.
+	 * @param powerBeingConsumed The total power amount being consumed.
+	 */
+	public static void consumeFood(Dominion dominion, int powerBeingConsumed) {
+		// Do not consume more items as the previous item is still being consumed
+		if (dominion.getFoodPowerBeingConsumed() >= powerBeingConsumed) {
+			dominion.setFoodPowerBeingConsumed(dominion.getFoodPowerBeingConsumed() - powerBeingConsumed);
+			updateDominion(dominion);
+			return;
+		}
+
+		// Set the default to consider what's currently being consumed still
+		int combinedPowerOfItems = dominion.getFoodPowerBeingConsumed();
+
+		// Go through the food currently in the reserves
+		for (ItemStack food : dominion.getFood()) {
+			if (food == null || food.getType() == Material.AIR) {
+				continue;
+			}
+
+			int powerOfItem = getClaimFoodPower(food.getType());
+			// Take one quantity at a time of that particular item
+			for (int quantity = food.getAmount(); quantity > 0; quantity--) {
+				food.setAmount(food.getAmount() - 1);
+				combinedPowerOfItems += powerOfItem;
+
+				// If there is no more power needed
+				if (combinedPowerOfItems >= powerBeingConsumed) {
+					int remainingPower = combinedPowerOfItems - powerBeingConsumed;
+					dominion.setFoodPowerBeingConsumed(remainingPower);
+					updateDominion(dominion);
+					return;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Consumes money or land the Dominion has when there is not enough food available.
+	 * @param dominion The dominion.
+	 * @return True if money was consumed, false if land was consumed.
+	 */
+	public static boolean consumeMoneyOrLand(Dominion dominion) {
+		if (dominion.getBalance() >= 500) {
+			Bukkit.getLogger().info("Balance consumed");
+			dominion.setBalance(dominion.getBalance() - 500);
+			updateDominion(dominion);
+			return true;
+		} else {
+			// Only the balance runs out, start unclaiming the outer chunks, where the last unclaimed chunk will be the home
+			for (Chunk chunk : dominion.getChunks()) {
+				// Unclaim the dominion home last
+				if (dominion.getChunks().size() > 1 && dominion.getDominionHome().getChunk().equals(chunk)) {
+					Bukkit.getLogger().info("Skipping since the Dominion Home is in this chunk");
+					continue;
+				}
+
+				if (isAllClaimsConnectedAfterUnclaiming(dominion, chunk)) {
+					Bukkit.getLogger().info("Chunk unclaimed successfully since no money and no food");
+					dominion.getChunks().remove(chunk);
+					updateDominion(dominion);
+				}
+			}
+
+			return false;
+		}
 	}
 
 }

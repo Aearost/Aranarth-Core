@@ -1402,13 +1402,8 @@ public class CommandDominion {
 
 	private static void foodStorage(Player player) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-		if (dominion.getLeader().equals(player.getUniqueId())) {
-			// Open the GUI
-			GuiDominionFood gui = new GuiDominionFood(player);
-			gui.openGui();
-			player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
-		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cOnly the Dominion's leader can access this!"));
-		}
+		GuiDominionFood gui = new GuiDominionFood(player);
+		gui.openGui();
+		player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
 	}
 }
