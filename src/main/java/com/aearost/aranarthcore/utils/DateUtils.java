@@ -179,8 +179,8 @@ public class DateUtils {
 			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[1]));
 			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[2]));
 
+			String description = "";
 			if (isNewMonth) {
-				String description = "";
 				switch (month) {
 					case Month.IGNIVOR -> description = DateUtils.getIgnivorDescription();
 					case Month.AQUINVOR -> description = DateUtils.getAquinvorDescription();
@@ -203,6 +203,7 @@ public class DateUtils {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
 					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
+					DiscordUtils.monthMessage(month, description);
 				} else {
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);

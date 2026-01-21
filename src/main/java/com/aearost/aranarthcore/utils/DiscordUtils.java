@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
@@ -591,5 +592,24 @@ public class DiscordUtils {
 		notifications.sendMessageEmbeds(embed.build()).queue();
 		// Server owner's Discord User ID
 		notifications.sendMessage("<@201812118981443584>").queue();
+	}
+
+	/**
+	 * Sends a notification when it is a new month.
+	 * Updates only #server-chat in Discord.
+	 * @param month The new month.
+	 * @param description The description of the month.
+	 */
+	public static void monthMessage(Month month, String description) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+
+		description = description.replaceAll("&.", "");
+
+		embed.setTitle("The month of " + ChatUtils.getFormattedItemName(month.name()) + " has begun!")
+				.setDescription(description)
+				.setColor(Color.MAGENTA);
+
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 	}
 }

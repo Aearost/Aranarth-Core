@@ -267,7 +267,6 @@ public class PersistenceUtils {
 				HashMap<Perk, Integer> perks = new HashMap<>();
 				for (int i = 0; i < perkArray.length; i++) {
 					Perk perk = perkArray[i];
-					Bukkit.getLogger().info("Perk: " + perk.name());
 					perks.put(perk, Integer.parseInt(perksValues[i]));
 				}
 
@@ -409,11 +408,9 @@ public class PersistenceUtils {
 						String muteEndDate = aranarthPlayer.getMuteEndDate();
 						String particles = aranarthPlayer.getParticleNum() + "";
 
-						// 0*0*0*0*0*0*0*0*0*0*0*0
 						String perks = "";
 						for (int i = 0; i < Perk.values().length; i++) {
 							Perk perk = Perk.values()[i];
-							Bukkit.getLogger().info("Perk: " + perk.name());
 							perks += aranarthPlayer.getPerks().get(perk);
 
 							if (i < aranarthPlayer.getPerks().size() - 1) {
