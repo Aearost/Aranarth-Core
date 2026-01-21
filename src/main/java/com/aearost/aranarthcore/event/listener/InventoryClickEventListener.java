@@ -62,6 +62,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiShopLocationClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food Storage")) {
                 new GuiDominionFoodClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
+                new GuiDominionResourcesClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -444,8 +445,6 @@ public class DominionUtils {
 					}
 				}
 			}
-
-
 		}
 	}
 
@@ -576,6 +575,28 @@ public class DominionUtils {
 				return 0;
 			}
 		}
+	}
+
+	/**
+	 * Provides the list of biomes that a Dominion has access to claim from.
+	 * @param dominion The Dominion.
+	 * @return The list of biomes that a Dominion has access to claim from.
+	 */
+	public static List<Biome> getResourceClaimTypes(Dominion dominion) {
+		List<Biome> biomes = new ArrayList<>();
+		int y = 63;
+		for (Chunk chunk : dominion.getChunks()) {
+			for (int x = 0; x < 16; x++) {
+				for (int z = 0; z < 16; z++) {
+					Biome biome = chunk.getBlock(x, y, z).getBiome();
+					if (!biomes.contains(biome)) {
+						biomes.add(biome);
+					}
+				}
+			}
+		}
+
+		return biomes;
 	}
 
 }
