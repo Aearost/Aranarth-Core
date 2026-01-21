@@ -139,6 +139,7 @@ Features
 [+] Adding toggle to enable an armor stand's arms by right-clicking it with an empty hand
 [+] Started to implement custom bending abilities
 [+] Created the AstralProjection ability
+[+] Added new month messages in Discord chat
 
 Miscellaneous
 - Removed redundant logs from weather

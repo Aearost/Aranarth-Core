@@ -556,19 +556,14 @@ public class DominionUtils {
 			Chunk chunkToRemove = null;
 			// Only the balance runs out, start unclaiming the outer chunks, where the last unclaimed chunk will be the home
 			for (Chunk chunk : dominion.getChunks()) {
-				Bukkit.getLogger().info("Iterating over chunk: " + chunk.getX() + "|" + chunk.getZ());
 				// Unclaim the dominion home last
 				if (dominion.getChunks().size() > 1 && dominion.getDominionHome().getChunk().equals(chunk)) {
-					Bukkit.getLogger().info("Home chunk, skipping to next");
 					continue;
 				}
 
 				if (isAllClaimsConnectedAfterUnclaiming(dominion, chunk)) {
-					Bukkit.getLogger().info("All claims will remain connected, can remove this chunk");
 					chunkToRemove = chunk;
 					break;
-				} else {
-					Bukkit.getLogger().info("Cannot remove this chunk as claims will not be connected");
 				}
 			}
 
