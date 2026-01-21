@@ -261,7 +261,16 @@ public class PersistenceUtils {
 
 				String muteEndDate = fields[15];
 				int particles = Integer.parseInt(fields[16]);
-				String perks = fields[17];
+
+				String[] perksValues = fields[17].split("\\*");
+				Perk[] perkArray = Perk.values();
+				HashMap<Perk, Integer> perks = new HashMap<>();
+				for (int i = 0; i < perkArray.length; i++) {
+					Perk perk = perkArray[i];
+					Bukkit.getLogger().info("Perk: " + perk.name());
+					perks.put(perk, Integer.parseInt(perksValues[i]));
+				}
+
 				long saintExpireDate = Long.parseLong(fields[18]);
 				boolean isCompressingItems = false;
 				if (fields[19].equals("1")) {
@@ -399,7 +408,19 @@ public class PersistenceUtils {
 
 						String muteEndDate = aranarthPlayer.getMuteEndDate();
 						String particles = aranarthPlayer.getParticleNum() + "";
-						String perks = aranarthPlayer.getPerks();
+
+						// 0*0*0*0*0*0*0*0*0*0*0*0
+						String perks = "";
+						for (int i = 0; i < Perk.values().length; i++) {
+							Perk perk = Perk.values()[i];
+							Bukkit.getLogger().info("Perk: " + perk.name());
+							perks += aranarthPlayer.getPerks().get(perk);
+
+							if (i < aranarthPlayer.getPerks().size() - 1) {
+								perks += "*";
+							}
+						}
+
 						long saintExpireDate = aranarthPlayer.getSaintExpireDate();
 						String isCompressingItems = "0";
 						if (aranarthPlayer.isCompressingItems()) {

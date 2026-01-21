@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
@@ -74,9 +75,7 @@ public class CommandToggle {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[1].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
-					String[] perks = aranarthPlayer.getPerks().split("\\*");
-					// The blue fire perk
-					if (perks[10].equals("1")) {
+					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {
 						if (aranarthPlayer.hasBlueFireDisabled()) {
 							aranarthPlayer.setBlueFireDisabled(false);
 							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7your blue fire"));

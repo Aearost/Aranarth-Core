@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
+import com.aearost.aranarthcore.objects.Perk;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -295,69 +297,63 @@ public class PermissionUtils {
 
 	/**
 	 * Adds the permissions for a player's additional perks.
-	 * Parts: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-	 * Default: 0*0*0*0*0*0*0*0*0*0*0*0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
 	 */
 	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		// The default
-		if (aranarthPlayer.getPerks().equals("0*0*0*0*0*0*0*0*0*0*0*0")) {
-			return;
-		}
+		HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 
-		String[] parts = aranarthPlayer.getPerks().split("\\*");
 		// Compressor
-		if (parts[0].equals("1")) {
+		if (perks.get(Perk.COMPRESSOR) == 1) {
 			perms.setPermission("aranarth.compress", true);
 		}
 		// Randomizer
-		if (parts[1].equals("1")) {
+		if (perks.get(Perk.RANDOMIZER) == 1) {
 			perms.setPermission("aranarth.randomizer", true);
 		}
 		// Blacklist
-		if (parts[2].equals("1")) {
+		if (perks.get(Perk.BLACKLIST) == 1) {
 			perms.setPermission("aranarth.blacklist", true);
 		}
 		// Tables
-		if (parts[3].equals("1")) {
+		if (perks.get(Perk.TABLES) == 1) {
 			perms.setPermission("aranarth.tables", true);
 		}
 		// Itemname
-		if (parts[4].equals("1")) {
+		if (perks.get(Perk.ITEMNAME) == 1) {
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
 		}
 		// Chat
-		if (parts[5].equals("1")) {
+		if (perks.get(Perk.CHAT) == 1) {
 			perms.setPermission("aranarth.chat.color", true);
 			perms.setPermission("aranarth.chat.hex", true);
 		}
 		// Shulker
-		if (parts[6].equals("1")) {
+		if (perks.get(Perk.SHULKER) == 1) {
 			perms.setPermission("aranarth.shulker", true);
 		}
 		// Inventory
-		if (parts[7].equals("1")) {
+		if (perks.get(Perk.INVENTORY) == 1) {
 			perms.setPermission("aranarth.inventory", true);
 		}
 		// Homes
-		if (!parts[8].equals("0")) {
-            switch (parts[8]) {
-                case "6" -> perms.setPermission("aranarth.extrahomes.6", true);
-                case "9" -> perms.setPermission("aranarth.extrahomes.9", true);
-                case "12" -> perms.setPermission("aranarth.extrahomes.12", true);
-                case "15" -> perms.setPermission("aranarth.extrahomes.15", true);
+		if (perks.get(Perk.HOMES) != 0) {
+            switch (perks.get(Perk.HOMES)) {
+                case 6 -> perms.setPermission("aranarth.extrahomes.6", true);
+                case 9 -> perms.setPermission("aranarth.extrahomes.9", true);
+                case 12 -> perms.setPermission("aranarth.extrahomes.12", true);
+                case 15 -> perms.setPermission("aranarth.extrahomes.15", true);
                 default -> perms.setPermission("aranarth.extrahomes.3", true);
             }
 		}
 		// Item Frame
-		if (parts[9].equals("1")) {
+		if (perks.get(Perk.ITEMFRAME) == 1) {
 			perms.setPermission("aranarth.invisible_item_frame", true);
 		}
 		// Blue Fire
-		if (parts[10].equals("1")) {
+		if (perks.get(Perk.BLUEFIRE) == 1) {
 			if (aranarthPlayer.hasBlueFireDisabled()) {
 				perms.setPermission("bending.fire.bluefirebending", false);
 			}
@@ -366,7 +362,7 @@ public class PermissionUtils {
 				perms.setPermission("bending.fire.bluefirebending", true);
 			}
 			updateSubElements(player);
-		} else if (parts[10].equals("0")) {
+		} else if (perks.get(Perk.BLUEFIRE) == 0) {
 			perms.setPermission("bending.fire.bluefirebending", false);
 			updateSubElements(player);
 		}

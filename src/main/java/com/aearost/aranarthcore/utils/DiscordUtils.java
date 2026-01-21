@@ -1,9 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Avatar;
-import com.aearost.aranarthcore.objects.Boost;
-import com.aearost.aranarthcore.objects.Punishment;
+import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
@@ -300,8 +297,7 @@ public class DiscordUtils {
 		}
 
 		Guild guild = getGuild();
-		String discordPerk = aranarthPlayer.getPerks().split("\\*")[11];
-		if (discordPerk.equals("1")) {
+		if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 1) {
 			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 		} else {
 			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
