@@ -55,7 +55,7 @@ public class GuiRankupClick {
 				DiscordUtils.updateRank(player, aranarthPlayer.getRank(), true);
 
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has become " + aOrAn + " " + rankDisplay + "&7!"));
-				PermissionUtils.evaluatePlayerPermissions(player, false);
+				PermissionUtils.evaluatePlayerPermissions(player);
 				player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 				player.closeInventory();
 			} else {

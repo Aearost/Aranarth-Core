@@ -157,3 +157,4 @@ Miscellaneous
 - Updated all references to .playSound() to be at the player itself rather than the player's location
 - Updated README to be more reflective of the current state of the plugin
 - Renamed all getters and setters for booleans in AranarthPlayer
+- Restructured the way that permissions are evaluated as the permission for bluefire was identified correctly and no longer needed recursive calls to apply the permission

@@ -1,12 +1,16 @@
-package com.aearost.aranarthcore.abilities;
+package com.aearost.aranarthcore.abilities.waterbending;
 
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.util.BlockSource;
+import com.projectkorra.projectkorra.util.ClickType;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.Player;
 
-public class BlankAbility extends PlantAbility implements AddonAbility {
+public class VineWhip extends PlantAbility implements AddonAbility {
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -16,16 +20,23 @@ public class BlankAbility extends PlantAbility implements AddonAbility {
     private int range;
     @Attribute(Attribute.DURATION)
     private int duration;
+    @Attribute(Attribute.DAMAGE)
+    private int damage;
 
-    public BlankAbility(Player player) {
+    private Block source;
+
+    public VineWhip(Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
             return;
         }
 
-        // Add ability values here
-        // cooldown = 1000;
+        cooldown = 4000;
+        selectRange = 6;
+        range = 25;
+        duration = 5000;
+        damage = 6;
 
         // Activates the ability
         start();
@@ -36,7 +47,19 @@ public class BlankAbility extends PlantAbility implements AddonAbility {
      */
     @Override
     public void progress() {
+        if (source == null) {
+            selectSource();
+        }
 
+        // Base logic on WaterManipulation
+        // http://github.com/ProjectKorra/ProjectKorra/blob/master/core/src/com/projectkorra/projectkorra/waterbending/WaterManipulation.java
+    }
+
+    public void selectSource() {
+        Block block = BlockSource.getWaterSourceBlock(player, selectRange, ClickType.SHIFT_DOWN, false, false, bPlayer.canPlantbend());
+        if (block.getBlockData() instanceof Leaves) {
+            source = block;
+        }
     }
 
     /**
@@ -45,7 +68,7 @@ public class BlankAbility extends PlantAbility implements AddonAbility {
      */
     @Override
     public boolean isSneakAbility() {
-        return false;
+        return true;
     }
 
     /**
@@ -72,7 +95,7 @@ public class BlankAbility extends PlantAbility implements AddonAbility {
      */
     @Override
     public String getName() {
-        return "AstralProjection";
+        return "VineWhip";
     }
 
     /**

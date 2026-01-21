@@ -62,7 +62,7 @@ public class CommandRankSet {
 					String name = "";
 					if (sender instanceof Player senderPlayer) {
 						if (senderPlayer.getUniqueId().equals(player.getUniqueId())) {
-							PermissionUtils.evaluatePlayerPermissions(senderPlayer, false);
+							PermissionUtils.evaluatePlayerPermissions(senderPlayer);
 						}
 					}
 

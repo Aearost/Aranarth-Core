@@ -63,7 +63,7 @@ public class PlayerServerJoinListener implements Listener {
 		}
 
 		// Permissions must be applied before nickname check is done
-		PermissionUtils.evaluatePlayerPermissions(player, false);
+		PermissionUtils.evaluatePlayerPermissions(player);
 
 		// Clears a player's nickname if they do not have permission for one
 		if (!player.hasPermission("aranarth.nick")) {

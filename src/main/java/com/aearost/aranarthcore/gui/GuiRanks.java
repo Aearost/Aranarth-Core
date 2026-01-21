@@ -219,7 +219,8 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightningbending"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightning Bending"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- #cab0ff&oSpiritual Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
@@ -247,7 +248,7 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLavabending"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLava Bending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
@@ -276,7 +277,7 @@ public class GuiRanks {
 		}
 
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustionbending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustion Bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));

@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.AvatarAbilityChange;
-import com.aearost.aranarthcore.event.player.VanillaCommandCancel;
+import com.aearost.aranarthcore.event.player.CommandOverrides;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -23,6 +23,6 @@ public class PlayerCommandPreprocessEventListener implements Listener {
         if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(e.getPlayer().getUniqueId())) {
             new AvatarAbilityChange().execute(e);
         }
-        new VanillaCommandCancel().execute(e);
+        new CommandOverrides().execute(e);
     }
 }

@@ -66,6 +66,7 @@ public class AranarthPlayer {
 	private boolean isTogglingChat = false;
 	private boolean isTogglingTp = false;
 	private boolean isTogglingChangeClaim = false;
+	private boolean hasBlueFireDisabled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -115,6 +116,7 @@ public class AranarthPlayer {
 		this.isTogglingChat = false;
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
+		this.hasBlueFireDisabled = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -170,6 +172,7 @@ public class AranarthPlayer {
 		this.isTogglingChat = false;
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
+		this.hasBlueFireDisabled = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -997,4 +1000,21 @@ public class AranarthPlayer {
 	public void setTogglingChangeClaim(boolean togglingChangeClaim) {
 		isTogglingChangeClaim = togglingChangeClaim;
 	}
+
+	/**
+	 * Provides the value tracking whether the player currently has blue fire disabled.
+	 * @return The value tracking whether the player currently has blue fire disabled.
+	 */
+	public boolean hasBlueFireDisabled() {
+		return hasBlueFireDisabled;
+	}
+
+	/**
+	 * Updates the value tracking whether the player currently has blue fire disabled.
+	 * @param hasBlueFireDisabled The value tracking whether the player currently has blue fire disabled.
+	 */
+	public void setBlueFireDisabled(boolean hasBlueFireDisabled) {
+		this.hasBlueFireDisabled = hasBlueFireDisabled;
+	}
+
 }
