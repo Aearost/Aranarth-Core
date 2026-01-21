@@ -52,7 +52,7 @@ public class AranarthPlayer {
 	private Location lastKnownTeleportLocation;
 	private int particleNum = 100;
 	private boolean isAddingPotions = false;
-	private String perks;
+	private HashMap<Perk, Integer> perks = new HashMap<>();
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
 	private boolean isCompressingItems = false;
@@ -104,7 +104,7 @@ public class AranarthPlayer {
 		this.lastKnownTeleportLocation = null;
 		this.particleNum = 100;
 		this.isAddingPotions = false;
-		this.perks = "0*0*0*0*0*0*0*0*0*0*0*0";
+		this.perks = new HashMap<>();
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
@@ -123,7 +123,7 @@ public class AranarthPlayer {
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, String perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
+						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
 						  int votePoints,
 						  Pronouns pronouns) {
 		this.username = username;
@@ -777,19 +777,17 @@ public class AranarthPlayer {
 
 	/**
 	 * Provides the perks that the player has access to.
-	 * Perks will be split as: compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 	 * @return The perks that the player has access to.
 	 */
-	public String getPerks() {
+	public HashMap<Perk, Integer> getPerks() {
 		return perks;
 	}
 
 	/**
 	 * Updates the perks that the player has access to.
-	 * compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
 	 * @param perks The player's new perks.
 	 */
-	public void setPerks(String perks) {
+	public void setPerks(HashMap<Perk, Integer> perks) {
 		this.perks = perks;
 	}
 

@@ -1191,13 +1191,7 @@ public class AranarthUtils {
 			saintHomeNum = 5;
 		}
 
-		String perksHomeAmountAsString = aranarthPlayer.getPerks().split("\\*")[8];
-		int perksHomeAmount = 0;
-		try {
-			perksHomeAmount = Integer.parseInt(perksHomeAmountAsString);
-		} catch (NumberFormatException e) {
-			Bukkit.getLogger().info("Something went wrong parsing the number of perk homes the player has...");
-		}
+		int perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
 
 		return rankHomeNum + saintHomeNum + perksHomeAmount;
 	}

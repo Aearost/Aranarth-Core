@@ -92,6 +92,10 @@ public class AranarthCoreBendingListener implements Listener {
 	@EventHandler
 	public void onMannequinDamage(final EntityDamageEvent e) {
 		if (e.getEntityType() == EntityType.MANNEQUIN) {
+			if (e.getCause() == EntityDamageEvent.DamageCause.KILL) {
+				return;
+			}
+
 			e.setDamage(0);
 			UUID toRemove = null;
 			for (UUID uuid : activeProjections.keySet()) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -10,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.awt.*;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -34,20 +36,20 @@ public class CommandPerks {
 			UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				String[] perks = aranarthPlayer.getPerks().split("\\*");
+				HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e" + aranarthPlayer.getNickname() + "&e's &6&lPerks &8- - -"));
-				sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks[0]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks[1]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks[2]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Tables: &e" + perks[3]));
-				sender.sendMessage(ChatUtils.translateToColor("&6ItemName: &e" + perks[4]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Chat: &e" + perks[5]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Shulker: &e" + perks[6]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks[7]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks[8]));
-				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks[9]));
-				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks[10]));
-				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks[11]));
+				sender.sendMessage(ChatUtils.translateToColor("&6Compressor: &e" + perks.get(Perk.COMPRESSOR)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Randomizer: &e" + perks.get(Perk.RANDOMIZER)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Blacklist: &e" + perks.get(Perk.BLACKLIST)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Tables: &e" + perks.get(Perk.TABLES)));
+				sender.sendMessage(ChatUtils.translateToColor("&6ItemName: &e" + perks.get(Perk.ITEMNAME)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Chat: &e" + perks.get(Perk.CHAT)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Shulker: &e" + perks.get(Perk.SHULKER)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks.get(Perk.INVENTORY)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks.get(Perk.HOMES)));
+				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMNAME)));
+				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks.get(Perk.BLUEFIRE)));
+				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
@@ -63,38 +65,27 @@ public class CommandPerks {
 					if (AranarthUtils.getPlayer(uuid) != null) {
 						if (isValidPerk(args[2].toLowerCase())) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-							// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-							String[] perks = aranarthPlayer.getPerks().split("\\*");
-                            switch (perks[8]) {
-                                case "0" -> perks[8] = "3";
-                                case "3" -> perks[8] = "6";
-                                case "6" -> perks[8] = "9";
-                                case "9" -> perks[8] = "12";
-                                case "12" -> perks[8] = "15";
-                            }
+							HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 
-							// Updates the perk variable
-							String perksAsString = "";
-							for (int i = 0; i < perks.length; i++) {
-								perksAsString += perks[i];
-								if (i < perks.length - 1) {
-									perksAsString += "*";
+							if (perks.get(Perk.HOMES) <= 12) {
+								perks.put(Perk.HOMES, perks.get(Perk.HOMES) + 3);
+
+								aranarthPlayer.setPerks(perks);
+								AranarthUtils.setPlayer(uuid, aranarthPlayer);
+								if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+									Player player = Bukkit.getPlayer(uuid);
+									PermissionUtils.evaluatePlayerPermissions(player);
 								}
-							}
-							aranarthPlayer.setPerks(perksAsString);
-							AranarthUtils.setPlayer(uuid, aranarthPlayer);
-							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player);
-							}
 
-							if (!args[3].equals("0")) {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
 								DiscordUtils.donationNotification(message, uuid, Color.CYAN);
-							}
 
-							return true;
+								return true;
+							} else {
+								sender.sendMessage(ChatUtils.chatMessage("&cThis player already has 15 homes!"));
+								return true;
+							}
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThis is not a valid perk!"));
 							return true;
@@ -113,64 +104,30 @@ public class CommandPerks {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
-					String[] perks = aranarthPlayer.getPerks().split("\\*");
+					HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
 							|| args[2].equals("shulker") || args[2].equals("inventory") || args[2].equals("itemframe")
 							|| args[2].equals("bluefire")) {
 						if (args[3].equals("0") || args[3].equals("1")) {
+							// Updates the perk value based on the input
+							perks.put(Perk.valueOf(args[2].toUpperCase()), Integer.parseInt(args[3]));
+
 							String perk = "";
 							switch (args[2]) {
-								case "compressor" -> {
-									perk = "&6&lCompressor";
-									perks[0] = args[3];
-								}
-								case "randomizer" -> {
-									perk = "&a&lRandomizer";
-									perks[1] = args[3];
-								}
-								case "blacklist" -> {
-									perk = "&8&lBlacklist";
-									perks[2] = args[3];
-								}
-								case "tables" -> {
-									perk = "&6&lTables";
-									perks[3] = args[3];
-								}
-								case "itemname" -> {
-									perk = "&c&lItem Name";
-									perks[4] = args[3];
-								}
-								case "chat" -> {
-									perk = "&e&lColored Chat";
-									perks[5] = args[3];
-								}
-								case "shulker" -> {
-									perk = "&5&lShulker Assist";
-									perks[6] = args[3];
-								}
-								case "inventory" -> {
-									perk = "&3&lInventory Assist";
-									perks[7] = args[3];
-								}
-								case "itemframe" -> {
-									perk = "&f&lInvisible Item Frames";
-									perks[9] = args[3];
-								}
-								case "bluefire" -> {
-									perk = "&b&lBlue Fire";
-									perks[10] = args[3];
-								}
+								case "compressor" -> perk = "&6&lCompressor";
+								case "randomizer" -> perk = "&a&lRandomizer";
+								case "blacklist" -> perk = "&8&lBlacklist";
+								case "tables" -> perk = "&6&lTables";
+								case "itemname" -> perk = "&c&lItem Name";
+								case "chat" -> perk = "&e&lColored Chat";
+								case "shulker" -> perk = "&5&lShulker Assist";
+								case "inventory" -> perk = "&3&lInventory Assist";
+								case "itemframe" -> perk = "&f&lInvisible Item Frames";
+								case "bluefire" -> perk = "&b&lBlue Fire";
 							}
-							// Updates the perk variable
-							String perksAsString = "";
-							for (int i = 0; i < perks.length; i++) {
-								perksAsString += perks[i];
-								if (i < perks.length - 1) {
-									perksAsString += "*";
-								}
-							}
-							aranarthPlayer.setPerks(perksAsString);
+
+							aranarthPlayer.setPerks(perks);
 							AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
 							// Enables all materials to be compressed by default
@@ -195,17 +152,8 @@ public class CommandPerks {
 					} else if (args[2].equals("homes")) {
 						if (args[3].equals("0") || args[3].equals("3") || args[3].equals("6") || args[3].equals("9")
 								|| args[3].equals("12") || args[3].equals("15")) {
-							perks[8] = args[3];
-
-							// Updates the perk variable
-							String perksAsString = "";
-							for (int i = 0; i < perks.length; i++) {
-								perksAsString += perks[i];
-								if (i < perks.length - 1) {
-									perksAsString += "*";
-								}
-							}
-							aranarthPlayer.setPerks(perksAsString);
+							perks.put(Perk.HOMES, Integer.parseInt(args[3]));
+							aranarthPlayer.setPerks(perks);
 							AranarthUtils.setPlayer(uuid, aranarthPlayer);
 							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
 								Player player = Bukkit.getPlayer(uuid);
@@ -222,17 +170,8 @@ public class CommandPerks {
 						}
 						return true;
 					} else if (args[2].equals("discord")) {
-						perks[11] = args[3];
-
-						// Updates the perk variable
-						String perksAsString = "";
-						for (int i = 0; i < perks.length; i++) {
-							perksAsString += perks[i];
-							if (i < perks.length - 1) {
-								perksAsString += "*";
-							}
-						}
-						aranarthPlayer.setPerks(perksAsString);
+						perks.put(Perk.DISCORD, Integer.parseInt(args[3]));
+						aranarthPlayer.setPerks(perks);
 						AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
 						DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
