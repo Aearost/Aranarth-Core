@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
+import com.aearost.aranarthcore.gui.GuiDominionResources;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -185,6 +186,8 @@ public class CommandDominion {
 					claimToggle(player);
 				} else if (args[1].equalsIgnoreCase("food")) {
 					foodStorage(player);
+				} else if (args[1].equalsIgnoreCase("resources")) {
+					resources(player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -1322,9 +1325,22 @@ public class CommandDominion {
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
 
+	/**
+	 * Opens the Dominion's food storage.
+	 * @param player The player.
+	 */
 	private static void foodStorage(Player player) {
-		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		GuiDominionFood gui = new GuiDominionFood(player);
+		gui.openGui();
+		player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+	}
+
+	/**
+	 * Opens the Dominion's resource claim options.
+	 * @param player The player.
+	 */
+	private static void resources(Player player) {
+		GuiDominionResources gui = new GuiDominionResources(player);
 		gui.openGui();
 		player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
 	}
