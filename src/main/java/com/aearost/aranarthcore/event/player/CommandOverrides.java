@@ -29,7 +29,10 @@ public class CommandOverrides {
         if (parts[0].startsWith("/b")) {
             if (parts[0].equalsIgnoreCase("/b") || parts[0].toLowerCase().startsWith("/bend")) {
                 if (parts[1].equalsIgnoreCase("ch") || parts[1].equalsIgnoreCase("choose")) {
-                    PermissionUtils.evaluatePlayerPermissions(player);
+                    // Player executing this in the arena world prevents sub-elements from being removed when changing world
+                    if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
+                        PermissionUtils.evaluatePlayerPermissions(player);
+                    }
                 }
             }
         }
