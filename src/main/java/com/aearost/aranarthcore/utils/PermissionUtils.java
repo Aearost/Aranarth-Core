@@ -22,9 +22,8 @@ public class PermissionUtils {
 	/**
 	 * Centralizes all permissions logic being set.
 	 * @param player The player.
-	 * @param isSecondCall If it was a recursive call from the same method for the sub-element fix.
 	 */
-	public static void evaluatePlayerPermissions(Player player, boolean isSecondCall) {
+	public static void evaluatePlayerPermissions(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 
@@ -33,7 +32,7 @@ public class PermissionUtils {
 		reEvaluateMonthlySaints(player);
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
-		addPlayerPerks(perms, player, isSecondCall);
+		addPlayerPerks(perms, player);
 
 		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 		// If the player is the avatar
@@ -41,34 +40,38 @@ public class PermissionUtils {
 			updateAvatarPermissions(player.getUniqueId(), false);
 		}
 
-		// Updates the sub-elements and abilities according to their current rank
-		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		updateSubElements(player);
 
-		if (bendingPlayer != null) {
-			for (Element element : bendingPlayer.getElements()) {
-				for (Element.SubElement subElement : Element.getSubElements(element)) {
-					if (bendingPlayer.hasSubElementPermission(subElement)) {
-						bendingPlayer.addSubElement(subElement);
-					} else {
-						bendingPlayer.getSubElements().remove(subElement);
+		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+	}
+
+	/**
+	 * Updates the player's sub-elements based on their current permissions.
+	 * @param player The player.
+	 */
+	public static void updateSubElements(Player player) {
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+			@Override
+			public void run() {
+				// Updates the sub-elements and abilities according to their current rank
+				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+
+				if (bendingPlayer != null) {
+					for (Element element : bendingPlayer.getElements()) {
+						for (Element.SubElement subElement : Element.getSubElements(element)) {
+							if (bendingPlayer.hasSubElementPermission(subElement)) {
+								bendingPlayer.addSubElement(subElement);
+							} else {
+								bendingPlayer.getSubElements().remove(subElement);
+							}
+						}
 					}
+					bendingPlayer.removeUnusableAbilities();
+					bendingPlayer.saveSubElements();
+					bendingPlayer.saveElements();
 				}
 			}
-			bendingPlayer.removeUnusableAbilities();
-		}
-
-		if (isSecondCall) {
-			Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
-		} else {
-			// Applies again as sub-elements do not update correctly unless command is re-executed
-			Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-				@Override
-				public void run() {
-					evaluatePlayerPermissions(player, true);
-				}
-			}, 10);
-
-		}
+		}, 1);
 	}
 
 	/**
@@ -85,11 +88,12 @@ public class PermissionUtils {
 		perms.setPermission("bending.water.plantbending", false);
 		perms.setPermission("bending.fire.combustionbending", false);
 		perms.setPermission("bending.fire.lightningbending", false);
-		perms.setPermission("bending.fire.bluefire", false);
+		perms.setPermission("bending.fire.bluefirebending", false);
 		perms.setPermission("bending.earth.metalbending", false);
 		perms.setPermission("bending.earth.lavabending", false);
 		perms.setPermission("bending.earth.sandbending", false);
 		perms.setPermission("bending.air.flight", false);
+		perms.setPermission("bending.air.spiritual", false);
 		perms.setPermission("bending.earth.sandbending", false);
 		perms.setPermission("bending.water.bloodbending", false);
 		perms.setPermission("bending.water.bloodbending.anytime", false);
@@ -102,6 +106,10 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.suffocate", false);
 		perms.setPermission("bending.earth.lavaflux", false);
 		perms.setPermission("bending.earth.fissure", false);
+
+		// Enable all Aranarth abilities by default as sub-element permission takes precedence
+		perms.setPermission("bending.ability.astralprojection", true);
+		perms.setPermission("bending.ability.vinewhip", true);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);
@@ -208,7 +216,7 @@ public class PermissionUtils {
 				perms.setPermission("bending.ability.spiritbeam", false);
 				perms.setPermission("bending.earth.lavaflux", true);
 
-				evaluatePlayerPermissions((Player) player, false);
+				evaluatePlayerPermissions((Player) player);
 			}
 		}
 		// A new avatar
@@ -228,8 +236,16 @@ public class PermissionUtils {
 
 			for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
 				// Skips bloodbending, flight, and blue fire
-				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.BLUE_FIRE
-						&& subElement != Element.SubElement.FLIGHT) {
+				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
+					if (subElement == Element.SubElement.BLUE_FIRE) {
+						if (player.isOnline()) {
+							Player onlinePlayer = player.getPlayer();
+							if (!onlinePlayer.hasPermission("bending.fire.bluefirebending")) {
+								continue;
+							}
+						}
+					}
+
 					if (!bendingPlayer.hasSubElement(subElement)) {
 						bendingPlayer.addSubElement(subElement);
 					}
@@ -254,6 +270,7 @@ public class PermissionUtils {
 				perms.setPermission("bending.earth.metalbending", true);
 				perms.setPermission("bending.earth.lavabending", true);
 				perms.setPermission("bending.earth.sandbending", true);
+				perms.setPermission("bending.air.spiritual", true);
 
 				// Enable all abilities
 				perms.setPermission("bending.ability.waterarms", true);
@@ -282,13 +299,11 @@ public class PermissionUtils {
 	 * Default: 0*0*0*0*0*0*0*0*0*0*0*0
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
-	 * @param isSecondCall If it was a recursive call from the same method for the sub-element fix.
 	 */
-	private static void addPlayerPerks(PermissionAttachment perms, Player player, boolean isSecondCall) {
+	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		// The default
 		if (aranarthPlayer.getPerks().equals("0*0*0*0*0*0*0*0*0*0*0*0")) {
-			perms.setPermission("bending.donor", false);
 			return;
 		}
 
@@ -296,44 +311,36 @@ public class PermissionUtils {
 		// Compressor
 		if (parts[0].equals("1")) {
 			perms.setPermission("aranarth.compress", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Randomizer
 		if (parts[1].equals("1")) {
 			perms.setPermission("aranarth.randomizer", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Blacklist
 		if (parts[2].equals("1")) {
 			perms.setPermission("aranarth.blacklist", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Tables
 		if (parts[3].equals("1")) {
 			perms.setPermission("aranarth.tables", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Itemname
 		if (parts[4].equals("1")) {
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Chat
 		if (parts[5].equals("1")) {
 			perms.setPermission("aranarth.chat.color", true);
 			perms.setPermission("aranarth.chat.hex", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Shulker
 		if (parts[6].equals("1")) {
 			perms.setPermission("aranarth.shulker", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Inventory
 		if (parts[7].equals("1")) {
 			perms.setPermission("aranarth.inventory", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Homes
 		if (!parts[8].equals("0")) {
@@ -344,52 +351,24 @@ public class PermissionUtils {
                 case "15" -> perms.setPermission("aranarth.extrahomes.15", true);
                 default -> perms.setPermission("aranarth.extrahomes.3", true);
             }
-			perms.setPermission("bending.donor", true);
 		}
 		// Item Frame
 		if (parts[9].equals("1")) {
 			perms.setPermission("aranarth.invisible_item_frame", true);
-			perms.setPermission("bending.donor", true);
 		}
 		// Blue Fire
 		if (parts[10].equals("1")) {
-			perms.setPermission("bending.fire.bluefire", true);
-			OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
-			if (bendingPlayer == null) {
-				return;
+			if (aranarthPlayer.hasBlueFireDisabled()) {
+				perms.setPermission("bending.fire.bluefirebending", false);
 			}
-
-			if (bendingPlayer.getElements().contains(Element.FIRE)) {
-				if (!isSecondCall) {
-					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-						@Override
-						public void run() {
-							Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b a BlueFire " + player.getName());
-						}
-					}, 50);
-				}
-				perms.setPermission("bending.donor", true);
+			// Will default to be enabled, must be manually toggled off via /ac toggle bluefire
+			else {
+				perms.setPermission("bending.fire.bluefirebending", true);
 			}
+			updateSubElements(player);
 		} else if (parts[10].equals("0")) {
-			perms.setPermission("bending.fire.bluefire", false);
-			OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
-			if (bendingPlayer == null) {
-				return;
-			}
-
-			if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-				if (!isSecondCall) {
-					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-						@Override
-						public void run() {
-							OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
-							if (bendingPlayer.getSubElements().contains(Element.SubElement.BLUE_FIRE)) {
-								Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "b remove " + player.getName() + " BlueFire");
-							}
-						}
-					}, 10);
-				}
-			}
+			perms.setPermission("bending.fire.bluefirebending", false);
+			updateSubElements(player);
 		}
 	}
 
@@ -451,6 +430,7 @@ public class PermissionUtils {
 		// Prince
 		if (rank >= 6) {
 			perms.setPermission("bending.fire.lightningbending", true);
+			perms.setPermission("bending.air.spiritual", true);
 			perms.setPermission("aranarth.toggle.msg", true);
 			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("bending.command.preset.create.15", true);
@@ -517,7 +497,6 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.blacklist", true);
 			perms.setPermission("aranarth.tables", true);
-			perms.setPermission("bending.donor", true);
 		} else {
 			return;
 		}

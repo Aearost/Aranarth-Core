@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
+import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -41,6 +42,9 @@ public class AranarthCore extends JavaPlugin {
 		// Sets default storm values
 		AranarthUtils.setWeather(Weather.CLEAR);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
+
+		CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+		Bukkit.getLogger().info("AranarthCore Bending has been loaded");
 
 		runRepeatingTasks();
 	}
@@ -196,7 +200,7 @@ public class AranarthCore extends JavaPlugin {
 		new SleepSkipListener(this);
 		new BoostEffectsListener(this);
 		new LeafDropsListener(this);
-		new AranarthCoreAbilityListener(this);
+		new AranarthCoreBendingListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

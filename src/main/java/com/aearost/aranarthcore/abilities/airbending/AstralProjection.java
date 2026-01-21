@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities;
+package com.aearost.aranarthcore.abilities.airbending;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;

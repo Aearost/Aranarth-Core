@@ -85,7 +85,7 @@ public class CommandPerks {
 							AranarthUtils.setPlayer(uuid, aranarthPlayer);
 							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
 								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player, false);
+								PermissionUtils.evaluatePlayerPermissions(player);
 							}
 
 							if (!args[3].equals("0")) {
@@ -180,7 +180,7 @@ public class CommandPerks {
 
 							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
 								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player, false);
+								PermissionUtils.evaluatePlayerPermissions(player);
 							}
 
 							if (!args[3].equals("0")) {
@@ -209,7 +209,7 @@ public class CommandPerks {
 							AranarthUtils.setPlayer(uuid, aranarthPlayer);
 							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
 								Player player = Bukkit.getPlayer(uuid);
-								PermissionUtils.evaluatePlayerPermissions(player, false);
+								PermissionUtils.evaluatePlayerPermissions(player);
 							}
 
 							if (!args[3].equals("0")) {

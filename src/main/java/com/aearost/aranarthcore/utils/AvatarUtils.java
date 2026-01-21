@@ -208,7 +208,7 @@ public class AvatarUtils {
 	public static void setNewAvatar(Avatar avatar) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
 		if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
-			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()), false);
+			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()));
 		}
 		avatars.add(avatar);
 
