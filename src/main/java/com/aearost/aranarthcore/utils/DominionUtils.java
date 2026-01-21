@@ -426,19 +426,21 @@ public class DominionUtils {
 			} else {
 				int result = consumeMoneyOrLand(dominion);
 				for (UUID memberUuid : dominion.getMembers()) {
-					Player member = Bukkit.getPlayer(memberUuid);
-					member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
-					// Money was consumed
-					if (result == 1) {
-						member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$500 &7was consumed &7was sold to pay for the tax"));
-					}
-					// Land was consumed
-					else if (result == 0) {
-						member.sendMessage(ChatUtils.chatMessage("&7Instead, a chunk was sold to pay for the tax"));
-					}
-					// Last chunk was consumed
-					else {
-						updateDominionLeader(dominion, null, true);
+					if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
+						Player member = Bukkit.getPlayer(memberUuid);
+						member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
+						// Money was consumed
+						if (result == 1) {
+							member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$500 &7was consumed &7was sold to pay for the tax"));
+						}
+						// Land was consumed
+						else if (result == 0) {
+							member.sendMessage(ChatUtils.chatMessage("&7Instead, a chunk was sold to pay for the tax"));
+						}
+						// Last chunk was consumed
+						else {
+							updateDominionLeader(dominion, null, true);
+						}
 					}
 				}
 			}
