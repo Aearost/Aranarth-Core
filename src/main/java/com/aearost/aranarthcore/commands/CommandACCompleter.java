@@ -1149,6 +1149,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("map");
 		displayedOptions.add("autoclaim");
 		displayedOptions.add("food");
+		displayedOptions.add("resources");
 		return displayedOptions;
 	}
 
@@ -1215,10 +1216,13 @@ public class CommandACCompleter implements TabCompleter {
 					if (args[1].equalsIgnoreCase("r") || args[1].equalsIgnoreCase("re")) {
 						displayedOptions.add("remove");
 						displayedOptions.add("rename");
+						displayedOptions.add("resources");
 					} else if ("remove".startsWith(args[1])) {
 						displayedOptions.add("remove");
 					} else if ("rename".startsWith(args[1])) {
 						displayedOptions.add("rename");
+					} else if ("resources".startsWith(args[1])) {
+						displayedOptions.add("resources");
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
