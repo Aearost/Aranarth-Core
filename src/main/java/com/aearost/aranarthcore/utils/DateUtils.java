@@ -281,27 +281,27 @@ public class DateUtils {
 	 */
 	public static String provideWeekdayName(int weekdayNum) {
 		if (weekdayNum == 0) {
-			return "Hydris";
+			return "Aethis";
 		} else if (weekdayNum == 1) {
-			return "Terris";
-		}
-		else if (weekdayNum == 2) {
 			return "Pyris";
 		}
-		else if (weekdayNum == 3) {
+		else if (weekdayNum == 2) {
 			return "Aeris";
 		}
+		else if (weekdayNum == 3) {
+			return "Hydris";
+		}
 		else if (weekdayNum == 4) {
-			return "Ferris";
+			return "Terris";
 		}
 		else if (weekdayNum == 5) {
-			return "Sylvis";
+			return "Ferris";
 		}
 		else if (weekdayNum == 6) {
-			return "Umbris";
+			return "Sylvis";
 		}
 		else if (weekdayNum == 7) {
-			return "Aethis";
+			return "Umbris";
 		} else {
 			return null;
 		}
