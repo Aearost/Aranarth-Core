@@ -72,6 +72,7 @@ public class CommandShop {
 					UUID uuid = AranarthUtils.getUUIDFromUsername(args[2]);
 					if (uuid != null) {
 						if (AranarthUtils.getShopLocations().containsKey(uuid)) {
+							AranarthUtils.deleteShopLocation(uuid);
 							player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + "'s &7shop has been deleted"));
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &cdoes not have a shop"));
