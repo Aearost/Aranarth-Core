@@ -1343,9 +1343,13 @@ public class CommandDominion {
 	private static void resources(Dominion dominion, Player player) {
 		if (dominion != null) {
 			if (player.getUniqueId().equals(dominion.getLeader())) {
-				GuiDominionResources gui = new GuiDominionResources(player);
-				gui.openGui();
-				player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+				if (dominion.getClaimableResources() > 0) {
+					GuiDominionResources gui = new GuiDominionResources(player);
+					gui.openGui();
+					player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYour Dominion does not have any resources available for claiming!"));
+				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can execute this command!"));
 			}
