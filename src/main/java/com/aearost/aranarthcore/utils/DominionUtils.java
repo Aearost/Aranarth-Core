@@ -431,7 +431,7 @@ public class DominionUtils {
 						member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
 						// Money was consumed
 						if (result == 1) {
-							member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$500 &7was consumed &7was sold to pay for the tax"));
+							member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$250 &7was consumed &7was sold to pay for the tax"));
 						}
 						// Land was consumed
 						else if (result == 0) {
@@ -544,8 +544,8 @@ public class DominionUtils {
 	 * @return 1 if consuming money, 0 if consuming a chunk, -1 if disbanding the Dominion.
 	 */
 	public static int consumeMoneyOrLand(Dominion dominion) {
-		if (dominion.getBalance() >= 500) {
-			dominion.setBalance(dominion.getBalance() - 500);
+		if (dominion.getBalance() >= 250) {
+			dominion.setBalance(dominion.getBalance() - 250);
 			updateDominion(dominion);
 			return 1;
 		} else {
