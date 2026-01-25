@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
+import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class Dominion {
 	private ItemStack[] food;
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
+	private Biome biomeResourcesBeingClaimed;
 
 	// Keep balance at the end
 	private double balance;
@@ -51,6 +53,7 @@ public class Dominion {
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
 		this.food = food;
 		this.claimableResources = claimableResources;
+		this.biomeResourcesBeingClaimed = null;
 
 		// Keep balance at the end
 		this.balance = balance;
@@ -296,4 +299,19 @@ public class Dominion {
 		this.claimableResources = claimableResources;
 	}
 
+	/**
+	 * Provides the Biome that the Dominion is currently attempting to claim resources from.
+	 * @return The Biome that the Dominion is currently attempting to claim resources from.
+	 */
+	public Biome getBiomeResourcesBeingClaimed() {
+		return biomeResourcesBeingClaimed;
+	}
+
+	/**
+	 * Updates the Biome that the Dominion is currently attempting to claim resources from.
+	 * @param biomeResourcesBeingClaimed The Biome that the Dominion is currently attempting to claim resources from.
+	 */
+	public void setBiomeResourcesBeingClaimed(Biome biomeResourcesBeingClaimed) {
+		this.biomeResourcesBeingClaimed = biomeResourcesBeingClaimed;
+	}
 }

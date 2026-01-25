@@ -1348,7 +1348,7 @@ public class CommandDominion {
 					gui.openGui();
 					player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cYour Dominion does not have any resources available for claiming!"));
+					player.sendMessage(ChatUtils.chatMessage("&cThere aren't any resources available for claiming!"));
 				}
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can execute this command!"));
