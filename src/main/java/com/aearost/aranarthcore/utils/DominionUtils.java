@@ -453,10 +453,8 @@ public class DominionUtils {
 	 * @return The claim power that the input item contains.
 	 */
 	public static int getClaimFoodPower(Material type) {
-		if (type == Material.ENCHANTED_GOLDEN_APPLE) {
-			return 200;
-		} else if (type == Material.CAKE) {
-			return 100;
+		if (type == Material.ENCHANTED_GOLDEN_APPLE || type == Material.CAKE) {
+			return 500;
 		} else if (type == Material.HAY_BLOCK || type == Material.RABBIT_STEW) {
 			return 50;
 		} else if (type == Material.MUSHROOM_STEW || type == Material.BEETROOT_SOUP) {
