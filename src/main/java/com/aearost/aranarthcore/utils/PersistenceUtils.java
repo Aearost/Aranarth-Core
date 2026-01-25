@@ -840,7 +840,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|balance|food
+				// #name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|balance
 				String[] fields = row.split("\\|");
 
 				String name = fields[0];
@@ -895,11 +895,13 @@ public class PersistenceUtils {
 				if (!fields[13].isEmpty()) {
 					food = ItemUtils.itemStackArrayFromBase64(fields[13]);
 				}
+				int claimableResources = Integer.parseInt(fields[14]);
 
 				// Keep balance at the end
-				double balance = Double.parseDouble(fields[14]);
+				double balance = Double.parseDouble(fields[15]);
 
-				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks, x, y, z, yaw, pitch, food,
+				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks,
+						x, y, z, yaw, pitch, food, claimableResources,
 						// Keep balance at the end
 						balance));
 			}
@@ -942,7 +944,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|leader|members|allied|truced|enemied|worldName|chunks|x|y|z|yaw|pitch|balance|inventory\n");
+					writer.write("#name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|balance\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -1007,14 +1009,17 @@ public class PersistenceUtils {
 							String z = dominionHome.getZ() + "";
 							String yaw = dominionHome.getYaw() + "";
 							String pitch = dominionHome.getPitch() + "";
-							String balance = dominion.getBalance() + "";
 							String foodString = ItemUtils.itemStackArrayToBase64(dominion.getFood());
+							int claimableResources = dominion.getClaimableResources();
+
+							// Keep at the end
+							String balance = dominion.getBalance() + "";
 
 							String row = name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
 									+ enemiesString + "|" + worldName + "|" + chunksString + "|"
-									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" +
+									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
 									// Keep balance at the end
-									balance + "\n";
+									+ balance + "\n";
 							writer.write(row);
 						}
 					}

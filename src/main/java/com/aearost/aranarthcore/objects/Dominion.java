@@ -28,12 +28,13 @@ public class Dominion {
 	private Location dominionHome;
 	private ItemStack[] food;
 	private int foodPowerBeingConsumed;
+	private int claimableResources;
 
 	// Keep balance at the end
 	private double balance;
 
 	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
-					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
+					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food, int claimableResources,
 					// Keep balance at the end
 					double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
@@ -49,6 +50,7 @@ public class Dominion {
 		this.chunks = chunks;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
 		this.food = food;
+		this.claimableResources = claimableResources;
 
 		// Keep balance at the end
 		this.balance = balance;
@@ -276,6 +278,22 @@ public class Dominion {
 	 */
 	public void setFoodPowerBeingConsumed(int foodPowerBeingConsumed) {
 		this.foodPowerBeingConsumed = foodPowerBeingConsumed;
+	}
+
+	/**
+	 * Provides the number of available resource claims a Dominion has available.
+	 * @return The number of available resource claims a Dominion has available.
+	 */
+	public int getClaimableResources() {
+		return claimableResources;
+	}
+
+	/**
+	 * Updates the number of available resource claims a Dominion has available.
+	 * @param claimableResources The number of available resource claims a Dominion has available.
+	 */
+	public void setClaimableResources(int claimableResources) {
+		this.claimableResources = claimableResources;
 	}
 
 }

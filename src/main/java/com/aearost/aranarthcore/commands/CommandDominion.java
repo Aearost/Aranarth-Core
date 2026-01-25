@@ -187,7 +187,7 @@ public class CommandDominion {
 				} else if (args[1].equalsIgnoreCase("food")) {
 					foodStorage(player);
 				} else if (args[1].equalsIgnoreCase("resources")) {
-					resources(player);
+					resources(dominion, player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac dominion <command>"));
@@ -264,7 +264,7 @@ public class CommandDominion {
 
 								DominionUtils.createDominion(new Dominion(
 										dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks,
-										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54],
+										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54], 0,
 										// Keep the balance at the end
 										5000));
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
@@ -1337,11 +1337,20 @@ public class CommandDominion {
 
 	/**
 	 * Opens the Dominion's resource claim options.
+	 * @param dominion The player's Dominion.
 	 * @param player The player.
 	 */
-	private static void resources(Player player) {
-		GuiDominionResources gui = new GuiDominionResources(player);
-		gui.openGui();
-		player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+	private static void resources(Dominion dominion, Player player) {
+		if (dominion != null) {
+			if (player.getUniqueId().equals(dominion.getLeader())) {
+				GuiDominionResources gui = new GuiDominionResources(player);
+				gui.openGui();
+				player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cOnly the leader of the Dominion can execute this command!"));
+			}
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&cYou must be the leader of a Dominion to execute this command!"));
+		}
 	}
 }
