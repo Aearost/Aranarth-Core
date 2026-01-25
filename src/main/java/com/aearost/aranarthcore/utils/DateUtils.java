@@ -139,6 +139,8 @@ public class DateUtils {
 
 			if (weekdayNum == 7) {
 				weekdayNum = 0;
+				// Additionally sends messages to inform the leader
+				DominionUtils.increaseClaimableResources();
 			} else {
 				weekdayNum++;
 			}

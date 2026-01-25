@@ -4,10 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -1680,6 +1677,32 @@ public class DominionUtils {
 		}
 
 		return multiplierItems;
+	}
+
+	/**
+	 * Increases the amount of resources that can be claimed by the Dominion.
+	 */
+	public static void increaseClaimableResources() {
+		for (Dominion dominion : getDominions()) {
+			int claimableAmount = dominion.getClaimableResources();
+			OfflinePlayer player = Bukkit.getOfflinePlayer(dominion.getLeader());
+			boolean isIncreasedAmount = false;
+
+			if (claimableAmount < 16) {
+				claimableAmount++;
+				dominion.setClaimableResources(claimableAmount);
+				updateDominion(dominion);
+				isIncreasedAmount = true;
+			}
+
+			if (player.isOnline()) {
+				if (isIncreasedAmount) {
+					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
+				} else {
+					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion currently has a backlog of resources to be claimed"));
+				}
+			}
+		}
 	}
 
 }

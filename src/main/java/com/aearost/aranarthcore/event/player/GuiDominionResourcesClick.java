@@ -41,7 +41,10 @@ public class GuiDominionResourcesClick {
 					loc.getWorld().dropItemNaturally(loc, remainder.get(0));
 				}
 			}
+			dominion.setClaimableResources(dominion.getClaimableResources() - 1);
+			DominionUtils.updateDominion(dominion);
 			player.sendMessage(ChatUtils.chatMessage("&7You have claimed resources from the &e" + biomeNameUnformatted + " &7biome"));
+
 			player.closeInventory();
 		}
 	}
