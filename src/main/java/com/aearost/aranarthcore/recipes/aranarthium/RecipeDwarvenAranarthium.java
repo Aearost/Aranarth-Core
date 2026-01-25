@@ -21,8 +21,9 @@ public class RecipeDwarvenAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_DWARVEN_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumDwarven().getItem());
 
-		recipe.shape("BGB", "GEG", "BRB");
+		recipe.shape("HBH", "BEB", "GRG");
 
+		recipe.setIngredient('H', Material.GOAT_HORN);
 		recipe.setIngredient('B', Material.GLOW_BERRIES);
 		recipe.setIngredient('E', Material.ECHO_SHARD);
 		recipe.setIngredient('G', Material.GOLD_INGOT);
@@ -30,6 +31,6 @@ public class RecipeDwarvenAranarthium {
 
 		Bukkit.addRecipe(recipe);
 	}
-		
+
 	
 }

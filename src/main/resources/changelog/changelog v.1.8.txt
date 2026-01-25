@@ -140,6 +140,7 @@ Features
 [+] Started to implement custom bending abilities
 [+] Created the AstralProjection ability
 [+] Added new month messages in Discord chat
+[~] Nerfed Dwarven Aranarthium recipe to require Goat Horns
 
 Miscellaneous
 - Removed redundant logs from weather

@@ -9,6 +9,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 import static com.aearost.aranarthcore.objects.CustomItemKeys.ARANARTHIUM_INGOT;
@@ -50,6 +51,11 @@ public class CraftingOverridesAranarthium {
                         return;
                     }
                 }
+            }
+
+            // Skip meta check for Goat horns
+            if (ingredientMeta instanceof MusicInstrumentMeta) {
+                return;
             }
         }
         // Handles normal ingredients being used to craft enhanced Aranarthium
