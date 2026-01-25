@@ -11,15 +11,17 @@ import org.bukkit.inventory.ItemStack;
  */
 public class GuiDominionFoodClick {
 	public void execute(InventoryClickEvent e) {
-		if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-			if (e.getCurrentItem() != null && !isEligibleFoodItem(e.getCurrentItem().getType())) {
-				e.setCancelled(true);
-			}
-		} else {
-			if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
-				ItemStack hotbarItem = e.getView().getBottomInventory().getItem(e.getHotbarButton());
-				if (hotbarItem != null && !isEligibleFoodItem(hotbarItem.getType())) {
+		if (e.getClickedInventory() != null) {
+			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
+				if (e.getCurrentItem() != null && !isEligibleFoodItem(e.getCurrentItem().getType())) {
 					e.setCancelled(true);
+				}
+			} else {
+				if (e.getAction() == InventoryAction.HOTBAR_SWAP) {
+					ItemStack hotbarItem = e.getView().getBottomInventory().getItem(e.getHotbarButton());
+					if (hotbarItem != null && !isEligibleFoodItem(hotbarItem.getType())) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
@@ -41,7 +43,7 @@ public class GuiDominionFoodClick {
 				|| type == Material.BEEF || type == Material.CHICKEN || type == Material.RABBIT
 				|| type == Material.COD || type == Material.SALMON || type == Material.POISONOUS_POTATO
 				|| type == Material.WHEAT || type == Material.BEETROOT || type == Material.BAKED_POTATO
-				|| type == Material.CARROTS || type == Material.POTATO || type == Material.DRIED_KELP
+				|| type == Material.CARROT || type == Material.POTATO || type == Material.DRIED_KELP
 				|| type == Material.MELON_SLICE || type == Material.SWEET_BERRIES || type == Material.GLOW_BERRIES
 				|| type == Material.CHORUS_FRUIT || type == Material.COOKIE;
 	}

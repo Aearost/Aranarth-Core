@@ -455,10 +455,10 @@ public class DominionUtils {
 	public static int getClaimFoodPower(Material type) {
 		if (type == Material.ENCHANTED_GOLDEN_APPLE || type == Material.CAKE) {
 			return 500;
+		} else if (type == Material.MUSHROOM_STEW || type == Material.BEETROOT_SOUP) {
+			return 150;
 		} else if (type == Material.HAY_BLOCK || type == Material.RABBIT_STEW) {
 			return 50;
-		} else if (type == Material.MUSHROOM_STEW || type == Material.BEETROOT_SOUP) {
-			return 40;
 		} else if (type == Material.GOLDEN_APPLE || type == Material.COOKED_PORKCHOP || type == Material.COOKED_MUTTON
 				|| type == Material.COOKED_BEEF || type == Material.COOKED_CHICKEN || type == Material.COOKED_RABBIT
 				|| type == Material.COOKED_COD || type == Material.COOKED_SALMON) {
@@ -481,7 +481,7 @@ public class DominionUtils {
 			return 5;
 		} else if (type == Material.BAKED_POTATO) {
 			return 3;
-		} else if (type == Material.CARROTS || type == Material.POTATO || type == Material.DRIED_KELP) {
+		} else if (type == Material.CARROT || type == Material.POTATO || type == Material.DRIED_KELP) {
 			return 2;
 		} else if (type == Material.MELON_SLICE || type == Material.SWEET_BERRIES || type == Material.GLOW_BERRIES
 				|| type == Material.CHORUS_FRUIT || type == Material.COOKIE) {
