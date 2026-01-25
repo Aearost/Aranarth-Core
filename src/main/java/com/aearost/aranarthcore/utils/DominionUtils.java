@@ -1699,10 +1699,9 @@ public class DominionUtils {
 				if (isIncreasedAmount) {
 					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
 				} else {
-					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion currently has a backlog of resources to be claimed"));
+					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion must claim its available resources!"));
 				}
 			}
 		}
 	}
-
 }
