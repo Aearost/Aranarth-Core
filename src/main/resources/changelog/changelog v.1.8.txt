@@ -141,6 +141,8 @@ Features
 [+] Created the AstralProjection ability
 [+] Added new month messages in Discord chat
 [~] Nerfed Dwarven Aranarthium recipe to require Goat Horns
+[~] Swapped extra hearts from Ardent to Elven aranarthium
+[~] Increased Strength obtained from Ardent armor
 
 Miscellaneous
 - Removed redundant logs from weather
