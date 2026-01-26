@@ -720,7 +720,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getFollivorDescription() {
-		return "The month of Follivór introduces the start of autumn. Trees provide more EXP and additional log drops, and saplings grow at quicker speeds";
+		return "The month of Follivór introduces the start of autumn. Trees provide more EXP and additional log drops, and saplings grow at quicker speeds.";
 	}
 
 	/**
@@ -736,7 +736,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getFaunivorDescription() {
-		return "The month of Faunivór encourages a little bloodshed. The sacrificed will yield increased weapon damage, and increased drop rates for both meat and animal products.";
+		return "The month of Faunivór encourages a little bloodshed. Weapons will deal increased damage, and mob drop rates will be doubled for both meat and animal products.";
 	}
 
 	/**
