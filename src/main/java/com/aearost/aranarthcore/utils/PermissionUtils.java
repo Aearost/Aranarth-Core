@@ -67,7 +67,9 @@ public class PermissionUtils {
 							if (bendingPlayer.hasSubElementPermission(subElement)) {
 								bendingPlayer.addSubElement(subElement);
 							} else {
-								bendingPlayer.getSubElements().remove(subElement);
+								if (AvatarUtils.getCurrentAvatar() == null || !AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+									bendingPlayer.getSubElements().remove(subElement);
+								}
 							}
 						}
 					}
@@ -240,6 +242,8 @@ public class PermissionUtils {
 			}
 
 			for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
+				Bukkit.getLogger().info(subElement.getName());
+
 				// Skips bloodbending, flight, and blue fire
 				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
 					if (subElement == Element.SubElement.BLUE_FIRE) {
