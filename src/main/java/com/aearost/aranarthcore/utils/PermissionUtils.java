@@ -67,8 +67,21 @@ public class PermissionUtils {
 							if (bendingPlayer.hasSubElementPermission(subElement)) {
 								bendingPlayer.addSubElement(subElement);
 							} else {
-								if (AvatarUtils.getCurrentAvatar() == null || !AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+								Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+								// Removes sub-elements with the exception of the avatar
+								if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
 									bendingPlayer.getSubElements().remove(subElement);
+								} else {
+									// Different logic for the avatar
+									// Toggling blue fire as needed based on avatar
+									if (currentAvatar.getUuid().equals(player.getUniqueId())) {
+										if (subElement == Element.SubElement.BLUE_FIRE) {
+											AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+											if (aranarthPlayer.hasBlueFireDisabled()) {
+												bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
+											}
+										}
+									}
 								}
 							}
 						}
@@ -242,15 +255,17 @@ public class PermissionUtils {
 			}
 
 			for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
-				Bukkit.getLogger().info(subElement.getName());
-
 				// Skips bloodbending, flight, and blue fire
 				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
 					if (subElement == Element.SubElement.BLUE_FIRE) {
 						if (player.isOnline()) {
 							Player onlinePlayer = player.getPlayer();
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							if (!onlinePlayer.hasPermission("bending.fire.bluefirebending")) {
-								continue;
+								// Removes if they have the sub-element but not the permission (they toggled it)
+								if (bendingPlayer.hasSubElement(Element.SubElement.BLUE_FIRE)) {
+									bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
+								}
 							}
 						}
 					}
