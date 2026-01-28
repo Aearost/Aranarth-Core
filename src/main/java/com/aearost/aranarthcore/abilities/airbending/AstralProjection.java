@@ -204,7 +204,9 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility {
      */
     @Override
     public void stop() {
-        player.setGameMode(GameMode.SURVIVAL);
+        if (player != null) {
+            player.setGameMode(GameMode.SURVIVAL);
+        }
     }
 
     /**
