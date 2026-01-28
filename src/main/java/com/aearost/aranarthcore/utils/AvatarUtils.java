@@ -9,8 +9,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +21,6 @@ import java.util.UUID;
  */
 public class AvatarUtils {
 
-	private static final Logger log = LoggerFactory.getLogger(AvatarUtils.class);
 	private static List<Avatar> avatars = new ArrayList<>();
 
 	/**
@@ -121,7 +118,9 @@ public class AvatarUtils {
 		if (previousAvatar != null) {
 			removeCurrentAvatar();
 			return true;
-		} else {
+		}
+		// If there is not currently a reigning avatar but one has previously existed
+		else {
 			char previousAvatarElement = avatars.get(avatars.size() - 2).getElement();
 			char newAvatarElement = switch (previousAvatarElement) {
 				case 'A' -> 'W';
@@ -142,7 +141,7 @@ public class AvatarUtils {
 						Bukkit.getLogger().info("No other avatar found, defaulting to this one");
 						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 								DateUtils.getRawInRealLifeDate(), "", playerElement);
-						avatars.remove(avatars.size() - 1); // It is the null placeholder
+						avatars.remove(avatars.size() - 1); // Removing the null placeholder
 						setNewAvatar(avatar);
 						DiscordUtils.addAvatarMessageToDiscord(avatar, true);
 						return true;
@@ -167,7 +166,7 @@ public class AvatarUtils {
 
 							avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 									DateUtils.getRawInRealLifeDate(), "", playerElement);
-							avatars.remove(avatars.size() - 1); // It is the null placeholder
+							avatars.remove(avatars.size() - 1); // Removing the null placeholder
 							setNewAvatar(avatar);
 							DiscordUtils.addAvatarMessageToDiscord(avatar, true);
 							return true;
@@ -206,11 +205,11 @@ public class AvatarUtils {
 	 * @param avatar The new Avatar.
 	 */
 	public static void setNewAvatar(Avatar avatar) {
+		avatars.add(avatar);
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
 		if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
 			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()));
 		}
-		avatars.add(avatar);
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.playSound(player, Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);

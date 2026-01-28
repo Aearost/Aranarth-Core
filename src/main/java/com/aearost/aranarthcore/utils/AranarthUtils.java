@@ -20,12 +20,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.profile.PlayerProfile;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -311,7 +309,8 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					toggleArenaBendingPermissions(player, true);
+					PermissionUtils.toggleArenaBendingPermissions(player, true);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 				player.getInventory().clear();
@@ -321,7 +320,8 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
-				toggleArenaBendingPermissions(player, true);
+				PermissionUtils.toggleArenaBendingPermissions(player, true);
+				PermissionUtils.updateSubElements(player);
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
@@ -337,7 +337,8 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					toggleArenaBendingPermissions(player, false);
+					PermissionUtils.toggleArenaBendingPermissions(player, false);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 			} else if (destinationWorld.startsWith("creative")) {
@@ -345,7 +346,8 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
 					player.setGameMode(GameMode.CREATIVE);
-					toggleArenaBendingPermissions(player, false);
+					PermissionUtils.toggleArenaBendingPermissions(player, false);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 			}
@@ -363,7 +365,8 @@ public class AranarthUtils {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
-					toggleArenaBendingPermissions(player, true);
+					PermissionUtils.toggleArenaBendingPermissions(player, true);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 				player.getInventory().clear();
@@ -373,7 +376,8 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
-				toggleArenaBendingPermissions(player, true);
+				PermissionUtils.toggleArenaBendingPermissions(player, true);
+				PermissionUtils.updateSubElements(player);
 				return;
 			}
 			player.getInventory().clear();
@@ -382,66 +386,6 @@ public class AranarthUtils {
 			return;
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
-
-	/**
-	 * Handles adding and removing all sub-element permissions as players enter and exit the arena world.
-	 * @param player The player.
-	 * @param isInArenaWorld Whether the player is actively in the arena world.
-	 */
-	public static void toggleArenaBendingPermissions(Player player, boolean isInArenaWorld) {
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-
-				if (isInArenaWorld) {
-					// Enable sub-elements
-					perms.setPermission("bending.water.healing", true);
-					perms.setPermission("bending.water.plantbending", true);
-					perms.setPermission("bending.fire.combustionbending", true);
-					perms.setPermission("bending.fire.lightningbending", true);
-					perms.setPermission("bending.earth.metalbending", true);
-					perms.setPermission("bending.earth.lavabending", true);
-					perms.setPermission("bending.earth.sandbending", true);
-					perms.setPermission("bending.air.spiritual", true);
-					perms.setPermission("bending.earth.sandbending", true);
-
-					// Enable abilities
-					perms.setPermission("bending.ability.waterarms", true);
-					perms.setPermission("bending.ability.firecomet", true);
-					perms.setPermission("bending.ability.metalclips", true);
-					perms.setPermission("bending.ability.sonicblast", true);
-					perms.setPermission("bending.ability.suffocate", true);
-					perms.setPermission("bending.earth.lavaflux", true);
-					perms.setPermission("bending.earth.fissure", true);
-				}
-				else {
-					// Disable sub-elements
-					perms.setPermission("bending.water.healing", false);
-					perms.setPermission("bending.water.plantbending", false);
-					perms.setPermission("bending.fire.combustionbending", false);
-					perms.setPermission("bending.fire.lightningbending", false);
-					perms.setPermission("bending.earth.metalbending", false);
-					perms.setPermission("bending.earth.lavabending", false);
-					perms.setPermission("bending.earth.sandbending", false);
-					perms.setPermission("bending.air.flight", false);
-					perms.setPermission("bending.air.spiritual", false);
-					perms.setPermission("bending.earth.sandbending", false);
-
-					// Disable abilities
-					perms.setPermission("bending.ability.waterarms", false);
-					perms.setPermission("bending.ability.firecomet", false);
-					perms.setPermission("bending.ability.metalclips", false);
-					perms.setPermission("bending.ability.sonicblast", false);
-					perms.setPermission("bending.ability.suffocate", false);
-					perms.setPermission("bending.earth.lavaflux", false);
-					perms.setPermission("bending.earth.fissure", false);
-				}
-
-				PermissionUtils.updateSubElements(player);
-			}
-		}.runTaskLater(AranarthCore.getInstance(), 1);
 	}
 
 	/**
