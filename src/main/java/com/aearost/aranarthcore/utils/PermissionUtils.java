@@ -34,7 +34,7 @@ public class PermissionUtils {
 		reEvaluateMonthlySaints(player);
 		setSaintPermissions(perms, aranarthPlayer.getSaintRank());
 		setCouncilPermissions(perms, aranarthPlayer.getCouncilRank());
-		addPlayerPerks(perms, player);
+		refreshPlayerPerks(perms, player);
 
 		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 		// If the player is the avatar
@@ -43,10 +43,8 @@ public class PermissionUtils {
 		}
 
 		// Must update arena permissions after base permissions apply
-		AranarthUtils.toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
-
+		toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
 		updateSubElements(player);
-
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
 
@@ -55,43 +53,101 @@ public class PermissionUtils {
 	 * @param player The player.
 	 */
 	public static void updateSubElements(Player player) {
-		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-			@Override
-			public void run() {
-				// Updates the sub-elements and abilities according to their current rank
-				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		// Updates the sub-elements and abilities according to their current rank
+		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 
-				if (bendingPlayer != null) {
-					for (Element element : bendingPlayer.getElements()) {
-						for (Element.SubElement subElement : Element.getSubElements(element)) {
-							if (bendingPlayer.hasSubElementPermission(subElement)) {
-								bendingPlayer.addSubElement(subElement);
-							} else {
-								Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
-								// Removes sub-elements with the exception of the avatar
-								if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
-									bendingPlayer.getSubElements().remove(subElement);
-								} else {
-									// Different logic for the avatar
-									// Toggling blue fire as needed based on avatar
-									if (currentAvatar.getUuid().equals(player.getUniqueId())) {
-										if (subElement == Element.SubElement.BLUE_FIRE) {
-											AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-											if (aranarthPlayer.hasBlueFireDisabled()) {
-												bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
-											}
-										}
+		if (bendingPlayer != null) {
+			for (Element element : bendingPlayer.getElements()) {
+				for (Element.SubElement subElement : Element.getSubElements(element)) {
+					if (bendingPlayer.hasSubElementPermission(subElement)) {
+
+						if (!bendingPlayer.hasSubElement(subElement)) {
+							bendingPlayer.addSubElement(subElement);
+						}
+					} else {
+						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+
+						// Removes sub-elements with the exception of the avatar
+						if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
+							bendingPlayer.getSubElements().remove(subElement);
+						} else {
+							// Different logic for the avatar
+							// Toggling blue fire as needed based on avatar
+							if (currentAvatar.getUuid().equals(player.getUniqueId())) {
+								if (subElement == Element.SubElement.BLUE_FIRE) {
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+									if (aranarthPlayer.hasBlueFireDisabled()) {
+										bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
 									}
 								}
 							}
 						}
 					}
+				}
+			}
+
+			Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+				@Override
+				public void run() {
 					bendingPlayer.removeUnusableAbilities();
 					bendingPlayer.saveSubElements();
 					bendingPlayer.saveElements();
 				}
-			}
-		}, 1);
+			}, 5);
+		}
+	}
+
+	/**
+	 * Handles adding and removing all sub-element permissions as players enter and exit the arena world.
+	 * @param player The player.
+	 * @param isInArenaWorld Whether the player is actively in the arena world.
+	 */
+	public static void toggleArenaBendingPermissions(Player player, boolean isInArenaWorld) {
+		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+
+		if (isInArenaWorld) {
+			// Enable sub-elements
+			perms.setPermission("bending.water.healing", true);
+			perms.setPermission("bending.water.plantbending", true);
+			perms.setPermission("bending.fire.combustionbending", true);
+			perms.setPermission("bending.fire.lightningbending", true);
+			perms.setPermission("bending.earth.metalbending", true);
+			perms.setPermission("bending.earth.lavabending", true);
+			perms.setPermission("bending.earth.sandbending", true);
+			perms.setPermission("bending.air.spiritual", true);
+			perms.setPermission("bending.earth.sandbending", true);
+
+			// Enable abilities
+			perms.setPermission("bending.ability.waterarms", true);
+			perms.setPermission("bending.ability.firecomet", true);
+			perms.setPermission("bending.ability.metalclips", true);
+			perms.setPermission("bending.ability.sonicblast", true);
+			perms.setPermission("bending.ability.suffocate", true);
+			perms.setPermission("bending.earth.lavaflux", true);
+			perms.setPermission("bending.earth.fissure", true);
+		}
+		else {
+			// Disable sub-elements
+			perms.setPermission("bending.water.healing", false);
+			perms.setPermission("bending.water.plantbending", false);
+			perms.setPermission("bending.fire.combustionbending", false);
+			perms.setPermission("bending.fire.lightningbending", false);
+			perms.setPermission("bending.earth.metalbending", false);
+			perms.setPermission("bending.earth.lavabending", false);
+			perms.setPermission("bending.earth.sandbending", false);
+			perms.setPermission("bending.air.flight", false);
+			perms.setPermission("bending.air.spiritual", false);
+			perms.setPermission("bending.earth.sandbending", false);
+
+			// Disable abilities
+			perms.setPermission("bending.ability.waterarms", false);
+			perms.setPermission("bending.ability.firecomet", false);
+			perms.setPermission("bending.ability.metalclips", false);
+			perms.setPermission("bending.ability.sonicblast", false);
+			perms.setPermission("bending.ability.suffocate", false);
+			perms.setPermission("bending.earth.lavaflux", false);
+			perms.setPermission("bending.earth.fissure", false);
+		}
 	}
 
 	/**
@@ -265,6 +321,7 @@ public class PermissionUtils {
 								// Removes if they have the sub-element but not the permission (they toggled it)
 								if (bendingPlayer.hasSubElement(Element.SubElement.BLUE_FIRE)) {
 									bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
+									continue;
 								}
 							}
 						}
@@ -322,7 +379,7 @@ public class PermissionUtils {
 	 * @param perms The permissions the player will have access to.
 	 * @param player The player.
 	 */
-	private static void addPlayerPerks(PermissionAttachment perms, Player player) {
+	private static void refreshPlayerPerks(PermissionAttachment perms, Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 
@@ -383,10 +440,8 @@ public class PermissionUtils {
 			else {
 				perms.setPermission("bending.fire.bluefirebending", true);
 			}
-			updateSubElements(player);
 		} else if (perks.get(Perk.BLUEFIRE) == 0) {
 			perms.setPermission("bending.fire.bluefirebending", false);
-			updateSubElements(player);
 		}
 	}
 

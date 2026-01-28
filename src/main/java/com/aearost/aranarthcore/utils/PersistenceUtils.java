@@ -7,8 +7,6 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.inventory.ItemStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,8 +22,6 @@ import java.util.*;
  * txt files stored in the AranarthCore plugin folder.
  */
 public class PersistenceUtils {
-
-	private static final Logger log = LoggerFactory.getLogger(PersistenceUtils.class);
 
 	/**
 	 * Initializes the homes HashMap based on the contents of homes.txt.
