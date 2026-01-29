@@ -559,10 +559,12 @@ public class DateUtils {
 	 * There is also an increased chance of rain during the month of Aquinvor.
 	 */
 	private void applyAquinvorEffects() {
-		List<PotionEffect> effects = new ArrayList<>();
-		effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-		effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
-		applyEffectToAllPlayers(effects);
+		if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
+			List<PotionEffect> effects = new ArrayList<>();
+			effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+			effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
+			applyEffectToAllPlayers(effects);
+		}
 		meltSnow(2);
 
 		// Increased rain chance

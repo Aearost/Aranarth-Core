@@ -1,0 +1,7 @@
+AranarthCore v. 1.9
+
+Features
+[~] Restricted Aquinvor potion effects to only apply while it is raining
+
+Miscellaneous
+-
