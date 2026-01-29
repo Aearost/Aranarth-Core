@@ -46,7 +46,7 @@ public class GuiHomepadClick {
 				gui.openGui();
 				player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 			} else if (currentPage == 0) {
-				int numOfHomes = AranarthUtils.getHomes().size();
+				int numOfHomes = AranarthUtils.getHomepads().size();
 				int maxPages;
 				// If the amount is a multiple of 27
 				if (numOfHomes % 27 == 0) {
@@ -71,7 +71,7 @@ public class GuiHomepadClick {
 		// If they click Next
 		else if (isClickedHomepadGui && slot == 35 && heldItem == Material.AIR) {
 			e.setCancelled(true);
-			int numOfHomes = AranarthUtils.getHomes().size();
+			int numOfHomes = AranarthUtils.getHomepads().size();
 			int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 			int maxPages;
 
@@ -101,7 +101,7 @@ public class GuiHomepadClick {
 					return;
 				}
 
-				List<Home> homes = AranarthUtils.getHomes();
+				List<Home> homes = AranarthUtils.getHomepads();
 				Home home = null;
 				try {
 					home = homes.get((aranarthPlayer.getCurrentGuiPageNum() * 27) + slot);
@@ -118,8 +118,8 @@ public class GuiHomepadClick {
 						if (heldItem == home.getIcon()) {
 							player.sendMessage(ChatUtils.chatMessage("&cThis homepad already uses that icon!"));
 						} else {
-							AranarthUtils.updateHome(home.getHomeName(), home.getLocation(), heldItem);
-							player.sendMessage(ChatUtils.chatMessage(home.getHomeName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
+							AranarthUtils.updateHomepad(home.getName(), home.getLocation(), heldItem);
+							player.sendMessage(ChatUtils.chatMessage(home.getName() + "&7's icon is now &e" + ChatUtils.getFormattedItemName(heldItem.name())));
 						}
 					} else {
 						if (player.isInsideVehicle()) {
@@ -127,29 +127,27 @@ public class GuiHomepadClick {
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
 								player.leaveVehicle();
 								mount.teleport(home.getLocation());
-								player.teleport(home.getLocation());
-								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
+								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 								try {
 									Thread.sleep(20);
 								} catch (InterruptedException ex) {
 									Bukkit.getLogger().info("Something went wrong with the teleportation...");
 								}
-								player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
-								player.sendMessage(ChatUtils
-										.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
+
+								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 								mount.addPassenger(player);
 							}
 						} else {
-							player.teleport(home.getLocation());
-							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getHomeName() + " via homepad");
+							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 							try {
 								Thread.sleep(20);
 							} catch (InterruptedException ex) {
 								Bukkit.getLogger().info("Something went wrong with the teleportation...");
 							}
+							AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
 							player.sendMessage(ChatUtils
-									.chatMessage("&5&oYou have been wooshed to &d" + home.getHomeName() + "&5!"));
-							player.playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.0F);
+									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 						}
 					}
 					player.closeInventory();

@@ -21,6 +21,7 @@ public class CommandTrust {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to trust!"));
+			return true;
 		} else {
 			if (sender instanceof Player player) {
 				boolean isPlayerFound = false;
@@ -31,8 +32,8 @@ public class CommandTrust {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							aranarthPlayer.setTrustedPlayerUUID(offlinePlayer.getUniqueId());
 							aranarthPlayer.setUntrustedPlayerUUID(null);
-							aranarthPlayer.setIsUnlockingContainer(false);
-							aranarthPlayer.setIsLockingContainer(false);
+							aranarthPlayer.setUnlockingContainer(false);
+							aranarthPlayer.setLockingContainer(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to trust &e" + offlinePlayer.getName()));
 							isPlayerFound = true;

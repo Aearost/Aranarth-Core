@@ -14,7 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of an Aquatic Aranarthium Boots item.
@@ -28,6 +28,8 @@ public class AquaticAranarthiumBoots implements AranarthItem {
 		ItemStack item = new ItemStack(Material.NETHERITE_BOOTS, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_boots");
+//			meta.setItemModel(key);
 			meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.TIDE));
 			meta.addEnchant(Enchantment.DEPTH_STRIDER, 5, true);
 			ArrayList<String> lore = new ArrayList<>();

@@ -1,7 +1,164 @@
-AranarthCore v. 1.7
+AranarthCore v. 1.8
 
 Features
-[+] TBD
+[+] Added land claiming system known as Dominions
+[+] Set up permissions system and added permissions for all Aranarth functionality
+[+] Added in-game ranks and rankup system
+[+] Added donor ranks known as Saints
+[+] Added staff ranks known as Council
+[+] Added in /ac tp, /ac tphere, /ac tpaccept, and /ac tpdeny
+[+] Added in /ac mute, /ac unmute, /ac ban, and /ac unban
+[+] Added in /ac home (with GUI), /ac sethome, and /ac delhome
+[+] Added in /ac pronouns command to change pronouns
+[+] Added in /ac pay, and /ac baltop
+[+] Added in /ac back functionality, tracking a player's last location before they teleported
+[+] Added in /ac particles to control how many Aranarth particles will be displayed
+[+] Added in /ac seen to show the time the player was last online in the sender's timezone
+[+] Added in /ac warp functionality and warp persistence
+[+] Added in /ac msg command
+[+] Added in /ac rules
+[+] Added in /ac warn to give and track a warning provided to a player
+[+] Added in /ac punishments to track all warnings, mutes, and bans a player has had
+[+] Added in /ac perks
+[+] Added in /ac admin functionality and updated protection bypasses based on it
+[+] Added in /ac tables
+[+] Added in /ac hat
+[+] Added in /ac compress and compressor functionality
+[+] Added a GUI for /ac potions
+[+] Added in crates functionality
+[+] Added in voting functionality
+[+] Added in hard caps to the number of available potions and quiver slots a player has access to
+[+] Updated chat format to support ranks and pronouns
+[+] Added discord role auto-assignment when rank is changed (rankup or by command)
+[+] Added discord punishment logging when any change is made to the player's punishment history
+[-] Removed prefix command as it was not going to be used (no custom prefixes moving forward)
+[-] Removed swimtoggle command as mounts will be able to swim in vanilla mineceraft in a few releases
+[~] Restricted the crafting and placing of homepads to only SMP
+[+] Added in custom resourcepack for arrows and arrowheads
+[+] Added in a quiver texture
+[~] Changed the colour of the obsidian arrow
+[~] Corrected issue where unloaded chunks were being selected for weather functionality causing lag
+[~] Removed redundant pages from /ac calendar and added title page
+[~] Added color to highlight a player's name during special timeframes with custom join and quit messages
+[~] Fixed issue where nicknames were being stored as the player's old username
+[~] Happy Ghasts are only immune to damage in the survival and SMP worlds
+[~] Extra logs are only dropped in the survival and SMP worlds
+[~] Fixed bug where saddles and horse armor were double dropping during Faunivor
+[+] Added command completion for all council commands
+[-] Removed all explosions other than wind charges
+[~] Infinity bows no longer work infinitely with special arrows
+[~] Changed Quiver to be a Leather item instead of a bundle
+[+] Added sound effect when opening a Quiver
+[~] Fixed feedback message for /ac give sender
+[~] Seemingly fixed major lag spikes from teleporting to unloaded chunks due to DateUtils
+[~] Fixed bug where vines were still growing in the arena world
+[~] Decreased Resistance cap to 3 levels
+[~] Fixed bug where % would cause errors
+[~] Prevented pipe and underscore characters from being input to persisting files
+[+] Added in potion name formatting for /ac potions to show proper display names
+[~] Fixed /ac give command showing the AranarthCore prefix twice
+[~] Made Quivers non-stackable items
+[~] Re-ordered the prefix symbols
+[~] Limited access to SMP and Creative worlds to OG players only
+[+] Added a resource world
+[+] Made it so arrows must be crafted using arrowheads in a fletching table
+[+] Added wildflowers, leaf litter, bush, firefly bush, and pale hanging moss to list of invalid blocks for snow
+[+] Added permission restrictions to the shulker assist functionality
+[+] Added permission restrictions to the inventory assist functionality
+[+] Added permission restrictions to crafting invisible item frames
+[+] Added functionality to persist player individually purchased perks from donations
+[~] Fixed bugs involving tipped arrows not applying effects or damaging as expected
+[~] Added limitation to only replenish inventory from shulkers if the player has both the inventory and shulker permissions
+[~] Increased grass block spawn rates after snow melts from 5% to 12%
+[+] Armor trims are no longer able to be applied to Aranarthium armor
+[~] Fixed issue where escaping the aranarthium anvil wouldn't return the armour piece if it had an armor trim or an enchantment
+[~] Increased charged creeper spawn rates during Aestivor and normal thunderstorms as well
+[~] Re-wrote and changed the logic and the formatting for player and server shop creation
+[~] Added centralized teleport logic
+[+] Added holograms to shops
+[+] Added in Breeze spawns during the month of Ventivor
+[+] Added in bulk transaction mode
+[+] Added a custom sleep vote skip functionality to keep the survival, SMP, and resource worlds in alignment with time
+[+] Added in custom server join message for new players
+[+] Added in MOTD to display when players join the server
+[~] Fixed bug where sugarcane blocks were being uncrafted into bamboo instead of sugarcane
+[+] Fixed issue where flowing water was freezing during winter months
+[+] Implemented server boosts
+[-] Pets can now be harmed so long as they are not in their Dominion territory
+[+] Pets will automatically un-sit once attacked
+[+] Twins born during Calorvor are now tamed by default if the parents were tamed
+[-] Removed the waterfall particles as they were a significant source of server lag
+[+] Added Dominion deposit and withdrawal functionality
+[+] All AranarthCore recipes are added to players by default
+[+] Dominion chunks are required to be connected now
+[+] Dominion chunks are limited based on the number of players in it (25 chunks per player)
+[+] Dominions can now be renamed via /ac dominion rename
+[+] Leaders can be changed in a Dominion via /ac dominion setleader
+[+] Dominion relations have been implemented and prevent or allow different interactions such as PvP or door opening
+[-] Decreased the number of homes available to Saints
+[~] Dominion names are limited to 30 characters excluding color formatting
+[~] Fixed bug where you could not destroy the block in front of a shop
+[~] Added dynamic snow and ice melting/forming based on the number of online players due to major performance impacts
+[~] Corrected issues where blacklisted items were not being ignored or trashed
+[~] Players that are not OGs can no longer teleport to the SMP via /ac tpaccept
+[~] TnT explosion damage is only limited when the explosion is in a Dominion
+[~] Fixed issue where teleporting while bending was toggled would un-toggle it
+[~] Fixed bug where snow was forming under blocks it shouldn't have been
+[~] Fixed bug where opening a container while holding a splash/lingering potion would add one from the potion inventory
+[~] Updated the mcmmo potion name check to be Paper-based
+[~] Fixed issues where end portals would teleport you to the incorrect location
+[+] Locked containers will automatically be unlocked if the player is inactive for 90 days
+[~] Bypass fire ticks from Scorched Aranarthium when in the same or allied/truced Dominion
+[~] Fixed issue where armor stands were dropping in double when destroyed
+[~] Fixed errors when not specifying colors or text in the itemname command
+[+] Prevented pets from targeting players when they're in a positive Dominion relation
+[~] Fixed /ac itemname sub-commands for gradient colors
+[~] Restructured weather functionality to apply fixed amounts of block updates rather than randomly in a radius of the player
+[+] Added shift-click support for Aranarthium anvils
+[+] Fixed items disappearing when Aranarthium Anvil is empty
+[~] Fixed issues with incorrect potions being consumed from potions pouch
+[+] Added a Quantity field to /ac give
+[~] Increased the range of God Apple Fragment messages from 32 to 48
+[+] Added support for extra leaf drops when simply breaking leaves, using Tree Feller, or using Leaf Blower
+[+] Added functionality to increase or decrease from a player's balance via /ac balance
+[+] Fixed duplication bug involving shulker boxes in the off-hand
+[~] Changed recipe for Invisible Item Frames to use glow item frames rather than regular item frames
+[~] Fixed double error message when doing /ac itemname
+[~] Added limit to Darkness status effect
+[+] Added increased Spears damage to Elven armor
+[+] Included Spears in the Boost of the Hunter
+[+] Included Spears in the extra damage during Faunivor
+[~] Bone meal on saplings during Follivor will no longer take 2 Bone meal
+[~] Fixed issue where bone meal'd saplings during Follivor were not working with Tree Feller
+[+] Made all store purchases broadcast donations in chat and display the nickname of the player
+[+] Added notifications for boosts and perks when added/purchased
+[+] Created notifications specific to donations and routed all donation messages to here
+[-] Removed check for rankset if the rank of the player executing the command changes their rank
+[+] Implemented /ac toggle
+[+] Implemented /ac shop to teleport to player shop locations
+[+] Adding toggle to enable an armor stand's arms by right-clicking it with an empty hand
+[+] Started to implement custom bending abilities
+[+] Created the AstralProjection ability
+[+] Added new month messages in Discord chat
+[~] Nerfed Dwarven Aranarthium recipe to require Goat Horns
+[~] Swapped extra hearts from Ardent to Elven aranarthium
+[~] Increased Strength obtained from Ardent armor
 
 Miscellaneous
-- TBD
+- Removed redundant logs from weather
+- Changed persisting files format to be pipe-separated lines for each record rather than json
+- Adapted PersistenceUtils to reflect this new format
+- Moved the pronouns to the end of the list of persisted fields in AranarthPlayer
+- Corrected names of Homepads and Shops across all files, methods, etc
+- Added support for nether and end portals across both Survival and SMP worlds
+- Fixed issue where nickname was null and caused errors in saving Aranarth Players
+- Restructured the logic of prefix and message formatting into ChatUtils
+- Added support for all admin council ranks to use /ac balance to update a player's balance
+- Centralized all arena logic in one grouped event listener class
+- Updated all underscore characters of field separators in persisting files
+- Re-wrote chest locking functionality as it had several gaps and difficulties integrating with player shops
+- Updated plugin to be based on Paper 1.21.11 instead of Spigot
+- Updated all references to .playSound() to be at the player itself rather than the player's location
+- Updated README to be more reflective of the current state of the plugin
+- Renamed all getters and setters for booleans in AranarthPlayer
+- Restructured the way that permissions are evaluated as the permission for bluefire was identified correctly and no longer needed recursive calls to apply the permission

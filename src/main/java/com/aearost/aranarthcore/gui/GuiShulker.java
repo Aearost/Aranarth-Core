@@ -20,7 +20,7 @@ public class GuiShulker {
 	}
 	
 	private Inventory initializeGui(Player player, Inventory shulkerInventory) {
-		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Shulker");
+		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Held Shulker");
 		for (int i = 0; i < shulkerInventory.getSize(); i++) {
 			gui.setItem(i, shulkerInventory.getItem(i));
 		}

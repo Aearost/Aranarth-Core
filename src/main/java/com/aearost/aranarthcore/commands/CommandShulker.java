@@ -18,12 +18,17 @@ public class CommandShulker {
      */
     public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
+            if (!player.hasPermission("aranarth.shulker")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+                return true;
+            }
+
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            if (aranarthPlayer.getIsAddingToShulker()) {
-                aranarthPlayer.setIsAddingToShulker(false);
+            if (aranarthPlayer.isAddingToShulker()) {
+                aranarthPlayer.isAddingToShulker(false);
                 player.sendMessage(ChatUtils.chatMessage("&7You are no longer adding items to shulkers"));
             } else {
-                aranarthPlayer.setIsAddingToShulker(true);
+                aranarthPlayer.isAddingToShulker(true);
                 player.sendMessage(ChatUtils.chatMessage("&7You are now adding items to shulkers"));
             }
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

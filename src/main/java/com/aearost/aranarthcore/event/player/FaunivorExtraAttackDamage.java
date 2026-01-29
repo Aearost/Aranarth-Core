@@ -31,6 +31,7 @@ public class FaunivorExtraAttackDamage {
 			return 6;
 		} else if (type == Material.NETHERITE_SWORD || type == Material.DIAMOND_SWORD
 				|| type == Material.NETHERITE_AXE || type == Material.DIAMOND_AXE
+				|| type == Material.NETHERITE_SPEAR || type == Material.DIAMOND_SPEAR
 				|| type == Material.TRIDENT) {
 			return 5;
 		} else if (type == Material.NETHERITE_PICKAXE || type == Material.DIAMOND_PICKAXE

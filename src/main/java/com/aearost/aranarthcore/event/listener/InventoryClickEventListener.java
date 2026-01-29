@@ -32,17 +32,42 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection")) {
                 new GuiQuiverClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")
-                        || ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Remove Potions")) {
-                new GuiPotionPreventNonPotionAdd().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Your Potions")
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Remove Potions")) {
                 new GuiPotionRemove().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
+                new GuiPotionListPreventRemoval().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Add Potions")) {
+                new GuiPotionPreventNonPotionAdd().execute(e);
+                new GuiPotionAdd().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Held Shulker")) {
                 new GuiShulkerPreventDrop().execute(e);
                 new ShulkerPreventSlotSwitch().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Ranks")) {
+                new GuiRanksClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Rankup Confirm")) {
+                new GuiRankupClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Homes")) {
+                new GuiHomesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
+                new GuiWarpClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Tables")) {
+                new GuiTablesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Aranarth Store - ")) {
+                new GuiStoreClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Compressible Items")) {
+                new GuiCompressorClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
+                new GuiCrateClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
+                new GuiShopLocationClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food Storage")) {
+                new GuiDominionFoodClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
+                new GuiDominionResourcesClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
-                if (e.getView().getType() == InventoryType.ANVIL) {
+                if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {
                     new AranarthiumArmourCraft().execute(e);
                 } else if (e.getClickedInventory().getType() == InventoryType.LOOM) {
                     new BannerExtendPatternLimit().execute(e);
@@ -53,6 +78,6 @@ public class InventoryClickEventListener implements Listener {
         }
 
         // Execute regardless of inventory type
-        new QuiverSwitchSlots().execute(e);
+//        new QuiverSwitchSlots().execute(e);
     }
 }

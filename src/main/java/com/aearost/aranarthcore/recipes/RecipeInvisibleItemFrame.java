@@ -25,7 +25,7 @@ public class RecipeInvisibleItemFrame {
 
 		recipe.setIngredient('L', Material.LAPIS_LAZULI);
 		recipe.setIngredient('G', Material.GLOWSTONE_DUST);
-		recipe.setIngredient('I', Material.ITEM_FRAME);
+		recipe.setIngredient('I', Material.GLOW_ITEM_FRAME);
 		
 		Bukkit.addRecipe(recipe);
 	}

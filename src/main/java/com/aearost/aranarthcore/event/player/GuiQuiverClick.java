@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -18,7 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 /**
  * Prevents players from adding non-arrow items to the arrows inventory.
@@ -37,20 +36,23 @@ public class GuiQuiverClick {
 				return;
 			}
 
-			// If adding a new item to the arrows inventory
-			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
-				ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-				// Ensures a non-empty slot is clicked
-				if (Objects.isNull(clickedItem)) {
-					// If placing potion back into player slots
-					if (Objects.nonNull(e.getCursor())) {
+			ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
+			// Ensures a non-empty slot is clicked
+			if (clickedItem != null) {
+				// If adding a new item to the arrows inventory
+				if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
+					// If placing an arrow back into player slots
+					if (Objects.nonNull(e.getCursor()) && isItemArrow(e.getCursor())) {
 						return;
 					}
-					e.setCancelled(true);
-				}
 
-				if (!isItemArrow(clickedItem)) {
-					e.setCancelled(true);
+					if (!isItemArrow(clickedItem)) {
+						e.setCancelled(true);
+					}
+				} else if (e.getClickedInventory().getType() == InventoryType.CHEST) {
+					if (clickedItem.getType() == Material.BLACK_STAINED_GLASS_PANE) {
+						e.setCancelled(true);
+					}
 				}
 			}
 		} else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Arrow Selection") && e.getView().getType() == InventoryType.CHEST) {
@@ -132,7 +134,6 @@ public class GuiQuiverClick {
 											}
 											// Regular or Spectral Arrows
 											else {
-												Bukkit.getLogger().info("AHHH");
 												if (selectedArrow.getType() == Material.ARROW) {
 													player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
 													player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);

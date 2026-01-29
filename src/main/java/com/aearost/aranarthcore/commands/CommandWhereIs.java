@@ -15,16 +15,17 @@ public class CommandWhereIs {
 	 * @param sender The user that entered the command.
 	 * @param args The arguments of the command.
 	 */
-	public static void onCommand(CommandSender sender, String[] args) {
+	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			if (!player.getName().equalsIgnoreCase("Aearost")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-				return;
+			if (!player.hasPermission("aranarth.whereis")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				return true;
 			}
 		}
 
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
+			return true;
 		} else {
 			boolean isPlayerFound = false;
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -33,14 +34,15 @@ public class CommandWhereIs {
 					sender.sendMessage(ChatUtils.chatMessage(onlinePlayer.getDisplayName()
 							+ " &7is in &e" + location.getWorld().getName() + " &7at &ex: " + location.getBlockX() + " | y: " + location.getBlockY() +
 							" | z: " + location.getBlockZ()));
-					return;
+					return true;
 				}
 			}
 			if (!isPlayerFound) {
 				sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+				return true;
 			}
 		}
-		return;
+		return false;
 	}
 
 }

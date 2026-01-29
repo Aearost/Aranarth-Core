@@ -24,14 +24,19 @@ public class CommandRandomizer {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.randomizer")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
+
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (args.length == 1) {
-				if (aranarthPlayer.getIsRandomizing()) {
+				if (aranarthPlayer.isRandomizing()) {
 					player.sendMessage(ChatUtils.chatMessage("&7Blocks will no longer be randomized from the pattern"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&7Blocks will now be randomized from the pattern!"));
 				}
-				aranarthPlayer.setIsRandomizing(!aranarthPlayer.getIsRandomizing());
+				aranarthPlayer.isRandomizing(!aranarthPlayer.isRandomizing());
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				return true;
 			} else {

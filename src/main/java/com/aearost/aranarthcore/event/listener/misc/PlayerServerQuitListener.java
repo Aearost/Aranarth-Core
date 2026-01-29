@@ -2,9 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
-import com.aearost.aranarthcore.utils.AranarthUtils;
-import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -26,13 +24,17 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+
+		// Called to save the Avatar's abilities to prevent loss of avatar abilities
+		if (AvatarUtils.getCurrentAvatar() != null) {
+			if (AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				PersistenceUtils.saveAvatarBinds();
+			}
+		}
+
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
-		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDisplay = AranarthUtils.getNickname(player);
-		} else {
-			nameToDisplay = AranarthUtils.getUsername(player);
-		}
+		nameToDisplay = "&7" + AranarthUtils.getNickname(player);
 		
 		if (dateUtils.isValentinesDay()) {
 			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
@@ -59,17 +61,17 @@ public class PlayerServerQuitListener implements Listener {
 			public void run() {
 				if (runs == 0) {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
 					}
 					runs++;
 				} else if (runs == 1){
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
 					}
 					runs++;
 				} else {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
+						onlinePlayer.playSound(onlinePlayer, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
 					}
 					cancel();
 				}

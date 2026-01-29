@@ -17,8 +17,8 @@ public class TippedArrowDamagePrevent {
 		if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player) {
 				if (e.getEntity() instanceof Player player) {
-					if (arrow.getItem().hasItemMeta()) {
-						if (arrow.getItem().getItemMeta() instanceof PotionMeta potionMeta) {
+					if (arrow.getItemStack().hasItemMeta()) {
+						if (arrow.getItemStack().getItemMeta() instanceof PotionMeta potionMeta) {
 							boolean shouldPotionDamage = checkIfPotionShouldDamage(potionMeta.getBasePotionType());
 							// If it is a positive effect, do not damage and apply the effect
 							if (!shouldPotionDamage) {
@@ -27,10 +27,9 @@ public class TippedArrowDamagePrevent {
 									PotionEffect newEffect = new PotionEffect(
 											effect.getType(), effect.getDuration() / 8, effect.getAmplifier());
 									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-									aranarthPlayer.setIsHitByTippedArrow(true);
+									aranarthPlayer.setHitByTippedArrow(true);
 									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 									player.addPotionEffect(newEffect);
-									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								}
 								e.getDamageSource().getDirectEntity().remove();
 							}
@@ -47,11 +46,8 @@ public class TippedArrowDamagePrevent {
 	 * @return Confirmation of whether the potion would do damage.
 	 */
 	private boolean checkIfPotionShouldDamage(PotionType type) {
-		return (type == PotionType.AWKWARD || type == PotionType.HARMING || type == PotionType.MUNDANE
-				|| type == PotionType.OOZING || type == PotionType.POISON || type == PotionType.SLOWNESS
-				|| type == PotionType.THICK || type == PotionType.WATER || type == PotionType.WEAKNESS
-				|| type == PotionType.TURTLE_MASTER || type == PotionType.WIND_CHARGED || type == PotionType.WEAVING
-				|| type == PotionType.INFESTED
-		);
+		return type.name().contains("AWKWARD") || type.name().contains("HARMING") ||type.name().contains("MUNDANE") || type.name().contains("TURTLE_MASTER") ||
+				type.name().contains("OOZING") || type.name().contains("POISON") ||type.name().contains("SLOWNESS") || type.name().contains("WIND_CHARGED") ||
+				type.name().contains("THICK") || type.name().contains("WEAKNESS") || type.name().contains("WEAVING") || type.name().contains("INFESTED");
 	}
 }

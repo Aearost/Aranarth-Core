@@ -66,7 +66,7 @@ public class CommandAranarthium {
 	private static String ardentArmour() {
 		return ChatUtils.translateToColor(
 				"&lArdent Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oStrength II, Resistance II,&r and an extra row of hearts.\n\nAdditionally yields increased damage using &lSwords."
+						"Provides the wearer with the status effects of &oStrength III &rand &oResistance II.\n\nAdditionally yields increased damage using &lSwords."
 		);
 	}
 
@@ -80,7 +80,7 @@ public class CommandAranarthium {
 	private static String elvenArmour() {
 		return ChatUtils.translateToColor(
 				"&lElven Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oSpeed III&r and &oJump Boost II&r.\n\nAdditionally yields increased damage using &lBows."
+						"Provides the wearer with the status effects of &oSpeed III, Jump Boost II,&r and an extra row of hearts.\n\nAdditionally yields increased damage using &lBows &rand &lSpears."
 		);
 	}
 

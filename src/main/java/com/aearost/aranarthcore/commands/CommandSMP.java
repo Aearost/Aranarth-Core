@@ -3,13 +3,11 @@ package com.aearost.aranarthcore.commands;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.potion.PotionEffect;
-
-import java.io.IOException;
 
 /**
  * Teleports the player to the SMP world, sharing the SMP inventory.
@@ -24,24 +22,14 @@ public class CommandSMP {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-                // Teleports you to the survival world spawn
-				try {
-					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "smp");
-				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					return false;
-				}
-				// Only remove potion effects if changing from a non-survival world
-				if (!player.getLocation().getWorld().getName().startsWith("smp")) {
-					for (PotionEffect effect : player.getActivePotionEffects()) {
-						player.removePotionEffect(effect.getType());
-					}
+				if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
+					return true;
 				}
 
-				Location loc = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
-				player.teleport(loc);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSMP!"));
-				player.setGameMode(GameMode.SURVIVAL);
+				Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn);
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 				perms.setPermission("worldedit.*", false);
@@ -54,5 +42,4 @@ public class CommandSMP {
 		}
 		return false;
 	}
-
 }

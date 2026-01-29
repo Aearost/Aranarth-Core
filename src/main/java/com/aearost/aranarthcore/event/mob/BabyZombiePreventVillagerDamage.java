@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
-import org.bukkit.entity.*;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 /**

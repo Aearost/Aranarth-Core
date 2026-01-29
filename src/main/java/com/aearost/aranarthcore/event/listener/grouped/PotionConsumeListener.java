@@ -7,16 +7,18 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.ThrownPotion;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionType;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class PotionConsumeListener implements Listener {
@@ -41,12 +43,25 @@ public class PotionConsumeListener implements Listener {
 	 * @param e The event.
 	 */
 	@EventHandler
-	public void onPotionUse(final PlayerInteractEvent e) {
-		if (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-			if (Objects.nonNull(e.getItem())) {
-				if (e.getItem().getType() == Material.SPLASH_POTION
-						|| e.getItem().getType() == Material.LINGERING_POTION) {
-                    replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
+	public void onPotionUse(final ProjectileLaunchEvent e) {
+		if (e.getEntity() instanceof ThrownPotion potion) {
+			if (potion.getShooter() instanceof Player player) {
+				int heldSlot = player.getInventory().getHeldItemSlot();
+
+				// Thrown from off-hand while holding nothing
+				ItemStack heldItem = player.getInventory().getStorageContents()[heldSlot];
+				if (heldItem == null) {
+					replacePotion(player, potion.getItem(), false);
+				} else {
+					Material heldType = heldItem.getType();
+					// Thrown from off-hand while holding an item that is not a splash or lingering potion
+					if (heldType != Material.SPLASH_POTION && heldType != Material.LINGERING_POTION) {
+						replacePotion(player, potion.getItem(), false);
+					}
+					// Thrown from main-hand
+					else {
+						replacePotion(player, potion.getItem(), true);
+					}
 				}
 			}
 		}
@@ -63,19 +78,18 @@ public class PotionConsumeListener implements Listener {
 			return;
 		}
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		
-		List<ItemStack> potions = aranarthPlayer.getPotions();
+
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 		if (Objects.nonNull(potions)) {
-			for (ItemStack potion : potions) {
+			for (ItemStack potion : potions.keySet()) {
 				PotionMeta potionMeta = (PotionMeta) potion.getItemMeta();
 				if (consumedPotion.getType() == potion.getType()) {
 					
 					PotionMeta consumedPotionMeta = (PotionMeta) consumedPotion.getItemMeta();
 					// Ensures that the potion is the same
 					if (consumedPotionMeta.getBasePotionType() == potionMeta.getBasePotionType()) {
-						// If it's an mcMMO potion, ensure that it is the exact same potion
-						if (consumedPotionMeta.hasItemName()) {
-							if (!consumedPotionMeta.getItemName().equals(potionMeta.getItemName())) {
+						if (consumedPotionMeta.getBasePotionType() == PotionType.MUNDANE) {
+							if (!isSamePotion(consumedPotionMeta, potionMeta)) {
 								continue;
 							}
 						}
@@ -90,15 +104,31 @@ public class PotionConsumeListener implements Listener {
 						}
 						
 						if (potion.getType() == Material.SPLASH_POTION || potion.getType() == Material.LINGERING_POTION) {
-							potion.setAmount(2);
-							player.getInventory().setItem(slot, potion);
-							potions.remove(potion);
+							ItemStack potionCopy = potion.clone();
+
+							potions.put(potion, potions.get(potion) - 1);
+							if (potions.get(potion) == 0) {
+								potions.remove(potion);
+							}
 							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+							// Replaces the potion with the copy
+							potionCopy.setAmount(1);
+							Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+								@Override
+								public void run() {
+									player.getInventory().setItem(slot, potionCopy);
+								}
+							}, 1);
 						} else {
-							potions.remove(potion);
+							potions.put(potion, potions.get(potion) - 1);
+							if (potions.get(potion) == 0) {
+								potions.remove(potion);
+							}
 							aranarthPlayer.setPotions(potions);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 							final int finalSlot = slot;
 							
 							// Required to add potion to inventory after consumption
@@ -116,6 +146,28 @@ public class PotionConsumeListener implements Listener {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Confirms that the two potions are different.
+	 * @param metaA The first potion meta.
+	 * @param metaB The second potion meta.
+	 * @return Confirmation that the two potions are different.
+	 */
+	private boolean isSamePotion(PotionMeta metaA, PotionMeta metaB) {
+		// If one is a Mundane potion
+		if (metaA.hasCustomEffects() != metaB.hasCustomEffects()) {
+			return false;
+		}
+
+		for (PotionEffect potionEffectA : metaA.getCustomEffects()) {
+			if (metaB.getAllEffects().contains(potionEffectA)) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+		return false;
 	}
 
 }

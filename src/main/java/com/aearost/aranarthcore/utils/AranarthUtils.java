@@ -1,18 +1,20 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Home;
-import com.aearost.aranarthcore.objects.LockedContainer;
-import com.aearost.aranarthcore.objects.PlayerShop;
+import com.aearost.aranarthcore.objects.*;
+import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
+import org.bukkit.ban.ProfileBanList;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -21,12 +23,21 @@ import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.profile.PlayerProfile;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.function.Consumer;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
 
 
 /**
@@ -37,7 +48,6 @@ public class AranarthUtils {
 	private static final HashMap<UUID, AranarthPlayer> players = new HashMap<>();
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
-	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
 	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
 	private static List<LockedContainer> lockedContainers;
 	private static int day;
@@ -52,14 +62,16 @@ public class AranarthUtils {
 	private static boolean isPlayingWindSound;
 	private static int cherryParticleDelay;
 	private static Weather weather;
-
-	public AranarthUtils(boolean isServerStarting) {
-		if (isServerStarting) {
-			PersistenceUtils.loadHomes();
-		} else {
-			PersistenceUtils.saveHomes();
-		}
-	}
+	private static final List<UUID> mutedPlayers = new ArrayList<>();
+	private static List<Home> warps = new ArrayList<>();
+	private static final HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+	private static final List<UUID> originalPlayers = new ArrayList<>();
+	private static int phantomSpawnDelay = 0;
+	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
+	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
+	private static final List<CrateType> cratesInUse = new ArrayList<>();
+	private static final List<TextDisplay> textHolograms = new ArrayList<>();
+	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -110,6 +122,25 @@ public class AranarthUtils {
 	 */
 	public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
 		players.put(uuid, aranarthPlayer);
+		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
+				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
+				|| uuid.equals(getUUIDFromUsername("SachsiBua")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
+				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))) {
+			originalPlayers.add(uuid);
+		}
+	}
+
+	/**
+	 * Determines if the player is one of the original players of Aranarth.
+	 * @param uuid The player's UUID.
+	 * @return Confirmation whether the player is one of the original players of Aranarth.
+	 */
+	public static boolean isOriginalPlayer(UUID uuid) {
+		if (originalPlayers.contains(uuid)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -130,7 +161,7 @@ public class AranarthUtils {
 	 */
 	public static String getNickname(OfflinePlayer player) {
 		String nickname = players.get(player.getUniqueId()).getNickname();
-		return nickname.isEmpty() ? getUsername(player) : nickname;
+		return (nickname == null || nickname.isEmpty()) ? getUsername(player) : nickname;
 	}
 
 	/**
@@ -138,7 +169,7 @@ public class AranarthUtils {
 	 *
 	 * @param location The Location that the homepad is located at.
 	 */
-	public static void addNewHome(Location location) {
+	public static void addNewHomepad(Location location) {
 		homes.add(new Home("NEW", location, Material.HEAVY_WEIGHTED_PRESSURE_PLATE));
 	}
 
@@ -149,7 +180,7 @@ public class AranarthUtils {
 	 * @param direction The Location containing the direction of the homepad to be used.
 	 * @param icon The Material that will be displayed for the homepad.
 	 */
-	public static void updateHome(String homeName, Location direction, Material icon) {
+	public static void updateHomepad(String homeName, Location direction, Material icon) {
 		for (int i = 0; i < homes.size(); i++) {
 			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
 					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
@@ -165,7 +196,7 @@ public class AranarthUtils {
 	 *
 	 * @return The List of homepads.
 	 */
-	public static List<Home> getHomes() {
+	public static List<Home> getHomepads() {
 		return homes;
 	}
 
@@ -174,7 +205,7 @@ public class AranarthUtils {
 	 *
 	 * @param newHomes The new list of homepads.
 	 */
-	public static void setHomes(List<Home> newHomes) {
+	public static void setHomepads(List<Home> newHomes) {
 		homes = newHomes;
 	}
 
@@ -193,7 +224,7 @@ public class AranarthUtils {
 	 * @param location The location of the homepad.
 	 * @return The homepad at the location.
 	 */
-	public static Home getHomePad(Location location) {
+	public static Home getHomepad(Location location) {
 		for (Home home : homes) {
 			if (locationsMatch(location, home.getLocation())) {
 				return home;
@@ -207,7 +238,7 @@ public class AranarthUtils {
 	 *
 	 * @param location The location of the homepad to be removed.
 	 */
-	public static void removeHomePad(Location location) {
+	public static void removeHomepad(Location location) {
 		Home toRemove = null;
 		for (Home home : homes) {
 			if (locationsMatch(location, home.getLocation())) {
@@ -246,19 +277,40 @@ public class AranarthUtils {
 	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
-		if (currentWorld.equals(destinationWorld)
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))
-				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("smp"))
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("smp"))
-				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("world"))) {
-			return;
+		// Include any world that should share the inventory of Survival
+		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource")) {
+			currentWorld = "world";
+		}
+		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource")) {
+			destinationWorld = "world";
 		}
 
-		if (currentWorld.startsWith("world") || currentWorld.startsWith("smp")) {
+		boolean isSurvivalToSurvival = currentWorld.startsWith("world") && destinationWorld.startsWith("world");
+		boolean isSameWorld = currentWorld.equals(destinationWorld);
+
+		// No need to change inventory
+		if (isSurvivalToSurvival || isSameWorld) {
+			if (!destinationWorld.equals("creative")) {
+				if (aranarthPlayer.getCouncilRank() != 3) {
+					player.setGameMode(GameMode.SURVIVAL);
+				}
+				return;
+			}
+		} else {
+			// Remove potion effects when changing the world
+			for (PotionEffect effect : player.getActivePotionEffects()) {
+				player.removePotionEffect(effect.getType());
+			}
+		}
+
+		if (currentWorld.startsWith("world")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 			if (destinationWorld.startsWith("arena")) {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+					player.setGameMode(GameMode.SURVIVAL);
+					PermissionUtils.toggleArenaBendingPermissions(player, true);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 				player.getInventory().clear();
@@ -267,40 +319,54 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_LEGGINGS, 1),
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
+				player.setGameMode(GameMode.SURVIVAL);
+				PermissionUtils.toggleArenaBendingPermissions(player, true);
+				PermissionUtils.updateSubElements(player);
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+					player.setGameMode(GameMode.CREATIVE);
 					return;
 				}
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
-			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
+			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+					player.setGameMode(GameMode.SURVIVAL);
+					PermissionUtils.toggleArenaBendingPermissions(player, false);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 			} else if (destinationWorld.startsWith("creative")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
+					player.setGameMode(GameMode.CREATIVE);
+					PermissionUtils.toggleArenaBendingPermissions(player, false);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
-			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
+			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
+					player.setGameMode(GameMode.SURVIVAL);
 					return;
 				}
 			} else if (destinationWorld.startsWith("arena")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
+					player.setGameMode(GameMode.SURVIVAL);
+					PermissionUtils.toggleArenaBendingPermissions(player, true);
+					PermissionUtils.updateSubElements(player);
 					return;
 				}
 				player.getInventory().clear();
@@ -309,6 +375,9 @@ public class AranarthUtils {
 						new ItemStack(Material.IRON_LEGGINGS, 1),
 						new ItemStack(Material.IRON_CHESTPLATE, 1),
 						new ItemStack(Material.IRON_HELMET, 1)});
+				player.setGameMode(GameMode.SURVIVAL);
+				PermissionUtils.toggleArenaBendingPermissions(player, true);
+				PermissionUtils.updateSubElements(player);
 				return;
 			}
 			player.getInventory().clear();
@@ -346,16 +415,16 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		} else if (isWearingArmorType(player, "ardent")) {
-			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		} else if (isWearingArmorType(player, "dwarven")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		} else if (isWearingArmorType(player, "elven")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
-			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
 		} else if (isWearingArmorType(player, "scorched")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
@@ -445,67 +514,6 @@ public class AranarthUtils {
 	public static void decrementDragonHeadFuelAmount(Location location) {
 		Integer newAmount = dragonHeads.get(location) - 1;
 		dragonHeads.put(location, newAmount);
-	}
-
-	/**
-	 * Provides the current list of player shops.
-	 * @return The list of player shops.
-	 */
-	public static HashMap<UUID, List<PlayerShop>> getShops() {
-		return playerShops;
-	}
-
-	/**
-	 * Provides the shop at the input sign location.
-	 * @param location The location of the sign.
-	 * @return The player shop if it exists.
-	 */
-	public static PlayerShop getShop(Location location) {
-		if (getShops() != null) {
-			for (UUID uuid : playerShops.keySet()) {
-				for (PlayerShop shop : playerShops.get(uuid)) {
-					if (shop.getLocation().equals(location)) {
-						return shop;
-					}
-				}
-			}
-
-		}
-		return null;
-	}
-
-	/**
-	 * Adding the input shop by the associated UUID.
-	 * @param uuid The UUID. Null if it is a server shop.
-	 * @param newShop The new player shop.
-	 */
-	public static void addShop(UUID uuid, PlayerShop newShop) {
-		List<PlayerShop> shops = playerShops.get(uuid);
-		if (shops == null) {
-			shops = new ArrayList<>();
-		}
-		shops.add(newShop);
-		playerShops.put(uuid, shops);
-	}
-
-	/**
-	 * Removes the player shop at the associated location for the input UUID.
-	 * @param uuid The UUID.
-	 * @param location The location of the sign of the shop.
-	 */
-	public static void removeShop(UUID uuid, Location location) {
-		List<PlayerShop> shops = playerShops.get(uuid);
-		int shopSlotToDelete = -1;
-		for (int i = 0; i < shops.size(); i++) {
-			if (shops.get(i).getLocation().equals(location)) {
-				shopSlotToDelete = i;
-				break;
-			}
-		}
-		// Only delete if a shop was found
-		if (shopSlotToDelete != -1) {
-			shops.remove(shopSlotToDelete);
-		}
 	}
 
 	/**
@@ -709,8 +717,17 @@ public class AranarthUtils {
 				|| type == Material.NETHER_WART;
 	}
 
+	/**
+	 * Applies the waterfall effect at the base of flowing water.
+	 */
 	public static void applyWaterfallEffect() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			// Skips the particle
+			if (new Random().nextInt(100) >= aranarthPlayer.getParticleNum()) {
+				continue;
+			}
+
 			Location playerLoc = player.getLocation();
 			int radius = 40;
 
@@ -774,31 +791,6 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Returns a HashMap containing the quantity of a given potion that a player has.
-	 * @param player The player running the command.
-	 * @return The HashMap of the potions the player has, as well as the quantity of the potion.
-	 */
-	public static HashMap<ItemStack, Integer> getPotionsAndAmounts(Player player) {
-		List<ItemStack> potions = getPlayer(player.getUniqueId()).getPotions();
-		HashMap<ItemStack, Integer> potionsAndAmounts = new HashMap<>();
-
-		// Counts how many potions of the same type there are
-		for (ItemStack potionToCount : potions) {
-			// Add the potion if it doesn't exist
-			if (potionsAndAmounts.get(potionToCount) == null) {
-				potionsAndAmounts.put(potionToCount, 1);
-				continue;
-			}
-
-			int amount = potionsAndAmounts.get(potionToCount);
-			amount++;
-			potionsAndAmounts.put(potionToCount, amount);
-		}
-
-		return potionsAndAmounts;
-	}
-
-	/**
 	 * Provides the current state of the weather.
 	 * @return The current state of the weather.
 	 */
@@ -822,10 +814,6 @@ public class AranarthUtils {
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return null;
 		}
-//		Bukkit.getLogger().info("*********************************");
-//		for (LockedContainer container : lockedContainers) {
-//			Bukkit.getLogger().info(container.toString());
-//		}
 		return lockedContainers;
 	}
 
@@ -944,7 +932,7 @@ public class AranarthUtils {
 		List<UUID> trusted = null;
 		for (LockedContainer container : getLockedContainers()) {
 			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[1];
 			if (loc2 == null) {
 				if (isSameLocation(loc1, location)) {
 					trusted = container.getTrusted();
@@ -974,7 +962,7 @@ public class AranarthUtils {
 		List<UUID> trusted = null;
 		for (LockedContainer container : getLockedContainers()) {
 			Location loc1 = container.getLocations()[0];
-			Location loc2 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[1];
 			if (loc2 == null) {
 				if (isSameLocation(loc1, location)) {
 					trusted = container.getTrusted();
@@ -1002,6 +990,10 @@ public class AranarthUtils {
 	 * @return Confirmation whether the input block is a container block.
 	 */
 	public static boolean isContainerBlock(Block block) {
+		if (block == null) {
+			return false;
+		}
+
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
 				|| block.getType() == Material.BARREL
@@ -1057,6 +1049,7 @@ public class AranarthUtils {
 	 */
 	public static boolean canOpenContainer(Player player, Block block) {
 		List<LockedContainer> lockedContainers = getLockedContainers();
+
 		if (lockedContainers == null || lockedContainers.isEmpty()) {
 			return true;
 		}
@@ -1068,10 +1061,6 @@ public class AranarthUtils {
 				if (trusted.contains(player.getUniqueId())) {
 					return true;
 				}
-			}
-			// The container is not locked
-			else {
-				return true;
 			}
 		}
 		return false;
@@ -1153,6 +1142,7 @@ public class AranarthUtils {
 	 */
 	public static ItemStack getArrowFromType(String arrowType) {
 		return switch (arrowType) {
+			case "arrowhead" -> new ItemStack(Material.ARROW, 4);
 			case "iron" -> new ArrowIron().getItem();
 			case "gold" -> new ArrowGold().getItem();
 			case "amethyst" -> new ArrowAmethyst().getItem();
@@ -1162,4 +1152,1236 @@ public class AranarthUtils {
 		};
 	}
 
+	/**
+	 * Provides the UUID associated to the given username.
+	 * @param username The username being verified.
+	 * @return The UUID of the associated player.
+	 */
+	public static UUID getUUIDFromUsername(String username) {
+		for (UUID uuid : players.keySet()) {
+			if (getPlayer(uuid).getUsername() == null) {
+				continue;
+			}
+
+			if (getPlayer(uuid).getUsername().equals(username)) {
+				return uuid;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Provides the combined total number of homes that a given player can set.
+	 * Includes homes from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of homes that a given player can set.
+	 */
+	public static int getMaxHomeNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankHomeNum = 0;
+		int saintHomeNum = 0;
+		int perksHomeNum = 0;
+
+		int rank = aranarthPlayer.getRank();
+		if (rank == 0 || rank == 1) {
+			rankHomeNum = 1;
+		} else if (rank == 2 || rank == 3) {
+			rankHomeNum = 2;
+		} else if (rank == 4 || rank == 5) {
+			rankHomeNum = 3;
+		} else if (rank == 6 || rank == 7) {
+			rankHomeNum = 4;
+		} else if (rank == 8) {
+			rankHomeNum = 5;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintHomeNum = 1;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintHomeNum = 3;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintHomeNum = 5;
+		}
+
+		int perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+
+		return rankHomeNum + saintHomeNum + perksHomeAmount;
+	}
+
+	/**
+	 * Adds a new home to the player.
+	 * Assumes validation was done.
+	 * @param player The player.
+	 * @param home The player's home.
+     */
+	public static void addPlayerHome(Player player, Home home) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		aranarthPlayer.getHomes().add(home);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
+	/**
+	 * Deletes one of the player's homes.
+	 * @param player The player.
+	 * @param homeName The player's home name that they will be deleting.
+	 */
+	public static void deletePlayerHome(Player player, String homeName) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		Home homeToDelete = null;
+		for (Home home : aranarthPlayer.getHomes()) {
+			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
+				homeToDelete = home;
+			}
+		}
+		aranarthPlayer.getHomes().remove(homeToDelete);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
+	/**
+	 * Provides the Location with a solid block that is directly underneath the player.
+	 * @param loc The teleport location.
+	 * @return The Location.
+	 */
+	public static Location getSafeTeleportLocation(Location loc) {
+		World world = loc.getWorld();
+
+		// Start from the player's current Y position and go downward
+		int x = loc.getBlockX();
+		int z = loc.getBlockZ();
+		int y = loc.getBlockY();
+
+		Block solidBlock = null;
+
+		for (int currentY = y; currentY >= world.getMinHeight(); currentY--) {
+			Block currentBlock = world.getBlockAt(x, currentY, z);
+			Material type = currentBlock.getType();
+
+			// Check if this block is solid and not water/lava
+			if (type.isSolid() && type != Material.WATER && type != Material.LAVA) {
+				solidBlock = currentBlock;
+				break;
+			}
+		}
+
+		// If a solid block was found, place the player just above it
+		Location surfaceLoc = null;
+		if (solidBlock != null) {
+			surfaceLoc = solidBlock.getLocation().add(0.5, 1, 0.5); // Center and place feet above
+			surfaceLoc.setYaw(loc.getYaw());
+			surfaceLoc.setPitch(loc.getPitch());
+		} else {
+			return null;
+		}
+		return surfaceLoc;
+	}
+
+	/**
+	 * Refreshes all muted players.
+	 */
+	public static void refreshMutes() {
+		// Initial startup of server
+		if (mutedPlayers.isEmpty()) {
+			for (UUID uuid : players.keySet()) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
+					mutedPlayers.add(uuid);
+				}
+			}
+		} else {
+			LocalDateTime currentDate = LocalDateTime.now();
+			List<UUID> toRemove = new ArrayList<>();
+			for (UUID uuid : mutedPlayers) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				String muteEndDate = aranarthPlayer.getMuteEndDate();
+
+				if (muteEndDate.isEmpty()) {
+					continue;
+				}
+
+				LocalDateTime definedMuteDate = null;
+				if (!muteEndDate.equals("none")) {
+					try {
+						int year = Integer.parseInt("20" + muteEndDate.substring(0, 2));
+						int month = Integer.parseInt(trimZero(muteEndDate.substring(2, 4)));
+						int day = Integer.parseInt(trimZero(muteEndDate.substring(4, 6)));
+						int hour = Integer.parseInt(trimZero(muteEndDate.substring(6, 8)));
+						int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
+						definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
+					} catch (NumberFormatException e) {
+						Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+						return;
+					}
+				} else {
+					// Always will be after the current date if "none" is the end date
+					definedMuteDate = LocalDateTime.of(9999, 1, 1, 1, 1);
+				}
+
+				if (definedMuteDate.isBefore(currentDate)) {
+					toRemove.add(uuid);
+				}
+			}
+
+			for (UUID uuid : toRemove) {
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				AranarthUtils.removeMutedPlayer(uuid);
+				aranarthPlayer.setMuteEndDate("");
+				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+				Punishment punishment = new Punishment(
+						uuid, LocalDateTime.now(), "UNMUTE", "The player's mute has automatically ended", null);
+				DiscordUtils.addPunishmentToDiscord(punishment);
+
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+				if (offlinePlayer.isOnline()) {
+					Player player = Bukkit.getPlayer(uuid);
+					player.sendMessage(ChatUtils.chatMessage("&7You are no longer muted"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Refreshes all banned players.
+	 */
+	public static void refreshBans() {
+		ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+		List<BanEntry<PlayerProfile>> toRemove = new ArrayList<>();
+		for (BanEntry<? super com.destroystokyo.paper.profile.PlayerProfile> entry : profileBanList.getEntries()) {
+			PlayerProfile profile = (PlayerProfile) entry.getBanTarget();
+			UUID uuid = profile.getUniqueId();
+			// If the player's ban is temporary
+			if (entry.getExpiration() != null) {
+				// If they are no longer banned
+				if (entry.getExpiration().before(new Date())) {
+					Punishment punishment = new Punishment(
+							uuid, LocalDateTime.now(), "UNBAN", "The player's ban has automatically ended", null);
+					DiscordUtils.addPunishmentToDiscord(punishment);
+					entry.remove();
+				}
+			}
+
+
+		}
+	}
+
+	/**
+	 * Trims the leading zero if the value is only one digit.
+	 * @param value The value.
+	 * @return The trimmed value.
+	 */
+	private static String trimZero(String value) {
+		if (value.startsWith("0")) {
+			return value.substring(1);
+		} else {
+			return value;
+		}
+	}
+
+	/**
+	 * Adds the player's UUID to the list of muted players.
+	 * @param uuid The player's UUID.
+	 */
+	public static void addMutedPlayer(UUID uuid) {
+		mutedPlayers.add(uuid);
+	}
+
+	/**
+	 * Removes the player's UUID from the list of muted players.
+	 * @param uuid The player's UUID.
+	 */
+	public static void removeMutedPlayer(UUID uuid) {
+		mutedPlayers.remove(uuid);
+	}
+
+	/**
+	 * Provides the String portion of the player's rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's rank.
+	 */
+	public static String getRank(AranarthPlayer aranarthPlayer) {
+		int rank = aranarthPlayer.getRank();
+		if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
+			switch (rank) {
+				case 1: return "&d[&aEsquire&d] &r";
+				case 2: return "&7[&fKnight&7] &r";
+				case 3: return "&5[&dBaron&5] &r";
+				case 4: return "&8[&7Count&8] &r";
+				case 5: return "&6[&eDuke&6] &r";
+				case 6: return "&6[&bPrince&6] &r";
+				case 7: return "&6[&9King&6] &r";
+				case 8: return "&6[&4Emperor&6] &r";
+			}
+		} else {
+			switch (rank) {
+				case 1: return "&d[&aEsquire&d] &r";
+				case 2: return "&7[&fKnight&7] &r";
+				case 3: return "&5[&dBaroness&5] &r";
+				case 4: return "&8[&7Countess&8] &r";
+				case 5: return "&6[&eDuchess&6] &r";
+				case 6: return "&6[&bPrincess&6] &r";
+				case 7: return "&6[&9Queen&6] &r";
+				case 8: return "&6[&4Empress&6] &r";
+			}
+		}
+		return "&8[&aPeasant&8] &r";
+	}
+
+	/**
+	 * Provides the String portion of the player's Saint rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's Saint rank.
+	 */
+	public static String getSaintRank(AranarthPlayer aranarthPlayer) {
+		int saintRank = aranarthPlayer.getSaintRank();
+		return switch (saintRank) {
+			case 1 -> "&b⚜&r";
+			case 2 -> "&e⚜&r";
+			case 3 -> "&c⚜&r";
+			default -> "";
+		};
+	}
+
+	/**
+	 * Provides the String portion of the player's Council rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's Council rank.
+	 */
+	public static String getCouncilRank(AranarthPlayer aranarthPlayer) {
+		int councilRank = aranarthPlayer.getCouncilRank();
+		return switch (councilRank) {
+			case 1 -> "&3۞&r";
+			case 2 -> "&6۞&r";
+			case 3 -> "&4۞&r";
+			default -> "";
+		};
+	}
+
+	/**
+	 * Provides the String portion of the player's Architect rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's Architect rank.
+	 */
+	public static String getArchitectRank(AranarthPlayer aranarthPlayer) {
+		int architectRank = aranarthPlayer.getArchitectRank();
+		return switch (architectRank) {
+			case 1 -> "&a&l\uD83D\uDD28&r"; // Hammer emoji
+			default -> "";
+		};
+	}
+
+	/**
+	 * Confirms if the input coordinate is within the server Spawn.
+	 * @param loc The location of the block or entity.
+	 * @return Confirmation if the input coordinate is within the server Spawn.
+	 */
+	public static boolean isSpawnLocation(Location loc) {
+		int topRightX = 335;
+		int topRightZ = -447;
+		int bottomLeftX = -351;
+		int bottomLeftZ = 255;
+
+		if (!loc.getWorld().getName().equals("world")) {
+			return false;
+		}
+
+		int x = loc.getBlockX();
+		int z = loc.getBlockZ();
+
+		if ((bottomLeftX < x && x < topRightX) && (bottomLeftZ > z && z > topRightZ)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Plays the teleport sound effect.
+	 * @param player The player to play the sound for.
+	 * @return Confirmation that the teleport was successful
+	 */
+	public static boolean teleportPlayer(Player player, Location from, Location to) {
+		// Teleporting seems to manually toggle on a player's bending when it was toggled off
+		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+		boolean isToggled = false;
+		if (!bendingPlayer.isToggled()) {
+			isToggled = true;
+		}
+
+		Location locToTeleportTo = getSafeTeleportLocation(to);
+		// If i.e over the void
+		if (locToTeleportTo == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
+			return false;
+		}
+		player.teleport(locToTeleportTo);
+		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+
+		// Saves the player's last location for /ac back
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		aranarthPlayer.setLastKnownTeleportLocation(from);
+		setPlayer(player.getUniqueId(), aranarthPlayer);
+
+		try {
+			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
+			// Toggles off the bending if it should be toggled off
+			if (isToggled) {
+				bendingPlayer.toggleBending();
+			}
+			return true;
+		} catch (IOException e) {
+			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+			return false;
+		}
+	}
+
+	/**
+	 * Calculates the number of particles to be displayed based on the player's particle value.
+	 * @param particleNum The particle amount from the calculated server functionality.
+	 * @param playerParticleNum The amount of particles the player has set to be displayed.
+	 * @return The number of particles to display for the player.
+	 */
+	public static int calculateParticlesForPlayer(int particleNum, int playerParticleNum) {
+		double calculatedDouble = particleNum;
+		calculatedDouble = particleNum * ((double) playerParticleNum / 100);
+		int calculatedInt = (int) Math.floor(calculatedDouble);
+
+		// If the calculated amount yields a value lower than 0 yet the player has particles enabled
+		if (calculatedInt == 0 && playerParticleNum != 0) {
+			return 1;
+		} else {
+			return calculatedInt;
+		}
+	}
+
+	/**
+	 * Provides the player's timezone.
+	 * @param player The player.
+	 * @param callback The player's timezone.
+	 */
+	public static void getPlayerTimezone(Player player, Consumer<ZoneId> callback) {
+		String ip = player.getAddress().getAddress().getHostAddress();
+		Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+			try {
+				URL url = new URL("http://ip-api.com/json/" + ip + "?fields=timezone");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+				String[] lineSplit = reader.readLine().split("\"");
+				ZoneId zoneId = ZoneId.of(lineSplit[3]);
+				reader.close();
+
+				// Switch back to main thread for player messaging
+				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(zoneId));
+			} catch (Exception e) {
+				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> callback.accept(null));
+			}
+		});
+	}
+
+	/**
+	 * Provides the list of warps.
+	 * @return The list of warps.
+	 */
+	public static List<Home> getWarps() {
+		return warps;
+	}
+
+	/**
+	 * Updates the list of warps.
+	 * @param newWarps The list of warps.
+	 */
+	public static void setWarps(List<Home> newWarps) {
+		warps = newWarps;
+	}
+
+	/**
+	 * Adds a new warp to the list of warps.
+	 * @param warp The new warp.
+	 */
+	public static void addWarp(Home warp) {
+		warps.add(warp);
+	}
+
+	/**
+	 * Removes a warp from the list of warps.
+	 * @param warp The warp to be removed.
+	 */
+	public static void removeWarp(Home warp) {
+		warps.remove(warp);
+	}
+
+	/**
+	 * Provides the HashMap of all punishments for all players.
+	 * @return The HashMap of all punishments for all players.
+	 */
+	public static HashMap<UUID, List<Punishment>> getAllPunishments() {
+		return punishments;
+	}
+
+	/**
+	 * Provides the HashMap of all punishments for a given player's UUID.
+	 * @param uuid The player's UUID.
+	 * @return The HashMap of all punishments for a given player's UUID.
+	 */
+	public static List<Punishment> getPunishments(UUID uuid) {
+		return punishments.get(uuid);
+	}
+
+	/**
+	 * Adds a new punishment to the player's List.
+	 * @param uuid The player's UUID.
+	 * @param punishment The new punishment.
+	 * @param isFromStartup Whether the punishment is added from server startup or a true new punishment.
+	 */
+	public static void addPunishment(UUID uuid, Punishment punishment, boolean isFromStartup) {
+		if (punishments.get(uuid) == null) {
+			punishments.put(uuid, new ArrayList<>());
+		}
+
+		// Send message to #punishment-history in Discord if it's a new punishment being added
+		if (!isFromStartup) {
+			DiscordUtils.addPunishmentToDiscord(punishment);
+		}
+
+		punishments.get(uuid).add(punishment);
+	}
+
+	/**
+	 * Removes an existing punishment from the player.
+	 * @param uuid The player's UUID.
+	 * @param punishment The punishment being removed.
+	 */
+	public static void removePunishment(UUID uuid, Punishment punishment) {
+		punishments.get(uuid).remove(punishment);
+	}
+
+	/**
+	 * Applies passive effects to all players that are in Spawn.
+	 */
+	public static void applySpawnBuffs() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			if (isSpawnLocation(player.getLocation())) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+			}
+		}
+	}
+
+	/**
+	 * Provides the names for the potions that a player has.
+	 * Note the inner HashMap reflects only one single potion per outer HashMap.
+	 * @param player The player.
+	 * @return The HashMap of names and the quantities of the associated potion.
+	 */
+	public static HashMap<String, HashMap<ItemStack, Integer>> getPlayerPotionNames(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
+		HashMap<String, HashMap<ItemStack, Integer>> nameToPotionAmount = new HashMap<>();
+
+		for (ItemStack potion : potions.keySet()) {
+			String potionName = null;
+			if (potion.getType() == Material.AIR) {
+				potions.remove(potion);
+				continue;
+			}
+
+			// If it is an mcMMO potion
+			if (potion.hasItemMeta() && potion.getItemMeta().hasCustomName()) {
+				// customName() is in the following format by default
+				/*
+				TextComponentImpl{content="", style=StyleImpl{obfuscated=not_set, bold=not_set, strikethrough=not_set,
+					underlined=not_set, italic=not_set, color=null, shadowColor=null, clickEvent=null, hoverEvent=null,
+					insertion=null, font=null}, children=[TextComponentImpl{content="Potion Of Haste",
+					style=StyleImpl{obfuscated=false, bold=false, strikethrough=false, underlined=false, italic=false, color=null,
+					shadowColor=null, clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}]}
+				 */
+				String[] componentParts = (potion.getItemMeta().customName().children().get(0) + "").split("\"");
+				potionName = componentParts[1];
+			} else {
+				PotionMeta meta = (PotionMeta) potion.getItemMeta();
+				if (meta != null) {
+					potionName = addPotionConsumptionMethodToName(potion, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
+				}
+			}
+			HashMap<ItemStack, Integer> potionToAdd = new HashMap<>();
+			potionToAdd.put(potion, potions.get(potion));
+			nameToPotionAmount.put(potionName, potionToAdd);
+		}
+		return nameToPotionAmount;
+	}
+
+	/**
+	 * Provides the formatted name for a given potion.
+	 * @param potion The potion item.
+	 * @param potionName The base name for the potion.
+	 * @return The formatted name for a given potion.
+	 */
+	private static String addPotionConsumptionMethodToName(ItemStack potion, String potionName) {
+		String[] partsOfName = potionName.split(" ");
+		StringBuilder finalName = new StringBuilder();
+
+		if (potionName.startsWith("Long")) {
+			if (potion.getType() == Material.POTION) {
+				finalName = new StringBuilder("Extended Potion of ");
+			} else if (potion.getType() == Material.SPLASH_POTION) {
+				finalName = new StringBuilder("Extended Splash Potion of ");
+			} else if (potion.getType() == Material.LINGERING_POTION) {
+				finalName = new StringBuilder("Extended Lingering Potion of ");
+			}
+		} else {
+			if (potion.getType() == Material.POTION) {
+				finalName = new StringBuilder("Potion of ");
+			} else if (potion.getType() == Material.SPLASH_POTION) {
+				finalName = new StringBuilder("Splash Potion of ");
+			} else if (potion.getType() == Material.LINGERING_POTION) {
+				finalName = new StringBuilder("Lingering Potion of ");
+			}
+		}
+
+		// Handles formatting the actual potion name
+		for (int i = 0; i < partsOfName.length; i++) {
+			if (partsOfName[i].equals("Long") || partsOfName[i].equals("Strong") || partsOfName[i].equals("of")) {
+				continue;
+			} else {
+				if (i == partsOfName.length - 1) {
+					finalName.append(partsOfName[i]);
+				} else {
+					finalName.append(partsOfName[i]).append(" ");
+				}
+			}
+		}
+
+		if (potionName.startsWith("Strong")) {
+			finalName.append(" II");
+		}
+
+		return finalName.toString();
+	}
+
+	/**
+	 * Provides the combined total number of potions that a given player has.
+	 * Includes potion from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of potions that a given player has.
+	 */
+	public static int getMaxPotionNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankPotionNum = 0;
+		int saintPotionNum = 0;
+
+		if (aranarthPlayer.getRank() == 1) {
+			rankPotionNum = 100;
+		} else if (aranarthPlayer.getRank() == 2) {
+			rankPotionNum = 200;
+		} else if (aranarthPlayer.getRank() == 3) {
+			rankPotionNum = 350;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankPotionNum = 500;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankPotionNum = 750;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankPotionNum = 1000;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankPotionNum = 1500;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankPotionNum = 2500;
+		} else {
+			rankPotionNum = 50;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintPotionNum = 500;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintPotionNum = 1000;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintPotionNum = 2500;
+		}
+
+		return rankPotionNum + saintPotionNum;
+	}
+
+	/**
+	 * Provides the current number of potions that the player has stored in their potions pouch.
+	 * @param player The player.
+	 * @return The number of potions that the player has stored in their potions pouch.
+	 */
+	public static int getPlayerStoredPotionNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		if (aranarthPlayer.getPotions() == null || aranarthPlayer.getPotions().isEmpty()) {
+			return 0;
+		}
+
+		int storedPotionNum = 0;
+		for (int amount : aranarthPlayer.getPotions().values()) {
+			storedPotionNum += amount;
+		}
+		return storedPotionNum;
+	}
+
+	/**
+	 * Provides the combined total number of Quiver slots that a given player has.
+	 * Includes quiver slots from both the in-game rank, and Saint ranks.
+	 * @param player The player.
+	 * @return The combined total number of Quiver slots that a given player has.
+	 */
+	public static int getMaxQuiverSize(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankQuiverSlotNum = 0;
+		int saintQuiverSlotNum = 0;
+
+		if (aranarthPlayer.getRank() == 1) {
+			rankQuiverSlotNum = 5;
+		} else if (aranarthPlayer.getRank() == 2) {
+			rankQuiverSlotNum = 9;
+		} else if (aranarthPlayer.getRank() == 3) {
+			rankQuiverSlotNum = 12;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankQuiverSlotNum = 18;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankQuiverSlotNum = 25;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankQuiverSlotNum = 30;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankQuiverSlotNum = 36;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankQuiverSlotNum = 45;
+		} else {
+			rankQuiverSlotNum = 3;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintQuiverSlotNum = 6;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintQuiverSlotNum = 9;
+		}
+
+		return rankQuiverSlotNum + saintQuiverSlotNum;
+	}
+
+	/**
+	 * Provides the total number of player shops that a given player can create.
+	 * @param player The player.
+	 * @return The total number of player shops that a given player can create.
+	 */
+	public static int getMaxShopNum(Player player) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		int rankQuiverSlotNum = 0;
+		int saintQuiverSlotNum = 0;
+
+		if (aranarthPlayer.getRank() == 3) {
+			rankQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getRank() == 4) {
+			rankQuiverSlotNum = 7;
+		} else if (aranarthPlayer.getRank() == 5) {
+			rankQuiverSlotNum = 15;
+		} else if (aranarthPlayer.getRank() == 6) {
+			rankQuiverSlotNum = 30;
+		} else if (aranarthPlayer.getRank() == 7) {
+			rankQuiverSlotNum = 50;
+		} else if (aranarthPlayer.getRank() == 8) {
+			rankQuiverSlotNum = -1;
+		} else {
+			rankQuiverSlotNum = 0;
+		}
+
+		if (aranarthPlayer.getSaintRank() == 1) {
+			saintQuiverSlotNum = 3;
+		} else if (aranarthPlayer.getSaintRank() == 2) {
+			saintQuiverSlotNum = 6;
+		} else if (aranarthPlayer.getSaintRank() == 3) {
+			saintQuiverSlotNum = 9;
+		}
+
+		return rankQuiverSlotNum + saintQuiverSlotNum;
+	}
+
+	/**
+	 * Determines if the player is currently blacklisting the given item.
+	 * @param aranarthPlayer The aranarth player.
+	 * @param item The item that is attempting to be picked up.
+	 * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
+	 */
+	public static int isBlacklistingItem(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
+		if (!player.hasPermission("aranarth.blacklist")) {
+			return -1;
+		}
+
+		List<ItemStack> blacklistedItems = aranarthPlayer.getBlacklist();
+		if (blacklistedItems == null || blacklistedItems.isEmpty()) {
+			return -1;
+		}
+
+		for (ItemStack is : blacklistedItems) {
+			if (is.isSimilar(item)) {
+				if (aranarthPlayer.isDeletingBlacklistedItems()) {
+					return 0;
+				} else {
+					return 1;
+				}
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Provides the value for the manual spawning of phantoms during the month of Obscurvor.
+	 * @return The value for the manual spawning of phantoms during the month of Obscurvor.
+	 */
+	public static int getPhantomSpawnDelay() {
+		return phantomSpawnDelay;
+	}
+
+	/**
+	 * Updates the value for the manual spawning of phantoms during the month of Obscurvor.
+	 * @param newPhantomSpawnDelay The new value for the manual spawning of phantoms during the month of Obscurvor.
+	 */
+	public static void setPhantomSpawnDelay(int newPhantomSpawnDelay) {
+		phantomSpawnDelay = newPhantomSpawnDelay;
+	}
+
+	/**
+	 * Provides all server boosts that are currently active.
+	 * @return The HashMap of server boosts that are currently active.
+	 */
+	public static HashMap<Boost, LocalDateTime> getServerBoosts() {
+		return serverBoosts;
+	}
+
+	/**
+	 * Applies a new server boost or increases the duration of an existing server boost.
+	 * @param boost The type of boost being applied. A null value signifies 24 hours.
+	 * @param duration The duration of the boost being applied.
+	 * @param uuid The username of the player that is applying the boost.
+	 */
+	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid) {
+		String name = "";
+		if (boost == Boost.MINER) {
+			name = "&8&lBoost of the Miner";
+		} else if (boost == Boost.HARVEST) {
+			name = "&6&lBoost of the Harvest";
+		} else if (boost == Boost.HUNTER) {
+			name = "&c&lBoost of the Hunter";
+		} else if (boost == Boost.CHI) {
+			name = "&f&lBoost of Chi";
+		} else {
+			name = "&7&lUnspecified Boost";
+		}
+
+		// A new boost will automatically apply for 24 hours
+		if (duration == null) {
+			// Increase by 24 hours if it already exists i.e the same boost was purchased twice
+			if (serverBoosts.get(boost) != null) {
+				LocalDateTime currentBoostEnd = serverBoosts.get(boost);
+				LocalDateTime newBoostEnd = currentBoostEnd.plusDays(1);
+				serverBoosts.put(boost, newBoostEnd);
+			}
+			// Create a new boost as it doesn't exist yet
+			else {
+				LocalDateTime now = LocalDateTime.now();
+				LocalDateTime newBoostEnd = now.plusDays(1);
+				serverBoosts.put(boost, newBoostEnd);
+			}
+
+			// Handles messages
+			if (uuid == null) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+				DiscordUtils.updateBoostInDiscord(null, boost, true);
+			} else {Bukkit.broadcastMessage(ChatUtils.translateToColor(""));
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+				DiscordUtils.updateBoostInDiscord(uuid, boost, true);
+			}
+		}
+		// Should only be called during server startup
+		else {
+			serverBoosts.put(boost, duration);
+		}
+	}
+
+	/**
+	 * Removes the specified server boost.
+	 * @param boost The boost being removed.
+	 */
+	public static void removeServerBoost(Boost boost) {
+		if (AranarthUtils.getServerBoosts().containsKey(boost)) {
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+			DiscordUtils.updateBoostInDiscord(null, boost, false);
+			serverBoosts.remove(boost);
+		}
+	}
+
+	/**
+	 * Provides the messages for all active server boosts, specifying the name and the remaining duration of the boost
+	 * @return The formatted name of the boost as the key, and the remaining duration of the boost as the value.
+	 */
+	public static HashMap<String, String> getActiveServerBoostsMessages() {
+		HashMap<String, String> boostMessages = new HashMap<>();
+		for (Boost boost : serverBoosts.keySet()) {
+			LocalDateTime ldt = serverBoosts.get(boost);
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+			boostMessages.put(ChatUtils.translateToColor(name), getRemainingBoostDuration(boost));
+		}
+		return boostMessages;
+	}
+
+	/**
+	 * Provides a String containing the text value of the remaining amount of time for the currently applied boost.
+	 * @param boost The boost.
+	 * @return The String containing the text value of the remaining amount of time for the currently applied boost.
+	 */
+	private static String getRemainingBoostDuration(Boost boost) {
+		LocalDateTime expiry = AranarthUtils.getServerBoosts().get(boost);
+
+		Duration duration = Duration.between(LocalDateTime.now(), expiry);
+		int minutes = (int) duration.toMinutes();
+		int hours = minutes / 60;
+		int days = minutes / 1440;
+
+		int remainingHours = hours % 24;
+		int remainingMinutes = minutes % 60;
+
+		if (days > 0) {
+			return "&e" + days + "d " + remainingHours + "h " + remainingMinutes + "m";
+		} else if (hours > 0) {
+			return "&e" + hours + "h " + remainingMinutes + "m";
+		} else {
+			return "&e" + minutes + "m";
+		}
+	}
+
+	/**
+	 * Refreshes server boost functionality and deactivates them once they are no longer active.
+	 */
+	public static void refreshServerBoosts() {
+		List<Boost> toRemove = new ArrayList<>();
+		for (Boost boost : serverBoosts.keySet()) {
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+
+			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+				DiscordUtils.updateBoostInDiscord(null, boost, false);
+				serverBoosts.remove(boost);
+			}
+		}
+
+		if (serverBoosts.containsKey(Boost.MINER)) {
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.HASTE, 220, 1));
+			}
+		} else if (serverBoosts.containsKey(Boost.HUNTER) || serverBoosts.containsKey(Boost.CHI)) {
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 220, 1));
+			}
+		}
+	}
+
+	/**
+	 * Provides the HashMap of all UUIDs and the lists of Materials that they are compressing.
+	 * @return The HashMap of all UUIDs and the lists of Materials that they are compressing.
+	 */
+	public static HashMap<UUID, List<Material>> getCompressibleTypes() {
+		return compressibleTypes;
+	}
+
+	/**
+	 * Adds the material to the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being added to their list.
+	 */
+	public static void addCompressibleItem(UUID uuid, Material material) {
+		List<Material> materials = new ArrayList<>();
+		if (compressibleTypes.containsKey(uuid)) {
+			materials = compressibleTypes.get(uuid);
+		}
+		// Avoid duplicate entry of materials
+		if (materials.contains(material)) {
+			return;
+		}
+		materials.add(material);
+		compressibleTypes.put(uuid, materials);
+	}
+
+	/**
+	 * Removes the material from the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being removed to their list.
+	 */
+	public static void removeCompressibleItem(UUID uuid, Material material) {
+		if (compressibleTypes.containsKey(uuid)) {
+			List<Material> materials = compressibleTypes.get(uuid);
+            materials.remove(material);
+			compressibleTypes.put(uuid, materials);
+		}
+	}
+
+	/**
+	 * Determines if the Material is in the player's list of compressible items.
+	 * @param uuid The UUID of the player.
+	 * @param material The Material that is being verified.
+	 */
+	public static boolean isItemBeingCompressed(UUID uuid, Material material) {
+		if (compressibleTypes.containsKey(uuid)) {
+			if (compressibleTypes.get(uuid).contains(material)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Confirms if the input ItemStack is a compressible item.
+	 * @param item The item that is being verified.
+	 * @param shouldCheckItemMeta Whether the method should be checking itemMeta.
+	 * @return Confirmation if the input item is compressible.
+	 */
+	public static boolean isCompressible(ItemStack item, boolean shouldCheckItemMeta) {
+		if (shouldCheckItemMeta) {
+			if (item.hasItemMeta()) {
+				return false;
+			}
+		}
+
+		Material type = item.getType();
+		return type == Material.COAL || type ==  Material.RAW_COPPER || type ==  Material.COPPER_NUGGET
+				|| type ==  Material.COPPER_INGOT || type == Material.RAW_IRON || type == Material.IRON_NUGGET
+				|| type == Material.IRON_INGOT || type == Material.RAW_GOLD || type == Material.GOLD_NUGGET
+				|| type == Material.GOLD_INGOT || type == Material.REDSTONE || type == Material.LAPIS_LAZULI
+				|| type == Material.DIAMOND || type == Material.EMERALD || type == Material.NETHERITE_INGOT
+				|| type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
+				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
+				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
+				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL;
+	}
+
+	/**
+	 * Enables the compressor for all Materials.
+	 * @param uuid The player's UUID.
+	 */
+	public static void compressAllMaterials(UUID uuid) {
+		addCompressibleItem(uuid, Material.COAL);
+		addCompressibleItem(uuid, Material.RAW_COPPER);
+		addCompressibleItem(uuid, Material.COPPER_NUGGET);
+		addCompressibleItem(uuid, Material.COPPER_INGOT);
+		addCompressibleItem(uuid, Material.RAW_IRON);
+		addCompressibleItem(uuid, Material.IRON_NUGGET);
+		addCompressibleItem(uuid, Material.IRON_INGOT);
+		addCompressibleItem(uuid, Material.RAW_GOLD);
+		addCompressibleItem(uuid, Material.GOLD_NUGGET);
+		addCompressibleItem(uuid, Material.GOLD_INGOT);
+		addCompressibleItem(uuid, Material.REDSTONE);
+		addCompressibleItem(uuid, Material.LAPIS_LAZULI);
+		addCompressibleItem(uuid, Material.DIAMOND);
+		addCompressibleItem(uuid, Material.EMERALD);
+		addCompressibleItem(uuid, Material.NETHERITE_INGOT);
+		addCompressibleItem(uuid, Material.AMETHYST_SHARD);
+		addCompressibleItem(uuid, Material.RESIN_CLUMP);
+		addCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+		addCompressibleItem(uuid, Material.WHEAT);
+		addCompressibleItem(uuid, Material.MELON_SLICE);
+		addCompressibleItem(uuid, Material.DRIED_KELP);
+		addCompressibleItem(uuid, Material.SUGAR_CANE);
+		addCompressibleItem(uuid, Material.HONEYCOMB);
+		addCompressibleItem(uuid, Material.SLIME_BALL);
+		addCompressibleItem(uuid, Material.BONE_MEAL);
+		addCompressibleItem(uuid, Material.SNOWBALL);
+		addCompressibleItem(uuid, Material.CLAY_BALL);
+	}
+
+	/**
+	 * Disables the compressor for all Materials.
+	 * @param uuid The player's UUID.
+	 */
+	public static void stopCompressingAllMaterials(UUID uuid) {
+		removeCompressibleItem(uuid, Material.COAL);
+		removeCompressibleItem(uuid, Material.RAW_COPPER);
+		removeCompressibleItem(uuid, Material.COPPER_NUGGET);
+		removeCompressibleItem(uuid, Material.COPPER_INGOT);
+		removeCompressibleItem(uuid, Material.RAW_IRON);
+		removeCompressibleItem(uuid, Material.IRON_NUGGET);
+		removeCompressibleItem(uuid, Material.IRON_INGOT);
+		removeCompressibleItem(uuid, Material.RAW_GOLD);
+		removeCompressibleItem(uuid, Material.GOLD_NUGGET);
+		removeCompressibleItem(uuid, Material.GOLD_INGOT);
+		removeCompressibleItem(uuid, Material.REDSTONE);
+		removeCompressibleItem(uuid, Material.LAPIS_LAZULI);
+		removeCompressibleItem(uuid, Material.DIAMOND);
+		removeCompressibleItem(uuid, Material.EMERALD);
+		removeCompressibleItem(uuid, Material.NETHERITE_INGOT);
+		removeCompressibleItem(uuid, Material.AMETHYST_SHARD);
+		removeCompressibleItem(uuid, Material.RESIN_CLUMP);
+		removeCompressibleItem(uuid, Material.GLOWSTONE_DUST);
+		removeCompressibleItem(uuid, Material.WHEAT);
+		removeCompressibleItem(uuid, Material.MELON_SLICE);
+		removeCompressibleItem(uuid, Material.DRIED_KELP);
+		removeCompressibleItem(uuid, Material.SUGAR_CANE);
+		removeCompressibleItem(uuid, Material.HONEYCOMB);
+		removeCompressibleItem(uuid, Material.SLIME_BALL);
+		removeCompressibleItem(uuid, Material.BONE_MEAL);
+		removeCompressibleItem(uuid, Material.SNOWBALL);
+		removeCompressibleItem(uuid, Material.CLAY_BALL);
+	}
+
+	/**
+	 * Provides the list of crates that are currently in use.
+	 * @return The list of crates that are currently in use.
+	 */
+	public static List<CrateType> getCratesInUse() {
+		return cratesInUse;
+	}
+
+	/**
+	 * Adds the crate to be in use.
+	 * @param type The type of crate.
+	 */
+	public static void addCrateInUse(CrateType type) {
+		cratesInUse.add(type);
+	}
+
+	/**
+	 * Removes the crate from being in use.
+	 * @param type The type of crate.
+	 */
+	public static void removeCrateFromUse(CrateType type) {
+		cratesInUse.remove(type);
+	}
+
+	/**
+	 * Updates the name, location, and/or icon of an existing warp.
+	 *
+	 * @param warpName The new name to be used for the warp.
+	 * @param direction The Location containing the direction of the warp to be used.
+	 * @param icon The Material that will be displayed for the warp.
+	 */
+	public static void updateWarp(String warpName, Location direction, Material icon) {
+		for (int i = 0; i < warps.size(); i++) {
+			if (warps.get(i).getLocation().getBlockX() == direction.getBlockX()
+					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
+					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+				if (!warps.get(i).getName().equals(warpName)) {
+					Bukkit.getLogger().info(warpName);
+					Bukkit.getLogger().info(warps.get(i).getName());
+					continue;
+				}
+
+				Home updatedWarp = new Home(warpName, direction, icon);
+				warps.set(i, updatedWarp);
+			}
+		}
+	}
+
+	/**
+	 * Updates the name, location, and/or icon of an existing home.
+	 *
+	 * @param player The player updating the home.
+	 * @param homeName The new name to be used for the home.
+	 * @param direction The Location containing the direction of the home to be used.
+	 * @param icon The Material that will be displayed for the home.
+	 */
+	public static void updateHome(Player player, String homeName, Location direction, Material icon) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		List<Home> homes = aranarthPlayer.getHomes();
+		for (int i = 0; i < homes.size(); i++) {
+			if (homes.get(i).getLocation().getBlockX() == direction.getBlockX()
+					&& homes.get(i).getLocation().getBlockY() == direction.getBlockY()
+					&& homes.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
+
+				// Prevents bug where incorrect home icon updates when they share the same location
+				if (!homes.get(i).getName().equals(homeName)) {
+					continue;
+				}
+
+				Home updatedHome = new Home(homeName, direction, icon);
+				homes.set(i, updatedHome);
+				aranarthPlayer.setHomes(homes);
+				setPlayer(player.getUniqueId(), aranarthPlayer);
+			}
+		}
+	}
+
+	/**
+	 * Removes all LockedContainers for players that have been inactive for 90 days.
+	 */
+	public static void removeInactiveLockedContainers() {
+		List<Integer> toRemove = new ArrayList<>();
+		LocalDateTime now = LocalDateTime.now();
+		if (lockedContainers == null) {
+			return;
+		}
+
+		for (int i = 0; i < lockedContainers.size(); i++) {
+			LockedContainer locked = lockedContainers.get(i);
+			OfflinePlayer player = Bukkit.getOfflinePlayer(locked.getOwner());
+			LocalDateTime localDateTime = null;
+			Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
+			localDateTime = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
+			if (!player.isOnline() && localDateTime.isBefore(now.minusDays(90))) {
+				toRemove.add(i);
+			}
+		}
+
+		// Going in reverse to avoid deleting incorrect ones
+		for (int i = lockedContainers.size() - 1; i > 0; i--) {
+			if (toRemove.contains(i)) {
+				lockedContainers.remove(i);
+			}
+		}
+	}
+
+	/**
+	 * Provides the HashMap of Shop Locations.
+	 * @return The HashMap of Shop Locations.
+	 */
+	public static HashMap<UUID, Location> getShopLocations() {
+		return shopLocations;
+	}
+
+	/**
+	 * Creates a new Shop Location that can be teleported to.
+	 * @param uuid The shop owner's UUID.
+	 * @param location The location of the shop's home.
+	 */
+	public static void createShopLocation(UUID uuid, Location location) {
+		shopLocations.put(uuid, location);
+	}
+
+	/**
+	 * Deletes an existing Shop Location.
+	 * @param uuid The shop owner's UUID.
+	 */
+	public static void deleteShopLocation(UUID uuid) {
+		shopLocations.remove(uuid);
+	}
 }

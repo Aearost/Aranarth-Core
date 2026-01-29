@@ -1,0 +1,6 @@
+Huge thanks to steve6472 for assisting with getting the custom resourcepack set up!
+
+For the future:
+- Create a new zip by selecting the assets, pack.mcmeta, and pack.png files
+- Attach the zip of the resourcepack to https://mc-packs.net/
+- Use the provided URL and SHA1 and update the values in the server.properties file

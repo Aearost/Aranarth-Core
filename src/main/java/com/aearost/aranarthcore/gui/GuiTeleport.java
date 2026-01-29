@@ -35,7 +35,7 @@ public class GuiTeleport {
 	}
 
 	private Inventory initializeGui(Player player, int pageNum) {
-		List<Home> homes = AranarthUtils.getHomes();
+		List<Home> homes = AranarthUtils.getHomepads();
 		int totalHomesOnPage = homes.size();
 		int homeNumber = pageNum * 27;
 		
@@ -107,7 +107,7 @@ public class GuiTeleport {
 			lore.add(ChatUtils.translateToColor("&6z: &7" + home.getLocation().getBlockZ()));
 
 			if (Objects.nonNull(homeMeta)) {
-				homeMeta.setDisplayName(ChatUtils.translateToColor(home.getHomeName()));
+				homeMeta.setDisplayName(ChatUtils.translateToColor(home.getName()));
 				homeMeta.setLore(lore);
 			}
 			homePad.setItemMeta(homeMeta);

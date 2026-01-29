@@ -4,8 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.HomepadBreak;
-import com.aearost.aranarthcore.event.player.PlayerShopDestroy;
-import com.aearost.aranarthcore.event.world.ArenaBlockBreak;
+import com.aearost.aranarthcore.event.player.ShopDestroy;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -37,17 +36,15 @@ public class BlockBreakEventListener implements Listener {
             new TorchflowerBreak().execute(e);
         } else if (type == Material.PITCHER_PLANT || type == Material.PITCHER_CROP || hasLightCropAbove(e.getBlock(), "PITCHER_PLANT")) {
             new PitcherPlantBreak().execute(e);
-        } else if (e.getBlock().getWorld().getName().equalsIgnoreCase("arena")) {
-            new ArenaBlockBreak().execute(e);
-        } else if (AranarthUtils.isContainerBlock(e.getBlock())) {
-            new ContainerBreak().execute(e);
         } else {
             if (e.getBlock().getType().name().endsWith("_ORE")) {
                 new OreClusterDrops().execute(e);
-                new DwarvenAranarthiumOreDrops().execute(e);
+                new OreExtraDrops().execute(e);
             }
-            new PlayerShopDestroy().execute(e);
         }
+
+        new ShopDestroy().execute(e);
+        new ContainerBreak().execute(e);
 
         if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
             new LogExtraDrops().execute(e);

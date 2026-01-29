@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
@@ -23,16 +26,28 @@ public class ArmorStandSwitchListener implements Listener {
 
 	@EventHandler
 	public void execute(PlayerInteractAtEntityEvent e) {
-		if (e.getPlayer().isSneaking()) {
-			if (e.getRightClicked() instanceof ArmorStand armorStand) {
-				Player player = e.getPlayer();
+		if (e.getRightClicked() instanceof ArmorStand armorStand) {
+			Player player = e.getPlayer();
+			Dominion dominion = DominionUtils.getDominionOfChunk(e.getRightClicked().getLocation().getChunk());
+			// Do not proceed if it is in a claimed dominion that the player is not in
+			if (dominion != null) {
+				if (!dominion.getMembers().contains(player.getUniqueId())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are not in the Dominion of &e" + dominion.getName()));
+					e.setCancelled(true);
+					return;
+				}
+			}
 
+			if (e.getPlayer().isSneaking()) {
 				if (Objects.nonNull(armorStand.getEquipment())) {
+
 					// Gets the player's current armor
 					ItemStack playerHelmet = player.getInventory().getArmorContents()[3];
 					ItemStack playerChestplate = player.getInventory().getArmorContents()[2];
 					ItemStack playerLeggings = player.getInventory().getArmorContents()[1];
 					ItemStack playerBoots = player.getInventory().getArmorContents()[0];
+					ItemStack playerMainHand = player.getInventory().getItemInMainHand();
+					ItemStack playerOffHand = player.getInventory().getItemInOffHand();
 
 					// Updates the player's armor to match what is on the armor stand
 					player.getInventory().setArmorContents(new ItemStack[] {
@@ -41,10 +56,14 @@ public class ArmorStandSwitchListener implements Listener {
 							armorStand.getEquipment().getChestplate(),
 							armorStand.getEquipment().getHelmet(),
 					});
+					player.getInventory().setItemInMainHand(armorStand.getEquipment().getItemInMainHand());
+					player.getInventory().setItemInOffHand(armorStand.getEquipment().getItemInOffHand());
 					// Updates the armor stand's armor to match what was on the player
 					armorStand.getEquipment().setArmorContents(new ItemStack[] {
 							playerBoots, playerLeggings, playerChestplate, playerHelmet
 					});
+					armorStand.getEquipment().setItemInMainHand(playerMainHand);
+					armorStand.getEquipment().setItemInOffHand(playerOffHand);
 
 					player.playSound(player, Sound.BLOCK_ANVIL_USE, 0.5F, 1.5F);
 					e.setCancelled(true);

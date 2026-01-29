@@ -1,5 +1,9 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Door;
@@ -12,7 +16,26 @@ public class DoubleDoorOpen {
 
     public void execute(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
+
         if (block.getBlockData() instanceof Door door) {
+            if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+                if (!aranarthPlayer.isInAdminMode()) {
+                    return;
+                }
+            }
+
+            Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
+            Dominion blockDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+            if (blockDominion != null) {
+                if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+                    if (!aranarthPlayer.isInAdminMode()) {
+                        return;
+                    }
+                }
+            }
+
             Block sideBlock;
             if (door.getFacing() == BlockFace.NORTH || door.getFacing() == BlockFace.SOUTH) {
                 if (door.getHinge() == Door.Hinge.LEFT) {

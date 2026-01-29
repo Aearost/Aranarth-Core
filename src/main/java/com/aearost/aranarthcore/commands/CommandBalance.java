@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * Displays the balance of the player or the specified player.
@@ -21,14 +22,14 @@ public class CommandBalance {
 	 * @return Confirmation of whether the command was a success or not.
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
-		DecimalFormat df = new DecimalFormat("0.00");
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		if (args.length >= 1) {
 			if (args.length == 1) {
 				if (sender instanceof Player player) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					player.sendMessage(ChatUtils.chatMessage("&7Your balance is &6$" + df.format(aranarthPlayer.getBalance())));
+					player.sendMessage(ChatUtils.chatMessage("&7Your balance is &6" + formatter.format(aranarthPlayer.getBalance())));
 				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player! /ac balance <player>"));
+					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player! /ac balance [player]"));
 				}
 				return true;
 			} else {
@@ -39,7 +40,7 @@ public class CommandBalance {
 						if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 							if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
-								sender.sendMessage(ChatUtils.chatMessage("&e" + offlinePlayer.getName() + "'s &7balance is &6$" + df.format(aranarthPlayer.getBalance())));
+								sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance is &6" + formatter.format(aranarthPlayer.getBalance())));
 								isPlayerFound = true;
 								break;
 							}
@@ -50,8 +51,10 @@ public class CommandBalance {
 					}
 				} else if (args.length == 3) {
 					if (sender instanceof Player player) {
-						if (!player.getName().equals("Aearost")) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						// Only Council admins can run this command
+						if (aranarthPlayer.getCouncilRank() != 3) {
+							player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac balance [player]"));
 							return true;
 						}
 					}
@@ -63,10 +66,30 @@ public class CommandBalance {
 							if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
 								try {
-									double valueAsDouble = Double.parseDouble(args[2]);
-									String valueWithTwoDecimals = df.format(valueAsDouble);
-									aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
-									sender.sendMessage(ChatUtils.chatMessage("&e" + offlinePlayer.getName() + "'s balance has been set to &6$" + valueWithTwoDecimals));
+									DecimalFormat df = new DecimalFormat("0.00");
+
+									// If increasing the balance
+									if (args[2].charAt(0) == '+') {
+										double valueAsDouble = Double.parseDouble(args[2].substring(1));
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(aranarthPlayer.getBalance() + Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been increased by &6" + formatter.format(valueAsDouble)));
+									}
+									// If decreasing the balance
+									else if (args[2].charAt(0) == '-') {
+										double valueAsDouble = Double.parseDouble(args[2].substring(1));
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(aranarthPlayer.getBalance() - Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been decreased by &6" + formatter.format(valueAsDouble)));
+									}
+									// If overriding the balance
+									else {
+										double valueAsDouble = Double.parseDouble(args[2]);
+										String valueWithTwoDecimals = df.format(valueAsDouble);
+										aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
+										sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + "&e's &7balance has been set to &6" + formatter.format(valueAsDouble)));
+									}
+
 									isPlayerFound = true;
 								} catch (NumberFormatException e) {
 									sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));

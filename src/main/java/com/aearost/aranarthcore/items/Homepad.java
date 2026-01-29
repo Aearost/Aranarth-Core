@@ -9,7 +9,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.HOMEPAD;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.HOMEPAD;
 
 
 public class Homepad implements AranarthItem {
@@ -21,6 +21,8 @@ public class Homepad implements AranarthItem {
 		ItemStack item = new ItemStack(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "homepad");
+//			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(HOMEPAD, PersistentDataType.STRING, "homepad");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
