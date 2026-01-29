@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Material;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
@@ -54,9 +56,26 @@ public class ExtraWeaponsDamage {
 						// Arrow damage increase
 						if (e.getDamageSource().getDamageType() == DamageType.ARROW) {
 							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
+						} else if (e.getDamageSource().getDamageType() == DamageType.SPEAR) {
+							e.setDamage(e.getDamage() + random.nextInt(6) + 4);
 						}
 					} else if (AranarthUtils.isWearingArmorType(attacker, "scorched")) {
 						if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
+							// Bypass fire ticks when in the same or allied/truced Dominion
+							if (entity instanceof Player target) {
+								Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
+								if (targetDominion != null) {
+									Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+									if (attackerDominion != null) {
+										if (targetDominion.getLeader().equals(attackerDominion.getLeader())
+												|| DominionUtils.areAllied(targetDominion, attackerDominion)
+												|| DominionUtils.areTruced(targetDominion, attackerDominion)) {
+											return;
+										}
+									}
+								}
+							}
+
 							// Applies fire ticks for any source of melee damage
 							entity.setFireTicks(60);
 							if (weapon.containsEnchantment(Enchantment.FIRE_ASPECT)) {

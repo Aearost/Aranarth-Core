@@ -13,7 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of a Soulbound Aranarthium Helmet item.
@@ -27,6 +27,8 @@ public class SoulboundAranarthiumHelmet implements AranarthItem {
 		ItemStack item = new ItemStack(Material.NETHERITE_HELMET, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_soulbound_helmet");
+//			meta.setItemModel(key);
 			meta.setTrim(new ArmorTrim(TrimMaterial.AMETHYST, TrimPattern.RAISER));
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "soulbound");

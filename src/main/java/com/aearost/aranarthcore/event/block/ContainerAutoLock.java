@@ -1,16 +1,14 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.entity.Player;
+import org.bukkit.Material;
+import org.bukkit.block.*;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.inventory.InventoryHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,110 +20,126 @@ import java.util.UUID;
 public class ContainerAutoLock {
 
     public void execute(BlockPlaceEvent e) {
-        if (e.getBlock().getState() instanceof Chest) {
-            List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
-            Player player = e.getPlayer();
+        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+            return;
+        }
 
-            // If there is already a single chest that this is being connected to, add the second location to the locked container
-            if (e.getBlockAgainst().getState() instanceof Chest chest) {
-                // In case a chest is placed against trapped chest or vice versa
-                if (e.getBlock().getType() == e.getBlockAgainst().getType()) {
-                    LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(e.getBlockAgainst());
-                    List<UUID> trusted = new ArrayList<>();
-                    trusted.add(player.getUniqueId());
-                    // If creating a double chest and it is not yet locked
-                    if (lockedContainer == null) {
-                        Location[] locations = getLocationsFromBlocks(e.getBlockPlaced(), e.getBlockAgainst());
-                        lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
-                        AranarthUtils.addLockedContainer(lockedContainer);
-                        player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
-                        return;
-                    } else {
-                        if (lockedContainer.getOwner().equals(player.getUniqueId())) {
-                            InventoryHolder holder = chest.getInventory().getHolder();
-                            // Ensures it isn't already a double chest
-                            if (!(holder instanceof DoubleChest)) {
-                                Location[] singleContainerLocation = new Location[] { e.getBlockAgainst().getLocation(), null };
-                                int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
-                                if (breakResult == 0) {
-                                    Location[] locations = getLocationsFromBlocks(e.getBlockPlaced(), e.getBlockAgainst());
-                                    lockedContainer = new LockedContainer(player.getUniqueId(), trusted, locations);
-                                    AranarthUtils.addLockedContainer(lockedContainer);
-                                    return;
-                                } else {
-                                    player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with deleting the container..."));
-                                    e.setCancelled(true);
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
+        Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
+        Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+        if (blockDominion != null) {
+            if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
+                return;
             }
+        }
 
-            UUID uuid = e.getPlayer().getUniqueId();
-            Location loc = e.getBlock().getLocation();
-            List<UUID> trustedPlayers = new ArrayList<>();
-            trustedPlayers.add(uuid);
-            // Only has the player placing the chest trusted by default
-            LockedContainer container = new LockedContainer(uuid, trustedPlayers, AranarthUtils.getLocationsOfContainer(e.getBlock()));
-            AranarthUtils.addLockedContainer(container);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
-        } else {
-            UUID uuid = e.getPlayer().getUniqueId();
+        Block placed = e.getBlockPlaced();
+        if (placed.getState() instanceof Chest) {
+            // Two Chest objects will be used thus this must be explicitly defined
+            org.bukkit.block.data.type.Chest placedChestData = (org.bukkit.block.data.type.Chest) e.getBlockPlaced().getBlockData();
+            String chestTypeBeingPlaced = placedChestData.getType().name();
+
+            int value = 0;
+            // Placing the right block of a double chest
+            if (!chestTypeBeingPlaced.equals("SINGLE")) {
+                Block leftBlock = null;
+                Block rightBlock = null;
+                boolean isPlacingLeftChest = chestTypeBeingPlaced.equals("RIGHT");
+                // Placing the left block of a double chest, this becomes locs[0]
+                if (isPlacingLeftChest) {
+                    leftBlock = placed;
+                    rightBlock = getConnectedChest(placed, placedChestData);
+                } else {
+                    rightBlock = placed;
+                    leftBlock = getConnectedChest(placed, placedChestData);
+                }
+
+                LockedContainer lockedContainer = null;
+                Location[] locs = new Location[] { leftBlock.getLocation(), rightBlock.getLocation() };
+                if (isPlacingLeftChest) {
+                    lockedContainer = AranarthUtils.getLockedContainerAtBlock(rightBlock);
+                } else {
+                    lockedContainer = AranarthUtils.getLockedContainerAtBlock(leftBlock);
+                }
+
+                // Updates the locations so both will be locked
+                if (lockedContainer != null) {
+                    AranarthUtils.removeLockedContainer(lockedContainer.getLocations());
+                    lockedContainer.setLocations(locs);
+                    AranarthUtils.addLockedContainer(lockedContainer);
+                }
+                return;
+            }
+        }
+
+
+        // Logic to create a locked container for single chests or for shulkers or barrels
+        if (placed.getState() instanceof Chest || placed.getState() instanceof ShulkerBox || placed.getType() == Material.BARREL) {
             List<UUID> trusted = new ArrayList<>();
-            trusted.add(uuid);
-            Location[] location = new Location[] { e.getBlock().getLocation(), null };
-            LockedContainer lockedContainer = new LockedContainer(uuid, trusted, location);
+            trusted.add(e.getPlayer().getUniqueId());
+            LockedContainer lockedContainer = new LockedContainer(e.getPlayer().getUniqueId(), trusted, new Location[] { placed.getLocation(), null });
             AranarthUtils.addLockedContainer(lockedContainer);
-            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&7This container has been locked"));
         }
     }
 
     /**
-     * Provides the two locations where the first index is the left chest of the double chest being created.
-     * @param placed The block that was placed.
-     * @param against The block that it was placed against.
-     * @return The locations of both blocks where the first index is the left chest and the second is the right.
+     * Provides the chest block that was initially there before the placed block was added and created a double chest.
+     * @param chestBlock The block that was just placed.
+     * @param chestData The data of the chest.
+     * @return The block that was initially there before the placed block was added and created a double chest.
      */
-    private Location[] getLocationsFromBlocks(Block placed, Block against) {
-        Location placedLoc = placed.getLocation();
-        Location againstLoc = against.getLocation();
+    private Block getConnectedChest(Block chestBlock, org.bukkit.block.data.type.Chest chestData) {
+        // Get the direction the chest is facing
+        org.bukkit.block.BlockFace facing = chestData.getFacing();
 
-        if (against.getBlockData() instanceof org.bukkit.block.data.type.Chest againstData) {
-            if (placed.getBlockData() instanceof org.bukkit.block.data.type.Chest placedData) {
-                if (againstData.getFacing() == BlockFace.NORTH) {
-                    // If the right chest was placed, against is the left chest
-                    if (againstLoc.getBlockX() > placedLoc.getBlockX()) {
-                        return new Location[] { againstLoc, placedLoc };
-                    } else {
-                        return new Location[] { placedLoc, againstLoc };
-                    }
-                } else if (againstData.getFacing() == BlockFace.EAST) {
-                    // If the right chest was placed, against is the left chest
-                    if (againstLoc.getBlockZ() > placedLoc.getBlockZ()) {
-                        return new Location[] { againstLoc, placedLoc };
-                    } else {
-                        return new Location[] { placedLoc, againstLoc };
-                    }
-                } else if (againstData.getFacing() == BlockFace.SOUTH) {
-                    // If the right chest was placed, against is the left chest
-                    if (againstLoc.getBlockX() < placedLoc.getBlockX()) {
-                        return new Location[] { againstLoc, placedLoc };
-                    } else {
-                        return new Location[] { placedLoc, againstLoc };
-                    }
-                } else if (againstData.getFacing() == BlockFace.WEST) {
-                    // If the right chest was placed, against is the left chest
-                    if (againstLoc.getBlockZ() < placedLoc.getBlockZ()) {
-                        return new Location[] { againstLoc, placedLoc };
-                    } else {
-                        return new Location[] { placedLoc, againstLoc };
-                    }
-                }
-            }
+        // Calculate offset based on chest type and facing direction
+        org.bukkit.block.BlockFace offset = null;
+
+        String chestTypeBeingPlaced = chestData.getType().name();
+        if (chestTypeBeingPlaced.equals("LEFT")) {
+            // Left chest - connected chest is to the right
+            offset = getBlockFaceToLeft(facing);
+        } else {
+            // Right chest - connected chest is to the left
+            offset = getBlockFaceToRight(facing);
         }
+
+        Block connected = chestBlock.getRelative(offset);
+        if (connected.getType() == Material.CHEST) {
+            return connected;
+        }
+
         return null;
+    }
+
+    /**
+     * Provides the block relative to the left of the block.
+     * @param facing The direction that the right block is currently facing.
+     * @return The face of the left block.
+     */
+    private org.bukkit.block.BlockFace getBlockFaceToLeft(org.bukkit.block.BlockFace facing) {
+        return switch (facing) {
+            case NORTH -> BlockFace.EAST;
+            case EAST -> BlockFace.SOUTH;
+            case SOUTH -> BlockFace.WEST;
+            case WEST -> BlockFace.NORTH;
+            default -> BlockFace.SELF;
+        };
+    }
+
+    /**
+     * Provides the block relative to the right of the block.
+     * @param facing The direction that the left block is currently facing.
+     * @return The face of the right block.
+     */
+    private org.bukkit.block.BlockFace getBlockFaceToRight(org.bukkit.block.BlockFace facing) {
+        return switch (facing) {
+            case NORTH -> BlockFace.WEST;
+            case WEST -> BlockFace.SOUTH;
+            case SOUTH -> BlockFace.EAST;
+            case EAST -> BlockFace.NORTH;
+            default -> BlockFace.SELF;
+        };
     }
 
 }

@@ -11,7 +11,6 @@ import org.bukkit.inventory.ItemStack;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Removes an input quantity of a potion from the player's stored potions.
@@ -32,55 +31,47 @@ public class GuiPotionRemove {
 				// Clicking in the potions inventory
 				else {
 					ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
-					if (Objects.isNull(clickedItem)) {
+					if (clickedItem == null) {
 						e.setCancelled(true);
 						return;
 					}
 
 					Player player = (Player) e.getWhoClicked();
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-					HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
-					List<ItemStack> potions = aranarthPlayer.getPotions();
-					int currentAmount = potionsAndAmounts.get(clickedItem);
+					HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 					int toBeRemoved = aranarthPlayer.getPotionQuantityToRemove();
 
-					List<Integer> indexesToRemove = new ArrayList<>();
-
-					// Finds which potions in the list will be removed
-					for (int i = 0; i < potions.size(); i++) {
+					List<ItemStack> potionsToRemove = new ArrayList<>();
+					int amountRemoved = 0;
+					// While there is still quantity in the pouch for that potion
+					while (potions.get(clickedItem) > 0) {
 						if (toBeRemoved == 0) {
 							break;
 						}
-
-						if (potions.get(i).isSimilar(clickedItem)) {
-							indexesToRemove.add(i);
-							toBeRemoved--;
-						}
+						potionsToRemove.add(clickedItem);
+						amountRemoved++;
+						toBeRemoved--;
+						potions.put(clickedItem, potions.get(clickedItem) - 1);
 					}
 
-
-					// Removes the potions that were selected
-					for (int index : indexesToRemove.reversed()) {
-						potions.remove(index);
+					if (potions.get(clickedItem) == 0) {
+						potions.remove(clickedItem);
 					}
 
 					e.setCancelled(true);
 					player.closeInventory();
 
-					int amountToAddToInventory = aranarthPlayer.getPotionQuantityToRemove();
 					aranarthPlayer.setPotions(potions);
 					aranarthPlayer.setPotionQuantityToRemove(0);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					player.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + amountToAddToInventory + " &7potions"));
+					player.sendMessage(ChatUtils.chatMessage("&7You have removed &e" + amountRemoved + " &7potions"));
 
-					// Adds the items to the player's inventory or drops to ground if no space
-					while (amountToAddToInventory > 0) {
-						HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(clickedItem);
+					for (ItemStack potionBeingAdded : potionsToRemove) {
+						HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(potionBeingAdded);
 						if (!nonAdded.isEmpty()) {
 							// Will only ever be 1 since this adds 1 potion at a time
 							player.getLocation().getWorld().dropItemNaturally(player.getLocation(), nonAdded.get(0));
 						}
-						amountToAddToInventory--;
 					}
 				}
 			}

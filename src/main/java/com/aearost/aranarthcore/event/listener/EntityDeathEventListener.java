@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.mob.AnimalDeathDrops;
+import com.aearost.aranarthcore.event.mob.FaunivorExtraDeathDrops;
 import com.aearost.aranarthcore.event.mob.GoatDeath;
 import com.aearost.aranarthcore.event.mob.WanderingTraderDeath;
 import com.aearost.aranarthcore.event.mob.ZombieHorseSpawn;
@@ -35,7 +35,7 @@ public class EntityDeathEventListener implements Listener {
 
         if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
             if (e.getEntity() instanceof Animals) {
-                new AnimalDeathDrops().execute(e);
+                new FaunivorExtraDeathDrops().execute(e);
             }
         }
     }

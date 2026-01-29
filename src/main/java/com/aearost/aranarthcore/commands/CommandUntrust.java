@@ -21,6 +21,7 @@ public class CommandUntrust {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player to untrust!"));
+			return true;
 		} else {
 			if (sender instanceof Player player) {
 				boolean isPlayerFound = false;
@@ -35,8 +36,8 @@ public class CommandUntrust {
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 								aranarthPlayer.setTrustedPlayerUUID(null);
 								aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
-								aranarthPlayer.setIsUnlockingContainer(false);
-								aranarthPlayer.setIsLockingContainer(false);
+								aranarthPlayer.setUnlockingContainer(false);
+								aranarthPlayer.setLockingContainer(false);
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to untrust &e" + offlinePlayer.getName()));
 								isPlayerFound = true;

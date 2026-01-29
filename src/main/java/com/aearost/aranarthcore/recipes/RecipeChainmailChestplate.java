@@ -23,7 +23,7 @@ public class RecipeChainmailChestplate {
 
 		recipe.shape("C C", "CCC", "CCC");
 
-		recipe.setIngredient('C', Material.CHAIN);
+		recipe.setIngredient('C', Material.IRON_CHAIN);
 		
 		Bukkit.addRecipe(recipe);
 	}

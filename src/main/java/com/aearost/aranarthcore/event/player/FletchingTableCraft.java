@@ -14,7 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW_HEAD;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW_HEAD;
 
 /**
  * Handles all crafting of items within a Fletching Table.
@@ -204,8 +204,16 @@ public class FletchingTableCraft {
 
 		ItemStack single = firstNonEmpty(a, b, c);
 		if (single == null) return null;
+		if (single.hasItemMeta()) {
+			if (single.getItemMeta().getPersistentDataContainer().has(ARROW_HEAD)) {
+				return null;
+			}
+		}
 
 		Material type = single.getType();
+		if (type == Material.FLINT) {
+			return new Arrowhead().getItem();
+		}
 		if (type == Material.IRON_INGOT) {
 			return new ArrowheadIron().getItem();
 		}
@@ -301,7 +309,9 @@ public class FletchingTableCraft {
 				continue;
 			}
 
-			if (ingredient.getType() == Material.IRON_INGOT) {
+			if (ingredient.getType() == Material.FLINT) {
+				arrowheadToReturn = new Arrowhead().getItem();
+			} else if (ingredient.getType() == Material.IRON_INGOT) {
 				arrowheadToReturn = new ArrowheadIron().getItem();
 			} else if (ingredient.getType() == Material.GOLD_INGOT) {
 				arrowheadToReturn = new ArrowheadGold().getItem();

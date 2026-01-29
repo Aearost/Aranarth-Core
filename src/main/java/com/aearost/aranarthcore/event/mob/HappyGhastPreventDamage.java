@@ -12,11 +12,14 @@ import java.util.Objects;
  */
 public class HappyGhastPreventDamage {
 	public void execute(EntityDamageEvent e) {
-		if (isPlayerCausedDamage(e.getCause())) {
-			if (Objects.nonNull(e.getDamageSource().getCausingEntity())
-					&& e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm a Happy Ghast!"));
-				e.setCancelled(true);
+		String worldName = e.getEntity().getLocation().getWorld().getName();
+		if (worldName.startsWith("world") || worldName.startsWith("smp")) {
+			if (isPlayerCausedDamage(e.getCause())) {
+				if (Objects.nonNull(e.getDamageSource().getCausingEntity())
+						&& e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+					attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm a Happy Ghast!"));
+					e.setCancelled(true);
+				}
 			}
 		}
 	}

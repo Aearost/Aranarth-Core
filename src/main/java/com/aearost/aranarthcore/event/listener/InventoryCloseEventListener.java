@@ -21,12 +21,16 @@ public class InventoryCloseEventListener implements Listener {
     @EventHandler
     public void onInventoryClose(InventoryCloseEvent e) {
         if (e.getView().getType() == InventoryType.CHEST) {
-            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Potions")) {
-                new GuiPotionClose().execute(e);
+            if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Add Potions")) {
+                new GuiPotionAddClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Quiver")) {
                 new GuiQuiverClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Shulker")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Held Shulker")) {
                 new GuiShulkerClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
+                new GuiCrateClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food Storage")) {
+                new GuiDominionFoodClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {

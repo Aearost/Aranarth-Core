@@ -4,15 +4,10 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.potion.PotionEffect;
-
-import java.io.IOException;
-import java.util.Objects;
 
 /**
  * Teleports the player to the creative world, using the creative inventory.
@@ -27,21 +22,13 @@ public class CommandCreative {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-                // Teleports you to the creative world spawn
-				try {
-					if (Objects.nonNull(player.getLocation().getWorld())) {
-						AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "creative");
-					}
-				} catch (IOException e) {
-					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
-					return false;
+				if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
+					return true;
 				}
-				for (PotionEffect effect : player.getActivePotionEffects()) {
-					player.removePotionEffect(effect.getType());
-				}
-				player.teleport(new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2));
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative!"));
-				player.setGameMode(GameMode.CREATIVE);
+				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn);
+				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
 				perms.setPermission("worldedit.*", true);
@@ -54,5 +41,4 @@ public class CommandCreative {
 		}
 		return false;
 	}
-
 }

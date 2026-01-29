@@ -4,7 +4,9 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.RespawnNonSurvival;
 import com.aearost.aranarthcore.event.player.RespawnSurvival;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.AvatarUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,11 +31,13 @@ public class PlayerRespawnEventListener implements Listener {
     public void onPlayerDeath(final PlayerDeathEvent e) {
         String world = e.getEntity().getWorld().getName();
         Player player = e.getEntity();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+        aranarthPlayer.setLastKnownTeleportLocation(player.getLocation());
+
         if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             aranarthPlayer.setLevelBeforeDeath(player.getLevel());
             aranarthPlayer.setExpBeforeDeath(player.getExp());
-            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             e.getDrops().clear();
             e.setDroppedExp(0);
         } else {
@@ -41,10 +45,16 @@ public class PlayerRespawnEventListener implements Listener {
                 e.setKeepInventory(true);
                 e.getDrops().clear();
                 e.setDroppedExp(0);
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 aranarthPlayer.setLevelBeforeDeath(player.getLevel());
                 aranarthPlayer.setExpBeforeDeath(player.getExp());
-                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+        }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+        Avatar avatar = AvatarUtils.getCurrentAvatar();
+        if (avatar != null) {
+            if (avatar.getUuid().equals(player.getUniqueId())) {
+                AvatarUtils.removeCurrentAvatar();
             }
         }
     }

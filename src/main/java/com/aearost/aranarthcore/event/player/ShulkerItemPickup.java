@@ -11,8 +11,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-import java.util.Objects;
-
 /**
  * Automatically places picked up items that have incomplete stacks in a shulker
  * box into that stack. This only works when you have at least 1 free inventory slot.
@@ -23,12 +21,8 @@ public class ShulkerItemPickup {
 		Player player = (Player) e.getEntity();
 		ItemStack pickupItem = e.getItem().getItemStack();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
-			for (ItemStack blacklistedItem : aranarthPlayer.getBlacklist()) {
-				if (pickupItem.getType() == blacklistedItem.getType()) {
-					return;
-				}
-			}
+		if (AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupItem) != -1) {
+			return;
 		}
 
 		int amountRemaining = pickupItem.getAmount();
@@ -46,12 +40,16 @@ public class ShulkerItemPickup {
 			if (is != null) {
 				if (is.getItemMeta() instanceof BlockStateMeta im) {
 					if (im.getBlockState() instanceof ShulkerBox shulker) {
-						if (!aranarthPlayer.getIsAddingToShulker()) {
+						if (!aranarthPlayer.isAddingToShulker()) {
 							return;
 						}
 
-						if ((player.getOpenInventory().getTitle()).equals("Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
+						if ((player.getOpenInventory().getTitle()).equals("Held Shulker") && player.getOpenInventory().getType() == InventoryType.CHEST) {
 							e.setCancelled(true);
+							return;
+						}
+
+						if (!player.hasPermission("aranarth.shulker")) {
 							return;
 						}
 
@@ -92,7 +90,7 @@ public class ShulkerItemPickup {
 
 		// If there was quantity put in a shulker box and quantity remains
 		if (e.isCancelled()) {
-			player.playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
+			player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
 			pickupItem.setAmount(amountRemaining);
 			player.getInventory().addItem(pickupItem);
 		}

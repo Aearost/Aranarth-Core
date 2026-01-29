@@ -20,31 +20,47 @@ public class CommandNickname {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 
-		if (args.length == 1) {
-			if (sender instanceof Player player) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (sender instanceof Player player) {
+			if (!player.hasPermission("aranarth.nick")) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+				return true;
+			}
+
+			if (args.length == 1) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				aranarthPlayer.setNickname("");
 				player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been removed!"));
 				return true;
-			} else {
-				sender.sendMessage(ChatUtils.chatMessage("&cConsole does not have a nickname!"));
-				return true;
-			}
-		} else if (args.length == 2) {
-			if (sender instanceof Player player) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			} else if (args.length == 2) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (args[1].contains("&")) {
+					if (!player.hasPermission("aranarth.nick.color")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						return true;
+					}
+				}
+
+				if (args[1].contains("#")) {
+					if (!player.hasPermission("aranarth.nick.hex")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						return true;
+					}
+				}
 
 				aranarthPlayer.setNickname(args[1]);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + args[1]));
 				return true;
-			}
-			return false;
-		} else {
-			if (sender instanceof Player player) {
-                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			} else {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				int stringStart = 1;
 				if (args[1].equalsIgnoreCase("gradient") || args[1].equalsIgnoreCase("gradientbold")) {
+					if (!player.hasPermission("aranarth.nick.gradient")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						return true;
+					}
+
 					stringStart = 3;
 				}
 
@@ -73,14 +89,17 @@ public class CommandNickname {
 						return true;
 					}
 					player.sendMessage(ChatUtils.chatMessage("&cYour nickname could not be set to a gradient"));
-					return false;
+					return true;
 				}
 
 				aranarthPlayer.setNickname(nickname);
 				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + nickname));
 				return true;
 			}
+
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
+			return true;
 		}
-		return false;
 	}
 }

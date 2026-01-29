@@ -7,7 +7,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.*;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.HONEY_GLAZED_HAM;
 
 /**
  * Handles the overrides when crafting involving Honey Glazed Ham.

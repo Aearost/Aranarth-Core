@@ -13,7 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of an Aquatic Aranarthium Leggings item.
@@ -31,6 +31,8 @@ public class AquaticAranarthiumLeggings implements AranarthItem {
 		meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
 
 		if (Objects.nonNull(meta)) {
+//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_leggings");
+//			meta.setItemModel(key);
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);

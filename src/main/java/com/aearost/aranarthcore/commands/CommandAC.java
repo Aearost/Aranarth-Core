@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -22,19 +24,20 @@ public class CommandAC implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &7/ac <sub-command>"));
+			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac <sub-command>"));
 			return false;
 		} else {
 			boolean commandResult = false;
 			// Applies only to Aearost (ops) or Console=
 			if (sender instanceof Player player) {
-				if (player.getName().equalsIgnoreCase("Aearost")) {
-					commandResult = isSenderOp(sender, args);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (aranarthPlayer.getCouncilRank() > 0) {
+					commandResult = isCouncil(sender, args);
 				} else {
 					commandResult = isValidCommand(sender, args);
 				}
 			} else {
-				commandResult = isValidCommand(sender, args);
+				commandResult = isCouncil(sender, args);
 			}
 
 			if (!commandResult) {
@@ -44,13 +47,10 @@ public class CommandAC implements CommandExecutor {
 		}
 	}
 
-	private boolean isSenderOp(CommandSender sender, String[] args) {
+	private boolean isCouncil(CommandSender sender, String[] args) {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("whereis")) {
 			CommandWhereIs.onCommand(sender, args);
-			commandResult = true;
-		} else if (args[0].equalsIgnoreCase("itemname")) {
-			CommandItemName.onCommand(sender, args);
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("give")) {
 			CommandGive.onCommand(sender, args);
@@ -58,6 +58,28 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("dateset")) {
 			CommandDate.onCommand(sender, args);
 			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("mute")) {
+			commandResult = CommandMute.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unmute")) {
+			commandResult = CommandUnmute.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("ban")) {
+			commandResult = CommandBan.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unban")) {
+			commandResult = CommandUnban.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("spy")) {
+			commandResult = CommandSpy.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("invsee")) {
+			commandResult = CommandInvsee.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("warn")) {
+			commandResult = CommandWarn.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("punishments")) {
+			commandResult = CommandPunishments.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("broadcast")) {
+			commandResult = CommandBroadcast.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("perks")) {
+			commandResult = CommandPerks.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("admin")) {
+			commandResult = CommandAdmin.onCommand(sender, args);
 		} else {
 			commandResult = isValidCommand(sender, args);
 		}
@@ -68,14 +90,10 @@ public class CommandAC implements CommandExecutor {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("homepad")) {
 			commandResult = CommandHomePad.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("swimtoggle")) {
-			commandResult = CommandMountSwimToggle.onCommand(sender);
 		} else if (args[0].equalsIgnoreCase("nick")) {
 			commandResult = CommandNickname.onCommand(sender,args);
 		} else if (args[0].equalsIgnoreCase("ping")) {
 			commandResult = CommandPing.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("prefix")) {
-			commandResult = CommandPrefix.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("arena")) {
 			commandResult = CommandArena.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("survival")) {
@@ -108,6 +126,72 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandUnlock.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("lock")) {
 			commandResult = CommandLock.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("ranks")) {
+			commandResult = CommandRanks.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("rankup")) {
+			commandResult = CommandRankup.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("rankset")) {
+			commandResult = CommandRankSet.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("pronouns")) {
+			commandResult = CommandPronouns.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("dominion")) {
+			commandResult = CommandDominion.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("sethome")) {
+			commandResult = CommandSethome.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("home")) {
+			commandResult = CommandHome.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("delhome")) {
+			commandResult = CommandDelhome.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("compress")) {
+			commandResult = CommandCompress.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tp")) {
+			commandResult = CommandTp.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tphere")) {
+			commandResult = CommandTphere.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("back")) {
+			commandResult = CommandBack.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("seen")) {
+			commandResult = CommandSeen.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("hat")) {
+			commandResult = CommandHat.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("toggle")) {
+			commandResult = CommandToggle.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("rules")) {
+			commandResult = CommandRules.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("warp")) {
+			commandResult = CommandWarp.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("msg")) {
+			commandResult = CommandMsg.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("pay")) {
+			commandResult = CommandPay.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("baltop")) {
+			commandResult = CommandBaltop.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tables")) {
+			commandResult = CommandTables.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("trash")) {
+			commandResult = CommandTrash.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpaccept")) {
+			commandResult = CommandTpaccept.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpdeny")) {
+			commandResult = CommandTpdeny.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("particles")) {
+			commandResult = CommandParticles.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("itemname")) {
+			commandResult = CommandItemName.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("resource")) {
+			commandResult = CommandResource.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("avatar")) {
+			commandResult = CommandAvatar.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("store")) {
+			commandResult = CommandStore.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("boosts")) {
+			commandResult = CommandBoosts.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("vote")) {
+			commandResult = CommandVote.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("cmsg")) {
+			commandResult = CommandCMsg.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("shop")) {
+			commandResult = CommandShop.onCommand(sender, args);
 		}
 		return commandResult;
 	}

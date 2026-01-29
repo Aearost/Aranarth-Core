@@ -18,15 +18,16 @@ public class CommandItemName {
      * @param sender The user that entered the command.
      * @param args   The arguments of the command.
      */
-    public static void onCommand(CommandSender sender, String[] args) {
+    public static boolean onCommand(CommandSender sender, String[] args) {
         if (sender instanceof Player player) {
-            if (!player.getName().equalsIgnoreCase("Aearost")) {
+            if (!player.hasPermission("aranarth.itemname")) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
-                return;
+                return true;
             }
 
             if (args.length == 1) {
                 sender.sendMessage(ChatUtils.chatMessage("&cYou must enter an item name!"));
+                return true;
             } else {
                 ItemStack item = player.getInventory().getItemInMainHand();
                 if (item.getType() == Material.AIR) {
@@ -38,10 +39,15 @@ public class CommandItemName {
                         player.sendMessage(ChatUtils.chatMessage("&7You have removed the name from this item"));
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
-                        return;
+                        return true;
                     } else {
                         int stringStart = 1;
                         if (args[1].startsWith("gradient")) {
+                            if (!player.hasPermission("aranarth.itemname.gradient")) {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+                                return true;
+                            }
+
                             // Start at the actual name and not the attribute
                             stringStart = 3;
                         }
@@ -59,6 +65,11 @@ public class CommandItemName {
 
                         String itemName = itemNameSB.toString();
                         if (args[1].startsWith("gradient")) {
+                            if (args.length < 4) {
+                                player.sendMessage(ChatUtils.chatMessage("&cYou must specify the colors and the text!"));
+                                return true;
+                            }
+
                             if (args[1].equalsIgnoreCase("gradient")) {
                                 itemName = ChatUtils.translateToGradient(args[2], itemName, false);
                             } else if (args[1].equalsIgnoreCase("gradientbold")) {
@@ -67,7 +78,7 @@ public class CommandItemName {
 
                             if (Objects.isNull(itemName)) {
                                 player.sendMessage(ChatUtils.chatMessage("&cYour item could not be renamed as a gradient"));
-                                return;
+                                return true;
                             } else {
                                 meta.setDisplayName(itemName);
                             }
@@ -79,13 +90,14 @@ public class CommandItemName {
                         item.setItemMeta(meta);
                         player.getInventory().setItemInMainHand(item);
                         player.sendMessage(ChatUtils.chatMessage("&7You have named this item " + itemName));
-                        return;
+                        return true;
                     }
                 }
             }
         } else {
             sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+            return true;
         }
-        return;
+        return false;
     }
 }

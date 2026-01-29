@@ -1,0 +1,615 @@
+package com.aearost.aranarthcore.utils;
+
+import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.objects.*;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
+import github.scarsz.discordsrv.dependencies.jda.api.JDA;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
+import org.bukkit.BanList;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.ban.ProfileBanList;
+
+import java.awt.*;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Provides a variety of utility methods for everything related to Discord integration.
+ */
+public class DiscordUtils {
+
+	private static final TextChannel punishmentHistoryChannelId = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
+	private static final TextChannel roleChangesChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("roles");
+	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+	private static final TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
+
+	/**
+	 * Provides the Discord Guild.
+	 * @return The Discord Guild.
+	 */
+	public static Guild getGuild() {
+		JDA jda = DiscordSRV.getPlugin().getJda();
+		return jda.getGuildById("664319732446396416");
+	}
+
+	/**
+	 * Updates the player's in-game rank accordingly in Discord's roles.
+	 * Updates #server-chat and #role-changes in Discord.
+	 * @param player The player whose rank is changing.
+	 * @param newRankNum The player's new rank number.
+	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
+	 */
+	public static void updateRank(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		Role roleToAdd = switch (newRankNum) {
+			case 1 -> guild.getRoleById("1436839935964352543"); // Esquire
+			case 2 -> guild.getRoleById("1436840295768784928"); // Knight
+			case 3 -> guild.getRoleById("1436840332703563968"); // Baron
+			case 4 -> guild.getRoleById("1436840423334084668"); // Count
+			case 5 -> guild.getRoleById("1436840444771438752"); // Duke
+			case 6 -> guild.getRoleById("1436840565982498968"); // Prince
+			case 7 -> guild.getRoleById("1436840642331410634"); // King
+			case 8 -> guild.getRoleById("1436840682881945630"); // Emperor
+            default -> guild.getRoleById("1436839882268872744"); // Peasant
+        };
+
+		if (playerDiscordId != null) {
+			List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
+			for (Role role : playerDiscordRoles) {
+				// Any of the rank-based roles
+				if (role.getId().equals("1436839935964352543") || role.getId().equals("1436840295768784928")
+						|| role.getId().equals("1436840332703563968") || role.getId().equals("1436840423334084668")
+						|| role.getId().equals("1436840444771438752") || role.getId().equals("1436840565982498968")
+						|| role.getId().equals("1436840642331410634") || role.getId().equals("1436840682881945630")
+						|| role.getId().equals("1436839882268872744")) {
+					guild.removeRoleFromMember(playerDiscordId, role).queue();
+				}
+			}
+			guild.addRoleToMember(playerDiscordId, roleToAdd).queue();
+		}
+
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			String aOrAn = "a";
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
+			String[] rankNameNoBrackets = rankName.split("]");
+			rankName = rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 2);
+			if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
+				aOrAn = "an";
+			}
+
+			String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor(player.getName() + " has become " + aOrAn + " " + rankName + "!", null, url)
+					.setColor(Color.LIGHT_GRAY);
+
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+		}
+    }
+
+	/**
+	 * Updates the player's Saint rank accordingly in Discord's roles.
+	 * Only manually updates #role-changes, as the other updates are from donationNotification().
+	 * @param player The player whose Saint rank is changing.
+	 * @param newRankNum The player's new Saint rank number.
+	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
+	 */
+	public static void updateSaint(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		boolean isSaint = false;
+
+		// If they are a Saint
+		if (newRankNum > 0) {
+			isSaint = true;
+			if (playerDiscordId != null) {
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+			}
+		} else {
+			if (playerDiscordId != null) {
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+			}
+		}
+
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isSaint) {
+				donationNotification(player.getName() + " has donated and become a Saint!", player.getUniqueId(), Color.MAGENTA);
+
+				// Must manually be sent for role changes
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
+						.setColor(Color.MAGENTA);
+				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			}
+		}
+	}
+
+	/**
+	 * Updates the player's Architect rank accordingly in Discord's roles.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
+	 * @param player The player whose Architect rank is changing.
+	 * @param newRankNum The player's new Architect rank number.
+	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
+	 */
+	public static void updateArchitect(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		boolean isArchitect = false;
+
+		// If they are an Architect
+		if (newRankNum > 0) {
+			isArchitect = true;
+			if (playerDiscordId != null) {
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
+			}
+		} else {
+			if (playerDiscordId != null) {
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
+			}
+		}
+
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isArchitect) {
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has become an Architect!", null, url)
+						.setColor(Color.YELLOW);
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+				notifications.sendMessageEmbeds(embed.build()).queue();
+				// Server owner's Discord User ID
+				notifications.sendMessage("<@201812118981443584>").queue();
+			}
+		}
+	}
+
+	/**
+	 * Updates the player's Council rank accordingly in Discord's roles.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
+	 * @param player The player whose Council rank is changing.
+	 * @param newRankNum The player's new Council rank number.
+	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
+	 */
+	public static void updateCouncil(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		boolean isHelper = false;
+		boolean isModerator = false;
+		boolean isAdmin = false;
+
+		if (playerDiscordId != null) {
+			// Remove all council ranks
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(); // The Council role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue(); // The Helper role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue(); // The Moderator role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue(); // The Admin role
+
+			// If they are a Council member
+			if (newRankNum == 1) {
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue();
+			} else if (newRankNum == 2) {
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue();
+			} else if (newRankNum == 3) {
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue();
+			}
+		}
+
+		// If they are a Council member
+		if (newRankNum == 1) {
+			isHelper = true;
+		} else if (newRankNum == 2) {
+			isModerator = true;
+		} else if (newRankNum == 3) {
+			isAdmin = true;
+		}
+
+		// Only display intentional changes in Discord, not auto-assign
+		if (isIntentionalChange) {
+			if (isHelper || isModerator || isAdmin) {
+				String rankName = "";
+				if (isAdmin) {
+					rankName = "an Admin";
+				} else if (isModerator) {
+					rankName = "a Moderator";
+				} else {
+					rankName = "a Helper";
+				}
+
+				String uuidNoDashes = player.getUniqueId().toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor(player.getName() + " has become " + rankName + "!", null, url)
+						.setColor(Color.YELLOW);
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+				notifications.sendMessageEmbeds(embed.build()).queue();
+				// Server owner's Discord User ID
+				notifications.sendMessage("<@201812118981443584>").queue();
+			}
+		}
+	}
+
+	/**
+	 * Update all Discord roles to stay aligned with in-game ranks in case of misalignment.
+	 */
+	public static void updateAllDiscordRoles() {
+		for (UUID uuid : DiscordSRV.getPlugin().getAccountLinkManager().getLinkedAccounts().values()) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+			// Strange bug where a player links their account but they do not have an AranarthPlayer
+			if (aranarthPlayer == null) {
+				continue;
+			}
+			updateRank(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getRank(), false);
+			updateSaint(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getSaintRank(), false);
+			updateArchitect(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getArchitectRank(), false);
+			updateCouncil(Bukkit.getOfflinePlayer(uuid), aranarthPlayer.getCouncilRank(), false);
+			updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
+			updateAvatar(Bukkit.getOfflinePlayer(uuid));
+		}
+	}
+
+	/**
+	 * Updates the player's Discord role accordingly in Discord's roles.
+	 * @param player The player whose Discord role is changing.
+	 * @param aranarthPlayer The AranarthPlayer object of the player.
+	 */
+	public static void updateDiscordRole(OfflinePlayer player, AranarthPlayer aranarthPlayer) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord role could not be updated as they have not linked their Discord");
+			return;
+		}
+
+		Guild guild = getGuild();
+		if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 1) {
+			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+		} else {
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+		}
+	}
+
+	/**
+	 * Updates the player's Avatar role in Discord. Not done automatically in addAvatarMessageToDiscord.
+	 * @param player The player being verified.
+	 */
+	private static void updateAvatar(OfflinePlayer player) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+		Role role = guild.getRoleById("1440165603687137461"); // Avatar
+		List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
+		if (playerDiscordRoles.contains(role)) {
+			// If the player is the current Avatar
+			if (AvatarUtils.getCurrentAvatar() == null || !AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				guild.removeRoleFromMember(playerDiscordId,role).queue();
+			}
+		} else {
+			// If the player is the current Avatar
+			if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
+				guild.addRoleToMember(playerDiscordId, role).queue();
+			}
+		}
+	}
+
+	/**
+	 * Adds a message in #punishment-history in Discord to reflect a punishment.
+	 * @param punishment The punishment being listed.
+	 */
+	public static void addPunishmentToDiscord(Punishment punishment) {
+		Guild guild = getGuild();
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(punishment.getUuid());
+		String uuidNoDashes = punishment.getUuid().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		EmbedBuilder embed = new EmbedBuilder();
+		String appliedBy = "Console";
+		if (punishment.getAppliedBy() != null) {
+			appliedBy = Bukkit.getOfflinePlayer(punishment.getAppliedBy()).getName();
+		}
+
+        switch (punishment.getType()) {
+            case "WARN" -> {
+                embed.setAuthor(aranarthPlayer.getUsername() + " has been warned", null, url);
+                embed.setColor(new Color(253, 233, 146));
+                embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Warned by:** " + appliedBy + "\n" +
+                        "**Reason:** " + punishment.getReason());
+            }
+			case "MUTE" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been muted", null, url);
+				embed.setColor(new Color(255, 255, 0));
+
+				String formattedEndDate = "None";
+				if (!aranarthPlayer.getMuteEndDate().equals("none")) {
+					LocalDateTime endDate = ChatUtils.getMuteEndAsLocalDateTime(aranarthPlayer);
+					String year = endDate.getYear() + "";
+					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+					String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+				}
+
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Muted by:** " + appliedBy + "\n" +
+						"**Mute end date:** " + formattedEndDate + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "BAN" -> {
+				OfflinePlayer player = Bukkit.getOfflinePlayer(punishment.getUuid());
+				ProfileBanList profileBanList = Bukkit.getBanList(BanList.Type.PROFILE);
+				String formattedEndDate = "None";
+
+				// If it's a temporary ban
+				if (profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration() != null) {
+					Instant banEndInstant = profileBanList.getBanEntry(player.getPlayerProfile()).getExpiration().toInstant();
+					LocalDateTime endDate = LocalDateTime.ofInstant(banEndInstant, ZoneId.systemDefault());
+					String year = endDate.getYear() + "";
+					String month = endDate.getMonthValue() < 10 ? "0" + endDate.getMonthValue() : endDate.getMonthValue() + "";
+					String day = endDate.getDayOfMonth() < 10 ? "0" + endDate.getDayOfMonth() : endDate.getDayOfMonth() + "";
+					String hour = endDate.getHour() < 10 ? "0" + endDate.getHour() : endDate.getHour() + "";
+					String minute = endDate.getMinute() < 10 ? "0" + endDate.getMinute() : endDate.getMinute() + "";
+					formattedEndDate = month + "/" + day + "/" + year + " at " + hour + ":" + minute + " EST";
+				}
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been banned", null, url);
+				embed.setColor(new Color(70, 0, 0));
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Banned by:** " + appliedBy + "\n" +
+						"**Ban end date:** " + formattedEndDate + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "UNMUTE" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been unmuted", null, url);
+				embed.setColor(Color.GREEN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unmuted by:** " + appliedBy + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "UNBAN" -> {
+				embed.setAuthor(aranarthPlayer.getUsername() + " has been unbanned", null, url);
+				embed.setColor(Color.GREEN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unbanned by:** " + appliedBy + "\n" +
+						"**Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_WARN" -> {
+				embed.setAuthor("A warning has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Warning removed by:** " + appliedBy + "\n" +
+						"**Original Warn Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_MUTE" -> {
+				embed.setAuthor("A mute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Mute removed by:** " + appliedBy + "\n" +
+						"**Original Mute Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_BAN" -> {
+				embed.setAuthor("A ban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Ban removed by:** " + appliedBy + "\n" +
+						"**Original Ban Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_UNMUTE" -> {
+				embed.setAuthor("An unmute has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unmute removed by:** " + appliedBy + "\n" +
+						"**Original Unmute Reason:** " + punishment.getReason());
+			}
+			case "REMOVE_UNBAN" -> {
+				embed.setAuthor("An unban has been removed from " + aranarthPlayer.getUsername(), null, url);
+				embed.setColor(Color.CYAN);
+				embed.setDescription("**UUID:** " + punishment.getUuid().toString() + "\n" +
+						"**Unban removed by:** " + appliedBy + "\n" +
+						"**Original Unban Reason:** " + punishment.getReason());
+			}
+        }
+		punishmentHistoryChannelId.sendMessageEmbeds(embed.build()).queue();
+	}
+
+	/**
+	 * Adds a message in Discord to reflect changes to the Avatar.
+	 * Updates #server-chat, #role-changes, and #notifications in Discord.
+	 * @param isNewAvatar Confirmation whether the message is for a new avatar, and if not, a deceased one.
+	 */
+	public static void addAvatarMessageToDiscord(Avatar avatar, boolean isNewAvatar) {
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(avatar.getUuid());
+		String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(avatar.getUuid()));
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info(username + "'s Discord roles could not be updated as they have not linked their Discord");
+		}
+
+		Guild guild = getGuild();
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(avatar.getUuid());
+		String uuidNoDashes = avatar.getUuid().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		Role role = guild.getRoleById("1440165603687137461"); // Avatar
+
+		// If it is a player who has become the Avatar
+		if (isNewAvatar) {
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor("Avatar " + username + " has risen!", null, url)
+					.setColor(Color.MAGENTA);
+			if (playerDiscordId != null) {
+				guild.addRoleToMember(playerDiscordId, role).queue();
+			}
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			notifications.sendMessageEmbeds(embed.build()).queue();
+		}
+		// If the avatar has deceased
+		else {
+			EmbedBuilder embed = new EmbedBuilder()
+					.setAuthor("Avatar " + username + " has deceased...", null, url)
+					.setColor(Color.MAGENTA);
+			if (playerDiscordId != null) {
+				guild.removeRoleFromMember(playerDiscordId, role).queue();
+			}
+			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+		}
+	}
+
+	/**
+	 * Adds a message in #server-chat in Discord to reflect the addition of a new server boost.
+	 * Only updates #server-chat if a boost is expired.
+	 * @param uuid The UUID of the player who purchased/is applying the boost.
+	 * @param boost The boost being applied.
+	 * @param isAdding Whether a boost is being added.
+	 */
+	public static void updateBoostInDiscord(UUID uuid, Boost boost, boolean isAdding) {
+		Guild guild = getGuild();
+
+		String name = "";
+		Color color = null;
+		if (boost == Boost.MINER) {
+			name = "Boost of the Miner";
+			color = new Color(85, 85, 85);
+		} else if (boost == Boost.HARVEST) {
+			name = "Boost of the Harvest";
+			color = new Color(255, 170, 0);
+		} else if (boost == Boost.HUNTER) {
+			name = "Boost of the Hunter";
+			color = new Color(255, 85, 85);
+		} else if (boost == Boost.CHI) {
+			name = "Boost of Chi";
+			color = new Color(255, 255, 255);
+		} else {
+			name = "Unspecified Boost";
+			color = new Color(255, 85, 255);
+		}
+
+		// If it was applied by a user
+		if (uuid != null) {
+			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
+			donationNotification(username + " has applied the " + name, uuid, color);
+		} else {
+			if (isAdding) {
+				donationNotification("The " + name + " has been applied", null, color);
+			} else {
+				EmbedBuilder embed = new EmbedBuilder()
+						.setAuthor("The " + name + " has expired")
+						.setColor(color);
+				serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+			}
+		}
+	}
+
+	/**
+	 * Sends a notification when a player donates.
+	 * Updates both #notifications and #role-changes in Discord.
+	 * @param message The message to be sent.
+	 * @param uuid The UUID of the player who donated.
+	 */
+	public static void donationNotification(String message, UUID uuid, Color color) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
+
+		if (uuid == null) {
+			embed.setAuthor(message);
+		} else {
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+
+			embed.setAuthor(message, null, url);
+		}
+		embed.setColor(color);
+
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		notifications.sendMessageEmbeds(embed.build()).queue();
+		// Server owner's Discord User ID
+		notifications.sendMessage("<@201812118981443584>").queue();
+	}
+
+	/**
+	 * Sends a miscellaneous notification when desired to be sent to the notifications channel.
+	 * Updates only #notifications in Discord.
+	 * @param message The message to be sent.
+	 * @param uuid The UUID of the player who is involved with the notification.
+	 */
+	public static void createNotification(String message, UUID uuid) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
+
+		if (uuid == null) {
+			embed.setAuthor(message).setColor(Color.CYAN);
+		} else {
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+
+			embed.setAuthor(message, null, url).setColor(Color.CYAN);
+		}
+
+		notifications.sendMessageEmbeds(embed.build()).queue();
+		// Server owner's Discord User ID
+		notifications.sendMessage("<@201812118981443584>").queue();
+	}
+
+	/**
+	 * Sends a notification when it is a new month.
+	 * Updates only #server-chat in Discord.
+	 * @param month The new month.
+	 * @param description The description of the month.
+	 */
+	public static void monthMessage(Month month, String description) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+
+		description = description.replaceAll("&.", "");
+
+		embed.setTitle("The month of " + ChatUtils.getFormattedItemName(month.name()) + " has begun!")
+				.setDescription(description)
+				.setColor(Color.MAGENTA);
+
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+	}
+}

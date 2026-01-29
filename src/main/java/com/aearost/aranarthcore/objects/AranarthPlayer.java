@@ -1,7 +1,11 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.enums.Pronouns;
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,13 +19,11 @@ public class AranarthPlayer {
 	private boolean isStandingOnHomePad;
 	private int currentGuiPageNum;
 	private String nickname;
-	private String prefix;
-	private boolean isMountSwimEnabled;
 	private String survivalInventory;
 	private String arenaInventory;
 	private String creativeInventory;
 	private boolean isDeletingBlacklistedItems;
-	private List<ItemStack> potions;
+	private HashMap<ItemStack, Integer> potions;
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
 	private boolean isHitByTippedArrow;
@@ -37,14 +39,40 @@ public class AranarthPlayer {
 	private UUID untrustedPlayerUUID;
 	private boolean isLockingContainer;
 	private boolean isUnlockingContainer;
+	private Pronouns pronouns;
+	private int rank;
+	private int saintRank;
+	private int councilRank;
+	private int architectRank;
+	private Dominion pendingDominion;
+	private List<Home> homes;
+	private String muteEndDate;
+	private UUID teleportToUuid;
+	private UUID teleportFromUuid;
+	private Location lastKnownTeleportLocation;
+	private int particleNum = 100;
+	private boolean isAddingPotions = false;
+	private HashMap<Perk, Integer> perks = new HashMap<>();
+	private boolean isInAdminMode = false;
+	private long saintExpireDate;
+	private boolean isCompressingItems = false;
+	private int bulkTransactionNum = 0;
+	private boolean isOpeningCrateWithCyclingItem = false;
+	private CrateType crateTypeBeingOpened = null;
+	private int voteTotal;
+	private int votePoints;
+	private boolean isAutoClaimEnabled = false;
+	private boolean isTogglingMessages = false;
+	private boolean isTogglingChat = false;
+	private boolean isTogglingTp = false;
+	private boolean isTogglingChangeClaim = false;
+	private boolean hasBlueFireDisabled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = "";
-		this.prefix = "";
-		this.isMountSwimEnabled = false;
 		this.survivalInventory = "";
 		this.arenaInventory = "";
 		this.creativeInventory = "";
@@ -54,7 +82,7 @@ public class AranarthPlayer {
 		this.isDeletingBlacklistedItems = false;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
-		this.randomItems = null;
+		this.randomItems = new ArrayList<>();
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = 0.00;
@@ -63,15 +91,45 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
+		this.rank = 0;
+		this.saintRank = 0;
+		this.councilRank = 0;
+		this.architectRank = 0;
+		this.pendingDominion = null;
+		this.homes = new ArrayList<>();
+		this.muteEndDate = "";
+		this.pronouns = Pronouns.MALE;
+		this.teleportFromUuid = null;
+		this.teleportToUuid = null;
+		this.lastKnownTeleportLocation = null;
+		this.particleNum = 100;
+		this.isAddingPotions = false;
+		this.perks = new HashMap<>();
+		this.isInAdminMode = false;
+		this.saintExpireDate = 0;
+		this.isCompressingItems = false;
+		this.bulkTransactionNum = 0;
+		this.voteTotal = 0;
+		this.votePoints = 0;
+		this.isAutoClaimEnabled = false;
+		this.isTogglingMessages = false;
+		this.isTogglingChat = false;
+		this.isTogglingTp = false;
+		this.isTogglingChangeClaim = false;
+		this.hasBlueFireDisabled = false;
 	}
 
-	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
+	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
+						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
+						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
+						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
+						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
+						  int votePoints,
+						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
 		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
-		this.prefix = prefix;
-		this.isMountSwimEnabled = false;
 		this.survivalInventory = survivalInventory;
 		this.arenaInventory = arenaInventory;
 		this.creativeInventory = creativeInventory;
@@ -90,6 +148,34 @@ public class AranarthPlayer {
 		this.untrustedPlayerUUID = null;
 		this.isLockingContainer = false;
 		this.isUnlockingContainer = false;
+		this.rank = rank;
+		this.saintRank = saintRank;
+		this.councilRank = councilRank;
+		this.architectRank = architectRank;
+		this.pendingDominion = null;
+		this.homes = homes;
+		this.muteEndDate = "";
+		this.teleportFromUuid = null;
+		this.teleportToUuid = null;
+		this.lastKnownTeleportLocation = null;
+		this.particleNum = particleNum;
+		this.isAddingPotions = false;
+		this.perks = perks;
+		this.isInAdminMode = false;
+		this.saintExpireDate = saintExpireDate;
+		this.isCompressingItems = isCompressingItems;
+		this.bulkTransactionNum = 0;
+		this.voteTotal = voteTotal;
+		this.votePoints = votePoints;
+		this.isAutoClaimEnabled = false;
+		this.isTogglingMessages = false;
+		this.isTogglingChat = false;
+		this.isTogglingTp = false;
+		this.isTogglingChangeClaim = false;
+		this.hasBlueFireDisabled = false;
+
+		// Keep pronouns at the end
+		this.pronouns = pronouns;
 	}
 
 	/**
@@ -112,7 +198,7 @@ public class AranarthPlayer {
 	 * Provides confirmation whether the player is on a homepad.
 	 * @return Confirmation whether they are on a homepad.
 	 */
-	public boolean getIsStandingOnHomePad() {
+	public boolean isStandingOnHomePad() {
 		return isStandingOnHomePad;
 	}
 
@@ -120,7 +206,7 @@ public class AranarthPlayer {
 	 * Updates whether the player is on a homepad.
 	 * @param isStandingOnHomePad The new value.
 	 */
-	public void setIsStandingOnHomePad(boolean isStandingOnHomePad) {
+	public void setStandingOnHomePad(boolean isStandingOnHomePad) {
 		this.isStandingOnHomePad = isStandingOnHomePad;
 	}
 
@@ -145,7 +231,7 @@ public class AranarthPlayer {
 	 * @return The current nickname.
 	 */
 	public String getNickname() {
-		return nickname;
+		return (nickname == null || nickname.isEmpty()) ? username : nickname;
 	}
 
 	/**
@@ -153,39 +239,8 @@ public class AranarthPlayer {
 	 * @param nickname The new nickname.
 	 */
 	public void setNickname(String nickname) {
+		nickname = nickname.replaceAll("\\|", "");
 		this.nickname = nickname;
-	}
-
-	/**
-	 * Provides the player's current prefix.
-	 * @return The current prefix.
-	 */
-	public String getPrefix() {
-		return prefix;
-	}
-
-	/**
-	 * Updates the current prefix.
-	 * @param prefix The new prefix.
-	 */
-	public void setPrefix(String prefix) {
-		this.prefix = prefix;
-	}
-
-	/**
-	 * Provides confirmation whether the player's mount will swim.
-	 * @return Confirmation whether the player's mount is swimming.
-	 */
-	public boolean getIsMountSwimEnabled() {
-		return isMountSwimEnabled;
-	}
-
-	/**
-	 * Updates whether the player's mount will swim.
-	 * @param isMountSwimEnabled The new value.
-	 */
-	public void setIsMountSwimEnabled(boolean isMountSwimEnabled) {
-		this.isMountSwimEnabled = isMountSwimEnabled;
 	}
 
 	/**
@@ -240,7 +295,7 @@ public class AranarthPlayer {
 	 * Provides confirmation whether the player is deleting blacklisted items or not.
 	 * @return Confirmation of whether they are deleting the items or not.
 	 */
-	public boolean getIsDeletingBlacklistedItems() {
+	public boolean isDeletingBlacklistedItems() {
 		return isDeletingBlacklistedItems;
 	}
 
@@ -248,7 +303,7 @@ public class AranarthPlayer {
 	 * Updates whether the player will be deleting blacklisted items or not.
 	 * @param isDeletingBlacklistedItems The new value.
 	 */
-	public void setIsDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
+	public void setDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
 		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
 	}
 
@@ -256,7 +311,7 @@ public class AranarthPlayer {
 	 * Provides the List of potions that the player currently has in their potion inventory.
 	 * @return The List of the player's potions.
 	 */
-	public List<ItemStack> getPotions() {
+	public HashMap<ItemStack, Integer> getPotions() {
 		return potions;
 	}
 
@@ -264,7 +319,7 @@ public class AranarthPlayer {
 	 * Updates the player's current List of potions.
 	 * @param potions The new List of potions.
 	 */
-	public void setPotions(List<ItemStack> potions) {
+	public void setPotions(HashMap<ItemStack, Integer> potions) {
 		this.potions = potions;
 	}
 
@@ -304,7 +359,7 @@ public class AranarthPlayer {
 	 * Provides the current value confirming if they were hit by a tipped arrow.
 	 * @return The current value confirming if they were hit by a tipped arrow.
 	 */
-	public boolean getIsHitByTippedArrow() {
+	public boolean isHitByTippedArrow() {
 		return isHitByTippedArrow;
 	}
 
@@ -312,7 +367,7 @@ public class AranarthPlayer {
 	 * Updates the player's current value confirming if they were hit by a tipped arrow.
 	 * @param isHitByTippedArrow The new confirmation of if they were hit by a tipped arrow.
 	 */
-	public void setIsHitByTippedArrow(boolean isHitByTippedArrow) {
+	public void setHitByTippedArrow(boolean isHitByTippedArrow) {
 		this.isHitByTippedArrow = isHitByTippedArrow;
 	}
 
@@ -352,7 +407,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is actively adding to their shulker box.
 	 * @return Whether the player is adding to their shulker box.
 	 */
-	public boolean getIsAddingToShulker() {
+	public boolean isAddingToShulker() {
 		return isAddingToShulker;
 	}
 
@@ -360,7 +415,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is adding to their shulker box.
 	 * @param isAddingToShulker Whether the player is adding to their shulker box.
 	 */
-	public void setIsAddingToShulker(boolean isAddingToShulker) {
+	public void isAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
 	}
 
@@ -384,7 +439,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is actively randomizing items.
 	 * @return Whether the player is randomizing items.
 	 */
-	public boolean getIsRandomizing() {
+	public boolean isRandomizing() {
 		return isRandomizing;
 	}
 
@@ -392,7 +447,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is randomizing items.
 	 * @param isRandomizing Whether the player is randomizing items.
 	 */
-	public void setIsRandomizing(boolean isRandomizing) {
+	public void isRandomizing(boolean isRandomizing) {
 		this.isRandomizing = isRandomizing;
 	}
 
@@ -400,7 +455,7 @@ public class AranarthPlayer {
 	 * Temporary variable tracking if the player is missing items from the randomizer pattern.
 	 * @return Whether the player is missing items from the randomizer pattern.
 	 */
-	public boolean getIsMissingItemMessageSent() {
+	public boolean isMissingItemMessageSent() {
 		return isMissingItemMessageSent;
 	}
 
@@ -408,7 +463,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is missing items from the randomizer pattern.
 	 * @param isMissingItemMessageSent Whether the player is missing items from the randomizer pattern.
 	 */
-	public void setIsMissingItemMessageSent(boolean isMissingItemMessageSent) {
+	public void isMissingItemMessageSent(boolean isMissingItemMessageSent) {
 		this.isMissingItemMessageSent = isMissingItemMessageSent;
 	}
 
@@ -480,7 +535,7 @@ public class AranarthPlayer {
 	 * Provides the temporary variable tracking whether the player is attempting to unlock a container.
 	 * @return Whether the player is attempting to unlock a container.
 	 */
-	public boolean getIsUnlockingContainer() {
+	public boolean isUnlockingContainer() {
 		return isUnlockingContainer;
 	}
 
@@ -488,7 +543,7 @@ public class AranarthPlayer {
 	 * Updates the temporary variable tracking whether the player is attempting to unlock a container.
 	 * @param isUnlockingContainer The temporary variable of whether the player is attempting to unlock a container.
 	 */
-	public void setIsUnlockingContainer(boolean isUnlockingContainer) {
+	public void setUnlockingContainer(boolean isUnlockingContainer) {
 		this.isUnlockingContainer = isUnlockingContainer;
 	}
 
@@ -496,7 +551,7 @@ public class AranarthPlayer {
 	 * Provides the temporary variable tracking whether the player is attempting to lock a container.
 	 * @return Whether the player is attempting to lock a container.
 	 */
-	public boolean getIsLockingContainer() {
+	public boolean isLockingContainer() {
 		return isLockingContainer;
 	}
 
@@ -504,8 +559,460 @@ public class AranarthPlayer {
 	 * Updates the temporary variable tracking whether the player is attempting to lock a container.
 	 * @param isLockingContainer The temporary variable of whether the player is attempting to lock a container.
 	 */
-	public void setIsLockingContainer(boolean isLockingContainer) {
+	public void setLockingContainer(boolean isLockingContainer) {
 		this.isLockingContainer = isLockingContainer;
+	}
+
+	/**
+	 * Provides the player's pronouns.
+	 * @return The player's pronouns.
+	 */
+	public Pronouns getPronouns() {
+		return pronouns;
+	}
+
+	/**
+	 * Updates the player's pronouns to the input value.
+	 * @param pronouns The new value.
+	 */
+	public void setPronouns(Pronouns pronouns) {
+		this.pronouns = pronouns;
+	}
+
+	/**
+	 * Provides the rank of the player.
+	 * @return The rank of the player.
+	 */
+	public int getRank() {
+		return rank;
+	}
+
+	/**
+	 * Updates the rank of the player.
+	 * @param rank The new rank of the player.
+	 */
+	public void setRank(int rank) {
+		this.rank = rank;
+	}
+
+	/**
+	 * Provides the Saint rank of the player.
+	 * @return The Saint rank of the player.
+	 */
+	public int getSaintRank() {
+		return saintRank;
+	}
+
+	/**
+	 * Updates the Saint rank of the player.
+	 * @param saintRank The new Saint rank of the player.
+	 */
+	public void setSaintRank(int saintRank) {
+		this.saintRank = saintRank;
+	}
+
+	/**
+	 * Provides the Council rank of the player.
+	 * @return The Council rank of the player.
+	 */
+	public int getCouncilRank() {
+		return councilRank;
+	}
+
+	/**
+	 * Updates the Council rank of the player.
+	 * @param councilRank The new Council rank of the player.
+	 */
+	public void setCouncilRank(int councilRank) {
+		this.councilRank = councilRank;
+	}
+
+	/**
+	 * Provides the Architect rank of the player.
+	 * @return The Architect rank of the player.
+	 */
+	public int getArchitectRank() {
+		return architectRank;
+	}
+
+	/**
+	 * Updates the Architect rank of the player.
+	 * @param architectRank The new Architect rank of the player.
+	 */
+	public void setArchitectRank(int architectRank) {
+		this.architectRank = architectRank;
+	}
+
+	/**
+	 * Provides the pending Dominion of the player.
+	 * @return The pending Dominion of the player.
+	 */
+	public Dominion getPendingDominion() {
+		return pendingDominion;
+	}
+
+	/**
+	 * Updates the pending Dominion of the player.
+	 * @param pendingDominion The pending Dominion.
+	 */
+	public void setPendingDominion(Dominion pendingDominion) {
+		this.pendingDominion = pendingDominion;
+	}
+
+	/**
+	 * Provides the player's homes.
+	 * @return The player's homes.
+	 */
+	public List<Home> getHomes() {
+		return homes;
+	}
+
+	/**
+	 * Updates the homes of the player.
+	 * @param homes The new homes of the player.
+	 */
+	public void setHomes(List<Home> homes) {
+		this.homes = homes;
+	}
+
+	/**
+	 * Provides the player's mute end date.
+	 * YYMMDDhhmm - Year | Month | Day | Hour | Minute
+	 * If value is "none", the player is muted indefinitely.
+	 * @return The player's mute end date.
+	 */
+	public String getMuteEndDate() {
+		return muteEndDate;
+	}
+
+	/**
+	 * Updates the player's mute end date.
+	 * YYMMDDhhmm - Year | Month | Day | Hour | Minute
+	 * If value is "none", the player is muted indefinitely.
+	 * @param muteEndDate The player's new mute end date.
+	 */
+	public void setMuteEndDate(String muteEndDate) {
+		this.muteEndDate = muteEndDate;
+	}
+
+	/**
+	 * Provides the UUID of the player that sent the request to teleport to them.
+	 * @return The UUID of the player that sent the request to teleport to them.
+	 */
+	public UUID getTeleportToUuid() {
+		return teleportToUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that sent the request to teleport to them.
+	 * @param teleportToUuid The new UUID of the player that sent the request to teleport to them.
+	 */
+	public void setTeleportToUuid(UUID teleportToUuid) {
+		this.teleportToUuid = teleportToUuid;
+	}
+
+	/**
+	 * Provides the UUID of the player that sent the request to teleport to this player.
+	 * @return The UUID of the player that sent the request to teleport to this player.
+	 */
+	public UUID getTeleportFromUuid() {
+		return teleportFromUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that sent the request to teleport to this player
+	 * @param teleportFromUuid The new UUID of the player that sent the request to teleport to this player
+	 */
+	public void setTeleportFromUuid(UUID teleportFromUuid) {
+		this.teleportFromUuid = teleportFromUuid;
+	}
+
+	/**
+	 * Provides the last known location of the player before a previous teleport.
+	 * @return The last known location of the player before a previous teleport.
+	 */
+	public Location getLastKnownTeleportLocation() {
+		return lastKnownTeleportLocation;
+	}
+
+	/**
+	 * Updates the last known location of the player before a previous teleport.
+	 * @param lastKnownTeleportLocation The new last known location of the player before a previous teleport.
+	 */
+	public void setLastKnownTeleportLocation(Location lastKnownTeleportLocation) {
+		this.lastKnownTeleportLocation = lastKnownTeleportLocation;
+	}
+
+	/**
+	 * Provides the number of Aranarth particles seen by the player.
+	 * @return The number of Aranarth particles seen by the player.
+	 */
+	public int getParticleNum() {
+		return particleNum;
+	}
+
+	/**
+	 * Updates the number of Aranarth particles seen by the player.
+	 * @param particleNum The number of Aranarth particles seen by the player.
+	 */
+	public void setParticleNum(int particleNum) {
+		this.particleNum = particleNum;
+	}
+
+	/**
+	 * Provides whether the player is adding potions to their potions pouch.
+	 * @return Whether the player is adding potions to their potions pouch
+	 */
+	public boolean isAddingPotions() {
+		return isAddingPotions;
+	}
+
+	/**
+	 * Updates whether the player is adding potions to their potions pouch.
+	 * @param isAddingPotions Whether the player is adding potions to their potions pouch.
+	 */
+	public void setAddingPotions(boolean isAddingPotions) {
+		this.isAddingPotions = isAddingPotions;
+	}
+
+	/**
+	 * Provides the perks that the player has access to.
+	 * @return The perks that the player has access to.
+	 */
+	public HashMap<Perk, Integer> getPerks() {
+		return perks;
+	}
+
+	/**
+	 * Updates the perks that the player has access to.
+	 * @param perks The player's new perks.
+	 */
+	public void setPerks(HashMap<Perk, Integer> perks) {
+		this.perks = perks;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is in admin mode.
+	 * @return Whether the player is in admin mode.
+	 */
+	public boolean isInAdminMode() {
+		return isInAdminMode;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is in admin mode.
+	 * @param isInAdminMode Whether the player is in admin mode.
+	 */
+	public void setInAdminMode(boolean isInAdminMode) {
+		this.isInAdminMode = isInAdminMode;
+	}
+
+	/**
+	 * Provides the expiration date of the player's temporary saint rank.
+	 * @return The expiration date of the player's temporary saint rank.
+	 */
+	public long getSaintExpireDate() {
+		return saintExpireDate;
+	}
+
+	/**
+	 * Updates the expiration date of the player's temporary saint rank.
+	 * @param saintExpireDate The expiration date of the player's temporary saint rank.
+	 */
+	public void setSaintExpireDate(long saintExpireDate) {
+		this.saintExpireDate = saintExpireDate;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is compressing items or not.
+	 * @return Whether the player is compressing items or not.
+	 */
+	public boolean isCompressingItems() {
+		return isCompressingItems;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is compressing items or not.
+	 * @param isCompressingItems Whether the player is compressing items or not.
+	 */
+	public void setCompressingItems(boolean isCompressingItems) {
+		this.isCompressingItems = isCompressingItems;
+	}
+
+	/**
+	 * Provides the variable tracking which point of the bulk transaction the player is currently making.
+	 * 0 is none, 1 is actively making a bulk purchase, -1 is just finished making a bulk purchase.
+	 */
+	public int getBulkTransactionNum() {
+		return bulkTransactionNum;
+	}
+
+	/**
+	 * Updates the variable tracking which point of the bulk transaction the player is currently making.
+	 * @param bulkTransactionNum Which point of the bulk transaction the player is currently making.
+	 */
+	public void setBulkTransactionNum(int bulkTransactionNum) {
+		this.bulkTransactionNum = bulkTransactionNum;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is currently opening a crate with a cycling item.
+	 * @return The variable tracking whether the player is currently opening a crate with a cycling item.
+	 */
+	public boolean isOpeningCrateWithCyclingItem() {
+		return isOpeningCrateWithCyclingItem;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is currently opening a crate with a cycling item.
+	 * @param isOpeningCrateWithCyclingItem The variable tracking whether the player is currently opening a crate with a cycling item.
+	 */
+	public void setOpeningCrateWithCyclingItem(boolean isOpeningCrateWithCyclingItem) {
+		this.isOpeningCrateWithCyclingItem = isOpeningCrateWithCyclingItem;
+	}
+
+	/**
+	 * Provides the variable tracking what kind of crate is currently being opened by the player.
+	 * @return The crate type that is currently being opened by the player.
+	 */
+	public CrateType getCrateTypeBeingOpened() {
+		return crateTypeBeingOpened;
+	}
+
+	/**
+	 * Updates the variable tracking what kind of crate is currently being opened by the player.
+	 * @param crateTypeBeingOpened The crate type that is currently being opened by the player.
+	 */
+	public void setCrateTypeBeingOpened(CrateType crateTypeBeingOpened) {
+		this.crateTypeBeingOpened = crateTypeBeingOpened;
+	}
+
+	/**
+	 * Provides the number of times the player has voted.
+	 * @return The number of times the player has voted.
+	 */
+	public int getVoteTotal() {
+		return voteTotal;
+	}
+
+	/**
+	 * Updates the number of times the player has voted.
+	 * @param voteTotal The number of times the player has voted.
+	 */
+	public void setVoteTotal(int voteTotal) {
+		this.voteTotal = voteTotal;
+	}
+
+	/**
+	 * Provides the number of vote points the player has.
+	 * @return The number of vote points the player has.
+	 */
+	public int getVotePoints() {
+		return votePoints;
+	}
+
+	/**
+	 * Updates the number of vote points the player has.
+	 * @param votePoints The number of vote points the player has.
+	 */
+	public void setVotePoints(int votePoints) {
+		this.votePoints = votePoints;
+	}
+
+	/**
+	 * Provides the value tracking whether the player is claiming chunks.
+	 * @return The value tracking whether the player is claiming chunks.
+	 */
+	public boolean isAutoClaimEnabled() {
+		return isAutoClaimEnabled;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is claiming chunks.
+	 * @param isAutoClaimEnabled The value tracking whether the player is claiming chunks.
+	 */
+	public void setAutoClaimEnabled(boolean isAutoClaimEnabled) {
+		this.isAutoClaimEnabled = isAutoClaimEnabled;
+	}
+
+	/**
+	 * Provides the value tracking whether the player is toggling incoming messages.
+	 * @return The value tracking whether the player is toggling incoming messages.
+	 */
+	public boolean isTogglingMessages() {
+		return isTogglingMessages;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming messages.
+	 * @param togglingMessages The value tracking whether the player is toggling incoming messages.
+	 */
+	public void setTogglingMessages(boolean togglingMessages) {
+		isTogglingMessages = togglingMessages;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming chat messages.
+	 * @return The value tracking whether the player is toggling incoming chat messages.
+	 */
+	public boolean isTogglingChat() {
+		return isTogglingChat;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming chat messages.
+	 * @param togglingChat The value tracking whether the player is toggling incoming chat messages.
+	 */
+	public void setTogglingChat(boolean togglingChat) {
+		isTogglingChat = togglingChat;
+	}
+
+	/**
+	 * Provides the value tracking whether the player is toggling incoming teleport requests.
+	 * @return The value tracking whether the player is toggling incoming teleport requests.
+	 */
+	public boolean isTogglingTp() {
+		return isTogglingTp;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling incoming teleport requests.
+	 * @param togglingTp The value tracking whether the player is toggling incoming teleport requests.
+	 */
+	public void setTogglingTp(boolean togglingTp) {
+		isTogglingTp = togglingTp;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling claim change messages.
+	 * @return The value tracking whether the player is toggling claim change messages.
+	 */
+	public boolean isTogglingChangeClaim() {
+		return isTogglingChangeClaim;
+	}
+
+	/**
+	 * Updates the value tracking whether the player is toggling claim change messages.
+	 * @param togglingChangeClaim The value tracking whether the player is toggling claim change messages.
+	 */
+	public void setTogglingChangeClaim(boolean togglingChangeClaim) {
+		isTogglingChangeClaim = togglingChangeClaim;
+	}
+
+	/**
+	 * Provides the value tracking whether the player currently has blue fire disabled.
+	 * @return The value tracking whether the player currently has blue fire disabled.
+	 */
+	public boolean hasBlueFireDisabled() {
+		return hasBlueFireDisabled;
+	}
+
+	/**
+	 * Updates the value tracking whether the player currently has blue fire disabled.
+	 * @param hasBlueFireDisabled The value tracking whether the player currently has blue fire disabled.
+	 */
+	public void setBlueFireDisabled(boolean hasBlueFireDisabled) {
+		this.hasBlueFireDisabled = hasBlueFireDisabled;
 	}
 
 }

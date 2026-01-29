@@ -2,25 +2,33 @@ package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
-import java.util.List;
 
 public class GuiPotions {
 
 	private final Player player;
 	private final Inventory initializedGui;
 
-	public GuiPotions(Player player, boolean isAdding) {
+	/**
+	 * Creates a GUI for a player's potions.
+	 * @param player The player.
+	 * @param potionGuiType The potion GUI type. 0 for listing, 1 for adding, -1 for removing.
+	 */
+	public GuiPotions(Player player, int potionGuiType) {
 		this.player = player;
-		if (isAdding) {
+		if (potionGuiType == 1) {
 			this.initializedGui = initializeAddGui(player);
-		} else {
+		} else if (potionGuiType == -1 ){
 			this.initializedGui = initializeRemoveGui(player);
+		} else {
+			this.initializedGui = initializeListGui(player);
 		}
 	}
 
@@ -29,16 +37,20 @@ public class GuiPotions {
 		player.openInventory(initializedGui);
 	}
 
-	private Inventory initializeAddGui(Player player) {
-		return Bukkit.getServer().createInventory(player, 54, "Potions");
+	public Inventory getInitializedGui() {
+		return initializedGui;
+	}
+
+	public Inventory initializeAddGui(Player player) {
+		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
+		return Bukkit.getServer().createInventory(player, 54, "Add Potions (" + potionStats + ")");
 	}
 
 	private Inventory initializeRemoveGui(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		List<ItemStack> potions = aranarthPlayer.getPotions();
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
 
-		HashMap<ItemStack, Integer> potionsAndAmounts = AranarthUtils.getPotionsAndAmounts(player);
-		int size = potionsAndAmounts.size();
+		int size = potions.size();
 
 		// Size is based on which method is used
 		// If the amount is a multiple of 9, use a full row
@@ -47,9 +59,42 @@ public class GuiPotions {
 		}
 
 		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions");
-		for (ItemStack storedPotion : potionsAndAmounts.keySet()) {
+		for (ItemStack storedPotion : potions.keySet()) {
 			inventory.addItem(storedPotion);
 		}
+		return inventory;
+	}
+
+	private Inventory initializeListGui(Player player) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		HashMap<ItemStack, Integer> potions = aranarthPlayer.getPotions();
+
+		int size = potions.size();
+
+		// Size is based on which method is used
+		// If the amount is a multiple of 9, use a full row
+		if (size % 9 != 0) {
+			size = ((int) (double) (size / 9) + 1) * 9;
+		}
+		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
+
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Your Potions (" + potionStats + ")");
+
+		HashMap<String, HashMap<ItemStack, Integer>> formattedPotions = AranarthUtils.getPlayerPotionNames(player);
+		for (String formattedName : formattedPotions.keySet()) {
+			HashMap<ItemStack, Integer> storedPotion = formattedPotions.get(formattedName);
+			// Should only have 1 record in it
+			for (ItemStack potion : storedPotion.keySet()) {
+				ItemStack potionCopy = potion.clone();
+				if (potionCopy.hasItemMeta()) {
+					ItemMeta meta = potionCopy.getItemMeta();
+					meta.setDisplayName(ChatUtils.translateToColor("&e" + formattedName + " &6x" + storedPotion.get(potion)));
+					potionCopy.setItemMeta(meta);
+					inventory.addItem(potionCopy);
+				}
+			}
+		}
+
 		return inventory;
 	}
 
