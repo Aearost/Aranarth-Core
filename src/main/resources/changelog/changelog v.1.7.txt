@@ -1,0 +1,56 @@
+AranarthCore v. 1.7
+
+Features
+[+] Added a new world for a public Survival server, and moved the previous world under /ac smp
+[+] Added in Fletching Table functionality
+[+] Added iron, gold, amethyst, obsidian, and diamond arrows and arrow heads
+[+] Added /ac calendar to provide a book with information about the calendar system
+[+] Added /ac aranarthium to provide a book with information about aranarthium
+[+] Added /ac date to display the current server date
+[+] Added /ac dateset to manually change the current server date in-game
+[+] Added particle effect around the bottom of waterfalls
+[+] Added container lock functionality
+[+] Can re-add bark to stripped wood and create 6-sided wood from logs using bone meal
+[+] Eyeblossoms now light up when changing from opened to closed
+[~] Coal is now crafted using 2 charcoal and not just 1
+[~] Prevented shops from being created in non-survival worlds
+[+] Added sounds for when players join and quit the server
+[+] Added support for /ac potion remove <qty> to remove potions from the player's potion inventory
+[~] Prevented the 111th of each month from showing as 111st in date message
+[~] Prevented wandering trader death throwing error when slain by i.e fall damage or non-mob source
+[~] Prevented issues where /ac commands couldn't be run by console
+[~] Added missing response messages from commands executed by Console
+[~] Fixed bug where enhanced aranarthium ingots could not be crafted
+[~] Snow will no longer fall in jungle biomes, only mountainous parts of it
+[~] Increased snow radius from 100 blocks to 250
+[+] Players can store their EXP in an EXP bottle by sneak right-clicking
+[~] Fixed issues with rain not starting/stopping correctly
+[~] Added feature to consider storms from previous server restart
+[+] Rain messages display in all months
+[~] Fixed issues where rain and thunder was not starting and ending correctly
+[+] Added functionality for charged creepers to spawn in any month at a low rate
+[+] Added functionality to prevent snow from forming on the Stashenleda path
+[+] Added sound for when opening and closing a shulker in backpack-mode
+[+] Happy Ghasts can no longer be harmed by players
+[~] Fixed bug where commands had error due incorrect method check
+[~] It will now snow and rain during the month of Umbravor rather than only snow
+[~] Fixed bug where nether wart couldn't be auto-replanted
+[~] Made sure quivers and potion inventories cannot be opened in non-survival worlds
+[~] Hoppers cannot be placed under any locked chest
+[~] Fixed bug where non-arrow items could be placed in a Quiver by hotbar swapping
+[~] Made tipped arrows show their colour when toggled through the Quiver click
+[+] All sources of melee damage now apply fire ticks when wearing Scorched Aranarthium
+[+] Scorched Aranarthium now makes the wearer immune to the slowness applied by the Winter months
+[+] Added extra XP for logs during the month of Follivor
+[~] Made it so extra wood drops during Follivor are now based on whether the actual log was placed or not
+[+] Added Taming XP yield when breeding animals
+
+Miscellaneous
+- Restructured date message logic to be a callable method
+- Restructured a lot of the weather functionality
+- Minor adjustments to the date message to remove extra lines and AranarthCore prefix to all messages
+- Minor changes to wandering trader slain message
+- Added helper method to quickly list the quantity of each potion a player has
+- Re-wrote most of the crop harvest logic
+- Re-wrote most of ArrowConsume to cleanly identify if the shot and quiver arrows match
+- Simplified logic of special arrow damage effects

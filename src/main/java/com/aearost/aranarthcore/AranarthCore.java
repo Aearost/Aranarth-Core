@@ -1,15 +1,14 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.event.block.*;
-import com.aearost.aranarthcore.event.misc.PotionEffectStack;
-import com.aearost.aranarthcore.event.mob.*;
-import com.aearost.aranarthcore.event.player.*;
-import com.aearost.aranarthcore.event.world.*;
+import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.event.listener.*;
+import com.aearost.aranarthcore.event.listener.grouped.*;
+import com.aearost.aranarthcore.event.listener.misc.*;
+import com.aearost.aranarthcore.event.listener.misc.PotionEffectStackListener;
 import com.aearost.aranarthcore.recipes.*;
-import org.bukkit.Bukkit;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import com.aearost.aranarthcore.recipes.aranarthium.*;
+import com.aearost.aranarthcore.utils.DateUtils;
+import org.bukkit.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.aearost.aranarthcore.commands.CommandAC;
@@ -17,6 +16,8 @@ import com.aearost.aranarthcore.commands.CommandACCompleter;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
+
+import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
 
@@ -28,15 +29,23 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
+		plugin = this;
+		initializeWorlds();
 		initializeUtils();
 		initializeEvents();
 		initializeRecipes();
 		initializeCommands();
-		initializeWorlds();
 		initializeItems();
 
-		plugin = this;
 
+		// Sets default storm values
+		AranarthUtils.setWeather(Weather.CLEAR);
+		AranarthUtils.setStormDelay(new Random().nextInt(18000));
+
+		runRepeatingTasks();
+	}
+
+	private void runRepeatingTasks() {
 		// Update the persistence files every 30 minutes to protect from loss of data
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
@@ -46,14 +55,26 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Homes and aranarth players have been saved");
 			}
 		}, 36000, 36000);
-		
-		// Check every 5 seconds to update armour trim effects
+
+		// Check every 5 seconds to update Aranarthium effects, and to see if it is a new day
 		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 			@Override
 			public void run() {
-				AranarthUtils.updateArmorTrimEffects();
+				AranarthUtils.applyArmourEffects();
+
+				// Seasons functionality
+				DateUtils dateUtils = new DateUtils();
+				dateUtils.calculateServerDate();
 			}
 		}, 0, 100);
+
+		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			@Override
+			public void run() {
+				AranarthUtils.applyWaterfallEffect();
+			}
+		}, 0, 1);
+
 	}
 
 	public static AranarthCore getInstance() {
@@ -67,91 +88,64 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadHomes();
 		PersistenceUtils.loadAranarthPlayers();
 		PersistenceUtils.loadPlayerShops();
+		PersistenceUtils.loadServerDate();
+		PersistenceUtils.loadLockedContainers();
 	}
 
 	/**
 	 * Initializes all AranarthCore events.
 	 */
 	private void initializeEvents() {
-		new HomePadStep(this);
-		new HomePadPlace(this);
-		new HomePadBreak(this);
-		new PlayerServerJoin(this);
-		new PlayerServerQuit(this);
-		new GuiHomepadClick(this);
-		new ExplosionPrevent(this);
-		new SoilTrampleCancel(this);
-		new CraftingOverrides(this);
-		new LogWoodStripPrevent(this);
-		new PlayerChat(this);
-		new EndermanPickupCancel(this);
-		new EntityEggPickupCancel(this);
-		new BuddingAmethystBreak(this);
-		new MountSpawn(this);
-		new MountSwim(this);
-		new CropHarvest(this);
-		new RespawnCancel(this);
-		new SugarcaneBlockPlace(this);
-		new TorchflowerPlace(this);
-		new TorchflowerBreak(this);
-		new TorchflowerGrow(this);
-		new PitcherPlantPlace(this);
-		new PitcherPlantBreak(this);
-		new PillagerOutpostSpawnCancel(this);
-		new ShulkerItemPickup(this);
-		new ZombieHorseSpawn(this);
-		new ArenaBlockBreak(this);
-		new ArenaItemDrops(this);
-		new ArenaMeltPrevent(this);
-		new ArenaGrowPrevent(this);
-		new ArenaDurabilityPrevent(this);
-		new ArenaHungerLossPrevent(this);
-		new ConcretePowderGravityPrevent(this);
-		new VillagerTradeOverrides(this);
-		new CoralDry(this);
-		new MobDestroyDoorPrevent(this);
-		new PlayerTeleportBetweenWorlds(this);
-		new ExpGainPrevent(this);
-		new GuiBlacklistClick(this);
-		new BlacklistItemPickupPrevent(this);
-		new GuiVillagerClick(this);
-		new VillagerInventoryViewClick(this);
-		new VillagerCamelPickup(this);
-		new VillagerCamelDismount(this);
-		new DurabilityDecreaseWarning(this);
-		new ParrotJumpCancelDismount(this);
-		new PetHurtPrevent(this);
-		new InvisibleItemFrameInteract(this);
-		new HoneyGlazedHamEat(this);
-		new GuiPotionClose(this);
-		new GuiPotionPreventNonPotionAdd(this);
-		new DragonHeadClick(this);
-		new PotionConsume(this);
-		new QuiverPreventAddToBundle(this);
-		new QuiverClick(this);
-		new GuiQuiverClose(this);
-		new GuiQuiverClick(this);
-		new ArrowConsume(this);
-		new WanderingTraderSpawnAnnounce(this);
-		new PotionEffectStack(this);
-		new MangroveRootShear(this);
-		new ChestSort(this);
-		new GoatDeath(this);
-		new DoorDoubleOpen(this);
-		new ArmorStandSwitch(this);
-		new TippedArrowDamagePrevent(this);
-		new NonSurvivalDeathRespawn(this);
-		new EnderChestPlacePrevent(this);
-		new ArenaPlayerKill(this);
-		new ShulkerClick(this);
-		new GuiShulkerClose(this);
-		new GuiShulkerPreventDrop(this);
-		new RandomizerBlockPlace(this);
-		new PlayerAutoReplenishSlot(this);
-		new PlayerShopCreate(this);
-		new PlayerShopDestroy(this);
-		new PlayerShopInteract(this);
-		new PlayerShopChestOpen(this);
+		// General listeners
+		new BlockBreakEventListener(this);
+		new BlockPlaceEventListener(this);
+		new InventoryClickEventListener(this);
+		new InventoryCloseEventListener(this);
+		new PlayerInteractEventListener(this);
+		new PlayerInteractEntityEventListener(this);
+		new PlayerMoveEventListener(this);
+		new EntityChangeBlockEventListener(this);
+		new EntityPickupItemEventListener(this);
+		new CreatureSpawnEventListener(this);
+		new BlockGrowEventListener(this);
+		new ItemSpawnEventListener(this);
+		new BlockFadeEventListener(this);
+		new PlayerItemConsumeEventListener(this);
+		new EntitySpawnEventListener(this);
+		new EntityDamageByEntityEventListener(this);
+		new EntityDamageEventListener(this);
+		new EntityTargetEventListener(this);
+		new EntityDeathEventListener(this);
+		new EntityShootBowEventListener(this);
+		new BlockFormEventListener(this);
+		new BlockPhysicsEventListener(this);
+		new ProjectileHitEventListener(this);
+
+		// Multi-event listeners for single purpose
+		new InvisibleItemFrameListener(this);
+		new ExplosionListener(this);
+		new SoilTrampleListener(this);
+		new CraftingOverridesListener(this);
+		new PotionConsumeListener(this);
+		new PlayerRespawnEventListener(this);
+
+		// Single-purpose and single-event event listeners
+		new PlayerServerJoinListener(this);
+		new PlayerServerQuitListener(this);
+		new PlayerChatListener(this);
+		new ArenaHungerLossPreventListener(this);
+		new MobDestroyDoorListener(this);
+		new PlayerTeleportBetweenWorldsListener(this);
+		new ExpGainPreventListener(this);
+		new VillagerCamelDismountListener(this);
+		new PotionEffectStackListener(this);
+		new PlayerShopCreateListener(this);
+		new WeatherChangeListener(this);
+		new LeafDecayDropsListener(this);
+		new LeavesPreventBurnListener(this);
+		new SnowballHitListener(this);
+		new ArmorStandSwitchListener(this);
+		new TamingXPFromBreeding(this);
 	}
 
 	/**
@@ -205,6 +199,20 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeMossBlock(this);
 		new RecipeMossCarpet(this);
 		new RecipeBlackDye(this);
+		new RecipePaleMossBlock(this);
+		new RecipePaleMossCarpet(this);
+		new RecipeHoneyBlockUncraft(this);
+		new RecipeCopperExposed(this);
+		new RecipeCopperWeathered(this);
+		new RecipeCopperOxidized(this);
+		new RecipeAranarthiumIngot(this);
+		new RecipeAquaticAranarthium(this);
+		new RecipeDwarvenAranarthium(this);
+		new RecipeElvenAranarthium(this);
+		new RecipeScorchedAranarthium(this);
+		new RecipeArdentAranarthium(this);
+		new RecipeSoulboundAranarthium(this);
+		new RecipeGodApple(this);
 	}
 
 	/**
@@ -220,6 +228,48 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	private void initializeWorlds() {
 		// Loads the world if it isn't yet loaded
+		if (Bukkit.getWorld("world") == null) {
+			WorldCreator wc = new WorldCreator("world");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("world_nether") == null) {
+			WorldCreator wc = new WorldCreator("world_nether");
+			wc.environment(World.Environment.NETHER);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("world_the_end") == null) {
+			WorldCreator wc = new WorldCreator("world_the_end");
+			wc.environment(World.Environment.THE_END);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("smp") == null) {
+			WorldCreator wc = new WorldCreator("smp");
+			wc.environment(World.Environment.NORMAL);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("smp_nether") == null) {
+			WorldCreator wc = new WorldCreator("smp_nether");
+			wc.environment(World.Environment.NETHER);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("smp_the_end") == null) {
+			WorldCreator wc = new WorldCreator("smp_the_end");
+			wc.environment(World.Environment.THE_END);
+			wc.type(WorldType.NORMAL);
+			wc.createWorld();
+		}
+
 		if (Bukkit.getWorld("arena") == null) {
 			WorldCreator wc = new WorldCreator("arena");
 			wc.environment(World.Environment.NORMAL);
@@ -239,7 +289,7 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes the AranarthCore custom items needing namespace keys.
 	 */
 	private void initializeItems() {
-		new InvisibleItemFrame(this);
+		new InvisibleItemFrame();
 	}
 
 	/**
@@ -250,6 +300,10 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveHomes();
 		PersistenceUtils.saveAranarthPlayers();
 		PersistenceUtils.savePlayerShops();
+		PersistenceUtils.saveServerDate();
+		PersistenceUtils.saveLockedContainers();
+
+		Bukkit.resetRecipes();
 	}
 
 }

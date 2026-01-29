@@ -144,11 +144,13 @@ public class ItemUtils {
 					player.getInventory().addItem(is);
 					return 0;
 				}
-				// Some was placed in the inventory, but not all
-			} else if (amount < itemToAdd.getAmount()) {
+			}
+			// Some was placed in the inventory, but not all
+			else if (amount < itemToAdd.getAmount()) {
 				return amount;
-				// No space in the inventory
-			} else {
+			}
+			// No space in the inventory
+			else {
 				return -1;
 			}
 		}

@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.recipes;
 
-import com.aearost.aranarthcore.items.HomePad;
+import com.aearost.aranarthcore.items.Homepad;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -19,7 +19,7 @@ public class RecipeHomePad {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HOME_PAD");
-		ShapedRecipe recipe = new ShapedRecipe(nk, HomePad.getHomePad());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new Homepad().getItem());
 
 		recipe.shape("LDL", "GPG", "LDL");
 

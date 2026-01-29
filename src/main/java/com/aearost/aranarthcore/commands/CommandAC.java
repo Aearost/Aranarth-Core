@@ -26,16 +26,19 @@ public class CommandAC implements CommandExecutor {
 			return false;
 		} else {
 			boolean commandResult = false;
+			// Applies only to Aearost (ops) or Console=
 			if (sender instanceof Player player) {
 				if (player.getName().equalsIgnoreCase("Aearost")) {
 					commandResult = isSenderOp(sender, args);
 				} else {
 					commandResult = isValidCommand(sender, args);
 				}
+			} else {
+				commandResult = isValidCommand(sender, args);
+			}
 
-				if (!commandResult) {
-					sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
-				}
+			if (!commandResult) {
+				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
 			}
 			return commandResult;
 		}
@@ -44,10 +47,16 @@ public class CommandAC implements CommandExecutor {
 	private boolean isSenderOp(CommandSender sender, String[] args) {
 		boolean commandResult = false;
 		if (args[0].equalsIgnoreCase("whereis")) {
-			commandResult = CommandWhereIs.onCommand(sender, args);
+			CommandWhereIs.onCommand(sender, args);
 			commandResult = true;
 		} else if (args[0].equalsIgnoreCase("itemname")) {
-			commandResult = CommandItemName.onCommand(sender, args);
+			CommandItemName.onCommand(sender, args);
+			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("give")) {
+			CommandGive.onCommand(sender, args);
+			commandResult = true;
+		} else if (args[0].equalsIgnoreCase("dateset")) {
+			CommandDate.onCommand(sender, args);
 			commandResult = true;
 		} else {
 			commandResult = isValidCommand(sender, args);
@@ -71,6 +80,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandArena.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("survival")) {
 			commandResult = CommandSurvival.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("smp")) {
+			commandResult = CommandSMP.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("creative")) {
 			commandResult = CommandCreative.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("blacklist")) {
@@ -83,8 +94,21 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRandomizer.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("balance")) {
 			commandResult = CommandBalance.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("date")) {
+			commandResult = CommandDate.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("calendar")) {
+			commandResult = CommandCalendar.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("aranarthium")) {
+			commandResult = CommandAranarthium.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("trust")) {
+			commandResult = CommandTrust.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("untrust")) {
+			commandResult = CommandUntrust.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("unlock")) {
+			commandResult = CommandUnlock.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("lock")) {
+			commandResult = CommandLock.onCommand(sender, args);
 		}
 		return commandResult;
 	}
-
 }

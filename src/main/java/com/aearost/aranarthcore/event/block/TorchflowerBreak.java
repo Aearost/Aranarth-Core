@@ -1,31 +1,24 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-public class TorchflowerBreak implements Listener {
+/**
+ * Removes the light block above the torchflower.
+ */
+public class TorchflowerBreak {
 
-	public TorchflowerBreak(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Removes the light block above the torchflower.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onTorchflowerBreak(final BlockBreakEvent e) {
+	public void execute(BlockBreakEvent e) {
 		Location location = e.getBlock().getLocation();
 		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
-		
+
+		// Breaking the flower
 		if (location.getBlock().getType() == Material.TORCHFLOWER && locationAbove.getBlock().getType() == Material.LIGHT) {
 			locationAbove.getBlock().setType(Material.AIR);
-		} else if (locationAbove.getBlock().getType() == Material.TORCHFLOWER) {
+		}
+		// Breaking the block under the flower
+		else if (locationAbove.getBlock().getType() == Material.TORCHFLOWER) {
 			Location locationAboveTorchflower = new Location(locationAbove.getWorld(), locationAbove.getX(), locationAbove.getY() + 1, locationAbove.getZ());
 			locationAboveTorchflower.getBlock().setType(Material.AIR);
 		}

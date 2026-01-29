@@ -4,37 +4,40 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Objects;
 
+import static com.aearost.aranarthcore.items.CustomItemKeys.HONEY_GLAZED_HAM;
+
 /**
  * Provides the necessary components of a Honey Glazed Ham item.
  */
-public class HoneyGlazedHam {
+public class HoneyGlazedHam implements AranarthItem {
 
 	/**
 	 * @return The Honey Glazed Ham.
 	 */
-	public static ItemStack getHoneyGlazedHam() {
-		ItemStack honeyGlazeHam = new ItemStack(Material.COOKED_PORKCHOP, 1);
-		ItemMeta meta = honeyGlazeHam.getItemMeta();
-		ArrayList<String> lore = new ArrayList<>();
-
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.COOKED_PORKCHOP, 1);
+		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
+			ArrayList<String> lore = new ArrayList<>();
+			meta.getPersistentDataContainer().set(HONEY_GLAZED_HAM, PersistentDataType.STRING, "honey_glazed_ham");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			honeyGlazeHam.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return honeyGlazeHam;
+	    return item;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&6Honey Glazed Ham";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&eAin't that sweet?";
 	}
 	

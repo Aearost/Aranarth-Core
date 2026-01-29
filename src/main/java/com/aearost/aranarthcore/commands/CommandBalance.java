@@ -27,6 +27,8 @@ public class CommandBalance {
 				if (sender instanceof Player player) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					player.sendMessage(ChatUtils.chatMessage("&7Your balance is &6$" + df.format(aranarthPlayer.getBalance())));
+				} else {
+					sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player! /ac balance <player>"));
 				}
 				return true;
 			} else {
@@ -48,36 +50,37 @@ public class CommandBalance {
 					}
 				} else if (args.length == 3) {
 					if (sender instanceof Player player) {
-						if (player.getName().equals("Aearost")) {
-							boolean isPlayerFound = false;
-							// Does the player exist
-							for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
-								if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
-									if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
-										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
-										try {
-											Double valueAsDouble = Double.parseDouble(args[2]);
-											String formattedValue = df.format(valueAsDouble);
-											double newBalance = Double.parseDouble(formattedValue);
-											aranarthPlayer.setBalance(newBalance);
-											player.sendMessage(ChatUtils.chatMessage("&e" + offlinePlayer.getName() + "'s balance has been set to &6$" + newBalance));
-											isPlayerFound = true;
-										} catch (NumberFormatException e) {
-											player.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
-										}
-									}
-								}
-							}
-							if (!isPlayerFound) {
-								sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
-							}
-						} else {
-							return false;
+						if (!player.getName().equals("Aearost")) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+							return true;
 						}
 					}
+
+					boolean isPlayerFound = false;
+					// Does the player exist
+					for (OfflinePlayer offlinePlayer : Bukkit.getOfflinePlayers()) {
+						if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
+							if (offlinePlayer.getName().equalsIgnoreCase(args[1])) {
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(offlinePlayer.getUniqueId());
+								try {
+									double valueAsDouble = Double.parseDouble(args[2]);
+									String valueWithTwoDecimals = df.format(valueAsDouble);
+									aranarthPlayer.setBalance(Double.parseDouble(valueWithTwoDecimals));
+									sender.sendMessage(ChatUtils.chatMessage("&e" + offlinePlayer.getName() + "'s balance has been set to &6$" + valueWithTwoDecimals));
+									isPlayerFound = true;
+								} catch (NumberFormatException e) {
+									sender.sendMessage(ChatUtils.chatMessage("&cThat value is invalid!"));
+								}
+							}
+						}
+					}
+
+					if (!isPlayerFound) {
+						sender.sendMessage(ChatUtils.chatMessage("&cThis player does not exist!"));
+					}
 				}
-				return true;
 			}
+			return true;
 		}
 		return false;
 	}

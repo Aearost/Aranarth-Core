@@ -14,7 +14,7 @@ import org.bukkit.potion.PotionEffect;
 import java.io.IOException;
 
 /**
- * Teleports the player to the survival world, sharing the survival inventory.
+ * Teleports the player to the Survival world, sharing the Survival inventory.
  */
 public class CommandSurvival {
 
@@ -26,7 +26,6 @@ public class CommandSurvival {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-
                 // Teleports you to the survival world spawn
 				try {
 					AranarthUtils.switchInventory(player, player.getLocation().getWorld().getName(), "world");
@@ -34,10 +33,16 @@ public class CommandSurvival {
 					player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 					return false;
 				}
-				for (PotionEffect effect : player.getActivePotionEffects()) {
-					player.removePotionEffect(effect.getType());
+
+				// Only remove potion effects if changing from a non-survival world
+				if (!player.getLocation().getWorld().getName().startsWith("world")) {
+					for (PotionEffect effect : player.getActivePotionEffects()) {
+						player.removePotionEffect(effect.getType());
+					}
 				}
-				player.teleport(new Location(Bukkit.getWorld("world"), 0.5, 120, 3, 180, 0));
+
+				Location loc = new Location(Bukkit.getWorld("world"), 0.5, 80, 3, 180, 0);
+				player.teleport(loc);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSurvival!"));
 				player.setGameMode(GameMode.SURVIVAL);
 
@@ -47,6 +52,7 @@ public class CommandSurvival {
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+				return true;
 			}
 		}
 		return false;

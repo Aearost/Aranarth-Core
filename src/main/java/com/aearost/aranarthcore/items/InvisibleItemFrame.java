@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.items;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -18,33 +19,33 @@ import java.util.Objects;
  * Inspired by tiffany352
  * Source: <a href="https://github.com/tiffany352/InvisibleItemFrames/blob/main/src/main/java/com/tiffnix/invisibleitemframes/InvisibleItemFrames.java">tiffany352 GitHub</a>
  */
-public class InvisibleItemFrame {
+public class InvisibleItemFrame implements AranarthItem {
 
-	public static Plugin PLUGIN = null;
+	public static Plugin PLUGIN;
 	public static NamespacedKey IS_INVISIBLE;
 	public static ItemStack ITEM_FRAME;
-	
-	public InvisibleItemFrame(Plugin plugin) {
-		PLUGIN = plugin;
-		IS_INVISIBLE = new NamespacedKey(plugin, "invisible");
-		ITEM_FRAME = getInvisibleItemFrame();
+
+	public InvisibleItemFrame() {
+		PLUGIN = AranarthCore.getInstance();
+		IS_INVISIBLE = new NamespacedKey(AranarthCore.getInstance(), "invisible");
+		ITEM_FRAME = getItem();
 	}
 	
 	/**
 	 * @return The Invisible Item Frame.
 	 */
-	public static ItemStack getInvisibleItemFrame() {
-		ItemStack invisibleItemFrame = new ItemStack(Material.ITEM_FRAME, 1);
-		ItemMeta meta = invisibleItemFrame.getItemMeta();
+	public ItemStack getItem() {
+		ItemStack item = new ItemStack(Material.ITEM_FRAME, 1);
+		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
-			invisibleItemFrame.setItemMeta(meta);
+			item.setItemMeta(meta);
 		}
-	    return invisibleItemFrame;
+	    return item;
 	}
 
 	/**
@@ -61,11 +62,11 @@ public class InvisibleItemFrame {
 		return false;
 	}
 	
-	public static String getName() {
+	public String getName() {
 		return "&6&lInvisible Item Frame";
 	}
 	
-	public static String getLore() {
+	public String getLore() {
 		return "&eYou can place it, but you won't see it!";
 	}
 	

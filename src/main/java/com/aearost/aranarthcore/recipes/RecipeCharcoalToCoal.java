@@ -21,7 +21,7 @@ public class RecipeCharcoalToCoal {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_COAL_FROM_CHARCOAL");
 		ShapelessRecipe recipe = new ShapelessRecipe(nk, new ItemStack(Material.COAL, 1));
 		
-		recipe.addIngredient(1, Material.CHARCOAL);
+		recipe.addIngredient(2, Material.CHARCOAL);
 		
 		Bukkit.addRecipe(recipe);
 	}

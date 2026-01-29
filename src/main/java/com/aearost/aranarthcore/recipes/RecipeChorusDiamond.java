@@ -19,7 +19,7 @@ public class RecipeChorusDiamond {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_CHORUS_DIAMOND");
-		ShapedRecipe recipe = new ShapedRecipe(nk, ChorusDiamond.getChorusDiamond());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new ChorusDiamond().getItem());
 
 		recipe.shape("CCC", "CDC", "CCC");
 

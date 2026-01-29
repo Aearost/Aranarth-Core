@@ -34,10 +34,12 @@ public class GuiQuiver {
 		Inventory gui = null;
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		List<ItemStack> arrows = new ArrayList<>();
-		for (ItemStack is : aranarthPlayer.getArrows()) {
-			if (is != null) {
-				ItemStack clone = is.clone();
-				arrows.add(clone);
+		if (aranarthPlayer.getArrows() != null) {
+			for (ItemStack is : aranarthPlayer.getArrows()) {
+				if (is != null) {
+					ItemStack clone = is.clone();
+					arrows.add(clone);
+				}
 			}
 		}
 

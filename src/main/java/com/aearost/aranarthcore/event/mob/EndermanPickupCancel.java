@@ -1,27 +1,13 @@
 package com.aearost.aranarthcore.event.mob;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.EntityType;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 
-public class EndermanPickupCancel implements Listener {
+/**
+ * Handles logic to prevent the picking up of blocks for Endermen.
+ */
+public class EndermanPickupCancel {
 
-	public EndermanPickupCancel(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-	
-	/**
-	 * Deals with preventing endermen from picking up blocks.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onEndermanPickupBlock(final EntityChangeBlockEvent e) {
-		if (e.getEntityType() == EntityType.ENDERMAN) {
-			e.setCancelled(true);
-		}
-	}
-
+    public void execute(EntityChangeBlockEvent e) {
+        e.setCancelled(true);
+    }
 }
