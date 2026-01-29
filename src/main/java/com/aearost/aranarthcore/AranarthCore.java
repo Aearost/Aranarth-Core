@@ -286,6 +286,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeArdentAranarthium(this);
 		new RecipeSoulboundAranarthium(this);
 		new RecipeGodApple(this);
+		new RecipeGreenDye(this);
 	}
 
 	/**
