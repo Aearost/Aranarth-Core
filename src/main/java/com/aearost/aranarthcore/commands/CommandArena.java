@@ -49,6 +49,7 @@ public class CommandArena {
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
+				return true;
 			}
 		}
 		return false;

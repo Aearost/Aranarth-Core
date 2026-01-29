@@ -19,7 +19,7 @@ public class RecipeInvisibleItemFrame {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_INVISIBLE_ITEM_FRAME");
-		ShapedRecipe recipe = new ShapedRecipe(nk, InvisibleItemFrame.getInvisibleItemFrame());
+		ShapedRecipe recipe = new ShapedRecipe(nk, new InvisibleItemFrame().getItem());
 
 		recipe.shape("LGL", "GIG", "LGL");
 

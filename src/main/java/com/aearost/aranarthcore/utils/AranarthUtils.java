@@ -1,21 +1,33 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.objects.PlayerShop;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
+import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ArmorMeta;
-import org.bukkit.inventory.meta.trim.TrimPattern;
+import org.bukkit.inventory.meta.BannerMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import java.io.IOException;
 import java.util.*;
+
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.items.CustomItemKeys.ARROW;
+
 
 /**
  * Provides a large variety of utility methods for everything related to AranarthCore.
@@ -26,6 +38,20 @@ public class AranarthUtils {
 	private static List<Home> homes = new ArrayList<>();
 	private static final HashMap<Location, Integer> dragonHeads = new HashMap<>();
 	private static final HashMap<UUID, List<PlayerShop>> playerShops = new HashMap<>();
+	private static final HashMap<UUID, BannerMeta> playerBanners = new HashMap<>();
+	private static List<LockedContainer> lockedContainers;
+	private static int day;
+	private static int weekday;
+	private static Month month;
+	private static int year;
+	private static int stormDuration;
+	private static int stormDelay;
+	private static boolean hasStormedInMonth;
+	private static int currentTime;
+	private static int windPlayTimer;
+	private static boolean isPlayingWindSound;
+	private static int cherryParticleDelay;
+	private static Weather weather;
 
 	public AranarthUtils(boolean isServerStarting) {
 		if (isServerStarting) {
@@ -204,7 +230,6 @@ public class AranarthUtils {
 					&& location1.getBlockZ() == location2.getBlockZ()
 					&& location1.getWorld().getName().equals(location2.getWorld().getName());
 		} else {
-			Bukkit.getLogger().info("One or more of the worlds does not exist!");
 			return false;
 		}
 	}
@@ -222,11 +247,14 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		if (currentWorld.equals(destinationWorld)
-				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))) {
+				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("world"))
+				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("smp"))
+				|| (currentWorld.startsWith("world") && destinationWorld.startsWith("smp"))
+				|| (currentWorld.startsWith("smp") && destinationWorld.startsWith("world"))) {
 			return;
 		}
 
-		if (currentWorld.startsWith("world")) {
+		if (currentWorld.startsWith("world") || currentWorld.startsWith("smp")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 			if (destinationWorld.startsWith("arena")) {
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
@@ -248,7 +276,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
-			if (destinationWorld.startsWith("world")) {
+			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
@@ -263,7 +291,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
-			if (destinationWorld.startsWith("world")) {
+			if (destinationWorld.startsWith("world") || destinationWorld.startsWith("smp")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
@@ -292,58 +320,75 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Handles applying armor trim effects.
+	 * Cycles through online players and verifies if they are wearing a full set of Aranarthium armor.
 	 */
-	public static void updateArmorTrimEffects() {
+	public static void applyArmourEffects() {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
 			if (Objects.nonNull(aranarthPlayer.getUsername())) {
 				Player player = Bukkit.getPlayer(aranarthPlayer.getUsername());
 				if (Objects.nonNull(player)) {
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.RAISER)) {
-						player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 2));
+					ItemStack[] armor = player.getInventory().getArmorContents();
+					if (armor[0] != null && armor[1] != null && armor[2] != null && armor[3] != null) {
+						verifyAndApplyAranarthiumArmourEffects(player);
 					}
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.SILENCE)) {
-						player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
-					}
-					if (verifyPlayerHasArmorTrim(player, TrimPattern.SHAPER)) {
-						// There is no amplifier to this effect
-						player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
-					}
-//					if (verifyPlayerHasArmorTrim(player, TrimPattern.EYE)) {
-//						// IDEA: See nearby players via Glowing effect - https://www.spigotmc.org/threads/make-everybody-glow-to-one-player.465348/
-//					}
 				}
 			}
 		}
 	}
 
 	/**
-	 * Verifies if the player has the specified armor trim.
-	 *
-	 * @param player The player to be verified.
-	 * @param trimPattern The trim to be verified.
-	 * @return Confirmation of whether the player has the specified trim.
+	 * Ensures that the given player is wearing a full set of Aranarthium Armour and applies its effects.
+	 * @param player The player being verified.
 	 */
-	public static boolean verifyPlayerHasArmorTrim(Player player, TrimPattern trimPattern) {
+	private static void verifyAndApplyAranarthiumArmourEffects(Player player) {
+		if (isWearingArmorType(player, "aquatic")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isWearingArmorType(player, "ardent")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 9));
+		} else if (isWearingArmorType(player, "dwarven")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isWearingArmorType(player, "elven")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 320, 1));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isWearingArmorType(player, "scorched")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isWearingArmorType(player, "soulbound")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		}
+	}
+
+	/**
+	 * Verifies if the input armor type is fully equipped by the player.
+	 * @param player The player being verified.
+	 * @param type The armor type to be verified.
+	 * @return Confirmation whether the specified type is fully equipped.
+	 */
+	public static boolean isWearingArmorType(Player player, String type) {
 		ItemStack[] armor = player.getInventory().getArmorContents();
-		for (ItemStack is : armor) {
-			if (Objects.nonNull(is)) {
-				// Elytras cannot have trims thus must be ignored
-				if (is.getType() == Material.ELYTRA) {
-					continue;
-				}
-				if (is.getItemMeta() instanceof ArmorMeta armorMeta) {
-                    if (armorMeta.hasTrim()) {
-						if (Objects.nonNull(armorMeta.getTrim())) {
-							if (armorMeta.getTrim().getPattern() == trimPattern) {
-								return true;
-							}
-						}
+		int counter = 0;
+		for (ItemStack is : player.getInventory().getArmorContents()) {
+			if (is == null) {
+				return false;
+			}
+
+			if (is.hasItemMeta()) {
+				if (is.getItemMeta().getPersistentDataContainer().has(ARMOR_TYPE, PersistentDataType.STRING)) {
+					if (is.getItemMeta().getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING).equals(type)) {
+						counter++;
 					}
 				}
 			}
 		}
-		return false;
+		// Ensures that all 4 pieces of armour are Dwarven
+        return counter == 4;
 	}
 
 	/**
@@ -402,10 +447,19 @@ public class AranarthUtils {
 		dragonHeads.put(location, newAmount);
 	}
 
+	/**
+	 * Provides the current list of player shops.
+	 * @return The list of player shops.
+	 */
 	public static HashMap<UUID, List<PlayerShop>> getShops() {
 		return playerShops;
 	}
 
+	/**
+	 * Provides the shop at the input sign location.
+	 * @param location The location of the sign.
+	 * @return The player shop if it exists.
+	 */
 	public static PlayerShop getShop(Location location) {
 		if (getShops() != null) {
 			for (UUID uuid : playerShops.keySet()) {
@@ -420,6 +474,11 @@ public class AranarthUtils {
 		return null;
 	}
 
+	/**
+	 * Adding the input shop by the associated UUID.
+	 * @param uuid The UUID. Null if it is a server shop.
+	 * @param newShop The new player shop.
+	 */
 	public static void addShop(UUID uuid, PlayerShop newShop) {
 		List<PlayerShop> shops = playerShops.get(uuid);
 		if (shops == null) {
@@ -429,6 +488,11 @@ public class AranarthUtils {
 		playerShops.put(uuid, shops);
 	}
 
+	/**
+	 * Removes the player shop at the associated location for the input UUID.
+	 * @param uuid The UUID.
+	 * @param location The location of the sign of the shop.
+	 */
 	public static void removeShop(UUID uuid, Location location) {
 		List<PlayerShop> shops = playerShops.get(uuid);
 		int shopSlotToDelete = -1;
@@ -443,4 +507,659 @@ public class AranarthUtils {
 			shops.remove(shopSlotToDelete);
 		}
 	}
+
+	/**
+	 * Provides the current server day.
+	 * @return The server day.
+	 */
+	public static int getDay() {
+		return day;
+	}
+
+	/**
+	 * Updates the current server day.
+	 * @param newDay The new server day.
+	 */
+	public static void setDay(int newDay) {
+		day = newDay;
+	}
+
+	/**
+	 * Provides the current server weekday.
+	 * @return The server weekday.
+	 */
+	public static int getWeekday() {
+		return weekday;
+	}
+
+	/**
+	 * Updates the current server weekday.
+	 * @param newWeekday The new server weekday.
+	 */
+	public static void setWeekday(int newWeekday) {
+		weekday = newWeekday;
+	}
+
+	/**
+	 * Provides the current server month.
+	 * @return The server month.
+	 */
+	public static Month getMonth() {
+		return month;
+	}
+
+	/**
+	 * Updates the current server month.
+	 * @param newMonth The new server month.
+	 */
+	public static void setMonth(Month newMonth) {
+		if (newMonth != month) {
+			// Ensures that each month has a new value
+			hasStormedInMonth = false;
+			stormDelay = 0;
+			stormDuration = 0;
+		}
+		month = newMonth;
+
+	}
+
+	/**
+	 * Provides the current server year.
+	 * @return The server year.
+	 */
+	public static int getYear() {
+		return year;
+	}
+
+	/**
+	 * Updates the current server year.
+	 * @param newYear The new server year.
+	 */
+	public static void setYear(int newYear) {
+		year = newYear;
+	}
+
+	/**
+	 * Provides the intended duration of the current storm.
+	 * @return The duration of the current storm.
+	 */
+	public static int getStormDuration() {
+		return stormDuration;
+	}
+
+	/**
+	 * Updates the value of the current storm duration.
+	 * @param newStormDuration The new duration of the storm.
+	 */
+	public static void setStormDuration(int newStormDuration) {
+		stormDuration = newStormDuration;
+	}
+
+	/**
+	 * Provides the current delay between storms.
+	 * @return The current delay between storms.
+	 */
+	public static int getStormDelay() {
+		return stormDelay;
+	}
+
+	/**
+	 * Updates the value of the delay between storms.
+	 * @param newStormDelay The new delay between storms.
+	 */
+	public static void setStormDelay(int newStormDelay) {
+		stormDelay = newStormDelay;
+	}
+
+	/**
+	 * Provides the confirmation whether it has stormed since server startup or new month.
+	 * @return Confirmation if it has stormed since the server startup or new month.
+	 */
+	public static boolean getHasStormedInMonth() {
+		return hasStormedInMonth;
+	}
+
+	/**
+	 * Updates the value of whether it has stormed in the month since the server startup or new month.
+	 * @param newHasStormedInMonth The new confirmation whether it has stormed since the server startup or new month.
+	 */
+	public static void setHasStormedInMonth(boolean newHasStormedInMonth) {
+		hasStormedInMonth = newHasStormedInMonth;
+	}
+
+	/**
+	 * Provides the current timer since the last wind began.
+	 * @return The current timer since the last wind began.
+	 */
+	public static int getWindPlayTimer() {
+		return windPlayTimer;
+	}
+
+	/**
+	 * Updates the current timer since the last wind began.
+	 * @param newWindPlayTimer The new current timer since the last wind began.
+	 */
+	public static void setWindPlayTimer(int newWindPlayTimer) {
+		windPlayTimer = newWindPlayTimer;
+	}
+
+	/**
+	 * Provides confirmation whether the wind sound is currently playing.
+	 * @return Confirmation whether the wind sound is currently playing.
+	 */
+	public static boolean getIsPlayingWindSound() {
+		return isPlayingWindSound;
+	}
+
+	/**
+	 * Updates the value of whether the wind sound is currently playing.
+	 * @param newIsPlayingWindSound The new value of whether the wind sound is currently playing.
+	 */
+	public static void setIsPlayingWindSound(boolean newIsPlayingWindSound) {
+		isPlayingWindSound = newIsPlayingWindSound;
+	}
+
+	/**
+	 * Provides the current delay since the last display of cherry leaf particles.
+	 * @return The delay since the last display of cherry leaf particles.
+	 */
+	public static int getCherryParticleDelay() {
+		return cherryParticleDelay;
+	}
+
+	/**
+	 * Updates the value of the current delay since the last display of cherry leaf particles.
+	 * @param newCherryParticleDelay The new value of the delay since the last display of cherry leaf particles.
+	 */
+	public static void setCherryParticleDelay(int newCherryParticleDelay) {
+		cherryParticleDelay = newCherryParticleDelay;
+	}
+
+	/**
+	 * Provides the banner the player is editing.
+	 * @param uuid The player's UUID.
+	 * @return The banner's meta.
+	 */
+	public static BannerMeta getPlayerBanner(UUID uuid) {
+		return playerBanners.get(uuid);
+	}
+
+	/**
+	 * Updates the value of the player's banner.
+	 * @param uuid The UUID of the player.
+	 * @param bannerMeta The banner's meta.
+	 */
+	public static void setPlayerBanner(UUID uuid, BannerMeta bannerMeta) {
+		// If the player is done with editing the banner
+		if (bannerMeta == null) {
+			playerBanners.remove(uuid);
+		}
+
+		playerBanners.put(uuid, bannerMeta);
+	}
+
+	/**
+	 * Confirms if the input item is indeed a crop.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the block is a crop or not.
+	 */
+	public static boolean isBlockCrop(Material type) {
+		return type == Material.WHEAT || type == Material.CARROTS
+				|| type == Material.POTATOES || type == Material.BEETROOTS
+				|| type == Material.NETHER_WART;
+	}
+
+	public static void applyWaterfallEffect() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			Location playerLoc = player.getLocation();
+			int radius = 40;
+
+			int px = playerLoc.getBlockX();
+			int py = playerLoc.getBlockY();
+			int pz = playerLoc.getBlockZ();
+
+			World world = player.getWorld();
+
+			for (int x = -radius; x <= radius; x++) {
+				for (int z = -radius; z <= radius; z++) {
+					for (int y = py + 10; y >= py - 10; y--) {
+						Block start = world.getBlockAt(px + x, y, pz + z);
+
+						// Only check flowing water blocks (NOT source blocks)
+						if (start.getType() != Material.WATER) continue;
+
+						if (start.getBlockData() instanceof Levelled startLevel) {
+							if (startLevel.getLevel() == 0) {
+								continue; // Skip source blocks
+							}
+						} else {
+							continue;
+						}
+
+						// Check how far this water can fall
+						int fallHeight = 0;
+						Block landing = null;
+
+						for (int dy = 1; dy <= 10; dy++) {
+							Block below = start.getRelative(0, -dy, 0);
+
+							if (below.getType() == Material.WATER) {
+								if (below.getBlockData() instanceof Levelled landingLevel) {
+									if (landingLevel.getLevel() == 0) {
+										// Found a source block as landing
+										fallHeight = dy;
+										landing = below;
+										break;
+									}
+								}
+							} else if (!below.getType().isAir()) {
+								// Hit something solid or non-water — stop
+								break;
+							}
+						}
+
+						// Trigger particle effect if flow into source block from at least 2 blocks up
+						if (fallHeight >= 2 && landing != null) {
+							Location particleLoc = landing.getLocation().add(0.5, 1.2, 0.5);
+
+							if (player.getLocation().distanceSquared(particleLoc) <= radius * radius) {
+								Particle.DustOptions whiteDust = new Particle.DustOptions(Color.fromRGB(255, 255, 255), 1.0f);
+								player.spawnParticle(Particle.DUST, particleLoc, 5, 0.6, 0.3, 0.6, whiteDust);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Returns a HashMap containing the quantity of a given potion that a player has.
+	 * @param player The player running the command.
+	 * @return The HashMap of the potions the player has, as well as the quantity of the potion.
+	 */
+	public static HashMap<ItemStack, Integer> getPotionsAndAmounts(Player player) {
+		List<ItemStack> potions = getPlayer(player.getUniqueId()).getPotions();
+		HashMap<ItemStack, Integer> potionsAndAmounts = new HashMap<>();
+
+		// Counts how many potions of the same type there are
+		for (ItemStack potionToCount : potions) {
+			// Add the potion if it doesn't exist
+			if (potionsAndAmounts.get(potionToCount) == null) {
+				potionsAndAmounts.put(potionToCount, 1);
+				continue;
+			}
+
+			int amount = potionsAndAmounts.get(potionToCount);
+			amount++;
+			potionsAndAmounts.put(potionToCount, amount);
+		}
+
+		return potionsAndAmounts;
+	}
+
+	/**
+	 * Provides the current state of the weather.
+	 * @return The current state of the weather.
+	 */
+	public static Weather getWeather() {
+		return weather;
+	}
+
+	/**
+	 * Updates the value of the current state of the weather.
+	 * @param newWeather The new value of the current state of the weather.
+	 */
+	public static void setWeather(Weather newWeather) {
+		weather = newWeather;
+	}
+
+	/**
+	 * Provides the list of locked containers.
+	 * @return The list of locked containers.
+	 */
+	public static List<LockedContainer> getLockedContainers() {
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return null;
+		}
+//		Bukkit.getLogger().info("*********************************");
+//		for (LockedContainer container : lockedContainers) {
+//			Bukkit.getLogger().info(container.toString());
+//		}
+		return lockedContainers;
+	}
+
+	/**
+	 * Updates the list of locked containers.
+	 * @param newLockedContainers The new list of locked containers.
+	 */
+	public static void setLockedContainers(List<LockedContainer> newLockedContainers) {
+		lockedContainers = newLockedContainers;
+	}
+
+	/**
+	 * Adds a new locked container to the list.
+	 * @param lockedContainer The locked container to be added to the list.
+	 */
+	public static void addLockedContainer(LockedContainer lockedContainer) {
+		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+			lockedContainers = new ArrayList<>();
+		}
+		lockedContainers.add(lockedContainer);
+	}
+
+	/**
+	 * Removes a container if it was a locked container in the list.
+	 * @param locations The locations of the container being removed.
+	 * @return 0 if the whole container was removed, 1 if one of the container locations was removed, -1 if unsuccessful
+	 */
+	public static int removeLockedContainer(Location[] locations) {
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return -1;
+		}
+
+		boolean isLockedContainer = false;
+		boolean isDoubleContainer = false;
+		int i = 0;
+
+		while (i < lockedContainers.size()) {
+			Location loc1 = lockedContainers.get(i).getLocations()[0];
+			Location loc2 = lockedContainers.get(i).getLocations()[1];
+			isDoubleContainer = loc1 != null && loc2 != null;
+
+			if (isDoubleContainer) {
+				// If the whole container is being removed
+				if (locations[1] != null) {
+					if (isSameLocation(loc1, locations[0]) && isSameLocation(loc2, locations[1])) {
+						isLockedContainer = true;
+						lockedContainers.remove(i);
+						return 0;
+					}
+				}
+				// Only one of the two locations is being removed
+				else {
+					// Breaking left chest
+					if (isSameLocation(loc1, locations[0])) {
+						locations[0] = loc2;
+						isLockedContainer = true;
+						break;
+					}
+					// Breaking right chest
+					else if (isSameLocation(loc2, locations[0])) {
+						locations[0] = loc1;
+						isLockedContainer = true;
+						break;
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, locations[0])) {
+					isLockedContainer = true;
+					break;
+				}
+			}
+			i++;
+		}
+
+		if (isLockedContainer) {
+			if (isDoubleContainer) {
+				lockedContainers.get(i).setLocations(locations);
+				return 1;
+			} else {
+				lockedContainers.remove(i);
+				return 0;
+			}
+		} else {
+			return -1;
+		}
+	}
+
+	/**
+	 * Provides the Location[] of the container, locked or unlocked.
+	 * If it is a double chest, the left chest is the first index, right is the second.
+	 * @param container The container that the location is being fetched for.
+	 * @return The Location[] of the container.
+	 */
+	public static Location[] getLocationsOfContainer(Block container) {
+		Location loc1 = container.getLocation();
+		Location loc2 = null;
+		if (container.getState() instanceof Chest chest) {
+			InventoryHolder holder = chest.getInventory().getHolder();
+			// Chests can be two blocks wide and the non-clicked block may be the locked container
+			if (holder instanceof DoubleChest doubleChest) {
+				Chest leftChest = (Chest) doubleChest.getLeftSide();
+				Chest rightChest = (Chest) doubleChest.getRightSide();
+				loc1 = leftChest.getLocation();
+				loc2 = rightChest.getLocation();
+			}
+		}
+		return new Location[] { loc1, loc2 };
+	}
+
+	/**
+	 * Adds a player to the list of trusted players to access the container.
+	 * @param uuidToAdd The UUID of the player being added to the container.
+	 * @param location The location of the container.
+	 */
+	public static void addPlayerToContainer(UUID uuidToAdd, Location location) {
+		List<UUID> trusted = null;
+		for (LockedContainer container : getLockedContainers()) {
+			Location loc1 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[0];
+			if (loc2 == null) {
+				if (isSameLocation(loc1, location)) {
+					trusted = container.getTrusted();
+					// If the UUID is already there, do nothing
+					if (!trusted.contains(uuidToAdd)) {
+						trusted.add(uuidToAdd);
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+					trusted = container.getTrusted();
+					// If the UUID is already there, do nothing
+					if (!trusted.contains(uuidToAdd)) {
+						trusted.add(uuidToAdd);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Removes a player from the list of trusted players to access the container.
+	 * @param uuidToRemove The UUID of the player being removed from the container.
+	 * @param location The location of the container.
+	 */
+	public static boolean removePlayerFromContainer(UUID uuidToRemove, Location location) {
+		List<UUID> trusted = null;
+		for (LockedContainer container : getLockedContainers()) {
+			Location loc1 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[0];
+			if (loc2 == null) {
+				if (isSameLocation(loc1, location)) {
+					trusted = container.getTrusted();
+					if (trusted.contains(uuidToRemove)) {
+						trusted.remove(uuidToRemove);
+						return true;
+					}
+				}
+			} else {
+				if (isSameLocation(loc1, location) || isSameLocation(loc2, location)) {
+					trusted = container.getTrusted();
+					if (trusted.contains(uuidToRemove)) {
+						trusted.remove(uuidToRemove);
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Confirms if the input block is a container block.
+	 * @param block The block being verified.
+	 * @return Confirmation whether the input block is a container block.
+	 */
+	public static boolean isContainerBlock(Block block) {
+		return block.getType() == Material.CHEST
+				|| block.getType() == Material.TRAPPED_CHEST
+				|| block.getType() == Material.BARREL
+				|| block.getType().name().endsWith("SHULKER_BOX");
+	}
+
+	/**
+	 * Helper method to determine if the input locations are the same.
+	 * @param loc1 The first location.
+	 * @param loc2 The second location.
+	 * @return Confirmation whether the input locations are the same.
+	 */
+	private static boolean isSameLocation(Location loc1, Location loc2) {
+		return loc1.getBlockX() == loc2.getX()
+				&& loc1.getBlockY() == loc2.getY()
+				&& loc1.getBlockZ() == loc2.getZ();
+	}
+
+	/**
+	 * Provides the LockedContainer at the given block, if it is indeed a locked container.
+	 * @param block The block being searched.
+	 * @return The LockedContainer object if found, or null if not.
+	 */
+	public static LockedContainer getLockedContainerAtBlock(Block block) {
+		if (getLockedContainers() == null || getLockedContainers().isEmpty()) {
+			return null;
+		}
+
+		if (isContainerBlock(block)) {
+			for (LockedContainer container : getLockedContainers()) {
+				Location loc1 = container.getLocations()[0];
+				Location loc2 = container.getLocations()[1];
+				// If it is a single chest/container
+				if (loc2 == null) {
+					if (isSameLocation(loc1, block.getLocation())) {
+						return container;
+					}
+				} else {
+					if (isSameLocation(loc1, block.getLocation()) || isSameLocation(loc2, block.getLocation())) {
+						return container;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Confirms whether the player is trusted to the container they are interacting with.
+	 * @param player The player clicking the block.
+	 * @param block The block that was clicked.
+	 * @return Confirmation whether the player is trusted to the container.
+	 */
+	public static boolean canOpenContainer(Player player, Block block) {
+		List<LockedContainer> lockedContainers = getLockedContainers();
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return true;
+		}
+
+		if (isContainerBlock(block)) {
+			LockedContainer lockedContainer = getLockedContainerAtBlock(block);
+			if (lockedContainer != null) {
+				List<UUID> trusted = lockedContainer.getTrusted();
+				if (trusted.contains(player.getUniqueId())) {
+					return true;
+				}
+			}
+			// The container is not locked
+			else {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Verifies if the launched arrow and the arrow from the Quiver are the same.
+	 * @param launchedArrow The launched arrow.
+	 * @param quiverArrow The arrow in the quiver.
+	 * @return The arrow if it matches.
+	 */
+	public static ItemStack verifyIsSameArrow(ItemStack launchedArrow, ItemStack quiverArrow) {
+		// Basic or special arrow
+		if (launchedArrow.getType() == Material.ARROW) {
+			if (quiverArrow.getType() == Material.ARROW) {
+				if (launchedArrow.hasItemMeta()) {
+					if (quiverArrow.hasItemMeta()) {
+						// Both have meta
+						ItemMeta launchedMeta = launchedArrow.getItemMeta();
+						ItemMeta quiverMeta = quiverArrow.getItemMeta();
+						if (launchedMeta.getPersistentDataContainer().has(ARROW)) {
+							if (quiverMeta.getPersistentDataContainer().has(ARROW)) {
+								String launchedType = launchedMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+								String quiverType = quiverMeta.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+								if (launchedType.equals(quiverType)) {
+									return launchedArrow;
+								} else {
+									return null;
+								}
+							}
+						}
+						// One of them is not a Special arrow but has meta somehow
+						Bukkit.getLogger().info("Something went wrong with identifying the arrows...");
+						return null;
+					} else {
+						return null;
+					}
+				} else {
+					if (quiverArrow.hasItemMeta()) {
+						return null;
+					} else {
+						// Both are regular arrows
+						return launchedArrow;
+					}
+				}
+			} else {
+				return null;
+			}
+		}
+		// Spectral arrow
+		else if (launchedArrow.getType() == Material.SPECTRAL_ARROW) {
+			if (quiverArrow.getType() == Material.SPECTRAL_ARROW) {
+				return launchedArrow;
+			}
+		}
+		// Tipped arrow
+		else {
+			if (quiverArrow.hasItemMeta()) {
+				if (launchedArrow.getItemMeta() instanceof PotionMeta launchedMeta
+						&& quiverArrow.getItemMeta() instanceof PotionMeta quiverMeta) {
+                    if (launchedMeta.getBasePotionType() == quiverMeta.getBasePotionType()) {
+						return launchedArrow;
+					} else {
+						return null;
+					}
+				}
+			} else {
+				return null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Provides the ItemStack with a single quantity of the input arrow type.
+	 * @param arrowType The type of custom arrow.
+	 * @return The arrow with a single quantity.
+	 */
+	public static ItemStack getArrowFromType(String arrowType) {
+		return switch (arrowType) {
+			case "iron" -> new ArrowIron().getItem();
+			case "gold" -> new ArrowGold().getItem();
+			case "amethyst" -> new ArrowAmethyst().getItem();
+			case "obsidian" -> new ArrowObsidian().getItem();
+			case "diamond" -> new ArrowDiamond().getItem();
+			default -> null;
+		};
+	}
+
 }

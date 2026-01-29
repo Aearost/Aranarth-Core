@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
@@ -38,6 +39,11 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions = displayNoResultsForAll(displayedOptions);
 					}
 				}
+			} else if (sender instanceof ConsoleCommandSender) {
+				displayedOptions = displayForOp(sender, displayedOptions, args);
+				if (displayedOptions.isEmpty()) {
+					displayedOptions = displayNoResultsForOp(displayedOptions);
+				}
 			}
 		}
 
@@ -50,18 +56,20 @@ public class CommandACCompleter implements TabCompleter {
 
 	/**
 	 * Displays the commands only available to specified players, as well as all other commands.
-	 * @param player The user that entered the command.
+	 * @param sender The user that entered the command.
 	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayForOp(Player player, List<String> displayedOptions, String[] args) {
+	private List<String> displayForOp(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
 			displayedOptions.add("whereis");
 		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
 			displayedOptions.add("itemname");
+		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
+			displayedOptions.add("give");
 		} else {
-			displayedOptions = displayForAll(player, displayedOptions, args);
+			displayedOptions = displayForAll(sender, displayedOptions, args);
 		}
 
 		return displayedOptions;
@@ -69,33 +77,57 @@ public class CommandACCompleter implements TabCompleter {
 
 	/**
 	 * Displays the commands available to all players.
-	 * @param player The user that entered the command.
+	 * @param sender The user that entered the command.
 	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
 	 * @return The updated list of options to be displayed.
 	 */
-	private List<String> displayForAll(Player player, List<String> displayedOptions, String[] args) {
+	private List<String> displayForAll(CommandSender sender, List<String> displayedOptions, String[] args) {
 		if (!args[0].isEmpty() && "homepad".startsWith(args[0])) {
 			displayedOptions.add("homepad");
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
 			displayedOptions.add("nick");
-		} else if (!args[0].isEmpty() && "arena".startsWith(args[0])) {
-			displayedOptions.add("arena");
-		} else if (!args[0].isEmpty() && "creative".startsWith(args[0])) {
-			displayedOptions.add("creative");
+		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
+			if (args[0].equals("a")) {
+				displayedOptions.add("arena");
+				displayedOptions.add("aranarthium");
+			} else {
+				if (args[0].equals("ar")) {
+					displayedOptions.add("arena");
+					displayedOptions.add("aranarthium");
+				} else {
+					if ("arena".startsWith(args[0])) {
+						displayedOptions.add("arena");
+					} else if ("aranarthium".startsWith(args[0])) {
+						displayedOptions.add("aranarthium");
+					}
+				}
+			}
+		} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
+			if (args[0].equals("c")) {
+				displayedOptions.add("creative");
+				displayedOptions.add("calendar");
+			} else if ("creative".startsWith(args[0])) {
+				displayedOptions.add("creative");
+			} else if ("calendar".startsWith(args[0])) {
+				displayedOptions.add("calendar");
+			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
 			if (args[0].equals("s")) {
 				displayedOptions.add("survival");
 				displayedOptions.add("swimtoggle");
 				displayedOptions.add("shulker");
+				displayedOptions.add("smp");
 			} else if ("swimtoggle".startsWith(args[0])) {
 				displayedOptions.add("swimtoggle");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("shulker".startsWith(args[0])) {
 				displayedOptions.add("shulker");
+			} else if ("smp".startsWith(args[0])) {
+				displayedOptions.add("smp");
 			}
-		}else if (!args[0].isEmpty() && args[0].startsWith("b")) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
 			if (args[0].equals("b")) {
 				displayedOptions.add("blacklist");
 				displayedOptions.add("balance");
@@ -104,8 +136,7 @@ public class CommandACCompleter implements TabCompleter {
 			} else if ("balance".startsWith(args[0])) {
 				displayedOptions.add("balance");
 			}
-		}
-		else if (!args[0].isEmpty() && args[0].startsWith("p")) {
+		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
 			if (args[0].equals("p")) {
 				displayedOptions.add("ping");
 				displayedOptions.add("potions");
@@ -119,6 +150,28 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "randomizer".startsWith(args[0])) {
 			displayedOptions.add("randomizer");
+		} else if (!args[0].isEmpty() && "date".startsWith(args[0])) {
+			displayedOptions.add("date");
+		} else if (!args[0].isEmpty() && "aranarth".startsWith(args[0])) {
+			displayedOptions.add("aranarth");
+		} else if (!args[0].isEmpty() && "trust".startsWith(args[0])) {
+			displayedOptions.add("trust");
+		} else if (!args[0].isEmpty() && "lock".startsWith(args[0])) {
+			displayedOptions.add("lock");
+		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
+			if (args[0].equals("u")) {
+				displayedOptions.add("untrust");
+				displayedOptions.add("unlock");
+			} else {
+				if (args[0].equals("un")) {
+					displayedOptions.add("untrust");
+					displayedOptions.add("unlock");
+				} else if (!args[0].isEmpty() && "untrust".startsWith(args[0])) {
+					displayedOptions.add("untrust");
+				} else if (!args[0].isEmpty() && "unlock".startsWith(args[0])) {
+					displayedOptions.add("unlock");
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -131,6 +184,7 @@ public class CommandACCompleter implements TabCompleter {
 	private List<String> displayNoResultsForOp(List<String> displayedOptions) {
 		displayedOptions.add("whereis");
 		displayedOptions.add("itemname");
+		displayedOptions.add("give");
 		displayedOptions = displayNoResultsForAll(displayedOptions);
 		return displayedOptions;
 	}
@@ -154,6 +208,14 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("shulker");
 		displayedOptions.add("randomizer");
 		displayedOptions.add("balance");
+		displayedOptions.add("date");
+		displayedOptions.add("calendar");
+		displayedOptions.add("aranarthium");
+		displayedOptions.add("trust");
+		displayedOptions.add("untrust");
+		displayedOptions.add("lock");
+		displayedOptions.add("unlock");
+		displayedOptions.add("smp");
 		return displayedOptions;
 	}
 
@@ -169,28 +231,12 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 2) {
 					if (!args[1].isEmpty() && "create".startsWith(args[1])) {
 						displayedOptions.add("create");
-					} else if (!args[1].isEmpty() && "give".startsWith(args[1])) {
-						displayedOptions.add("give");
 					} else {
 						displayedOptions.add("create");
-						displayedOptions.add("give");
-					}
-				} else {
-					if (args[1].equalsIgnoreCase("give")) {
-						Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-						Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-						for (Player onlinePlayer : onlinePlayers) {
-							// Only display the name if it aligns with one that is currently online
-							if (onlinePlayer.getName().toLowerCase().startsWith(args[2].toLowerCase())) {
-								displayedOptions.add(onlinePlayer.getName());
-							} else if (args[1].isEmpty()) {
-								displayedOptions.add(onlinePlayer.getName());
-							}
-						}
 					}
 				}
 			}
-			case "ping", "balance" -> {
+			case "ping", "balance", "trust", "untrust" -> {
 				Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 				Bukkit.getOnlinePlayers().toArray(onlinePlayers);
 				for (Player onlinePlayer : onlinePlayers) {
@@ -213,13 +259,22 @@ public class CommandACCompleter implements TabCompleter {
 				}
 			}
 			case "potions" -> {
-				if (!args[1].isEmpty() && "add".startsWith(args[1])) {
-					displayedOptions.add("add");
-				} else if (!args[1].isEmpty() && "list".startsWith(args[1])) {
-					displayedOptions.add("list");
-				} else {
-					displayedOptions.add("add");
-					displayedOptions.add("list");
+				if (args.length == 2) {
+					if (!args[1].isEmpty() && "add".startsWith(args[1])) {
+						displayedOptions.add("add");
+					} else if (!args[1].isEmpty() && "list".startsWith(args[1])) {
+						displayedOptions.add("list");
+					} else if (!args[1].isEmpty() && "remove".startsWith(args[1])) {
+						displayedOptions.add("remove");
+					} else {
+						displayedOptions.add("add");
+						displayedOptions.add("list");
+						displayedOptions.add("remove");
+					}
+				} else if (args.length == 3) {
+					if (args[1].equals("remove") && args[2].isEmpty()) {
+						displayedOptions.add("qty");
+					}
 				}
 			}
 			case "randomizer" -> {

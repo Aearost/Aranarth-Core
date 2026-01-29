@@ -1,29 +1,18 @@
 package com.aearost.aranarthcore.event.mob;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.Random;
 
-public class MountSpawn implements Listener {
-
-	public MountSpawn(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Deals with overriding the default spawn behaviour for horses and camels.
-	 * Determines the values in brackets of probability.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onMountSpawn(final CreatureSpawnEvent e) {
-		if (e.getEntity() instanceof AbstractHorse && !(e.getEntity() instanceof Camel)) {
+/**
+ * Deals with overriding the default spawn behaviour for horses and camels.
+ * Determines the values in brackets of probability.
+ */
+public class MountSpawn {
+	public void execute(CreatureSpawnEvent e) {
+		if (!(e.getEntity() instanceof Camel camel)) {
 			AbstractHorse horse;
 			if (e.getEntity() instanceof Horse) {
 				horse = (Horse) e.getEntity();
@@ -98,7 +87,7 @@ public class MountSpawn implements Listener {
 				horse.setTamed(true);
 				horse.setHealth(horse.getAttribute(Attribute.MAX_HEALTH).getValue());
 			}
-		} else if (e.getEntity() instanceof Camel camel) {
+		} else {
             Random r = new Random();
 			
 			// A maximum limit of 40 hearts (80 half-hearts) --> 80
@@ -155,7 +144,5 @@ public class MountSpawn implements Listener {
 			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
 			camel.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
 		}
-		
 	}
-
 }

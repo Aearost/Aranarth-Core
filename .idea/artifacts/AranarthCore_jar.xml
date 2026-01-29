@@ -3,7 +3,6 @@
     <output-path>$USER_HOME$/Desktop/Folders/Minecraft/Aranarth/plugins</output-path>
     <root id="archive" name="AranarthCore.jar">
       <element id="module-output" name="AranarthCore" />
-      <element id="library" level="project" name="mcMMO" />
     </root>
   </artifact>
 </component>

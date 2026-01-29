@@ -24,7 +24,7 @@ public class CommandPotions {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
-			if (!player.getLocation().getWorld().getName().startsWith("world")) {
+			if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
 				return true;
 			}
@@ -46,31 +46,32 @@ public class CommandPotions {
                             }
 
                             // Counts how many of each potion there is
-                            HashMap<String, Integer> amountOfPotions = new HashMap<>();
-                            for (ItemStack potionToCount : potions) {
-                                String potionName = null;
-                                if (potionToCount.getType() == Material.AIR) {
-                                    potions.remove(potionToCount);
-                                    continue;
-                                }
+							// Logic differs too much for using the helper method AranarthUtils.getPotionsAndAmounts()
+							HashMap<String, Integer> amountOfPotions = new HashMap<>();
+							for (ItemStack potionToCount : potions) {
+								String potionName = null;
+								if (potionToCount.getType() == Material.AIR) {
+									potions.remove(potionToCount);
+									continue;
+								}
 
-                                // If it is an mcMMO potion
-                                if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
-                                    potionName = potionToCount.getItemMeta().getItemName();
-                                } else {
-                                    PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
+								// If it is an mcMMO potion
+								if (potionToCount.hasItemMeta() && potionToCount.getItemMeta().hasItemName()) {
+									potionName = potionToCount.getItemMeta().getItemName();
+								} else {
+									PotionMeta meta = (PotionMeta) potionToCount.getItemMeta();
 									if (Objects.nonNull(meta)) {
 										potionName = addPotionConsumptionMethodToName(potionToCount, ChatUtils.getFormattedItemName(meta.getBasePotionType().name()));
 									}
-                                }
+								}
 
-                                if (amountOfPotions.containsKey(potionName)) {
-                                    Integer newAmount = amountOfPotions.get(potionName) + 1;
-                                    amountOfPotions.put(potionName, newAmount);
-                                } else {
-                                    amountOfPotions.put(potionName, 1);
-                                }
-                            }
+								if (amountOfPotions.containsKey(potionName)) {
+									Integer newAmount = amountOfPotions.get(potionName) + 1;
+									amountOfPotions.put(potionName, newAmount);
+								} else {
+									amountOfPotions.put(potionName, 1);
+								}
+							}
                             aranarthPlayer.setPotions(potions);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
@@ -90,16 +91,32 @@ public class CommandPotions {
                         }
                     }
                     case "add" -> {
-                        GuiPotions gui = new GuiPotions(player);
+                        GuiPotions gui = new GuiPotions(player, true);
                         gui.openGui();
 						return true;
                     }
                     case "remove" -> {
-                        // Check next sub-commands to ensure valid syntax
-                        // Also will need auto-completer to display all potions that they have
-                        // /ac potion remove HEALTH_BOOST 7 (assuming this is the accurate name)
-                        // Most likely comes from PotionEffectType (for effect) and PotionEffect (for
-                        // amplifier)
+						if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
+							if (args.length >= 3) {
+								try {
+									int quantity = Integer.parseInt(args[2]);
+									if (quantity > 0) {
+										AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+										aranarthPlayer.setPotionQuantityToRemove(quantity);
+										AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+										GuiPotions gui = new GuiPotions(player, false);
+										gui.openGui();
+									} else {
+										player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
+									}
+								} catch (NumberFormatException e) {
+									player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+								}
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+							}
+							return true;
+						}
                     }
                     default ->
                             player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid potion sub-command!"));

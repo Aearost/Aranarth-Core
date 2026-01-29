@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.objects;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -31,6 +32,11 @@ public class AranarthPlayer {
 	private boolean isRandomizing;
 	private boolean isMissingItemMessageSent;
 	private double balance;
+	private int potionQuantityToRemove;
+	private UUID trustedPlayerUUID;
+	private UUID untrustedPlayerUUID;
+	private boolean isLockingContainer;
+	private boolean isUnlockingContainer;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -52,6 +58,11 @@ public class AranarthPlayer {
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = 0.00;
+		this.potionQuantityToRemove = 0;
+		this.trustedPlayerUUID = null;
+		this.untrustedPlayerUUID = null;
+		this.isLockingContainer = false;
+		this.isUnlockingContainer = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String prefix, String survivalInventory, String arenaInventory, String creativeInventory, List<ItemStack> potions, List<ItemStack> arrows, List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance) {
@@ -74,6 +85,11 @@ public class AranarthPlayer {
 		this.isRandomizing = false;
 		this.isMissingItemMessageSent = false;
 		this.balance = balance;
+		this.potionQuantityToRemove = 0;
+		this.trustedPlayerUUID = null;
+		this.untrustedPlayerUUID = null;
+		this.isLockingContainer = false;
+		this.isUnlockingContainer = false;
 	}
 
 	/**
@@ -410,6 +426,86 @@ public class AranarthPlayer {
 	 */
 	public void setBalance(double balance) {
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * @return The quantity to be removed.
+	 */
+	public int getPotionQuantityToRemove() {
+		return potionQuantityToRemove;
+	}
+
+	/**
+	 * Updates the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * @param potionQuantityToRemove The quantity of the potion to be removed.
+	 */
+	public void setPotionQuantityToRemove(int potionQuantityToRemove) {
+		this.potionQuantityToRemove = potionQuantityToRemove;
+	}
+
+	/**
+	 * Provides the temporary variable tracking which player is being trusted to a container.
+	 * @return The player's UUID that will be trusted to the container.
+	 */
+	public UUID getTrustedPlayerUUID() {
+		return trustedPlayerUUID;
+	}
+
+	/**
+	 * Updates the temporary variable tracking which player is being trusted to a container.
+	 * @param trustedPlayerUUID The UUID of the player to be trusted.
+	 */
+	public void setTrustedPlayerUUID(UUID trustedPlayerUUID) {
+		this.trustedPlayerUUID = trustedPlayerUUID;
+	}
+
+	/**
+	 * Provides the temporary variable tracking which player is being untrusted from a container.
+	 * @return The player's UUID that will be untrusted from the container.
+	 */
+	public UUID getUntrustedPlayerUUID() {
+		return untrustedPlayerUUID;
+	}
+
+	/**
+	 * Updates the temporary variable tracking which player is being untrusted from a container.
+	 * @param untrustedPlayerUUID The UUID of the player to be untrusted.
+	 */
+	public void setUntrustedPlayerUUID(UUID untrustedPlayerUUID) {
+		this.untrustedPlayerUUID = untrustedPlayerUUID;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is attempting to unlock a container.
+	 * @return Whether the player is attempting to unlock a container.
+	 */
+	public boolean getIsUnlockingContainer() {
+		return isUnlockingContainer;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is attempting to unlock a container.
+	 * @param isUnlockingContainer The temporary variable of whether the player is attempting to unlock a container.
+	 */
+	public void setIsUnlockingContainer(boolean isUnlockingContainer) {
+		this.isUnlockingContainer = isUnlockingContainer;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is attempting to lock a container.
+	 * @return Whether the player is attempting to lock a container.
+	 */
+	public boolean getIsLockingContainer() {
+		return isLockingContainer;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is attempting to lock a container.
+	 * @param isLockingContainer The temporary variable of whether the player is attempting to lock a container.
+	 */
+	public void setIsLockingContainer(boolean isLockingContainer) {
+		this.isLockingContainer = isLockingContainer;
 	}
 
 }

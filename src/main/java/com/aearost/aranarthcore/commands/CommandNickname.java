@@ -28,7 +28,7 @@ public class CommandNickname {
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cConsole does not have a nickname!"));
-				return false;
+				return true;
 			}
 		} else if (args.length == 2) {
 			if (sender instanceof Player player) {

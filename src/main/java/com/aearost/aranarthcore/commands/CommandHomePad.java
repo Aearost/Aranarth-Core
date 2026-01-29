@@ -1,16 +1,12 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.items.HomePad;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.ItemUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,29 +29,6 @@ public class CommandHomePad {
 				return true;
 			} else {
                 switch (args[1]) {
-                    case "give" -> {
-                        if (args.length > 2) {
-                            if (!player.getName().equals("Aearost")) {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
-                                return true;
-                            }
-
-                            Player playerInArg = null;
-                            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                                if (onlinePlayer.getName().equalsIgnoreCase(args[2])) {
-                                    playerInArg = onlinePlayer;
-                                }
-                            }
-                            if (playerInArg != null) {
-                                ItemStack homepadItem = HomePad.getHomePad();
-                                ItemUtils.giveItem(homepadItem, playerInArg, sender);
-                            } else {
-                                player.sendMessage(ChatUtils.chatMessage("&7" + args[1] + " &cis not a valid player name!"));
-                            }
-                        } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou must enter a player name!"));
-                        }
-                    }
                     case "create" -> {
                         // Must be on a valid homepad
                         if (Objects.nonNull(AranarthUtils.getHomePad(player.getLocation()))) {
@@ -98,14 +71,14 @@ public class CommandHomePad {
                                 final int newNumber = Integer.parseInt(args[3]);
                                 if (newNumber == homeNumber) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a different number to reorder!"));
-                                    return false;
+                                    return true;
                                 }
 
                                 List<Home> homes = AranarthUtils.getHomes();
                                 ArrayList<Home> newHomes = new ArrayList<>();
                                 if (Objects.isNull(homes) || homes.isEmpty()) {
                                     sender.sendMessage(ChatUtils.chatMessage("&cThere are no homes!"));
-                                    return false;
+                                    return true;
                                 }
 
                                 for (int i = 0; i < homes.size(); i++) {
@@ -129,7 +102,7 @@ public class CommandHomePad {
                                         "&7You have updated the slot number of " + homes.get(homeNumber).getHomeName()));
                             } catch (NumberFormatException e) {
                                 sender.sendMessage(ChatUtils.chatMessage("&cA home could not be updated!"));
-                                return false;
+                                return true;
                             }
                         }
                     }
@@ -139,12 +112,11 @@ public class CommandHomePad {
                     }
                 }
 			}
-
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis must be executed in-game!"));
+            return true;
 		}
-
-		return true;
+		return false;
 	}
 
 }

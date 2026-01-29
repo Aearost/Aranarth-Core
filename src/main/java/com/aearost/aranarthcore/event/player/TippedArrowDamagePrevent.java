@@ -1,30 +1,19 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionType;
 
-public class TippedArrowDamagePrevent implements Listener {
-
-	public TippedArrowDamagePrevent(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents damage from being taken from tipped arrows that apply a positive potion effect.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onArrowHitPlayer(final EntityDamageEvent e) {
+/**
+ * Prevents damage from being taken from tipped arrows that apply a positive potion effect.
+ */
+public class TippedArrowDamagePrevent {
+	public void execute(EntityDamageEvent e) {
 		if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
 			if (e.getDamageSource().getCausingEntity() instanceof Player) {
 				if (e.getEntity() instanceof Player player) {

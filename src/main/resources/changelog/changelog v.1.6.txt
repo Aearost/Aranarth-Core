@@ -1,11 +1,30 @@
 AranarthCore v. 1.6
 
 Features
-[+] Added economy functionality
+[+] Added seasons resulting in snow during winter months and melting during summer months
+[+] Added a server date system
+[+] Added special worldwide effects based on the given season
+[+] Added Aranarthium ingots
+[+] Added Aranarthium armor sets with custom effects
+[+] Added economy functionality using player shops
 [+] Added /ac balance [player] command to view your balance or another player's
+[+] Added recipe for Pale Moss blocks
+[+] Added recipe for Pale Moss Carpets
+[+] Added recipe to uncraft Honeycomb Blocks back into Honeycomb
+[+] Added recipe for Exposed Copper
+[+] Added recipe for Weathered Copper
+[+] Added recipe for Oxidized Copper
 
 Bug Fixes
-- N/A
+- Allowed players to move quiver around inventory
+- Fixed issue preventing multiple word usage of /ac itemname gradient
+- Crop harvest is now looking for Fortune and not Looting
+- Crop harvest fortune now works on wheat and beetroot when not sneaking
+- Added support for shulker boxes to be sorted with the chest sort functionality
+- Shulker boxes can no longer be placed in other shulker boxes via hotkey slot changes
 
 Miscellaneous
-- N/A
+- Restructured all events and listeners into more concise classes to prevent the same listener from being called in two classes
+- Made all custom items persist using NamespacedKey attributes
+- Made custom items be identified with the NamespacedKeys instead of their lore
+- Disabled Chest Sort

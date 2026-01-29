@@ -1,34 +1,17 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 
-public class ConcretePowderGravityPrevent implements Listener {
-
-	public ConcretePowderGravityPrevent(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
-
-	/**
-	 * Prevents concrete powder from being affected by gravity.
-	 * @param e The event.
-	 */
-	@EventHandler
-	public void onConcretePowderFall(final EntityChangeBlockEvent e) {
-		Entity entity = e.getEntity();
-		
-		if (entity instanceof FallingBlock) {
-			Block block = e.getBlock();
-			if (e.getTo() == Material.AIR && isConcretePowder(block.getType())) {
-				e.setCancelled(true);
-			}
+/**
+ * Prevents concrete powder from being affected by gravity.
+ */
+public class ConcretePowderGravityPrevent {
+	public void execute(EntityChangeBlockEvent e) {
+		Block block = e.getBlock();
+		if (e.getTo() == Material.AIR && isConcretePowder(block.getType())) {
+			e.setCancelled(true);
 		}
 	}
 	

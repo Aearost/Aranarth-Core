@@ -19,7 +19,7 @@ public class RecipeHoneyGlazedHam {
 	 */
 	private void createRecipe(Plugin plugin) {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_HONEY_GLAZED_HAM");
-		ShapelessRecipe recipe = new ShapelessRecipe(nk, HoneyGlazedHam.getHoneyGlazedHam());
+		ShapelessRecipe recipe = new ShapelessRecipe(nk, new HoneyGlazedHam().getItem());
 		
 		recipe.addIngredient(1, Material.COOKED_PORKCHOP);
 		recipe.addIngredient(1, Material.HONEY_BOTTLE);
