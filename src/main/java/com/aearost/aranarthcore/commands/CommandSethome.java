@@ -52,15 +52,7 @@ public class CommandSethome {
 					}
 
 					homeName = ChatUtils.removeSpecialCharacters(homeName);
-
-					// Ensures the home name isn't already used
 					String strippedName = ChatUtils.stripColorFormatting(homeName);
-					for (Home home : aranarthPlayer.getHomes()) {
-						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use the same home name twice!"));
-							return true;
-						}
-					}
 
 					// Ensures that more than just color codes were entered
 					if (strippedName.isEmpty()) {
@@ -68,10 +60,27 @@ public class CommandSethome {
 						return true;
 					}
 
+					// Replaces the existing home
+					String homeNameToDelete = "";
+					for (Home home : aranarthPlayer.getHomes()) {
+						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {
+							homeNameToDelete = home.getName();
+						}
+					}
+
+					if (!homeNameToDelete.isEmpty()) {
+						AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(homeNameToDelete));
+					}
+
 					// Create the home at the computed surface location
 					Home home = new Home(homeName, loc, Material.BARRIER);
 					AranarthUtils.addPlayerHome(player, home);
-					player.sendMessage(ChatUtils.chatMessage("&7You have added the home &e" + homeName));
+
+					if (homeNameToDelete.isEmpty()) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have added the home &e" + homeName));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You have updated the location of the home &e" + homeName));
+					}
 					return true;
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac sethome <name>"));

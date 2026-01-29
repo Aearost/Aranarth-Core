@@ -4,6 +4,7 @@ Features
 [~] Restricted Aquinvor potion effects to only apply while it is raining
 [+] Added Discord nickname changes for Dukes
 [+] Added recipe for green dye using blue and yellow dye
+[+] Added functionality to replace a home if another one already uses that name
 
 Miscellaneous
 -
