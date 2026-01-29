@@ -195,7 +195,7 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &2MetalClips"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &7Suffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick (and a nickname in Discord)"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
