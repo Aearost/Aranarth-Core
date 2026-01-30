@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.event.mob.FaunivorExtraDeathDrops;
 import com.aearost.aranarthcore.event.mob.GoatDeath;
 import com.aearost.aranarthcore.event.mob.WanderingTraderDeath;
 import com.aearost.aranarthcore.event.mob.ZombieHorseSpawn;
+import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Animals;
@@ -31,6 +32,8 @@ public class EntityDeathEventListener implements Listener {
             new WanderingTraderDeath().execute(e);
         } else if (e.getEntityType() == EntityType.GOAT) {
             new GoatDeath().execute(e);
+        } else if (e.getEntityType() == EntityType.PLAYER) {
+            new PlayerHeadDrop().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
