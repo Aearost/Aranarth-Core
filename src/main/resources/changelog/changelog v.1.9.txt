@@ -6,6 +6,8 @@ Features
 [+] Added recipe for green dye using blue and yellow dye
 [+] Added functionality to replace a home if another one already uses that name
 [+] Added functionality to drop a player's head at a rare rate when killed
+[+] Added sound effect when a player sends/receives a teleport request
+[+] Added a sound effect for the player that is not teleporting in a tpaccept
 
 Miscellaneous
 -

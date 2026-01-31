@@ -24,6 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.profile.PlayerProfile;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -2383,5 +2384,40 @@ public class AranarthUtils {
 	 */
 	public static void deleteShopLocation(UUID uuid) {
 		shopLocations.remove(uuid);
+	}
+
+	/**
+	 * Plays the jingle when a player sends or receives a teleport request.
+	 * @param player The player that sent or received the request.
+	 */
+	public static void playTeleportSound(Player player) {
+		Sound sound = Sound.BLOCK_NOTE_BLOCK_HARP;
+		new BukkitRunnable() {
+			int runs = 0;
+			@Override
+			public void run() {
+				float pitch = 1.5F;
+
+				switch (runs) {
+					case 0 -> pitch = 1.5F;
+					case 1 -> pitch = 1.25F;
+					case 2 -> pitch = 1.5F;
+					case 3 -> pitch = 2F;
+					default -> {
+						pitch = 0;
+					}
+				}
+
+				// No sound
+				if (pitch != 0) {
+					player.playSound(player, sound, 1F, pitch);
+				}
+
+				if (runs == 5) {
+					cancel();
+				}
+				runs++;
+			}
+		}.runTaskTimer(AranarthCore.getInstance(), 0, 3); // Runs every 3 ticks
 	}
 }
