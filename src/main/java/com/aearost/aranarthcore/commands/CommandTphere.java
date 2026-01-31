@@ -42,6 +42,8 @@ public class CommandTphere {
 						player.sendMessage(ChatUtils.chatMessage("&7You have sent a teleport request to &e" + targetPlayer.getNickname()));
 						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested you teleport to them"));
 						target.sendMessage(ChatUtils.chatMessage("&7Use &e/ac tpaccept &7or &e/ac tpdeny"));
+						AranarthUtils.playTeleportSound(player);
+						AranarthUtils.playTeleportSound(target);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 					}
