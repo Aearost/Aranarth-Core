@@ -45,6 +45,7 @@ public class PermissionUtils {
 		// Must update arena permissions after base permissions apply
 		toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
 		updateSubElements(player);
+		AranarthUtils.updateTab();
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
 

@@ -49,6 +49,7 @@ public class PlayerServerQuitListener implements Listener {
 		}
 
 		playQuitSound();
+		AranarthUtils.updateTab();
 	}
 
 	/**
