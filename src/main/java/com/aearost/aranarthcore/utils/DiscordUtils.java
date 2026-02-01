@@ -612,4 +612,24 @@ public class DiscordUtils {
 
 		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 	}
+
+	/**
+	 * Handles applying the muted role in Discord.
+	 * @param uuid The uuid of the player.
+	 * @param isApplyingMute Whether the player is actively being muted.
+	 */
+	public static void toggleMuteRole(UUID uuid, boolean isApplyingMute) {
+		Guild guild = getGuild();
+		Role mutedRole = guild.getRoleById("1467657570453033034"); // The Muted role
+		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
+		if (playerDiscordId == null) {
+			Bukkit.getLogger().info("The Muted role could not be applied to " + Bukkit.getOfflinePlayer(uuid).getName() + " as they are not linked to Discord");
+		} else {
+			if (isApplyingMute) {
+				guild.addRoleToMember(playerDiscordId, mutedRole).queue();
+			} else {
+				guild.removeRoleFromMember(playerDiscordId, mutedRole).queue();
+			}
+		}
+	}
 }

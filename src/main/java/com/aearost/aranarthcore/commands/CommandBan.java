@@ -65,8 +65,10 @@ public class CommandBan {
 
 		boolean wasPlayerBanned = false;
 		String nickname = "";
-		OfflinePlayer player = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[1]));
-		if (player != null) {
+		UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+
+		if (uuid != null) {
+			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 			wasPlayerBanned = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -88,7 +90,7 @@ public class CommandBan {
 			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
 			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
+			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
 			return;
 		}
 
