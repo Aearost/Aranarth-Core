@@ -10,6 +10,7 @@ Features
 [+] Added a sound effect for the player that is not teleporting in a tpaccept
 [+] Added functionality to beautify the tab list
 [+] Added additional calls to re-evaluate player permissions
+[+] Glass, glass panes, and ice will break when hit with an arrow
 
 Miscellaneous
 -
