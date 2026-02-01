@@ -11,6 +11,8 @@ Features
 [+] Added functionality to beautify the tab list
 [+] Added additional calls to re-evaluate player permissions
 [+] Glass, glass panes, and ice will break when hit with an arrow
+[+] Added a Muted role in Discord and added auto-assigning functionality
+[~] Fixed bug with mute and ban commands that caused errors when the player did not exist
 
 Miscellaneous
 -

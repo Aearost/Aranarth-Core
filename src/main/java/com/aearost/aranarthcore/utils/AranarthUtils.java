@@ -1384,6 +1384,7 @@ public class AranarthUtils {
 	 */
 	public static void addMutedPlayer(UUID uuid) {
 		mutedPlayers.add(uuid);
+		DiscordUtils.toggleMuteRole(uuid, true);
 	}
 
 	/**
@@ -1392,6 +1393,7 @@ public class AranarthUtils {
 	 */
 	public static void removeMutedPlayer(UUID uuid) {
 		mutedPlayers.remove(uuid);
+		DiscordUtils.toggleMuteRole(uuid, false);
 	}
 
 	/**

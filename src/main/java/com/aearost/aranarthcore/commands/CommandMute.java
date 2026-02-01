@@ -56,8 +56,9 @@ public class CommandMute {
 
 		boolean wasPlayerMuted = false;
 		String nickname = "";
-		OfflinePlayer player = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[1]));
-		if (player != null) {
+		UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+		if (uuid != null) {
+			OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 			wasPlayerMuted = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -121,7 +122,7 @@ public class CommandMute {
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			AranarthUtils.addMutedPlayer(player.getUniqueId());
 		} else {
-			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1]) + " &ccould not be found");
+			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
 		}
 
 		if (wasPlayerMuted) {
