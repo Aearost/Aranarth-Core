@@ -144,6 +144,16 @@ public class CommandRankSet {
 						}
 					}
 
+					if (sender instanceof Player senderPlayer) {
+						if (senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+							PermissionUtils.evaluatePlayerPermissions(senderPlayer);
+						}
+					}
+
+					if (player.isOnline()) {
+						PermissionUtils.evaluatePlayerPermissions(player.getPlayer());
+					}
+
 					if (isSuccessful) {
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						String rankName = Character.toUpperCase(args[1].charAt(0)) + args[1].substring(1);

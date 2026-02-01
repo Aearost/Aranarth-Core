@@ -8,6 +8,8 @@ Features
 [+] Added functionality to drop a player's head at a rare rate when killed
 [+] Added sound effect when a player sends/receives a teleport request
 [+] Added a sound effect for the player that is not teleporting in a tpaccept
+[+] Added functionality to beautify the tab list
+[+] Added additional calls to re-evaluate player permissions
 
 Miscellaneous
 -

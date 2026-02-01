@@ -2420,4 +2420,84 @@ public class AranarthUtils {
 			}
 		}.runTaskTimer(AranarthCore.getInstance(), 0, 3); // Runs every 3 ticks
 	}
+
+	/**
+	 * Handles logic to update how the tab list displays
+	 */
+	public static void updateTab() {
+		List<UUID> copy = new ArrayList<>();
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			player.setPlayerListHeader(ChatUtils.translateToColor("&8&l---------------------\n&6&lThe Realm of Aranarth"));
+			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
+			copy.add(player.getUniqueId());
+		}
+
+		HashMap<UUID, String> displayedNames = new LinkedHashMap<>();
+		int i = 0;
+		int rank = 15;
+		while (!copy.isEmpty()) {
+			boolean wasAddedToList = false;
+			UUID uuid = copy.get(i);
+			AranarthPlayer aranarthPlayer = getPlayer(uuid);
+			String display = ChatUtils.formatChatPrefix(Bukkit.getPlayer(uuid));
+			display = display.substring(5, display.length() - 1);
+			display = display.substring(0, display.length() - 7);
+
+			if (rank == 15 && aranarthPlayer.getCouncilRank() == 3) {
+				wasAddedToList = true;
+			} else if (rank == 14 && aranarthPlayer.getCouncilRank() == 2) {
+				wasAddedToList = true;
+			} else if (rank == 13 && aranarthPlayer.getCouncilRank() == 1) {
+				wasAddedToList = true;
+			} else if (rank == 12 && aranarthPlayer.getArchitectRank() == 1) {
+				wasAddedToList = true;
+			} else if (rank == 11 && aranarthPlayer.getSaintRank() == 3) {
+				wasAddedToList = true;
+			} else if (rank == 10 && aranarthPlayer.getSaintRank() == 2) {
+				wasAddedToList = true;
+			} else if (rank == 9 && aranarthPlayer.getSaintRank() == 1) {
+				wasAddedToList = true;
+			} else if (rank == 8 && aranarthPlayer.getRank() == 8) {
+				wasAddedToList = true;
+			} else if (rank == 7 && aranarthPlayer.getRank() == 7) {
+				wasAddedToList = true;
+			} else if (rank == 6 && aranarthPlayer.getRank() == 6) {
+				wasAddedToList = true;
+			} else if (rank == 5 && aranarthPlayer.getRank() == 5) {
+				wasAddedToList = true;
+			} else if (rank == 4 && aranarthPlayer.getRank() == 4) {
+				wasAddedToList = true;
+			} else if (rank == 3 && aranarthPlayer.getRank() == 3) {
+				wasAddedToList = true;
+			} else if (rank == 2 && aranarthPlayer.getRank() == 2) {
+				wasAddedToList = true;
+			} else if (rank == 1 && aranarthPlayer.getRank() == 1) {
+				wasAddedToList = true;
+			} else {
+				wasAddedToList = true;
+			}
+
+			// Only remove if the player was added to the list
+			if (wasAddedToList) {
+				displayedNames.put(uuid, ChatUtils.translateToColor(display));
+				copy.remove(uuid);
+			}
+
+			// Iterate to next player or reset to first
+			i++;
+			if (i >= copy.size()) {
+				i = 0;
+				rank--;
+			}
+		}
+
+		int j = 0;
+		for (UUID uuid : displayedNames.keySet()) {
+			Player player = Bukkit.getPlayer(uuid);
+			player.setPlayerListName(displayedNames.get(uuid));
+			player.setPlayerListOrder(j);
+			j++;
+		}
+	}
+
 }

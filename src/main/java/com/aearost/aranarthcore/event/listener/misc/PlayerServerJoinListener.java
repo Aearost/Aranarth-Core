@@ -117,6 +117,7 @@ public class PlayerServerJoinListener implements Listener {
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
 
 		playJoinSound();
+		AranarthUtils.updateTab();
 	}
 
 	/**
