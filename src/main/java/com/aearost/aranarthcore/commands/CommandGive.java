@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.items.AranarthItem;
+import com.aearost.aranarthcore.items.enchantment.AranarthEnchantment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -63,6 +64,8 @@ public class CommandGive {
 				} else if (args[2].startsWith("Key")) {
 					isKey = true;
 					fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
+				} else if (args[2].startsWith("Book")) {
+					fullPathName = "com.aearost.aranarthcore.items.enchantment." + args[2];
 				} else {
 					fullPathName = "com.aearost.aranarthcore.items." + args[2];
 				}
@@ -113,6 +116,31 @@ public class CommandGive {
 					if (isKey) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						DiscordUtils.donationNotification(player.getName() + " has purchased " + item.getItemMeta().getDisplayName() + " x3", player.getUniqueId(), Color.CYAN);
+					}
+				} else if (instance instanceof AranarthEnchantment aranarthEnchantment) {
+					int level = 1;
+					if (args.length >= 4) {
+						try {
+							level = Integer.parseInt(args[3]);
+							if (level < 0 || level > 5) {
+								throw new NumberFormatException();
+							}
+						} catch (NumberFormatException e) {
+							player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
+							return;
+						}
+					}
+					ItemStack item = aranarthEnchantment.getItem(level);
+					player.getInventory().addItem(item);
+
+					ItemMeta meta = item.getItemMeta();
+					String itemName = meta.getLore().get(1);
+
+					player.sendMessage(ChatUtils.chatMessage("&7You have been given a Book of " + itemName));
+					if (sender instanceof Player playerSender) {
+						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
+							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given a Book of " + itemName));
+						}
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThere is no item by that name!"));

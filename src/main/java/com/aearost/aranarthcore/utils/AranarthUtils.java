@@ -2500,4 +2500,23 @@ public class AranarthUtils {
 		}
 	}
 
+	/**
+	 * Provides the roman numeral equivalent of the input level.
+	 * @param level The level of the enchantment.
+	 * @return The roman numeral equivalent of the input level.
+	 */
+	public static String getEnchantmentLevelLetters(int level) {
+		String levelLetter = "I";
+		if (level == 2) {
+			return "II";
+		} else if (level == 3) {
+			return "III";
+		} else if (level == 4) {
+			return "IV";
+		} else if (level == 5) {
+			return "V";
+		}
+		return levelLetter;
+	}
+
 }

@@ -16,4 +16,4 @@ Features
 [~] Adjusted the baltop format to show the full prefix of a player, and adjusted the ranking number display
 
 Miscellaneous
--
+- Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
