@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.CHORUS_DIAMOND;
+import static com.aearost.aranarthcore.objects.CustomKeys.CHORUS_DIAMOND;
 
 /**
  * Provides the necessary components of a Chorus Diamond item.

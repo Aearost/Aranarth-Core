@@ -5,7 +5,7 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.HONEY_GLAZED_HAM;
+import static com.aearost.aranarthcore.objects.CustomKeys.HONEY_GLAZED_HAM;
 
 /**
  * Provides additional perks when eating honey glazed ham.

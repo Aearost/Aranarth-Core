@@ -6,7 +6,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
 
 /**
  * Puts items in the player's inventory if they were in the Enhanced Aranarthium anvil GUI.

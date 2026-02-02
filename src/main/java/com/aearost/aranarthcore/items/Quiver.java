@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.QUIVER;
+import static com.aearost.aranarthcore.objects.CustomKeys.QUIVER;
 
 /**
  * Provides the necessary components of a Quiver item.

@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW_HEAD;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
 
 
 public class ArrowheadDragon implements AranarthItem {

@@ -17,8 +17,8 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Map;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARANARTHIUM_INGOT;
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARANARTHIUM_INGOT;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
 
 /**
  * Enhances the piece of netherite armour to one of the Aranarthium armours.
