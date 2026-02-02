@@ -37,8 +37,8 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 
 /**

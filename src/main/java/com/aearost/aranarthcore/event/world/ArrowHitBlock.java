@@ -15,7 +15,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 /**
  * Overrides behaviour of custom arrows hitting blocks.

@@ -7,7 +7,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.QUIVER;
+import static com.aearost.aranarthcore.objects.CustomKeys.QUIVER;
 
 /**
  * Handles opening the quiver inventory.

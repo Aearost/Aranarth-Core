@@ -14,7 +14,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW_HEAD;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
 
 /**
  * Handles all crafting of items within a Fletching Table.

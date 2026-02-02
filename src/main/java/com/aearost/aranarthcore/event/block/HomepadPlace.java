@@ -6,7 +6,7 @@ import org.bukkit.Location;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.HOMEPAD;
+import static com.aearost.aranarthcore.objects.CustomKeys.HOMEPAD;
 
 /**
  * Adds a new entry to the homes HashMap when a Homepad is placed.

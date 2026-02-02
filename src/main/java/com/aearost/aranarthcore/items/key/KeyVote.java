@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.*;
+import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
 public class KeyVote implements AranarthItem {
 

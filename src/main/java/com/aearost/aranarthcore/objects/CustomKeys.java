@@ -3,7 +3,7 @@ package com.aearost.aranarthcore.objects;
 import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.NamespacedKey;
 
-public class CustomItemKeys {
+public class CustomKeys {
     public static final NamespacedKey ARMOR_TYPE = new NamespacedKey(AranarthCore.getInstance(), "armor_type");
     public static final NamespacedKey ARANARTHIUM_INGOT = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_ingot");
     public static final NamespacedKey CLUSTER = new NamespacedKey(AranarthCore.getInstance(), "cluster");
@@ -16,4 +16,5 @@ public class CustomItemKeys {
     public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
     public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
     public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
+    public static final NamespacedKey ENCHANTMENT = new NamespacedKey(AranarthCore.getInstance(), "enchantment");
 }
