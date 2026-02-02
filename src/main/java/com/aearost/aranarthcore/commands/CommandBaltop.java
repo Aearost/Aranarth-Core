@@ -83,13 +83,12 @@ public class CommandBaltop {
 
 		int counter = 1;
 		for (AranarthPlayer aranarthPlayer : playersAsList) {
-			String displayedName = "";
-			displayedName += AranarthUtils.getSaintRank(aranarthPlayer);
-			displayedName += AranarthUtils.getArchitectRank(aranarthPlayer);
-			displayedName += AranarthUtils.getCouncilRank(aranarthPlayer);
-			displayedName += aranarthPlayer.getNickname();
-
-			lines.add("&7" + counter + ". &e" + displayedName + ", &6" + formatter.format(aranarthPlayer.getBalance()));
+			UUID uuid = AranarthUtils.getUUIDFromUsername(aranarthPlayer.getUsername());
+			if (uuid == null) {
+				continue;
+			}
+			String displayedName = ChatUtils.providePrefixAndName(uuid);
+			lines.add("&8[&6" + counter + "&8] &e" + displayedName + ", &6" + formatter.format(aranarthPlayer.getBalance()));
 			counter++;
 		}
 

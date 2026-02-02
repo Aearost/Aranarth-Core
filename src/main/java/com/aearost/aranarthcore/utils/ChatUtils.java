@@ -4,13 +4,11 @@ import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -283,7 +281,7 @@ public class ChatUtils {
 	 * @param player The player sending the message.
 	 * @return The formatted prefix.
 	 */
-	public static String formatChatPrefix(Player player) {
+	public static String formatChatPrefix(OfflinePlayer player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		String nickname = aranarthPlayer.getNickname();
 		String prefix = "&l⊰&r";
@@ -305,6 +303,18 @@ public class ChatUtils {
 		prefix += "&l⊱ &r";
 		prefix = ChatUtils.translateToColor(prefix);
 		return prefix;
+	}
+
+	/**
+	 * Provides the formatted prefix and the name of the player.
+	 * @param uuid The UUID of the player.
+	 * @return The formatted prefix and the name of the player.
+	 */
+	public static String providePrefixAndName(UUID uuid) {
+		String prefixAndName = ChatUtils.formatChatPrefix(Bukkit.getOfflinePlayer(uuid));
+		prefixAndName = prefixAndName.substring(5, prefixAndName.length() - 1);
+		prefixAndName = prefixAndName.substring(0, prefixAndName.length() - 7);
+		return prefixAndName;
 	}
 
 	/**
