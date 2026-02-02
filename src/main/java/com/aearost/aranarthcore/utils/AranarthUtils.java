@@ -2441,9 +2441,7 @@ public class AranarthUtils {
 			boolean wasAddedToList = false;
 			UUID uuid = copy.get(i);
 			AranarthPlayer aranarthPlayer = getPlayer(uuid);
-			String display = ChatUtils.formatChatPrefix(Bukkit.getPlayer(uuid));
-			display = display.substring(5, display.length() - 1);
-			display = display.substring(0, display.length() - 7);
+			String display = ChatUtils.providePrefixAndName(uuid);
 
 			if (rank == 15 && aranarthPlayer.getCouncilRank() == 3) {
 				wasAddedToList = true;
