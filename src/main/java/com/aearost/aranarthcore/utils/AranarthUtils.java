@@ -37,8 +37,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
-import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
 
 /**
@@ -2517,6 +2516,23 @@ public class AranarthUtils {
 			return "V";
 		}
 		return levelLetter;
+	}
+
+	/**
+	 * Determines whether the input item contains an Aranarth enchantment.
+	 * @param item The item.
+	 * @param enchantment The enchantment name.
+	 * @return Whether the input item contains an Aranarth enchantment.
+	 */
+	public static boolean hasAranarthEnchantment(ItemStack item, String enchantment) {
+		if (item.hasItemMeta()) {
+			if (item.getItemMeta().getPersistentDataContainer().has(ENCHANTMENT, PersistentDataType.STRING)) {
+				if (item.getItemMeta().getPersistentDataContainer().get(ENCHANTMENT, PersistentDataType.STRING).equals(enchantment)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 }
