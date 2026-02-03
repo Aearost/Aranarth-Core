@@ -1482,7 +1482,7 @@ public class AranarthUtils {
 		int bottomLeftX = -351;
 		int bottomLeftZ = 255;
 
-		if (!loc.getWorld().getName().equals("world")) {
+		if (!loc.getWorld().getName().equals("spawn")) {
 			return false;
 		}
 
