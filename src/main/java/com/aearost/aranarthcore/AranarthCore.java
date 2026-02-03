@@ -8,11 +8,13 @@ import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.objects.Avatar;
+import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -371,12 +373,26 @@ public class AranarthCore extends JavaPlugin {
 			wc.type(WorldType.FLAT);
 			wc.createWorld();
 		}
-		
+
 		if (Bukkit.getWorld("creative") == null) {
 			WorldCreator wc = new WorldCreator("creative");
 			wc.environment(World.Environment.NORMAL);
 			wc.type(WorldType.FLAT);
 			wc.createWorld();
+		}
+
+		if (Bukkit.getWorld("spawn") == null) {
+			WorldCreator wc = new WorldCreator("spawn");
+			wc.environment(World.Environment.NORMAL);
+			wc.generator(new VoidChunkGenerator());
+			wc.createWorld();
+
+			World spawn = Bukkit.getWorld("spawn");
+			spawn.setGameRule(GameRules.ADVANCE_TIME, false);
+			spawn.setGameRule(GameRules.ADVANCE_WEATHER, false);
+			spawn.setGameRule(GameRules.SPAWN_MOBS, false);
+			Block block = spawn.getBlockAt(0, 100, 0);
+			block.setType(Material.BEDROCK);
 		}
 	}
 
