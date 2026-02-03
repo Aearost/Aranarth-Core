@@ -131,8 +131,11 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("seen");
 				displayedOptions.add("store");
 				displayedOptions.add("shop");
+				displayedOptions.add("spawn");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
+			} else if ("spawn".startsWith(args[0])) {
+				displayedOptions.add("spawn");
 			} else if ("smp".startsWith(args[0])) {
 				displayedOptions.add("smp");
 			} else {
@@ -772,6 +775,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("vote");
 		displayedOptions.add("toggle");
 		displayedOptions.add("shop");
+		displayedOptions.add("spawn");
 		return displayedOptions;
 	}
 

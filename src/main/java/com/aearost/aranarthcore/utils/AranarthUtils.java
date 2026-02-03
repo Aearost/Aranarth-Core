@@ -278,10 +278,10 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Include any world that should share the inventory of Survival
-		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource")) {
+		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn")) {
 			currentWorld = "world";
 		}
-		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource")) {
+		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn")) {
 			destinationWorld = "world";
 		}
 
