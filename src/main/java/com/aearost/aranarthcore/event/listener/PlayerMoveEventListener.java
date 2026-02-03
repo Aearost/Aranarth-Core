@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.DominionChunkChange;
 import com.aearost.aranarthcore.event.player.HomepadStep;
 import com.aearost.aranarthcore.event.player.SpawnChangeLocation;
+import com.aearost.aranarthcore.event.player.SpawnVoidFall;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,9 +21,14 @@ public class PlayerMoveEventListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
-        new DominionChunkChange().execute(e);
-        new SpawnChangeLocation().execute(e);
-        new HomepadStep().execute(e);
+        if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
+            new DominionChunkChange().execute(e);
+            new SpawnChangeLocation().execute(e);
+        } else if (e.getPlayer().getLocation().getWorld().getName().startsWith("smp")) {
+            new HomepadStep().execute(e);
+        } else if (e.getPlayer().getLocation().getWorld().getName().startsWith("spawn")) {
+            new SpawnVoidFall().execute(e);
+        }
     }
 
 }
