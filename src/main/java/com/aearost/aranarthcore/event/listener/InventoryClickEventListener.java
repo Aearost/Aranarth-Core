@@ -69,6 +69,7 @@ public class InventoryClickEventListener implements Listener {
             if (e.getClickedInventory() != null) {
                 if (e.getView().getType() == InventoryType.ANVIL || e.getView().getType() == InventoryType.SMITHING) {
                     new AranarthiumArmourCraft().execute(e);
+                    new AranarthiumEnchantmentApply().execute(e);
                 } else if (e.getClickedInventory().getType() == InventoryType.LOOM) {
                     new BannerExtendPatternLimit().execute(e);
                 } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Fletching Table")) {
