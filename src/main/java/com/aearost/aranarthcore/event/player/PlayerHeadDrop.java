@@ -1,7 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -26,18 +25,29 @@ public class PlayerHeadDrop {
                         Random random = new Random();
                         ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
-                        if (AranarthUtils.hasAranarthEnchantment(weapon, "beheading")) {
-                            Bukkit.getLogger().info("HAS BEHEADING!!!");
-                        } else {
-                            int chance = random.nextInt(100) + 1;
-                            // Only a 5% chance of a head being dropped
-                            if (chance <= 5) {
-                                ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
-                                SkullMeta meta = (SkullMeta) skull.getItemMeta();
-                                meta.setOwningPlayer(player);
-                                skull.setItemMeta(meta);
-                                e.getDrops().add(skull);
+                        // 10% chance
+                        int range = 50;
+                        if (AranarthUtils.hasIncantation(weapon, "beheading")) {
+                            int level = AranarthUtils.getIncantationLevel(weapon);
+                            if (level == 1) {
+                                // 20% chance
+                                range = 25;
+                            } else if (level == 2) {
+                                // 33% chance
+                                range = 15;
+                            } else if (level == 3) {
+                                // 50% chance
+                                range = 10;
                             }
+                        }
+
+                        int chance = random.nextInt(range) + 1;
+                        if (chance <= 5) {
+                            ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
+                            SkullMeta meta = (SkullMeta) skull.getItemMeta();
+                            meta.setOwningPlayer(player);
+                            skull.setItemMeta(meta);
+                            e.getDrops().add(skull);
                         }
                     }
                 }

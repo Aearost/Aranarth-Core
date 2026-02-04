@@ -16,5 +16,6 @@ public class CustomKeys {
     public static final NamespacedKey ARROW = new NamespacedKey(AranarthCore.getInstance(), "arrow");
     public static final NamespacedKey ARROW_HEAD = new NamespacedKey(AranarthCore.getInstance(), "arrowhead");
     public static final NamespacedKey CRATE_KEY = new NamespacedKey(AranarthCore.getInstance(), "crate_key");
-    public static final NamespacedKey ENCHANTMENT = new NamespacedKey(AranarthCore.getInstance(), "enchantment");
+    public static final NamespacedKey INCANTATION_TYPE = new NamespacedKey(AranarthCore.getInstance(), "incantation_type");
+    public static final NamespacedKey INCANTATION_LEVEL = new NamespacedKey(AranarthCore.getInstance(), "incantation_level");
 }
