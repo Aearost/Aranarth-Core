@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.items.AranarthItem;
-import com.aearost.aranarthcore.items.enchantment.AranarthEnchantment;
+import com.aearost.aranarthcore.items.incantation.Incantation;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -64,8 +64,8 @@ public class CommandGive {
 				} else if (args[2].startsWith("Key")) {
 					isKey = true;
 					fullPathName = "com.aearost.aranarthcore.items.key." + args[2];
-				} else if (args[2].startsWith("Book")) {
-					fullPathName = "com.aearost.aranarthcore.items.enchantment." + args[2];
+				} else if (args[2].startsWith("Incantation")) {
+					fullPathName = "com.aearost.aranarthcore.items.incantation." + args[2];
 				} else {
 					fullPathName = "com.aearost.aranarthcore.items." + args[2];
 				}
@@ -117,29 +117,36 @@ public class CommandGive {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						DiscordUtils.donationNotification(player.getName() + " has purchased " + item.getItemMeta().getDisplayName() + " x3", player.getUniqueId(), Color.CYAN);
 					}
-				} else if (instance instanceof AranarthEnchantment aranarthEnchantment) {
-					int level = 1;
+				} else if (instance instanceof Incantation incantation) {
+					ItemStack item = incantation.getItem();
+					int quantity = 1;
 					if (args.length >= 4) {
 						try {
-							level = Integer.parseInt(args[3]);
-							if (level < 0 || level > 5) {
+							quantity = Integer.parseInt(args[3]);
+							if (quantity <= 0 || quantity > item.getMaxStackSize()) {
 								throw new NumberFormatException();
 							}
-						} catch (NumberFormatException e) {
+							item.setAmount(quantity);
+						} catch (Exception e) {
 							player.sendMessage(ChatUtils.chatMessage("&cThe entered Quantity is invalid!"));
 							return;
 						}
 					}
-					ItemStack item = aranarthEnchantment.getItem(level);
+
 					player.getInventory().addItem(item);
 
 					ItemMeta meta = item.getItemMeta();
-					String itemName = meta.getLore().get(1);
+					String itemName = ChatUtils.getFormattedItemName(item.getType().name());
+					if (meta != null) {
+						if (meta.hasDisplayName()) {
+							itemName = meta.getDisplayName();
+						}
+					}
 
-					player.sendMessage(ChatUtils.chatMessage("&7You have been given a Book of " + itemName));
+					player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
 					if (sender instanceof Player playerSender) {
 						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
-							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given a Book of " + itemName));
+							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
 						}
 					}
 				} else {

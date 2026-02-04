@@ -2501,10 +2501,10 @@ public class AranarthUtils {
 
 	/**
 	 * Provides the roman numeral equivalent of the input level.
-	 * @param level The level of the enchantment.
+	 * @param level The level of the incantation.
 	 * @return The roman numeral equivalent of the input level.
 	 */
-	public static String getEnchantmentLevelLetters(int level) {
+	public static String getIncantationLevelInNumerals(int level) {
 		String levelLetter = "I";
 		if (level == 2) {
 			return "II";
@@ -2519,20 +2519,34 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Determines whether the input item contains an Aranarth enchantment.
+	 * Determines whether the input item contains an Aranarth incantation.
 	 * @param item The item.
-	 * @param enchantment The enchantment name.
-	 * @return Whether the input item contains an Aranarth enchantment.
+	 * @param incantation The incantation name.
+	 * @return Whether the input item contains an Aranarth incantation.
 	 */
-	public static boolean hasAranarthEnchantment(ItemStack item, String enchantment) {
+	public static boolean hasIncantation(ItemStack item, String incantation) {
 		if (item.hasItemMeta()) {
-			if (item.getItemMeta().getPersistentDataContainer().has(ENCHANTMENT, PersistentDataType.STRING)) {
-				if (item.getItemMeta().getPersistentDataContainer().get(ENCHANTMENT, PersistentDataType.STRING).equals(enchantment)) {
+			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
+				if (item.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING).equals(incantation)) {
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Provides
+	 * @param item The item.
+	 * @return The level of the applied incantation. -1 if the level is not determined.
+	 */
+	public static int getIncantationLevel(ItemStack item) {
+		if (item.hasItemMeta()) {
+			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_LEVEL, PersistentDataType.INTEGER)) {
+				return item.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+			}
+		}
+		return -1;
 	}
 
 }
