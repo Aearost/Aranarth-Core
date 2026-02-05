@@ -17,6 +17,7 @@ Features
 [+] Implemented a Spawn world to separate the Survival spawn
 [+] Introduced Incantations, limited to 1 incantation per item
 [+] Added the Incantation of Beheading
+[+] Added the Incantation of Lifesteal
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
