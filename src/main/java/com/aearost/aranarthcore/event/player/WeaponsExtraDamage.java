@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.mob;
+package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -21,7 +21,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 /**
  * Increases damage for various weapons depending on the Aranarthium armor set that is worn.
  */
-public class ExtraWeaponsDamage {
+public class WeaponsExtraDamage {
 	public void execute(EntityDamageEvent e) {
 		Entity entity = e.getEntity();
 		if (isPlayerCausedDamage(e.getCause())) {
