@@ -18,6 +18,7 @@ Features
 [+] Introduced Incantations, limited to 1 incantation per item
 [+] Added the Incantation of Beheading
 [+] Added the Incantation of Lifesteal
+[+] Added recipe for mushroom stew using nether fungus
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
