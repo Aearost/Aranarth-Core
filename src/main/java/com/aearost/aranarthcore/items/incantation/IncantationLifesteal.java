@@ -25,6 +25,7 @@ public class IncantationLifesteal implements Incantation {
             meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "lifesteal");
             meta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
             meta.setDisplayName(ChatUtils.translateToColor("&aIncantation of " + getIncantationName()));
+            meta.setMaxStackSize(1);
             incantation.setItemMeta(meta);
         }
         return incantation;
