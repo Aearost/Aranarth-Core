@@ -21,8 +21,9 @@ public class IncantationBeheading implements Incantation {
 
         ItemMeta meta = incantation.getItemMeta();
         if (Objects.nonNull(meta)) {
-            NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "beheading");
-            meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "beheading");
+            NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "incantation_beheading");
+            meta.setItemModel(key);
+            meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_beheading");
             meta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
             meta.setDisplayName(ChatUtils.translateToColor("&cIncantation of " + getIncantationName()));
             meta.setMaxStackSize(1);

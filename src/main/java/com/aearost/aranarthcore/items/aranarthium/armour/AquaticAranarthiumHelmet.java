@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.items.aranarthium.armour;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
@@ -33,8 +35,8 @@ public class AquaticAranarthiumHelmet implements AranarthItem {
 		meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
 
 		if (Objects.nonNull(meta)) {
-//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_helmet");
-//			meta.setItemModel(key);
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_helmet");
+			meta.setItemModel(key);
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);

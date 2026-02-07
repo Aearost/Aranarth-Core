@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.items.aranarthium.armour;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
@@ -28,8 +30,8 @@ public class AquaticAranarthiumBoots implements AranarthItem {
 		ItemStack item = new ItemStack(Material.NETHERITE_BOOTS, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_boots");
-//			meta.setItemModel(key);
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_boots");
+			meta.setItemModel(key);
 			meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.TIDE));
 			meta.addEnchant(Enchantment.DEPTH_STRIDER, 5, true);
 			ArrayList<String> lore = new ArrayList<>();
