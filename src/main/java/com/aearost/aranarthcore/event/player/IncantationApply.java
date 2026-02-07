@@ -42,11 +42,18 @@ public class IncantationApply {
 							Entity entity = nearby.getFirst();
 							if (entity instanceof Item floorItem) {
 								ItemStack item = floorItem.getItemStack();
-								String type = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+								ItemMeta itemMeta = item.getItemMeta();
 
+								// Do not allow 2 incantations to be applied to the same item
+								if (itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
+									player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+									return;
+								}
+
+								String type = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
 								if (type.equals("beheading")) {
 									if (isMeleeWeapon(item)) {
-										ItemMeta itemMeta = item.getItemMeta();
+
 										int level = 1;
 										// Increase the existing level
 										if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
@@ -59,7 +66,7 @@ public class IncantationApply {
 										}
 										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
 
-										String fullIncantationName = ChatUtils.translateToColor("&7Beheading " + AranarthUtils.getIncantationLevelInNumerals(level));
+										String fullIncantationName = ChatUtils.translateToColor("&cBeheading " + AranarthUtils.getIncantationLevelInNumerals(level));
 										// Dynamically apply the incantation description on the item
 										List<String> lore = itemMeta.getLore();
 										if (lore == null) {
@@ -78,13 +85,12 @@ public class IncantationApply {
 										item.setItemMeta(itemMeta);
 										droppedItem.remove();
 										floorItem.setItemStack(item);
-										player.sendMessage(ChatUtils.chatMessage("&5You have applied the &7Beheading &5incantation!"));
+										player.sendMessage(ChatUtils.chatMessage("&5You have applied the &cIncantation of Beheading!"));
 										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 									}
 								}
 								else if (type.equals("lifesteal")) {
 									if (isMeleeWeapon(item)) {
-										ItemMeta itemMeta = item.getItemMeta();
 										int level = 1;
 										// Increase the existing level
 										if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
@@ -116,7 +122,7 @@ public class IncantationApply {
 										item.setItemMeta(itemMeta);
 										droppedItem.remove();
 										floorItem.setItemStack(item);
-										player.sendMessage(ChatUtils.chatMessage("&5You have applied the &aLifesteal &5incantation!"));
+										player.sendMessage(ChatUtils.chatMessage("&5You have applied the &aIncantation of Lifesteal!"));
 										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 									}
 								}
