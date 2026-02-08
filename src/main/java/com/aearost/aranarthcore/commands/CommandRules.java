@@ -24,7 +24,7 @@ public class CommandRules {
 		sender.sendMessage(ChatUtils.translateToColor("&8[&68&8] &7No glitch abuse, hacking, auto-clickers, lag machines, or any sort of abuse of the game"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&69&8] &7Ask Staff (the Council) before using mods - only client-side cosmetic mods are permitted (OptiFine, Shaders, MiniHUD, etc.)"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&610&8] &7Do not impersonate or disrespect Staff (the Council)"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&611&8] &7Only the use of manually harvested crop farms or spawner farms are permitted"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&611&8] &7Only the use of manually harvested crop, spawner, and farms are permitted"));
 		return true;
 	}
 
