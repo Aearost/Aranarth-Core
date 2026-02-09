@@ -2565,7 +2565,7 @@ public class AranarthUtils {
 			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
-			cooldown = 60000;
+			cooldown = 5000;
 		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
 			cooldown = 60000;

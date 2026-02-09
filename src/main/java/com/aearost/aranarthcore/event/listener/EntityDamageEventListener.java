@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.event.player.HornSeekExtraDamage;
 import com.aearost.aranarthcore.event.player.WeaponsExtraDamage;
 import com.aearost.aranarthcore.event.mob.HappyGhastPreventDamage;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
@@ -39,6 +40,7 @@ public class EntityDamageEventListener implements Listener {
         // Do not affect tamed mobs
         else {
             new WeaponsExtraDamage().execute(e);
+            new HornSeekExtraDamage().execute(e);
         }
 
         if (e.getEntity().getType() == EntityType.HAPPY_GHAST) {

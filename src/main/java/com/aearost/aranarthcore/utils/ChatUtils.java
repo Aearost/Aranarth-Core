@@ -254,7 +254,7 @@ public class ChatUtils {
 			messages[0] = displayName + " &7has left to spend time with their Valentine";
 			messages[1] = displayName + " &7 has left, along with their love...";
 			messages[2] = "The love story of " + displayName + " &7 is over";
-			messages[3] = "Hearts are broken; " + displayName + " &7has departed";
+			messages[3] = "Hearts are broken, as " + displayName + " &7has departed";
 		} else if (specialDay == SpecialDay.EASTER) {
 			messages[0] = displayName + " &7has hopped off the server!";
 			messages[1] = displayName + " &7took all of the Easter eggs and ran away!";

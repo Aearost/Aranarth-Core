@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
-import org.bukkit.MusicInstrument;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
@@ -14,8 +14,8 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class GoatHornUse {
 
-//    0 Ponder --> Hunger
-//    1 Sing --> Song
+//    0 Ponder --> Traveller
+//    1 Sing --> Shakes apples/god apple fragments off trees
 //    2 Seek --> Attacking
 //    3 Feel --> Defensive
 //
@@ -31,16 +31,17 @@ public class GoatHornUse {
             player.setCooldown(e.getItem(), 1); // Mimics no cooldown
             if (meta.getInstrument() == MusicInstrument.PONDER_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.PONDER_GOAT_HORN)) {
-
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SPEED, 600, 4));
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.JUMP_BOOST, 600, 4));
                 }
             } else if (meta.getInstrument() == MusicInstrument.SING_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SING_GOAT_HORN)) {
-
+                    dropNearbyApples(player);
                 }
             } else if (meta.getInstrument() == MusicInstrument.SEEK_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SEEK_GOAT_HORN)) {
-                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.STRENGTH, 600, 1));
-                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SPEED, 600, 1));
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.STRENGTH, 600, 2));
+                    // Will additionally take more damage as per HornSeekExtraDamage
                 }
             } else if (meta.getInstrument() == MusicInstrument.FEEL_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.FEEL_GOAT_HORN)) {
@@ -78,5 +79,9 @@ public class GoatHornUse {
         aranarthPlayer.setUsingGoatHorn(true);
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         player.addPotionEffect(effect);
+    }
+
+    private void dropNearbyApples(Player player) {
+
     }
 }
