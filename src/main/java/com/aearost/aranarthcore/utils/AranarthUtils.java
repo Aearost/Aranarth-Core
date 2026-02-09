@@ -2560,8 +2560,29 @@ public class AranarthUtils {
 		long lastHornUse = 0;
 		long cooldown = 0;
 
-		if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.PONDER_GOAT_HORN) != null ? horns.get(MusicInstrument.PONDER_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.FEEL_GOAT_HORN) != null ? horns.get(MusicInstrument.FEEL_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.ADMIRE_GOAT_HORN) != null ? horns.get(MusicInstrument.ADMIRE_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.CALL_GOAT_HORN) != null ? horns.get(MusicInstrument.CALL_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.YEARN_GOAT_HORN) != null ? horns.get(MusicInstrument.YEARN_GOAT_HORN) : -1;
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
 			cooldown = 60000;
 		}
 
@@ -2572,6 +2593,12 @@ public class AranarthUtils {
 			setPlayer(player.getUniqueId(), aranarthPlayer);
 			return true;
 		} else {
+			// Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+					onlinePlayer.stopSound(SoundCategory.RECORDS);
+				}
+			}
 			long remainder = (lastHornUse + cooldown) - System.currentTimeMillis();
 			remainder = remainder / 1000;
 			int seconds = (int) remainder;
