@@ -14,28 +14,55 @@ import org.bukkit.potion.PotionEffectType;
  */
 public class GoatHornUse {
 
-//    Ponder --> Hunger
-//    Sing --> Song
-//    Seek --> Attacking
-//    Feel --> Defensive
+//    0 Ponder --> Hunger
+//    1 Sing --> Song
+//    2 Seek --> Attacking
+//    3 Feel --> Defensive
 //
-//    Admire --> Golems
-//    Call --> Wolves
-//    Yearn --> Horse
-//    Dream --> Cleanse
-
-    // For future: the basis will be to take the current time in epoch milliseconds when the horn is used successfully
-    // If the horn is attempted to be used again before the specified elapsed difference is passed, then display a message
+//    4 Admire --> Golems
+//    5 Call --> Wolves
+//    6 Yearn --> Horse
+//    7 Dream --> Cleanse
 
     public void execute(PlayerInteractEvent e) {
         Player player = e.getPlayer();
         if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
             MusicInstrumentMeta meta = (MusicInstrumentMeta) e.getItem().getItemMeta();
-            if (meta.getInstrument() == MusicInstrument.SEEK_GOAT_HORN) {
+            player.setCooldown(e.getItem(), 1); // Mimics no cooldown
+            if (meta.getInstrument() == MusicInstrument.PONDER_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.PONDER_GOAT_HORN)) {
+
+                }
+            } else if (meta.getInstrument() == MusicInstrument.SING_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SING_GOAT_HORN)) {
+
+                }
+            } else if (meta.getInstrument() == MusicInstrument.SEEK_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SEEK_GOAT_HORN)) {
                     applyHornPotionEffect(player, new PotionEffect(PotionEffectType.STRENGTH, 600, 1));
                     applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SPEED, 600, 1));
-                    player.setCooldown(e.getItem(), 1200); // 60 second cooldown on the horn
+                }
+            } else if (meta.getInstrument() == MusicInstrument.FEEL_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.FEEL_GOAT_HORN)) {
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.RESISTANCE, 200, 1));
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.REGENERATION, 200, 1));
+                    applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SLOWNESS, 200, 2));
+                }
+            } else if (meta.getInstrument() == MusicInstrument.ADMIRE_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.ADMIRE_GOAT_HORN)) {
+
+                }
+            } else if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.CALL_GOAT_HORN)) {
+
+                }
+            } else if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.YEARN_GOAT_HORN)) {
+
+                }
+            } else if (meta.getInstrument() == MusicInstrument.DREAM_GOAT_HORN) {
+                if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.DREAM_GOAT_HORN)) {
+
                 }
             }
         }
