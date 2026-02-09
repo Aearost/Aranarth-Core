@@ -2549,4 +2549,35 @@ public class AranarthUtils {
 		return -1;
 	}
 
+	/**
+	 * Attempts to use the given horn based on the previous use of the horn.
+	 * @param player The player.
+	 * @param horn The type of horn.
+	 */
+	public static boolean canUseHornSuccessfully(Player player, MusicInstrument horn) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		HashMap<MusicInstrument, Long> horns = aranarthPlayer.getHorns();
+		long lastHornUse = 0;
+		long cooldown = 0;
+
+		if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
+			cooldown = 60000;
+		}
+
+		// If the horn can be used again
+		if (lastHornUse + cooldown < System.currentTimeMillis()) {
+			horns.put(horn, System.currentTimeMillis());
+			aranarthPlayer.setHorns(horns);
+			setPlayer(player.getUniqueId(), aranarthPlayer);
+			return true;
+		} else {
+			long remainder = (lastHornUse + cooldown) - System.currentTimeMillis();
+			remainder = remainder / 1000;
+			int seconds = (int) remainder;
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this horn again for another &e" + seconds + " &cseconds!"));
+			return false;
+		}
+	}
+
 }

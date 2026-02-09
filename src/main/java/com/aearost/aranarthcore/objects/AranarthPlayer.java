@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Location;
+import org.bukkit.MusicInstrument;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -67,6 +68,8 @@ public class AranarthPlayer {
 	private boolean isTogglingTp = false;
 	private boolean isTogglingChangeClaim = false;
 	private boolean hasBlueFireDisabled = false;
+	private boolean isUsingGoatHorn = false;
+	private HashMap<MusicInstrument, Long> horns = new HashMap<>();
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -117,6 +120,8 @@ public class AranarthPlayer {
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
 		this.hasBlueFireDisabled = false;
+		this.isUsingGoatHorn = false;
+		this.horns = new HashMap<>();
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -173,6 +178,8 @@ public class AranarthPlayer {
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
 		this.hasBlueFireDisabled = false;
+		this.isUsingGoatHorn = false;
+		this.horns = new HashMap<>();
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1015,4 +1022,35 @@ public class AranarthPlayer {
 		this.hasBlueFireDisabled = hasBlueFireDisabled;
 	}
 
+	/**
+	 * Provides the HashMap tracking the last executions of each horn.
+	 * @return The HashMap tracking the last executions of each horn.
+	 */
+	public HashMap<MusicInstrument, Long> getHorns() {
+		return horns;
+	}
+
+	/**
+	 * Updates the HashMap tracking the last executions of each horn.
+	 * @param horns The HashMap tracking the last executions of each horn.
+	 */
+	public void setHorns(HashMap<MusicInstrument, Long> horns) {
+		this.horns = horns;
+	}
+
+	/**
+	 * Provides the value tracking whether the player has just used a Goat Horn.
+	 * @return The value tracking whether the player has just used a Goat Horn.
+	 */
+	public boolean isUsingGoatHorn() {
+		return isUsingGoatHorn;
+	}
+
+	/**
+	 * Updates the value tracking whether the player has just used a Goat Horn.
+	 * @param usingGoatHorn The value tracking whether the player has just used a Goat Horn.
+	 */
+	public void setUsingGoatHorn(boolean usingGoatHorn) {
+		isUsingGoatHorn = usingGoatHorn;
+	}
 }

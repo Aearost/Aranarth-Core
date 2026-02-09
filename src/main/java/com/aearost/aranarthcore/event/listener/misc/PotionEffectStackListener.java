@@ -78,8 +78,10 @@ public class PotionEffectStackListener implements Listener {
 					if (entity instanceof Player player) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						if (aranarthPlayer.isHitByTippedArrow()) {
-							Bukkit.getLogger().info("Hit by tipped arrow");
 							aranarthPlayer.setHitByTippedArrow(false);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						} else if (aranarthPlayer.isUsingGoatHorn()) {
+							aranarthPlayer.setUsingGoatHorn(false);
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						} else {
 							return;
