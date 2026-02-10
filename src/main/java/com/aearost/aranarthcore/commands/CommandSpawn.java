@@ -22,7 +22,7 @@ public class CommandSpawn {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-				Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 0, 0);
+				Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 0, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), spawn);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSpawn"));
 

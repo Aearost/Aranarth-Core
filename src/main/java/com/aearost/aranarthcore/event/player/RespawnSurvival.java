@@ -30,8 +30,8 @@ public class RespawnSurvival {
         }
 
         String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
-        if (deathWorld.startsWith("world")) {
-            e.setRespawnLocation(new Location(Bukkit.getWorld("world"), -29.5, 75, -73.5, 0, 0));
+        if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
+            e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 0, 0));
         } else if (deathWorld.startsWith("smp")) {
             e.setRespawnLocation(new Location(Bukkit.getWorld("smp"), 0.5, 120, 3.5, 180, 0));
         }

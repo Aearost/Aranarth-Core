@@ -21,6 +21,7 @@ Features
 [+] Added recipe for mushroom stew using nether fungus
 [+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
 [~] Slight tweaks to the farms rule
+[~] Updated the default spawn location to be in the Spawn world
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
