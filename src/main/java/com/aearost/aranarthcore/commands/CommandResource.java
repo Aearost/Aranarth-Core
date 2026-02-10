@@ -5,9 +5,13 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
+
+import java.util.Random;
 
 /**
  * Teleports the player to the Resource world, sharing the Resource inventory.
@@ -22,8 +26,21 @@ public class CommandResource {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
-				Location resourceSpawn = new Location(Bukkit.getWorld("resource"), 35.5, 124, -16.5, 90, 0);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), resourceSpawn);
+				World resource = Bukkit.getWorld("resource");
+				Random random = new Random();
+				Location selectedLocation = null;
+				boolean isLocationFound = false;
+				while (!isLocationFound) {
+					int x = random.nextInt(5001) - 2500;
+					int z = random.nextInt(5001) - 2500;
+					if (resource.getHighestBlockAt(x, z).getType() != Material.WATER) {
+						isLocationFound = true;
+						selectedLocation = resource.getHighestBlockAt(x, z).getLocation();
+						selectedLocation.add(0, 1, 0);
+					}
+				}
+
+				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation);
 				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
 
 				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
