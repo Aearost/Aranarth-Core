@@ -13,7 +13,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionEffectTypeCategory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -70,7 +73,7 @@ public class GoatHornUse {
                 }
             } else if (meta.getInstrument() == MusicInstrument.DREAM_GOAT_HORN) {
                 if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.DREAM_GOAT_HORN)) {
-
+                    cleanseNegativeEffects(player);
                 }
             }
         }
@@ -155,6 +158,23 @@ public class GoatHornUse {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Removes all negative potion effects from the player.
+     * @param player The player.
+     */
+    private void cleanseNegativeEffects(Player player) {
+        List<PotionEffectType> toRemove = new ArrayList<>();
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            if (effect.getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
+                toRemove.add(effect.getType());
+            }
+        }
+
+        for (PotionEffectType type : toRemove) {
+            player.removePotionEffect(type);
         }
     }
 

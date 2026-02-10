@@ -17,7 +17,7 @@ public class HornSeekExtraDamage {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			Long lastUsed = aranarthPlayer.getHorns().get(MusicInstrument.SEEK_GOAT_HORN);
 			// If the effect of the horn is still active, increase the damage taken by 1.5x
-			if (lastUsed + 30000 > System.currentTimeMillis()) {
+			if (lastUsed != null && (lastUsed + 30000 > System.currentTimeMillis())) {
 				double finalDamage = e.getFinalDamage();
 				double extra = finalDamage * 0.5;
 				e.setDamage(e.getDamage() + extra);

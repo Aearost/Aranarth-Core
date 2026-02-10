@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.MusicInstrument;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,6 +15,7 @@ import org.bukkit.event.entity.EntityPotionEffectEvent.Action;
 import org.bukkit.event.entity.EntityPotionEffectEvent.Cause;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.potion.PotionEffectTypeCategory;
 
 import java.util.Objects;
 
@@ -33,6 +35,18 @@ public class PotionEffectStackListener implements Listener {
 		// Prevents a new potion effect from being called if the effect already is applied
 		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN && e.getOldEffect() != null) {
 			return;
+		}
+
+		if (e.getNewEffect() != null && e.getNewEffect().getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
+			if (e.getEntity() instanceof Player player) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				Long lastUsed = aranarthPlayer.getHorns().get(MusicInstrument.DREAM_GOAT_HORN);
+				// If the effect of the horn is still active, prevent new effects from being added
+				if (lastUsed != null && (lastUsed + 5000 > System.currentTimeMillis())) {
+					e.setCancelled(true);
+					return;
+				}
+			}
 		}
 
 		if (e.getEntity() instanceof LivingEntity entity) {
@@ -133,7 +147,7 @@ public class PotionEffectStackListener implements Listener {
 	 * @return The amplifier after it has been capped accordingly.
 	 */
 	private int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
-		 if (type == PotionEffectType.ABSORPTION) {
+		 if (type == org.bukkit.potion.PotionEffectType.ABSORPTION) {
 				if (calculatedAmplifier >= 5) {
 					calculatedAmplifier = 4;
 				}

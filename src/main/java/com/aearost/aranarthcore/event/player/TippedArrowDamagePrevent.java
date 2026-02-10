@@ -48,6 +48,7 @@ public class TippedArrowDamagePrevent {
 	private boolean checkIfPotionShouldDamage(PotionType type) {
 		return type.name().contains("AWKWARD") || type.name().contains("HARMING") ||type.name().contains("MUNDANE") || type.name().contains("TURTLE_MASTER") ||
 				type.name().contains("OOZING") || type.name().contains("POISON") ||type.name().contains("SLOWNESS") || type.name().contains("WIND_CHARGED") ||
-				type.name().contains("THICK") || type.name().contains("WEAKNESS") || type.name().contains("WEAVING") || type.name().contains("INFESTED");
+				type.name().contains("THICK") || type.name().contains("WEAKNESS") || type.name().contains("WEAVING") || type.name().contains("INFESTED")
+				|| type.name().contains("WITHER");
 	}
 }
