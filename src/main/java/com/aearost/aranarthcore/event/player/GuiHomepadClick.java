@@ -127,23 +127,17 @@ public class GuiHomepadClick {
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
 								player.leaveVehicle();
 								mount.teleport(home.getLocation());
-								Home finalHome = home;
-								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
-									if (success) {
-										player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + finalHome.getName() + "&c!"));
-										Bukkit.getLogger().info(player.getName() + " has teleported to " + finalHome.getName() + " via homepad");
-										mount.addPassenger(player);
-									} else {
-										player.sendMessage(ChatUtils.chatMessage("&cYou were not wooshed to &d" + finalHome.getName() + "&c!"));
-										return;
-									}
-								});
-
+								player.teleport(home.getLocation());
+								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 								try {
 									Thread.sleep(20);
 								} catch (InterruptedException ex) {
 									Bukkit.getLogger().info("Something went wrong with the teleportation...");
 								}
+
+								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+								mount.addPassenger(player);
 							}
 						} else {
 							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
@@ -152,16 +146,10 @@ public class GuiHomepadClick {
 							} catch (InterruptedException ex) {
 								Bukkit.getLogger().info("Something went wrong with the teleportation...");
 							}
-							Home finalHome = home;
-							AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
-								if (success) {
-									player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + finalHome.getName() + "&c!"));
-									Bukkit.getLogger().info(player.getName() + " has teleported to " + finalHome.getName() + " via homepad");
-								} else {
-									player.sendMessage(ChatUtils.chatMessage("&cYou were not wooshed to &d" + finalHome.getName() + "&c!"));
-									return;
-								}
-							});
+							player.teleport(home.getLocation());
+							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+							player.sendMessage(ChatUtils
+									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 						}
 					}
 					player.closeInventory();
