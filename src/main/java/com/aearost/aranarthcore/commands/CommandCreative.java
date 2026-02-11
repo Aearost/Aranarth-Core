@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -25,7 +26,8 @@ public class CommandCreative {
 					return true;
 				}
 				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, success -> {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
 					} else {

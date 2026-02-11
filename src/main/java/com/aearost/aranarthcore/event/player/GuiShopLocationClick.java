@@ -109,7 +109,7 @@ public class GuiShopLocationClick {
 						}
 
 						AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
-						AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), aranarthPlayer.isInAdminMode(), success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
 							} else {

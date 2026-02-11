@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -38,7 +39,8 @@ public class CommandResource {
 					}
 				}
 
-				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, success -> {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
 					} else {

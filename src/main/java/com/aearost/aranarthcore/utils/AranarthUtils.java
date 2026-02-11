@@ -1513,14 +1513,25 @@ public class AranarthUtils {
 	 * @param player The player that is being teleported.
 	 * @param from The location that the player is teleporting from.
 	 * @param to The location that the player is teleporting to.
+	 * @param isImmediateTeleport Whether the teleportation should be immediate or not.
 	 * @param resultCallback Confirmation whether the teleportation was successful or not.
 	 */
-	public static void teleportPlayer(Player player, Location from, Location to, Consumer<Boolean> resultCallback) {
-		player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
-		initiateTeleport(player, () -> {
-			boolean result = handleTeleportLogic(player, from, to);
-			resultCallback.accept(result);
-		});
+	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, Consumer<Boolean> resultCallback) {
+		if (isImmediateTeleport) {
+			boolean wasSuccessful = handleTeleportLogic(player, from, to);
+			if (wasSuccessful) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have teleported"));
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou were unable to teleport"));
+			}
+			return;
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+			initiateTeleport(player, () -> {
+				boolean result = handleTeleportLogic(player, from, to);
+				resultCallback.accept(result);
+			});
+		}
 	}
 
 	/**

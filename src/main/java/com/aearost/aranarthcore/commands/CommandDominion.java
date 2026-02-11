@@ -205,7 +205,8 @@ public class CommandDominion {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (dominion != null) {
 			if (player.hasPermission("aranarth.dominion.home")) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), success -> {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
 					} else {
