@@ -1,13 +1,11 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachment;
 
 /**
  * Teleports the player to the SMP world, sharing the SMP inventory.
@@ -28,12 +26,13 @@ public class CommandSMP {
 				}
 
 				Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
-
-				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-				perms.setPermission("worldedit.*", false);
-
+				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eSMP"));
+					}
+				});
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));

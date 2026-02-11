@@ -109,8 +109,13 @@ public class GuiShopLocationClick {
 						}
 
 						AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
-						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
-						AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid));
+						AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), success -> {
+							if (success) {
+								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopOwnerPlayer.getNickname() + "'s &cshop!"));
+							}
+						});
 						player.closeInventory();
 					}
 				}

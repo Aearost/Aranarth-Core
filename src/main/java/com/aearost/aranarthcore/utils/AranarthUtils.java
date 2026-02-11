@@ -20,11 +20,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.profile.PlayerProfile;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -72,6 +74,7 @@ public class AranarthUtils {
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final List<TextDisplay> textHolograms = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
+	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -301,6 +304,14 @@ public class AranarthUtils {
 			for (PotionEffect effect : player.getActivePotionEffects()) {
 				player.removePotionEffect(effect.getType());
 			}
+		}
+
+		// World edit permissions
+		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		if (destinationWorld.equals("creative")) {
+			perms.setPermission("worldedit.*", true);
+		} else {
+			perms.setPermission("worldedit.*", false);
 		}
 
 		if (currentWorld.startsWith("world")) {
@@ -1496,11 +1507,50 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Plays the teleport sound effect.
-	 * @param player The player to play the sound for.
-	 * @return Confirmation that the teleport was successful
+	 * Handles creating the teleport task timer and initializing the callback method.
+	 * @param player The player that is being teleported.
+	 * @param from The location that the player is teleporting from.
+	 * @param to The location that the player is teleporting to.
+	 * @param resultCallback Confirmation whether the teleportation was successful or not.
 	 */
-	public static boolean teleportPlayer(Player player, Location from, Location to) {
+	public static void teleportPlayer(Player player, Location from, Location to, Consumer<Boolean> resultCallback) {
+		player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+		initiateTeleport(player, () -> {
+			boolean result = handleTeleportLogic(player, from, to);
+			resultCallback.accept(result);
+		});
+	}
+
+	/**
+	 * Prepares the player to be teleported by creating the teleport task.
+	 * @param player The player.
+	 * @param onSuccess The method to be called once the timer ends to handle the actual teleportation.
+	 */
+	public static void initiateTeleport(Player player, Runnable onSuccess) {
+		// Override the previous task if exists with the new one
+		teleportingPlayers.remove(player.getUniqueId());
+
+		// Initiate the teleportation after a 3 second delay, storing the task for the duration
+		BukkitTask task = new BukkitRunnable() {
+			@Override
+			public void run() {
+				teleportingPlayers.remove(player.getUniqueId());
+				onSuccess.run();
+			}
+		}.runTaskLater(AranarthCore.getInstance(), 60);
+
+		// This is run before the above task itself due to the delay
+		teleportingPlayers.put(player.getUniqueId(), task);
+	}
+
+	/**
+	 * Handles the actual teleportation of the player.
+	 * @param player The player that is being teleported.
+	 * @param from The location that the player is teleporting from.
+	 * @param to The location that the player is teleporting to.
+	 * @return Confirmation if the teleportation was successful.
+	 */
+	private static boolean handleTeleportLogic(Player player, Location from, Location to) {
 		// Teleporting seems to manually toggle on a player's bending when it was toggled off
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 		boolean isToggled = false;
@@ -1533,6 +1583,23 @@ public class AranarthUtils {
 			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 			return false;
 		}
+	}
+
+	/**
+	 * Provides the BukkitTask associated to the player's teleportation.
+	 * @param uuid The player's UUID.
+	 * @return The BukkitTask associated to the player's teleportation.
+	 */
+	public static BukkitTask getTeleportTask(UUID uuid) {
+		return teleportingPlayers.get(uuid);
+	}
+
+	/**
+	 * Provides the BukkitTask associated to the player's teleportation.
+	 * @param uuid The player's UUID.
+	 */
+	public static void removeTeleportTask(UUID uuid) {
+		teleportingPlayers.remove(uuid);
 	}
 
 	/**

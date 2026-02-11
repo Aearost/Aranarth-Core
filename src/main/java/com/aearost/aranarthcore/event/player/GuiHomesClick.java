@@ -46,8 +46,13 @@ public class GuiHomesClick {
 								player.closeInventory();
 								return;
 							} else {
-								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
-								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
+								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
+									if (success) {
+										player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
+									} else {
+										player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + home.getName()));
+									}
+								});
 								player.closeInventory();
 								return;
 							}
