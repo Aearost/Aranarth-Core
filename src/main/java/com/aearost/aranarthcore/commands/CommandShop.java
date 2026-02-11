@@ -90,7 +90,8 @@ public class CommandShop {
 							AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
 							if (shopLocations.get(uuid) != null) {
 								wasShopFound[0] = true;
-								AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), success -> {
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+								AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), aranarthPlayer.isInAdminMode(), success -> {
 									if (success) {
 										player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
 									} else {

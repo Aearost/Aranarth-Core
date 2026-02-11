@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
 import com.aearost.aranarthcore.gui.GuiWarps;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -39,7 +40,8 @@ public class CommandWarp {
 				} else {
 					for (Home warp : AranarthUtils.getWarps()) {
 						if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(args[1])) {
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), success -> {
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
 								if (success) {
 									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
 								} else {

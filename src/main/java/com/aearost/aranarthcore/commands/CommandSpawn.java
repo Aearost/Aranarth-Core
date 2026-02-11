@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -21,7 +22,8 @@ public class CommandSpawn {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
 				Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, success -> {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSpawn"));
 					} else {

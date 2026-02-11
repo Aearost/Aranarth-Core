@@ -41,9 +41,11 @@ public class PlayerTeleportCancelByMove {
 				else {
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 						AranarthPlayer aranarthPlayerOnline = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-						if (aranarthPlayerOnline.getTeleportFromUuid().equals(player.getUniqueId())) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
-							return;
+						if (aranarthPlayerOnline.getTeleportFromUuid() != null) {
+							if (aranarthPlayerOnline.getTeleportFromUuid().equals(player.getUniqueId())) {
+								onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
+								return;
+							}
 						}
 					}
 				}

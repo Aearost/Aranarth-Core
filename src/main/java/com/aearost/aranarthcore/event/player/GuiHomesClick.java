@@ -46,7 +46,7 @@ public class GuiHomesClick {
 								player.closeInventory();
 								return;
 							} else {
-								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
+								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
 									if (success) {
 										player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
 									} else {

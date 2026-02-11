@@ -28,12 +28,11 @@ public class CommandHome {
 						homeNameBuilder.append(" ");
 					}
 				}
+
 				String homeName = homeNameBuilder.toString();
-
-
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
 							} else {
