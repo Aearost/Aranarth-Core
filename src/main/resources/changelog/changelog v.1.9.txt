@@ -24,6 +24,7 @@ Features
 [~] Updated the default spawn location to be in the Spawn world
 [+] Added random teleportation logic in Survival and Resource worlds
 [+] Added a 3-second delay to all teleport requests requiring players to stay in place
+[~] Fixed issue where teleporting to creative from creative cleared inventory
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

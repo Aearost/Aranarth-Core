@@ -390,6 +390,8 @@ public class AranarthUtils {
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
 				return;
+			} else if (destinationWorld.equals("creative")) {
+				return;
 			}
 			player.getInventory().clear();
 		} else {
