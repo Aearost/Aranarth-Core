@@ -39,7 +39,7 @@ public class CommandTp {
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						targetPlayer.setTeleportFromUuid(player.getUniqueId());
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
-						player.sendMessage(ChatUtils.chatMessage("&7You have sent a teleport request to &e" + targetPlayer.getNickname()));
+						player.sendMessage(ChatUtils.chatMessage("&7You have requested to teleport to &e" + targetPlayer.getNickname()));
 						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested to teleport to you"));
 						target.sendMessage(ChatUtils.chatMessage("&7Use &e/ac tpaccept &7or &e/ac tpdeny"));
 						AranarthUtils.playTeleportSound(player);

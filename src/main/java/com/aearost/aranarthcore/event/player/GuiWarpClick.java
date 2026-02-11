@@ -53,8 +53,14 @@ public class GuiWarpClick {
 								}
 							}
 
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation());
-							player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), success -> {
+								if (success) {
+									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou could not warp to &e" + warp.getName()));
+								}
+							});
+
 							player.closeInventory();
 							return;
 						}

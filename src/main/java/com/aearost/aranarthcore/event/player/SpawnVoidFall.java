@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.event.player.PlayerMoveEvent;
 
 /**
@@ -18,7 +19,9 @@ public class SpawnVoidFall {
 
 		if (e.getTo().getY() <= 50) {
 			Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 0, 0);
-			AranarthUtils.teleportPlayer(e.getPlayer(), e.getPlayer().getLocation(), spawn);
+			Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+			e.getPlayer().teleport(locToTeleportTo);
+			e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 		}
 	}
 }

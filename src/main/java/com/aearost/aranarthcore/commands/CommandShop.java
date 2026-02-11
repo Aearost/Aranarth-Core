@@ -83,18 +83,25 @@ public class CommandShop {
 					return true;
 				} else {
 					HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-					boolean wasShopFound = false;
+					boolean[] wasShopFound = new boolean[] { false };
 					for (UUID uuid : shopLocations.keySet()) {
 						String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
 						if (args[1].equalsIgnoreCase(username)) {
 							AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
-							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
-							AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid));
-							wasShopFound = true;
+							if (shopLocations.get(uuid) != null) {
+								wasShopFound[0] = true;
+								AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), success -> {
+									if (success) {
+										player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwnerPlayer.getNickname() + "'s &7shop!"));
+									} else {
+										player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopOwnerPlayer.getNickname() + "'s &cshop!"));
+									}
+								});
+							}
 						}
 					}
 
-					if (!wasShopFound) {
+					if (!wasShopFound[0]) {
 						player.sendMessage(ChatUtils.chatMessage("&cThis player does not have a shop!"));
 					}
 					return true;

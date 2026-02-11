@@ -33,8 +33,13 @@ public class CommandHome {
 
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
-						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), success -> {
+							if (success) {
+								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + home.getName()));
+							}
+						});
 						return true;
 					}
 				}

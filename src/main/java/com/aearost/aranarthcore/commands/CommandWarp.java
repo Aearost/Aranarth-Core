@@ -39,8 +39,13 @@ public class CommandWarp {
 				} else {
 					for (Home warp : AranarthUtils.getWarps()) {
 						if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(args[1])) {
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation());
-							player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), success -> {
+								if (success) {
+									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou could not warp to &e" + warp.getName()));
+								}
+							});
 							return true;
 						}
 					}

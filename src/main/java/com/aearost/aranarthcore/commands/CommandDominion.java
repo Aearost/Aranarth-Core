@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -12,7 +11,6 @@ import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.permissions.PermissionAttachment;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -207,13 +205,15 @@ public class CommandDominion {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		if (dominion != null) {
 			if (player.hasPermission("aranarth.dominion.home")) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome());
-				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
-
-				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-				perms.setPermission("worldedit.*", false);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + dominion.getName()));
+					}
+				});
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to your Dominion!"));
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to teleport to your Dominion!"));
 			}
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));

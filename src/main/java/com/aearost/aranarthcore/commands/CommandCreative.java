@@ -1,13 +1,11 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachment;
 
 /**
  * Teleports the player to the creative world, using the creative inventory.
@@ -27,11 +25,13 @@ public class CommandCreative {
 					return true;
 				}
 				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
-
-				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-				perms.setPermission("worldedit.*", true);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &eCreative"));
+					}
+				});
 
 				return true;
 			} else {

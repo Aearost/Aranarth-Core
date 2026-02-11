@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.commands;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -9,7 +8,6 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.permissions.PermissionAttachment;
 
 import java.util.Random;
 
@@ -40,12 +38,13 @@ public class CommandResource {
 					}
 				}
 
-				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation);
-				player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
-
-				PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-				perms.setPermission("worldedit.*", false);
-
+				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eResource &cworld"));
+					}
+				});
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));
