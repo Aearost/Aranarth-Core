@@ -26,6 +26,7 @@ Features
 [+] Added a 3-second delay to all teleport requests requiring players to stay in place
 [~] Fixed issue where teleporting to creative from creative cleared inventory
 [~] Disabled PvP in the Resource World
+[+] Added a 1-minute cooldown to players teleporting between worlds
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

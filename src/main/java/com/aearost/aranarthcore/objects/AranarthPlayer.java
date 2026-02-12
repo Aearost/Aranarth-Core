@@ -70,6 +70,7 @@ public class AranarthPlayer {
 	private boolean hasBlueFireDisabled = false;
 	private boolean isUsingGoatHorn = false;
 	private HashMap<MusicInstrument, Long> horns = new HashMap<>();
+	private long lastWorldCommandUse = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -122,6 +123,7 @@ public class AranarthPlayer {
 		this.hasBlueFireDisabled = false;
 		this.isUsingGoatHorn = false;
 		this.horns = new HashMap<>();
+		this.lastWorldCommandUse = 0;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -180,6 +182,7 @@ public class AranarthPlayer {
 		this.hasBlueFireDisabled = false;
 		this.isUsingGoatHorn = false;
 		this.horns = new HashMap<>();
+		this.lastWorldCommandUse = 0;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1052,5 +1055,21 @@ public class AranarthPlayer {
 	 */
 	public void setUsingGoatHorn(boolean usingGoatHorn) {
 		isUsingGoatHorn = usingGoatHorn;
+	}
+
+	/**
+	 * Provides the last time that the player changed world via commands.
+	 * @return The last time that the player changed world via commands.
+	 */
+	public long getLastWorldCommandUse() {
+		return lastWorldCommandUse;
+	}
+
+	/**
+	 * Updates the last time that the player changed world via commands.
+	 * @param lastWorldCommandUse The last time that the player changed world via commands.
+	 */
+	public void setLastWorldCommandUse(long lastWorldCommandUse) {
+		this.lastWorldCommandUse = lastWorldCommandUse;
 	}
 }

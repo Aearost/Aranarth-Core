@@ -25,6 +25,15 @@ public class CommandResource {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+					if (!aranarthPlayer.isInAdminMode()) {
+						int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+						player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto use this command!"));
+						return true;
+					}
+				}
+
 				World resource = Bukkit.getWorld("resource");
 				Random random = new Random();
 				Location selectedLocation = null;
@@ -39,9 +48,10 @@ public class CommandResource {
 					}
 				}
 
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
+						aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eResource &7world"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eResource &cworld"));

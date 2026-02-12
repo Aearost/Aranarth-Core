@@ -25,10 +25,21 @@ public class CommandCreative {
 					player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
 					return true;
 				}
-				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
+
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+					if (!aranarthPlayer.isInAdminMode()) {
+						int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+						player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto use this command!"));
+						return true;
+					}
+				}
+
+				Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
+						aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &eCreative"));

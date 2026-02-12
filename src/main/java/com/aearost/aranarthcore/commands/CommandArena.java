@@ -23,8 +23,18 @@ public class CommandArena {
 			if (sender instanceof Player player) {
 				Location arenaSpawn = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+					if (!aranarthPlayer.isInAdminMode()) {
+						int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+						player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto use this command!"));
+						return true;
+					}
+				}
+
 				AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
+						aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eArena &7world"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eArena &cworld"));

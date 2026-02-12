@@ -26,10 +26,20 @@ public class CommandSMP {
 					return true;
 				}
 
-				Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+					if (!aranarthPlayer.isInAdminMode()) {
+						int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+						player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto use this command!"));
+						return true;
+					}
+				}
+
+				Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), success -> {
 					if (success) {
+						aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to the &eSMP"));
