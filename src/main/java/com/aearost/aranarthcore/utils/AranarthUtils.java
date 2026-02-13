@@ -2638,53 +2638,133 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
 		HashMap<MusicInstrument, Long> horns = aranarthPlayer.getHorns();
 		long lastHornUse = 0;
-		long cooldown = 0;
+		long cooldown = getHornCooldown(horn);
 
 		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.PONDER_GOAT_HORN) != null ? horns.get(MusicInstrument.PONDER_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.FEEL_GOAT_HORN) != null ? horns.get(MusicInstrument.FEEL_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.ADMIRE_GOAT_HORN) != null ? horns.get(MusicInstrument.ADMIRE_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.CALL_GOAT_HORN) != null ? horns.get(MusicInstrument.CALL_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.YEARN_GOAT_HORN) != null ? horns.get(MusicInstrument.YEARN_GOAT_HORN) : -1;
-			cooldown = 60000;
 		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
 			lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
-			cooldown = 30000;
 		}
 
-		// If the horn can be used again
-		if (lastHornUse + cooldown < System.currentTimeMillis()) {
+		long lastHornUseOnCooldown = 0;
+		MusicInstrument hornWithLongestCooldown = null;
+		// Ensures only one horn can be used at a time (limiting stacking)
+		for (MusicInstrument hornOnCooldown : horns.keySet()) {
+			lastHornUseOnCooldown = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
+
+			// If the horn is actively on cooldown
+			if (lastHornUseOnCooldown + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
+				if (hornWithLongestCooldown == null) {
+					hornWithLongestCooldown = hornOnCooldown;
+				}
+
+				if (horns.get(hornOnCooldown) >= horns.get(hornWithLongestCooldown)) {
+					hornWithLongestCooldown = hornOnCooldown;
+				}
+			}
+		}
+
+		// If there are no horns on cooldown
+		if (hornWithLongestCooldown == null) {
 			horns.put(horn, System.currentTimeMillis());
 			aranarthPlayer.setHorns(horns);
 			setPlayer(player.getUniqueId(), aranarthPlayer);
+			String hornName = getHornName(horn);
+
+			// Goat horns are heard up to 256 blocks away, inform nearby players
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getName().equals(player.getName())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+					continue;
+				}
+
+				if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+				}
+			}
+
 			return true;
-		} else {
+		}
+		// If there was a horn on cooldown
+		else {
 			// Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
 					onlinePlayer.stopSound(SoundCategory.RECORDS);
 				}
 			}
-			long remainder = (lastHornUse + cooldown) - System.currentTimeMillis();
+			long remainder = (lastHornUseOnCooldown + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
 			remainder = remainder / 1000;
 			int seconds = (int) remainder;
-			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this horn again for another &e" + seconds + " &cseconds!"));
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
 			return false;
 		}
+	}
+
+	/**
+	 * Provides the cooldown of the input horn.
+	 * @param horn The horn.
+	 * @return The cooldown of the input horn.
+	 */
+	private static long getHornCooldown(MusicInstrument horn) {
+		long cooldown = 60000;
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			cooldown = 90000;
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			cooldown = 180000;
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			cooldown = 150000;
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			cooldown = 120000;
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			cooldown = 30000;
+		}
+		return cooldown;
+	}
+
+	/**
+	 * Provides the custom name for each horn.
+	 * @param horn The horn.
+	 * @return The name of the horn.
+	 */
+	private static String getHornName(MusicInstrument horn) {
+		String name = "Horns";
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			name = "the Traveller";
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			name = "the Forager";
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			name = "the Brute";
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			name = "the Resilient";
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			name = "the Armored";
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			name = "the Beasts";
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			name = "the Stallion";
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			name = "the Pure";
+		}
+		return name;
 	}
 
 }
