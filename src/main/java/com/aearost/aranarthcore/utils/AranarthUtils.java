@@ -13,6 +13,8 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.TextDisplay;
 import org.bukkit.inventory.InventoryHolder;
@@ -2767,4 +2769,25 @@ public class AranarthUtils {
 		return name;
 	}
 
+	/**
+	 * Refreshes the Locations of all Guardians.
+	 */
+	public static void refreshGuardians() {
+		for (AranarthPlayer aranarthPlayer : players.values()) {
+			HashMap<EntityType, List<Guardian>> guardians = aranarthPlayer.getGuardians();
+			for (EntityType type : guardians.keySet()) {
+				for (int i = 0; i < guardians.size(); i++) {
+					Guardian guardian = guardians.get(type).get(i);
+
+					// Must manually load the chunk to allow the entity to teleport
+					Chunk chunk = guardian.getLocation().getChunk();
+					if (chunk.isLoaded()) {
+						Entity entity = Bukkit.getEntity(guardian.getUuid());
+						guardian.setLocation(entity.getLocation());
+						guardians.get(type).set(i, guardian);
+					}
+				}
+			}
+		}
+	}
 }
