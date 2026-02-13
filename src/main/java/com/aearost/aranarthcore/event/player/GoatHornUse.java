@@ -1,12 +1,16 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Guardian;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -16,6 +20,7 @@ import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionEffectTypeCategory;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +45,7 @@ public class GoatHornUse {
         Player player = e.getPlayer();
         if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
             if (e.getHand() == EquipmentSlot.HAND && (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR)) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 MusicInstrumentMeta meta = (MusicInstrumentMeta) e.getItem().getItemMeta();
                 player.setCooldown(e.getItem(), 1); // Mimics no cooldown
                 if (meta.getInstrument() == MusicInstrument.PONDER_GOAT_HORN) {
@@ -54,7 +60,7 @@ public class GoatHornUse {
                 } else if (meta.getInstrument() == MusicInstrument.SEEK_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SEEK_GOAT_HORN)) {
                         applyHornPotionEffect(player, new PotionEffect(PotionEffectType.STRENGTH, 600, 2));
-                        // Will additionally take more damage as per HornSeekExtraDamage
+                        // Will additionally cause the player to take more damage as per HornSeekExtraDamage
                     }
                 } else if (meta.getInstrument() == MusicInstrument.FEEL_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.FEEL_GOAT_HORN)) {
@@ -63,16 +69,34 @@ public class GoatHornUse {
                         applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SLOWNESS, 200, 2));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.ADMIRE_GOAT_HORN) {
-                    if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.ADMIRE_GOAT_HORN)) {
-
+                    List<Guardian> guardians = aranarthPlayer.getGuardians().get(EntityType.IRON_GOLEM);
+                    if (guardians != null && !guardians.isEmpty()) {
+                        if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.ADMIRE_GOAT_HORN)) {
+                            // Summon up to 2 designated iron golems
+                            summonGuardian(player, EntityType.IRON_GOLEM);
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eIron Golem Guardians"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
-                    if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.CALL_GOAT_HORN)) {
-
+                    List<Guardian> guardians = aranarthPlayer.getGuardians().get(EntityType.WOLF);
+                    if (guardians != null && !guardians.isEmpty()) {
+                        if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.CALL_GOAT_HORN)) {
+                            // Summon up to 8 designated tamed wolves
+                            summonGuardian(player, EntityType.WOLF);
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eWolf Guardians"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
-                    if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.YEARN_GOAT_HORN)) {
-
+                    List<Guardian> guardian = aranarthPlayer.getGuardians().get(EntityType.HORSE);
+                    if (guardian != null && !guardian.isEmpty()) {
+                        if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.YEARN_GOAT_HORN)) {
+                            // Summon 1 designated horse
+                            summonGuardian(player, EntityType.HORSE);
+                        }
+                    } else {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated a &eHorse Guardian"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.DREAM_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.DREAM_GOAT_HORN)) {
@@ -80,6 +104,8 @@ public class GoatHornUse {
                     }
                 }
             }
+        } else {
+            player.sendMessage(ChatUtils.chatMessage("&7Goat horns do not have extra functionality in this world!"));
         }
     }
 
@@ -179,6 +205,32 @@ public class GoatHornUse {
 
         for (PotionEffectType type : toRemove) {
             player.removePotionEffect(type);
+        }
+    }
+
+    /**
+     * Summons the pre-designated Guardians associated to the player.
+     * @param player The player who blew the horn.
+     * @param guardianType The Guardian type that the player will be summoning.
+     */
+    private void summonGuardian(Player player, EntityType guardianType) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (guardianType == EntityType.HORSE) {
+            Guardian guardian = aranarthPlayer.getGuardians().get(guardianType).getFirst();
+
+            // Must manually load the chunk to allow the entity to teleport
+            Chunk chunk = guardian.getLocation().getChunk();
+            chunk.load(true);
+
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Entity entity = Bukkit.getEntity(guardian.getUuid());
+                    entity.teleport(player.getLocation());
+                    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+                    player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
+                }
+            }.runTaskLater(AranarthCore.getInstance(), 60L);
         }
     }
 
