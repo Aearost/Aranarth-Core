@@ -290,10 +290,8 @@ public class GoatHornUse {
 
         for (Entity entity : player.getNearbyEntities(64, 16, 64)) {
             if (entity instanceof Player nearbyPlayer) {
-                Bukkit.getLogger().info("A");
                 double distance = player.getLocation().distance(nearbyPlayer.getLocation());
                 if (distance < closestDistance) {
-                    Bukkit.getLogger().info("B");
                     Dominion nearbyDominion = DominionUtils.getPlayerDominion(nearbyPlayer.getUniqueId());
 
                     if ((playerDominion == null || nearbyDominion == null) ||
