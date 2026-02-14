@@ -4,14 +4,14 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Guardian;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -241,9 +241,19 @@ public class GoatHornUse {
             new BukkitRunnable() {
                 @Override
                 public void run() {
+                    Player closestPlayerTarget = getTarget(player);
+
                     for (Guardian guardian : guardians) {
                         Entity entity = Bukkit.getEntity(guardian.getUuid());
                         entity.teleport(player.getLocation());
+                        if (entity instanceof Mob mob) {
+                            if (closestPlayerTarget != null) {
+                                mob.setTarget(closestPlayerTarget);
+                            }
+                            if (mob instanceof Wolf wolf) {
+                                wolf.setSitting(false);
+                            }
+                        }
                     }
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
                     player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
@@ -266,6 +276,38 @@ public class GoatHornUse {
                 }
             }.runTaskLater(AranarthCore.getInstance(), 60L);
         }
+    }
+
+    /**
+     * Provides the target of the player using the horn.
+     * @param player The player using the horn.
+     * @return The target of the player using the horn.
+     */
+    private Player getTarget(Player player) {
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        double closestDistance = 64;
+        Player closestPlayer = null;
+
+        for (Entity entity : player.getNearbyEntities(64, 16, 64)) {
+            if (entity instanceof Player nearbyPlayer) {
+                Bukkit.getLogger().info("A");
+                double distance = player.getLocation().distance(nearbyPlayer.getLocation());
+                if (distance < closestDistance) {
+                    Bukkit.getLogger().info("B");
+                    Dominion nearbyDominion = DominionUtils.getPlayerDominion(nearbyPlayer.getUniqueId());
+
+                    if ((playerDominion == null || nearbyDominion == null) ||
+                            (!nearbyDominion.getLeader().equals(playerDominion.getLeader())
+                            && !DominionUtils.areAllied(playerDominion, nearbyDominion)
+                            && !DominionUtils.areTruced(playerDominion, nearbyDominion))) {
+                        closestPlayer = nearbyPlayer;
+                        closestDistance = distance;
+                    }
+                }
+            }
+        }
+
+        return closestPlayer;
     }
 
 }
