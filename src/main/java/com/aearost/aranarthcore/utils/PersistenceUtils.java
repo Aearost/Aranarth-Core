@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -1700,6 +1701,178 @@ public class PersistenceUtils {
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the shop locations");
+			}
+		}
+	}
+
+	/**
+	 * Loads the guardians based on the contents of guardians.txt.
+	 */
+	public static void loadGuardians() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "guardians.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the guardians file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				String[] playerParts = row.split("\\|");
+				UUID playerUuid = UUID.fromString(playerParts[0]);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+				HashMap<EntityType, List<Guardian>> guardians = new HashMap<>();
+
+				List<Guardian> horse = new ArrayList<>();
+				String[] horseParts = playerParts[1].split("___");
+				for (int i = 1; i < horseParts.length; i++) {
+					String[] parts = horseParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Guardian guardian = new Guardian(uuid, EntityType.HORSE, loc);
+					horse.add(guardian);
+				}
+
+				List<Guardian> ironGolems = new ArrayList<>();
+				String[] golemParts = playerParts[2].split("___");
+				for (int i = 1; i < golemParts.length; i++) {
+					String[] parts = golemParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Guardian guardian = new Guardian(uuid, EntityType.IRON_GOLEM, loc);
+					ironGolems.add(guardian);
+				}
+
+				List<Guardian> wolves = new ArrayList<>();
+				String[] wolfParts = playerParts[3].split("___");
+				for (int i = 1; i < wolfParts.length; i++) {
+					String[] parts = wolfParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Guardian guardian = new Guardian(uuid, EntityType.WOLF, loc);
+					wolves.add(guardian);
+				}
+
+				guardians.put(EntityType.HORSE, horse);
+				guardians.put(EntityType.IRON_GOLEM, ironGolems);
+				guardians.put(EntityType.WOLF, wolves);
+				aranarthPlayer.setGuardians(guardians);
+				AranarthUtils.setPlayer(playerUuid, aranarthPlayer);
+			}
+			Bukkit.getLogger().info("The guardians have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the guardians");
+		}
+	}
+
+	/**
+	 * Saves the guardians to the guardians.txt file.
+	 */
+	public static void saveGuardians() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "guardians.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new guardians.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of guardians.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
+				for (UUID uuid : aranarthPlayers.keySet()) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+					HashMap<EntityType, List<Guardian>> guardians = aranarthPlayer.getGuardians();
+					if (guardians == null || guardians.isEmpty()) {
+						continue;
+					}
+
+					String playerGuardians = uuid + "|";
+
+					// Ensures that all types of guardians have been initialized
+					if (guardians.get(EntityType.HORSE) == null) {
+						guardians.put(EntityType.HORSE, new ArrayList<>());
+					}
+					playerGuardians += EntityType.HORSE.name() + "___";
+					for (Guardian guardian : guardians.get(EntityType.HORSE)) {
+						playerGuardians += guardian.getUuid() + "_";
+						Location loc = guardian.getLocation();
+						playerGuardians += loc.getWorld().getName() + "_";
+						playerGuardians += loc.getBlockX() + "_";
+						playerGuardians += loc.getBlockY() + "_";
+						playerGuardians += loc.getBlockZ() + "___";
+					}
+					playerGuardians += "|";
+
+					if (guardians.get(EntityType.IRON_GOLEM) == null) {
+						guardians.put(EntityType.IRON_GOLEM, new ArrayList<>());
+					}
+					playerGuardians += EntityType.IRON_GOLEM.name() + "___";
+					for (Guardian guardian : guardians.get(EntityType.IRON_GOLEM)) {
+						playerGuardians += guardian.getUuid() + "_";
+						Location loc = guardian.getLocation();
+						playerGuardians += loc.getWorld().getName() + "_";
+						playerGuardians += loc.getBlockX() + "_";
+						playerGuardians += loc.getBlockY() + "_";
+						playerGuardians += loc.getBlockZ() + "___";
+					}
+					playerGuardians += "|";
+
+					if (guardians.get(EntityType.WOLF) == null) {
+						guardians.put(EntityType.WOLF, new ArrayList<>());
+					}
+					playerGuardians += EntityType.WOLF.name() + "___";
+					for (Guardian guardian : guardians.get(EntityType.WOLF)) {
+						playerGuardians += guardian.getUuid() + "_";
+						Location loc = guardian.getLocation();
+						playerGuardians += loc.getWorld().getName() + "_";
+						playerGuardians += loc.getBlockX() + "_";
+						playerGuardians += loc.getBlockY() + "_";
+						playerGuardians += loc.getBlockZ() + "___";
+					}
+
+					playerGuardians += "\n";
+					writer.write(playerGuardians);
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the guardians");
 			}
 		}
 	}
