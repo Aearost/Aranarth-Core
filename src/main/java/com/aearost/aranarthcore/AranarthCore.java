@@ -57,7 +57,7 @@ public class AranarthCore extends JavaPlugin {
 			@Override
 			public void run() {
 				PersistenceUtils.saveHomepads();
-				PersistenceUtils.saveGuardians();
+				PersistenceUtils.saveSentinels();
 				PersistenceUtils.saveAranarthPlayers();
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
@@ -120,7 +120,7 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.refreshMutes();
 				AranarthUtils.refreshBans();
 				AranarthUtils.refreshServerBoosts();
-				AranarthUtils.refreshGuardians();
+				AranarthUtils.refreshSentinels();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
@@ -157,7 +157,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadBoosts();
 		PersistenceUtils.loadCompressible();
 		PersistenceUtils.loadShopLocations();
-		PersistenceUtils.loadGuardians();
+		PersistenceUtils.loadSentinels();
 	}
 
 	/**
@@ -416,7 +416,7 @@ public class AranarthCore extends JavaPlugin {
 		ShopUtils.removeAllHolograms();
 		PersistenceUtils.saveServerDate();
 		PersistenceUtils.saveHomepads();
-		PersistenceUtils.saveGuardians();
+		PersistenceUtils.saveSentinels();
 		PersistenceUtils.saveAranarthPlayers();
 		PersistenceUtils.saveShops();
 		PersistenceUtils.saveLockedContainers();
