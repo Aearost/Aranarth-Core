@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Marks the entity as one of the player's Guardians to be summoned by a Goat Horn.
  */
-public class MarkGuardian {
+public class GuardianMark {
 	public void execute(PlayerInteractEntityEvent e) {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -27,15 +27,43 @@ public class MarkGuardian {
 			if (player.getInventory().getItemInMainHand().hasItemMeta()) {
 				if (player.getInventory().getItemInMainHand().getItemMeta() instanceof MusicInstrumentMeta meta) {
 					// Iron Golem Guardians
-					if (e.getRightClicked() instanceof IronGolem) {
-						if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
+					if (e.getRightClicked() instanceof IronGolem ironGolem) {
+						if (meta.getInstrument() == MusicInstrument.ADMIRE_GOAT_HORN) {
+							e.setCancelled(true);
+							List<Guardian> ironGolemGuardians = guardians.get(EntityType.IRON_GOLEM);
+							if (ironGolemGuardians == null) {
+								ironGolemGuardians = new ArrayList<>();
+							}
 
+							if (ironGolemGuardians.size() < 2) {
+								ironGolemGuardians.add(new Guardian(ironGolem.getUniqueId(), EntityType.IRON_GOLEM, ironGolem.getLocation()));
+								guardians.put(EntityType.IRON_GOLEM, ironGolemGuardians);
+								aranarthPlayer.setGuardians(guardians);
+								player.sendMessage(ChatUtils.chatMessage("&7You have marked this as one of your &eIron Golem Guardians"));
+								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou have already designated 2 &eIron Golem Guardians!"));
+							}
 						}
 					}
 					// Wolf Guardians
-					else if (e.getRightClicked() instanceof Wolf) {
+					else if (e.getRightClicked() instanceof Wolf wolf) {
 						if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
+							e.setCancelled(true);
+							List<Guardian> wolfGuardians = guardians.get(EntityType.WOLF);
+							if (wolfGuardians == null) {
+								wolfGuardians = new ArrayList<>();
+							}
 
+							if (wolfGuardians.size() < 8) {
+								wolfGuardians.add(new Guardian(wolf.getUniqueId(), EntityType.WOLF, wolf.getLocation()));
+								guardians.put(EntityType.WOLF, wolfGuardians);
+								aranarthPlayer.setGuardians(guardians);
+								player.sendMessage(ChatUtils.chatMessage("&7You have marked this as one of your &eWolf Guardians"));
+								player.playSound(player, Sound.BLOCK_BELL_RESONATE, 1F, 2F);
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cYou have already designated 8 &eWolf Guardians!"));
+							}
 						}
 					}
 					// Horse Guardian

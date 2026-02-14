@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.mob.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.mob.VillagerTradeOverrides;
-import com.aearost.aranarthcore.event.player.MarkGuardian;
+import com.aearost.aranarthcore.event.player.GuardianMark;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.IronGolem;
@@ -33,7 +33,7 @@ public class PlayerInteractEntityEventListener implements Listener {
                 new VillagerCamelPickup().execute(e);
             } else if (e.getRightClicked() instanceof AbstractHorse || e.getRightClicked() instanceof Wolf
                         || e.getRightClicked() instanceof IronGolem) {
-                new MarkGuardian().execute(e);
+                new GuardianMark().execute(e);
             }
         }
     }
