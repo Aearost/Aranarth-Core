@@ -62,6 +62,12 @@ public class GuardianMark {
 					else if (e.getRightClicked() instanceof Wolf wolf) {
 						if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
 							e.setCancelled(true);
+
+							if (!wolf.isTamed() || !wolf.getOwnerUniqueId().equals(player.getUniqueId())) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou do not own this &eWolf!"));
+								return;
+							}
+
 							List<Guardian> wolfGuardians = guardians.get(EntityType.WOLF);
 							if (wolfGuardians == null) {
 								wolfGuardians = new ArrayList<>();
@@ -94,6 +100,12 @@ public class GuardianMark {
 					else if (e.getRightClicked() instanceof AbstractHorse horse) {
 						if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
 							e.setCancelled(true);
+
+							if (!horse.isTamed() || !horse.getOwnerUniqueId().equals(player.getUniqueId())) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou do not own this &eHorse!"));
+								return;
+							}
+
 							List<Guardian> horseGuardian = guardians.get(EntityType.HORSE);
 							if (horseGuardian == null) {
 								horseGuardian = new ArrayList<>();
