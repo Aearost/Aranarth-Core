@@ -35,6 +35,18 @@ public class GuardianMark {
 								ironGolemGuardians = new ArrayList<>();
 							}
 
+							Guardian guardianToUnmark = null;
+							for (Guardian guardian : ironGolemGuardians) {
+								if (guardian.getUuid().equals(ironGolem.getUniqueId())) {
+									guardianToUnmark = guardian;
+								}
+							}
+							if (guardianToUnmark != null) {
+								ironGolemGuardians.remove(guardianToUnmark);
+								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eIron Golem"));
+								return;
+							}
+
 							if (ironGolemGuardians.size() < 2) {
 								ironGolemGuardians.add(new Guardian(ironGolem.getUniqueId(), EntityType.IRON_GOLEM, ironGolem.getLocation()));
 								guardians.put(EntityType.IRON_GOLEM, ironGolemGuardians);
@@ -53,6 +65,18 @@ public class GuardianMark {
 							List<Guardian> wolfGuardians = guardians.get(EntityType.WOLF);
 							if (wolfGuardians == null) {
 								wolfGuardians = new ArrayList<>();
+							}
+
+							Guardian guardianToUnmark = null;
+							for (Guardian guardian : wolfGuardians) {
+								if (guardian.getUuid().equals(wolf.getUniqueId())) {
+									guardianToUnmark = guardian;
+								}
+							}
+							if (guardianToUnmark != null) {
+								wolfGuardians.remove(guardianToUnmark);
+								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eWolf"));
+								return;
 							}
 
 							if (wolfGuardians.size() < 8) {
@@ -74,6 +98,19 @@ public class GuardianMark {
 							if (horseGuardian == null) {
 								horseGuardian = new ArrayList<>();
 							}
+
+							Guardian guardianToUnmark = null;
+							for (Guardian guardian : horseGuardian) {
+								if (guardian.getUuid().equals(horse.getUniqueId())) {
+									guardianToUnmark = guardian;
+								}
+							}
+							if (guardianToUnmark != null) {
+								horseGuardian.remove(guardianToUnmark);
+								player.sendMessage(ChatUtils.chatMessage("&7You have unmarked this &eHorse"));
+								return;
+							}
+
 							if (horseGuardian.isEmpty()) {
 								horseGuardian.add(new Guardian(horse.getUniqueId(), EntityType.HORSE, horse.getLocation()));
 								guardians.put(EntityType.HORSE, horseGuardian);
