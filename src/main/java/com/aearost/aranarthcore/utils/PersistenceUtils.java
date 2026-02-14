@@ -1706,12 +1706,12 @@ public class PersistenceUtils {
 	}
 
 	/**
-	 * Loads the guardians based on the contents of guardians.txt.
+	 * Loads the sentinels based on the contents of sentinels.txt.
 	 */
-	public static void loadGuardians() {
+	public static void loadSentinels() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-				+ "guardians.txt";
+				+ "sentinels.txt";
 		File file = new File(filePath);
 
 		// First run of plugin
@@ -1723,16 +1723,16 @@ public class PersistenceUtils {
 		try {
 			reader = new Scanner(file);
 
-			Bukkit.getLogger().info("Attempting to read the guardians file...");
+			Bukkit.getLogger().info("Attempting to read the sentinels file...");
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
 				String[] playerParts = row.split("\\|");
 				UUID playerUuid = UUID.fromString(playerParts[0]);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
-				HashMap<EntityType, List<Guardian>> guardians = new HashMap<>();
+				HashMap<EntityType, List<Sentinel>> sentinels = new HashMap<>();
 
-				List<Guardian> horse = new ArrayList<>();
+				List<Sentinel> horse = new ArrayList<>();
 				String[] horseParts = playerParts[1].split("___");
 				for (int i = 1; i < horseParts.length; i++) {
 					String[] parts = horseParts[i].split("_");
@@ -1742,11 +1742,11 @@ public class PersistenceUtils {
 					int y = Integer.parseInt(parts[3]);
 					int z = Integer.parseInt(parts[4]);
 					Location loc = new Location(world, x, y, z);
-					Guardian guardian = new Guardian(uuid, EntityType.HORSE, loc);
-					horse.add(guardian);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.HORSE, loc);
+					horse.add(sentinel);
 				}
 
-				List<Guardian> ironGolems = new ArrayList<>();
+				List<Sentinel> ironGolems = new ArrayList<>();
 				String[] golemParts = playerParts[2].split("___");
 				for (int i = 1; i < golemParts.length; i++) {
 					String[] parts = golemParts[i].split("_");
@@ -1756,11 +1756,11 @@ public class PersistenceUtils {
 					int y = Integer.parseInt(parts[3]);
 					int z = Integer.parseInt(parts[4]);
 					Location loc = new Location(world, x, y, z);
-					Guardian guardian = new Guardian(uuid, EntityType.IRON_GOLEM, loc);
-					ironGolems.add(guardian);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.IRON_GOLEM, loc);
+					ironGolems.add(sentinel);
 				}
 
-				List<Guardian> wolves = new ArrayList<>();
+				List<Sentinel> wolves = new ArrayList<>();
 				String[] wolfParts = playerParts[3].split("___");
 				for (int i = 1; i < wolfParts.length; i++) {
 					String[] parts = wolfParts[i].split("_");
@@ -1770,30 +1770,30 @@ public class PersistenceUtils {
 					int y = Integer.parseInt(parts[3]);
 					int z = Integer.parseInt(parts[4]);
 					Location loc = new Location(world, x, y, z);
-					Guardian guardian = new Guardian(uuid, EntityType.WOLF, loc);
-					wolves.add(guardian);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.WOLF, loc);
+					wolves.add(sentinel);
 				}
 
-				guardians.put(EntityType.HORSE, horse);
-				guardians.put(EntityType.IRON_GOLEM, ironGolems);
-				guardians.put(EntityType.WOLF, wolves);
-				aranarthPlayer.setGuardians(guardians);
+				sentinels.put(EntityType.HORSE, horse);
+				sentinels.put(EntityType.IRON_GOLEM, ironGolems);
+				sentinels.put(EntityType.WOLF, wolves);
+				aranarthPlayer.setSentinels(sentinels);
 				AranarthUtils.setPlayer(playerUuid, aranarthPlayer);
 			}
-			Bukkit.getLogger().info("The guardians have been initialized");
+			Bukkit.getLogger().info("The sentinels have been initialized");
 			reader.close();
 		} catch (FileNotFoundException e) {
-			Bukkit.getLogger().info("Something went wrong with loading the guardians");
+			Bukkit.getLogger().info("Something went wrong with loading the sentinels");
 		}
 	}
 
 	/**
-	 * Saves the guardians to the guardians.txt file.
+	 * Saves the sentinels to the sentinels.txt file.
 	 */
-	public static void saveGuardians() {
+	public static void saveSentinels() {
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-				+ File.separator + "guardians.txt";
+				+ File.separator + "sentinels.txt";
 		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
 		File file = new File(filePath);
 
@@ -1806,10 +1806,10 @@ public class PersistenceUtils {
 			try {
 				// If the file isn't already there
 				if (file.createNewFile()) {
-					Bukkit.getLogger().info("A new guardians.txt file has been generated");
+					Bukkit.getLogger().info("A new sentinels.txt file has been generated");
 				}
 			} catch (IOException e) {
-				Bukkit.getLogger().info("An error occurred in the creation of guardians.txt");
+				Bukkit.getLogger().info("An error occurred in the creation of sentinels.txt");
 			}
 
 			try {
@@ -1817,62 +1817,62 @@ public class PersistenceUtils {
 				HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
 				for (UUID uuid : aranarthPlayers.keySet()) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					HashMap<EntityType, List<Guardian>> guardians = aranarthPlayer.getGuardians();
-					if (guardians == null || guardians.isEmpty()) {
+					HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+					if (sentinels == null || sentinels.isEmpty()) {
 						continue;
 					}
 
-					String playerGuardians = uuid + "|";
+					String playerSentinels = uuid + "|";
 
-					// Ensures that all types of guardians have been initialized
-					if (guardians.get(EntityType.HORSE) == null) {
-						guardians.put(EntityType.HORSE, new ArrayList<>());
+					// Ensures that all types of sentinels have been initialized
+					if (sentinels.get(EntityType.HORSE) == null) {
+						sentinels.put(EntityType.HORSE, new ArrayList<>());
 					}
-					playerGuardians += EntityType.HORSE.name() + "___";
-					for (Guardian guardian : guardians.get(EntityType.HORSE)) {
-						playerGuardians += guardian.getUuid() + "_";
-						Location loc = guardian.getLocation();
-						playerGuardians += loc.getWorld().getName() + "_";
-						playerGuardians += loc.getBlockX() + "_";
-						playerGuardians += loc.getBlockY() + "_";
-						playerGuardians += loc.getBlockZ() + "___";
+					playerSentinels += EntityType.HORSE.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.HORSE)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
 					}
-					playerGuardians += "|";
+					playerSentinels += "|";
 
-					if (guardians.get(EntityType.IRON_GOLEM) == null) {
-						guardians.put(EntityType.IRON_GOLEM, new ArrayList<>());
+					if (sentinels.get(EntityType.IRON_GOLEM) == null) {
+						sentinels.put(EntityType.IRON_GOLEM, new ArrayList<>());
 					}
-					playerGuardians += EntityType.IRON_GOLEM.name() + "___";
-					for (Guardian guardian : guardians.get(EntityType.IRON_GOLEM)) {
-						playerGuardians += guardian.getUuid() + "_";
-						Location loc = guardian.getLocation();
-						playerGuardians += loc.getWorld().getName() + "_";
-						playerGuardians += loc.getBlockX() + "_";
-						playerGuardians += loc.getBlockY() + "_";
-						playerGuardians += loc.getBlockZ() + "___";
+					playerSentinels += EntityType.IRON_GOLEM.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.IRON_GOLEM)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
 					}
-					playerGuardians += "|";
+					playerSentinels += "|";
 
-					if (guardians.get(EntityType.WOLF) == null) {
-						guardians.put(EntityType.WOLF, new ArrayList<>());
+					if (sentinels.get(EntityType.WOLF) == null) {
+						sentinels.put(EntityType.WOLF, new ArrayList<>());
 					}
-					playerGuardians += EntityType.WOLF.name() + "___";
-					for (Guardian guardian : guardians.get(EntityType.WOLF)) {
-						playerGuardians += guardian.getUuid() + "_";
-						Location loc = guardian.getLocation();
-						playerGuardians += loc.getWorld().getName() + "_";
-						playerGuardians += loc.getBlockX() + "_";
-						playerGuardians += loc.getBlockY() + "_";
-						playerGuardians += loc.getBlockZ() + "___";
+					playerSentinels += EntityType.WOLF.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.WOLF)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
 					}
 
-					playerGuardians += "\n";
-					writer.write(playerGuardians);
+					playerSentinels += "\n";
+					writer.write(playerSentinels);
 				}
 
 				writer.close();
 			} catch (IOException e) {
-				Bukkit.getLogger().info("There was an error in saving the guardians");
+				Bukkit.getLogger().info("There was an error in saving the sentinels");
 			}
 		}
 	}

@@ -72,7 +72,7 @@ public class AranarthPlayer {
 	private boolean isUsingGoatHorn = false;
 	private HashMap<MusicInstrument, Long> horns = new HashMap<>();
 	private long lastWorldCommandUse = 0;
-	private HashMap<EntityType, List<Guardian>> guardians = new HashMap<>();
+	private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -126,7 +126,7 @@ public class AranarthPlayer {
 		this.isUsingGoatHorn = false;
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
-		this.guardians = new HashMap<>();
+		this.sentinel = new HashMap<>();
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -186,7 +186,7 @@ public class AranarthPlayer {
 		this.isUsingGoatHorn = false;
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
-		this.guardians = new HashMap<>();
+		this.sentinel = new HashMap<>();
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1078,18 +1078,18 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the HashMap of the player's designated Guardians to be summoned by a horn.
-	 * @return The HashMap of the player's designated Guardians to be summoned by a horn.
+	 * Provides the HashMap of the player's designated sentinels to be summoned by a horn.
+	 * @return The HashMap of the player's designated sentinels to be summoned by a horn.
 	 */
-	public HashMap<EntityType, List<Guardian>> getGuardians() {
-		return guardians;
+	public HashMap<EntityType, List<Sentinel>> getSentinels() {
+		return sentinel;
 	}
 
 	/**
-	 * Updates the HashMap of the player's designated Guardians to be summoned by a horn.
-	 * @param guardians The HashMap of the player's designated Guardians to be summoned by a horn.
+	 * Updates the HashMap of the player's designated sentinels to be summoned by a horn.
+	 * @param sentinels The HashMap of the player's designated sentinels to be summoned by a horn.
 	 */
-	public void setGuardians(HashMap<EntityType, List<Guardian>> guardians) {
-		this.guardians = guardians;
+	public void setSentinels(HashMap<EntityType, List<Sentinel>> sentinels) {
+		this.sentinel = sentinels;
 	}
 }

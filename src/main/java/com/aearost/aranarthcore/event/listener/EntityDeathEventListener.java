@@ -33,10 +33,10 @@ public class EntityDeathEventListener implements Listener {
             new PlayerHeadDrop().execute(e);
         }
 
-        // If the mob was a Guardian
+        // If the mob was a sentinel
         if (e.getEntityType() == EntityType.HORSE || e.getEntityType() == EntityType.IRON_GOLEM
                 || e.getEntityType() == EntityType.WOLF) {
-            new GuardianDeath().execute(e);
+            new SentinelDeath().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.FAUNIVOR) {

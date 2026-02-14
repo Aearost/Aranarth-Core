@@ -5,7 +5,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.Guardian;
+import com.aearost.aranarthcore.objects.Sentinel;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -59,10 +59,10 @@ public class GoatHornUse {
                         applyHornPotionEffect(player, new PotionEffect(PotionEffectType.SLOWNESS, 200, 2));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.ADMIRE_GOAT_HORN) {
-                    List<Guardian> guardians = aranarthPlayer.getGuardians().get(EntityType.IRON_GOLEM);
-                    if (guardians != null && !guardians.isEmpty()) {
+                    List<Sentinel> sentinels = aranarthPlayer.getSentinels().get(EntityType.IRON_GOLEM);
+                    if (sentinels != null && !sentinels.isEmpty()) {
                         Entity target = e.getPlayer().getTargetEntity(5);
-                        // Prevents the calling of the event when marking a guardian
+                        // Prevents the calling of the event when marking a sentinel
                         if (target != null && target.getType() == EntityType.IRON_GOLEM) {
                             // Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
                             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -75,16 +75,16 @@ public class GoatHornUse {
 
                         if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.ADMIRE_GOAT_HORN)) {
                             // Summon up to 2 designated iron golems
-                            summonGuardians(player, EntityType.IRON_GOLEM);
+                            summonSentinels(player, EntityType.IRON_GOLEM);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eIron Golem Guardians"));
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eIron Golem Sentinels"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.CALL_GOAT_HORN) {
-                    List<Guardian> guardians = aranarthPlayer.getGuardians().get(EntityType.WOLF);
-                    if (guardians != null && !guardians.isEmpty()) {
+                    List<Sentinel> sentinels = aranarthPlayer.getSentinels().get(EntityType.WOLF);
+                    if (sentinels != null && !sentinels.isEmpty()) {
                         Entity target = e.getPlayer().getTargetEntity(5);
-                        // Prevents the calling of the event when marking a guardian
+                        // Prevents the calling of the event when marking a sentinel
                         if (target != null && target.getType() == EntityType.WOLF) {
                             // Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
                             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -97,20 +97,20 @@ public class GoatHornUse {
 
                         if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.CALL_GOAT_HORN)) {
                             // Summon up to 8 designated tamed wolves
-                            summonGuardians(player, EntityType.WOLF);
+                            summonSentinels(player, EntityType.WOLF);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eWolf Guardians"));
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated any &eWolf Sentinels"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
-                    List<Guardian> guardian = aranarthPlayer.getGuardians().get(EntityType.HORSE);
-                    if (guardian != null && !guardian.isEmpty()) {
+                    List<Sentinel> sentinel = aranarthPlayer.getSentinels().get(EntityType.HORSE);
+                    if (sentinel != null && !sentinel.isEmpty()) {
                         if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.YEARN_GOAT_HORN)) {
                             // Summon 1 designated horse
-                            summonGuardians(player, EntityType.HORSE);
+                            summonSentinels(player, EntityType.HORSE);
                         }
                     } else {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated a &eHorse Guardian"));
+                        player.sendMessage(ChatUtils.chatMessage("&cYou have not yet designated a &eHorse Sentinel"));
                     }
                 } else if (meta.getInstrument() == MusicInstrument.DREAM_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.DREAM_GOAT_HORN)) {
@@ -223,18 +223,18 @@ public class GoatHornUse {
     }
 
     /**
-     * Summons the pre-designated Guardians associated to the player.
+     * Summons the pre-designated sentinels associated to the player.
      * @param player The player who blew the horn.
-     * @param guardianType The Guardian type that the player will be summoning.
+     * @param sentinelType The sentinel type that the player will be summoning.
      */
-    private void summonGuardians(Player player, EntityType guardianType) {
+    private void summonSentinels(Player player, EntityType sentinelType) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        if (guardianType == EntityType.IRON_GOLEM || guardianType == EntityType.WOLF) {
-            List<Guardian> guardians = aranarthPlayer.getGuardians().get(guardianType);
+        if (sentinelType == EntityType.IRON_GOLEM || sentinelType == EntityType.WOLF) {
+            List<Sentinel> sentinels = aranarthPlayer.getSentinels().get(sentinelType);
 
             // Must manually load the chunk to allow the entity to teleport
-            for (Guardian guardian : guardians) {
-                Chunk chunk = guardian.getLocation().getChunk();
+            for (Sentinel sentinel : sentinels) {
+                Chunk chunk = sentinel.getLocation().getChunk();
                 chunk.load(true);
             }
 
@@ -243,8 +243,8 @@ public class GoatHornUse {
                 public void run() {
                     Player closestPlayerTarget = getTarget(player);
 
-                    for (Guardian guardian : guardians) {
-                        Entity entity = Bukkit.getEntity(guardian.getUuid());
+                    for (Sentinel sentinel : sentinels) {
+                        Entity entity = Bukkit.getEntity(sentinel.getUuid());
                         entity.teleport(player.getLocation());
                         if (entity instanceof Mob mob) {
                             if (closestPlayerTarget != null) {
@@ -259,17 +259,17 @@ public class GoatHornUse {
                     player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);
                 }
             }.runTaskLater(AranarthCore.getInstance(), 60L);
-        } else if (guardianType == EntityType.HORSE) {
-            Guardian guardian = aranarthPlayer.getGuardians().get(guardianType).getFirst();
+        } else if (sentinelType == EntityType.HORSE) {
+            Sentinel sentinel = aranarthPlayer.getSentinels().get(sentinelType).getFirst();
 
             // Must manually load the chunk to allow the entity to teleport
-            Chunk chunk = guardian.getLocation().getChunk();
+            Chunk chunk = sentinel.getLocation().getChunk();
             chunk.load(true);
 
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Entity entity = Bukkit.getEntity(guardian.getUuid());
+                    Entity entity = Bukkit.getEntity(sentinel.getUuid());
                     entity.teleport(player.getLocation());
                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
                     player.getWorld().spawnParticle(Particle.PORTAL, player.getEyeLocation(), 250, 3, 2, 3);

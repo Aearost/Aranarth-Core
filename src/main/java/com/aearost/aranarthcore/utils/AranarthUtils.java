@@ -2770,21 +2770,21 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Refreshes the Locations of all Guardians.
+	 * Refreshes the Locations of all sentinels.
 	 */
-	public static void refreshGuardians() {
+	public static void refreshSentinels() {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
-			HashMap<EntityType, List<Guardian>> guardians = aranarthPlayer.getGuardians();
-			for (EntityType type : guardians.keySet()) {
-				for (int i = 0; i < guardians.get(type).size(); i++) {
-					Guardian guardian = guardians.get(type).get(i);
+			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+			for (EntityType type : sentinels.keySet()) {
+				for (int i = 0; i < sentinels.get(type).size(); i++) {
+					Sentinel sentinel = sentinels.get(type).get(i);
 
 					// Must manually load the chunk to allow the entity to teleport
-					Chunk chunk = guardian.getLocation().getChunk();
+					Chunk chunk = sentinel.getLocation().getChunk();
 					if (chunk.isLoaded()) {
-						Entity entity = Bukkit.getEntity(guardian.getUuid());
-						guardian.setLocation(entity.getLocation());
-						guardians.get(type).set(i, guardian);
+						Entity entity = Bukkit.getEntity(sentinel.getUuid());
+						sentinel.setLocation(entity.getLocation());
+						sentinels.get(type).set(i, sentinel);
 					}
 				}
 			}
