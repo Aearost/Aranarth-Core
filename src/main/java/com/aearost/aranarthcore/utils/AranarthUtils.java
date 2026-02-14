@@ -2731,14 +2731,11 @@ public class AranarthUtils {
 		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
 			cooldown = 90000;
 		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-//			cooldown = 180000; TODO
-			cooldown = 3000;
+			cooldown = 180000;
 		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-//			cooldown = 150000; TODO
-			cooldown = 3000;
+			cooldown = 150000;
 		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-//			cooldown = 120000; TODO
-			cooldown = 3000;
+			cooldown = 120000;
 		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
 			cooldown = 30000;
 		}
@@ -2792,5 +2789,19 @@ public class AranarthUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Provides the UUID of the AranarthPlayer.
+	 * @param aranarthPlayer The AranarthPlayer.
+	 * @return The UUID of the AranarthPlayer.
+	 */
+	public static UUID getUuidOfAranarthPlayer(AranarthPlayer aranarthPlayer) {
+		for (UUID uuid : players.keySet()) {
+			if (players.containsValue(aranarthPlayer)) {
+				return uuid;
+			}
+		}
+		return null;
 	}
 }

@@ -2,10 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.mob.FaunivorExtraDeathDrops;
-import com.aearost.aranarthcore.event.mob.GoatDeath;
-import com.aearost.aranarthcore.event.mob.WanderingTraderDeath;
-import com.aearost.aranarthcore.event.mob.ZombieHorseSpawn;
+import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -34,6 +31,12 @@ public class EntityDeathEventListener implements Listener {
             new GoatDeath().execute(e);
         } else if (e.getEntityType() == EntityType.PLAYER) {
             new PlayerHeadDrop().execute(e);
+        }
+
+        // If the mob was a Guardian
+        if (e.getEntityType() == EntityType.HORSE || e.getEntityType() == EntityType.IRON_GOLEM
+                || e.getEntityType() == EntityType.WOLF) {
+            new GuardianDeath().execute(e);
         }
 
         if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
