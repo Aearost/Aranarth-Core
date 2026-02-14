@@ -1,32 +1,35 @@
 AranarthCore v. 1.9
 
-Features
+Major Features
+[+] Implemented a Spawn world to separate the Survival spawn
+[+] Added in custom functionality for all Goat Horn variants
+[+] Introduced Incantations, limited to 1 incantation per item
+[+] Added functionality to beautify the tab list
+[+] Added random teleportation logic in Survival and Resource worlds
+[+] Added a 3-second delay to all teleport requests requiring players to stay in place
+[+] Added a 1-minute cooldown to players teleporting between worlds
+[+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
+
+Minor Features
+[+] Added the Incantation of Beheading
+[+] Added the Incantation of Lifesteal
+[+] Added functionality to drop a player's head at a rare rate when killed
 [~] Restricted Aquinvor potion effects to only apply while it is raining
 [+] Added Discord nickname changes for Dukes
 [+] Added recipe for green dye using blue and yellow dye
 [+] Added functionality to replace a home if another one already uses that name
-[+] Added functionality to drop a player's head at a rare rate when killed
 [+] Added sound effect when a player sends/receives a teleport request
 [+] Added a sound effect for the player that is not teleporting in a tpaccept
-[+] Added functionality to beautify the tab list
 [+] Added additional calls to re-evaluate player permissions
 [+] Glass, glass panes, and ice will break when hit with an arrow
 [+] Added a Muted role in Discord and added auto-assigning functionality
 [~] Fixed bug with mute and ban commands that caused errors when the player did not exist
 [~] Adjusted the baltop format to show the full prefix of a player, and adjusted the ranking number display
-[+] Implemented a Spawn world to separate the Survival spawn
-[+] Introduced Incantations, limited to 1 incantation per item
-[+] Added the Incantation of Beheading
-[+] Added the Incantation of Lifesteal
 [+] Added recipe for mushroom stew using nether fungus
-[+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
 [~] Slight tweaks to the farms rule
 [~] Updated the default spawn location to be in the Spawn world
-[+] Added random teleportation logic in Survival and Resource worlds
-[+] Added a 3-second delay to all teleport requests requiring players to stay in place
 [~] Fixed issue where teleporting to creative from creative cleared inventory
 [~] Disabled PvP in the Resource World
-[+] Added a 1-minute cooldown to players teleporting between worlds
 [+] Added /ac flyspeed for the council
 
 Miscellaneous
