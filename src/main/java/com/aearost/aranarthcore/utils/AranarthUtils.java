@@ -2731,11 +2731,14 @@ public class AranarthUtils {
 		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
 			cooldown = 90000;
 		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
-			cooldown = 180000;
+//			cooldown = 180000; TODO
+			cooldown = 3000;
 		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
-			cooldown = 150000;
+//			cooldown = 150000; TODO
+			cooldown = 3000;
 		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
-			cooldown = 120000;
+//			cooldown = 120000; TODO
+			cooldown = 3000;
 		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
 			cooldown = 30000;
 		}
@@ -2776,7 +2779,7 @@ public class AranarthUtils {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
 			HashMap<EntityType, List<Guardian>> guardians = aranarthPlayer.getGuardians();
 			for (EntityType type : guardians.keySet()) {
-				for (int i = 0; i < guardians.size(); i++) {
+				for (int i = 0; i < guardians.get(type).size(); i++) {
 					Guardian guardian = guardians.get(type).get(i);
 
 					// Must manually load the chunk to allow the entity to teleport
