@@ -542,16 +542,15 @@ public class DominionUtils {
 		}
 
 		// Provides different yields based on the input
-		switch (amplifier) {
-			case -1: power = (int) (power * 0.75);
-			case 1: power = (int) (power * 1.25);
-			case 2: power = (int) (power * 1.5);
-			case 3: power = (int) (power * 1.75);
-			case 4: power = power * 2;
-			case 5: power = (int) (power * 2.5);
-			default: break;
-        }
-		return power;
+		return switch (amplifier) {
+			case -1 -> power = (int) (power * 0.75);
+			case 1 -> power = (int) (power * 1.25);
+			case 2 -> power = (int) (power * 1.5);
+			case 3 -> power = (int) (power * 1.75);
+			case 4 -> power = power * 2;
+			case 5 -> power = (int) (power * 2.5);
+			default -> power;
+        };
 	}
 
 	/**
