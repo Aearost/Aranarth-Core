@@ -1163,6 +1163,10 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("autoclaim");
 		displayedOptions.add("food");
 		displayedOptions.add("resources");
+		displayedOptions.add("conquer");
+		displayedOptions.add("surrender");
+		displayedOptions.add("rebel");
+		displayedOptions.add("retreat");
 		return displayedOptions;
 	}
 
@@ -1182,10 +1186,13 @@ public class CommandACCompleter implements TabCompleter {
 					if (args[1].equalsIgnoreCase("c")) {
 						displayedOptions.add("create");
 						displayedOptions.add("claim");
+						displayedOptions.add("conquer");
 					} else if ("create".startsWith(args[1])) {
 						displayedOptions.add("create");
 					} else if ("claim".startsWith(args[1])) {
 						displayedOptions.add("claim");
+					} else if ("conquer".startsWith(args[1])) {
+						displayedOptions.add("conquer");
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
@@ -1230,12 +1237,18 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions.add("remove");
 						displayedOptions.add("rename");
 						displayedOptions.add("resources");
+						displayedOptions.add("rebel");
+						displayedOptions.add("retreat");
 					} else if ("remove".startsWith(args[1])) {
 						displayedOptions.add("remove");
 					} else if ("rename".startsWith(args[1])) {
 						displayedOptions.add("rename");
 					} else if ("resources".startsWith(args[1])) {
 						displayedOptions.add("resources");
+					} else if ("rebel".startsWith(args[1])) {
+						displayedOptions.add("rebel");
+					} else if ("retreat".startsWith(args[1])) {
+						displayedOptions.add("retreat");
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
@@ -1246,13 +1259,19 @@ public class CommandACCompleter implements TabCompleter {
 				} else if ("home".startsWith(args[1])) {
 					displayedOptions.add("home");
 				} else if (args[1].startsWith("s")) {
-					if (args[1].equalsIgnoreCase("s") || args[1].equalsIgnoreCase("se") || args[1].equalsIgnoreCase("set")) {
+					if (args[1].equalsIgnoreCase("s")) {
+						displayedOptions.add("sethome");
+						displayedOptions.add("setleader");
+						displayedOptions.add("surrender");
+					} else if (args[1].equalsIgnoreCase("se") || args[1].equalsIgnoreCase("set")) {
 						displayedOptions.add("sethome");
 						displayedOptions.add("setleader");
 					} else if ("sethome".startsWith(args[1])) {
 						displayedOptions.add("sethome");
 					} else if ("setleader".startsWith(args[1])) {
 						displayedOptions.add("setleader");
+					} else if ("surrender".startsWith(args[1])) {
+						displayedOptions.add("surrender");
 					} else {
 						displayedOptions = addDominionSubCommands(displayedOptions);
 					}
