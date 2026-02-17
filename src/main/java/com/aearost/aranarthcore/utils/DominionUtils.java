@@ -445,7 +445,7 @@ public class DominionUtils {
 				// Determines if there's an increase, or if the Dominion is conquered, a decrease
 				int amplifier = dominion.getConquered().size();
 				if (amplifier == 0) {
-					if (getConqueror(dominion) != null) {
+					if (getConquerorOfDominion(dominion) != null) {
 						amplifier = -1;
 					}
 				}
@@ -588,7 +588,7 @@ public class DominionUtils {
 			// Determines if there's an increase, or if the Dominion is conquered, a decrease
 			int amplifier = dominion.getConquered().size();
 			if (amplifier == 0) {
-				if (getConqueror(dominion) != null) {
+				if (getConquerorOfDominion(dominion) != null) {
 					amplifier = -1;
 				}
 			}
@@ -1776,7 +1776,7 @@ public class DominionUtils {
 				int money = dominion.getConquered().size() >= 5 ? 2500 : dominion.getConquered().size() * 500;
 				dominion.setBalance(dominion.getBalance() + money);
 			} else {
-				if (getConqueror(dominion) != null) {
+				if (getConquerorOfDominion(dominion) != null) {
 					dominion.setBalance(dominion.getBalance() - 100);
 					isTaxed = true;
 				}
@@ -1806,7 +1806,7 @@ public class DominionUtils {
 	 * @param dominion The Dominion.
 	 * @return The UUID of the Dominion leader that conquered the input Dominion.
 	 */
-	public static UUID getConqueror(Dominion dominion) {
+	public static UUID getConquerorOfDominion(Dominion dominion) {
 		for (Dominion dominionInList : getDominions()) {
 			if (dominionInList.getConquered().contains(dominion.getLeader())) {
 				return dominionInList.getLeader();
@@ -1822,7 +1822,7 @@ public class DominionUtils {
 	 */
 	public static int getMaxClaimableResourcesAmount(Dominion dominion) {
 		// If the Dominion is conquered, they are limited to a total of 8 claims
-		if (getConqueror(dominion) != null) {
+		if (getConquerorOfDominion(dominion) != null) {
 			return 8;
 		}
 		// Base amount of 16, and increase by 8 for each conquered Dominion
@@ -1839,7 +1839,7 @@ public class DominionUtils {
 	 */
 	private static boolean isAllowedToClaimResources(Dominion dominion) {
 		// If the Dominion is conquered, there is a 50% chance that the claim will be skipped
-		if (getConqueror(dominion) != null) {
+		if (getConquerorOfDominion(dominion) != null) {
 			return new Random().nextBoolean();
 		}
 

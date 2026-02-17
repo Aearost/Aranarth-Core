@@ -1398,13 +1398,19 @@ public class CommandDominion {
 							return;
 						}
 
-						if (DominionUtils.getConqueror(dominion) != null) {
+						if (DominionUtils.getConquerorOfDominion(dominion) != null) {
 							player.sendMessage(ChatUtils.chatMessage("&cA conquered Dominion cannot conquer another!"));
 							return;
 						}
 
 						if (dominion.getConquered().contains(dominionFromList.getLeader())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already conquered &e" + dominionFromList.getName()));
+							return;
+						}
+
+						UUID conquerorUuid = DominionUtils.getConquerorOfDominion(dominionFromList);
+						if (conquerorUuid != null) {
+							player.sendMessage(ChatUtils.chatMessage("&cThis Dominion is already conquered by &e" + DominionUtils.getPlayerDominion(conquerorUuid).getName()));
 							return;
 						}
 
@@ -1477,6 +1483,9 @@ public class CommandDominion {
 							dominion.setConqueredRequest(null);
 							List<UUID> conquered = dominionFromList.getConquered();
 							conquered.add(dominion.getLeader());
+							// Transfers the conquered dominions over to the new conqueror
+                            conquered.addAll(dominion.getConquered());
+							dominion.setConquered(new ArrayList<>());
 							dominionFromList.setConquered(conquered);
 
 							DominionUtils.updateDominion(dominion);
