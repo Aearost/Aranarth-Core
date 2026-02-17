@@ -1398,6 +1398,11 @@ public class CommandDominion {
 							return;
 						}
 
+						if (DominionUtils.getConqueror(dominion) != null) {
+							player.sendMessage(ChatUtils.chatMessage("&cA conquered Dominion cannot conquer another!"));
+							return;
+						}
+
 						if (dominion.getConquered().contains(dominionFromList.getLeader())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already conquered &e" + dominionFromList.getName()));
 							return;
