@@ -442,7 +442,14 @@ public class DominionUtils {
 					continue;
 				}
 
-				int powerOfFoodItem = getClaimFoodPower(food.getType(), dominion.getConquered().size());
+				// Determines if there's an increase, or if the Dominion is conquered, a decrease
+				int amplifier = dominion.getConquered().size();
+				if (amplifier == 0) {
+					if (getConqueror(dominion) != null) {
+						amplifier = -1;
+					}
+				}
+				int powerOfFoodItem = getClaimFoodPower(food.getType(), amplifier);
 				totalPower += (powerOfFoodItem * food.getAmount());
 			}
 
@@ -534,8 +541,9 @@ public class DominionUtils {
 			amplifier = 5;
 		}
 
-		// Provides increased yields based on the input
+		// Provides different yields based on the input
 		switch (amplifier) {
+			case -1: power = (int) (power * 0.75);
 			case 1: power = (int) (power * 1.25);
 			case 2: power = (int) (power * 1.5);
 			case 3: power = (int) (power * 1.75);
@@ -577,7 +585,14 @@ public class DominionUtils {
 				continue;
 			}
 
-			int powerOfItem = getClaimFoodPower(food.getType(), dominion.getConquered().size());
+			// Determines if there's an increase, or if the Dominion is conquered, a decrease
+			int amplifier = dominion.getConquered().size();
+			if (amplifier == 0) {
+				if (getConqueror(dominion) != null) {
+					amplifier = -1;
+				}
+			}
+			int powerOfItem = getClaimFoodPower(food.getType(), amplifier);
 			// Take one quantity at a time of that particular item
 			for (int quantity = food.getAmount(); quantity > 0; quantity--) {
 				food.setAmount(food.getAmount() - 1);
@@ -1755,9 +1770,17 @@ public class DominionUtils {
 				}
 			}
 
-			// $500 per week per conquered Dominion, limit of 5 conquered rewards per week
-			int money = dominion.getConquered().size() >= 5 ? 2500 : dominion.getConquered().size() * 500;
-			dominion.setBalance(dominion.getBalance() + money);
+			boolean isTaxed = false;
+			if (!dominion.getConquered().isEmpty()) {
+				// $500 per week per conquered Dominion, limit of 5 conquered rewards per week
+				int money = dominion.getConquered().size() >= 5 ? 2500 : dominion.getConquered().size() * 500;
+				dominion.setBalance(dominion.getBalance() + money);
+			} else {
+				if (getConqueror(dominion) != null) {
+					dominion.setBalance(dominion.getBalance() - 100);
+					isTaxed = true;
+				}
+			}
 			updateDominion(dominion);
 
 			if (player.isOnline()) {
@@ -1769,6 +1792,10 @@ public class DominionUtils {
 					} else {
 						player.getPlayer().sendMessage(ChatUtils.chatMessage("&7You must claim the available resources from your Dominion"));
 					}
+				}
+
+				if (isTaxed) {
+					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was taxed $100 this week by your Conqueror"));
 				}
 			}
 		}
