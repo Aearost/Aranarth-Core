@@ -1,6 +1,7 @@
 AranarthCore v. 1.9
 
 Major Features
+[+] Added in Dominion conquering functionality, providing increased and decreased perks to the involved Dominions
 [+] Implemented a Spawn world to separate the Survival spawn
 [+] Added in custom functionality for all Goat Horn variants
 [+] Introduced Incantations, limited to 1 incantation per item

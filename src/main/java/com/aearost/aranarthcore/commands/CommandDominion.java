@@ -988,7 +988,7 @@ public class CommandDominion {
 	 */
 	private static void displayInfoForDominion(Player player, Dominion dominion) {
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
-		player.sendMessage(ChatUtils.translateToColor("&8&lThe Dominion of &e" + dominion.getName()));
+		String dominionName = "&8&lThe Dominion of &e" + dominion.getName();
 
 		AranarthPlayer leader = AranarthUtils.getPlayer(dominion.getLeader());
 		String leaderDisplayedName = "";
@@ -997,7 +997,28 @@ public class CommandDominion {
 		leaderDisplayedName += AranarthUtils.getCouncilRank(leader);
 		leaderDisplayedName += leader.getNickname();
 
-		player.sendMessage(ChatUtils.translateToColor("&7Leader: &e" + leaderDisplayedName));
+		dominionName += " &8&lled by &e" + leaderDisplayedName;
+		player.sendMessage(ChatUtils.translateToColor(dominionName));
+
+		if (DominionUtils.getConquerorOfDominion(dominion) != null) {
+			Dominion conqueror = DominionUtils.getPlayerDominion(DominionUtils.getConquerorOfDominion(dominion));
+			player.sendMessage(ChatUtils.translateToColor("&8Ruled by the Dominion of &e" + conqueror.getName()));
+		} else if (!dominion.getConquered().isEmpty()) {
+			String conquered = "&8Ruling over the Dominion";
+			if (dominion.getConquered().size() > 1) {
+				conquered += "s";
+			}
+			conquered += " of ";
+
+			for (int i = 0; i < dominion.getConquered().size(); i++) {
+				Dominion conqueredDominion = DominionUtils.getPlayerDominion(dominion.getConquered().get(i));
+				conquered += "&e" + conqueredDominion.getName();
+				if (i < dominion.getConquered().size() - 1) {
+					conquered += "&7, ";
+				}
+			}
+			player.sendMessage(ChatUtils.translateToColor(conquered));
+		}
 
 		StringBuilder membersBuilder = new StringBuilder();
 		membersBuilder.append("&7Members: &e");
