@@ -74,7 +74,7 @@ public class GuiRanks {
 		}
 		peasantLore.add(ChatUtils.translateToColor("&f&lBending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- Basic abilities"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- &3&oIcebending"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- #99f5ff&oIce Bending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 3 quiver slots"));
@@ -92,8 +92,8 @@ public class GuiRanks {
 		}
 		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oHealing"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oPlantbending"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &2&oSandbending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- #008048&oPlant Bending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- #ffdc82&oSand Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac dominion home"));
@@ -113,7 +113,7 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($1,250)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- &2&oMetalbending"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
@@ -203,8 +203,8 @@ public class GuiRanks {
 			}
 		}
 		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &2MetalClips"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &7Suffocate"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetalClips"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- &7&oSuffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick (and a nickname in Discord)"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
@@ -233,7 +233,7 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightning Bending"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- #820d0d&oLightning Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- #cab0ff&oSpiritual Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
@@ -265,8 +265,8 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLava Bending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- #c73800&oLava Bending"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &c&oFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
@@ -297,7 +297,7 @@ public class GuiRanks {
 		}
 
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustion Bending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- #690213&oCombustion Bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));
