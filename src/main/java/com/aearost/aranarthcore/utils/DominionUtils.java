@@ -375,6 +375,45 @@ public class DominionUtils {
 					break;
 				}
 			}
+			for (int i = 0; i < dominion.getConquered().size(); i++) {
+				if (dominion.getConquered().get(i).equals(oldLeader)) {
+					if (!isDeleting) {
+						dominion.getConquered().set(i, newLeader);
+					} else {
+						dominion.getConquered().remove(oldLeader);
+					}
+					break;
+				}
+			}
+			for (int i = 0; i < dominion.getConquered().size(); i++) {
+				if (dominion.getConquered().get(i).equals(oldLeader)) {
+					if (!isDeleting) {
+						dominion.getConquered().set(i, newLeader);
+					} else {
+						dominion.getConquered().remove(oldLeader);
+					}
+					break;
+				}
+			}
+			if (dominion.getConqueredRequest() != null) {
+				if (dominion.getConqueredRequest().equals(oldLeader)) {
+					if (!isDeleting) {
+						dominion.setConqueredRequest(newLeader);
+					} else {
+						dominion.setConqueredRequest(null);
+					}
+				}
+			}
+			if (dominion.getRebelRequest() != null) {
+				if (dominion.getRebelRequest().equals(oldLeader)) {
+					if (!isDeleting) {
+						dominion.setRebelRequest(newLeader);
+					} else {
+						dominion.setRebelRequest(null);
+					}
+				}
+			}
+
 			updateDominion(dominion);
 		}
 		if (!isDeleting) {
