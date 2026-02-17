@@ -1684,22 +1684,79 @@ public class DominionUtils {
 		for (Dominion dominion : getDominions()) {
 			int claimableAmount = dominion.getClaimableResources();
 			OfflinePlayer player = Bukkit.getOfflinePlayer(dominion.getLeader());
-			boolean isIncreasedAmount = false;
 
-			if (claimableAmount < 16) {
-				claimableAmount++;
-				dominion.setClaimableResources(claimableAmount);
-				updateDominion(dominion);
-				isIncreasedAmount = true;
+			boolean isAmountIncreasing = false;
+			boolean isClaimPrevented = false;
+			int maxClaimableResourcesAmount = getMaxClaimableResourcesAmount(dominion);
+
+			if (claimableAmount < maxClaimableResourcesAmount) {
+				if (isAllowedToClaimResources(dominion)) {
+					claimableAmount++;
+					dominion.setClaimableResources(claimableAmount);
+					updateDominion(dominion);
+					isAmountIncreasing = true;
+				} else {
+					isClaimPrevented = true;
+				}
 			}
 
 			if (player.isOnline()) {
-				if (isIncreasedAmount) {
+				if (isAmountIncreasing) {
 					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7It is a new week - Dominion resources may be claimed"));
 				} else {
-					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion must claim its available resources!"));
+					if (isClaimPrevented) {
+						player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was unable to claim resources this week"));
+					} else {
+						player.getPlayer().sendMessage(ChatUtils.chatMessage("&7You must claim the available resources from your Dominion"));
+					}
 				}
 			}
 		}
+	}
+
+	/**
+	 * Provides the UUID of the Dominion leader that conquered the input Dominion.
+	 * @param dominion The Dominion.
+	 * @return The UUID of the Dominion leader that conquered the input Dominion.
+	 */
+	public static UUID getConqueror(Dominion dominion) {
+		for (Dominion dominionInList : getDominions()) {
+			if (dominionInList.getConquered().contains(dominion.getLeader())) {
+				return dominionInList.getLeader();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Provides the maximum amount of resources that the Dominion is permitted to claim.
+	 * @param dominion The Dominion.
+	 * @return The maximum amount of resources that the Dominion is permitted to claim.
+	 */
+	public static int getMaxClaimableResourcesAmount(Dominion dominion) {
+		// If the Dominion is conquered, they are limited to a total of 8 claims
+		if (getConqueror(dominion) != null) {
+			return 8;
+		}
+		// Base amount of 16, and increase by 8 for each conquered Dominion
+		int total = 16;
+		total += dominion.getConquered().size() * 8;
+		return total;
+	}
+
+	/**
+	 * Determines whether the Dominion will be permitted to claim resources.
+	 * 50% chance for conquered Dominions, 100% chance for non-conquered.
+	 * @param dominion The Dominion.
+	 * @return Whether the Dominion will be permitted to claim resources.
+	 */
+	private static boolean isAllowedToClaimResources(Dominion dominion) {
+		// If the Dominion is conquered, there is a 50% chance that the claim will be skipped
+		if (getConqueror(dominion) != null) {
+			return new Random().nextBoolean();
+		}
+
+		// Always allowed to claim if not conquered
+		return true;
 	}
 }
