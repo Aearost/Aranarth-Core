@@ -31,12 +31,15 @@ public class Dominion {
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
 	private Biome biomeResourcesBeingClaimed;
+	private List<UUID> conquered;
+	private UUID conqueredRequest;
 
 	// Keep balance at the end
 	private double balance;
 
 	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
-					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food, int claimableResources,
+					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
+					int claimableResources, List<UUID> conquered,
 					// Keep balance at the end
 					double balance) {
 		name = ChatUtils.removeSpecialCharacters(name);
@@ -54,6 +57,8 @@ public class Dominion {
 		this.food = food;
 		this.claimableResources = claimableResources;
 		this.biomeResourcesBeingClaimed = null;
+		this.conquered = conquered;
+		this.conqueredRequest = null;
 
 		// Keep balance at the end
 		this.balance = balance;
@@ -313,5 +318,37 @@ public class Dominion {
 	 */
 	public void setBiomeResourcesBeingClaimed(Biome biomeResourcesBeingClaimed) {
 		this.biomeResourcesBeingClaimed = biomeResourcesBeingClaimed;
+	}
+
+	/**
+	 * Provides the list of Dominion leaders that have been conquered by this Dominion.
+	 * @return The list of Dominion leaders that have been conquered by this Dominion.
+	 */
+	public List<UUID> getConquered() {
+		return conquered;
+	}
+
+	/**
+	 * Updates the list of Dominion leaders that have been conquered by this Dominion.
+	 * @param conquered The list of Dominion leaders that have been conquered by this Dominion.
+	 */
+	public void setConquered(List<UUID> conquered) {
+		this.conquered = conquered;
+	}
+
+	/**
+	 * Provides the UUID of the Dominion leader that sent a conquer request.
+	 * @return The UUID of the Dominion leader that sent a conquer request.
+	 */
+	public UUID getConqueredRequest() {
+		return conqueredRequest;
+	}
+
+	/**
+	 * Updates the UUID of the Dominion leader that sent a conquer request.
+	 * @param conqueredRequest The UUID of the Dominion leader that sent a conquer request.
+	 */
+	public void setConqueredRequest(UUID conqueredRequest) {
+		this.conqueredRequest = conqueredRequest;
 	}
 }
