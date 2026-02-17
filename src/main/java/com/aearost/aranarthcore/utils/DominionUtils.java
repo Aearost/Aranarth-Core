@@ -442,7 +442,7 @@ public class DominionUtils {
 					continue;
 				}
 
-				int powerOfFoodItem = getClaimFoodPower(food.getType());
+				int powerOfFoodItem = getClaimFoodPower(food.getType(), dominion.getConquered().size());
 				totalPower += (powerOfFoodItem * food.getAmount());
 			}
 
@@ -489,44 +489,61 @@ public class DominionUtils {
 	/**
 	 * Determines the claim power that the input item contains.
 	 * @param type The Material of item being provided.
+	 * @param amplifier The amplifier to be applied to the item, limited to 5.
 	 * @return The claim power that the input item contains.
 	 */
-	public static int getClaimFoodPower(Material type) {
+	public static int getClaimFoodPower(Material type, int amplifier) {
+		int power = 0;
 		if (type == Material.ENCHANTED_GOLDEN_APPLE || type == Material.CAKE) {
-			return 500;
+			power = 500;
 		} else if (type == Material.MUSHROOM_STEW || type == Material.BEETROOT_SOUP) {
-			return 150;
+			power = 150;
 		} else if (type == Material.HAY_BLOCK || type == Material.RABBIT_STEW) {
-			return 50;
+			power = 50;
 		} else if (type == Material.GOLDEN_APPLE || type == Material.COOKED_PORKCHOP || type == Material.COOKED_MUTTON
 				|| type == Material.COOKED_BEEF || type == Material.COOKED_CHICKEN || type == Material.COOKED_RABBIT
 				|| type == Material.COOKED_COD || type == Material.COOKED_SALMON) {
-			return 32;
+			power = 32;
 		} else if (type == Material.PUMPKIN_PIE) {
-			return 25;
+			power = 25;
 		} else if (type == Material.DRIED_KELP_BLOCK) {
-			return 20;
+			power = 20;
 		} else if (type == Material.BREAD || type == Material.APPLE) {
-			return 16;
+			power = 16;
 		} else if (type == Material.GOLDEN_CARROT) {
-			return 10;
+			power = 10;
 		} else if (type == Material.PORKCHOP || type == Material.MUTTON
 				|| type == Material.BEEF || type == Material.CHICKEN || type == Material.RABBIT
 				|| type == Material.COD || type == Material.SALMON) {
-			return 8;
+			power = 8;
 		} else if (type == Material.POISONOUS_POTATO) {
-			return 6;
+			power = 6;
 		} else if (type == Material.WHEAT || type == Material.BEETROOT) {
-			return 5;
+			power = 5;
 		} else if (type == Material.BAKED_POTATO) {
-			return 3;
+			power = 3;
 		} else if (type == Material.CARROT || type == Material.POTATO || type == Material.DRIED_KELP) {
-			return 2;
+			power = 2;
 		} else if (type == Material.MELON_SLICE || type == Material.SWEET_BERRIES || type == Material.GLOW_BERRIES
 				|| type == Material.CHORUS_FRUIT || type == Material.COOKIE) {
-			return 1;
+			power = 1;
 		}
-		return 0;
+
+		// Limited to an amplifier of 5
+		if (amplifier > 5) {
+			amplifier = 5;
+		}
+
+		// Provides increased yields based on the input
+		switch (amplifier) {
+			case 1: power = (int) (power * 1.25);
+			case 2: power = (int) (power * 1.5);
+			case 3: power = (int) (power * 1.75);
+			case 4: power = power * 2;
+			case 5: power = (int) (power * 2.5);
+			default: break;
+        }
+		return power;
 	}
 
 	/**
@@ -535,7 +552,7 @@ public class DominionUtils {
 	 * @return Confirmation whether the input Material is a food item.
 	 */
 	public static boolean isFoodItem(Material type) {
-		return getClaimFoodPower(type) > 0;
+		return getClaimFoodPower(type, 0) > 0;
 	}
 
 	/**
@@ -560,7 +577,7 @@ public class DominionUtils {
 				continue;
 			}
 
-			int powerOfItem = getClaimFoodPower(food.getType());
+			int powerOfItem = getClaimFoodPower(food.getType(), dominion.getConquered().size());
 			// Take one quantity at a time of that particular item
 			for (int quantity = food.getAmount(); quantity > 0; quantity--) {
 				food.setAmount(food.getAmount() - 1);
@@ -1717,9 +1734,9 @@ public class DominionUtils {
 	}
 
 	/**
-	 * Increases the amount of resources that can be claimed by the Dominion.
+	 * Provides the rewards for the Dominion.
 	 */
-	public static void increaseClaimableResources() {
+	public static void provideDominionRewards() {
 		for (Dominion dominion : getDominions()) {
 			int claimableAmount = dominion.getClaimableResources();
 			OfflinePlayer player = Bukkit.getOfflinePlayer(dominion.getLeader());
@@ -1732,12 +1749,16 @@ public class DominionUtils {
 				if (isAllowedToClaimResources(dominion)) {
 					claimableAmount++;
 					dominion.setClaimableResources(claimableAmount);
-					updateDominion(dominion);
 					isAmountIncreasing = true;
 				} else {
 					isClaimPrevented = true;
 				}
 			}
+
+			// $500 per week per conquered Dominion, limit of 5 conquered rewards per week
+			int money = dominion.getConquered().size() >= 5 ? 2500 : dominion.getConquered().size() * 500;
+			dominion.setBalance(dominion.getBalance() + money);
+			updateDominion(dominion);
 
 			if (player.isOnline()) {
 				if (isAmountIncreasing) {
