@@ -10,6 +10,7 @@ Major Features
 [+] Added a 3-second delay to all teleport requests requiring players to stay in place
 [+] Added a 1-minute cooldown to players teleporting between worlds
 [+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
+[+] Added mcMMO requirements to rank up
 
 Minor Features
 [+] Added the Incantation of Beheading
