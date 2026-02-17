@@ -33,6 +33,7 @@ public class Dominion {
 	private Biome biomeResourcesBeingClaimed;
 	private List<UUID> conquered;
 	private UUID conqueredRequest;
+	private UUID rebelRequest;
 
 	// Keep balance at the end
 	private double balance;
@@ -350,5 +351,21 @@ public class Dominion {
 	 */
 	public void setConqueredRequest(UUID conqueredRequest) {
 		this.conqueredRequest = conqueredRequest;
+	}
+
+	/**
+	 * Provides the UUID of the Dominion leader of the conquered Dominion.
+	 * @return The UUID of the Dominion leader of the conquered Dominion.
+	 */
+	public UUID getRebelRequest() {
+		return rebelRequest;
+	}
+
+	/**
+	 * Updates the UUID of the Dominion leader of the conquered Dominion.
+	 * @param rebelRequest The UUID of the Dominion leader of the conquered Dominion.
+	 */
+	public void setRebelRequest(UUID rebelRequest) {
+		this.rebelRequest = rebelRequest;
 	}
 }
