@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.player.DominionDeath;
 import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -31,6 +32,7 @@ public class EntityDeathEventListener implements Listener {
             new GoatDeath().execute(e);
         } else if (e.getEntityType() == EntityType.PLAYER) {
             new PlayerHeadDrop().execute(e);
+            new DominionDeath().execute(e);
         }
 
         // If the mob was a sentinel

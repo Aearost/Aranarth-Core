@@ -11,6 +11,7 @@ Major Features
 [+] Added a 1-minute cooldown to players teleporting between worlds
 [+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
 [+] Added mcMMO requirements to rank up
+[+] Added functionality for dominions to lose food, money, or claimed chunks when a player dies
 
 Minor Features
 [+] Added the Incantation of Beheading

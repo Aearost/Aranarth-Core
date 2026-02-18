@@ -436,22 +436,7 @@ public class DominionUtils {
 		}
 
 		for (Dominion dominion : getDominions()) {
-			int totalPower = 0;
-			for (ItemStack food : dominion.getFood()) {
-				if (food == null || food.getType() == Material.AIR) {
-					continue;
-				}
-
-				// Determines if there's an increase, or if the Dominion is conquered, a decrease
-				int amplifier = dominion.getConquered().size();
-				if (amplifier == 0) {
-					if (getConquerorOfDominion(dominion) != null) {
-						amplifier = -1;
-					}
-				}
-				int powerOfFoodItem = getClaimFoodPower(food.getType(), amplifier);
-				totalPower += (powerOfFoodItem * food.getAmount());
-			}
+			int totalFoodPower = getTotalFoodPower(dominion);
 
 			int powerBeingConsumed = 0;
 			// Consume 100 power per day for <=25 chunks
@@ -463,14 +448,14 @@ public class DominionUtils {
 				powerBeingConsumed = 500;
 			}
 
-			if (totalPower >= powerBeingConsumed) {
+			if (totalFoodPower >= powerBeingConsumed) {
 				consumeFood(dominion, powerBeingConsumed);
 				if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
 					Player onlineLeader = Bukkit.getPlayer(dominion.getLeader());
 					onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
 				}
 			} else {
-				int result = consumeMoneyOrLand(dominion);
+				int result = consumeMoneyOrLand(dominion, 250);
 				for (UUID memberUuid : dominion.getMembers()) {
 					if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
 						Player member = Bukkit.getPlayer(memberUuid);
@@ -491,6 +476,31 @@ public class DominionUtils {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Provides the total food power of the Dominion.
+	 * @param dominion The Dominion.
+	 * @return The total food power of the Dominion.
+	 */
+	public static int getTotalFoodPower(Dominion dominion) {
+		int totalPower = 0;
+		for (ItemStack food : dominion.getFood()) {
+			if (food == null || food.getType() == Material.AIR) {
+				continue;
+			}
+
+			// Determines if there's an increase, or if the Dominion is conquered, a decrease
+			int amplifier = dominion.getConquered().size();
+			if (amplifier == 0) {
+				if (getConquerorOfDominion(dominion) != null) {
+					amplifier = -1;
+				}
+			}
+			int powerOfFoodItem = getClaimFoodPower(food.getType(), amplifier);
+			totalPower += (powerOfFoodItem * food.getAmount());
+		}
+		return totalPower;
 	}
 
 	/**
@@ -591,6 +601,7 @@ public class DominionUtils {
 					amplifier = -1;
 				}
 			}
+
 			int powerOfItem = getClaimFoodPower(food.getType(), amplifier);
 			// Take one quantity at a time of that particular item
 			for (int quantity = food.getAmount(); quantity > 0; quantity--) {
@@ -611,11 +622,12 @@ public class DominionUtils {
 	/**
 	 * Consumes money or land the Dominion has when there is not enough food available.
 	 * @param dominion The dominion.
+	 * @param moneyToConsume The amount of money to be consumed.
 	 * @return 1 if consuming money, 0 if consuming a chunk, -1 if disbanding the Dominion.
 	 */
-	public static int consumeMoneyOrLand(Dominion dominion) {
-		if (dominion.getBalance() >= 250) {
-			dominion.setBalance(dominion.getBalance() - 250);
+	public static int consumeMoneyOrLand(Dominion dominion, int moneyToConsume) {
+		if (dominion.getBalance() >= moneyToConsume) {
+			dominion.setBalance(dominion.getBalance() - moneyToConsume);
 			updateDominion(dominion);
 			return 1;
 		} else {
