@@ -5,8 +5,14 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.OfflineBendingPlayer;
+import io.papermc.paper.datacomponent.item.ResolvableProfile;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -210,6 +216,7 @@ public class AvatarUtils {
 		if (Bukkit.getOfflinePlayer(avatar.getUuid()).isOnline()) {
 			PermissionUtils.evaluatePlayerPermissions(Bukkit.getPlayer(avatar.getUuid()));
 		}
+		updateNewestAvatarMannequin();
 
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.playSound(player, Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);
@@ -242,6 +249,7 @@ public class AvatarUtils {
 		avatars.set(avatars.size() - 1, oldAvatar);
 		avatars.add(null);
 		PermissionUtils.updateAvatarPermissions(oldAvatar.getUuid(), true);
+		shiftAvatarMannequins();
 
 		DiscordUtils.addAvatarMessageToDiscord(oldAvatar, false);
 
@@ -261,6 +269,158 @@ public class AvatarUtils {
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 70);
+	}
+
+	/**
+	 * Updates the latest avatar mannequin when a new avatar is selected.
+	 */
+	private static void updateNewestAvatarMannequin() {
+		Location center = new Location(Bukkit.getWorld("world"), 0, 200, 0);
+		for (Entity entity : center.getNearbyEntities(1, 5, 1)) {
+			if (entity instanceof Mannequin mannequin) {
+				mannequin.setInvulnerable(true);
+				mannequin.setGravity(false);
+				mannequin.setPersistent(true);
+				mannequin.setNoPhysics(false);
+				mannequin.setInvisible(false);
+				mannequin.setImmovable(true);
+
+				UUID uuid = getCurrentAvatar().getUuid();
+				OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+				mannequin.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
+				String elementSymbol = getElementSymbol(uuid, getCurrentAvatar());
+				mannequin.setCustomName(ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol));
+			}
+		}
+	}
+
+	/**
+	 * Cycles all avatar mannequins down the line when an avatar dies.
+	 */
+	private static void shiftAvatarMannequins() {
+		Location center = new Location(Bukkit.getWorld("world"), 0, 200, 0);
+		for (Entity entity : center.getNearbyEntities(30, 5, 30)) {
+			if (entity instanceof Mannequin mannequin) {
+				mannequin.setInvulnerable(true);
+				mannequin.setGravity(false);
+				mannequin.setPersistent(true);
+				mannequin.setNoPhysics(false);
+				mannequin.setImmovable(true);
+
+				Bukkit.getLogger().info("-----------");
+				int indexInShownAvatars = getMannequinPosition(mannequin);
+
+				// Skip the last one as it will simply be overridden
+				if (indexInShownAvatars == 4) {
+					continue;
+				}
+				// Hide the first one as there is no active avatar
+				else if (indexInShownAvatars == 0) {
+					mannequin.setInvisible(true);
+				}
+				// Move all avatars over by 1
+				else {
+					Bukkit.getLogger().info("Index Before: " + indexInShownAvatars);
+					// Ensures only the last 50 avatars will be shown
+					// Skips the last one as well as it is null
+					int overallIndex = (avatars.size() - 2) - indexInShownAvatars;
+
+					Bukkit.getLogger().info("Index After: " + overallIndex);
+					if (avatars.get(overallIndex + 1) != null) {
+						Bukkit.getLogger().info("Updating the mannequin");
+						UUID uuid = avatars.get(overallIndex + 1).getUuid();
+						OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+						mannequin.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
+						String elementSymbol = getElementSymbol(uuid, avatars.get(overallIndex + 1));
+						mannequin.setCustomName(ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol));
+						mannequin.setCustomNameVisible(true);
+					}
+				}
+
+
+			}
+		}
+	}
+
+	/**
+	 * Provides the numeric position that the mannequin is in the cycle.
+	 * @param mannequin The mannequin.
+	 * @return The numeric position that the mannequin is in the cycle.
+	 */
+	private static int getMannequinPosition(Mannequin mannequin) {
+		Location loc = mannequin.getLocation();
+		int x = loc.getBlockX();
+		int y = loc.getBlockY();
+		int z = loc.getBlockZ();
+		Bukkit.getLogger().info(x + "|" + y + "|" + z);
+
+		if (x == 0 && y == 200 && z == 0) {
+			return 0;
+		} else if (x == 2 && y == 200 && z == 0) {
+			return 1;
+		} else if (x == 4 && y == 200 && z == 0) {
+			return 2;
+		} else if (x == 6 && y == 200 && z == 0) {
+			return 3;
+		} else {
+			return 4;
+		}
+//		else if (x == 10 && y == 200 && z == 0) {
+//			return 5;
+//		} else if (x == 12 && y == 200 && z == 0) {
+//			return 6;
+//		} else if (x == 14 && y == 200 && z == 0) {
+//			return 7;
+//		} else if (x == 16 && y == 200 && z == 0) {
+//			return 8;
+//		} else if (x == 18 && y == 200 && z == 0) {
+//			return 9;
+//		} else if (x == 20 && y == 200 && z == 0) {
+//			return 10;
+//		} else if (x == 22 && y == 200 && z == 0) {
+//			return 11;
+//		} else if (x == 24 && y == 200 && z == 0) {
+//			return 12;
+//		}
+	}
+
+	/**
+	 * Provides the symbol of the current element of the input player.
+	 * @param uuid The UUID of the player.
+	 * @param avatar The associated avatar iteration if the input is or was an avatar.
+	 * @return The symbol of the current element of the input player.
+	 */
+	public static String getElementSymbol(UUID uuid, Avatar avatar) {
+		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+		OfflineBendingPlayer bendingPlayer = new OfflineBendingPlayer(player);
+
+		Element element = Element.AIR;
+		if (avatar != null) {
+			char elementCharacter = avatar.getElement();
+			if (elementCharacter == 'W') {
+				element = Element.WATER;
+			} else if (elementCharacter == 'E') {
+				element = Element.EARTH;
+			} else if (elementCharacter == 'F') {
+				element = Element.FIRE;
+			}
+		} else {
+			element = bendingPlayer.getElements().getFirst();
+		}
+
+		String elementAsString = "";
+		if (element == Element.WATER) {
+			elementAsString = "&b水";
+		} else if (element == Element.EARTH) {
+			elementAsString = "&a土";
+		} else if (element == Element.FIRE) {
+			elementAsString = "&c火";
+		} else {
+			elementAsString = "&7気";
+		}
+		return elementAsString;
 	}
 
 }

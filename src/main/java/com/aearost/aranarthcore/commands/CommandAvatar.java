@@ -25,16 +25,7 @@ public class CommandAvatar {
 				sender.sendMessage(ChatUtils.chatMessage("&7&oAranarth is currently without an Avatar..."));
 				return true;
 			}
-			String element = "";
-			if (currentAvatar.getElement() == 'W') {
-				element = "&b水";
-			} else if (currentAvatar.getElement() == 'E') {
-				element = "&a土";
-			} else if (currentAvatar.getElement() == 'F') {
-				element = "&c火";
-			} else {
-				element = "&7気";
-			}
+			String element = AvatarUtils.getElementSymbol(currentAvatar.getUuid(), currentAvatar);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(currentAvatar.getUuid());
 			sender.sendMessage(ChatUtils.chatMessage("&5&l&oThe current Avatar is " + element + " &d" + aranarthPlayer.getNickname() + " " + element));
 			return true;
