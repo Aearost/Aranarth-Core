@@ -47,7 +47,7 @@ public class CommandPerks {
 				sender.sendMessage(ChatUtils.translateToColor("&6Shulker: &e" + perks.get(Perk.SHULKER)));
 				sender.sendMessage(ChatUtils.translateToColor("&6Inventory: &e" + perks.get(Perk.INVENTORY)));
 				sender.sendMessage(ChatUtils.translateToColor("&6Homes: &e" + perks.get(Perk.HOMES)));
-				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMNAME)));
+				sender.sendMessage(ChatUtils.translateToColor("&6ItemFrame: &e" + perks.get(Perk.ITEMFRAME)));
 				sender.sendMessage(ChatUtils.translateToColor("&6BlueFire: &e" + perks.get(Perk.BLUEFIRE)));
 				sender.sendMessage(ChatUtils.translateToColor("&6Discord: &e" + perks.get(Perk.DISCORD)));
 				return true;
@@ -103,7 +103,7 @@ public class CommandPerks {
 			if (AranarthUtils.getPlayer(uuid) != null) {
 				if (isValidPerk(args[2].toLowerCase())) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-					// compressor_randomizer_blacklist_tables_itemname_chat_shulker_inventory_homes_itemframe_bluefire_discord
+
 					HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 					if (args[2].equals("compressor") || args[2].equals("randomizer") || args[2].equals("blacklist")
 							|| args[2].equals("tables") || args[2].equals("itemname") || args[2].equals("chat")
@@ -144,6 +144,14 @@ public class CommandPerks {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
 								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							} else {
+								sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
+								// If the sender is either console or if the sender player is not the one the perk is being applied to
+								if (Bukkit.getOfflinePlayer(uuid).isOnline() &&
+										(!(sender instanceof Player) || sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(uuid))) {
+									Player player = Bukkit.getPlayer(uuid);
+									player.sendMessage(ChatUtils.chatMessage("&7Your " + perk + " &7has been removed"));
+								}
 							}
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
