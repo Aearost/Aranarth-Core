@@ -11,9 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Mannequin;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -290,7 +288,16 @@ public class AvatarUtils {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				mannequin.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
 				String elementSymbol = getElementSymbol(uuid, getCurrentAvatar());
-				mannequin.setCustomName(ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol));
+				Location above = mannequin.getLocation();
+				above.add(0, 2, 0);
+
+				String name = ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol);
+
+				// Always will create a new text display
+				mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
+					displayEntity.setText(name);
+					displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
+				});
 			}
 		}
 	}
@@ -308,34 +315,61 @@ public class AvatarUtils {
 				mannequin.setNoPhysics(false);
 				mannequin.setImmovable(true);
 
-				Bukkit.getLogger().info("-----------");
 				int indexInShownAvatars = getMannequinPosition(mannequin);
+
+				Location above = mannequin.getLocation();
+				above.add(0, 2, 0);
 
 				// Skip the last one as it will simply be overridden
 				if (indexInShownAvatars == 4) {
 					continue;
 				}
-				// Hide the first one as there is no active avatar
+				// Delete the first one as there is no active avatar
 				else if (indexInShownAvatars == 0) {
 					mannequin.setInvisible(true);
+					// Despawn the text display
+					for (Entity nearby : above.getNearbyEntities(1, 1, 1)) {
+						if (nearby instanceof TextDisplay displayEntity) {
+							nearby.remove();
+							break;
+						}
+					}
 				}
 				// Move all avatars over by 1
 				else {
-					Bukkit.getLogger().info("Index Before: " + indexInShownAvatars);
 					// Ensures only the last 50 avatars will be shown
 					// Skips the last one as well as it is null
 					int overallIndex = (avatars.size() - 2) - indexInShownAvatars;
 
-					Bukkit.getLogger().info("Index After: " + overallIndex);
 					if (avatars.get(overallIndex + 1) != null) {
-						Bukkit.getLogger().info("Updating the mannequin");
 						UUID uuid = avatars.get(overallIndex + 1).getUuid();
 						OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 						mannequin.setProfile(ResolvableProfile.resolvableProfile(player.getPlayerProfile()));
 						String elementSymbol = getElementSymbol(uuid, avatars.get(overallIndex + 1));
-						mannequin.setCustomName(ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol));
-						mannequin.setCustomNameVisible(true);
+
+						// Identifies if a text display already exists
+						TextDisplay textDisplay = null;
+						for (Entity nearby : above.getNearbyEntities(1, 1, 1)) {
+							if (nearby instanceof TextDisplay displayEntity) {
+								textDisplay = displayEntity;
+								break;
+							}
+						}
+
+						String name = ChatUtils.translateToColor(elementSymbol + " &r" + aranarthPlayer.getNickname() + " " + elementSymbol);
+
+						// Creating a new text display
+						if (textDisplay == null) {
+							mannequin.getWorld().spawn(above, TextDisplay.class, displayEntity -> {
+								displayEntity.setText(name);
+								displayEntity.setBillboard(Display.Billboard.VERTICAL); // Pivots only around the vertical axis
+							});
+						}
+						// Updating the existing text display
+						else {
+							textDisplay.setText(name);
+						}
 					}
 				}
 
@@ -354,7 +388,6 @@ public class AvatarUtils {
 		int x = loc.getBlockX();
 		int y = loc.getBlockY();
 		int z = loc.getBlockZ();
-		Bukkit.getLogger().info(x + "|" + y + "|" + z);
 
 		if (x == 0 && y == 200 && z == 0) {
 			return 0;
