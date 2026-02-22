@@ -207,6 +207,7 @@ public class AranarthCore extends JavaPlugin {
 		new BoostEffectsListener(this);
 		new LeafDropsListener(this);
 		new AranarthCoreBendingListener(this);
+		new MountStatsListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

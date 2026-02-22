@@ -1,17 +1,36 @@
-package com.aearost.aranarthcore.event.mob;
+package com.aearost.aranarthcore.event.listener.grouped;
 
+import com.aearost.aranarthcore.AranarthCore;
+import org.bukkit.Bukkit;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
 
-/**
- * Deals with overriding the default spawn behaviour for horses and camels.
- * Determines the values in brackets of probability.
- */
-public class MountSpawn {
-	public void execute(CreatureSpawnEvent e) {
+import static com.aearost.aranarthcore.objects.CustomKeys.*;
+
+public class MountStatsListener implements Listener {
+
+	public MountStatsListener(AranarthCore plugin) {
+		Bukkit.getPluginManager().registerEvents(this, plugin);
+	}
+
+	/**
+	 * Deals with overriding the default spawn behaviour for horses and camels.
+	 * Determines the values in brackets of probability, however fully randomized.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onMountSpawn(final CreatureSpawnEvent e) {
+		if (e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.BREEDING) {
+			return;
+		}
+
 		if (!(e.getEntity() instanceof Camel camel)) {
 			AbstractHorse horse;
 			if (e.getEntity() instanceof Horse) {
@@ -24,9 +43,9 @@ public class MountSpawn {
 				// Donkeys, Mules, Llamas, etc
 				return;
 			}
-			
+
 			Random r = new Random();
-			
+
 			// A maximum limit of 30 hearts (60 half-hearts) --> 60
 			// Will need a minimum of 8 hearts (16 half-hearts)
 			final int healthBracket = r.nextInt(10) + 1;
@@ -44,7 +63,8 @@ public class MountSpawn {
 			}
 			final int healthValue = r.nextInt((healthMax - healthMin) + 1) + healthMin;
 			horse.getAttribute(Attribute.MAX_HEALTH).setBaseValue(healthValue);
-			
+			horse.getPersistentDataContainer().set(MOUNT_HEALTH, PersistentDataType.INTEGER, healthValue);
+
 			// A maximum limit of 8 blocks of jump --> 1.28
 			// A minimum limit of 2 blocks of jump --> 0.57
 			final int jumpBracket = r.nextInt(10) + 1;
@@ -62,7 +82,8 @@ public class MountSpawn {
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
 			horse.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(jumpValue);
-			
+			horse.getPersistentDataContainer().set(MOUNT_JUMP, PersistentDataType.DOUBLE, jumpValue);
+
 			// A maximum limit of 25 m/s --> 0.592417062
 			// A minimum limit of 8 m/s --> 0.19
 			final int speedBracket = r.nextInt(10) + 1;
@@ -80,7 +101,8 @@ public class MountSpawn {
 			}
 			final double speedValue = speedMin + (speedMax - speedMin) * r.nextDouble();
 			horse.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
-			
+			horse.getPersistentDataContainer().set(MOUNT_SPEED, PersistentDataType.DOUBLE, speedValue);
+
 			// Without this, skeleton horses and zombie horses will not be rideable
 			// and will spawn with very low health
 			if (horse instanceof SkeletonHorse || horse instanceof ZombieHorse) {
@@ -88,8 +110,8 @@ public class MountSpawn {
 				horse.setHealth(horse.getAttribute(Attribute.MAX_HEALTH).getValue());
 			}
 		} else {
-            Random r = new Random();
-			
+			Random r = new Random();
+
 			// A maximum limit of 40 hearts (80 half-hearts) --> 80
 			// Will need a minimum of 8 hearts (16 half-hearts)
 			final int healthBracket = r.nextInt(10) + 1;
@@ -107,7 +129,7 @@ public class MountSpawn {
 			}
 			final int healthValue = r.nextInt((healthMax - healthMin) + 1) + healthMin;
 			camel.getAttribute(Attribute.MAX_HEALTH).setBaseValue(healthValue);
-			
+
 			// A maximum limit of 4.5 blocks of jump --> 0.909
 			// A minimum limit of 1 blocks of jump --> 0.382
 			final int jumpBracket = r.nextInt(10) + 1;
@@ -125,7 +147,7 @@ public class MountSpawn {
 			}
 			final double jumpValue = jumpMin + (jumpMax - jumpMin) * r.nextDouble();
 			camel.getAttribute(Attribute.JUMP_STRENGTH).setBaseValue(jumpValue);
-			
+
 			// A maximum limit of 18 m/s --> 0.428
 			// A minimum limit of 8 m/s --> 0.19
 			final int speedBracket = r.nextInt(10) + 1;
@@ -145,4 +167,20 @@ public class MountSpawn {
 			camel.getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedValue);
 		}
 	}
+
+	@EventHandler
+	public void onMount(VehicleEnterEvent e) {
+		if (e.getVehicle() instanceof AbstractHorse || e.getVehicle() instanceof Camel) {
+			if (e.getVehicle().getPersistentDataContainer().get(MOUNT_HEALTH, PersistentDataType.INTEGER) == null
+				|| e.getVehicle().getPersistentDataContainer().get(MOUNT_JUMP, PersistentDataType.DOUBLE) == null
+				|| e.getVehicle().getPersistentDataContainer().get(MOUNT_SPEED, PersistentDataType.DOUBLE) == null) {
+				return;
+			}
+
+			int health = e.getVehicle().getPersistentDataContainer().get(MOUNT_HEALTH, PersistentDataType.INTEGER);
+			double jump = e.getVehicle().getPersistentDataContainer().get(MOUNT_JUMP, PersistentDataType.DOUBLE);
+			double speed = e.getVehicle().getPersistentDataContainer().get(MOUNT_SPEED, PersistentDataType.DOUBLE);
+		}
+	}
+
 }
