@@ -167,4 +167,14 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 		}
 	}
+
+	@EventHandler
+	public void onDisconnect(PlayerQuitEvent e) {
+		Player player = e.getPlayer();
+		// Ends AstralProjections on the player disconnecting from the server
+		if (activeProjections.containsKey(player.getUniqueId())) {
+			activeProjections.get(player.getUniqueId()).endAbility();
+		}
+	}
+
 }

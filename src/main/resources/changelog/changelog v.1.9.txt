@@ -39,6 +39,8 @@ Minor Features
 [+] Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
 [+] Added feedback message when a perk is manually removed from a player
 [~] Fixed issue where the itemname perk value would be displayed in /ac perks instead of the itemframe perk
+[~] Fixed issue where logging off while in an AstralProjection would not put the player back in Survival
+[~] Made it so the mannequin is sneaking when astral projecting (sitting is not possible)
 
 Miscellaneous
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
