@@ -155,10 +155,19 @@ public class ChatUtils {
 	 * @return The message without the formatting.
 	 */
 	public static String stripColorFormatting(String msg) {
+		// Removes basic color codes
 		String colorStripped = ChatColor.stripColor(msg);
-		while (colorStripped.startsWith("&")) {
-			colorStripped = colorStripped.substring(2);
+		if (colorStripped.contains("&")) {
+			String pattern = "&[a-f0-9]";
+			colorStripped = colorStripped.replaceAll(pattern, "");
 		}
+
+		// Removes any manually added hex codes
+		if (colorStripped.contains("#")) {
+			String pattern = "#.{6}";
+			colorStripped = colorStripped.replaceAll(pattern, "");
+		}
+
 		return colorStripped;
 	}
 

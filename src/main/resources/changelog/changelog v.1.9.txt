@@ -13,6 +13,7 @@ Major Features
 [+] Added mcMMO requirements to rank up
 [+] Added functionality for dominions to lose food, money, or claimed chunks when a player dies
 [~] Fixed issue where sub-elements were not being provided due to permissions changes with arena world
+[+] Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
 
 Minor Features
 [+] Added the Incantation of Beheading
