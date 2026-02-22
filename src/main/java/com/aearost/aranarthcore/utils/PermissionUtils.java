@@ -59,17 +59,22 @@ public class PermissionUtils {
 
 		if (bendingPlayer != null) {
 			for (Element element : bendingPlayer.getElements()) {
+				Bukkit.getLogger().info("Element: " + element.getName());
 				for (Element.SubElement subElement : Element.getSubElements(element)) {
+					Bukkit.getLogger().info(subElement.getName());
 					if (bendingPlayer.hasSubElementPermission(subElement)) {
-
+						Bukkit.getLogger().info("Has permission");
 						if (!bendingPlayer.hasSubElement(subElement)) {
+							Bukkit.getLogger().info("Adding");
 							bendingPlayer.addSubElement(subElement);
 						}
 					} else {
+						Bukkit.getLogger().info("Does not have sub-element permission");
 						Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
 
 						// Removes sub-elements with the exception of the avatar
 						if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
+							Bukkit.getLogger().info("Removing sub-element");
 							bendingPlayer.getSubElements().remove(subElement);
 						} else {
 							// Different logic for the avatar
@@ -105,7 +110,6 @@ public class PermissionUtils {
 	 */
 	public static void toggleArenaBendingPermissions(Player player, boolean isInArenaWorld) {
 		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
-
 		if (isInArenaWorld) {
 			// Enable sub-elements
 			perms.setPermission("bending.water.healing", true);
@@ -128,6 +132,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.earth.fissure", true);
 		}
 		else {
+			Bukkit.getLogger().info("Disabling sub elements");
 			// Disable sub-elements
 			perms.setPermission("bending.water.healing", false);
 			perms.setPermission("bending.water.plantbending", false);
@@ -148,6 +153,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.suffocate", false);
 			perms.setPermission("bending.earth.lavaflux", false);
 			perms.setPermission("bending.earth.fissure", false);
+			setRankPermissions(perms, AranarthUtils.getPlayer(player.getUniqueId()).getRank());
 		}
 	}
 
