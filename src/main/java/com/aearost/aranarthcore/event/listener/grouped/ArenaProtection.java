@@ -142,7 +142,9 @@ public class ArenaProtection implements Listener {
 	 */
 	@EventHandler
 	public void onTeleportFromSpawn(PlayerTeleportEvent e) {
-		toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+		if (e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+		}
 	}
 
 	/**
