@@ -21,11 +21,11 @@ public class RecipeElvenAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_ELVEN_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumElven().getItem());
 
-		recipe.shape("QPQ", "WEW", "FFF");
+		recipe.shape("EPE", "WSW", "FFF");
 
-		recipe.setIngredient('Q', Material.QUARTZ);
+		recipe.setIngredient('E', Material.EMERALD);
 		recipe.setIngredient('P', Material.PHANTOM_MEMBRANE);
-		recipe.setIngredient('E', Material.ECHO_SHARD);
+		recipe.setIngredient('S', Material.ECHO_SHARD);
 		recipe.setIngredient('W', Material.WIND_CHARGE);
 		recipe.setIngredient('F', Material.FEATHER);
 

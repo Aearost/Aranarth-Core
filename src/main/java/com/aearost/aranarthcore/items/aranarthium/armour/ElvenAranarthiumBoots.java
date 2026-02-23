@@ -31,10 +31,9 @@ public class ElvenAranarthiumBoots implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven_boots");
 			meta.setItemModel(key);
-			meta.setTrim(new ArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT));
+			meta.setTrim(new ArmorTrim(TrimMaterial.EMERALD, TrimPattern.BOLT));
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "elven");
-
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
@@ -44,7 +43,7 @@ public class ElvenAranarthiumBoots implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#FAF0E6&lElven Aranarthium Boots");
+		return ChatUtils.translateToColor("#3F704D&lElven Aranarthium Boots");
 	}
 	
 	public String getLore() {

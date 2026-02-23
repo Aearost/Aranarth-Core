@@ -45,6 +45,7 @@ Minor Features
 [~] Fixed bug where bending would be untoggled when teleporting i.e dismounting a horse
 [~] Fixed crates not being openable due to invalid world
 [~] Replaced shulker boxes in the Epic crates with Incantations
+[~] Updated Elven Aranarthium to be green/emerald instead of white/quartz
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

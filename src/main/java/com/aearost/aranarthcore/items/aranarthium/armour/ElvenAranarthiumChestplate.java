@@ -31,7 +31,7 @@ public class ElvenAranarthiumChestplate implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven_chestplate");
 			meta.setItemModel(key);
-			meta.setTrim(new ArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT));
+			meta.setTrim(new ArmorTrim(TrimMaterial.EMERALD, TrimPattern.BOLT));
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "elven");
 
@@ -44,7 +44,7 @@ public class ElvenAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#FAF0E6&lElven Aranarthium Chestplate");
+		return ChatUtils.translateToColor("#3F704D&lElven Aranarthium Chestplate");
 	}
 	
 	public String getLore() {
