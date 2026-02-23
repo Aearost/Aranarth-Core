@@ -80,7 +80,7 @@ public class CommandWarn {
 
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 						if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId())) {
-							onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been warned!"));
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been warned for: &e" + reason));
 							onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
 						}
 					}
