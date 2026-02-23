@@ -50,7 +50,7 @@ public class CrateOpen {
 
         if (e.getHand() == EquipmentSlot.HAND) {
             if (block != null) {
-                if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+                if (block.getWorld().getName().equals("world")) {
                     if (block.getType() == Material.CHEST) {
                         e.setCancelled(true);
                         ItemStack heldItem = player.getInventory().getItemInMainHand();
