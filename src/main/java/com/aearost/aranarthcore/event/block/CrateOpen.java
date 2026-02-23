@@ -53,7 +53,7 @@ public class CrateOpen {
 
         if (e.getHand() == EquipmentSlot.HAND) {
             if (block != null) {
-                if (block.getWorld().getName().equals("world")) {
+                if (block.getWorld().getName().equals("spawn")) {
                     if (block.getType() == Material.CHEST) {
                         e.setCancelled(true);
                         ItemStack heldItem = player.getInventory().getItemInMainHand();
