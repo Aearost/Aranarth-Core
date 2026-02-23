@@ -36,11 +36,13 @@ public class SentinelDeath {
 			}
 		}
 
-		HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayerOfSentinel.getSentinels();
-		List<Sentinel> sentinelsOfType = sentinels.get(e.getEntityType());
-		sentinelsOfType.remove(sentinelToRemove);
-		sentinels.put(e.getEntityType(), sentinelsOfType);
-		aranarthPlayerOfSentinel.setSentinels(sentinels);
-		AranarthUtils.setPlayer(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel), aranarthPlayerOfSentinel);
+		if (aranarthPlayerOfSentinel != null) {
+			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayerOfSentinel.getSentinels();
+			List<Sentinel> sentinelsOfType = sentinels.get(e.getEntityType());
+			sentinelsOfType.remove(sentinelToRemove);
+			sentinels.put(e.getEntityType(), sentinelsOfType);
+			aranarthPlayerOfSentinel.setSentinels(sentinels);
+			AranarthUtils.setPlayer(AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayerOfSentinel), aranarthPlayerOfSentinel);
+		}
 	}
 }

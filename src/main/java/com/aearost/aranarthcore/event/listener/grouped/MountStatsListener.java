@@ -241,14 +241,9 @@ public class MountStatsListener implements Listener {
 	 */
 	private double calculateValue(NamespacedKey key, LivingEntity child, double fatherValue, double motherValue) {
 		Random random = new Random();
-		Bukkit.getLogger().info("------------------");
-		Bukkit.getLogger().info("Stat: " + key.getKey());
-		Bukkit.getLogger().info("Father stat: " + fatherValue);
-		Bukkit.getLogger().info("Mother stat: " + motherValue);
 
 		boolean isDecreasing = random.nextInt(5) == 0;
 		if (isDecreasing) {
-			Bukkit.getLogger().info("Decreasing the stat");
 			if (child instanceof AbstractHorse horse) {
 				if (key == MOUNT_HEALTH) {
 					double healthAmountToReduce = random.nextInt(4);
@@ -281,7 +276,6 @@ public class MountStatsListener implements Listener {
 		} else {
 			boolean isIncreasing = random.nextInt(5) == 0;
 			if (isIncreasing) {
-				Bukkit.getLogger().info("Increasing the stat");
 				if (child instanceof AbstractHorse horse) {
 					if (key == MOUNT_HEALTH) {
 						double healthAmountToIncrease = random.nextInt(4);
@@ -314,13 +308,8 @@ public class MountStatsListener implements Listener {
 			}
 		}
 
-		Bukkit.getLogger().info("Taking average");
 		// Provides the average of both stats if not decreasing or increasing
-		if (key == MOUNT_HEALTH) {
-			return (int) (fatherValue + motherValue) / 2;
-		} else {
-			return (fatherValue + motherValue) / 2;
-		}
+		return (fatherValue + motherValue) / 2;
 	}
 
 	/**
