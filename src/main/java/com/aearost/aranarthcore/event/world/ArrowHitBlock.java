@@ -40,7 +40,7 @@ public class ArrowHitBlock {
 					Dominion shooterDominion = DominionUtils.getPlayerDominion(shooter.getUniqueId());
 					Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 					if (chunkDominion == null || (shooterDominion == null && chunkDominion == null)
-							|| shooterDominion.getLeader().equals(chunkDominion.getLeader())) {
+							|| (shooterDominion != null && shooterDominion.getLeader().equals(chunkDominion.getLeader()))) {
 						boolean isIce = block.getType() == Material.ICE;
 
 						new BukkitRunnable() {
