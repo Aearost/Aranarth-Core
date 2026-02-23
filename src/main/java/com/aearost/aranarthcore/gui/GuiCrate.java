@@ -635,9 +635,15 @@ public class GuiCrate {
 		}
 		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
 		String color = cycledIncantationMeta.getDisplayName();
-		color = color.substring(1, 2);
+
+		if (color.substring(2).startsWith("Incantation")) {
+			color = color.substring(0, 2); // Basic color code
+		} else {
+			color = color.substring(0, 14); // Hex code
+		}
 		cycledIncantationMeta.setDisplayName(ChatUtils.translateToColor(
-				"&" + color + "&l" + ChatUtils.stripColorFormatting(cycledIncantationMeta.getDisplayName())));
+				color + "&l" + ChatUtils.stripColorFormatting(cycledIncantationMeta.getDisplayName())));
+
 		List<String> cycledIncantationLore = new ArrayList<>();
 		cycledIncantationLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		cycledIncantationMeta.setLore(cycledIncantationLore);

@@ -25,7 +25,7 @@ public class IncantationBeheading implements Incantation {
             meta.setItemModel(key);
             meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_beheading");
             meta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
-            meta.setDisplayName(ChatUtils.translateToColor("&cIncantation of " + getIncantationName()));
+            meta.setDisplayName(ChatUtils.translateToColor("#5b0001Incantation of " + getIncantationName()));
             meta.setMaxStackSize(1);
             incantation.setItemMeta(meta);
         }
