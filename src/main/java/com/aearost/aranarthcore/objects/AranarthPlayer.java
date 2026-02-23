@@ -73,6 +73,7 @@ public class AranarthPlayer {
 	private HashMap<MusicInstrument, Long> horns = new HashMap<>();
 	private long lastWorldCommandUse = 0;
 	private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
+	private int plentifulBlocksToDestroy = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1091,5 +1092,21 @@ public class AranarthPlayer {
 	 */
 	public void setSentinels(HashMap<EntityType, List<Sentinel>> sentinels) {
 		this.sentinel = sentinels;
+	}
+
+	/**
+	 * Provides the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 * @return The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 */
+	public int getPlentifulBlocksToDestroy() {
+		return plentifulBlocksToDestroy;
+	}
+
+	/**
+	 * Updates the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 */
+	public void setPlentifulBlocksToDestroy(int plentifulBlocksToDestroy) {
+		this.plentifulBlocksToDestroy = plentifulBlocksToDestroy;
 	}
 }

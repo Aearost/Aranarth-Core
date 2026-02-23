@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -30,11 +31,7 @@ public class LogWoodStripPrevent {
      * @return Confirmation whether the block is a log/wood or not.
      */
     private Material getMaterialIfLogOrWood(Block block) {
-        if (block.getType() == Material.OAK_LOG || block.getType() == Material.BIRCH_LOG
-                || block.getType() == Material.SPRUCE_LOG || block.getType() == Material.JUNGLE_LOG
-                || block.getType() == Material.DARK_OAK_LOG || block.getType() == Material.ACACIA_LOG
-                || block.getType() == Material.CRIMSON_STEM || block.getType() == Material.WARPED_STEM
-                || block.getType() == Material.MANGROVE_LOG || block.getType() == Material.CHERRY_LOG
+        if (AranarthUtils.isHarvestableWithAxe(block.getType())
                 || block.getType() == Material.OAK_WOOD || block.getType() == Material.BIRCH_WOOD
                 || block.getType() == Material.SPRUCE_WOOD || block.getType() == Material.JUNGLE_WOOD
                 || block.getType() == Material.DARK_OAK_WOOD || block.getType() == Material.ACACIA_WOOD

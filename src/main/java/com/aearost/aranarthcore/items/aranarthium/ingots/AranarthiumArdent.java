@@ -26,7 +26,7 @@ public class AranarthiumArdent implements AranarthItem {
 		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "d");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_ardent");
 			meta.setItemModel(key);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARANARTHIUM_INGOT, PersistentDataType.STRING, "ardent");

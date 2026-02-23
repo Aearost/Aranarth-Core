@@ -5,6 +5,9 @@ Major Features
 [+] Implemented a Spawn world to separate the Survival spawn
 [+] Added in custom functionality for all Goat Horn variants
 [+] Introduced Incantations, limited to 1 incantation per item
+[+] Added the Incantation of Beheading
+[+] Added the Incantation of Lifesteal
+[+] Added the Incantation of Plentiful
 [+] Added functionality to beautify the tab list
 [+] Added random teleportation logic in Survival and Resource worlds
 [+] Added a 3-second delay to all teleport requests requiring players to stay in place
@@ -14,9 +17,6 @@ Major Features
 [+] Implemented functionality for bred mounts to take stats from both parents
 
 Minor Features
-[+] Added the Incantation of Beheading
-[+] Added the Incantation of Lifesteal
-[+] Added the Incantation of Plentiful
 [+] Added functionality to drop a player's head at a rare rate when killed
 [~] Restricted Aquinvor potion effects to only apply while it is raining
 [+] Added Discord nickname changes for Dukes

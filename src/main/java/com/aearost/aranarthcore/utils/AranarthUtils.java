@@ -731,6 +731,53 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Confirms if the input item can be harvested by a pickaxe.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by a pickaxe.
+	 */
+	public static boolean isHarvestableWithPickaxe(Material type) {
+		return type == Material.STONE || type == Material.DEEPSLATE
+				|| type == Material.SANDSTONE || type == Material.RED_SANDSTONE
+				|| type == Material.GRANITE || type == Material.DIORITE
+				|| type == Material.ANDESITE || type == Material.CALCITE
+				|| type == Material.TUFF || type == Material.DRIPSTONE_BLOCK
+				|| type == Material.POINTED_DRIPSTONE || type == Material.MAGMA_BLOCK
+				|| type == Material.NETHERRACK || type == Material.CRIMSON_NYLIUM
+				|| type == Material.BASALT || type == Material.SMOOTH_BASALT
+				|| type == Material.END_STONE || type == Material.ANCIENT_DEBRIS
+				|| type == Material.AMETHYST_BLOCK || type == Material.BUDDING_AMETHYST
+				|| type.name().endsWith("_ORE");
+	}
+
+	/**
+	 * Confirms if the input item can be harvested by an axe.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by an axe.
+	 */
+	public static boolean isHarvestableWithAxe(Material type) {
+		if (type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) {
+			return true;
+		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
+				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Confirms if the input item can be harvested by a shovel.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by a shovel.
+	 */
+	public static boolean isHarvestableWithShovel(Material type) {
+		return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.PODZOL
+				|| type == Material.GRASS_BLOCK || type == Material.MYCELIUM || type == Material.ROOTED_DIRT
+				|| type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
+				|| type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
+				|| type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
+	}
+
+	/**
 	 * Applies the waterfall effect at the base of flowing water.
 	 */
 	public static void applyWaterfallEffect() {
@@ -2373,8 +2420,6 @@ public class AranarthUtils {
 					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
 					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
 				if (!warps.get(i).getName().equals(warpName)) {
-					Bukkit.getLogger().info(warpName);
-					Bukkit.getLogger().info(warps.get(i).getName());
 					continue;
 				}
 

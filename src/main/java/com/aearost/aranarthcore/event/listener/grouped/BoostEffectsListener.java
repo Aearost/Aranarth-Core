@@ -87,7 +87,7 @@ public class BoostEffectsListener implements Listener {
 					Material type = e.getBlock().getType();
 					Location loc = e.getBlock().getLocation();
 					// Increase drops by 1.5x
-					if (isSoilBlock(type) || isLogBlock(type)) {
+					if (AranarthUtils.isHarvestableWithShovel(type) || AranarthUtils.isHarvestableWithAxe(type)) {
 						if (new Random().nextInt(2) == 0) {
 							loc.getWorld().dropItemNaturally(loc, new ItemStack(type, 1));
 						}
@@ -95,34 +95,6 @@ public class BoostEffectsListener implements Listener {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Determines if the input Material is a soil block.
-	 * @param type The Material.
-	 * @return Confirmation if the input Material is a soil block.
-	 */
-	private boolean isSoilBlock(Material type) {
-		return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.PODZOL
-				|| type == Material.GRASS_BLOCK || type == Material.MYCELIUM || type == Material.ROOTED_DIRT
-				|| type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
-				|| type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
-				|| type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
-	}
-
-	/**
-	 * Determines if the input Material is a log block.
-	 * @param type The Material.
-	 * @return Confirmation if the input Material is a log block.
-	 */
-	private boolean isLogBlock(Material type) {
-		if (type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) {
-			return true;
-		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
-					|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE) {
-			return true;
-		}
-		return false;
 	}
 
 	/**
