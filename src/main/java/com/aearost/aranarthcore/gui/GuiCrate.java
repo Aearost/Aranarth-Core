@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
+import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
+import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -35,7 +37,7 @@ public class GuiCrate {
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
 			// Updating the cluster and spawn eggs here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1));
+			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
@@ -309,15 +311,6 @@ public class GuiCrate {
 		money5000.setItemMeta(money5000Meta);
 		gui.setItem(2, money5000);
 
-		ItemStack shulkerBox = new ItemStack(Material.SHULKER_BOX, 1);
-		ItemMeta shulkerBoxMeta = shulkerBox.getItemMeta();
-		shulkerBoxMeta.setDisplayName(ChatUtils.translateToColor("#956895&lShulker Box"));
-		List<String> shulkerBoxLore = new ArrayList<>();
-		shulkerBoxLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		shulkerBoxMeta.setLore(shulkerBoxLore);
-		shulkerBox.setItemMeta(shulkerBoxMeta);
-		gui.setItem(3, shulkerBox);
-
 		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 2);
 		ItemMeta netheriteMeta = netherite.getItemMeta();
 		netheriteMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Ingot"));
@@ -584,8 +577,9 @@ public class GuiCrate {
 	 * Provides the Cluster that is associated to the input index for an Epic Crate.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
+	 * @param incantationIndex The index of the incantation.
 	 */
-	public void updateEpicCrateItems(int eggIndex, int clusterIndex) {
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex) {
 		// Cycle through the spawn eggs
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -632,6 +626,23 @@ public class GuiCrate {
 		cycledClusterMeta.setLore(cycledClusterLore);
 		cluster.setItemMeta(cycledClusterMeta);
 		initializedGui.setItem(23, cluster);
+
+		// Cycle through the Incantations
+		ItemStack incantation = null;
+		switch (incantationIndex) {
+			case 1 -> incantation = new IncantationLifesteal().getItem();
+			default -> incantation = new IncantationBeheading().getItem();
+		}
+		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
+		String color = cycledIncantationMeta.getDisplayName();
+		color = color.substring(1, 2);
+		cycledIncantationMeta.setDisplayName(ChatUtils.translateToColor(
+				"&" + color + "&l" + ChatUtils.stripColorFormatting(cycledIncantationMeta.getDisplayName())));
+		List<String> cycledIncantationLore = new ArrayList<>();
+		cycledIncantationLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		cycledIncantationMeta.setLore(cycledIncantationLore);
+		incantation.setItemMeta(cycledIncantationMeta);
+		initializedGui.setItem(3, incantation);
 	}
 
 	/**

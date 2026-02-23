@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.gui.GuiCrate;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
+import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
+import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -121,7 +123,7 @@ public class CrateOpen {
                                                 indexes.set(0, 0);
                                             }
 
-                                            // Cycle through the next iteration
+                                            // Cycle through the next cluster iteration
                                             if (indexes.get(1) < 7) {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
@@ -167,17 +169,19 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next spawn egg iteration
                                             if (indexes.get(0) < 3) {
@@ -191,6 +195,13 @@ public class CrateOpen {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
+                                            }
+
+                                            // Cycle through the next incantation iteration
+                                            if (indexes.get(2) < 2) {
+                                                indexes.set(2, indexes.get(2) + 1);
+                                            } else {
+                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -549,8 +560,8 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.SHULKER_BOX, 1);
-                    name = "#956895&lShulker Box x1";
+                    reward = getCycledEpicIncantation(new Random().nextInt(2));
+                    name = reward.getItemMeta().getDisplayName();
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
                     name = "#3a383a&lNetherite Ingot x2";
@@ -870,6 +881,20 @@ public class CrateOpen {
     }
 
     /**
+     * Provides the incantation that is associated to the input index for Epic crate rewards.
+     * @param index The index of the incantation.
+     * @return The incantation.
+     */
+    private ItemStack getCycledEpicIncantation(int index) {
+        ItemStack incantation = null;
+        switch (index) {
+            case 1 -> incantation = new IncantationLifesteal().getItem();
+            default -> incantation = new IncantationBeheading().getItem();
+        }
+        return incantation;
+    }
+
+    /**
      * Provides the spawn egg that is associated to the input index for Epic crate rewards.
      * @param index The index of the spawn egg.
      * @return The spawn egg.
@@ -942,14 +967,6 @@ public class CrateOpen {
 
         // Nothing to remove with cluster 4
         combined[3] = cluster4;
-
-        for (ItemStack is : combined) {
-            if (is != null) {
-                Bukkit.getLogger().info(is.getItemMeta().getDisplayName() + " x" + is.getAmount());
-            } else {
-                Bukkit.getLogger().info("NULL");
-            }
-        }
 
         return combined;
     }
