@@ -2,7 +2,7 @@
 name: Issue
 about: Report bugs and issues to be resolved
 title: "[BUG] "
-labels: bug
+labels: BUG
 assignees: Aearost
 
 ---

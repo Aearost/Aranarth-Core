@@ -2,7 +2,7 @@
 name: Suggestion
 about: Suggest an idea for the Server
 title: "[IDEA] "
-labels: idea
+labels: IDEA
 assignees: Aearost
 
 ---
