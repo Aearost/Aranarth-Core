@@ -9,10 +9,9 @@ Major Features
 [+] Added random teleportation logic in Survival and Resource worlds
 [+] Added a 3-second delay to all teleport requests requiring players to stay in place
 [+] Added a 1-minute cooldown to players teleporting between worlds
-[+] Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
 [+] Added mcMMO requirements to rank up
 [+] Added functionality for dominions to lose food, money, or claimed chunks when a player dies
-[~] Fixed issue where sub-elements were not being provided due to permissions changes with arena world
+[+] Implemented functionality for bred mounts to take stats from both parents
 
 Minor Features
 [+] Added the Incantation of Beheading
@@ -41,6 +40,9 @@ Minor Features
 [~] Fixed issue where the itemname perk value would be displayed in /ac perks instead of the itemframe perk
 [~] Fixed issue where logging off while in an AstralProjection would not put the player back in Survival
 [~] Made it so the mannequin is sneaking when astral projecting (sitting is not possible)
+[~] Fixed issue where sub-elements were not being provided due to permissions changes with arena world
 
-Miscellaneous
+Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
+- Restructured how mount stats are assigned when spawned in
+- Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
