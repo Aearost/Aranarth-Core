@@ -44,16 +44,19 @@ public class IncantationApply {
 								ItemStack item = floorItem.getItemStack();
 								ItemMeta itemMeta = item.getItemMeta();
 
-								// Do not allow 2 incantations to be applied to the same item
+								String incantationTypeOnItem = itemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+								String incantationTypeBeingApplied = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+
+								// Do not allow 2 different incantations to be applied to the same item
 								if (itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
-									player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
-									return;
+									if (!incantationTypeOnItem.equals(incantationTypeBeingApplied)) {
+										player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+										return;
+									}
 								}
 
-								String type = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-								if (type.equals("beheading")) {
+								if (incantationTypeBeingApplied.equals("incantation_beheading")) {
 									if (isMeleeWeapon(item)) {
-
 										int level = 1;
 										// Increase the existing level
 										if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
@@ -62,7 +65,7 @@ public class IncantationApply {
 										}
 										// Applying as a new incantation
 										else {
-											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "beheading");
+											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_beheading");
 										}
 										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
 
@@ -80,7 +83,6 @@ public class IncantationApply {
 												}
 											}
 										}
-
 										itemMeta.setLore(lore);
 										item.setItemMeta(itemMeta);
 										droppedItem.remove();
@@ -89,7 +91,7 @@ public class IncantationApply {
 										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 									}
 								}
-								else if (type.equals("lifesteal")) {
+								else if (incantationTypeBeingApplied.equals("incantation_lifesteal")) {
 									if (isMeleeWeapon(item)) {
 										int level = 1;
 										// Increase the existing level
@@ -99,7 +101,7 @@ public class IncantationApply {
 										}
 										// Applying as a new incantation
 										else {
-											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "lifesteal");
+											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
 										}
 										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
 
