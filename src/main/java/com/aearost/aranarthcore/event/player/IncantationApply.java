@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.items.incantation.Incantation;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
@@ -136,29 +137,69 @@ public class IncantationApply {
 										player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
 										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 									}
-								} else if (incantationTypeBeingApplied.equals("incantation_plentiful")) {
-									if (isTool(item) && !isExceedingLevel(item)) {
-										Incantation incantation = new IncantationPlentiful();
-										int level = 1;
-										itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
-										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
-										String fullIncantationName = ChatUtils.translateToColor(
-												incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
+								}
+							}
+						} else if (nearby.size() == 2) {
+							Entity entity1 = nearby.get(0);
+							Entity entity2 = nearby.get(1);
+							if (entity1 instanceof Item first && entity2 instanceof Item second) {
+								ItemStack tool = null;
+								ItemStack aranarthium = null;
+								if (isTool(first.getItemStack()) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
+									tool = first.getItemStack();
+									aranarthium = second.getItemStack();
+								} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && isTool(second.getItemStack())) {
+									aranarthium = first.getItemStack();
+									tool = second.getItemStack();
+								}
 
-										// Dynamically apply the incantation description on the item
-										List<String> lore = itemMeta.getLore();
-										if (lore == null) {
-											lore = new ArrayList<>();
-											lore.add(fullIncantationName);
-										}
+								if (tool == null || aranarthium == null) {
+									return;
+								}
 
-										itemMeta.setLore(lore);
-										item.setItemMeta(itemMeta);
-										droppedItem.remove();
-										floorItem.setItemStack(item);
-										player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+								String incantationTypeOnItem = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+								String incantationTypeBeingApplied = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+
+								// Do not allow 2 different incantations to be applied to the same item
+								if (droppedItemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
+									if (!incantationTypeOnItem.equals(incantationTypeBeingApplied)) {
+										player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+										return;
 									}
+								}
+
+								if (incantationTypeBeingApplied.equals("incantation_plentiful")) {
+									Incantation incantation = new IncantationPlentiful();
+									String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+									// Dynamically apply the incantation description on the item
+									List<String> lore = droppedItemMeta.getLore();
+									if (lore == null) {
+										lore = new ArrayList<>();
+										lore.add(fullIncantationName);
+									}
+
+									if (isTool(first.getItemStack())) {
+										ItemMeta firstMeta = first.getItemStack().getItemMeta();
+										firstMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
+										firstMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+										firstMeta.setLore(lore);
+										tool.setItemMeta(firstMeta);
+										first.setItemStack(tool);
+										second.remove();
+									} else {
+										ItemMeta secondMeta = second.getItemStack().getItemMeta();
+										secondMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
+										secondMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+										secondMeta.setLore(lore);
+										tool.setItemMeta(secondMeta);
+										second.setItemStack(tool);
+										first.remove();
+									}
+
+									droppedItem.remove();
+									player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+									player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 								}
 							}
 						}
