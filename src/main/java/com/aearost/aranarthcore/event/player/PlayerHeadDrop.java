@@ -27,7 +27,7 @@ public class PlayerHeadDrop {
 
                         // 10% chance
                         int range = 50;
-                        if (AranarthUtils.hasIncantation(weapon, "beheading")) {
+                        if (AranarthUtils.hasIncantation(weapon, "incantation_beheading")) {
                             int level = AranarthUtils.getIncantationLevel(weapon);
                             if (level == 1) {
                                 // 20% chance

@@ -99,7 +99,7 @@ public class WeaponsExtraDamage {
 						if (weapon.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
 							String incantationType = weapon.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
 							int level = weapon.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-							if (incantationType.equals("lifesteal")) {
+							if (incantationType.equals("incantation_lifesteal")) {
 								if (e.getDamageSource().getDamageType() == DamageType.PLAYER_ATTACK) {
 									double healAmount = 0;
 									if (level == 1) {
