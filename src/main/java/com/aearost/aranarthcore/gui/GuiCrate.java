@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -631,6 +632,7 @@ public class GuiCrate {
 		ItemStack incantation = null;
 		switch (incantationIndex) {
 			case 1 -> incantation = new IncantationLifesteal().getItem();
+			case 2 -> incantation = new IncantationPlentiful().getItem();
 			default -> incantation = new IncantationBeheading().getItem();
 		}
 		ItemMeta cycledIncantationMeta = incantation.getItemMeta();

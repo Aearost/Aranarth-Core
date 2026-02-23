@@ -13,17 +13,17 @@ import java.util.Objects;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
 
-public class IncantationLifesteal implements Incantation {
+public class IncantationPlentiful implements Incantation {
 
     @Override
     public ItemStack getItem() {
-        ItemStack incantation = new ItemStack(Material.LIME_DYE, 1);
+        ItemStack incantation = new ItemStack(Material.YELLOW_DYE, 1);
 
         ItemMeta meta = incantation.getItemMeta();
         if (Objects.nonNull(meta)) {
-            NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "incantation_lifesteal");
+            NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "incantation_plentiful");
             meta.setItemModel(key);
-            meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
+            meta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
             meta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
             meta.setDisplayName(ChatUtils.translateToColor(getColor() + "Incantation of " + getIncantationName()));
             meta.setMaxStackSize(1);
@@ -34,16 +34,16 @@ public class IncantationLifesteal implements Incantation {
 
     @Override
     public String getIncantationName() {
-        return "Lifesteal";
+        return "Plentiful";
     }
 
     @Override
     public int getLevelLimit() {
-        return 3;
+        return 1;
     }
 
     @Override
     public String getColor() {
-        return "&a";
+        return "&6";
     }
 }

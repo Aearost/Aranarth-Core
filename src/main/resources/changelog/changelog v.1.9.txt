@@ -16,6 +16,7 @@ Major Features
 Minor Features
 [+] Added the Incantation of Beheading
 [+] Added the Incantation of Lifesteal
+[+] Added the Incantation of Plentiful
 [+] Added functionality to drop a player's head at a rare rate when killed
 [~] Restricted Aquinvor potion effects to only apply while it is raining
 [+] Added Discord nickname changes for Dukes
@@ -49,3 +50,4 @@ Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
 - Restructured how mount stats are assigned when spawned in
 - Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
+- Added getColor() to the Incantation interface

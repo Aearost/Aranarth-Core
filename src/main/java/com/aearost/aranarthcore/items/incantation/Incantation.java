@@ -7,5 +7,6 @@ public interface Incantation {
     ItemStack getItem();
     String getIncantationName();
     int getLevelLimit();
+    String getColor();
 
 }
