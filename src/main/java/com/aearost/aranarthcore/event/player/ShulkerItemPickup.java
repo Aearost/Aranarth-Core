@@ -78,6 +78,7 @@ public class ShulkerItemPickup {
 									e.setCancelled(true);
 									e.getItem().remove();
 									shulkerInventory.setItem(shulkerSlot, shulkerStack);
+									shulker.update();
 									im.setBlockState(shulker);
 									is.setItemMeta(im);
 								}
