@@ -158,7 +158,7 @@ public class ChatUtils {
 		// Removes basic color codes
 		String colorStripped = ChatColor.stripColor(msg);
 		if (colorStripped.contains("&")) {
-			String pattern = "&[a-f0-9]";
+			String pattern = "&[0-9a-fk-or]";
 			colorStripped = colorStripped.replaceAll(pattern, "");
 		}
 

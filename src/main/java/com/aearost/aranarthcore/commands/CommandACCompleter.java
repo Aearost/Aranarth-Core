@@ -89,8 +89,15 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "nick".startsWith(args[0])) {
 			displayedOptions.add("nick");
-		} else if (!args[0].isEmpty() && "itemname".startsWith(args[0])) {
-			displayedOptions.add("itemname");
+		} else if (!args[0].isEmpty() && args[0].startsWith("i")) {
+			if (args[0].equals("i")) {
+				displayedOptions.add("itemname");
+				displayedOptions.add("info");
+			} else if ("itemname".startsWith(args[0])) {
+				displayedOptions.add("itemname");
+			} else if ("info".startsWith(args[0])) {
+				displayedOptions.add("info");
+			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("a")) {
 			if (args[0].equals("a")) {
 				displayedOptions.add("arena");
@@ -338,7 +345,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay", "msg" -> {
+			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay", "msg", "info" -> {
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
@@ -776,6 +783,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("toggle");
 		displayedOptions.add("shop");
 		displayedOptions.add("spawn");
+		displayedOptions.add("info");
 		return displayedOptions;
 	}
 

@@ -36,7 +36,6 @@ Minor Features
 [~] Disabled PvP in the Resource World
 [+] Added /ac flyspeed for the council
 [~] Adjusted the sub-elements and abilities display in /ac ranks
-[+] Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
 [+] Added feedback message when a perk is manually removed from a player
 [~] Fixed issue where the itemname perk value would be displayed in /ac perks instead of the itemframe perk
 [~] Fixed issue where logging off while in an AstralProjection would not put the player back in Survival
@@ -52,9 +51,13 @@ Minor Features
 [+] Added /ac time
 [+] Hitting entities with potions will increase Alchemy
 [-] Removed /ac spy
+[+] Added /ac info
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
 - Restructured how mount stats are assigned when spawned in
 - Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
 - Added getColor() to the Incantation interface
+- Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
+- Fixed getUuidOfAranarthPlayer in AranarthUtils not working correctly
+- Fixed stripColorFormatting() in ChatUtils not stripping bold and other formatting

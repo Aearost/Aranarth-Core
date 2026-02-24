@@ -2841,7 +2841,7 @@ public class AranarthUtils {
 	 */
 	public static UUID getUuidOfAranarthPlayer(AranarthPlayer aranarthPlayer) {
 		for (UUID uuid : players.keySet()) {
-			if (players.containsValue(aranarthPlayer)) {
+			if (players.get(uuid).equals(aranarthPlayer)) {
 				return uuid;
 			}
 		}

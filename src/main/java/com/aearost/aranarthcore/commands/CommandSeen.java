@@ -45,11 +45,19 @@ public class CommandSeen {
 					sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7is currently online"));
 					return true;
 				} else {
-					ZoneId timezone = null;
 					if (sender instanceof Player player) {
-						AranarthUtils.getPlayerTimezone(player, zoneId -> calculateDisplayDate(offlinePlayer, aranarthPlayer, zoneId, sender));
+						AranarthUtils.getPlayerTimezone(player, zoneId -> {
+							String result = calculateDisplayDate(
+								offlinePlayer,
+								aranarthPlayer,
+								zoneId,
+								sender
+							);
+							sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen " + result));
+						});
 					} else {
-						calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
+						String result = calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
+						sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen " + result));
 					}
 					return true;
 				}
@@ -91,7 +99,7 @@ public class CommandSeen {
 	 * @param timezone The player's timezone.
 	 * @param sender The sender that executed the command.
 	 */
-	private static void calculateDisplayDate(OfflinePlayer offlinePlayer, AranarthPlayer aranarthPlayer, ZoneId timezone, CommandSender sender) {
+	public static String calculateDisplayDate(OfflinePlayer offlinePlayer, AranarthPlayer aranarthPlayer, ZoneId timezone, CommandSender sender) {
 		LocalDateTime localDateTime = null;
 		Instant lastPlayed = Instant.ofEpochMilli(offlinePlayer.getLastPlayed());
 		if (timezone == null) {
@@ -123,8 +131,7 @@ public class CommandSeen {
 
 		}
 		String timezoneName = timezone.getDisplayName(TextStyle.SHORT, Locale.ENGLISH);
-		sender.sendMessage(ChatUtils.chatMessage(AranarthUtils.getRank(aranarthPlayer) + "&e" + aranarthPlayer.getNickname() + " &7was last seen &e"
-				+ month + " " + dateWithSuffix + ", " + year + " &7at &e" + hour + ":" + minute + " " + timezoneName));
+		return "&e" + month + " " + dateWithSuffix + ", " + year + " &7at &e" + hour + ":" + minute + " " + timezoneName;
 	}
 
 }
