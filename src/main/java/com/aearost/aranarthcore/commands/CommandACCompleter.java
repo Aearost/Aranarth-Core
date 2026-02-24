@@ -837,8 +837,6 @@ public class CommandACCompleter implements TabCompleter {
 			} else if (!args[0].isEmpty() && "broadcast".startsWith(args[0])) {
 				displayedOptions.add("broadcast");
 			}
-		} else if (!args[0].isEmpty() && "spy".startsWith(args[0])) {
-			displayedOptions.add("spy");
 		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
 			displayedOptions.add("invsee");
 		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
@@ -885,7 +883,7 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
-			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "spy", "warn", "punishments", "perks" -> {
+			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks" -> {
 				// List of online players
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
@@ -1129,7 +1127,6 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("ban");
 		displayedOptions.add("unban");
 		displayedOptions.add("invsee");
-		displayedOptions.add("spy");
 		displayedOptions.add("warn");
 		displayedOptions.add("broadcast");
 		displayedOptions.add("punishments");

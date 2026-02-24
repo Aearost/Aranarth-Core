@@ -51,6 +51,7 @@ Minor Features
 [~] Quivers will auto-replenish arrows when the last arrow in inventory is consumed
 [+] Added /ac time
 [+] Hitting entities with potions will increase Alchemy
+[-] Removed /ac spy
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

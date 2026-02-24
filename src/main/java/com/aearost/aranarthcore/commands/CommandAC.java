@@ -66,8 +66,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandBan.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("unban")) {
 			commandResult = CommandUnban.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("spy")) {
-			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("invsee")) {
 			commandResult = CommandInvsee.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("warn")) {
@@ -82,6 +80,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandAdmin.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("flyspeed")) {
 			commandResult = CommandFlyspeed.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("time")) {
+			commandResult = CommandTime.onCommand(sender, args);
 		} else {
 			commandResult = isValidCommand(sender, args);
 		}
@@ -196,8 +196,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandShop.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("spawn")) {
 			commandResult = CommandSpawn.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("time")) {
-			commandResult = CommandTime.onCommand(sender, args);
 		}
 		return commandResult;
 	}
