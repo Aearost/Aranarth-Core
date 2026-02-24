@@ -50,6 +50,7 @@ Minor Features
 [~] Fixed error when an arrow breaks a block in a dominion while the shooter does not have a dominion
 [~] Quivers will auto-replenish arrows when the last arrow in inventory is consumed
 [+] Added /ac time
+[+] Hitting entities with potions will increase Alchemy
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
