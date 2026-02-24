@@ -70,18 +70,28 @@ public class WeatherChangeListener implements Listener {
 
 					World world = Bukkit.getWorld("world");
 					World smp = Bukkit.getWorld("smp");
+					World resource = Bukkit.getWorld("resource");
 
 					world.setThunderDuration(0);
 					world.setWeatherDuration(0);
 					world.setThundering(false);
 					world.setStorm(false);
 					world.setClearWeatherDuration(delay);
+
 					smp.setThunderDuration(0);
 					smp.setWeatherDuration(0);
 					smp.setThundering(false);
 					smp.setStorm(false);
 					smp.setClearWeatherDuration(delay);
 					smp.setTime(world.getTime());
+
+					resource.setThunderDuration(0);
+					resource.setWeatherDuration(0);
+					resource.setThundering(false);
+					resource.setStorm(false);
+					resource.setClearWeatherDuration(delay);
+					resource.setTime(world.getTime());
+
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
 				}
 			}

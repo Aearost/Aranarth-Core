@@ -233,6 +233,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.boost.modify", false);
 		perms.setPermission("aranarth.vote.test", false);
 		perms.setPermission("aranarth.shop.modify", false);
+		perms.setPermission("aranarth.time", false);
 	}
 
 	/**
@@ -625,6 +626,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.whereis", true);
 			perms.setPermission("aranarth.broadcast", true);
 			perms.setPermission("aranarth.shop.modify", true);
+			perms.setPermission("aranarth.time", true);
 		} else {
 			return;
 		}

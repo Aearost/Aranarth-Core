@@ -196,6 +196,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandShop.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("spawn")) {
 			commandResult = CommandSpawn.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("time")) {
+			commandResult = CommandTime.onCommand(sender, args);
 		}
 		return commandResult;
 	}

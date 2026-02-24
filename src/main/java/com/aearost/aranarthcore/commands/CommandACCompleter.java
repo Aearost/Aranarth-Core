@@ -870,6 +870,8 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("cmsg");
 		} else if (!args[0].isEmpty() && "flyspeed".startsWith(args[0])) {
 			displayedOptions.add("flyspeed");
+		} else if (!args[0].isEmpty() && "time".startsWith(args[0])) {
+			displayedOptions.add("time");
 		}
 		displayedOptions = all(sender, displayedOptions, args);
 		return displayedOptions;
@@ -1100,6 +1102,14 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("10");
 				}
 			}
+			case "time" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("day");
+					displayedOptions.add("noon");
+					displayedOptions.add("night");
+					displayedOptions.add("midnight");
+				}
+			}
 		}
 		displayedOptions = allArgs(sender, displayedOptions, args);
 		return displayedOptions;
@@ -1127,6 +1137,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("admin");
 		displayedOptions.add("cmsg");
 		displayedOptions.add("flyspeed");
+		displayedOptions.add("time");
 		displayedOptions = noResultsAll(displayedOptions);
 		return displayedOptions;
 	}

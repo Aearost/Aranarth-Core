@@ -25,6 +25,17 @@ public class CommandOverrides {
             }
         }
 
+        // Prevent the command entirely
+        if (parts[0].equals("/time")) {
+            if (aranarthPlayer.getCouncilRank() < 2) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+            } else {
+                player.sendMessage(ChatUtils.chatMessage("&cUse &e/ac time <time> &cinstead!"));
+            }
+            e.setCancelled(true);
+            return;
+        }
+
         // Adding and removing the sub-elements upon changing element without relogging
         if (parts[0].startsWith("/b")) {
             if (parts[0].equalsIgnoreCase("/b") || parts[0].toLowerCase().startsWith("/bend")) {
