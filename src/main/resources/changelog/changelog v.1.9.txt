@@ -53,6 +53,7 @@ Minor Features
 [-] Removed /ac spy
 [+] Added /ac info
 [~] Added preventative measures to mitigate shulker box duplication bug
+[+] Players are immune to slowness from winter months while wearing Scorched Aranarthium
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

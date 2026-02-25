@@ -526,7 +526,7 @@ public class DateUtils {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.LUCK, 320, 0));
 		effects.add(new PotionEffect(PotionEffectType.REGENERATION, 320, 0));
-		applyEffectToAllPlayers(effects);
+		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
@@ -563,7 +563,7 @@ public class DateUtils {
 			List<PotionEffect> effects = new ArrayList<>();
 			effects.add(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 			effects.add(new PotionEffect(PotionEffectType.WATER_BREATHING, 320, 0));
-			applyEffectToAllPlayers(effects);
+			applyWeatherEffectsToAllPlayers(effects);
 		}
 		meltSnow(2);
 
@@ -592,7 +592,7 @@ public class DateUtils {
 	private void applyVentivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SPEED, 320, 0));
-		applyEffectToAllPlayers(effects);
+		applyWeatherEffectsToAllPlayers(effects);
 		meltSnow(2);
 		applyRain();
 	}
@@ -665,7 +665,7 @@ public class DateUtils {
 			List<PotionEffect> effects = new ArrayList<>();
 			effects.add(new PotionEffect(PotionEffectType.MINING_FATIGUE, 100, 0));
 			effects.add(new PotionEffect(PotionEffectType.WEAKNESS, 320, 0));
-			applyEffectToAllPlayers(effects);
+			applyWeatherEffectsToAllPlayers(effects);
 		}
 	}
 
@@ -776,7 +776,7 @@ public class DateUtils {
 	private void applyGlacivorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
-		applyEffectToAllPlayers(effects);
+		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
@@ -801,7 +801,7 @@ public class DateUtils {
 	private void applyFrigorvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 1));
-		applyEffectToAllPlayers(effects);
+		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
@@ -826,7 +826,7 @@ public class DateUtils {
 	private void applyObscurvorEffects() {
 		List<PotionEffect> effects = new ArrayList<>();
 		effects.add(new PotionEffect(PotionEffectType.SLOWNESS, 320, 0));
-		applyEffectToAllPlayers(effects);
+		applyWeatherEffectsToAllPlayers(effects);
 
 		// Applies delay to first snow storm
 		if (!AranarthUtils.getHasStormedInMonth()) {
@@ -851,16 +851,16 @@ public class DateUtils {
 	 * The effects will always be for the same fixed duration and same amplifier.
 	 * @param effects The effects to be applied.
 	 */
-	private void applyEffectToAllPlayers(List<PotionEffect> effects) {
+	private void applyWeatherEffectsToAllPlayers(List<PotionEffect> effects) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			PotionEffect effectToRemove = null;
+			PotionEffect slownessEffect = null;
 
 			for (PotionEffect effect : effects) {
 				if (effect.getType() == PotionEffectType.SLOWNESS) {
-					effectToRemove = effect;
+					slownessEffect = effect;
 				}
 			}
-			if (effectToRemove != null) {
+			if (slownessEffect != null) {
 				Location loc = player.getLocation();
 				boolean areAllBlocksAir = true;
 				Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
@@ -869,7 +869,14 @@ public class DateUtils {
 				}
 
 				if (!areAllBlocksAir) {
-					effects.remove(effectToRemove);
+					effects.remove(slownessEffect);
+				}
+				// Effect will apply
+				else {
+					// Scorched Aranarthium makes you slow immune to the weather effects
+					if (AranarthUtils.isWearingArmorType(player, "scorched")) {
+						effects.remove(slownessEffect);
+					}
 				}
 			}
 			player.addPotionEffects(effects);
