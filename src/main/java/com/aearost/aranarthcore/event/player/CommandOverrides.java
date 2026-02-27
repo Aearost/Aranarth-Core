@@ -25,8 +25,10 @@ public class CommandOverrides {
             }
         }
 
+        boolean isSurvivalWorld = player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
+                || player.getWorld().getName().startsWith("resource");
         // Prevent the command entirely
-        if (parts[0].equals("/time")) {
+        if (parts[0].equals("/time") && isSurvivalWorld) {
             if (aranarthPlayer.getCouncilRank() < 2) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
             } else {
