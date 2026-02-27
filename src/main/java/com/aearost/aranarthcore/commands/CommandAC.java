@@ -112,7 +112,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandShulker.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("randomizer")) {
 			commandResult = CommandRandomizer.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("balance")) {
+		} else if (args[0].equalsIgnoreCase("balance") || args[0].equalsIgnoreCase("bal")) {
 			commandResult = CommandBalance.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("date")) {
 			commandResult = CommandDate.onCommand(sender, args);
@@ -136,7 +136,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandRankSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("pronouns")) {
 			commandResult = CommandPronouns.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("dominion")) {
+		} else if (args[0].equalsIgnoreCase("dominion") || args[0].equalsIgnoreCase("d")) {
 			commandResult = CommandDominion.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("sethome")) {
 			commandResult = CommandSethome.onCommand(sender, args);
@@ -148,8 +148,12 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandCompress.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("tp")) {
 			commandResult = CommandTp.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("tphere")) {
+		} else if (args[0].equalsIgnoreCase("tphere") || args[0].equalsIgnoreCase("tp")) {
 			commandResult = CommandTphere.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpaccept") || args[0].equalsIgnoreCase("tpa")) {
+			commandResult = CommandTpaccept.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("tpdeny") || args[0].equalsIgnoreCase("tpd")) {
+			commandResult = CommandTpdeny.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("back")) {
 			commandResult = CommandBack.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("seen")) {
@@ -172,10 +176,6 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandTables.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("trash")) {
 			commandResult = CommandTrash.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("tpaccept")) {
-			commandResult = CommandTpaccept.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("tpdeny")) {
-			commandResult = CommandTpdeny.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("particles")) {
 			commandResult = CommandParticles.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("itemname")) {

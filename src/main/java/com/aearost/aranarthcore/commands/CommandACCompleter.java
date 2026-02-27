@@ -168,6 +168,7 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("b")) {
 				displayedOptions.add("blacklist");
 				displayedOptions.add("balance");
+				displayedOptions.add("bal");
 				displayedOptions.add("baltop");
 				displayedOptions.add("back");
 				displayedOptions.add("boosts");
@@ -179,17 +180,26 @@ public class CommandACCompleter implements TabCompleter {
 				if (args[0].startsWith("ba")) {
 					if (args[0].equals("ba")) {
 						displayedOptions.add("balance");
+						displayedOptions.add("bal");
 						displayedOptions.add("baltop");
 						displayedOptions.add("back");
 					} else if (args[0].equals("bal")) {
 						displayedOptions.add("balance");
 						displayedOptions.add("baltop");
-					} else if ("balance".startsWith(args[0])) {
-						displayedOptions.add("balance");
-					} else if ("baltop".startsWith(args[0])) {
-						displayedOptions.add("baltop");
 					} else if ("back".startsWith(args[0])) {
 						displayedOptions.add("back");
+					} else if (args[0].startsWith("bal")) {
+						if (args[0].equals("bal")) {
+							displayedOptions.add("balance");
+							displayedOptions.add("bal");
+							displayedOptions.add("baltop");
+						} else if ("balance".startsWith(args[0])) {
+							displayedOptions.add("balance");
+						} else if ("bal".startsWith(args[0])) {
+							displayedOptions.add("bal");
+						} else if ("baltop".startsWith(args[0])) {
+							displayedOptions.add("baltop");
+						}
 					}
 				}
 			}
@@ -219,6 +229,7 @@ public class CommandACCompleter implements TabCompleter {
 		} else if (!args[0].isEmpty() && args[0].startsWith("r")) {
 			if (args[0].equals("r")) {
 				displayedOptions.add("randomizer");
+				displayedOptions.add("rand");
 				displayedOptions.add("ranks");
 				displayedOptions.add("rankup");
 				displayedOptions.add("rules");
@@ -226,6 +237,7 @@ public class CommandACCompleter implements TabCompleter {
 			} else {
 				if (args[0].equals("ra")) {
 					displayedOptions.add("randomizer");
+					displayedOptions.add("rand");
 					displayedOptions.add("ranks");
 					displayedOptions.add("rankup");
 				} else {
@@ -233,6 +245,7 @@ public class CommandACCompleter implements TabCompleter {
 						displayedOptions.add("resource");
 					} else if (args[0].equals("ran")) {
 						displayedOptions.add("randomizer");
+						displayedOptions.add("rand");
 						displayedOptions.add("ranks");
 						displayedOptions.add("rankup");
 					} else {
@@ -274,8 +287,11 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("trust");
 				displayedOptions.add("tp");
 				displayedOptions.add("tphere");
+				displayedOptions.add("tph");
 				displayedOptions.add("tpaccept");
+				displayedOptions.add("tpa");
 				displayedOptions.add("tpdeny");
+				displayedOptions.add("tpd");
 				displayedOptions.add("tables");
 				displayedOptions.add("toggle");
 			} else {
@@ -283,8 +299,11 @@ public class CommandACCompleter implements TabCompleter {
 					if (args[0].equals("tp")) {
 						displayedOptions.add("tp");
 						displayedOptions.add("tphere");
+						displayedOptions.add("tph");
 						displayedOptions.add("tpaccept");
+						displayedOptions.add("tpa");
 						displayedOptions.add("tpdeny");
+						displayedOptions.add("tpd");
 					} else if ("tphere".startsWith(args[0])) {
 						displayedOptions.add("tphere");
 					} else if ("tpaccept".startsWith(args[0])) {
@@ -345,7 +364,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "trust", "untrust", "tp", "tphere", "pay", "msg", "info" -> {
+			case "ping", "balance", "bal", "trust", "untrust", "tp", "tphere", "pay", "msg", "info" -> {
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
@@ -370,7 +389,7 @@ public class CommandACCompleter implements TabCompleter {
 						if (args[2].isEmpty()) {
 							displayedOptions.add("amount");
 						}
-					} else if (args[0].equalsIgnoreCase("balance")) {
+					} else if (args[0].equalsIgnoreCase("balance") || args[0].equalsIgnoreCase("bal")) {
 						if (sender instanceof Player player) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 							if (aranarthPlayer.getCouncilRank() == 3) {
@@ -681,7 +700,7 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("toggle");
 				}
 			}
-			case "vote" -> {
+			case "vote", "v" -> {
 				if (args.length == 2) {
 					if (!args[1].isEmpty() && "stats".startsWith(args[1])) {
 						displayedOptions.add("stats");
@@ -743,7 +762,9 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("potions");
 		displayedOptions.add("shulker");
 		displayedOptions.add("randomizer");
+		displayedOptions.add("rand");
 		displayedOptions.add("balance");
+		displayedOptions.add("bal");
 		displayedOptions.add("date");
 		displayedOptions.add("calendar");
 		displayedOptions.add("aranarthium");
@@ -756,14 +777,18 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("rankup");
 		displayedOptions.add("pronouns");
 		displayedOptions.add("dominion");
+		displayedOptions.add("d");
 		displayedOptions.add("sethome");
 		displayedOptions.add("delhome");
 		displayedOptions.add("home");
 		displayedOptions.add("itemname");
 		displayedOptions.add("tp");
 		displayedOptions.add("tphere");
+		displayedOptions.add("tph");
 		displayedOptions.add("tpaccept");
+		displayedOptions.add("tpa");
 		displayedOptions.add("tpdeny");
+		displayedOptions.add("tpd");
 		displayedOptions.add("pay");
 		displayedOptions.add("baltop");
 		displayedOptions.add("particles");
@@ -780,6 +805,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("boosts");
 		displayedOptions.add("compress");
 		displayedOptions.add("vote");
+		displayedOptions.add("v");
 		displayedOptions.add("toggle");
 		displayedOptions.add("shop");
 		displayedOptions.add("spawn");
