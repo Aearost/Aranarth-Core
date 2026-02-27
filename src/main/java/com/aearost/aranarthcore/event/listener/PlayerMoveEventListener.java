@@ -23,8 +23,6 @@ public class PlayerMoveEventListener implements Listener {
             new SpawnChangeLocation().execute(e);
         } else if (e.getPlayer().getLocation().getWorld().getName().startsWith("smp")) {
             new HomepadStep().execute(e);
-        } else if (e.getPlayer().getLocation().getWorld().getName().startsWith("spawn")) {
-            new SpawnVoidFall().execute(e);
         }
 
         new PlayerTeleportCancelByMove().execute(e);
