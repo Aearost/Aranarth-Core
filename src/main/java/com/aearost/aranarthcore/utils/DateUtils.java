@@ -853,33 +853,36 @@ public class DateUtils {
 	 */
 	private void applyWeatherEffectsToAllPlayers(List<PotionEffect> effects) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			PotionEffect slownessEffect = null;
+			if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
+					|| player.getWorld().getName().startsWith("resource")) {
+				PotionEffect slownessEffect = null;
 
-			for (PotionEffect effect : effects) {
-				if (effect.getType() == PotionEffectType.SLOWNESS) {
-					slownessEffect = effect;
-				}
-			}
-			if (slownessEffect != null) {
-				Location loc = player.getLocation();
-				boolean areAllBlocksAir = true;
-				Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-				if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-					areAllBlocksAir = false;
-				}
-
-				if (!areAllBlocksAir) {
-					effects.remove(slownessEffect);
-				}
-				// Effect will apply
-				else {
-					// Scorched Aranarthium makes you slow immune to the weather effects
-					if (AranarthUtils.isWearingArmorType(player, "scorched")) {
-						effects.remove(slownessEffect);
+				for (PotionEffect effect : effects) {
+					if (effect.getType() == PotionEffectType.SLOWNESS) {
+						slownessEffect = effect;
 					}
 				}
+				if (slownessEffect != null) {
+					Location loc = player.getLocation();
+					boolean areAllBlocksAir = true;
+					Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
+					if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
+						areAllBlocksAir = false;
+					}
+
+					if (!areAllBlocksAir) {
+						effects.remove(slownessEffect);
+					}
+					// Effect will apply
+					else {
+						// Scorched Aranarthium makes you slow immune to the weather effects
+						if (AranarthUtils.isWearingArmorType(player, "scorched")) {
+							effects.remove(slownessEffect);
+						}
+					}
+				}
+				player.addPotionEffects(effects);
 			}
-			player.addPotionEffects(effects);
 		}
 	}
 
