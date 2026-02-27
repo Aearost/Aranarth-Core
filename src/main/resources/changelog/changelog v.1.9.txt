@@ -56,6 +56,7 @@ Minor Features
 [+] Players are immune to slowness from winter months while wearing Scorched Aranarthium
 [+] Added shorthand aliases for commands
 [~] Fixed issue where weather effects were applying in non-survival worlds
+[~] Fixed issue where bending was being untoggled incorrectly due to clashing toggleBending() calls
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

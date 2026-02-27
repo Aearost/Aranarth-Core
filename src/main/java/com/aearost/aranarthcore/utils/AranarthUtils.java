@@ -1635,7 +1635,7 @@ public class AranarthUtils {
 		try {
 			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
 			// Toggles off the bending if it should be toggled off
-			if (isToggled) {
+			if (isToggled && (!from.getWorld().getName().equals("spawn") && to.getWorld().getName().equals("spawn"))) {
 				bendingPlayer.toggleBending();
 			}
 			return true;

@@ -184,14 +184,6 @@ public class SpawnProtectionListener implements Listener {
 	}
 
 	/**
-	 * Automatically toggles the player's bending based on their movement to and from spawn.
-	 */
-	@EventHandler
-	public void onExitSpawn(PlayerMoveEvent e) {
-		toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
-	}
-
-	/**
 	 * Automatically toggles the player's bending based on their teleportation to and from spawn.
 	 */
 	@EventHandler
