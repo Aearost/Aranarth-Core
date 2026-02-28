@@ -74,7 +74,7 @@ public class AranarthPlayer {
 	private long lastWorldCommandUse = 0;
 	private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
 	private int plentifulBlocksToDestroy = 0;
-	private Location locationWhileAfk = null;
+	private Location locationWhereAfk = null;
 	private AfkLocation afkLocation = null;
 
 	public AranarthPlayer(String username) {
@@ -130,7 +130,7 @@ public class AranarthPlayer {
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
 		this.sentinel = new HashMap<>();
-		this.locationWhileAfk = null;
+		this.locationWhereAfk = null;
 		this.afkLocation = null;
 	}
 
@@ -192,7 +192,7 @@ public class AranarthPlayer {
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
 		this.sentinel = new HashMap<>();
-		this.locationWhileAfk = null;
+		this.locationWhereAfk = null;
 		this.afkLocation = null;
 
 		// Keep pronouns at the end
@@ -1120,16 +1120,16 @@ public class AranarthPlayer {
 	 * Provides the Location of the player where they went AFK.
 	 * @return The Location of the player where they went AFK.
 	 */
-	public Location getLocationWhileAfk() {
-		return locationWhileAfk;
+	public Location getLocationWhereAfk() {
+		return locationWhereAfk;
 	}
 
 	/**
 	 * Updates the Location of the player where they went AFK.
-	 * @param locationWhileAfk The Location of the player where they went AFK.
+	 * @param locationWhereAfk The Location of the player where they went AFK.
 	 */
-	public void setLocationWhileAfk(Location locationWhileAfk) {
-		this.locationWhileAfk = locationWhileAfk;
+	public void setLocationWhereAfk(Location locationWhereAfk) {
+		this.locationWhereAfk = locationWhereAfk;
 	}
 
 	/**

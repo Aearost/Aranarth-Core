@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands;
 
+import com.aearost.aranarthcore.objects.AfkLocation;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.CommandSender;
@@ -16,6 +18,9 @@ public class CommandAfk {
 	 */
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), 300));
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			AranarthUtils.toggleAfkStatus(player.getUniqueId());
 			return true;
 		} else {

@@ -18,7 +18,7 @@ public class AfkCancelByMove {
 
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getLocationWhileAfk() != null) {
+		if (aranarthPlayer.getLocationWhereAfk() != null) {
 			AranarthUtils.toggleAfkStatus(player.getUniqueId());
 		}
 	}

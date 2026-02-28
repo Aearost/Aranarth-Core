@@ -2889,9 +2889,9 @@ public class AranarthUtils {
 	public static void toggleAfkStatus(UUID uuid) {
 		Player player = Bukkit.getPlayer(uuid);
 		AranarthPlayer aranarthPlayer = getPlayer(uuid);
-		Location afkLocation = aranarthPlayer.getLocationWhileAfk();
-		if (afkLocation == null) {
-			aranarthPlayer.setLocationWhileAfk(player.getLocation().clone());
+		Location locationWhereAfk = aranarthPlayer.getLocationWhereAfk();
+		if (locationWhereAfk == null) {
+			aranarthPlayer.setLocationWhereAfk(player.getLocation().clone());
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
@@ -2900,7 +2900,7 @@ public class AranarthUtils {
 				}
 			}
 		} else {
-			aranarthPlayer.setLocationWhileAfk(null);
+			aranarthPlayer.setLocationWhereAfk(null);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
