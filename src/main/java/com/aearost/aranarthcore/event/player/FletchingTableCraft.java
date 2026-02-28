@@ -237,6 +237,11 @@ public class FletchingTableCraft {
 			if (type == Material.DIAMOND) {
 				return new ArrowheadDiamond().getItem();
 			}
+			if (type == Material.BONE) {
+				ItemStack is = new ArrowheadBone().getItem();
+				is.setAmount(2);
+				return is;
+			}
 		} else {
 			ItemStack[] ingredients = new ItemStack[] { a, b, c };
 
@@ -246,6 +251,46 @@ public class FletchingTableCraft {
 					new ItemStack(Material.FLINT) };
 			if (matchesIngredients(ingredients, explosiveRecipe)) {
 				return new ArrowheadExplosive().getItem();
+			}
+
+			// Lightning Arrowheads
+			ItemStack[] lightningRecipe = new ItemStack[] { new Arrowhead().getItem(),
+					new ItemStack(Material.COPPER_INGOT),
+					null };
+			if (matchesIngredients(ingredients, lightningRecipe)) {
+				return new ArrowheadLightning().getItem();
+			}
+
+			// Spectral Arrowheads
+			ItemStack[] spectralRecipe = new ItemStack[] { new Arrowhead().getItem(),
+					new ItemStack(Material.GLOWSTONE),
+					null };
+			if (matchesIngredients(ingredients, spectralRecipe)) {
+				return new ArrowheadSpectral().getItem();
+			}
+
+			// Rooting Arrowheads
+			ItemStack[] rootingArrow = new ItemStack[] { new Arrowhead().getItem(),
+					new ItemStack(Material.HANGING_ROOTS),
+					null };
+			if (matchesIngredients(ingredients, rootingArrow)) {
+				return new ArrowheadRooting().getItem();
+			}
+
+			// Gust Arrowheads
+			ItemStack[] gustRecipe = new ItemStack[] { new Arrowhead().getItem(),
+					new ItemStack(Material.WIND_CHARGE),
+					null };
+			if (matchesIngredients(ingredients, gustRecipe)) {
+				return new ArrowheadGust().getItem();
+			}
+
+			// Dragon Arrowheads
+			ItemStack[] dragonRecipe = new ItemStack[] { new ArrowheadObsidian().getItem(),
+					new ItemStack(Material.DRAGON_BREATH),
+					null };
+			if (matchesIngredients(ingredients, dragonRecipe)) {
+				return new ArrowheadDragon().getItem();
 			}
 		}
 

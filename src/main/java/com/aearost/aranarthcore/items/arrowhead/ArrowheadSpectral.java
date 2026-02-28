@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.items.arrow;
+package com.aearost.aranarthcore.items.arrowhead;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
@@ -11,21 +11,21 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
 
 
-public class ArrowFlaming implements AranarthItem {
+public class ArrowheadSpectral implements AranarthItem {
 
 	/**
-	 * @return The Flaming Arrow.
+	 * @return The Obsidian Arrowhead.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.ARROW, 1);
+		ItemStack item = new ItemStack(Material.FLINT, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrow_flaming");
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "arrowhead_spectral");
 			meta.setItemModel(key);
-			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "flaming");
+			meta.getPersistentDataContainer().set(ARROW_HEAD, PersistentDataType.STRING, "spectral");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			item.setItemMeta(meta);
 		}
@@ -33,7 +33,7 @@ public class ArrowFlaming implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "#ff4500Flaming Arrow";
+		return "&eSpectral Arrowhead";
 	}
 	
 }
