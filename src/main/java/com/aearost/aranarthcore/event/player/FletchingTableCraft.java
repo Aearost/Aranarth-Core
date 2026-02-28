@@ -6,12 +6,14 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
@@ -200,39 +202,148 @@ public class FletchingTableCraft {
 		ItemStack c = safe(inventory, 8);
 
 		int filled = countNonEmpty(a, b, c);
-		if (filled != 1) return null;
 
-		ItemStack single = firstNonEmpty(a, b, c);
-		if (single == null) return null;
-		if (single.hasItemMeta()) {
-			if (single.getItemMeta().getPersistentDataContainer().has(ARROW_HEAD)) {
+		// Basic arrowheads
+		if (filled == 1) {
+			ItemStack single = firstNonEmpty(a, b, c);
+			if (single == null) {
 				return null;
+			}
+
+			if (single.hasItemMeta()) {
+				if (single.getItemMeta().getPersistentDataContainer().has(ARROW_HEAD)) {
+					return null;
+				}
+			}
+
+			Material type = single.getType();
+			if (type == Material.FLINT) {
+				return new Arrowhead().getItem();
+			}
+			if (type == Material.IRON_INGOT) {
+				return new ArrowheadIron().getItem();
+			}
+			if (type == Material.GOLD_INGOT) {
+				return new ArrowheadGold().getItem();
+			}
+			if (type == Material.AMETHYST_SHARD) {
+				return new ArrowheadAmethyst().getItem();
+			}
+			if (type == Material.OBSIDIAN) {
+				ItemStack is = new ArrowheadObsidian().getItem();
+				is.setAmount(2);
+				return is;
+			}
+			if (type == Material.DIAMOND) {
+				return new ArrowheadDiamond().getItem();
+			}
+		} else {
+			ItemStack[] ingredients = new ItemStack[] { a, b, c };
+
+			// Explosive Arrowheads
+			ItemStack[] explosiveRecipe = new ItemStack[] { new Arrowhead().getItem(),
+					new ItemStack(Material.GUNPOWDER),
+					new ItemStack(Material.FLINT) };
+			if (matchesIngredients(ingredients, explosiveRecipe)) {
+				return new ArrowheadExplosive().getItem();
 			}
 		}
 
-		Material type = single.getType();
-		if (type == Material.FLINT) {
-			return new Arrowhead().getItem();
-		}
-		if (type == Material.IRON_INGOT) {
-			return new ArrowheadIron().getItem();
-		}
-		if (type == Material.GOLD_INGOT) {
-			return new ArrowheadGold().getItem();
-		}
-		if (type == Material.AMETHYST_SHARD) {
-			return new ArrowheadAmethyst().getItem();
-		}
-		if (type == Material.OBSIDIAN) {
-			ItemStack is = new ArrowheadObsidian().getItem();
-			is.setAmount(2);
-			return is;
-		}
-		if (type == Material.DIAMOND) {
-			return new ArrowheadDiamond().getItem();
+		return null;
+	}
+
+	/**
+	 * Determines if the input ingredients match the recipe's ingredients in a shapeless pattern.
+	 * @param ingredients The ingredients currently in the Fletching Table.
+	 * @param recipeIngredients The ingredients in the recipe.
+	 * @return Confirmation whether the input ingredients match the recipe's ingredients in a shapeless pattern.
+	 */
+	private boolean matchesIngredients(ItemStack[] ingredients, ItemStack[] recipeIngredients) {
+		boolean[] matched = new boolean[3];
+
+		for (int i = 0; i < 3; i++) {
+			ItemStack ingredient = ingredients[i];
+
+			boolean foundMatch = false;
+
+			for (int j = 0; j < 3; j++) {
+				if (matched[j]) {
+					continue;
+				}
+
+				ItemStack recipeIngredient = recipeIngredients[j];
+
+				// Both can be null
+				if (ingredient == null && recipeIngredient == null) {
+					matched[j] = true;
+					foundMatch = true;
+					break;
+				}
+
+				// If only one is null but the other is not
+				if (ingredient == null || recipeIngredient == null) {
+					continue;
+				}
+
+				// If the items are the same
+				if (ingredient.isSimilar(recipeIngredient)) {
+					if (!isPdcMatching(ingredient, recipeIngredient, ARROW_HEAD)) {
+						continue;
+					}
+					matched[j] = true;
+					foundMatch = true;
+					break;
+				}
+			}
+
+			// If the second array doesn't contain the item in the first, then they do not match
+			if (!foundMatch) {
+				return false;
+			}
 		}
 
-		return null;
+		return true;
+	}
+
+	/**
+	 * Determines whether the PersistentDataContainer matches between the two input ingredients.
+	 * @param ingredient The ingredient in the Fletching Table.
+	 * @param recipeIngredient The ingredient in the recipe.
+	 * @param key The key being verified.
+	 * @return Confirmation whether the PersistentDataContainer matches between the two input ingredients.
+	 */
+	private boolean isPdcMatching(ItemStack ingredient, ItemStack recipeIngredient, NamespacedKey key) {
+		// Both are regular ingredients with no meta
+		if (!ingredient.hasItemMeta() && !recipeIngredient.hasItemMeta()) {
+			return true;
+		}
+
+		// One has meta, the other doesn't
+		if (!ingredient.hasItemMeta() || !recipeIngredient.hasItemMeta()) {
+			return false;
+		}
+
+		PersistentDataContainer ingredientPdc = ingredient.getItemMeta().getPersistentDataContainer();
+		PersistentDataContainer recipePdc = recipeIngredient.getItemMeta().getPersistentDataContainer();
+
+		boolean ingredientHasKey = ingredientPdc.has(key, PersistentDataType.STRING);
+		boolean recipeHasKey = recipePdc.has(key, PersistentDataType.STRING);
+
+		// If only one has the PDC
+		if (ingredientHasKey != recipeHasKey) {
+			return false;
+		}
+
+		// If neither have the PDC
+		if (!ingredientHasKey) {
+			return true;
+		}
+
+		// Both have the PDC, the value must align
+		String ingredientValue = ingredientPdc.get(key, PersistentDataType.STRING);
+		String recipeValue = recipePdc.get(key, PersistentDataType.STRING);
+
+		return recipeValue != null && recipeValue.equals(ingredientValue);
 	}
 
 	private ItemStack safe(ItemStack[] inv, int i) {
@@ -242,10 +353,22 @@ public class FletchingTableCraft {
 	}
 
 	private int countNonEmpty(ItemStack... arr) {
-		int n = 0; for (ItemStack s : arr) if (s != null) n++; return n;
+		int n = 0;
+		for (ItemStack s : arr) {
+			if (s != null) {
+				n++;
+			}
+		}
+		return n;
 	}
+
 	private ItemStack firstNonEmpty(ItemStack... arr) {
-		for (ItemStack s : arr) if (s != null) return s; return null;
+		for (ItemStack s : arr) {
+			if (s != null) {
+				return s;
+			}
+		}
+		return null;
 	}
 
 	private void updateInventoryResult(InventoryClickEvent e) {
