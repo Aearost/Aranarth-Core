@@ -318,7 +318,7 @@ public class MountStatsListener implements Listener {
 	 */
 	@EventHandler
 	public void onMount(VehicleEnterEvent e) {
-		if (e.getVehicle() instanceof AbstractHorse || e.getVehicle() instanceof Camel) {
+		if (e.getVehicle() instanceof AbstractHorse || e.getVehicle() instanceof Camel || e.getVehicle() instanceof CamelHusk) {
 			if (e.getVehicle().getPersistentDataContainer().get(MOUNT_HEALTH, PersistentDataType.DOUBLE) == null
 				|| e.getVehicle().getPersistentDataContainer().get(MOUNT_JUMP, PersistentDataType.DOUBLE) == null
 				|| e.getVehicle().getPersistentDataContainer().get(MOUNT_SPEED, PersistentDataType.DOUBLE) == null) {
