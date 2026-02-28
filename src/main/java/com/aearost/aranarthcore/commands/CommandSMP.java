@@ -26,6 +26,11 @@ public class CommandSMP {
 					return true;
 				}
 
+				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					return true;
+				}
+
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), success -> {

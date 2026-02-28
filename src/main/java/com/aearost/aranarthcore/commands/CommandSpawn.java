@@ -21,6 +21,11 @@ public class CommandSpawn {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					return true;
+				}
+
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
 				AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), success -> {

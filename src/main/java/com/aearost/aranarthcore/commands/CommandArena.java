@@ -21,6 +21,11 @@ public class CommandArena {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					return true;
+				}
+
 				Location arenaSpawn = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 2);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				AranarthUtils.teleportPlayer(player, player.getLocation(), arenaSpawn, aranarthPlayer.isInAdminMode(), success -> {

@@ -25,6 +25,11 @@ public class CommandSurvival {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (args.length == 1) {
 			if (sender instanceof Player player) {
+				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					return true;
+				}
+
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
 					if (!aranarthPlayer.isInAdminMode()) {
