@@ -103,8 +103,11 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("arena");
 				displayedOptions.add("aranarthium");
 				displayedOptions.add("avatar");
+				displayedOptions.add("afk");
 			} else if ("avatar".startsWith(args[0])) {
 				displayedOptions.add("avatar");
+			} else if ("afk".startsWith(args[0])) {
+				displayedOptions.add("afk");
 			} else {
 				if (args[0].equals("ar")) {
 					displayedOptions.add("arena");

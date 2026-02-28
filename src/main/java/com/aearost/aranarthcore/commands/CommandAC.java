@@ -198,6 +198,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandSpawn.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("info")) {
 			commandResult = CommandInfo.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("afk")) {
+			commandResult = CommandAfk.onCommand(sender, args);
 		}
 		return commandResult;
 	}

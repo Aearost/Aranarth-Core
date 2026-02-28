@@ -116,11 +116,12 @@ public class AranarthCore extends JavaPlugin {
 			@Override
 			public void run() {
 				AranarthUtils.applyArmourEffects();
-//				AranarthUtils.applySpawnBuffs(); TODO
+				AranarthUtils.applySpawnBuffs();
 				AranarthUtils.refreshMutes();
 				AranarthUtils.refreshBans();
 				AranarthUtils.refreshServerBoosts();
 				AranarthUtils.refreshSentinels();
+				AranarthUtils.updateAfkLocations();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();

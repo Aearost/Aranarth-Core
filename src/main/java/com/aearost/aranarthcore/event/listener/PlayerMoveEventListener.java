@@ -25,6 +25,7 @@ public class PlayerMoveEventListener implements Listener {
             new HomepadStep().execute(e);
         }
 
+        new AfkCancelByMove().execute(e);
         new PlayerTeleportCancelByMove().execute(e);
     }
 

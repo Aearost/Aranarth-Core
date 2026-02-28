@@ -1067,9 +1067,9 @@ public class AranarthUtils {
 	 * @return Confirmation whether the input locations are the same.
 	 */
 	private static boolean isSameLocation(Location loc1, Location loc2) {
-		return loc1.getBlockX() == loc2.getX()
-				&& loc1.getBlockY() == loc2.getY()
-				&& loc1.getBlockZ() == loc2.getZ();
+		return loc1.getBlockX() == loc2.getBlockX()
+				&& loc1.getBlockY() == loc2.getBlockY()
+				&& loc1.getBlockZ() == loc2.getBlockZ();
 	}
 
 	/**
@@ -2847,4 +2847,64 @@ public class AranarthUtils {
 		}
 		return null;
 	}
+
+	/**
+	 * Toggles the player's AFK status.
+	 * @param uuid The UUID of the player.
+	 */
+	public static void toggleAfkStatus(UUID uuid) {
+		Player player = Bukkit.getPlayer(uuid);
+		AranarthPlayer aranarthPlayer = getPlayer(uuid);
+		Location afkLocation = aranarthPlayer.getLocationWhileAfk();
+		if (afkLocation == null) {
+			aranarthPlayer.setLocationWhileAfk(player.getLocation().clone());
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
+				}
+			}
+		} else {
+			aranarthPlayer.setLocationWhileAfk(null);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
+				}
+			}
+		}
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
+	/**
+	 * Updates all players' current AFK Locations.
+	 */
+	public static void updateAfkLocations() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+			AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
+			if (afkLocation == null) {
+				afkLocation = new AfkLocation(player.getLocation(), 0);
+				aranarthPlayer.setAfkLocation(afkLocation);
+				setPlayer(player.getUniqueId(), aranarthPlayer);
+			} else {
+				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
+					afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+					aranarthPlayer.setAfkLocation(afkLocation);
+					setPlayer(player.getUniqueId(), aranarthPlayer);
+
+					// Auto-afk after 5 minutes
+					if (afkLocation.getSeconds() == 300) {
+						toggleAfkStatus(player.getUniqueId());
+					}
+				} else {
+					aranarthPlayer.setAfkLocation(null);
+					setPlayer(player.getUniqueId(), aranarthPlayer);
+				}
+			}
+		}
+	}
+
 }

@@ -88,6 +88,10 @@ public class PlayerChatListener implements Listener {
         }
         e.getRecipients().removeAll(toRemove);
 
+        if (aranarthPlayer.getAfkLocation() != null) {
+            AranarthUtils.toggleAfkStatus(player.getUniqueId());
+        }
+
         if (ChatUtils.isPlayerMuted(player)) {
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
             e.setCancelled(true);

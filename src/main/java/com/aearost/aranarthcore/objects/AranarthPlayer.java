@@ -74,6 +74,8 @@ public class AranarthPlayer {
 	private long lastWorldCommandUse = 0;
 	private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
 	private int plentifulBlocksToDestroy = 0;
+	private Location locationWhileAfk = null;
+	private AfkLocation afkLocation = null;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -128,6 +130,8 @@ public class AranarthPlayer {
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
 		this.sentinel = new HashMap<>();
+		this.locationWhileAfk = null;
+		this.afkLocation = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -188,6 +192,8 @@ public class AranarthPlayer {
 		this.horns = new HashMap<>();
 		this.lastWorldCommandUse = 0;
 		this.sentinel = new HashMap<>();
+		this.locationWhileAfk = null;
+		this.afkLocation = null;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1108,5 +1114,37 @@ public class AranarthPlayer {
 	 */
 	public void setPlentifulBlocksToDestroy(int plentifulBlocksToDestroy) {
 		this.plentifulBlocksToDestroy = plentifulBlocksToDestroy;
+	}
+
+	/**
+	 * Provides the Location of the player where they went AFK.
+	 * @return The Location of the player where they went AFK.
+	 */
+	public Location getLocationWhileAfk() {
+		return locationWhileAfk;
+	}
+
+	/**
+	 * Updates the Location of the player where they went AFK.
+	 * @param locationWhileAfk The Location of the player where they went AFK.
+	 */
+	public void setLocationWhileAfk(Location locationWhileAfk) {
+		this.locationWhileAfk = locationWhileAfk;
+	}
+
+	/**
+	 * Provides the AFK Location tracking where the player is currently located.
+	 * @return The AFK Location tracking where the player is currently located.
+	 */
+	public AfkLocation getAfkLocation() {
+		return afkLocation;
+	}
+
+	/**
+	 * Updates the AFK Location tracking where the player is currently located.
+	 * @param afkLocation The AFK Location tracking where the player is currently located.
+	 */
+	public void setAfkLocation(AfkLocation afkLocation) {
+		this.afkLocation = afkLocation;
 	}
 }
