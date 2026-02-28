@@ -245,20 +245,22 @@ public class SpawnProtectionListener implements Listener {
 	 */
 	@EventHandler
 	private void onExitSpawnBounds(PlayerMoveEvent e) {
-		// If they did not move to a different coordinate and only their mouse
-		if (e.getTo() == null) {
-			return;
-		}
+		if (e.getPlayer().getWorld().getName().equals("spawn")) {
+			// If they did not move to a different coordinate and only their mouse
+			if (e.getTo() == null) {
+				return;
+			}
 
-		boolean isTooLow = e.getTo().getY() <= 50;
-		int x = e.getTo().getBlockX();
-		int z = e.getTo().getBlockZ();
-		boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220);
-		if (isTooLow || isLeavingSpawnBoundaries) {
-			Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
-			Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
-			e.getPlayer().teleport(locToTeleportTo);
-			e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+			boolean isTooLow = e.getTo().getY() <= 50;
+			int x = e.getTo().getBlockX();
+			int z = e.getTo().getBlockZ();
+			boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220);
+			if (isTooLow || isLeavingSpawnBoundaries) {
+				Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
+				Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+				e.getPlayer().teleport(locToTeleportTo);
+				e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+			}
 		}
 	}
 }
