@@ -59,6 +59,7 @@ Minor Features
 [~] Fixed issue where bending was being untoggled incorrectly due to clashing toggleBending() calls
 [+] Added boundaries to spawn to teleport players back to the spawnpoint if exceeded
 [+] Added in /ac afk
+[+] Leashed mobs will now teleport with the player across survival worlds
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

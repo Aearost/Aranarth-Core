@@ -15,6 +15,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -1624,7 +1625,35 @@ public class AranarthUtils {
 			player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
 			return false;
 		}
+
+		List<LivingEntity> leashedEntities = new ArrayList<>();
+		for (Entity nearby : from.getNearbyEntities(25, 25, 25)) {
+			if (nearby instanceof LivingEntity mob) {
+				if (mob.isLeashed()) {
+					if (mob.getLeashHolder() instanceof Player holder) {
+						if (holder.getUniqueId().equals(player.getUniqueId())) {
+							boolean isFromSurvivalWorld = from.getWorld().getName().startsWith("world")
+									|| from.getWorld().getName().startsWith("smp")
+									|| from.getWorld().getName().startsWith("resource");
+							boolean isToSurvivalWorld = to.getWorld().getName().startsWith("world")
+									|| to.getWorld().getName().startsWith("smp")
+									|| to.getWorld().getName().startsWith("resource");
+							if (isFromSurvivalWorld && isToSurvivalWorld) {
+								leashedEntities.add(mob);
+							} else {
+								mob.setLeashHolder(null);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		player.teleport(locToTeleportTo);
+		for (Entity leashed : leashedEntities) {
+			leashed.teleport(locToTeleportTo);
+		}
+
 		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 
 		// Saves the player's last location for /ac back
@@ -1638,6 +1667,11 @@ public class AranarthUtils {
 			if (isToggled && (!from.getWorld().getName().equals("spawn") && to.getWorld().getName().equals("spawn"))) {
 				bendingPlayer.toggleBending();
 			}
+
+			for (LivingEntity leashed : leashedEntities) {
+				leashed.setLeashHolder(player);
+			}
+
 			return true;
 		} catch (IOException e) {
 			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
