@@ -1209,6 +1209,13 @@ public class AranarthUtils {
 			case "amethyst" -> new ArrowAmethyst().getItem();
 			case "obsidian" -> new ArrowObsidian().getItem();
 			case "diamond" -> new ArrowDiamond().getItem();
+			case "explosive" -> new ArrowExplosive().getItem();
+			case "lightning" -> new ArrowLightning().getItem();
+			case "spectral" -> new ItemStack(Material.SPECTRAL_ARROW, 4);
+			case "rooting" -> new ArrowRooting().getItem();
+			case "gust" -> new ArrowGust().getItem();
+			case "dragon" -> new ArrowDragon().getItem();
+			case "bone" -> new ArrowBone().getItem();
 			default -> null;
 		};
 	}

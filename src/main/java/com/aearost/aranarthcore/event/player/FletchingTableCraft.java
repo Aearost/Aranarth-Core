@@ -179,13 +179,23 @@ public class FletchingTableCraft {
 		ItemStack stick = safe(inventory, 5);
 		ItemStack feather = safe(inventory, 8);
 
-		if (arrowhead == null || stick == null || feather == null) return null;
-		if (stick.getType() != Material.STICK || feather.getType() != Material.FEATHER) return null;
-		if (!arrowhead.hasItemMeta()) return null;
-		if (!arrowhead.getItemMeta().getPersistentDataContainer().has(ARROW_HEAD, PersistentDataType.STRING)) return null;
+		if (arrowhead == null || stick == null || feather == null) {
+			return null;
+		}
+		if (stick.getType() != Material.STICK || feather.getType() != Material.FEATHER) {
+			return null;
+		}
+		if (!arrowhead.hasItemMeta()) {
+			return null;
+		}
+		if (!arrowhead.getItemMeta().getPersistentDataContainer().has(ARROW_HEAD, PersistentDataType.STRING)) {
+			return null;
+		}
 
 		String special = arrowhead.getItemMeta().getPersistentDataContainer().get(ARROW_HEAD, PersistentDataType.STRING);
-		if (special == null) return null;
+		if (special == null) {
+			return null;
+		}
 
 		return AranarthUtils.getArrowFromType(special);
 	}
