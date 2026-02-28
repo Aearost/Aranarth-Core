@@ -60,6 +60,7 @@ Minor Features
 [+] Added boundaries to spawn to teleport players back to the spawnpoint if exceeded
 [+] Added in /ac afk
 [+] Leashed mobs will now teleport with the player across survival worlds
+[+] Prevented players from leashing and riding mobs that they do not own
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

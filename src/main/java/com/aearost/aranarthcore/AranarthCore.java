@@ -210,6 +210,7 @@ public class AranarthCore extends JavaPlugin {
 		new AranarthCoreBendingListener(this);
 		new MountStatsListener(this);
 		new PotionAlchemyExpListener(this);
+		new TamedPetStealPreventListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
@@ -227,7 +228,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArmorStandSwitchListener(this);
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
-		new ArmorStandItemAdd(this);
+		new ArmorStandItemAddListener(this);
 	}
 
 	/**

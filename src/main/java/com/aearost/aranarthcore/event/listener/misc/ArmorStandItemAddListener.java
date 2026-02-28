@@ -13,9 +13,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 
 
-public class ArmorStandItemAdd implements Listener {
+public class ArmorStandItemAddListener implements Listener {
 
-	public ArmorStandItemAdd(AranarthCore plugin) {
+	public ArmorStandItemAddListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
