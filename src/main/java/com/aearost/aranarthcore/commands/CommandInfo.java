@@ -131,7 +131,8 @@ public class CommandInfo {
 				if (sender instanceof Player player) {
 					if (player.hasPermission("aranarth.seen")) {
 						if (offlinePlayer.isOnline()) {
-							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online"));
+							Player onlinePlayer = offlinePlayer.getPlayer();
+							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
 						} else {
 							AranarthUtils.getPlayerTimezone(player, zoneId -> {
 								String result = CommandSeen.calculateDisplayDate(
@@ -146,7 +147,8 @@ public class CommandInfo {
 					}
 				} else {
 					if (offlinePlayer.isOnline()) {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online"));
+						Player onlinePlayer = offlinePlayer.getPlayer();
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
 					} else {
 						String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
 						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
@@ -157,6 +159,34 @@ public class CommandInfo {
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Provides the formatted name of the world the player is in.
+	 * @param name The unformatted name of the world the player is in.
+	 * @return The formatted name of the world the player is in.
+	 */
+	private static String getWorldName(String name) {
+		switch (name) {
+			case "world", "world_nether", "world_the_end" -> {
+				return "Survival";
+			}
+			case "resource", "resource_nether", "resource_the_end" -> {
+				return "Resource";
+			}
+			case "smp", "smp_nether", "smp_the_end" -> {
+				return "SMP";
+			}
+			case "arena" -> {
+				return "Arena";
+			}
+			case "creative" -> {
+				return "Creative";
+			}
+			default -> {
+				return "Spawn";
+			}
+        }
 	}
 
 }
