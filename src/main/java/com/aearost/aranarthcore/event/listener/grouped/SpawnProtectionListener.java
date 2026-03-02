@@ -193,6 +193,14 @@ public class SpawnProtectionListener implements Listener {
 	}
 
 	/**
+	 * Automatically toggles the player's bending based on their teleportation to and from spawn.
+	 */
+	@EventHandler
+	public void onPlayerDeath(PlayerRespawnEvent e) {
+		toggleBendingForLocation(e.getPlayer(), e.getRespawnLocation(), e.getRespawnLocation());
+	}
+
+	/**
 	 * Handles the actual toggling of the player's bending based on movement or teleportation to and from spawn.
 	 * @param player The player.
 	 * @param from The player's previous location before the movement or teleportation.
