@@ -68,51 +68,59 @@ public class ArrowHit {
 				}
 			} else if (type.equals("explosive")) {
 				if (block != null) {
-					int radius = 1; // 3x3 area (1 block in each direction)
-					int power = 5;
-					Location center = block.getLocation();
+					if (arrow.getShooter() instanceof Player shooter) {
+						Dominion shooterDominion = DominionUtils.getPlayerDominion(shooter.getUniqueId());
+						Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+						if (chunkDominion == null
+								|| (shooterDominion != null && shooterDominion.getLeader().equals(chunkDominion.getLeader()))) {
+							int radius = 1; // 3x3 area (1 block in each direction)
+							int power = 5;
+							Location center = block.getLocation();
 
-					for (int x = -radius; x <= radius; x++) {
-						for (int y = -radius; y <= radius; y++) {
-							for (int z = -radius; z <= radius; z++) {
-								Location loc = center.clone().add(x, y, z);
-								Block iteratedBlock = loc.getBlock();
+							for (int x = -radius; x <= radius; x++) {
+								for (int y = -radius; y <= radius; y++) {
+									for (int z = -radius; z <= radius; z++) {
+										Location loc = center.clone().add(x, y, z);
+										Block iteratedBlock = loc.getBlock();
 
-								if (iteratedBlock.getType().isAir()) {
-									continue;
-								}
+										if (iteratedBlock.getType().isAir()) {
+											continue;
+										}
 
-								double distance = center.distance(loc);
+										double distance = center.distance(loc);
 
-								// Make it spherical instead of cube
-								if (distance > radius + 0.5) {
-									continue;
-								}
+										// Make it spherical instead of cube
+										if (distance > radius + 0.5) {
+											continue;
+										}
 
-								float blastResistance = iteratedBlock.getType().getBlastResistance();
+										float blastResistance = iteratedBlock.getType().getBlastResistance();
 
-								// TNT power is normally 4.0
-								// We simulate block survival chance based on resistance
-								float resistanceFactor = blastResistance / 5.0f;
+										// TNT power is normally 4.0
+										// We simulate block survival chance based on resistance
+										float resistanceFactor = blastResistance / 5.0f;
 
-								// If resistance is too high/unbreaking
-								if (resistanceFactor > power) {
-									continue;
-								}
+										// If resistance is too high/unbreaking
+										if (resistanceFactor > power) {
+											continue;
+										}
 
-								// Random chance like TNT
-								float random = new Random().nextFloat();
-								if (random * power > resistanceFactor) {
-									center.getWorld().spawnParticle(Particle.EXPLOSION, loc, 1);
-									iteratedBlock.breakNaturally();
+										// Random chance like TNT
+										float random = new Random().nextFloat();
+										if (random * power > resistanceFactor) {
+											center.getWorld().spawnParticle(Particle.EXPLOSION, loc, 1);
+											iteratedBlock.breakNaturally();
+										}
+									}
 								}
 							}
+							center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1);
+							center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
+						} else {
+							shooter.sendMessage(ChatUtils.chatMessage("&cYou are not in the Dominion of &e" + chunkDominion.getName()));
 						}
+						arrow.remove();
 					}
-
-					center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1);
-					center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
-					arrow.remove();
 				}
 			} else if (type.equals("lightning")) {
 				Location loc = arrow.getLocation();
