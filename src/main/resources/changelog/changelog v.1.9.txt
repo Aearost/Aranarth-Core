@@ -15,6 +15,12 @@ Major Features
 [+] Added mcMMO requirements to rank up
 [+] Added functionality for dominions to lose food, money, or claimed chunks when a player dies
 [+] Implemented functionality for bred mounts to take stats from both parents
+[+] Added in the Bone Arrow and Bone Arrowhead
+[+] Added in the Dragon's Breath Arrow and Dragon's Breath Arrowhead
+[+] Added in the Explosive Arrow and Explosive Arrowhead
+[+] Added in the Gust Arrow and Gust Arrowhead
+[+] Added in the Lightning Arrow and Lightning Arrowhead
+[+] Added in the Rooting Arrow and Rooting Lightning
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed

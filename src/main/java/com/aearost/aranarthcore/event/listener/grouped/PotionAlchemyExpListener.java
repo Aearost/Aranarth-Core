@@ -71,32 +71,35 @@ public class PotionAlchemyExpListener implements Listener {
 	 */
 	@EventHandler
 	public void onLingeringPotionHitEntity(final AreaEffectCloudApplyEvent e) {
-		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(e.getEntity().getOwnerUniqueId());
-		if (offlinePlayer.isOnline()) {
-			Player player = Bukkit.getPlayer(e.getEntity().getOwnerUniqueId());
-			if (uuidToCloudIdentifier.containsKey(player.getUniqueId())) {
-				McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
-				AlchemyManager alchemyManager = new AlchemyManager(mcMMOPlayer);
+		UUID uuid = e.getEntity().getOwnerUniqueId();
+		if (uuid != null) {
+			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+			if (offlinePlayer.isOnline()) {
+				Player player = Bukkit.getPlayer(uuid);
+				if (uuidToCloudIdentifier.containsKey(player.getUniqueId())) {
+					McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
+					AlchemyManager alchemyManager = new AlchemyManager(mcMMOPlayer);
 
-				for (LivingEntity entity : e.getAffectedEntities()) {
-					if (entity.getPersistentDataContainer().has(LINGERING_POTION_ID)) {
-						continue;
-					}
-
-					int xp = 100;
-					if (entity instanceof Player) {
-						xp = 500;
-					}
-					alchemyManager.applyXpGain(xp, XPGainReason.PVE, XPGainSource.CUSTOM);
-					entity.getPersistentDataContainer().set(
-							LINGERING_POTION_ID, PersistentDataType.LONG, uuidToCloudIdentifier.get(player.getUniqueId()));
-
-					new BukkitRunnable() {
-						@Override
-						public void run() {
-							entity.getPersistentDataContainer().remove(LINGERING_POTION_ID);
+					for (LivingEntity entity : e.getAffectedEntities()) {
+						if (entity.getPersistentDataContainer().has(LINGERING_POTION_ID)) {
+							continue;
 						}
-					}.runTaskLater(AranarthCore.getInstance(), 120L); // 6-second delay to avoid stacking the exp gain
+
+						int xp = 100;
+						if (entity instanceof Player) {
+							xp = 500;
+						}
+						alchemyManager.applyXpGain(xp, XPGainReason.PVE, XPGainSource.CUSTOM);
+						entity.getPersistentDataContainer().set(
+								LINGERING_POTION_ID, PersistentDataType.LONG, uuidToCloudIdentifier.get(player.getUniqueId()));
+
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								entity.getPersistentDataContainer().remove(LINGERING_POTION_ID);
+							}
+						}.runTaskLater(AranarthCore.getInstance(), 120L); // 6-second delay to avoid stacking the exp gain
+					}
 				}
 			}
 		}

@@ -1,8 +1,9 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.world.ArrowHitBlock;
+import com.aearost.aranarthcore.event.world.ArrowHit;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Arrow;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -18,9 +19,8 @@ public class ProjectileHitEventListener implements Listener {
 
     @EventHandler
     public void onProjectileHit(ProjectileHitEvent e) {
-        // Hit a block
-        if (e.getHitBlock() != null) {
-            new ArrowHitBlock().execute(e);
+        if (e.getEntity() instanceof Arrow) {
+            new ArrowHit().execute(e);
         }
     }
 }
