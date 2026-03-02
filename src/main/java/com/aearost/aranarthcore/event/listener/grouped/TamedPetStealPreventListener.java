@@ -42,14 +42,16 @@ public class TamedPetStealPreventListener implements Listener {
 		if (e.getEntered() instanceof Player player) {
 			if (e.getVehicle() instanceof LivingEntity mob) {
 				if (mob instanceof Tameable tameable) {
-					if (!tameable.getOwner().getUniqueId().equals(player.getUniqueId())) {
-						e.setCancelled(true);
-						if (!isAttemptingToLeash) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride &e"
-									+ aranarthPlayer.getNickname() + "'s &e" + ChatUtils.getFormattedItemName(mob.getType().name())));
-						} else {
-							isAttemptingToLeash = false;
+					if (tameable.getOwner() != null) {
+						if (!tameable.getOwner().getUniqueId().equals(player.getUniqueId())) {
+							e.setCancelled(true);
+							if (!isAttemptingToLeash) {
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride &e"
+										+ aranarthPlayer.getNickname() + "'s &e" + ChatUtils.getFormattedItemName(mob.getType().name())));
+							} else {
+								isAttemptingToLeash = false;
+							}
 						}
 					}
 				}

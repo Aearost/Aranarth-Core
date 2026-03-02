@@ -168,10 +168,14 @@ public class DominionProtection implements Listener {
 						if (e.getDamageSource().getCausingEntity() != null) {
 							if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
 								Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-								Dominion targetDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
-								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
+								boolean petHasOwner = pet.getOwner() != null;
+								Dominion targetDominion = null;
+								if (petHasOwner) {
+									targetDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
+								}
 
 								if (attackerDominion != null && targetDominion != null) {
+									AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
 									// Do not display extra messages when at spawn
 									if (AranarthUtils.isSpawnLocation(pet.getLocation())) {
 										return;
