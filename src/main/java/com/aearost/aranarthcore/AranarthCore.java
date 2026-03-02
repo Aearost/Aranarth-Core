@@ -211,6 +211,7 @@ public class AranarthCore extends JavaPlugin {
 		new MountStatsListener(this);
 		new PotionAlchemyExpListener(this);
 		new TamedPetStealPreventListener(this);
+		new RootingArrowMovePrevent(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

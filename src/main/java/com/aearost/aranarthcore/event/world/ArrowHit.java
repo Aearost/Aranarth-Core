@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.world;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -116,6 +117,21 @@ public class ArrowHit {
 				Location loc = arrow.getLocation();
 				loc.getWorld().strikeLightning(loc);
 				arrow.remove();
+			} else if (type.equals("rooting")) {
+				if (e.getHitEntity() != null) {
+					e.getHitEntity().getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "rooting");
+					if (e.getHitEntity() instanceof Player player) {
+						player.sendMessage(ChatUtils.chatMessage("#964B00You have been rooted!"));
+					}
+
+					// Removes the attribute after 30 seconds
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							e.getHitEntity().getPersistentDataContainer().remove(ARROW);
+						}
+					}.runTaskLater(AranarthCore.getInstance(), 30);
+				}
 			}
 		}
 
