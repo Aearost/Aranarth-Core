@@ -112,6 +112,10 @@ public class ArrowHit {
 					center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
 					arrow.remove();
 				}
+			} else if (type.equals("lightning")) {
+				Location loc = arrow.getLocation();
+				loc.getWorld().strikeLightning(loc);
+				arrow.remove();
 			}
 		}
 
