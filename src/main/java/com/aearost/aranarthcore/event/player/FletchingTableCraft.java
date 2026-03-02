@@ -92,7 +92,6 @@ public class FletchingTableCraft {
 				}
 
 				if (craftsPossible > 0) {
-					Bukkit.getLogger().info("E");
 					// Multiply result amount by craftsPossible
 					result.setAmount(result.getAmount() * craftsPossible);
 
@@ -146,6 +145,11 @@ public class FletchingTableCraft {
 			if (e.getAction().name().startsWith("PICKUP")
 					|| e.getAction().name().startsWith("PLACE")
 					|| e.getAction() == InventoryAction.SWAP_WITH_CURSOR) {
+				if (e.getCursor() != null && e.getCurrentItem() == null) {
+					e.setCancelled(true);
+					return;
+				}
+
 				addEmptyBottle(e.getCurrentItem(), e.getWhoClicked());
 
 				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> updateResult(e.getInventory()));

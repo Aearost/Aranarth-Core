@@ -67,6 +67,7 @@ Minor Features
 [+] Added in /ac afk
 [+] Leashed mobs will now teleport with the player across survival worlds
 [+] Prevented players from leashing and riding mobs that they do not own
+[~] Fixed issue where clicking a Fletching Table's result slot when empty would clear the held item
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
