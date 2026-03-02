@@ -4,10 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -66,6 +63,54 @@ public class ArrowHit {
 				// 60% chance of breaking
 				if (new Random().nextInt(10) >= 4) {
 					e.getEntity().remove();
+				}
+			} else if (type.equals("explosive")) {
+				if (block != null) {
+					int radius = 1; // 3x3 area (1 block in each direction)
+					int power = 5;
+					Location center = block.getLocation();
+
+					for (int x = -radius; x <= radius; x++) {
+						for (int y = -radius; y <= radius; y++) {
+							for (int z = -radius; z <= radius; z++) {
+								Location loc = center.clone().add(x, y, z);
+								Block iteratedBlock = loc.getBlock();
+
+								if (iteratedBlock.getType().isAir()) {
+									continue;
+								}
+
+								double distance = center.distance(loc);
+
+								// Make it spherical instead of cube
+								if (distance > radius + 0.5) {
+									continue;
+								}
+
+								float blastResistance = iteratedBlock.getType().getBlastResistance();
+
+								// TNT power is normally 4.0
+								// We simulate block survival chance based on resistance
+								float resistanceFactor = blastResistance / 5.0f;
+
+								// If resistance is too high/unbreaking
+								if (resistanceFactor > power) {
+									continue;
+								}
+
+								// Random chance like TNT
+								float random = new Random().nextFloat();
+								if (random * power > resistanceFactor) {
+									center.getWorld().spawnParticle(Particle.EXPLOSION, loc, 1);
+									iteratedBlock.breakNaturally();
+								}
+							}
+						}
+					}
+
+					center.getWorld().spawnParticle(Particle.EXPLOSION_EMITTER, center, 1);
+					center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 1f, 1f);
+					arrow.remove();
 				}
 			}
 		}
