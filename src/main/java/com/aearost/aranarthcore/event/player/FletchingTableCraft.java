@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -15,6 +16,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+
+import java.util.HashMap;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
 
@@ -63,13 +66,33 @@ public class FletchingTableCraft {
 					ItemStack a = safe(contents, 2);
 					ItemStack b = safe(contents, 5);
 					ItemStack c = safe(contents, 8);
-					ItemStack ingredient = firstNonEmpty(a, b, c);
-					if (ingredient != null) {
-						craftsPossible = ingredient.getAmount();
+
+					// Have to manually check in case there are empty slots
+					if (a != null) {
+						craftsPossible = a.getAmount();
+					}
+					if (b != null) {
+						if (craftsPossible == 0) {
+							craftsPossible = b.getAmount();
+						} else {
+							if (b.getAmount() < craftsPossible) {
+								craftsPossible = b.getAmount();
+							}
+						}
+					}
+					if (c != null) {
+						if (craftsPossible == 0) {
+							craftsPossible = c.getAmount();
+						} else {
+							if (c.getAmount() < craftsPossible) {
+								craftsPossible = c.getAmount();
+							}
+						}
 					}
 				}
 
 				if (craftsPossible > 0) {
+					Bukkit.getLogger().info("E");
 					// Multiply result amount by craftsPossible
 					result.setAmount(result.getAmount() * craftsPossible);
 
@@ -80,6 +103,8 @@ public class FletchingTableCraft {
 					for (int i = 0; i < craftsPossible; i++) {
 						consumeIngredients(e.getInventory());
 					}
+
+					addEmptyBottle(result, player);
 
 					// Refresh result next tick
 					Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> updateResult(e.getInventory()));
@@ -99,6 +124,7 @@ public class FletchingTableCraft {
 					// Empty cursor → pick up full result stack (or you can limit to 1 if desired)
 					e.getWhoClicked().setItemOnCursor(result.clone());
 					consumeIngredients(e.getInventory()); // consume for one craft
+					addEmptyBottle(result, e.getWhoClicked());
 				} else if (cursor.isSimilar(result) && cursor.getAmount() < cursor.getMaxStackSize()) {
 					// Stack onto cursor
 					int spaceLeft = cursor.getMaxStackSize() - cursor.getAmount();
@@ -107,8 +133,10 @@ public class FletchingTableCraft {
 						cursor.setAmount(cursor.getAmount() + toAdd);
 						e.getWhoClicked().setItemOnCursor(cursor);
 						consumeIngredients(e.getInventory()); // consume for one craft
+						addEmptyBottle(result, e.getWhoClicked());
 					}
 				}
+
 				// Next tick: recompute result based on new ingredients
 				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> updateResult(e.getInventory()));
 				return;
@@ -118,6 +146,8 @@ public class FletchingTableCraft {
 			if (e.getAction().name().startsWith("PICKUP")
 					|| e.getAction().name().startsWith("PLACE")
 					|| e.getAction() == InventoryAction.SWAP_WITH_CURSOR) {
+				addEmptyBottle(e.getCurrentItem(), e.getWhoClicked());
+
 				Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> updateResult(e.getInventory()));
 			} else {
 				e.setCancelled(true);
@@ -508,6 +538,29 @@ public class FletchingTableCraft {
 			return null;
 		} else {
 			return arrowheadToReturn;
+		}
+	}
+
+	/**
+	 * Adds an empty bottle to the player's inventory when crafting a Dragon's Breath Arrowhead.
+	 * @param result The result.
+	 * @param player The player.
+	 */
+	private void addEmptyBottle(ItemStack result, HumanEntity player) {
+		if (result == null) {
+			return;
+		}
+		String type = result.getItemMeta().getPersistentDataContainer().get(ARROW_HEAD, PersistentDataType.STRING);
+		if (type == null) {
+			return;
+		}
+
+		if (type.equals("dragon")) {
+			HashMap<Integer, ItemStack> nonAdded = player.getInventory().addItem(new ItemStack(Material.GLASS_BOTTLE));
+			if (!nonAdded.isEmpty()) {
+				// Will only ever be 1 item
+				player.getLocation().getWorld().dropItemNaturally(player.getLocation(), nonAdded.get(0));
+			}
 		}
 	}
 }
