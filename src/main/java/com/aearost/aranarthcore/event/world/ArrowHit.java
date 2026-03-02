@@ -13,6 +13,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.Random;
 
@@ -131,6 +132,27 @@ public class ArrowHit {
 							e.getHitEntity().getPersistentDataContainer().remove(ARROW);
 						}
 					}.runTaskLater(AranarthCore.getInstance(), 30);
+				}
+			} else if (type.equals("gust")) {
+				Location loc = arrow.getLocation();
+				loc.add(0, 1, 0);
+				WindCharge charge = (WindCharge) loc.getWorld().spawnEntity(loc, EntityType.WIND_CHARGE);
+				charge.explode();
+				arrow.remove();
+
+				Location impact = arrow.getLocation().clone();
+
+				// Radius from the landed location of the arrow
+				for (Entity entity : arrow.getLocation().getNearbyEntities(1, 1, 1)) {
+					if (!(entity instanceof LivingEntity)) {
+						continue;
+					}
+
+					Vector direction = entity.getLocation().toVector().subtract(impact.toVector()).normalize();
+					direction.multiply(2.5); // Changes the movement and direction
+					direction.setY(1); // Lifts the entity slightly
+					entity.setVelocity(direction);
+					entity.setFallDistance(0); // Prevents weird fall damage
 				}
 			}
 		}
