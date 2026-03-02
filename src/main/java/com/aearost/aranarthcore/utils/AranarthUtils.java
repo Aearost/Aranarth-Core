@@ -17,6 +17,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
@@ -2944,6 +2946,36 @@ public class AranarthUtils {
 					aranarthPlayer.setAfkLocation(null);
 					setPlayer(player.getUniqueId(), aranarthPlayer);
 				}
+			}
+		}
+	}
+
+	public static void increaseMobDrops(EntityDeathEvent e) {
+		EntityEquipment equipment = e.getEntity().getEquipment();
+		List<ItemStack> equipmentList = new ArrayList<>();
+		equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
+		equipmentList.add(equipment.getItemInMainHand());
+		equipmentList.add(equipment.getItemInOffHand());
+
+		for (ItemStack drop : e.getDrops()) {
+			// Avoid duplication of held items or worn armor
+			if (equipmentList.contains(drop)) {
+				continue;
+			}
+
+			// Avoids duplication of saddles and armor on mounts
+			if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
+				continue;
+			}
+
+			int rand = new Random().nextInt(4);
+			// 50% chance to increase the drop by 1
+			if (rand <= 1) {
+				drop.setAmount(drop.getAmount() + 1);
+			}
+			// 25% chance to increase the drop by 2
+			else if (rand == 3) {
+				drop.setAmount(drop.getAmount() + 2);
 			}
 		}
 	}

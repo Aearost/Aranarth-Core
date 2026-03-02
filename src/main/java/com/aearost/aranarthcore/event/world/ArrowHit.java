@@ -32,7 +32,6 @@ public class ArrowHit {
 			arrow.setItemStack(AranarthUtils.getArrowFromType(arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING)));
 			String type = arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
 			if (type.equals("obsidian") || type.equals("dragon")) {
-
 				boolean isSpawningBreath = false;
 				if (type.equals("dragon")) {
 					// 20% chance of spawning dragon's breath cloud
@@ -63,7 +62,6 @@ public class ArrowHit {
 					cloud.clearCustomEffects();
 					cloud.addCustomEffect(new PotionEffect(PotionEffectType.INSTANT_DAMAGE, 1, 1), true);
 				}
-
 
 				// 60% chance of breaking
 				if (new Random().nextInt(10) >= 4) {
