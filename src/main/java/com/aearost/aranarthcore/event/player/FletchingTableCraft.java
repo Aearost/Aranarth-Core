@@ -145,7 +145,7 @@ public class FletchingTableCraft {
 			if (e.getAction().name().startsWith("PICKUP")
 					|| e.getAction().name().startsWith("PLACE")
 					|| e.getAction() == InventoryAction.SWAP_WITH_CURSOR) {
-				if (e.getCursor() != null && e.getCurrentItem() == null) {
+				if (e.getSlot() == 0 && e.getCursor() != null && e.getCurrentItem() == null) {
 					e.setCancelled(true);
 					return;
 				}
@@ -156,6 +156,11 @@ public class FletchingTableCraft {
 			} else {
 				e.setCancelled(true);
 			}
+		}
+
+		// Double clicking the item in inventory to take it from the result slot
+		if (e.getAction() == InventoryAction.COLLECT_TO_CURSOR) {
+			e.setCancelled(true);
 		}
 	}
 
