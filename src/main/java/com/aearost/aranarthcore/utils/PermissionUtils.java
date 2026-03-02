@@ -384,6 +384,13 @@ public class PermissionUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		HashMap<Perk, Integer> perks = aranarthPlayer.getPerks();
 
+		if (perks == null) {
+			perks = new HashMap<>();
+			aranarthPlayer.setPerks(perks);
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			return;
+		}
+
 		// Compressor
 		if (perks.get(Perk.COMPRESSOR) == 1) {
 			perms.setPermission("aranarth.compress", true);

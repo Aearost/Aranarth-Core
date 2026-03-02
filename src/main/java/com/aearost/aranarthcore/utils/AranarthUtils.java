@@ -1273,7 +1273,12 @@ public class AranarthUtils {
 			saintHomeNum = 5;
 		}
 
-		int perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+		int perksHomeAmount = 0;
+		if (aranarthPlayer.getPerks() != null) {
+			if (aranarthPlayer.getPerks().containsKey(Perk.HOMES)) {
+				perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+			}
+		}
 
 		return rankHomeNum + saintHomeNum + perksHomeAmount;
 	}
