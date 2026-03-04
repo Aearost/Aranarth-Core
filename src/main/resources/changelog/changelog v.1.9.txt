@@ -21,6 +21,7 @@ Major Features
 [+] Added in the Gust Arrow and Gust Arrowhead
 [+] Added in the Lightning Arrow and Lightning Arrowhead
 [+] Added in the Rooting Arrow and Rooting Lightning
+[+] Added in full /ac voteshop functionality
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed

@@ -405,7 +405,12 @@ public class PersistenceUtils {
 						String perks = "";
 						for (int i = 0; i < Perk.values().length; i++) {
 							Perk perk = Perk.values()[i];
-							perks += aranarthPlayer.getPerks().get(perk);
+							if (aranarthPlayer.getPerks().get(perk) == null) {
+								perks += 0;
+							} else {
+								// May be 0, 1, or a multiple of 3 if it's the homes perk
+								perks += aranarthPlayer.getPerks().get(perk);
+							}
 
 							if (i < aranarthPlayer.getPerks().size() - 1) {
 								perks += "*";

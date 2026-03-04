@@ -433,14 +433,14 @@ public class GuiCrate {
 		iron.setItemMeta(ironMeta);
 		gui.setItem(5, iron);
 
-		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 1);
-		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
-		mcmmo10Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +30"));
-		List<String> mcmmo10Lore = new ArrayList<>();
-		mcmmo10Lore.add(ChatUtils.translateToColor("&e8% Chance"));
-		mcmmo10Meta.setLore(mcmmo10Lore);
-		mcmmo10.setItemMeta(mcmmo10Meta);
-		gui.setItem(10, mcmmo10);
+		ItemStack mcmmo30 = new ItemStack(Material.PAPER, 1);
+		ItemMeta mcmmo30Meta = mcmmo30.getItemMeta();
+		mcmmo30Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +30"));
+		List<String> mcmmo30Lore = new ArrayList<>();
+		mcmmo30Lore.add(ChatUtils.translateToColor("&e8% Chance"));
+		mcmmo30Meta.setLore(mcmmo30Lore);
+		mcmmo30.setItemMeta(mcmmo30Meta);
+		gui.setItem(10, mcmmo30);
 
 		ItemStack netherStar = new ItemStack(Material.NETHER_STAR, 1);
 		ItemMeta netherStarMeta = netherStar.getItemMeta();

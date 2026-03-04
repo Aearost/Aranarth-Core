@@ -344,8 +344,21 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("warp");
 		} else if (!args[0].isEmpty() && "msg".startsWith(args[0])) {
 			displayedOptions.add("msg");
-		} else if (!args[0].isEmpty() && "vote".startsWith(args[0])) {
-			displayedOptions.add("vote");
+		} else if (!args[0].isEmpty() && args[0].startsWith("v")) {
+			if (args[0].equals("v")) {
+				displayedOptions.add("vote");
+				displayedOptions.add("vs");
+				displayedOptions.add("voteshop");
+			} else if (args[0].equals("vs")) {
+				displayedOptions.add("vs");
+			} else {
+				if ("vote".startsWith(args[0])) {
+					displayedOptions.add("vote");
+					displayedOptions.add("voteshop");
+				} else if ("voteshop".startsWith(args[0])) {
+					displayedOptions.add("voteshop");
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -813,6 +826,8 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("shop");
 		displayedOptions.add("spawn");
 		displayedOptions.add("info");
+		displayedOptions.add("voteshop");
+		displayedOptions.add("vs");
 		return displayedOptions;
 	}
 

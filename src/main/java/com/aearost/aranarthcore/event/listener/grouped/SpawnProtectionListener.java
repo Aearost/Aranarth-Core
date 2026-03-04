@@ -9,7 +9,6 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -253,22 +252,22 @@ public class SpawnProtectionListener implements Listener {
 	 */
 	@EventHandler
 	private void onExitSpawnBounds(PlayerMoveEvent e) {
-		if (e.getPlayer().getWorld().getName().equals("spawn")) {
-			// If they did not move to a different coordinate and only their mouse
-			if (e.getTo() == null) {
-				return;
-			}
-
-			boolean isTooLow = e.getTo().getY() <= 50;
-			int x = e.getTo().getBlockX();
-			int z = e.getTo().getBlockZ();
-			boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220);
-			if (isTooLow || isLeavingSpawnBoundaries) {
-				Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
-				Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
-				e.getPlayer().teleport(locToTeleportTo);
-				e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-			}
-		}
+//		if (e.getPlayer().getWorld().getName().equals("spawn")) { TODO
+//			// If they did not move to a different coordinate and only their mouse
+//			if (e.getTo() == null) {
+//				return;
+//			}
+//
+//			boolean isTooLow = e.getTo().getY() <= 50;
+//			int x = e.getTo().getBlockX();
+//			int z = e.getTo().getBlockZ();
+//			boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220);
+//			if (isTooLow || isLeavingSpawnBoundaries) {
+//				Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
+//				Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+//				e.getPlayer().teleport(locToTeleportTo);
+//				e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+//			}
+//		}
 	}
 }

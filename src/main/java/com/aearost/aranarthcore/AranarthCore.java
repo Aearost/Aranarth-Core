@@ -116,7 +116,7 @@ public class AranarthCore extends JavaPlugin {
 			@Override
 			public void run() {
 				AranarthUtils.applyArmourEffects();
-				AranarthUtils.applySpawnBuffs();
+//				AranarthUtils.applySpawnBuffs(); TODO
 				AranarthUtils.refreshMutes();
 				AranarthUtils.refreshBans();
 				AranarthUtils.refreshServerBoosts();

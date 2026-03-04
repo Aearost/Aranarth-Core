@@ -35,7 +35,7 @@ public class InvisibleItemFrame implements AranarthItem {
 	 * @return The Invisible Item Frame.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.ITEM_FRAME, 1);
+		ItemStack item = new ItemStack(Material.GLOW_ITEM_FRAME, 1);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 

@@ -188,7 +188,7 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandStore.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("boosts")) {
 			commandResult = CommandBoosts.onCommand(sender, args);
-		} else if (args[0].equalsIgnoreCase("vote")) {
+		} else if (args[0].equalsIgnoreCase("vote") || args[0].equalsIgnoreCase("v")) {
 			commandResult = CommandVote.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("cmsg")) {
 			commandResult = CommandCMsg.onCommand(sender, args);
@@ -200,6 +200,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInfo.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("afk")) {
 			commandResult = CommandAfk.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("voteshop") || args[0].equalsIgnoreCase("vs")) {
+			commandResult = CommandVoteShop.onCommand(sender, args);
 		}
 		return commandResult;
 	}
