@@ -202,6 +202,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandAfk.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("voteshop") || args[0].equalsIgnoreCase("vs")) {
 			commandResult = CommandVoteShop.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("skull")) {
+			commandResult = CommandSkull.onCommand(sender, args);
 		}
 		return commandResult;
 	}

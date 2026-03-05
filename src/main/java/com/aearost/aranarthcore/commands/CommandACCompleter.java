@@ -142,10 +142,13 @@ public class CommandACCompleter implements TabCompleter {
 				displayedOptions.add("store");
 				displayedOptions.add("shop");
 				displayedOptions.add("spawn");
+				displayedOptions.add("skull");
 			} else if ("survival".startsWith(args[0])) {
 				displayedOptions.add("survival");
 			} else if ("spawn".startsWith(args[0])) {
 				displayedOptions.add("spawn");
+			} else if ("skull".startsWith(args[0])) {
+				displayedOptions.add("skull");
 			} else if ("smp".startsWith(args[0])) {
 				displayedOptions.add("smp");
 			} else {
@@ -380,7 +383,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "ping", "balance", "bal", "trust", "untrust", "tp", "tphere", "pay", "msg", "info" -> {
+			case "ping", "balance", "bal", "trust", "untrust", "tp", "tphere", "pay", "msg", "skull", "info" -> {
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
 					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
@@ -828,6 +831,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("info");
 		displayedOptions.add("voteshop");
 		displayedOptions.add("vs");
+		displayedOptions.add("skull");
 		return displayedOptions;
 	}
 

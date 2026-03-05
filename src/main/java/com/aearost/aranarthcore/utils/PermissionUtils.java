@@ -234,6 +234,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.vote.test", false);
 		perms.setPermission("aranarth.shop.modify", false);
 		perms.setPermission("aranarth.time", false);
+		perms.setPermission("aranarth.skull", false);
 	}
 
 	/**
@@ -634,6 +635,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.broadcast", true);
 			perms.setPermission("aranarth.shop.modify", true);
 			perms.setPermission("aranarth.time", true);
+			perms.setPermission("aranarth.skull", true);
 		} else {
 			return;
 		}
@@ -665,6 +667,7 @@ public class PermissionUtils {
 
 		if (architectRank == 1) {
 			perms.setPermission("worldedit.*", true);
+			perms.setPermission("aranarth.skull", true);
 		}
 	}
 
