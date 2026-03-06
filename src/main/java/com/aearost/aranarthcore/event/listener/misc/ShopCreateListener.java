@@ -39,7 +39,7 @@ public class ShopCreateListener implements Listener {
 		if (sign.getState() instanceof Sign signState) {
 			// Only allow shop creation in Survival worlds
 			if (!player.getWorld().getName().startsWith("world") && !player.getWorld().getName().startsWith("smp")
-					&& !player.getWorld().getName().startsWith("spawn")) {
+					&& !player.getWorld().getName().equals("spawn")) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
 				return;
 			}
