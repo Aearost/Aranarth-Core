@@ -71,6 +71,7 @@ Minor Features
 [~] Fixed issue where clicking a Fletching Table's result slot when empty would clear the held item
 [~] Preventing collection to cursor in Fletching Tables as it would not consume ingredients correctly
 [~] Changed the base item of Invisible Item Frames to be Glow Item Frames instead of regular Item Frames
+[~] Fixed issue where the new month message would send to Discord once per online player
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

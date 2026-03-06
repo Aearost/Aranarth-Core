@@ -205,7 +205,6 @@ public class DateUtils {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
 					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
-					DiscordUtils.monthMessage(month, description);
 				} else {
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);
@@ -228,6 +227,11 @@ public class DateUtils {
 					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
 							player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 2f), 12L);
 				}
+			}
+
+			// Will display once and only once regardless of online players
+			if (isNewMonth) {
+				DiscordUtils.monthMessage(month, description);
 			}
 
 			DominionUtils.reEvaluateFoodInventory();
