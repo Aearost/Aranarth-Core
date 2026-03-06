@@ -14,7 +14,7 @@ public class ExtraDropsFromBoneArrow {
 	public void execute(EntityDeathEvent e) {
 		if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
 			String arrowType = arrow.getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
-			if (arrowType.equals("bone")) {
+			if (arrowType != null && arrowType.equals("bone")) {
 				AranarthUtils.increaseMobDrops(e);
 			}
 		}
