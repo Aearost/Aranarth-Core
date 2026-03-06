@@ -70,6 +70,7 @@ Minor Features
 [+] Prevented players from leashing and riding mobs that they do not own
 [~] Fixed issue where clicking a Fletching Table's result slot when empty would clear the held item
 [~] Preventing collection to cursor in Fletching Tables as it would not consume ingredients correctly
+[~] Changed the base item of Invisible Item Frames to be Glow Item Frames instead of regular Item Frames
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

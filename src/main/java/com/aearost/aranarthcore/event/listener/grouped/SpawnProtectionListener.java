@@ -10,6 +10,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,6 +23,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
+
+import java.util.List;
 
 /**
  * Prevents crops from being trampled by both players and other mobs
@@ -133,7 +137,18 @@ public class SpawnProtectionListener implements Listener {
 	@EventHandler
 	public void onMobSpawn(CreatureSpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
-			e.setCancelled(true);
+			if (e.getEntityType() != EntityType.ARMOR_STAND) {
+				// Cannot get the player who placed it but can get nearby players and prevent
+				List<Entity> nearby = e.getEntity().getNearbyEntities(8, 8, 8);
+				for (Entity entity : nearby) {
+					if (entity instanceof Player player) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						if (!aranarthPlayer.isInAdminMode()) {
+							e.setCancelled(true);
+						}
+					}
+				}
+			}
 		}
 	}
 
