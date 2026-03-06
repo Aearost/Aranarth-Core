@@ -57,7 +57,7 @@ public class InvisibleItemFrame implements AranarthItem {
 	 */
 	public static boolean isInvisibleItemFrame(Entity entity) {
 		if (entity != null) {
-			if (entity.getType() == EntityType.ITEM_FRAME) {
+			if (entity.getType() == EntityType.GLOW_ITEM_FRAME) {
 				return entity.getPersistentDataContainer().has(IS_INVISIBLE, PersistentDataType.BYTE);
 			}
 		}
