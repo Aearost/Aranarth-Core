@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.world;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -123,9 +124,11 @@ public class ArrowHit {
 					}
 				}
 			} else if (type.equals("lightning")) {
-				Location loc = arrow.getLocation();
-				loc.getWorld().strikeLightning(loc);
-				arrow.remove();
+				if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
+					Location loc = arrow.getLocation();
+					loc.getWorld().strikeLightning(loc);
+					arrow.remove();
+				}
 			} else if (type.equals("rooting")) {
 				if (e.getHitEntity() != null) {
 					e.getHitEntity().getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "rooting");
