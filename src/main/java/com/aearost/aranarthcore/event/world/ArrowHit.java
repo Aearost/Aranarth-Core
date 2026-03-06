@@ -54,8 +54,8 @@ public class ArrowHit {
 					cloud.setParticle(Particle.ENTITY_EFFECT, Color.fromRGB(170, 0, 255));
 
 					cloud.setRadius(3.0F);
-					cloud.setDuration(50);
-					cloud.setRadiusPerTick(-0.1F);
+					cloud.setDuration(100);
+					cloud.setRadiusPerTick(-0.03F);
 					cloud.setWaitTime(10);
 					cloud.setReapplicationDelay(20);
 
