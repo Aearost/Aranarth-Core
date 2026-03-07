@@ -1547,6 +1547,22 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Provides the String portion of the player's Architect rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's Architect rank.
+	 */
+	public static String getAvatarRank(AranarthPlayer aranarthPlayer) {
+		if (AvatarUtils.getCurrentAvatar() != null) {
+			UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
+			if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
+				return "&5✵";
+			}
+		}
+
+		return "";
+	}
+
+	/**
 	 * Confirms if the input coordinate is within the server Spawn.
 	 * @param loc The location of the block or entity.
 	 * @return Confirmation if the input coordinate is within the server Spawn.

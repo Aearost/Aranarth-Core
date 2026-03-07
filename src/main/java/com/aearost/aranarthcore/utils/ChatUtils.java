@@ -298,6 +298,8 @@ public class ChatUtils {
 		prefix += AranarthUtils.getCouncilRank(aranarthPlayer);
 		prefix += AranarthUtils.getArchitectRank(aranarthPlayer);
 		prefix += AranarthUtils.getSaintRank(aranarthPlayer);
+		prefix += AranarthUtils.getAvatarRank(aranarthPlayer);
+
 		if (!prefix.equals("&l⊰&r")) {
 			prefix += " ";
 		}
