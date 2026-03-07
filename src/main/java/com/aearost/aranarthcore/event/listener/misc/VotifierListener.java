@@ -14,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
 
 /**
@@ -32,7 +33,7 @@ public class VotifierListener implements Listener {
 		if (uuid != null) {
 			Vote vote = e.getVote();
 			// If it was a test vote, do not increase the number of votes the player has
-//			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
+//			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) { TODO
 //				return;
 //			}
 
@@ -43,34 +44,42 @@ public class VotifierListener implements Listener {
 
 			Player player = Bukkit.getPlayer(uuid);
 			ItemStack key = new KeyVote().getItem();
+			int amount = 1;
+			int random = new Random().nextInt(1000);
+			// 0.1% chance
+			if (random == 0) {
+				amount = 10;
+			}
+			// 1% chance
+			else if (random < 10) {
+				amount = 5;
+			}
+			// 5% chance
+			else if (random < 50) {
+				amount = 3;
+			}
+			// 10% chance
+			else if (random < 100) {
+				amount = 2;
+			}
+			key.setAmount(amount);
+
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &e" + key.getItemMeta().getDisplayName() + " x" + key.getAmount()));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted and received &e" + key.getItemMeta().getDisplayName() + " x" + key.getAmount()));
+				}
+			}
+
 			// If the player is online
 			if (player != null) {
 				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
-				player.sendMessage(ChatUtils.chatMessage("&7You have voted and received a &e" + key.getItemMeta().getDisplayName() + "!"));
 				if (!remainder.isEmpty()) {
 					player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remainder.get(0));
 					player.sendMessage(ChatUtils.chatMessage("&7Your crate key was dropped to the ground"));
 				}
 			}
-
-			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-					continue;
-				} else {
-					if (player != null && player.isOnline()) {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted and received a &e" + key.getItemMeta().getDisplayName() + "!"));
-					} else {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted for the server!"));
-					}
-				}
-			}
-
-			// Probably good to make a VotePlayer class or something like that
-			// Store the date each vote was made i.e 1207251 --> December 7th 2025 on vote site #1
-			// Or it might just be better to store two more int in aranarth player which would be "totalVoteNum" and "votePoints"
-			// Using this and adding logic in the listener, I could make it so that it will add to a temporary variable in AranarthUtils
-			// i.e add to another separate file the totalVoteNumForAllPlayers whenever the vote event is done, and can have one row per month
-			// Make vote points be able to purchase perks or crate keys, or for expensive amounts, purchase monthly saint
 		} else {
 			Bukkit.getLogger().info("Player " + username + " voted but has never joined the server before");
 		}
