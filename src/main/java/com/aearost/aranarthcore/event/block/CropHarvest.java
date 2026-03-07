@@ -30,6 +30,10 @@ import java.util.Random;
 public class CropHarvest {
 
 	public void execute(BlockBreakEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+			return;
+		}
+
 		Player player = e.getPlayer();
 		Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());

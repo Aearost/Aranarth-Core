@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -114,6 +115,19 @@ public class SpawnProtectionListener implements Listener {
 	@EventHandler
 	public void onEntityPlace(HangingPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from modifying signs at spawn.
+	 */
+	@EventHandler
+	public void onSignOpen(PlayerOpenSignEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
