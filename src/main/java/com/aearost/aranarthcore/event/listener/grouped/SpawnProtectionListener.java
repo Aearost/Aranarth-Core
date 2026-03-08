@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockIgniteEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -299,4 +300,17 @@ public class SpawnProtectionListener implements Listener {
 //			}
 //		}
 	}
+
+	/**
+	 * Prevents players from dealing and taking damage at spawn.
+	 */
+	@EventHandler
+	private void onDamage(BlockFromToEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+			if (e.getBlock().getType() == Material.WATER) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
 }
