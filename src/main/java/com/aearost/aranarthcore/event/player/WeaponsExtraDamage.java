@@ -110,7 +110,11 @@ public class WeaponsExtraDamage {
 										healAmount = e.getDamage() * 0.5;
 									}
 									Player player = (Player) e.getDamageSource().getCausingEntity();
-									player.setHealth(player.getHealth() + healAmount);
+									if ((player.getHealth() + healAmount) <= 20) {
+										player.setHealth(player.getHealth() + healAmount);
+									} else {
+										player.setHealth(20);
+									}
 								}
 							}
 						}
