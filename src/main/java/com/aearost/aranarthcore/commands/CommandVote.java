@@ -50,10 +50,12 @@ public class CommandVote {
 					}
 				} else if (args[1].equals("stats")) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					int voteNum = AranarthUtils.getVoteNum(player.getUniqueId());
+					int votePoints = AranarthUtils.getVotePoints(player.getUniqueId());
 					player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lYour Vote Stats &8- - -"));
-					player.sendMessage(ChatUtils.translateToColor("&7Total number of votes: &e" + aranarthPlayer.getVoteTotal()));
-					player.sendMessage(ChatUtils.translateToColor("&7Number of vote points: &e" + aranarthPlayer.getVoteTotal()));
-					player.sendMessage(ChatUtils.translateToColor("&7Number of vote points used: &e" + (aranarthPlayer.getVoteTotal() - aranarthPlayer.getVotePoints())));
+					player.sendMessage(ChatUtils.translateToColor("&7Total number of votes: &e" + AranarthUtils.getVoteNum(player.getUniqueId())));
+					player.sendMessage(ChatUtils.translateToColor("&7Number of vote points: &e" + AranarthUtils.getVotePoints(player.getUniqueId())));
+					player.sendMessage(ChatUtils.translateToColor("&7Available vote points: &e" + AranarthUtils.getAvailableVotePoints(player.getUniqueId())));
 					return true;
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac vote"));

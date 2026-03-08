@@ -61,8 +61,6 @@ public class AranarthPlayer {
 	private int bulkTransactionNum = 0;
 	private boolean isOpeningCrateWithCyclingItem = false;
 	private CrateType crateTypeBeingOpened = null;
-	private int voteTotal;
-	private int votePoints;
 	private boolean isAutoClaimEnabled = false;
 	private boolean isTogglingMessages = false;
 	private boolean isTogglingChat = false;
@@ -76,6 +74,7 @@ public class AranarthPlayer {
 	private int plentifulBlocksToDestroy = 0;
 	private Location locationWhereAfk = null;
 	private AfkLocation afkLocation = null;
+	private int votePointsSpent = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -118,8 +117,7 @@ public class AranarthPlayer {
 		this.saintExpireDate = 0;
 		this.isCompressingItems = false;
 		this.bulkTransactionNum = 0;
-		this.voteTotal = 0;
-		this.votePoints = 0;
+		this.votePointsSpent = 0;
 		this.isAutoClaimEnabled = false;
 		this.isTogglingMessages = false;
 		this.isTogglingChat = false;
@@ -138,8 +136,8 @@ public class AranarthPlayer {
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
-						  int votePoints,
+						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems,
+						  int votePointsSpent,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -180,8 +178,7 @@ public class AranarthPlayer {
 		this.saintExpireDate = saintExpireDate;
 		this.isCompressingItems = isCompressingItems;
 		this.bulkTransactionNum = 0;
-		this.voteTotal = voteTotal;
-		this.votePoints = votePoints;
+		this.votePointsSpent = votePointsSpent;
 		this.isAutoClaimEnabled = false;
 		this.isTogglingMessages = false;
 		this.isTogglingChat = false;
@@ -909,38 +906,6 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the number of times the player has voted.
-	 * @return The number of times the player has voted.
-	 */
-	public int getVoteTotal() {
-		return voteTotal;
-	}
-
-	/**
-	 * Updates the number of times the player has voted.
-	 * @param voteTotal The number of times the player has voted.
-	 */
-	public void setVoteTotal(int voteTotal) {
-		this.voteTotal = voteTotal;
-	}
-
-	/**
-	 * Provides the number of vote points the player has.
-	 * @return The number of vote points the player has.
-	 */
-	public int getVotePoints() {
-		return votePoints;
-	}
-
-	/**
-	 * Updates the number of vote points the player has.
-	 * @param votePoints The number of vote points the player has.
-	 */
-	public void setVotePoints(int votePoints) {
-		this.votePoints = votePoints;
-	}
-
-	/**
 	 * Provides the value tracking whether the player is claiming chunks.
 	 * @return The value tracking whether the player is claiming chunks.
 	 */
@@ -1146,5 +1111,21 @@ public class AranarthPlayer {
 	 */
 	public void setAfkLocation(AfkLocation afkLocation) {
 		this.afkLocation = afkLocation;
+	}
+
+	/**
+	 * Provides the number of vote points that have been spent by the player.
+	 * @return The number of vote points that have been spent by the player.
+	 */
+	public int getVotePointsSpent() {
+		return votePointsSpent;
+	}
+
+	/**
+	 * Updates the number of vote points that have been spent by the player.
+	 * @param votePointsSpent The number of vote points that have been spent by the player.
+	 */
+	public void setVotePointsSpent(int votePointsSpent) {
+		this.votePointsSpent = votePointsSpent;
 	}
 }

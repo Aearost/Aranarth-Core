@@ -56,9 +56,9 @@ public class GuiVoteShop {
 		meta.setOwningPlayer(player);
 		meta.setDisplayName(ChatUtils.translateToColor("&a&lYour Vote Stats"));
 		List<String> lore = new ArrayList<>();
-		lore.add(ChatUtils.translateToColor("&7Total votes: &e" + aranarthPlayer.getVoteTotal()));
-		lore.add(ChatUtils.translateToColor("&7Vote points: &e" + aranarthPlayer.getVotePoints()));
-		lore.add(ChatUtils.translateToColor("&7Spent vote points: &e" + (aranarthPlayer.getVoteTotal() - aranarthPlayer.getVotePoints())));
+		lore.add(ChatUtils.translateToColor("&7Total votes: &e" + AranarthUtils.getVoteNum(player.getUniqueId())));
+		lore.add(ChatUtils.translateToColor("&7Total vote points: &e" + AranarthUtils.getVotePoints(player.getUniqueId())));
+		lore.add(ChatUtils.translateToColor("&7Available vote points: &e" + AranarthUtils.getAvailableVotePoints(player.getUniqueId())));
 		meta.setLore(lore);
 		skull.setItemMeta(meta);
 		gui.setItem(4, skull);

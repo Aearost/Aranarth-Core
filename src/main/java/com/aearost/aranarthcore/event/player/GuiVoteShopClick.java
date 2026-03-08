@@ -39,7 +39,7 @@ public class GuiVoteShopClick {
 
 				String pointsAsString = clicked.getItemMeta().getLore().get(0).split(" ")[0];
 				int requiredPoints = Integer.parseInt(ChatUtils.stripColorFormatting(pointsAsString));
-				if (aranarthPlayer.getVotePoints() >= requiredPoints) {
+				if (AranarthUtils.getAvailableVotePoints(player.getUniqueId()) >= requiredPoints) {
 					GuiVoteShopPurchase gui = new GuiVoteShopPurchase(player, clicked);
 					gui.openGui();
 				} else {

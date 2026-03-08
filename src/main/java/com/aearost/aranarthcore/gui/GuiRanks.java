@@ -244,7 +244,7 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
 		princeLore.add("");
 		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 7500 levels"));
-		princeLore.add(ChatUtils.translateToColor("&7&oRequired per skill: 150 levels"));
+		princeLore.add(ChatUtils.translateToColor("&7&oRequired per skill: 175 levels"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 

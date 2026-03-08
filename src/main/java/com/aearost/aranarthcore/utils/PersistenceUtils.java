@@ -165,7 +165,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|voteTotal|votePoints|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -269,8 +269,8 @@ public class PersistenceUtils {
 				if (fields[19].equals("1")) {
 					isCompressingItems = true;
 				}
-				int voteTotal = Integer.parseInt(fields[20]);
-				int votePoints = Integer.parseInt(fields[21]);
+
+				int votePointsSpent = Integer.parseInt(fields[20]);
 
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
@@ -284,7 +284,7 @@ public class PersistenceUtils {
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, voteTotal, votePoints, pronouns));
+						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, pronouns));
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -323,7 +323,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|voteTotal|votePoints|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -422,8 +422,7 @@ public class PersistenceUtils {
 						if (aranarthPlayer.isCompressingItems()) {
 							isCompressingItems = "1";
 						}
-						int voteTotal = aranarthPlayer.getVoteTotal();
-						int votePoints = aranarthPlayer.getVotePoints();
+						int votePointsSpent = aranarthPlayer.getVotePointsSpent();
 
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
@@ -437,7 +436,7 @@ public class PersistenceUtils {
 								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
 								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
-								+ "|" + isCompressingItems + "|" + voteTotal + "|" + votePoints + "|"
+								+ "|" + isCompressingItems + "|" + votePointsSpent + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);
@@ -1722,6 +1721,84 @@ public class PersistenceUtils {
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the shop locations");
+			}
+		}
+	}
+
+	/**
+	 * Loads the votes on the contents of votes.txt.
+	 */
+	public static void loadVotes() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "votes.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the votes file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				String[] parts = row.split("\\|");
+				// #uuid|keyNum|timestamp
+				UUID uuid = UUID.fromString(parts[0]);
+				int keyNum = Integer.parseInt(parts[1]);
+				long timestamp = Long.parseLong(parts[2]);
+				AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
+			}
+			Bukkit.getLogger().info("The votes have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the votes");
+		}
+	}
+
+	/**
+	 * Saves the votes to the votes.txt file.
+	 */
+	public static void saveVotes() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "votes.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new votes.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of votes.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|keyNum|timestamp\n");
+				for (AranarthVote vote : AranarthUtils.getVotes()) {
+					UUID uuid = vote.getUuid();
+					int keyNum = vote.getPointsRewarded();
+					long timestamp = vote.getTimestamp();
+					writer.write(uuid.toString() + "|" + keyNum + "|" + timestamp + "\n");
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the votes");
 			}
 		}
 	}

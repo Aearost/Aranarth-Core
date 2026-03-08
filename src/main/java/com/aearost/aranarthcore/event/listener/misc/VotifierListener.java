@@ -2,7 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.key.KeyVote;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.vexsoftware.votifier.model.Vote;
@@ -37,42 +37,43 @@ public class VotifierListener implements Listener {
 //				return;
 //			}
 
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			aranarthPlayer.setVoteTotal(aranarthPlayer.getVoteTotal() + 1);
-			aranarthPlayer.setVotePoints(aranarthPlayer.getVotePoints() + 1);
-			AranarthUtils.setPlayer(uuid, aranarthPlayer);
-
 			Player player = Bukkit.getPlayer(uuid);
 			ItemStack key = new KeyVote().getItem();
 			int amount = 1;
 			int random = new Random().nextInt(1000);
 			// 0.1% chance
 			if (random == 0) {
-				amount = 10;
+				amount = 25;
 			}
 			// 1% chance
-			else if (random < 10) {
-				amount = 5;
+			else if (random == 10) {
+				amount = 10;
 			}
-			// 5% chance
-			else if (random < 50) {
-				amount = 3;
+			// 2.5% chance
+			else if (random < 25) {
+				amount = 5;
 			}
 			// 10% chance
 			else if (random < 100) {
+				amount = 3;
+			}
+			// 25% chance
+			else if (random < 250) {
 				amount = 2;
 			}
-			key.setAmount(amount);
 
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &e" + key.getItemMeta().getDisplayName() + " x" + key.getAmount()));
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
 				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted and received &e" + key.getItemMeta().getDisplayName() + " x" + key.getAmount()));
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(player.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
 				}
 			}
 
-			// If the player is online
+			// Adds their vote
+			AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), amount, System.currentTimeMillis()));
+
+			// If the player is online, add the keys
 			if (player != null) {
 				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
 				if (!remainder.isEmpty()) {

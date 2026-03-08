@@ -82,3 +82,4 @@ Backend Code Changes
 - Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
 - Fixed getUuidOfAranarthPlayer in AranarthUtils not working correctly
 - Fixed stripColorFormatting() in ChatUtils not stripping bold and other formatting
+- Added an AranarthVote class tracking the timestamp and the number of vote points that are rewarded in the vote

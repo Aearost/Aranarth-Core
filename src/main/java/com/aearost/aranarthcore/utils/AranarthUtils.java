@@ -78,6 +78,7 @@ public class AranarthUtils {
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+	private static final List<AranarthVote> votes = new ArrayList<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2971,6 +2972,10 @@ public class AranarthUtils {
 		}
 	}
 
+	/**
+	 * Increases the amount of drops from a mob in an EntityDeathEvent.
+	 * @param e The event.
+	 */
 	public static void increaseMobDrops(EntityDeathEvent e) {
 		EntityEquipment equipment = e.getEntity().getEquipment();
 		List<ItemStack> equipmentList = new ArrayList<>();
@@ -2999,6 +3004,62 @@ public class AranarthUtils {
 				drop.setAmount(drop.getAmount() + 2);
 			}
 		}
+	}
+
+	/**
+	 * Adds a vote to the list of votes.
+	 * @param vote The vote being added.
+	 */
+	public static void addVote(AranarthVote vote) {
+		votes.add(vote);
+	}
+
+	/**
+	 * Provides the list of votes.
+	 * @return The list of votes.
+	 */
+	public static List<AranarthVote> getVotes() {
+		return votes;
+	}
+
+	/**
+	 * Provides the number of times a player has voted - not the vote points.
+	 * @param uuid The UUID of the player.
+	 * @return The number of times a player has voted - not the vote points.
+	 */
+	public static int getVoteNum(UUID uuid) {
+		int voteNum = 0;
+		for (AranarthVote vote : votes) {
+			if (vote.getUuid().equals(uuid)) {
+				voteNum++;
+			}
+		}
+		return voteNum;
+	}
+
+	/**
+	 * Provides the number of vote points a player has - not necessarily usable.
+	 * @param uuid The UUID of the player.
+	 * @return The number of vote points a player has - not necessarily usable.
+	 */
+	public static int getVotePoints(UUID uuid) {
+		int pointsNum = 0;
+		for (AranarthVote vote : votes) {
+			if (vote.getUuid().equals(uuid)) {
+				pointsNum += vote.getPointsRewarded();
+			}
+		}
+		return pointsNum;
+	}
+
+	/**
+	 * Provides the number of vote points a player has available.
+	 * @param uuid The UUID of the player.
+	 * @return The number of vote points a player has available.
+	 */
+	public static int getAvailableVotePoints(UUID uuid) {
+		int totalPoints = getVotePoints(uuid);
+		return totalPoints - AranarthUtils.getPlayer(uuid).getVotePointsSpent();
 	}
 
 }
