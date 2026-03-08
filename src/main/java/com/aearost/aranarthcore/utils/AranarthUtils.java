@@ -1597,13 +1597,8 @@ public class AranarthUtils {
 	 */
 	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, Consumer<Boolean> resultCallback) {
 		if (isImmediateTeleport) {
-			boolean wasSuccessful = handleTeleportLogic(player, from, to);
-			if (wasSuccessful) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have teleported"));
-			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou were unable to teleport"));
-			}
-			return;
+			boolean result = handleTeleportLogic(player, from, to);
+			resultCallback.accept(result);
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
 			initiateTeleport(player, () -> {

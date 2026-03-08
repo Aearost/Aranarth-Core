@@ -7,9 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -27,6 +25,7 @@ import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * Prevents crops from being trampled by both players and other mobs
@@ -282,23 +281,105 @@ public class SpawnProtectionListener implements Listener {
 	 */
 	@EventHandler
 	private void onExitSpawnBounds(PlayerMoveEvent e) {
-//		if (e.getPlayer().getWorld().getName().equals("spawn")) { TODO
-//			// If they did not move to a different coordinate and only their mouse
-//			if (e.getTo() == null) {
-//				return;
-//			}
-//
-//			boolean isTooLow = e.getTo().getY() <= 50;
-//			int x = e.getTo().getBlockX();
-//			int z = e.getTo().getBlockZ();
-//			boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220);
-//			if (isTooLow || isLeavingSpawnBoundaries) {
-//				Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
-//				Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
-//				e.getPlayer().teleport(locToTeleportTo);
-//				e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-//			}
-//		}
+		Player player = e.getPlayer();
+		if (player.getWorld().getName().equals("spawn")) {
+			// If they did not move to a different coordinate and only their mouse
+			if (e.getTo() == null) {
+				return;
+			}
+
+			int x = e.getTo().getBlockX();
+			int y = e.getTo().getBlockY();
+			int z = e.getTo().getBlockZ();
+
+			boolean isEnteringSurvivalPortal = (x >= -3 && x <= 3) && (y >= 101 && y <= 111) && (z == -100);
+			boolean isEnteringResourcePortal = (x >= -23 && x <= -17) && (y >= 107 && y <= 117) && (z == -109);
+			boolean isEnteringArenaPortal = (x >= 16 && x <= 22) && (y >= 112 && y <= 121) && (z == -94);
+
+			if (isEnteringSurvivalPortal) {
+				teleportPlayerToWorld(player, "world");
+				return;
+			} else if (isEnteringResourcePortal) {
+				teleportPlayerToWorld(player, "resource");
+				return;
+			} else if (isEnteringArenaPortal) {
+				teleportPlayerToWorld(player, "arena");
+				return;
+			} else {
+//				boolean isTooLow = e.getTo().getY() <= 50;
+//				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO
+//				if (isTooLow || isLeavingSpawnBoundaries) {
+//					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
+//					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+//					e.getPlayer().teleport(locToTeleportTo);
+//					e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+//				}
+			}
+		}
+	}
+
+	/**
+	 * Teleports the player to the input world name.
+	 * @param player The player.
+	 * @param worldName The name of the world the player is teleporting to.
+	 */
+	private void teleportPlayerToWorld(Player player, String worldName) {
+		if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+			return;
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (System.currentTimeMillis() < aranarthPlayer.getLastWorldCommandUse() + 60000) {
+			if (!aranarthPlayer.isInAdminMode()) {
+				int wait = (int) ((aranarthPlayer.getLastWorldCommandUse() + 60000) - System.currentTimeMillis()) / 1000;
+				player.sendMessage(ChatUtils.chatMessage("&cYou must wait another &e" + wait + " seconds &cto teleport again!"));
+				return;
+			}
+		}
+
+		String adjustedName = "&eSurvival";
+		World world = Bukkit.getWorld(worldName);
+		if (world != null) {
+			Random random = new Random();
+			Location selectedLocation = null;
+			boolean isLocationFound = false;
+			while (!isLocationFound) {
+				int x = 0;
+				int z = 0;
+
+				if (worldName.equals("world")) {
+					x = random.nextInt(24501) - 12250;
+					z = random.nextInt(24501) - 12250;
+				} else if (worldName.equals("resource")) {
+					x = random.nextInt(5001) - 2500;
+					z = random.nextInt(5001) - 2500;
+					adjustedName = "the &eResource &7world";
+				} else if (worldName.equals("arena")) {
+					selectedLocation = new Location(Bukkit.getWorld("arena"), 0.5, 105, 0.5, 180, 0);
+					adjustedName = "the &eArena";
+					break;
+				}
+
+				if (world.getHighestBlockAt(x, z).getType() != Material.WATER) {
+					isLocationFound = true;
+					selectedLocation = world.getHighestBlockAt(x, z).getLocation();
+					selectedLocation.add(0, 1, 0);
+				}
+			}
+
+
+			String finalAdjustedName = adjustedName;
+			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, true, success -> {
+				if (success) {
+					aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to " + finalAdjustedName));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to " + finalAdjustedName));
+				}
+			});
+		}
 	}
 
 	/**
