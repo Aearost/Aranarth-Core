@@ -47,6 +47,7 @@ Minor Features
 [~] Fixed issue where the itemname perk value would be displayed in /ac perks instead of the itemframe perk
 [~] Fixed issue where logging off while in an AstralProjection would not put the player back in Survival
 [~] Made it so the mannequin is sneaking when astral projecting (sitting is not possible)
+[~] Fixed issue where you could not run any commands in spectator mode dude to AstralProjection
 [~] Fixed issue where sub-elements were not being provided due to permissions changes with arena world
 [~] Fixed bug where bending would be untoggled when teleporting i.e dismounting a horse
 [~] Fixed crates not being openable due to invalid world

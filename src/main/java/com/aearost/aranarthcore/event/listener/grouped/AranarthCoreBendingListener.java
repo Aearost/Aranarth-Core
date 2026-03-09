@@ -142,8 +142,10 @@ public class AranarthCoreBendingListener implements Listener {
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
 		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) {
-			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
+			if (activeProjections.containsKey(e.getPlayer().getUniqueId())) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
+			}
 		}
 	}
 
