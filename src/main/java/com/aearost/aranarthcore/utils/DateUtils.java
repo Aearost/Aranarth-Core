@@ -1036,7 +1036,8 @@ public class DateUtils {
 						// Handles applying the snow functionality
 						if (AranarthUtils.getWeather() == Weather.SNOW) {
 							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
+							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")
+									&& !loc.getWorld().getName().equals("resource") && !loc.getWorld().getName().equals("spawn")) {
 								continue;
 							}
 							// Do not proceed if the chunk is not yet loaded
@@ -1048,12 +1049,20 @@ public class DateUtils {
 
 							// Attempts to generate snow only once per second
 							if (runs % 5 == 0) {
+								if (loc.getWorld().getName().equals("spawn")) {
+									continue;
+								}
 								generateSnow(player, loc, bigFlakeDensity);
 							}
 						}
 
 						// Generate ice every second regardless of if it is snowing
 						if (runs % 5 == 0) {
+							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")
+									&& !loc.getWorld().getName().equals("resource")) {
+								continue;
+							}
+
 							generateIce(loc, bigFlakeDensity);
 						}
 					}
