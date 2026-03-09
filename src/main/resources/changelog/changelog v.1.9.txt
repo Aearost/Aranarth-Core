@@ -76,6 +76,8 @@ Minor Features
 [~] Fixed issue where the new month message would send to Discord once per online player
 [+] Coded in the Avatar symbol to chat
 [+] Added functionality to prevent water from flowing at spawn
+[~] Prevented bending at the arena spawn and corrected how it toggles bending
+[~] Fixed durability warnings not appearing
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
