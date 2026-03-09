@@ -60,9 +60,13 @@ public class GuiVoteShopPurchaseClick {
                 // Confirming the purchase
                 else if (e.getSlot() == 14) {
                     String pointsAsString = clicked.getItemMeta().getLore().get(0).split(" ")[0];
+                    Bukkit.getLogger().info("pointsAsString: " + pointsAsString);
                     int requiredPoints = Integer.parseInt(ChatUtils.stripColorFormatting(pointsAsString));
+                    Bukkit.getLogger().info("requiredPoints: " + requiredPoints);
+                    Bukkit.getLogger().info("aranarthPlayer.getVotePointsSpent(): " + aranarthPlayer.getVotePointsSpent());
                     aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
                     player.closeInventory();
                     String[] parts = clicked.getItemMeta().getDisplayName().split(" ");
                     String itemName = "";
@@ -101,7 +105,7 @@ public class GuiVoteShopPurchaseClick {
                                 return;
                             }
                         }
-                        aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                        aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         return;
                     }
@@ -122,7 +126,7 @@ public class GuiVoteShopPurchaseClick {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " tables 1");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
                         return;
@@ -133,7 +137,7 @@ public class GuiVoteShopPurchaseClick {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemframe 1");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
                         return;
@@ -144,7 +148,7 @@ public class GuiVoteShopPurchaseClick {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " chat 1");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
                         return;
@@ -155,7 +159,7 @@ public class GuiVoteShopPurchaseClick {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " itemname 1");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
                         return;
@@ -166,7 +170,7 @@ public class GuiVoteShopPurchaseClick {
                             Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " blacklist 1");
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou already have this perk!"));
-                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() + requiredPoints);
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
                             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                         }
                         return;
