@@ -45,20 +45,20 @@ public class VotifierListener implements Listener {
 			if (random == 0) {
 				amount = 25;
 			}
-			// 1% chance
-			else if (random == 10) {
+			// 0.5% chance
+			else if (random == 5) {
 				amount = 10;
 			}
-			// 2.5% chance
-			else if (random < 25) {
+			// 1.2% chance
+			else if (random < 12) {
 				amount = 5;
 			}
-			// 10% chance
-			else if (random < 100) {
+			// 5% chance
+			else if (random < 50) {
 				amount = 3;
 			}
-			// 25% chance
-			else if (random < 250) {
+			// 15% chance
+			else if (random < 150) {
 				amount = 2;
 			}
 
