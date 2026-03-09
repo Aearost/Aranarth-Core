@@ -5,10 +5,13 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
@@ -52,6 +55,45 @@ public class IncantationPlentifulBlockBreak {
 				// If it is not harvestable, the counter must be manually reduced regardless
 				aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			}
+		}
+
+		if (heldItem.getItemMeta() instanceof Damageable damageableItemMeta) {
+			int maxDurability = heldItem.getType().getMaxDurability();
+			int damageToReduceBy = 5;
+
+			// Decreased durability consumption for unbreaking
+			if (heldItem.containsEnchantment(Enchantment.UNBREAKING)) {
+				int level = heldItem.getEnchantmentLevel(Enchantment.UNBREAKING);
+				if (level == 1) {
+					damageToReduceBy = 3;
+				} else if (level == 2) {
+					damageToReduceBy = 2;
+				} else if (level == 3) {
+					damageToReduceBy = 1;
+				}
+			}
+
+			int newDamage = 0;
+			if (!damageableItemMeta.hasDamage()) {
+				newDamage = damageToReduceBy;
+			} else {
+				newDamage = damageableItemMeta.getDamage() + damageToReduceBy;
+			}
+
+			boolean willToolBreak = (maxDurability - newDamage) <= 0;
+			if (willToolBreak) {
+				new BukkitRunnable() {
+					@Override
+					public void run() {
+						player.getInventory().setItemInMainHand(null);
+						player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1F, 1F);
+						player.swingMainHand();
+					}
+				}.runTaskLater(AranarthCore.getInstance(), 1);
+			} else {
+				damageableItemMeta.setDamage(newDamage);
+				heldItem.setItemMeta(damageableItemMeta);
 			}
 		}
 	}
