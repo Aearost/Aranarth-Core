@@ -280,9 +280,12 @@ public class SpawnProtectionListener implements Listener {
 	 * Handles teleporting a player back to spawn when they fall into the void of the spawn world.
 	 */
 	@EventHandler
-	private void onExitSpawnBounds(PlayerMoveEvent e) {
+	private void onMove(PlayerMoveEvent e) {
 		Player player = e.getPlayer();
 		if (player.getWorld().getName().equals("spawn")) {
+			// Ensures that any movement at spawn toggles bending if not toggled already
+			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+
 			// If they did not move to a different coordinate and only their mouse
 			if (e.getTo() == null) {
 				return;
