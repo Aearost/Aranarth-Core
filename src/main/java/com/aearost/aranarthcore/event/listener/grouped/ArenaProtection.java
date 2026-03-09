@@ -19,6 +19,7 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
@@ -141,8 +142,19 @@ public class ArenaProtection implements Listener {
 	 * Automatically toggles the player's bending based on their teleportation to and from spawn.
 	 */
 	@EventHandler
-	public void onTeleportFromSpawn(PlayerTeleportEvent e) {
-		if (e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+	public void onTeleport(PlayerTeleportEvent e) {
+		if (e.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+		}
+	}
+
+	/**
+	 * Handles toggling the player's bending as they move at the arena spawn.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		if (e.getPlayer().getLocation().getWorld().getName().equals("arena")) {
 			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
 		}
 	}
@@ -168,7 +180,7 @@ public class ArenaProtection implements Listener {
 		}
 
 		// Leaving the arena spawn
-		if (!isToArenaSpawn) {
+		if (isFromArenaSpawn && !isToArenaSpawn) {
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
 			if (bPlayer != null) {
 				if (!bPlayer.isToggled()) {
