@@ -22,4 +22,5 @@ public class CustomKeys {
     public static final NamespacedKey MOUNT_JUMP = new NamespacedKey(AranarthCore.getInstance(), "mount_jump");
     public static final NamespacedKey MOUNT_SPEED = new NamespacedKey(AranarthCore.getInstance(), "mount_speed");
     public static final NamespacedKey LINGERING_POTION_ID = new NamespacedKey(AranarthCore.getInstance(), "lingering_potion_id");
+    public static final NamespacedKey AVATAR_INDEX = new NamespacedKey(AranarthCore.getInstance(), "avatar_index");
 }

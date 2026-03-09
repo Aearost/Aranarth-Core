@@ -151,7 +151,7 @@ public class SpawnProtectionListener implements Listener {
 	@EventHandler
 	public void onMobSpawn(CreatureSpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
-			if (e.getEntityType() != EntityType.ARMOR_STAND) {
+			if (e.getEntityType() != EntityType.ARMOR_STAND && e.getEntityType() != EntityType.MANNEQUIN) {
 				// Cannot get the player who placed it but can get nearby players and prevent
 				List<Entity> nearby = e.getEntity().getNearbyEntities(8, 8, 8);
 				for (Entity entity : nearby) {

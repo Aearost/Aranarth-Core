@@ -22,6 +22,7 @@ Major Features
 [+] Added in the Lightning Arrow and Lightning Arrowhead
 [+] Added in the Rooting Arrow and Rooting Lightning
 [+] Added in full /ac voteshop functionality
+[+] Added in an avatar room and functionality to cycle through the avatars
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
