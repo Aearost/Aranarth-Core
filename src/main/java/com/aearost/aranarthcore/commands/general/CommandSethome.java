@@ -1,0 +1,105 @@
+package com.aearost.aranarthcore.commands.general;
+
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Home;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+/**
+ * Allows the player to set a home.
+ */
+public class CommandSethome implements CommandExecutor {
+
+	/**
+	 * @param sender The user that entered the command.
+	 * @param command The command itself.
+	 * @param alias The alias of the command.
+	 * @param args The arguments of the command.
+	 * @return Confirmation of whether the command was a success or not.
+	 */
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+		if (sender instanceof Player player) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			int playerMaxHomeCount = AranarthUtils.getMaxHomeNum(player);
+			if (aranarthPlayer.getHomes().size() < playerMaxHomeCount) {
+				if (args.length >= 1) {
+					Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
+					if (loc == null || loc.getWorld().getName().equals("arena") || loc.getWorld().getName().equals("creative")
+							|| loc.getWorld().getName().startsWith("resource") || loc.getWorld().getName().startsWith("spawn")) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
+						return true;
+					}
+
+					// Construct the home name from args
+					StringBuilder homeNameBuilder = new StringBuilder();
+					for (int i = 0; i < args.length; i++) {
+						homeNameBuilder.append(args[i]);
+						if (i < args.length - 1) {
+							homeNameBuilder.append(" ");
+						}
+					}
+					String homeName = homeNameBuilder.toString();
+
+					if (player.hasPermission("aranarth.chat.hex")) {
+						homeName = ChatUtils.translateToColor(homeName);
+					} else if (player.hasPermission("aranarth.chat.color")) {
+						homeName = ChatUtils.playerColorChat(homeName);
+						if (homeName == null) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this kind of formatting!"));
+							return true;
+						}
+					}
+
+					homeName = ChatUtils.removeSpecialCharacters(homeName);
+					String strippedName = ChatUtils.stripColorFormatting(homeName);
+
+					// Ensures that more than just color codes were entered
+					if (strippedName.isEmpty()) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou must input a name!"));
+						return true;
+					}
+
+					// Replaces the existing home
+					String homeNameToDelete = "";
+					for (Home home : aranarthPlayer.getHomes()) {
+						if (ChatUtils.stripColorFormatting(home.getName()).equalsIgnoreCase(strippedName)) {
+							homeNameToDelete = home.getName();
+						}
+					}
+
+					if (!homeNameToDelete.isEmpty()) {
+						AranarthUtils.deletePlayerHome(player, ChatUtils.stripColorFormatting(homeNameToDelete));
+					}
+
+					// Create the home at the computed surface location
+					Home home = new Home(homeName, loc, Material.BARRIER);
+					AranarthUtils.addPlayerHome(player, home);
+
+					if (homeNameToDelete.isEmpty()) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have added the home &e" + homeName));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You have updated the location of the home &e" + homeName));
+					}
+					return true;
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/sethome <name>"));
+					return true;
+				}
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot set more than &e" + playerMaxHomeCount + " &chomes!"));
+				return true;
+			}
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+			return true;
+		}
+	}
+
+}

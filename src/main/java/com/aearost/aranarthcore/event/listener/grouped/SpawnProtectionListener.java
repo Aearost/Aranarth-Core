@@ -202,8 +202,8 @@ public class SpawnProtectionListener implements Listener {
 		if (AranarthUtils.isSpawnLocation(player.getLocation())) {
 			String[] parts = e.getMessage().split(" ");
 			if (parts.length > 1) {
-				if (parts[0].startsWith("/b")) {
-					if (parts[1].startsWith("t")) {
+				if (parts[0].startsWith("/b") || parts[0].startsWith("/bending")) {
+					if (parts[1].equals("t") || parts[1].equals("toggle")) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending at Spawn!"));
 					}
@@ -299,16 +299,16 @@ public class SpawnProtectionListener implements Listener {
 			boolean isEnteringResourcePortal = (x >= -23 && x <= -17) && (y >= 107 && y <= 117) && (z == -109);
 			boolean isEnteringArenaPortal = (x >= 16 && x <= 22) && (y >= 112 && y <= 121) && (z == -94);
 
-			if (isEnteringSurvivalPortal) {
-				teleportPlayerToWorld(player, "world");
-				return;
-			} else if (isEnteringResourcePortal) {
-				teleportPlayerToWorld(player, "resource");
-				return;
-			} else if (isEnteringArenaPortal) {
-				teleportPlayerToWorld(player, "arena");
-				return;
-			} else {
+//			if (isEnteringSurvivalPortal) { TODO
+//				teleportPlayerToWorld(player, "world");
+//				return;
+//			} else if (isEnteringResourcePortal) {
+//				teleportPlayerToWorld(player, "resource");
+//				return;
+//			} else if (isEnteringArenaPortal) {
+//				teleportPlayerToWorld(player, "arena");
+//				return;
+//			} else {
 //				boolean isTooLow = e.getTo().getY() <= 50;
 //				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO
 //				if (isTooLow || isLeavingSpawnBoundaries) {
@@ -317,7 +317,7 @@ public class SpawnProtectionListener implements Listener {
 //					e.getPlayer().teleport(locToTeleportTo);
 //					e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 //				}
-			}
+//			}
 		}
 	}
 

@@ -18,7 +18,7 @@ public class CommandOverrides {
         String[] parts = e.getMessage().split(" ");
 
         if (aranarthPlayer.getCouncilRank() != 3) {
-            if (parts[0].startsWith("/w") || parts[0].startsWith("/msg")) {
+            if (parts[0].startsWith("/w")) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
                 e.setCancelled(true);
                 return;

@@ -1045,6 +1045,11 @@ public class DateUtils {
 								continue;
 							}
 
+							// TODO Remove this block once spawn is ready
+							if (loc.getWorld().getName().equalsIgnoreCase("spawn")) {
+								continue;
+							}
+
 							applySnowParticles(player, loc, bigFlakeDensity, smallFlakeDensity);
 
 							// Attempts to generate snow only once per second
