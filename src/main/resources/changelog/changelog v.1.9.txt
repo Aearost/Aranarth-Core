@@ -81,6 +81,7 @@ Minor Features
 [~] Prevented bending at the arena spawn and corrected how it toggles bending
 [~] Fixed durability warnings not appearing
 [~] Renamed the GUI text of dominion's food to just say "Food" and not "Food Storage"
+[~] Alternated the colours of /rules with gray and yellow
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
