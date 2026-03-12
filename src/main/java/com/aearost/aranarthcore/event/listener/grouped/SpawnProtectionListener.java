@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.*;
@@ -43,9 +42,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onPlace(BlockPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
-				e.setCancelled(true);
-			}
+//			if (!aranarthPlayer.isInAdminMode()) { TODO
+//				e.setCancelled(true);
+//			}
 		}
 	}
 
@@ -56,9 +55,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
-				e.setCancelled(true);
-			}
+//			if (!aranarthPlayer.isInAdminMode()) { TODO
+//				e.setCancelled(true);
+//			}
 		}
 	}
 
@@ -70,9 +69,9 @@ public class SpawnProtectionListener implements Listener {
 		if (e.getRightClicked() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-				if (!aranarthPlayer.isInAdminMode()) {
-					e.setCancelled(true);
-				}
+//				if (!aranarthPlayer.isInAdminMode()) { TODO
+//					e.setCancelled(true);
+//				}
 			}
 		}
 	}
@@ -85,9 +84,9 @@ public class SpawnProtectionListener implements Listener {
 		if (e.getEntity() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-				if (!aranarthPlayer.isInAdminMode()) {
-					e.setCancelled(true);
-				}
+//				if (!aranarthPlayer.isInAdminMode()) { TODO
+//					e.setCancelled(true);
+//				}
 			}
 		}
 	}
@@ -116,9 +115,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onEntityPlace(HangingPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
-				e.setCancelled(true);
-			}
+//			if (!aranarthPlayer.isInAdminMode()) { TODO
+//				e.setCancelled(true);
+//			}
 		}
 	}
 
@@ -129,9 +128,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onSignOpen(PlayerOpenSignEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
-				e.setCancelled(true);
-			}
+//			if (!aranarthPlayer.isInAdminMode()) { TODO
+//				e.setCancelled(true);
+//			}
 		}
 	}
 
@@ -180,14 +179,14 @@ public class SpawnProtectionListener implements Listener {
 						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")
 						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-					if (!aranarthPlayer.isInAdminMode()) {
-						// Allow server shops to be used at spawn
-						if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
-							return;
-						}
-
-						e.setCancelled(true);
-					}
+//					if (!aranarthPlayer.isInAdminMode()) { TODO
+//						// Allow server shops to be used at spawn
+//						if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
+//							return;
+//						}
+//
+//						e.setCancelled(true);
+//					}
 				}
 			}
 		}
@@ -386,10 +385,10 @@ public class SpawnProtectionListener implements Listener {
 	}
 
 	/**
-	 * Prevents players from dealing and taking damage at spawn.
+	 * Prevents water from flowing at spawn.
 	 */
 	@EventHandler
-	private void onDamage(BlockFromToEvent e) {
+	private void onWaterFlow(BlockFromToEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			if (e.getBlock().getType() == Material.WATER) {
 				e.setCancelled(true);
