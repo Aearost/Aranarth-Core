@@ -60,7 +60,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
                 new GuiShopLocationClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food Storage")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food")) {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);

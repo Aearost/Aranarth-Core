@@ -430,7 +430,7 @@ public class DominionUtils {
 	public static void reEvaluateFoodInventory() {
 		// Close all inventories before evaluating
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			if (ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle()).endsWith("Food Storage")) {
+			if (ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle()).endsWith("Food")) {
 				onlinePlayer.closeInventory();
 			}
 		}
