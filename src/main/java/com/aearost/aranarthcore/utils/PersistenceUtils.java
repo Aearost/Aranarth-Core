@@ -1747,6 +1747,10 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
 				String[] parts = row.split("\\|");
 				// #uuid|keyNum|timestamp
 				UUID uuid = UUID.fromString(parts[0]);
