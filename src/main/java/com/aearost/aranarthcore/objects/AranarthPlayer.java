@@ -505,7 +505,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * Provides the temporary amount of the potion to be removed from the /potions remove command.
 	 * @return The quantity to be removed.
 	 */
 	public int getPotionQuantityToRemove() {
@@ -513,7 +513,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Updates the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * Updates the temporary amount of the potion to be removed from the /potions remove command.
 	 * @param potionQuantityToRemove The quantity of the potion to be removed.
 	 */
 	public void setPotionQuantityToRemove(int potionQuantityToRemove) {

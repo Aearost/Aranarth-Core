@@ -26,7 +26,7 @@ public class CommandTpAccept implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			// Player is accepting somebody's /ac tphere request
+			// Player is accepting somebody's /tphere request
 			if (aranarthPlayer.getTeleportToUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
@@ -59,7 +59,7 @@ public class CommandTpAccept implements CommandExecutor {
 				}
 				return true;
 			}
-			// Player is accepting somebody's /ac tp request
+			// Player is accepting somebody's /tp request
 			else if (aranarthPlayer.getTeleportFromUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportFromUuid());
 				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());

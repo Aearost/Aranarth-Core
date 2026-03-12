@@ -95,8 +95,8 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&o- #008048&oPlant Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- #ffdc82&oSand Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac dominion home"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /seen"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /dominion home"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 5 quiver slots"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 100 potion slots"));
 		esquireLore.add("");
@@ -116,7 +116,7 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- /msg"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
@@ -144,8 +144,8 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &b&oWaterArms"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /dominion create"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /tphere"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
@@ -175,7 +175,7 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &7&oSonicBlast"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		countLore.add(ChatUtils.translateToColor("&f&o- /ac back"));
+		countLore.add(ChatUtils.translateToColor("&f&o- /back"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
@@ -206,7 +206,7 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetalClips"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &7&oSuffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick (and a nickname in Discord)"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick (and a nickname in Discord)"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
@@ -236,8 +236,8 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&o- #820d0d&oLightning Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- #cab0ff&oSpiritual Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle msg"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle tp"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
@@ -268,8 +268,8 @@ public class GuiRanks {
 		kingLore.add(ChatUtils.translateToColor("&f&o- #c73800&oLava Bending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&oFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /toggle chat"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /nick (color)"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 50 player shops"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 1500 potion slots"));

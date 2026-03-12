@@ -110,10 +110,10 @@ public class CommandPotions implements CommandExecutor {
 									player.sendMessage(ChatUtils.chatMessage("&cYou must enter a valid quantity!"));
 								}
 							} catch (NumberFormatException e) {
-								player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+								player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /potions remove <qty>"));
 							}
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /ac potions remove <qty>"));
+							player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: /potions remove <qty>"));
 						}
 						return true;
                     }

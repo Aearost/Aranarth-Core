@@ -25,7 +25,7 @@ public class CommandPronouns implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length == 0) {
-				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax! /ac pronouns <pronouns>"));
+				player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax! /pronouns <pronouns>"));
 				return true;
 			}
 

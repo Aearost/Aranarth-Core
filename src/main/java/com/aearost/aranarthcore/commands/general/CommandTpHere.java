@@ -47,7 +47,7 @@ public class CommandTpHere implements CommandExecutor {
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have requested for &e" + targetPlayer.getNickname() + " &7to teleport to you"));
 						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested you teleport to them"));
-						target.sendMessage(ChatUtils.chatMessage("&7Use &e/ac tpaccept &7or &e/ac tpdeny"));
+						target.sendMessage(ChatUtils.chatMessage("&7Use &e/tpaccept &7or &e/tpdeny"));
 						AranarthUtils.playTeleportSound(player);
 						AranarthUtils.playTeleportSound(target);
 					} else {

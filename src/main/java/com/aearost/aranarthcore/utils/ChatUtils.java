@@ -408,16 +408,16 @@ public class ChatUtils {
 	 */
 	public static void sendServerTips() {
 		if (tips.isEmpty()) {
-			tips.add("&7&oNeed some materials? Gather them in &e&o/ac resource");
+			tips.add("&7&oNeed some materials? Gather them in &e&o/resource");
 			tips.add("&7&oGet your roles in &5&oDiscord &7&owith &e&o/discord link");
-			tips.add("&7&oIf you're confused with &6&oAranarth&7&o, go to &e&o/ac warp tutorial");
-			tips.add("&7&oInterested in special &d&operks? &7&oCheck out &e&o/ac store");
-			tips.add("&7&oDon't forget to use &e&o/ac vote &7&oto get daily &a&oVote Crate Keys");
+			tips.add("&7&oIf you're confused with &6&oAranarth&7&o, go to &e&o/warp tutorial");
+			tips.add("&7&oInterested in special &d&operks? &7&oCheck out &e&o/store");
+			tips.add("&7&oDon't forget to use &e&o/vote &7&oto get daily &a&oVote Crate Keys");
 			tips.add("&7&oFound a &c&obug &7&oor have a &6&osuggestion&7&o? Log it in our &5&oDiscord");
-			tips.add("&7&oSell your items at &e&o/ac warp market &7&oto earn &a&omoney");
-			tips.add("&7&oView the available &d&oin-game ranks &7&oat &e&o/ac ranks");
-			tips.add("&7&oBe sure to follow the rules seen in &e&o/ac rules");
-			tips.add("&7&oWant to create your &e&o/ac shop&7? Reach out to &6&oThe Council");
+			tips.add("&7&oSell your items at &e&o/warp market &7&oto earn &a&omoney");
+			tips.add("&7&oView the available &d&oin-game ranks &7&oat &e&o/ranks");
+			tips.add("&7&oBe sure to follow the rules seen in &e&o/rules");
+			tips.add("&7&oWant to create your &e&o/shop&7? Reach out to &6&oThe Council");
 
 			Collections.shuffle(tips);
 		}

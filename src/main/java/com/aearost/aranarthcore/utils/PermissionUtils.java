@@ -445,7 +445,7 @@ public class PermissionUtils {
 			if (aranarthPlayer.hasBlueFireDisabled()) {
 				perms.setPermission("bending.fire.bluefirebending", false);
 			}
-			// Will default to be enabled, must be manually toggled off via /ac toggle bluefire
+			// Will default to be enabled, must be manually toggled off via /toggle bluefire
 			else {
 				perms.setPermission("bending.fire.bluefirebending", true);
 			}
