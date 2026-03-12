@@ -355,6 +355,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("randomizer").setTabCompleter(new CommandRandomizerCompleter());
 		getCommand("ranks").setExecutor(new CommandRanks());
 		getCommand("rankup").setExecutor(new CommandRankup());
+		getCommand("reply").setExecutor(new CommandReply());
 		getCommand("resource").setExecutor(new CommandResource());
 		getCommand("rules").setExecutor(new CommandRules());
 		getCommand("seen").setExecutor(new CommandSeen());

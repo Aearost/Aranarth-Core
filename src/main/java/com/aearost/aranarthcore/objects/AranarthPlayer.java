@@ -75,6 +75,7 @@ public class AranarthPlayer {
 	private Location locationWhereAfk = null;
 	private AfkLocation afkLocation = null;
 	private int votePointsSpent = 0;
+	private UUID lastReceivedMessage = null;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -130,6 +131,7 @@ public class AranarthPlayer {
 		this.sentinel = new HashMap<>();
 		this.locationWhereAfk = null;
 		this.afkLocation = null;
+		this.lastReceivedMessage = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -191,6 +193,7 @@ public class AranarthPlayer {
 		this.sentinel = new HashMap<>();
 		this.locationWhereAfk = null;
 		this.afkLocation = null;
+		this.lastReceivedMessage = null;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1127,5 +1130,21 @@ public class AranarthPlayer {
 	 */
 	public void setVotePointsSpent(int votePointsSpent) {
 		this.votePointsSpent = votePointsSpent;
+	}
+
+	/**
+	 * Provides the UUID of the player who last messaged this player.
+	 * @return The UUID of the player who last messaged this player.
+	 */
+	public UUID getLastReceivedMessage() {
+		return lastReceivedMessage;
+	}
+
+	/**
+	 * Updates the UUID of the player who last messaged this player.
+	 * @param lastReceivedMessage The UUID of the player who last messaged this player.
+	 */
+	public void setLastReceivedMessage(UUID lastReceivedMessage) {
+		this.lastReceivedMessage = lastReceivedMessage;
 	}
 }

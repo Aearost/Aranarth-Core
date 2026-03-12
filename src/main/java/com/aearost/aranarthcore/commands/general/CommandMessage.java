@@ -27,7 +27,7 @@ public class CommandMessage implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length <= 1) {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac msg <player> <message>"));
+				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/msg <player> <message>"));
 				return true;
 			} else {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[0]);
@@ -43,39 +43,11 @@ public class CommandMessage implements CommandExecutor {
 
 					// If the player is online
 					if (target != null) {
-						StringBuilder msg = new StringBuilder();
-						for (int i = 1; i < args.length; i++) {
-							msg.append(args[i]);
-							if (i < args.length - 1) {
-								msg.append(" ");
-							}
-						}
-						String assembledMsg = msg.toString();
-
 						if (ChatUtils.isPlayerMuted(player)) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou are muted and cannot send messages!"));
 							return true;
 						}
-
-						String prefixStart = "&7⊰&r";
-						String prefixEnd = "&7⊱&r";
-						String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
-						String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
-
-						// Formats to color if the player sending has the permissions
-						String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
-
-						player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
-						target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
-
-						String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
-						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-							if (onlineAranarthPlayer.isInAdminMode()) {
-								onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
-							}
-						}
-
+						ChatUtils.sendPrivateMessage(player, target, args, false);
 						return true;
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &cis not online"));

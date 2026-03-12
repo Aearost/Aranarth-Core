@@ -80,6 +80,9 @@ commands:
     description: Lists the in-game upgradable ranks
   rankup:
     description: Directly lists the next rank that the player can rank up to
+  reply:
+    description: Replies to the last received message
+    aliases: [r]
   resource:
     description: Teleports the player to the Resource world
   rules:
