@@ -23,20 +23,20 @@ public class CommandAC implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+		if (sender instanceof Player player) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (aranarthPlayer.getCouncilRank() == 0) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+				return false;
+			}
+		}
+
 		if (args.length == 0) {
 			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac <sub-command>"));
 			return false;
 		} else {
 			boolean commandResult = false;
-			// Applies only to Aearost (ops) or Console=
-			if (sender instanceof Player player) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (aranarthPlayer.getCouncilRank() > 0) {
-					commandResult = isCouncil(sender, args);
-				}
-			} else {
-				commandResult = isCouncil(sender, args);
-			}
+			commandResult = isCouncil(sender, args);
 
 			if (!commandResult) {
 				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid sub-command!"));
