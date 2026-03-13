@@ -62,6 +62,11 @@ public class CommandMute {
 			wasPlayerMuted = true;
 			nickname = AranarthUtils.getNickname(player);
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (aranarthPlayer.getCouncilRank() == 3) {
+				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be muted"));
+				return;
+			}
+
 			if (!aranarthPlayer.getMuteEndDate().isEmpty()) {
 				sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already muted!"));
 				return;
