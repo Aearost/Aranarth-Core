@@ -5,7 +5,7 @@ main: com.aearost.aranarthcore.AranarthCore
 api-version: 1.21
 depend: [mcMMO, ProjectKorra, DiscordSRV, VotifierPlus]
 description: A core plugin to incorporate any features we desire into our Minecraft world
-loadbefore: [mcMMO, WorldEdit]
+loadbefore: [mcMMO]
 commands:
   ac:
     description: All underlying commands regarding the plugin

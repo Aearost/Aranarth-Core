@@ -138,8 +138,15 @@ public class CommandACCompleter implements TabCompleter {
 			displayedOptions.add("cmsg");
 		} else if (!args[0].isEmpty() && "flyspeed".startsWith(args[0])) {
 			displayedOptions.add("flyspeed");
-		} else if (!args[0].isEmpty() && "time".startsWith(args[0])) {
-			displayedOptions.add("time");
+		} else if (!args[0].isEmpty() && args[0].startsWith("t")) {
+			if (args[0].equalsIgnoreCase("t")) {
+				displayedOptions.add("time");
+				displayedOptions.add("tp");
+			} else if (!args[0].isEmpty() && "time".startsWith(args[0])) {
+				displayedOptions.add("time");
+			} else if (!args[0].isEmpty() && "tp".startsWith(args[0])) {
+				displayedOptions.add("tp");
+			}
 		}
 		return displayedOptions;
 	}
@@ -377,6 +384,39 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("midnight");
 				}
 			}
+			case "tp" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("username");
+						displayedOptions.add("x");
+					}
+				} else if (args.length == 3) {
+					boolean hasOnlinePlayer = false;
+					// Checks to see if the field is an online player's username
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						if (args[1].equalsIgnoreCase(onlinePlayer.getName())) {
+							hasOnlinePlayer = true;
+						}
+					}
+
+					// If teleporting players
+					if (hasOnlinePlayer) {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("username");
+						}
+					}
+					// If teleporting self to coordinates
+					else {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("y");
+						}
+					}
+				} else if (args.length == 4) {
+					if (args[3].isEmpty()) {
+						displayedOptions.add("z");
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -403,6 +443,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("cmsg");
 		displayedOptions.add("flyspeed");
 		displayedOptions.add("time");
+		displayedOptions.add("tp");
 		return displayedOptions;
 	}
 
