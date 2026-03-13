@@ -84,6 +84,7 @@ Minor Features
 [~] Alternated the colours of /rules with gray and yellow
 [+] Added in /ac tp for immediate teleporting to override /tp
 [~] Prevented Admins from being muted or banned
+[+] Implemented /ac invsee
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
