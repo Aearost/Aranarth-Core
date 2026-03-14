@@ -87,6 +87,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandDateSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("teleport") || args[0].equalsIgnoreCase("tp")) {
 			commandResult = CommandAdminTeleport.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("clearchat")) {
+			commandResult = CommandClearChat.onCommand(sender, args);
 		}
 		return commandResult;
 	}
