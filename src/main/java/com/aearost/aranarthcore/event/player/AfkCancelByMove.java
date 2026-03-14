@@ -18,8 +18,10 @@ public class AfkCancelByMove {
 
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.getLocationWhereAfk() != null) {
-			AranarthUtils.toggleAfkStatus(player.getUniqueId());
+		// The player runs the command when there is no AFK Location
+		if (aranarthPlayer.getAfkLocation() != null
+				&& aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+			AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
 		}
 	}
 }

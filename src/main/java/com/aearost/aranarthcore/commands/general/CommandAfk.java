@@ -25,9 +25,15 @@ public class CommandAfk implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), 300));
-			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-			AranarthUtils.toggleAfkStatus(player.getUniqueId());
+			if (aranarthPlayer.getAfkLocation() == null
+					|| aranarthPlayer.getAfkLocation().getSeconds() < AranarthUtils.getAfkSecondsAmount()) {
+				aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), AranarthUtils.getAfkSecondsAmount()));
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				AranarthUtils.toggleAfkStatus(player.getUniqueId(), true);
+			} else {
+				AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+			}
+
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis can only be executed in-game!"));

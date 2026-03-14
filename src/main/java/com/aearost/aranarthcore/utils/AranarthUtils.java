@@ -79,6 +79,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
+	private static final int afkSecondsAmount = 300;
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -2911,13 +2912,17 @@ public class AranarthUtils {
 	/**
 	 * Toggles the player's AFK status.
 	 * @param uuid The UUID of the player.
+	 * @param isEnablingAfk Whether the player is enabling their AFK status.
 	 */
-	public static void toggleAfkStatus(UUID uuid) {
+	public static void toggleAfkStatus(UUID uuid, boolean isEnablingAfk) {
 		Player player = Bukkit.getPlayer(uuid);
 		AranarthPlayer aranarthPlayer = getPlayer(uuid);
-		Location locationWhereAfk = aranarthPlayer.getLocationWhereAfk();
-		if (locationWhereAfk == null) {
-			aranarthPlayer.setLocationWhereAfk(player.getLocation().clone());
+		if (isEnablingAfk) {
+			if (aranarthPlayer.getAfkLocation() == null) {
+				AfkLocation afkLocation = new AfkLocation(player.getLocation(),getAfkSecondsAmount());
+				aranarthPlayer.setAfkLocation(afkLocation);
+			}
+
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
@@ -2925,8 +2930,9 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
 				}
 			}
+			Bukkit.getLogger().info(ChatUtils.translateToColor(aranarthPlayer.getNickname() + " is now AFK"));
 		} else {
-			aranarthPlayer.setLocationWhereAfk(null);
+			aranarthPlayer.setAfkLocation(null);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
@@ -2934,6 +2940,7 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
 				}
 			}
+			Bukkit.getLogger().info(ChatUtils.translateToColor(aranarthPlayer.getNickname() + " is no longer AFK"));
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
@@ -2950,16 +2957,19 @@ public class AranarthUtils {
 				aranarthPlayer.setAfkLocation(afkLocation);
 				setPlayer(player.getUniqueId(), aranarthPlayer);
 			} else {
+				// If the player hasn't moved
 				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
 					afkLocation.setSeconds(afkLocation.getSeconds() + 5);
 					aranarthPlayer.setAfkLocation(afkLocation);
 					setPlayer(player.getUniqueId(), aranarthPlayer);
 
 					// Auto-afk after 5 minutes
-					if (afkLocation.getSeconds() == 300) {
-						toggleAfkStatus(player.getUniqueId());
+					if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+						toggleAfkStatus(player.getUniqueId(), true);
 					}
-				} else {
+				}
+				// The player has moved
+				else {
 					aranarthPlayer.setAfkLocation(null);
 					setPlayer(player.getUniqueId(), aranarthPlayer);
 				}
@@ -3055,6 +3065,14 @@ public class AranarthUtils {
 	public static int getAvailableVotePoints(UUID uuid) {
 		int totalPoints = getVotePoints(uuid);
 		return totalPoints - AranarthUtils.getPlayer(uuid).getVotePointsSpent();
+	}
+
+	/**
+	 * Provides the number of seconds that a player is AFK to automatically be placed in the AFK status.
+	 * @return The number of seconds that a player is AFK to automatically be placed in the AFK status.
+	 */
+	public static int getAfkSecondsAmount() {
+		return afkSecondsAmount;
 	}
 
 }
