@@ -143,8 +143,8 @@ public class CommandACCompleter implements TabCompleter {
 			} else if (!args[0].isEmpty() && "clearchat".startsWith(args[0])) {
 				displayedOptions.add("clearchat");
 			}
-		} else if (!args[0].isEmpty() && "flyspeed".startsWith(args[0])) {
-			displayedOptions.add("flyspeed");
+		} else if (!args[0].isEmpty() && "speed".startsWith(args[0])) {
+			displayedOptions.add("speed");
 		} else if (!args[0].isEmpty() && args[0].startsWith("t")) {
 			if (args[0].equalsIgnoreCase("t")) {
 				displayedOptions.add("time");
@@ -377,7 +377,7 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("message");
 				}
 			}
-			case "flyspeed" -> {
+			case "speed" -> {
 				if (args[1].isEmpty()) {
 					displayedOptions.add("1");
 					displayedOptions.add("10");
@@ -448,7 +448,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("perks");
 		displayedOptions.add("admin");
 		displayedOptions.add("cmsg");
-		displayedOptions.add("flyspeed");
+		displayedOptions.add("speed");
 		displayedOptions.add("time");
 		displayedOptions.add("tp");
 		displayedOptions.add("clearchat");

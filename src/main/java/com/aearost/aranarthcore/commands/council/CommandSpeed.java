@@ -7,9 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Allows a player to modify the speed of their flight.
+ * Allows a player to modify the speed of their walking or their flight.
  */
-public class CommandFlyspeed {
+public class CommandSpeed {
 
 	/**
 	 * @param sender The user that entered the command.
@@ -42,8 +42,14 @@ public class CommandFlyspeed {
 				player.sendMessage(ChatUtils.chatMessage("&cThe speed must be between 1 and 10!"));
 				return true;
 			}
-			player.setFlySpeed(speed);
-			player.sendMessage(ChatUtils.chatMessage("&7You have updated your flying speed"));
+
+			if (player.isFlying()) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have updated your flying speed from &e" + (player.getFlySpeed() * 10) + " &7to &e" + (speed * 10)));
+				player.setFlySpeed(speed);
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&7You have updated your walking speed from &e" + (player.getWalkSpeed() * 10) + " &7to &e" + (speed * 10)));
+				player.setWalkSpeed(speed);
+			}
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
