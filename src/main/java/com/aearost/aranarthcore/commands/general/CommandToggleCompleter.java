@@ -29,6 +29,8 @@ public class CommandToggleCompleter implements TabCompleter {
 				displayedOptions.add("teleport");
 			} else if (!args[0].isEmpty() && "bluefire".startsWith(args[0])) {
 				displayedOptions.add("bluefire");
+			} else if (!args[0].isEmpty() && "spawnboost".startsWith(args[0])) {
+				displayedOptions.add("spawnboost");
 			} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
 				if (!args[0].isEmpty() && (args[0].equalsIgnoreCase("c")
 						|| args[0].equalsIgnoreCase("ch") || args[0].equalsIgnoreCase("cha"))) {
@@ -44,6 +46,7 @@ public class CommandToggleCompleter implements TabCompleter {
 					displayedOptions.add("teleport");
 					displayedOptions.add("changeclaim");
 					displayedOptions.add("bluefire");
+					displayedOptions.add("spawnboost");
 				}
 			} else {
 				displayedOptions.add("messages");
@@ -51,6 +54,7 @@ public class CommandToggleCompleter implements TabCompleter {
 				displayedOptions.add("teleport");
 				displayedOptions.add("changeclaim");
 				displayedOptions.add("bluefire");
+				displayedOptions.add("spawnboost");
 			}
 		}
 		return displayedOptions;

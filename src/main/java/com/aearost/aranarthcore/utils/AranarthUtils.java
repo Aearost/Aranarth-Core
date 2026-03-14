@@ -1848,8 +1848,10 @@ public class AranarthUtils {
 	public static void applySpawnBuffs() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			if (isSpawnLocation(player.getLocation())) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+				if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+				}
 			}
 		}
 	}

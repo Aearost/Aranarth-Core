@@ -86,6 +86,7 @@ Minor Features
 [~] Prevented Admins from being muted or banned
 [+] Implemented /ac invsee
 [+] Implemented /ac clearchat
+[+] Added /toggle spawnboost so that players can toggle the speed and jump effects provided while at spawn
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -94,6 +94,19 @@ public class CommandToggle implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to the blue fire perk"));
 					}
+				} else if (args[0].equalsIgnoreCase("spawnboost")) {
+					// Everyone has access
+					if (aranarthPlayer.isUsingSpawnBoost()) {
+						aranarthPlayer.setUsingSpawnBoost(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have disabled the spawn boost effects"));
+						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+							player.clearActivePotionEffects();
+						}
+					} else {
+						aranarthPlayer.setUsingSpawnBoost(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have enabled the spawn boost effects"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

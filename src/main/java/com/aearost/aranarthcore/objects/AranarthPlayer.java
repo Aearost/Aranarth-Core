@@ -75,6 +75,7 @@ public class AranarthPlayer {
 	private AfkLocation afkLocation = null;
 	private int votePointsSpent = 0;
 	private UUID lastReceivedMessage = null;
+	private boolean isUsingSpawnBoost = true;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -130,6 +131,7 @@ public class AranarthPlayer {
 		this.sentinel = new HashMap<>();
 		this.afkLocation = null;
 		this.lastReceivedMessage = null;
+		this.isUsingSpawnBoost = true;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -137,7 +139,7 @@ public class AranarthPlayer {
 						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
 						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems,
-						  int votePointsSpent,
+						  int votePointsSpent, boolean isUsingSpawnBoost,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -191,6 +193,7 @@ public class AranarthPlayer {
 		this.sentinel = new HashMap<>();
 		this.afkLocation = null;
 		this.lastReceivedMessage = null;
+		this.isUsingSpawnBoost = isUsingSpawnBoost;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1127,5 +1130,21 @@ public class AranarthPlayer {
 	 */
 	public void setLastReceivedMessage(UUID lastReceivedMessage) {
 		this.lastReceivedMessage = lastReceivedMessage;
+	}
+
+	/**
+	 * Provides the value tracking if the player is using the spawn boost effects.
+	 * @return The value tracking if the player is using the spawn boost effects.
+	 */
+	public boolean isUsingSpawnBoost() {
+		return isUsingSpawnBoost;
+	}
+
+	/**
+	 * Updates the value tracking if the player is using the spawn boost effects.
+	 * @param usingSpawnBoost The value tracking if the player is using the spawn boost effects.
+	 */
+	public void setUsingSpawnBoost(boolean usingSpawnBoost) {
+		isUsingSpawnBoost = usingSpawnBoost;
 	}
 }
