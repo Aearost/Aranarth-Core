@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.*;
@@ -42,9 +43,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onPlace(BlockPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//			if (!aranarthPlayer.isInAdminMode()) { TODO
-//				e.setCancelled(true);
-//			}
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -55,9 +56,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//			if (!aranarthPlayer.isInAdminMode()) { TODO
-//				e.setCancelled(true);
-//			}
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -69,9 +70,9 @@ public class SpawnProtectionListener implements Listener {
 		if (e.getRightClicked() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//				if (!aranarthPlayer.isInAdminMode()) { TODO
-//					e.setCancelled(true);
-//				}
+				if (!aranarthPlayer.isInAdminMode()) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -84,9 +85,9 @@ public class SpawnProtectionListener implements Listener {
 		if (e.getEntity() != null) {
 			if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//				if (!aranarthPlayer.isInAdminMode()) { TODO
-//					e.setCancelled(true);
-//				}
+				if (!aranarthPlayer.isInAdminMode()) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}
@@ -115,9 +116,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onEntityPlace(HangingPlaceEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//			if (!aranarthPlayer.isInAdminMode()) { TODO
-//				e.setCancelled(true);
-//			}
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -128,9 +129,9 @@ public class SpawnProtectionListener implements Listener {
 	public void onSignOpen(PlayerOpenSignEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getSign().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//			if (!aranarthPlayer.isInAdminMode()) { TODO
-//				e.setCancelled(true);
-//			}
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
 		}
 	}
 
@@ -179,14 +180,14 @@ public class SpawnProtectionListener implements Listener {
 						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")
 						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-//					if (!aranarthPlayer.isInAdminMode()) { TODO
-//						// Allow server shops to be used at spawn
-//						if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
-//							return;
-//						}
-//
-//						e.setCancelled(true);
-//					}
+					if (!aranarthPlayer.isInAdminMode()) {
+						// Allow server shops to be used at spawn
+						if (block.getType().name().endsWith("_SIGN") && ShopUtils.getShopFromLocation(block.getLocation()) != null) {
+							return;
+						}
+
+						e.setCancelled(true);
+					}
 				}
 			}
 		}
@@ -298,25 +299,26 @@ public class SpawnProtectionListener implements Listener {
 			boolean isEnteringResourcePortal = (x >= -23 && x <= -17) && (y >= 107 && y <= 117) && (z == -109);
 			boolean isEnteringArenaPortal = (x >= 16 && x <= 22) && (y >= 112 && y <= 121) && (z == -94);
 
-//			if (isEnteringSurvivalPortal) { TODO
-//				teleportPlayerToWorld(player, "world");
-//				return;
-//			} else if (isEnteringResourcePortal) {
-//				teleportPlayerToWorld(player, "resource");
-//				return;
-//			} else if (isEnteringArenaPortal) {
-//				teleportPlayerToWorld(player, "arena");
-//				return;
-//			} else {
-//				boolean isTooLow = e.getTo().getY() <= 50;
-//				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO
-//				if (isTooLow || isLeavingSpawnBoundaries) {
-//					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
-//					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
-//					e.getPlayer().teleport(locToTeleportTo);
-//					e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-//				}
-//			}
+			if (isEnteringSurvivalPortal) {
+				teleportPlayerToWorld(player, "world");
+				return;
+			} else if (isEnteringResourcePortal) {
+				teleportPlayerToWorld(player, "resource");
+				return;
+			} else if (isEnteringArenaPortal) {
+				teleportPlayerToWorld(player, "arena");
+				return;
+			} else {
+				boolean isTooLow = e.getTo().getY() <= 50;
+//				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO also consider the tutorials
+//				if (isTooLow || isLeavingSpawnBoundaries) { TODO might be best to just check if they're within a range of x/z coordinates so the far out tutorials will work fine
+				if (isTooLow) {
+					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
+					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+					e.getPlayer().teleport(locToTeleportTo);
+					e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+				}
+			}
 		}
 	}
 

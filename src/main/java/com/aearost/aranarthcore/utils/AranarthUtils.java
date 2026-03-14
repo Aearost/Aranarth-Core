@@ -1565,27 +1565,12 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Confirms if the input coordinate is within the server Spawn.
+	 * Confirms if the input coordinate is within the server Spawn world.
 	 * @param loc The location of the block or entity.
-	 * @return Confirmation if the input coordinate is within the server Spawn.
+	 * @return Confirmation if the input coordinate is within the server Spawn world.
 	 */
 	public static boolean isSpawnLocation(Location loc) {
-		int topRightX = 335;
-		int topRightZ = -447;
-		int bottomLeftX = -351;
-		int bottomLeftZ = 255;
-
-		if (!loc.getWorld().getName().equals("spawn")) {
-			return false;
-		}
-
-		int x = loc.getBlockX();
-		int z = loc.getBlockZ();
-
-		if ((bottomLeftX < x && x < topRightX) && (bottomLeftZ > z && z > topRightZ)) {
-			return true;
-		}
-		return false;
+		return loc.getWorld().getName().equals("spawn");
 	}
 
 	/**
