@@ -25,7 +25,10 @@ public class CommandCreative implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			// Only the OG players, Council, and Architect are permitted into the Creative world
+			if (!AranarthUtils.isOriginalPlayer(player.getUniqueId()) && aranarthPlayer.getCouncilRank() == 0
+					&& aranarthPlayer.getArchitectRank() == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to this world!"));
 				return false;
 			}
@@ -35,7 +38,6 @@ public class CommandCreative implements CommandExecutor {
 				return false;
 			}
 
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
 			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), success -> {
 				if (success) {

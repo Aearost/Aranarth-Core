@@ -87,6 +87,9 @@ Minor Features
 [+] Implemented /ac invsee
 [+] Implemented /ac clearchat
 [+] Added /toggle spawnboost so that players can toggle the speed and jump effects provided while at spawn
+[~] Updated the recipes of Elven and Scorched Aranarthium
+[+] Added Council and Architect access to the creative world
+[+] Added warning message to enderchests being opened in creative
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
