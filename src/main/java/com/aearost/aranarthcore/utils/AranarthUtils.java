@@ -2945,14 +2945,14 @@ public class AranarthUtils {
 				setPlayer(player.getUniqueId(), aranarthPlayer);
 			} else {
 				// If the player hasn't moved and isn't afk yet
-				if (isSameLocation(player.getLocation(), afkLocation.getLocation())
-						&& afkLocation.getSeconds() < getAfkSecondsAmount()) {
-					afkLocation.setSeconds(afkLocation.getSeconds() + 5);
-					aranarthPlayer.setAfkLocation(afkLocation);
-					setPlayer(player.getUniqueId(), aranarthPlayer);
-
+				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
+					if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
+						afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+						aranarthPlayer.setAfkLocation(afkLocation);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
+					}
 					// Auto-afk after 5 minutes
-					if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+					else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
 						toggleAfkStatus(player.getUniqueId(), true);
 					}
 				}
