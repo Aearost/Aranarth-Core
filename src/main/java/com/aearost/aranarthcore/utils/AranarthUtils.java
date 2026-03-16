@@ -2917,7 +2917,7 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
 				}
 			}
-			Bukkit.getLogger().info(ChatUtils.translateToColor(aranarthPlayer.getNickname() + " is now AFK"));
+			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
 		} else {
 			aranarthPlayer.setAfkLocation(null);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -2927,7 +2927,7 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
 				}
 			}
-			Bukkit.getLogger().info(ChatUtils.translateToColor(aranarthPlayer.getNickname() + " is no longer AFK"));
+			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
