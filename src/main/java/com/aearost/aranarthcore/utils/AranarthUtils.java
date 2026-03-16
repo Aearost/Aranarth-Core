@@ -2944,8 +2944,9 @@ public class AranarthUtils {
 				aranarthPlayer.setAfkLocation(afkLocation);
 				setPlayer(player.getUniqueId(), aranarthPlayer);
 			} else {
-				// If the player hasn't moved
-				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
+				// If the player hasn't moved and isn't afk yet
+				if (isSameLocation(player.getLocation(), afkLocation.getLocation())
+						&& afkLocation.getSeconds() < getAfkSecondsAmount()) {
 					afkLocation.setSeconds(afkLocation.getSeconds() + 5);
 					aranarthPlayer.setAfkLocation(afkLocation);
 					setPlayer(player.getUniqueId(), aranarthPlayer);
