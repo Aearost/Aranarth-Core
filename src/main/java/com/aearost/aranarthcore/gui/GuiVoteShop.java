@@ -67,7 +67,7 @@ public class GuiVoteShop {
 		ItemMeta keyVoteMeta = keyVote.getItemMeta();
 		keyVoteMeta.setDisplayName(ChatUtils.translateToColor("&a&lVote Crate Key"));
 		List<String> keyVoteLore = new ArrayList<>();
-		keyVoteLore.add(ChatUtils.translateToColor("&e3 vote points"));
+		keyVoteLore.add(ChatUtils.translateToColor("&e5 vote points"));
 		keyVoteMeta.setLore(keyVoteLore);
 		keyVote.setItemMeta(keyVoteMeta);
 		gui.setItem(11, keyVote);
@@ -76,7 +76,7 @@ public class GuiVoteShop {
 		ItemMeta keyRareMeta = keyRare.getItemMeta();
 		keyRareMeta.setDisplayName(ChatUtils.translateToColor("&6&lRare Crate Key"));
 		List<String> keyRareLore = new ArrayList<>();
-		keyRareLore.add(ChatUtils.translateToColor("&e10 vote points"));
+		keyRareLore.add(ChatUtils.translateToColor("&e25 vote points"));
 		keyRareMeta.setLore(keyRareLore);
 		keyRare.setItemMeta(keyRareMeta);
 		gui.setItem(12, keyRare);
@@ -94,7 +94,7 @@ public class GuiVoteShop {
 		ItemMeta keyEpicMeta = keyEpic.getItemMeta();
 		keyEpicMeta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key"));
 		List<String> keyEpicLore = new ArrayList<>();
-		keyEpicLore.add(ChatUtils.translateToColor("&e25 vote points"));
+		keyEpicLore.add(ChatUtils.translateToColor("&e50 vote points"));
 		keyEpicMeta.setLore(keyEpicLore);
 		keyEpic.setItemMeta(keyEpicMeta);
 		gui.setItem(14, keyEpic);
@@ -103,7 +103,7 @@ public class GuiVoteShop {
 		ItemMeta keyGodlyMeta = keyGodly.getItemMeta();
 		keyGodlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lGodly Crate Key"));
 		List<String> keyGodlyLore = new ArrayList<>();
-		keyGodlyLore.add(ChatUtils.translateToColor("&e50 vote points"));
+		keyGodlyLore.add(ChatUtils.translateToColor("&e100 vote points"));
 		keyGodlyMeta.setLore(keyGodlyLore);
 		keyGodly.setItemMeta(keyGodlyMeta);
 		gui.setItem(15, keyGodly);
