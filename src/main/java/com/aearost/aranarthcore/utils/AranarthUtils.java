@@ -2954,12 +2954,20 @@ public class AranarthUtils {
 					// Auto-afk after 5 minutes
 					else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
 						toggleAfkStatus(player.getUniqueId(), true);
+						// Prevents further calls
+						afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
+						aranarthPlayer.setAfkLocation(afkLocation);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
 					}
 				}
 				// The player has moved
 				else {
-					aranarthPlayer.setAfkLocation(null);
-					setPlayer(player.getUniqueId(), aranarthPlayer);
+					if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
+						toggleAfkStatus(player.getUniqueId(), false);
+					} else {
+						aranarthPlayer.setAfkLocation(null);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
+					}
 				}
 			}
 		}
