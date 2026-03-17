@@ -27,7 +27,8 @@ public class CommandAfk implements CommandExecutor {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getAfkLocation() == null
 					|| aranarthPlayer.getAfkLocation().getSeconds() < AranarthUtils.getAfkSecondsAmount()) {
-				aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), AranarthUtils.getAfkSecondsAmount()));
+				// + 10 seconds to avoid double AFK messages
+				aranarthPlayer.setAfkLocation(new AfkLocation(player.getLocation(), AranarthUtils.getAfkSecondsAmount() + 10));
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				AranarthUtils.toggleAfkStatus(player.getUniqueId(), true);
 			} else {
