@@ -91,6 +91,7 @@ Minor Features
 [+] Added Council and Architect access to the creative world
 [+] Added warning message to enderchests being opened in creative
 [~] Made minor adjustments to the descriptions of certain months
+[~] Removed god apple fragment drops in non-survival worlds
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

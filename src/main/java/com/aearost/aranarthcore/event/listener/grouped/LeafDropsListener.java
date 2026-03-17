@@ -91,22 +91,25 @@ public class LeafDropsListener implements Listener {
 	private void handleDrops(Block block) {
 		// During the month of Solarvor
 		if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
-				// 5% chance of dropping an apple instead of 0.5%
-				if (new Random().nextInt(20) == 0) {
-					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.APPLE));
-				}
-				// 0.5% chance of dropping a god apple fragment during Solarvor
-				else if (new Random().nextInt(200) == 0) {
-					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
-					for (Player player : Bukkit.getOnlinePlayers()) {
-						if (!block.getWorld().getName().equals(player.getWorld().getName())) {
-							continue;
-						}
+			String worldName = block.getWorld().getName();
+			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+				if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
+					// 5% chance of dropping an apple instead of 0.5%
+					if (new Random().nextInt(20) == 0) {
+						block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new ItemStack(Material.APPLE));
+					}
+					// 0.5% chance of dropping a god apple fragment during Solarvor
+					else if (new Random().nextInt(200) == 0) {
+						block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
+						for (Player player : Bukkit.getOnlinePlayers()) {
+							if (!block.getWorld().getName().equals(player.getWorld().getName())) {
+								continue;
+							}
 
-						// If the player is within 48 blocks of the spawn location
-						if (block.getLocation().distance(player.getLocation()) <= 48) {
-							player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+							// If the player is within 48 blocks of the spawn location
+							if (block.getLocation().distance(player.getLocation()) <= 48) {
+								player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+							}
 						}
 					}
 				}
@@ -148,16 +151,19 @@ public class LeafDropsListener implements Listener {
 		// 0.05% chance of dropping a god apple fragment
 		// Applies to all months other than Solarvor
 		if (new Random().nextInt(2000) == 0) {
-			if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
-				block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					if (!block.getWorld().getName().equals(player.getWorld().getName())) {
-						continue;
-					}
+			String worldName = block.getWorld().getName();
+			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+				if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
+					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						if (!block.getWorld().getName().equals(player.getWorld().getName())) {
+							continue;
+						}
 
-					// If the player is within 48 blocks of the spawn location
-					if (block.getLocation().distance(player.getLocation()) <= 48) {
-						player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+						// If the player is within 48 blocks of the spawn location
+						if (block.getLocation().distance(player.getLocation()) <= 48) {
+							player.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+						}
 					}
 				}
 			}

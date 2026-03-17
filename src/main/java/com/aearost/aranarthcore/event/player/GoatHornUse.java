@@ -156,42 +156,48 @@ public class GoatHornUse {
                                 Block belowBlock = block.getWorld().getBlockAt(x, y - 1, z);
                                 if (belowBlock.getType() == Material.AIR || belowBlock.getType() == Material.LEAF_LITTER) {
                                     if (AranarthUtils.getMonth() != Month.SOLARVOR) {
-                                        // 2.5% chance of dropping an apple
-                                        if (new Random().nextInt(40) == 0) {
-                                            belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
-                                        }
-                                        // 0.25% chance of dropping a god apple fragment during normal months
-                                        else if (new Random().nextInt(400) == 0) {
-                                            belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
-                                            for (Player nearby : Bukkit.getOnlinePlayers()) {
-                                                if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
-                                                    continue;
-                                                }
+                                        String worldName = block.getWorld().getName();
+                                        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+                                            // 2.5% chance of dropping an apple
+                                            if (new Random().nextInt(40) == 0) {
+                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
+                                            }
+                                            // 0.25% chance of dropping a god apple fragment during normal months
+                                            else if (new Random().nextInt(400) == 0) {
+                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
+                                                for (Player nearby : Bukkit.getOnlinePlayers()) {
+                                                    if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
+                                                        continue;
+                                                    }
 
-                                                // If the player is within 48 blocks of the spawn location
-                                                if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
-                                                    nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+                                                    // If the player is within 48 blocks of the spawn location
+                                                    if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
+                                                        nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+                                                    }
                                                 }
                                             }
                                         }
                                     }
                                     // Increased God Apple Fragment drop rates
                                     else {
-                                        // 5% chance of dropping an apple
-                                        if (new Random().nextInt(20) == 0) {
-                                            belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
-                                        }
-                                        // 0.5% chance of dropping a god apple fragment during Solarvor
-                                        else if (new Random().nextInt(20) == 0) {
-                                            belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
-                                            for (Player nearby : Bukkit.getOnlinePlayers()) {
-                                                if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
-                                                    continue;
-                                                }
+                                        String worldName = block.getWorld().getName();
+                                        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+                                            // 5% chance of dropping an apple
+                                            if (new Random().nextInt(20) == 0) {
+                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
+                                            }
+                                            // 0.5% chance of dropping a god apple fragment during Solarvor
+                                            else if (new Random().nextInt(20) == 0) {
+                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
+                                                for (Player nearby : Bukkit.getOnlinePlayers()) {
+                                                    if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
+                                                        continue;
+                                                    }
 
-                                                // If the player is within 48 blocks of the spawn location
-                                                if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
-                                                    nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+                                                    // If the player is within 48 blocks of the spawn location
+                                                    if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
+                                                        nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
+                                                    }
                                                 }
                                             }
                                         }
