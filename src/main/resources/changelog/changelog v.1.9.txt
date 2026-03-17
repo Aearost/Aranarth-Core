@@ -90,6 +90,7 @@ Minor Features
 [~] Updated the recipes of Elven and Scorched Aranarthium
 [+] Added Council and Architect access to the creative world
 [+] Added warning message to enderchests being opened in creative
+[~] Made minor adjustments to the descriptions of certain months
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

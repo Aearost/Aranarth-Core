@@ -639,7 +639,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getAestivorDescription() {
-		return "The month of Aestivór is ridden with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 20% chance that creepers will spawn as the charged variant.";
+		return "The month of Aestivór is riddled with violent thunderstorms. The skies will thunder far more frequently than other months. There is also a 20% chance that creepers will spawn as the charged variant.";
 	}
 
 	/**
@@ -694,7 +694,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getSolarvorDescription() {
-		return "The month of Solarvór favours the picking of apples. Increased apple drop rates, and frequent &6God Apple Fragments &rdrops, there will be plenty for all.";
+		return "The month of Solarvór favours the picking of apples. Increased apple drop rates, and frequent &6God Apple Fragment &rdrops - there will be plenty for all.";
 	}
 
 	/**
@@ -710,7 +710,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getFructivorDescription() {
-		return "The month of Fructivór is not for the lazy. Crop yields are doubled, and Farmer villagers favour the vendor by providing improved crop sell rates.";
+		return "The month of Fructivór is not for the lazy. Crop yields are doubled, and Farmer villagers favor the vendor by providing improved crop sell rates.";
 	}
 
 	/**
