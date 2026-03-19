@@ -295,10 +295,28 @@ public class SpawnProtectionListener implements Listener {
 			int y = e.getTo().getBlockY();
 			int z = e.getTo().getBlockZ();
 
+			// World portals
 			boolean isEnteringSurvivalPortal = (x >= -3 && x <= 3) && (y >= 101 && y <= 111) && (z == -100);
 			boolean isEnteringResourcePortal = (x >= -23 && x <= -17) && (y >= 107 && y <= 117) && (z == -109);
 			boolean isEnteringArenaPortal = (x >= 16 && x <= 22) && (y >= 112 && y <= 121) && (z == -94);
 
+			// Tutorial entry portals
+			boolean isEnteringBendingPortal = (x >= 50 && x <= 52) && (y >= 103 && y <= 106) && z == -59;
+			boolean isEnteringAranarthiumPortal = (x >= 55 && x <= 57) && (y >= 105 && y <= 108) && z == -49;
+			boolean isEnteringCalendarPortal = (z >= -69 && z <= -67) && (y >= 109 && y <= 112) && x == 65;
+			boolean isEnteringShopsPortal = (z >= -68 && z <= -66) && (y >= 111 && y <= 114) && x  == 47;
+			boolean isEnteringRanksPortal = (z >= -76 && z <= -74) && (y >= 111 && y <= 114) && x == 51;
+			boolean isEnteringDominionsPortal = (x >= 56 && x <= 58) && (y >= 112 && y <= 115) && z == -79;
+
+			// Tutorial exit portals
+			boolean isExitingBendingPortal = (x >= 2999 && x <= 3001) && (y >= 100 && y <= 102) && z == 65;
+			boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 71;
+			boolean isExitingCalendarPortal = (x >= 4999 && x <= 5001) && (y >= 100 && y <= 102) && z == 107;
+			boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 150;
+			boolean isExitingRanksPortal = (x >= 6999 && x <= 7001) && (y >= 100 && y <= 102) && z == 150;
+			boolean isExitingDominionsPortal = (x >= 7999 && x <= 8001) && (y >= 100 && y <= 102) && z == 150;
+
+			// World portals
 			if (isEnteringSurvivalPortal) {
 				teleportPlayerToWorld(player, "world");
 				return;
@@ -308,7 +326,132 @@ public class SpawnProtectionListener implements Listener {
 			} else if (isEnteringArenaPortal) {
 				teleportPlayerToWorld(player, "arena");
 				return;
-			} else {
+			}
+			// Tutorial entry portals
+			else if (isEnteringBendingPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 3000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &5Bending Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringAranarthiumPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 4000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &bAranarthium Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringCalendarPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 5000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eCalendar Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringShopsPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 6000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &aShops Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringRanksPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 7000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &4Ranks Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringDominionsPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 8000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &6Dominions Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			}
+			// Tutorial exit portals
+			else if (isExitingBendingPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 51.5, 103, -56.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &5Bending Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingAranarthiumPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 56.5, 104, -51.5, 180, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &bAranarthium Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingCalendarPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 63.5, 109, -67.5, 90, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &eCalendar Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingShopsPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 50.5, 110, -66.5, -90, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &aShops Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingRanksPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 55, 110, -74.5, -45, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &4Ranks Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingDominionsPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 57.5, 111, -74.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &6Dominions Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			}
+			else {
 				boolean isTooLow = e.getTo().getY() <= 50;
 //				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO also consider the tutorials
 //				if (isTooLow || isLeavingSpawnBoundaries) { TODO might be best to just check if they're within a range of x/z coordinates so the far out tutorials will work fine
