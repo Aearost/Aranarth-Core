@@ -21,13 +21,13 @@ public class RecipeArdentAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_ARDENT_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumArdent().getItem());
 
-		recipe.shape("DSD", "IEI", "BDB");
+		recipe.shape("RDR", "OEO", "IDI");
 
+		recipe.setIngredient('R', Material.RAW_IRON_BLOCK);
 		recipe.setIngredient('D', Material.DEEPSLATE);
-		recipe.setIngredient('S', Material.STONE);
+		recipe.setIngredient('O', Material.OBSIDIAN);
 		recipe.setIngredient('E', Material.ECHO_SHARD);
-		recipe.setIngredient('I', Material.IRON_INGOT);
-		recipe.setIngredient('B', Material.IRON_BLOCK);
+		recipe.setIngredient('I', Material.IRON_BLOCK);
 
 		Bukkit.addRecipe(recipe);
 	}

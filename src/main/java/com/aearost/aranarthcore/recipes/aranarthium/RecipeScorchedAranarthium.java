@@ -21,13 +21,13 @@ public class RecipeScorchedAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_SCORCHED_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumScorched().getItem());
 
-		recipe.shape("MLM", "BEB", "RXR");
+		recipe.shape("BLB", "MEM", "RXR");
 
-		recipe.setIngredient('M', Material.MAGMA_CREAM);
-		recipe.setIngredient('L', Material.LAVA_BUCKET);
-		recipe.setIngredient('E', Material.ECHO_SHARD);
 		recipe.setIngredient('B', Material.BLAZE_POWDER);
-		recipe.setIngredient('R', Material.RESIN_CLUMP);
+		recipe.setIngredient('L', Material.LAVA_BUCKET);
+		recipe.setIngredient('M', Material.MAGMA_BLOCK);
+		recipe.setIngredient('E', Material.ECHO_SHARD);
+		recipe.setIngredient('R', Material.RESIN_BLOCK);
 		recipe.setIngredient('X', Material.BLAZE_ROD);
 
 		Bukkit.addRecipe(recipe);

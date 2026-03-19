@@ -27,7 +27,7 @@ public class RecipeSoulboundAranarthium {
 		recipe.setIngredient('N', Material.NETHER_STAR);
 		recipe.setIngredient('E', Material.ECHO_SHARD);
 		recipe.setIngredient('C', Material.CHORUS_FRUIT);
-		recipe.setIngredient('A', Material.AMETHYST_SHARD);
+		recipe.setIngredient('A', Material.AMETHYST_BLOCK);
 		recipe.setIngredient('T', Material.TOTEM_OF_UNDYING);
 
 		Bukkit.addRecipe(recipe);

@@ -93,6 +93,8 @@ Minor Features
 [~] Made minor adjustments to the descriptions of certain months
 [~] Removed god apple fragment drops in non-survival worlds
 [~] Updated the location of the crates to their final location
+[~] Updated all Aranarthium recipes to use the block variant of the ingots
+[~] Made several changes to various Aranarthium recipes to be consistent with the recipe patterns
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
