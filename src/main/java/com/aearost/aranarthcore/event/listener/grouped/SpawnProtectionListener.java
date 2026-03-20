@@ -312,9 +312,9 @@ public class SpawnProtectionListener implements Listener {
 			boolean isExitingBendingPortal = (x >= 2999 && x <= 3001) && (y >= 100 && y <= 102) && z == 65;
 			boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 71;
 			boolean isExitingCalendarPortal = (x >= 4999 && x <= 5001) && (y >= 100 && y <= 102) && z == 107;
-			boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 150;
-			boolean isExitingRanksPortal = (x >= 6999 && x <= 7001) && (y >= 100 && y <= 102) && z == 150;
-			boolean isExitingDominionsPortal = (x >= 7999 && x <= 8001) && (y >= 100 && y <= 102) && z == 150;
+			boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 89;
+			boolean isExitingRanksPortal = (x >= 6999 && x <= 7001) && (y >= 100 && y <= 102) && z == 89;
+			boolean isExitingDominionsPortal = (x >= 7999 && x <= 8001) && (y >= 100 && y <= 102) && z == 95;
 
 			// World portals
 			if (isEnteringSurvivalPortal) {
