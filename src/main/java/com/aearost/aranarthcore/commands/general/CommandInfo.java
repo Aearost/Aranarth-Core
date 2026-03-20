@@ -87,7 +87,7 @@ public class CommandInfo implements CommandExecutor {
 					elementString = "&c火 &7気 &b水 &a土 &5The Current Avatar &a土 &b水 &7気 &c火";
 				} else {
 					OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(offlinePlayer.getName());
-					if (offlineBendingPlayer == null) {
+					if (offlineBendingPlayer == null || offlineBendingPlayer.getElements().isEmpty()) {
 						elementString = "&eNone";
 					} else {
 						Element element = offlineBendingPlayer.getElements().getFirst();
@@ -139,7 +139,8 @@ public class CommandInfo implements CommandExecutor {
 					if (player.hasPermission("aranarth.seen")) {
 						if (offlinePlayer.isOnline()) {
 							Player onlinePlayer = offlinePlayer.getPlayer();
-							boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+							boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
+									AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
 							if (isAfk) {
 								sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
 							} else {
@@ -160,7 +161,8 @@ public class CommandInfo implements CommandExecutor {
 				} else {
 					if (offlinePlayer.isOnline()) {
 						Player onlinePlayer = offlinePlayer.getPlayer();
-						boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+						boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
+								&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
 						if (isAfk) {
 							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
 						} else {
