@@ -76,6 +76,10 @@ public class AranarthCore extends JavaPlugin {
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
 
+				// Resets the two bending arenas
+				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1 slow");
+				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2 slow");
+
 				AranarthUtils.removeInactiveLockedContainers();
 			}
 		}, 36000, 36000);
