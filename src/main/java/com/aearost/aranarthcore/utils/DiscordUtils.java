@@ -27,8 +27,9 @@ public class DiscordUtils {
 
 	private static final TextChannel punishmentHistoryChannelId = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("punishment");
 	private static final TextChannel roleChangesChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("roles");
-	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("global");
+	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("chat");
 	private static final TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
+	private static final TextChannel dominions = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("dominions");
 
 	/**
 	 * Provides the Discord Guild.
@@ -631,5 +632,22 @@ public class DiscordUtils {
 				guild.removeRoleFromMember(playerDiscordId, mutedRole).queue();
 			}
 		}
+	}
+
+	/**
+	 * Handles sending messages to the dominions relations channel.
+	 * @param dominion The Dominion involved with the message that will show its leader's head in the message.
+	 * @param message The message to be sent.
+	 * @param color The color of the Discord message.
+	 */
+	public static void dominionMessage(Dominion dominion, String message, Color color) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
+		String uuidNoDashes = dominion.getLeader().toString().replaceAll("-", "");
+		String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+		embed.setAuthor(message, null, url).setColor(color);
+		dominions.sendMessageEmbeds(embed.build()).queue();
 	}
 }

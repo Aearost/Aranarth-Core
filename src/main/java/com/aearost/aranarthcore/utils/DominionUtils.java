@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.awt.Color;
 
 /**
  * Provides a large variety of utility methods for everything related to land claiming.
@@ -173,6 +174,7 @@ public class DominionUtils {
 	 */
 	public static void disbandDominion(Dominion dominion) {
 		Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has been disbanded"));
+		DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " &7has been disbanded", Color.RED);
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
 		aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
 		if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {

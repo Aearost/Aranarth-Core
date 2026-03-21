@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -14,6 +15,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.awt.Color;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -167,6 +169,7 @@ public class CommandDominion implements CommandExecutor {
 								dominion.setName(dominionName);
 								DominionUtils.updateDominion(dominion);
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName));
+								DiscordUtils.dominionMessage(dominion, "&7The Dominion of &e" + oldName + " &7has been renamed to &e" + dominionName, Color.CYAN);
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 									onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
@@ -282,17 +285,18 @@ public class CommandDominion implements CommandExecutor {
 
 								List<UUID> conquered = new ArrayList<>();
 
-								DominionUtils.createDominion(new Dominion(
+								Dominion dominion = new Dominion(
 										dominionName, player.getUniqueId(), members, allies, truced, enemies, loc.getWorld().getName(), chunks,
 										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54], 0,
 										conquered,
 										// Keep the balance at the end
-										5000)
-								);
+										5000);
+								DominionUtils.createDominion(dominion);
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 									onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);
 								}
+								DiscordUtils.dominionMessage(dominion, AranarthUtils.getNickname(player) + " has created the Dominion of " + dominionName, Color.GREEN);
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
 							}
@@ -598,7 +602,7 @@ public class CommandDominion implements CommandExecutor {
 							return;
 						}
 
-						// If accepting a request for a truce
+						// If accepting a request for an alliance
 						if (dominion.getAllianceRequests().contains(dominionFromList.getLeader())) {
 							resetDominionRelations(dominion, dominionFromList);
 
@@ -607,15 +611,8 @@ public class CommandDominion implements CommandExecutor {
 							DominionUtils.updateDominion(dominion);
 							DominionUtils.updateDominion(dominionFromList);
 
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &5Allied &7with &e" + dominionFromList.getName()));
-								} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &5Allied &7with &e" + dominion.getName()));
-								}
-							}
+							Bukkit.broadcastMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName());
+							DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
 						}
 						// If sending a new request for an alliance
 						else {
@@ -705,15 +702,8 @@ public class CommandDominion implements CommandExecutor {
 							DominionUtils.updateDominion(dominion);
 							DominionUtils.updateDominion(dominionFromList);
 
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &dTruced &7with &e" + dominionFromList.getName()));
-								} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &dTruced &7with &e" + dominion.getName()));
-								}
-							}
+							Bukkit.broadcastMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName());
+							DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
 						}
 						// If sending a new request for a truce
 						else {
@@ -795,15 +785,8 @@ public class CommandDominion implements CommandExecutor {
 								DominionUtils.updateDominion(dominionFromList);
 							}
 
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 0.8F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has &cEnemied &7your Dominion!"));
-								} else if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 0.8F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &cEnemied &e" + dominionFromList.getName()));
-								}
-							}
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7has enemied &e" + dominionFromList.getName()));
+							DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " has enemied " + dominionFromList.getName(), new Color(255, 85, 85));
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already Enemied with &e" + dominionFromList.getName()));
 							return;
@@ -864,13 +847,8 @@ public class CommandDominion implements CommandExecutor {
 						if (wasEnemied && dominion.getNeutralRequests().contains(dominionFromList.getLeader())) {
 							resetDominionRelations(dominion, dominionFromList);
 
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (dominion.getMembers().contains(onlinePlayer.getUniqueId())
-										|| dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominionFromList.getName()));
-								}
-							}
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominions &e" + dominion.getName() + " &7and &e" + dominionFromList.getName() + " &7are now &fneutral"));
+							DiscordUtils.dominionMessage(dominion, "The Dominions " + dominion.getName() + " and " + dominionFromList.getName() + " are now neutral", Color.WHITE);
 						}
 						// If sending a new request for neutrality
 						else {
@@ -964,11 +942,8 @@ public class CommandDominion implements CommandExecutor {
 							if (!uuid.equals(dominion.getLeader())) {
 								AranarthPlayer oldLeader = AranarthUtils.getPlayer(player.getUniqueId());
 								AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
-								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-										onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + oldLeader.getNickname() + " &7has transferred ownership of &e" + dominion.getName() + " &7to &e" + newLeader.getNickname()));
-									}
-								}
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + newLeader.getNickname() + " &7is the new leader of &e" + dominion.getName()));
+								DiscordUtils.dominionMessage(dominion, newLeader.getNickname() + " is the new leader of " + dominion.getName(), Color.CYAN);
 								DominionUtils.updateDominionLeader(dominion, uuid, false);
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou cannot set yourself as the new leader!"));
@@ -1523,8 +1498,9 @@ public class CommandDominion implements CommandExecutor {
 
 							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 								onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
-								onlinePlayer.sendMessage(ChatUtils.chatMessage("&4The Dominion of &e" + dominion.getName() + " &4has surrendered to &e" + dominionFromList.getName()));
+								onlinePlayer.sendMessage(ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName()));
 							}
+							DiscordUtils.dominionMessage(dominion, dominion.getName() + " has been conquered by " + dominionFromList.getName(), new Color(101, 0, 0));
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to conquer yours!"));
 						}
@@ -1649,8 +1625,9 @@ public class CommandDominion implements CommandExecutor {
 
 							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 								onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-								onlinePlayer.sendMessage(ChatUtils.chatMessage("&dThe Dominion of &e" + dominionFromList.getName() + " &dhas retreated from &e" + dominion.getName()));
+								onlinePlayer.sendMessage(ChatUtils.chatMessage(dominionFromList.getName() + " &dhas retreated from &e" + dominion.getName()));
 							}
+							DiscordUtils.dominionMessage(dominion, dominionFromList.getName() + " has retreated from " + dominion.getName(), new Color(135, 245, 220));
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to rebel against yours!"));
 						}

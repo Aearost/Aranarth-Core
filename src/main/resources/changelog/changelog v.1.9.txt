@@ -99,6 +99,7 @@ Minor Features
 [~] Added code-based functionality to the arena signs rather than command blocks
 [-] Removed redundant shop creation error message when placing a sign
 [+] Added functionality to reset the two bending arenas automatically
+[+] Added Dominion Relations channel in Discord and integrated dominion changes to it
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
