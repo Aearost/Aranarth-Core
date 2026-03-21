@@ -124,10 +124,16 @@ public class ArrowHit {
 					}
 				}
 			} else if (type.equals("lightning")) {
-				if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
-					Location loc = arrow.getLocation();
+				Location loc = arrow.getLocation().clone();
+				arrow.remove();
+				if (AranarthUtils.getWeather() == Weather.RAIN) {
+					// 25% chance of striking lightning
+					if (new Random().nextInt(100) < 25) {
+						loc.getWorld().strikeLightning(loc);
+					}
+				} else if (AranarthUtils.getWeather() == Weather.THUNDER) {
+					// 100% chance of striking lightning
 					loc.getWorld().strikeLightning(loc);
-					arrow.remove();
 				}
 			} else if (type.equals("rooting")) {
 				if (e.getHitEntity() != null) {
