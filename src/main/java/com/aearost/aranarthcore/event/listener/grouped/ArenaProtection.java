@@ -218,6 +218,7 @@ public class ArenaProtection implements Listener {
 	@EventHandler
 	public void onSignClick(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
+			e.setCancelled(true);
 			Player player = e.getPlayer();
 			Location loc = e.getClickedBlock().getLocation();
 			// Small arena
