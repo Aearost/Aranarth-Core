@@ -21,6 +21,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
 
@@ -208,6 +209,34 @@ public class SpawnProtectionListener implements Listener {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending at Spawn!"));
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents ender pearls from being thrown in the spawn world.
+	 */
+	@EventHandler
+	private void onEnderPearlThrow(ProjectileLaunchEvent e) {
+		if (e.getLocation().getWorld().getName().equals("spawn")) {
+			if (e.getEntityType() == EntityType.ENDER_PEARL) {
+				if (e.getEntity().getShooter() instanceof Player player) {
+					e.setCancelled(true);
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents chorus fruits from being eaten in the spawn world.
+	 */
+	@EventHandler
+	private void onChorusFruitEat(PlayerItemConsumeEvent e) {
+		if (e.getPlayer().getLocation().getWorld().getName().equals("spawn")) {
+			if (e.getItem().getType() == Material.CHORUS_FRUIT) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
 			}
 		}
 	}
