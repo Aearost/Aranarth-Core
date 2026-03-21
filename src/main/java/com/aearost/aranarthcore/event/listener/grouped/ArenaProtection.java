@@ -13,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -47,15 +48,29 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents blocks from being destroyed in the arena world spawn
+	 * Prevents blocks from being destroyed in the arena world spawn.
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
 		if (isArenaSpawn(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (aranarthPlayer.getCouncilRank() != 3) {
+			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
+			}
+		}
+	}
+
+	/**
+	 * Prevents blocks from being placed in the arena world spawn if somehow obtained.
+	 */
+	@EventHandler
+	public void onBlockPlace(final BlockPlaceEvent e) {
+		if (isArenaSpawn(e.getBlock().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place this here!"));
 			}
 		}
 	}
@@ -123,7 +138,7 @@ public class ArenaProtection implements Listener {
 		int y = loc.getBlockY();
 		int z = loc.getBlockZ();
 
-		return (x >= -4 && x <= 4) && (y >= 100 && y <= 111) && (z >= -4 && z <=4);
+		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
 	}
 
 	/**

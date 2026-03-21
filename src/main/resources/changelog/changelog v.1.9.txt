@@ -100,6 +100,7 @@ Minor Features
 [-] Removed redundant shop creation error message when placing a sign
 [+] Added functionality to reset the two bending arenas automatically
 [+] Added Dominion Relations channel in Discord and integrated dominion changes to it
+[~] Made tweaks to arena spawn block break prevention to be based on Admin mode and not council level
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
