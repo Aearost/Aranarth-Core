@@ -97,6 +97,7 @@ Minor Features
 [~] Made several changes to various Aranarthium recipes to be consistent with the recipe patterns
 [+] Added command completion for /ac dateset
 [~] Added code-based functionality to the arena signs rather than command blocks
+[-] Removed redundant shop creation error message when placing a sign
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
