@@ -154,6 +154,8 @@ public class CommandACCompleter implements TabCompleter {
 			} else if (!args[0].isEmpty() && "tp".startsWith(args[0])) {
 				displayedOptions.add("tp");
 			}
+		} else if (!args[0].isEmpty() && "dateset".startsWith(args[0])) {
+			displayedOptions.add("dateset");
 		}
 		return displayedOptions;
 	}
@@ -424,6 +426,14 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
+			case "dateset" -> {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("month");
+					displayedOptions.add("day");
+					displayedOptions.add("weekday");
+					displayedOptions.add("year");
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -452,6 +462,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("time");
 		displayedOptions.add("tp");
 		displayedOptions.add("clearchat");
+		displayedOptions.add("dateset");
 		return displayedOptions;
 	}
 

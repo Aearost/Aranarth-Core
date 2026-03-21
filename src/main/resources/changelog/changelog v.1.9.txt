@@ -95,6 +95,7 @@ Minor Features
 [~] Updated the location of the crates to their final location
 [~] Updated all Aranarthium recipes to use the block variant of the ingots
 [~] Made several changes to various Aranarthium recipes to be consistent with the recipe patterns
+[+] Added command completion for /ac dateset
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
