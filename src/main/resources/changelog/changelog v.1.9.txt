@@ -96,6 +96,7 @@ Minor Features
 [~] Updated all Aranarthium recipes to use the block variant of the ingots
 [~] Made several changes to various Aranarthium recipes to be consistent with the recipe patterns
 [+] Added command completion for /ac dateset
+[~] Added code-based functionality to the arena signs rather than command blocks
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
