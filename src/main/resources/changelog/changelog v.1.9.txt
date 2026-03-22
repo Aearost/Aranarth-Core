@@ -25,6 +25,9 @@ Major Features
 [+] Added in an avatar room and functionality to cycle through the avatars
 [~] Removed the /prefix from commands and shifted them all to be under their own commands
 [+] Added in /reply to quickly reply to messages
+[~] Made the rooted dirt recipe require 2 seeds
+[~] Added String to the recipe for a Bell
+[~] Set the apple in the God Apple recipe to be using a golden apple and not a normal apple
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
@@ -101,6 +104,7 @@ Minor Features
 [+] Added functionality to reset the two bending arenas automatically
 [+] Added Dominion Relations channel in Discord and integrated dominion changes to it
 [~] Made tweaks to arena spawn block break prevention to be based on Admin mode and not council level
+[+] Added enchantment glint to god apple fragments
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

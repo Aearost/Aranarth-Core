@@ -332,6 +332,7 @@ public class SpawnProtectionListener implements Listener {
 			// Tutorial entry portals
 			boolean isEnteringBendingPortal = (x >= 50 && x <= 52) && (y >= 103 && y <= 106) && z == -59;
 			boolean isEnteringAranarthiumPortal = (x >= 55 && x <= 57) && (y >= 105 && y <= 108) && z == -49;
+			boolean isEnteringRecipePortal = (z >= -57 && z <= -59) && (y >= 107 && y <= 110) && x == 65;
 			boolean isEnteringCalendarPortal = (z >= -69 && z <= -67) && (y >= 109 && y <= 112) && x == 65;
 			boolean isEnteringShopsPortal = (z >= -68 && z <= -66) && (y >= 111 && y <= 114) && x  == 47;
 			boolean isEnteringRanksPortal = (z >= -76 && z <= -74) && (y >= 111 && y <= 114) && x == 51;
@@ -340,6 +341,7 @@ public class SpawnProtectionListener implements Listener {
 			// Tutorial exit portals
 			boolean isExitingBendingPortal = (x >= 2999 && x <= 3001) && (y >= 100 && y <= 102) && z == 65;
 			boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 71;
+			boolean isExitingRecipesPortal = (x >= 8999 && x <= 9001) && (y >= 100 && y <= 102) && z == 143;
 			boolean isExitingCalendarPortal = (x >= 4999 && x <= 5001) && (y >= 100 && y <= 102) && z == 107;
 			boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 89;
 			boolean isExitingRanksPortal = (x >= 6999 && x <= 7001) && (y >= 100 && y <= 102) && z == 89;
@@ -372,6 +374,16 @@ public class SpawnProtectionListener implements Listener {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &bAranarthium Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
+					}
+				});
+				return;
+			} else if (isEnteringRecipePortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 9000.5, 100, 0.5, 0, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &fRecipe Tutorial"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cThis tutorial is currently disabled"));
 					}
@@ -434,6 +446,16 @@ public class SpawnProtectionListener implements Listener {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &bAranarthium Tutorial"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
+					}
+				});
+				return;
+			} else if (isExitingRecipesPortal) {
+				Location tutorialLoc = new Location(Bukkit.getWorld("spawn"), 62.5, 106, -57.5, 90, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), tutorialLoc, true, success -> {
+					if (success) {
+						player.sendMessage(ChatUtils.chatMessage("&7You have exited the &fRecipe Tutorial"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong. Please use &e/spawn"));
 					}

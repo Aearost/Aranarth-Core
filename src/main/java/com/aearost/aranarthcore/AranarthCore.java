@@ -77,8 +77,8 @@ public class AranarthCore extends JavaPlugin {
 				Bukkit.getLogger().info("Aranarth data has been saved");
 
 				// Resets the two bending arenas
-				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1 slow");
-				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2 slow");
+				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
+				Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
 
 				AranarthUtils.removeInactiveLockedContainers();
 			}
@@ -293,7 +293,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeBlackDye(this);
 		new RecipePaleMossBlock(this);
 		new RecipePaleMossCarpet(this);
-		new RecipeHoneyBlockUncraft(this);
+		new RecipeHoneycombBlockUncraft(this);
 		new RecipeCopperExposed(this);
 		new RecipeCopperWeathered(this);
 		new RecipeCopperOxidized(this);

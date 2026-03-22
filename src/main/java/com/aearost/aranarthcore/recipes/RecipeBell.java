@@ -21,10 +21,11 @@ public class RecipeBell {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_BELL");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new ItemStack(Material.BELL, 1));
 
-		recipe.shape("CGC", "GGG", "GIG");
+		recipe.shape("CGC", "GSG", "GIG");
 
 		recipe.setIngredient('C', Material.IRON_CHAIN);
 		recipe.setIngredient('G', Material.GOLD_INGOT);
+		recipe.setIngredient('S', Material.STRING);
 		recipe.setIngredient('I', Material.IRON_NUGGET);
 		
 		Bukkit.addRecipe(recipe);

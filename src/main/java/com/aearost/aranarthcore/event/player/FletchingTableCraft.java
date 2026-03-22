@@ -304,7 +304,7 @@ public class FletchingTableCraft {
 
 			// Lightning Arrowheads
 			ItemStack[] lightningRecipe = new ItemStack[] { new Arrowhead().getItem(),
-					new ItemStack(Material.COPPER_INGOT),
+					new ItemStack(Material.LIGHTNING_ROD),
 					null };
 			if (matchesIngredients(ingredients, lightningRecipe)) {
 				return new ArrowheadLightning().getItem();

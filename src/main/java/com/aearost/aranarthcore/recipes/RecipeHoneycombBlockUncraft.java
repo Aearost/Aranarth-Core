@@ -7,9 +7,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
 
-public class RecipeHoneyBlockUncraft {
+public class RecipeHoneycombBlockUncraft {
 
-	public RecipeHoneyBlockUncraft(Plugin plugin) {
+	public RecipeHoneycombBlockUncraft(Plugin plugin) {
 		createRecipe(plugin);
 	}
 

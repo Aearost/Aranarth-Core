@@ -27,6 +27,7 @@ public class GodAppleFragment implements AranarthItem {
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "god_apple_fragment");
 			meta.setItemModel(key);
+			meta.setEnchantmentGlintOverride(true);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(GOD_APPLE_FRAGMENT, PersistentDataType.STRING, "god_apple_fragment");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
