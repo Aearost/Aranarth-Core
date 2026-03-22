@@ -234,7 +234,7 @@ public class ShopUtils {
             }
             // Server shop
             else {
-                loc.add(0.5, 1, 0.5);
+                loc.add(0.5, 1.15, 0.5);
             }
 
             ItemDisplay hologram = loc.getWorld().spawn(loc, ItemDisplay.class);
