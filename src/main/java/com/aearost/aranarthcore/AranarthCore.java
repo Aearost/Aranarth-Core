@@ -246,15 +246,12 @@ public class AranarthCore extends JavaPlugin {
 	private void initializeRecipes() {
 		new RecipeHomePad(this);
 		new RecipeChorusDiamond(this);
-		new RecipeSaddleA(this);
-		new RecipeSaddleB(this);
 		new RecipeAmethystUncraft(this);
 		new RecipeDeepslateA(this);
 		new RecipeDeepslateB(this);
 		new RecipeHorseArmorIron(this);
 		new RecipeHorseArmorGolden(this);
 		new RecipeHorseArmorDiamond(this);
-		new RecipeNametag(this);
 		new RecipeCharcoalToCoal(this);
 		new RecipeBell(this);
 		new RecipeGlowInkSac(this);
@@ -277,7 +274,6 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeTuffA(this);
 		new RecipeTuffB(this);
 		new RecipeDiamondOre(this);
-		new RecipeLodestone(this);
 		new RecipeInvisibleItemFrame(this);
 		new RecipeHoneyGlazedHam(this);
 		new RecipeQuiver(this);
