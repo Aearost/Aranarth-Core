@@ -128,6 +128,7 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.refreshServerBoosts();
 				AranarthUtils.refreshSentinels();
 				AranarthUtils.updateAfkLocations();
+				AranarthUtils.updateTab();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();

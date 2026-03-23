@@ -83,7 +83,7 @@ public class AranarthUtils {
 
 	/**
 	 * Determines if the player has played on the server before.
-	 * 
+	 *
 	 * @param player The player to determine.
 	 * @return Confirmation of whether they've played before.
 	 */
@@ -94,7 +94,7 @@ public class AranarthUtils {
 	/**
 	 * Sets the username of a player. This is used to update a player's username
 	 * value in the case that they changed it.
-	 * 
+	 *
 	 * @param player The player whose username will be changed.
 	 */
 	public static void setUsername(Player player) {
@@ -105,7 +105,7 @@ public class AranarthUtils {
 
 	/**
 	 * Gets the AranarthPlayer corresponding to an input UUID.
-	 * 
+	 *
 	 * @param uuid The UUID of the player to be found.
 	 * @return The AranarthPlayer tied to the UUID.
 	 */
@@ -124,7 +124,7 @@ public class AranarthUtils {
 
 	/**
 	 * Adds a player to the players HashMap.
-	 * 
+	 *
 	 * @param uuid The UUID of the player to be added.
 	 * @param aranarthPlayer The new AranarthPlayer to be added.
 	 */
@@ -153,7 +153,7 @@ public class AranarthUtils {
 
 	/**
 	 * Gets the stored username of a player.
-	 * 
+	 *
 	 * @param player The player whose username is to be found.
 	 * @return The username of the player.
 	 */
@@ -521,7 +521,7 @@ public class AranarthUtils {
 		} else {
 			return dragonHeads.get(location);
 		}
-		
+
 	}
 
 	/**
@@ -2599,76 +2599,166 @@ public class AranarthUtils {
 	 * Handles logic to update how the tab list displays
 	 */
 	public static void updateTab() {
-		List<UUID> copy = new ArrayList<>();
-		for (Player player : Bukkit.getOnlinePlayers()) {
+		List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+		for (Player player : onlinePlayers) {
 			player.setPlayerListHeader(ChatUtils.translateToColor("&8&l---------------------\n&6&lThe Realm of Aranarth"));
 			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
-			copy.add(player.getUniqueId());
 		}
 
-		HashMap<UUID, String> displayedNames = new LinkedHashMap<>();
-		int i = 0;
-		int rank = 15;
-		while (!copy.isEmpty()) {
-			boolean wasAddedToList = false;
-			UUID uuid = copy.get(i);
-			AranarthPlayer aranarthPlayer = getPlayer(uuid);
+		// Sorts the list of players from the highest to lowest rank
+		onlinePlayers.sort((a, b) -> {
+			int first = getRankPriority(getPlayer(a.getUniqueId()));
+			int second = getRankPriority(getPlayer(b.getUniqueId()));
+			return Integer.compare(first, second);
+		});
+
+		int order = 0;
+		for (Player player : onlinePlayers) {
+			UUID uuid = player.getUniqueId();
 			String display = ChatUtils.providePrefixAndName(uuid);
-
-			if (rank == 15 && aranarthPlayer.getCouncilRank() == 3) {
-				wasAddedToList = true;
-			} else if (rank == 14 && aranarthPlayer.getCouncilRank() == 2) {
-				wasAddedToList = true;
-			} else if (rank == 13 && aranarthPlayer.getCouncilRank() == 1) {
-				wasAddedToList = true;
-			} else if (rank == 12 && aranarthPlayer.getArchitectRank() == 1) {
-				wasAddedToList = true;
-			} else if (rank == 11 && aranarthPlayer.getSaintRank() == 3) {
-				wasAddedToList = true;
-			} else if (rank == 10 && aranarthPlayer.getSaintRank() == 2) {
-				wasAddedToList = true;
-			} else if (rank == 9 && aranarthPlayer.getSaintRank() == 1) {
-				wasAddedToList = true;
-			} else if (rank == 8 && aranarthPlayer.getRank() == 8) {
-				wasAddedToList = true;
-			} else if (rank == 7 && aranarthPlayer.getRank() == 7) {
-				wasAddedToList = true;
-			} else if (rank == 6 && aranarthPlayer.getRank() == 6) {
-				wasAddedToList = true;
-			} else if (rank == 5 && aranarthPlayer.getRank() == 5) {
-				wasAddedToList = true;
-			} else if (rank == 4 && aranarthPlayer.getRank() == 4) {
-				wasAddedToList = true;
-			} else if (rank == 3 && aranarthPlayer.getRank() == 3) {
-				wasAddedToList = true;
-			} else if (rank == 2 && aranarthPlayer.getRank() == 2) {
-				wasAddedToList = true;
-			} else if (rank == 1 && aranarthPlayer.getRank() == 1) {
-				wasAddedToList = true;
+			int ping = player.getPing();
+			if (ping <= 100) {
+				display += " &8[&a" + ping + "ms&8]";
+			} else if (ping <= 150) {
+				display += " &8[&e" + ping + "ms&8]";
 			} else {
-				wasAddedToList = true;
+				display += " &8[&c" + ping + "ms&8]";
 			}
 
-			// Only remove if the player was added to the list
-			if (wasAddedToList) {
-				displayedNames.put(uuid, ChatUtils.translateToColor(display));
-				copy.remove(uuid);
-			}
-
-			// Iterate to next player or reset to first
-			i++;
-			if (i >= copy.size()) {
-				i = 0;
-				rank--;
-			}
+			player.setPlayerListName(ChatUtils.translateToColor(display));
+			player.setPlayerListOrder(order);
+			order++;
 		}
+	}
 
-		int j = 0;
-		for (UUID uuid : displayedNames.keySet()) {
-			Player player = Bukkit.getPlayer(uuid);
-			player.setPlayerListName(displayedNames.get(uuid));
-			player.setPlayerListOrder(j);
-			j++;
+	/**
+	 * Returns the total priority of the player's rank.
+	 * The higher the value, the higher up top on the tab list.
+	 */
+	private static int getRankPriority(AranarthPlayer aranarthPlayer) {
+		if (aranarthPlayer.getCouncilRank() == 3) {
+			return 48;
+		} else if (aranarthPlayer.getCouncilRank() == 2) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 47;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 46;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 45;
+			} else {
+				return 44;
+			}
+		} else if (aranarthPlayer.getCouncilRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 43;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 42;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 41;
+			} else {
+				return 40;
+			}
+		} else if (aranarthPlayer.getArchitectRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 39;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 38;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 37;
+			} else {
+				return 36;
+			}
+		} else if (aranarthPlayer.getRank() == 8) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 35;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 34;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 33;
+			} else {
+				return 32;
+			}
+		} else if (aranarthPlayer.getRank() == 7) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 31;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 30;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 29;
+			} else {
+				return 28;
+			}
+		} else if (aranarthPlayer.getRank() == 6) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 27;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 26;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 25;
+			} else {
+				return 24;
+			}
+		} else if (aranarthPlayer.getRank() == 5) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 23;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 22;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 21;
+			} else {
+				return 20;
+			}
+		} else if (aranarthPlayer.getRank() == 4) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 19;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 18;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 17;
+			} else {
+				return 16;
+			}
+		} else if (aranarthPlayer.getRank() == 3) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 15;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 14;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 13;
+			} else {
+				return 12;
+			}
+		} else if (aranarthPlayer.getRank() == 2) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 11;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 10;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 9;
+			} else {
+				return 8;
+			}
+		} else if (aranarthPlayer.getRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 7;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 6;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 5;
+			} else {
+				return 4;
+			}
+		} else {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 3;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 2;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 1;
+			} else {
+				return 0;
+			}
 		}
 	}
 
