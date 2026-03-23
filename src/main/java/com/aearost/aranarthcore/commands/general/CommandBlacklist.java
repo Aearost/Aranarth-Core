@@ -45,7 +45,7 @@ public class CommandBlacklist implements CommandExecutor {
 					aranarthPlayer.setBlacklistingMethod(-1);
 					player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now disabled"));
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid blacklist sub-command!"));
+					player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
 					return false;
 				}
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

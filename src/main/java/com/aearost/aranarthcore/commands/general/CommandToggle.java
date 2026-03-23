@@ -93,7 +93,7 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("inventory")) {
-
+					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("shulker")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isAddingToShulker()) {
@@ -108,13 +108,30 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
 					}
 				} else if (args[0].equalsIgnoreCase("blacklist")) {
-
+					if (player.hasPermission("aranarth.blacklist")) {
+						if (args[1].equals("ignore")) {
+							aranarthPlayer.setBlacklistingMethod(0);
+							player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
+						} else if (args[1].equals("trash")) {
+							aranarthPlayer.setBlacklistingMethod(1);
+							player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
+						} else if (args[1].equals("off")) {
+							aranarthPlayer.setBlacklistingMethod(-1);
+							player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now disabled"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
+							return true;
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
-
+					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
-
+					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("ping")) {
-
+					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
 					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {

@@ -117,6 +117,7 @@ Minor Features
 [~] Restructured blacklisting functionality to allow disabling of blacklist functionality all together
 [-] Removed /shulker
 [+] Added /toggle shulker to replace /shulker
+[+] Added /toggle blacklist as another way to toggle blacklist functionality
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

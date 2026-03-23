@@ -93,8 +93,6 @@ commands:
     description: Creates a new home
   shop:
     description: Opens the GUI to players' shops
-  shulker:
-    description: Toggles whether the player will be using the shulker assist functionality
   smp:
     description: Teleports the player to the SMP world
   spawn:
