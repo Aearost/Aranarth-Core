@@ -110,6 +110,7 @@ Minor Features
 [+] Added Dominion Relations channel in Discord and integrated dominion changes to it
 [~] Made tweaks to arena spawn block break prevention to be based on Admin mode and not council level
 [+] Added enchantment glint to god apple fragments
+[~] Added 20 character limit to nicknames
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -53,6 +53,11 @@ public class CommandNickname implements CommandExecutor {
 					}
 				}
 
+				if (ChatUtils.stripColorFormatting(args[0]).length() > 20) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+					return true;
+				}
+
 				aranarthPlayer.setNickname(args[0]);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				sender.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + args[0]));
@@ -89,11 +94,21 @@ public class CommandNickname implements CommandExecutor {
 					}
 
 					if (Objects.nonNull(nickname)) {
+						if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
+							player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+							return true;
+						}
+
 						aranarthPlayer.setNickname(nickname);
 						player.sendMessage(ChatUtils.chatMessage("&7Your nickname has been set to " + nickname));
 						return true;
 					}
 					player.sendMessage(ChatUtils.chatMessage("&cYour nickname could not be set to a gradient"));
+					return true;
+				}
+
+				if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
 					return true;
 				}
 
