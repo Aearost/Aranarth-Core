@@ -23,7 +23,15 @@ public class CommandPing implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
 			if (sender instanceof Player player) {
-                player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + player.getPing() + "ms"));
+				int ping = player.getPing();
+				if (ping <= 120) {
+					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+				} else if (ping <= 200) {
+					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+				}
+
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must specify a player's ping! /ping <player>"));
@@ -31,15 +39,29 @@ public class CommandPing implements CommandExecutor {
 			}
 		} else {
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				// If the user is running the command on another user's name
+				// If the user is running the command on themselves
 				if (sender.getName().equalsIgnoreCase(args[0])) {
-					sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + onlinePlayer.getPing() + "ms"));
+					int ping = onlinePlayer.getPing();
+					if (ping <= 120) {
+						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
+					} else if (ping <= 200) {
+						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
+					} else {
+						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
+					}
                     return true;
 				}
-				// If the user is running the command on their own name
+				// If the user is running the command on another player
 				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + onlinePlayer.getPing() + "ms"));
-                    return true;
+					int ping = onlinePlayer.getPing();
+					if (ping <= 120) {
+						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &a" + ping + "ms"));
+					} else if (ping <= 200) {
+						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + ping + "ms"));
+					} else {
+						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &c" + ping + "ms"));
+					}
+					return true;
 				}
 			}
             sender.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));

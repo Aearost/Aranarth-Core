@@ -344,6 +344,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("message").setExecutor(new CommandMessage());
 		getCommand("message").setTabCompleter(new CommandMessageCompleter());
 		getCommand("nickname").setExecutor(new CommandNickname());
+		getCommand("nickname").setTabCompleter(new CommandNicknameCompleter());
 		getCommand("particles").setExecutor(new CommandParticles());
 		getCommand("particles").setTabCompleter(new CommandParticlesCompleter());
 		getCommand("pay").setExecutor(new CommandPay());
