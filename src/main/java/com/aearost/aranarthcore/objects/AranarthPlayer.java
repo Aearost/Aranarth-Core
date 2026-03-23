@@ -24,7 +24,7 @@ public class AranarthPlayer {
 	private String survivalInventory;
 	private String arenaInventory;
 	private String creativeInventory;
-	private boolean isDeletingBlacklistedItems;
+	private int blacklistingMethod;
 	private HashMap<ItemStack, Integer> potions;
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
@@ -89,7 +89,7 @@ public class AranarthPlayer {
 		this.potions = null;
 		this.arrows = null;
 		this.blacklist = null;
-		this.isDeletingBlacklistedItems = false;
+		this.blacklistingMethod = -1;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = new ArrayList<>();
@@ -138,7 +138,7 @@ public class AranarthPlayer {
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
-						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
+						  List<ItemStack> blacklist, int blacklistingMethod, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
 						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems,
 						  int votePointsSpent, boolean isUsingSpawnBoost,
@@ -153,7 +153,7 @@ public class AranarthPlayer {
 		this.potions = potions;
 		this.arrows = arrows;
 		this.blacklist = blacklist;
-		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+		this.blacklistingMethod = blacklistingMethod;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = null;
@@ -316,19 +316,19 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides confirmation whether the player is deleting blacklisted items or not.
-	 * @return Confirmation of whether they are deleting the items or not.
+	 * Provides the blacklisting method used by the player.
+	 * @return The blacklisting method used by the player.
 	 */
-	public boolean isDeletingBlacklistedItems() {
-		return isDeletingBlacklistedItems;
+	public int getBlacklistingMethod() {
+		return blacklistingMethod;
 	}
 
 	/**
-	 * Updates whether the player will be deleting blacklisted items or not.
-	 * @param isDeletingBlacklistedItems The new value.
+	 * Updates the blacklisting method used by the player.
+	 * @param blacklistingMethod The blacklisting method used by the player.
 	 */
-	public void setDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
-		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+	public void setBlacklistingMethod(int blacklistingMethod) {
+		this.blacklistingMethod = blacklistingMethod;
 	}
 
 	/**
@@ -439,7 +439,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is adding to their shulker box.
 	 * @param isAddingToShulker Whether the player is adding to their shulker box.
 	 */
-	public void isAddingToShulker(boolean isAddingToShulker) {
+	public void setAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
 	}
 

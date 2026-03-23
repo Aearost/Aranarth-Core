@@ -36,11 +36,14 @@ public class CommandBlacklist implements CommandExecutor {
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (args[0].equals("ignore")) {
-					aranarthPlayer.setDeletingBlacklistedItems(false);
+					aranarthPlayer.setBlacklistingMethod(0);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
 				} else if (args[0].equals("trash")) {
-					aranarthPlayer.setDeletingBlacklistedItems(true);
+					aranarthPlayer.setBlacklistingMethod(1);
 					player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
+				} else if (args[0].equals("off")) {
+					aranarthPlayer.setBlacklistingMethod(-1);
+					player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now disabled"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid blacklist sub-command!"));
 					return false;

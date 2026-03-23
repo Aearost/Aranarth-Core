@@ -61,6 +61,7 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveSentinels();
 				PersistenceUtils.saveAranarthPlayers();
 				PersistenceUtils.saveVotes();
+				PersistenceUtils.saveToggledFeatures();
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
 				PersistenceUtils.saveShops();
@@ -167,6 +168,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadShopLocations();
 		PersistenceUtils.loadSentinels();
 		PersistenceUtils.loadVotes();
+		PersistenceUtils.loadToggledFeatures();
 	}
 
 	/**
@@ -506,6 +508,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveHomepads();
 		PersistenceUtils.saveSentinels();
 		PersistenceUtils.saveVotes();
+		PersistenceUtils.saveToggledFeatures();
 		PersistenceUtils.saveAranarthPlayers();
 		PersistenceUtils.saveShops();
 		PersistenceUtils.saveLockedContainers();

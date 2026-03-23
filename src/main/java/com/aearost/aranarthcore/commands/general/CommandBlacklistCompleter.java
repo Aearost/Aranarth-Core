@@ -27,9 +27,12 @@ public class CommandBlacklistCompleter implements TabCompleter {
 				displayedOptions.add("ignore");
 			} else if (!args[0].isEmpty() && "trash".startsWith(args[0])) {
 				displayedOptions.add("trash");
+			} else if (!args[0].isEmpty() && "off".startsWith(args[0])) {
+				displayedOptions.add("off");
 			} else {
 				displayedOptions.add("ignore");
 				displayedOptions.add("trash");
+				displayedOptions.add("off");
 			}
 		}
 		return displayedOptions;

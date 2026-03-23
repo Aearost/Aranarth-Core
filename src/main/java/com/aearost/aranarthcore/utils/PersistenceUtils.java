@@ -219,11 +219,7 @@ public class PersistenceUtils {
 					blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
 				}
 
-				boolean isDeletingBlacklistedItems = false;
-				if (fields[8].equals("1")) {
-					isDeletingBlacklistedItems = true;
-				}
-
+				int blacklistingMethod = Integer.parseInt(fields[8]);
 				double balance = Double.parseDouble(fields[9]);
 				int rank = Integer.parseInt(fields[10]);
 				int saintRank = Integer.parseInt(fields[11]);
@@ -285,7 +281,7 @@ public class PersistenceUtils {
 
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
-						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
+						blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
 						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
 						pronouns));
 			}
@@ -365,9 +361,13 @@ public class PersistenceUtils {
 						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
 							blacklist = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getBlacklist().toArray(new ItemStack[0]));
 						}
-						String isDeletingBlacklistedItems = "0";
-						if (aranarthPlayer.isDeletingBlacklistedItems()) {
-							isDeletingBlacklistedItems = "1";
+						String blacklistingMethod = "0";
+						if (aranarthPlayer.getBlacklistingMethod() == -1) {
+							blacklistingMethod = "-1";
+						} else if (aranarthPlayer.getBlacklistingMethod() == 1) {
+							blacklistingMethod = "1";
+						} else {
+							blacklistingMethod = "0";
 						}
 						String balance = aranarthPlayer.getBalance() + "";
 						String rank = aranarthPlayer.getRank() + "";
@@ -438,7 +438,7 @@ public class PersistenceUtils {
 						}
 
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
-								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
+								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
 								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
 								+ "|" + isCompressingItems + "|" + votePointsSpent + "|" + spawnBoostValue + "|"
@@ -449,6 +449,200 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the aranarth players!");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the toggled features based on the contents of toggled.txt.
+	 */
+	public static void loadToggledFeatures() {
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "toggled.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the toggled file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|ping|bluefire
+				String[] fields = row.split("\\|");
+				int lastIndex = fields.length - 1;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+
+				// Chat
+				if (fields[1].equals("0")) {
+					aranarthPlayer.setTogglingChat(false);
+				} else {
+					aranarthPlayer.setTogglingChat(true);
+				}
+
+				// Messages
+				if (fields[2].equals("0")) {
+					aranarthPlayer.setTogglingMessages(false);
+				} else {
+					aranarthPlayer.setTogglingMessages(true);
+				}
+
+				// Teleport
+				if (fields[3].equals("0")) {
+					aranarthPlayer.setTogglingTp(false);
+				} else {
+					aranarthPlayer.setTogglingTp(true);
+				}
+
+				// Spawn Boost
+				if (fields[4].equals("0")) {
+					aranarthPlayer.setUsingSpawnBoost(true);
+				} else {
+					aranarthPlayer.setUsingSpawnBoost(false);
+				}
+
+				// Change Claim
+				if (fields[5].equals("0")) {
+					aranarthPlayer.setTogglingChangeClaim(false);
+				} else {
+					aranarthPlayer.setTogglingChangeClaim(true);
+				}
+
+				// Inventory
+				if (fields[6].equals("0")) {
+//					aranarthPlayer.setTogglingTp(false);
+				} else {
+//					aranarthPlayer.setTogglingTp(true);
+				}
+
+				// Shulker
+				if (fields[7].equals("0")) {
+					aranarthPlayer.setAddingToShulker(true);
+				} else {
+					aranarthPlayer.setAddingToShulker(false);
+				}
+
+				// Blacklist
+				if (fields[8].equals("-1")) {
+					aranarthPlayer.setBlacklistingMethod(-1);
+				} else if (fields[8].equals("1")) {
+					aranarthPlayer.setBlacklistingMethod(1);
+				} else {
+					aranarthPlayer.setBlacklistingMethod(0);
+				}
+
+				// Compressing
+				if (fields[9].equals("0")) {
+					aranarthPlayer.setCompressingItems(true);
+				} else {
+					aranarthPlayer.setCompressingItems(false);
+				}
+
+				// Chest Lock
+				if (fields[10].equals("0")) {
+//					aranarthPlayer.setTogglingTp(false);
+				} else {
+//					aranarthPlayer.setTogglingTp(true);
+				}
+
+				// Ping
+				if (fields[11].equals("0")) {
+//					aranarthPlayer.setTogglingTp(false);
+				} else {
+//					aranarthPlayer.setTogglingTp(true);
+				}
+
+				// Keep blue fire toggle at the end and add before this
+				// No need to update the index as it will be dynamic
+				if (fields[lastIndex].equals("0")) {
+					aranarthPlayer.setBlueFireDisabled(false);
+				} else {
+					aranarthPlayer.setBlueFireDisabled(false);
+				}
+
+				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+			}
+			Bukkit.getLogger().info("All toggled features have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the toggled features!");
+		}
+	}
+
+	/**
+	 * Saves the toggled features to the toggled.txt file.
+	 */
+	public static void saveToggledFeatures() {
+		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
+		if (!aranarthPlayers.isEmpty()) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "toggled.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new toggled.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of toggled.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					// Template line
+					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|ping|bluefire\n");
+
+					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
+						AranarthPlayer aranarthPlayer = entry.getValue();
+
+						String uuid = entry.getKey().toString();
+						String chat = aranarthPlayer.isTogglingChat() ? "1" : "0";
+						String messages = aranarthPlayer.isTogglingMessages() ? "1" : "0";
+						String teleport = aranarthPlayer.isTogglingTp() ? "1" : "0";
+						String spawnboost = aranarthPlayer.isUsingSpawnBoost() ? "0" : "1"; // Reverse use of field
+						String changeClaim = aranarthPlayer.isTogglingChangeClaim() ? "1" : "0";
+						String inventory = "0";
+						String shulker = aranarthPlayer.isAddingToShulker() ? "0" : "1";
+						String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
+						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
+						String chestLock = "0";
+						String ping = "0";
+						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
+
+						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
+								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock
+								+ "|" + ping + "|"
+								+ bluefire + "\n";
+						writer.write(row);
+					}
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the toggled features!");
 				}
 			}
 		}

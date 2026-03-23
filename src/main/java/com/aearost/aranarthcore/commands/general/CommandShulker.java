@@ -30,10 +30,10 @@ public class CommandShulker implements CommandExecutor {
 
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
             if (aranarthPlayer.isAddingToShulker()) {
-                aranarthPlayer.isAddingToShulker(false);
+                aranarthPlayer.setAddingToShulker(false);
                 player.sendMessage(ChatUtils.chatMessage("&7You are no longer adding items to shulkers"));
             } else {
-                aranarthPlayer.isAddingToShulker(true);
+                aranarthPlayer.setAddingToShulker(true);
                 player.sendMessage(ChatUtils.chatMessage("&7You are now adding items to shulkers"));
             }
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

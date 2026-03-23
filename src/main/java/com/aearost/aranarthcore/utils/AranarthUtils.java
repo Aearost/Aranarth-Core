@@ -2089,11 +2089,7 @@ public class AranarthUtils {
 
 		for (ItemStack is : blacklistedItems) {
 			if (is.isSimilar(item)) {
-				if (aranarthPlayer.isDeletingBlacklistedItems()) {
-					return 0;
-				} else {
-					return 1;
-				}
+				return aranarthPlayer.getBlacklistingMethod();
 			}
 		}
 		return -1;
