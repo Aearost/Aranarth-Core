@@ -143,7 +143,14 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
-					// TODO to implement
+					if (aranarthPlayer.isAutoLockingChests()) {
+						aranarthPlayer.setAutoLockingChests(false);
+						player.sendMessage(ChatUtils.chatMessage("&7Automatic chest locking is now &cdisabled"));
+					} else {
+						aranarthPlayer.setAutoLockingChests(true);
+						player.sendMessage(ChatUtils.chatMessage("&7Automatic chest locking is now &aenabled"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
 					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {

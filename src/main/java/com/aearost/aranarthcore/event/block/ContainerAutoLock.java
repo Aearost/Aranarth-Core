@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -30,6 +31,11 @@ public class ContainerAutoLock {
             if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
                 return;
             }
+        }
+
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (!aranarthPlayer.isAutoLockingChests()) {
+            return;
         }
 
         Block placed = e.getBlockPlaced();

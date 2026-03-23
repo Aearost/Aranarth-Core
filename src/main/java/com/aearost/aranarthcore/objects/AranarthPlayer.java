@@ -79,6 +79,7 @@ public class AranarthPlayer {
 	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
 	private boolean isShowingPingInTab = true;
 	private boolean isTogglingInventoryAssist = false;
+	private boolean isAutoLockingChests = true;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -137,6 +138,7 @@ public class AranarthPlayer {
 		this.isUsingSpawnBoost = true;
 		this.combatLogTime = new HashMap<>();
 		this.isTogglingInventoryAssist = false;
+		this.isAutoLockingChests = true;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -201,6 +203,7 @@ public class AranarthPlayer {
 		this.isUsingSpawnBoost = isUsingSpawnBoost;
 		this.combatLogTime = new HashMap<>();
 		this.isTogglingInventoryAssist = false;
+		this.isAutoLockingChests = true;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1201,5 +1204,21 @@ public class AranarthPlayer {
 	 */
 	public void setTogglingInventoryAssist(boolean togglingInventoryAssist) {
 		isTogglingInventoryAssist = togglingInventoryAssist;
+	}
+
+	/**
+	 * Provides the value tracking if the player is automatically locking places chests.
+	 * @return The value tracking if the player is automatically locking places chests.
+	 */
+	public boolean isAutoLockingChests() {
+		return isAutoLockingChests;
+	}
+
+	/**
+	 * Updates the value tracking if the player is automatically locking places chests.
+	 * @param autoLockingChests The value tracking if the player is automatically locking places chests.
+	 */
+	public void setAutoLockingChests(boolean autoLockingChests) {
+		isAutoLockingChests = autoLockingChests;
 	}
 }

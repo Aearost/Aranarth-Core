@@ -556,9 +556,9 @@ public class PersistenceUtils {
 
 				// Chest Lock
 				if (fields[10].equals("0")) {
-//					aranarthPlayer.setTogglingTp(false);
+					aranarthPlayer.setAutoLockingChests(true);
 				} else {
-//					aranarthPlayer.setTogglingTp(true);
+					aranarthPlayer.setAutoLockingChests(false);
 				}
 
 				// Keep blue fire toggle at the end and add before this
@@ -623,7 +623,7 @@ public class PersistenceUtils {
 						String shulker = aranarthPlayer.isAddingToShulker() ? "0" : "1";
 						String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
 						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
-						String chestLock = "0";
+						String chestLock = aranarthPlayer.isAutoLockingChests() ? "0" : "1";
 						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
 
 						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
