@@ -573,7 +573,7 @@ public class PersistenceUtils {
 				if (fields[lastIndex].equals("0")) {
 					aranarthPlayer.setBlueFireDisabled(false);
 				} else {
-					aranarthPlayer.setBlueFireDisabled(false);
+					aranarthPlayer.setBlueFireDisabled(true);
 				}
 
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
