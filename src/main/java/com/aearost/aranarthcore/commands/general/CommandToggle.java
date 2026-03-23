@@ -27,21 +27,7 @@ public class CommandToggle implements CommandExecutor {
 		if (sender instanceof Player player) {
 			if (args.length >= 1) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (args[0].equalsIgnoreCase("messages")) {
-					if (player.hasPermission("aranarth.toggle.msg")) {
-						if (aranarthPlayer.isTogglingMessages()) {
-							aranarthPlayer.setTogglingMessages(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled private messages"));
-						} else {
-							aranarthPlayer.setTogglingMessages(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You have disabled private messages"));
-						}
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to toggle messages!"));
-						return true;
-					}
-				} else if (args[0].equalsIgnoreCase("chat")) {
+				if (args[0].equalsIgnoreCase("chat")) {
 					if (player.hasPermission("aranarth.toggle.chat")) {
 						if (aranarthPlayer.isTogglingChat()) {
 							aranarthPlayer.setTogglingChat(false);
@@ -53,6 +39,20 @@ public class CommandToggle implements CommandExecutor {
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to toggle chat!"));
+						return true;
+					}
+				} else if (args[0].equalsIgnoreCase("messages")) {
+					if (player.hasPermission("aranarth.toggle.msg")) {
+						if (aranarthPlayer.isTogglingMessages()) {
+							aranarthPlayer.setTogglingMessages(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled private messages"));
+						} else {
+							aranarthPlayer.setTogglingMessages(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You have disabled private messages"));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to toggle messages!"));
 						return true;
 					}
 				} else if (args[0].equalsIgnoreCase("teleport")) {
@@ -69,6 +69,19 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to toggle teleport requests!"));
 						return true;
 					}
+				} else if (args[0].equalsIgnoreCase("spawnboost")) {
+					// Everyone has access
+					if (aranarthPlayer.isUsingSpawnBoost()) {
+						aranarthPlayer.setUsingSpawnBoost(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have disabled the spawn boost effects"));
+						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
+							player.clearActivePotionEffects();
+						}
+					} else {
+						aranarthPlayer.setUsingSpawnBoost(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have enabled the spawn boost effects"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("changeclaim")) {
 					// Everyone has access
 					if (aranarthPlayer.isTogglingChangeClaim()) {
@@ -79,6 +92,29 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have disabled Dominion claim change messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("inventory")) {
+
+				} else if (args[0].equalsIgnoreCase("shulker")) {
+					if (player.hasPermission("aranarth.shulker")) {
+						if (aranarthPlayer.isAddingToShulker()) {
+							aranarthPlayer.setAddingToShulker(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You are no longer adding items to shulkers"));
+						} else {
+							aranarthPlayer.setAddingToShulker(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You are now adding items to shulkers"));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+					}
+				} else if (args[0].equalsIgnoreCase("blacklist")) {
+
+				} else if (args[0].equalsIgnoreCase("compressor")) {
+
+				} else if (args[0].equalsIgnoreCase("chestlock")) {
+
+				} else if (args[0].equalsIgnoreCase("ping")) {
+
 				} else if (args[0].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
 					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {
@@ -94,19 +130,6 @@ public class CommandToggle implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to the blue fire perk"));
 					}
-				} else if (args[0].equalsIgnoreCase("spawnboost")) {
-					// Everyone has access
-					if (aranarthPlayer.isUsingSpawnBoost()) {
-						aranarthPlayer.setUsingSpawnBoost(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You have disabled the spawn boost effects"));
-						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
-							player.clearActivePotionEffects();
-						}
-					} else {
-						aranarthPlayer.setUsingSpawnBoost(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You have enabled the spawn boost effects"));
-					}
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

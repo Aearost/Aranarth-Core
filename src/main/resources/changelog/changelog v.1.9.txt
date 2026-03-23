@@ -115,6 +115,8 @@ Minor Features
 [~] Slightly raised the height of the server shop holograms
 [~] Prevented EarthTunnel and Collapse from being used in other Dominions
 [~] Restructured blacklisting functionality to allow disabling of blacklist functionality all together
+[-] Removed /shulker
+[+] Added /toggle shulker to replace /shulker
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

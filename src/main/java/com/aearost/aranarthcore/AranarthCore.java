@@ -370,7 +370,6 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("sethome").setTabCompleter(new CommandSethomeCompleter());
 		getCommand("shop").setExecutor(new CommandShop());
 		getCommand("shop").setTabCompleter(new CommandShopCompleter());
-		getCommand("shulker").setExecutor(new CommandShulker());
 		getCommand("smp").setExecutor(new CommandSMP());
 		getCommand("spawn").setExecutor(new CommandSpawn());
 		getCommand("store").setExecutor(new CommandStore());
