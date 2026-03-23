@@ -93,15 +93,22 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("inventory")) {
-					// TODO to implement
+					if (aranarthPlayer.isTogglingInventoryAssist()) {
+						aranarthPlayer.setTogglingInventoryAssist(false);
+						player.sendMessage(ChatUtils.chatMessage("&7Your inventory assist perk is now &aenabled"));
+					} else {
+						aranarthPlayer.setTogglingInventoryAssist(true);
+						player.sendMessage(ChatUtils.chatMessage("&7Your inventory assist perk is now &cdisabled"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("shulker")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isAddingToShulker()) {
 							aranarthPlayer.setAddingToShulker(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You are no longer adding items to shulkers"));
+							player.sendMessage(ChatUtils.chatMessage("&7Your shulker assist perk is now &cdisabled"));
 						} else {
 							aranarthPlayer.setAddingToShulker(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You are now adding items to shulkers"));
+							player.sendMessage(ChatUtils.chatMessage("&7Your shulker assist perk is now &aenabled"));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {

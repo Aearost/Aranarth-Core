@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -17,6 +19,11 @@ public class PlayerAutoReplenishSlot {
 		Player player = e.getPlayer();
 
 		if (!player.hasPermission("aranarth.inventory")) {
+			return;
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer.isTogglingInventoryAssist()) {
 			return;
 		}
 

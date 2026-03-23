@@ -526,9 +526,9 @@ public class PersistenceUtils {
 
 				// Inventory
 				if (fields[6].equals("0")) {
-//					aranarthPlayer.setTogglingTp(false);
+					aranarthPlayer.setTogglingInventoryAssist(false);
 				} else {
-//					aranarthPlayer.setTogglingTp(true);
+					aranarthPlayer.setTogglingInventoryAssist(true);
 				}
 
 				// Shulker
@@ -619,7 +619,7 @@ public class PersistenceUtils {
 						String teleport = aranarthPlayer.isTogglingTp() ? "1" : "0";
 						String spawnboost = aranarthPlayer.isUsingSpawnBoost() ? "0" : "1";
 						String changeClaim = aranarthPlayer.isTogglingChangeClaim() ? "1" : "0";
-						String inventory = "0";
+						String inventory = aranarthPlayer.isTogglingInventoryAssist() ? "1" : "0";
 						String shulker = aranarthPlayer.isAddingToShulker() ? "0" : "1";
 						String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
 						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";

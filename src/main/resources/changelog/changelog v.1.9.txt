@@ -120,6 +120,7 @@ Minor Features
 [+] Added /toggle blacklist as another way to toggle blacklist functionality
 [-] Removed the toggle sub-command of /compressor
 [+] Added /toggle compressor
+[+] Added /toggle inventory
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -78,6 +78,7 @@ public class AranarthPlayer {
 	private boolean isUsingSpawnBoost = true;
 	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
 	private boolean isShowingPingInTab = true;
+	private boolean isTogglingInventoryAssist = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -135,7 +136,7 @@ public class AranarthPlayer {
 		this.lastReceivedMessage = null;
 		this.isUsingSpawnBoost = true;
 		this.combatLogTime = new HashMap<>();
-		this.isShowingPingInTab = true;
+		this.isTogglingInventoryAssist = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -199,6 +200,7 @@ public class AranarthPlayer {
 		this.lastReceivedMessage = null;
 		this.isUsingSpawnBoost = isUsingSpawnBoost;
 		this.combatLogTime = new HashMap<>();
+		this.isTogglingInventoryAssist = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1183,5 +1185,21 @@ public class AranarthPlayer {
 	 */
 	public void setShowingPingInTab(boolean showingPingInTab) {
 		isShowingPingInTab = showingPingInTab;
+	}
+
+	/**
+	 * Provides the value tracking if the player's inventory assist is disabled.
+	 * @return The value tracking if the player's inventory assist is disabled.
+	 */
+	public boolean isTogglingInventoryAssist() {
+		return isTogglingInventoryAssist;
+	}
+
+	/**
+	 * Updates the value tracking if the player's inventory assist is disabled.
+	 * @param togglingInventoryAssist The value tracking if the player's inventory assist is disabled.
+	 */
+	public void setTogglingInventoryAssist(boolean togglingInventoryAssist) {
+		isTogglingInventoryAssist = togglingInventoryAssist;
 	}
 }
