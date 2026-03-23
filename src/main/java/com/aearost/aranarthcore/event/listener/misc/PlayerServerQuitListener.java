@@ -12,6 +12,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.HashMap;
+
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
  * Additionally, customizes the join/leave server message format.
@@ -27,6 +29,11 @@ public class PlayerServerQuitListener implements Listener {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		aranarthPlayer.setAfkLocation(null);
+		if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+			player.setHealth(0);
+		}
+
+		aranarthPlayer.setCombatLogTime(new HashMap<>());
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 		// Called to save the Avatar's abilities to prevent loss of avatar abilities
@@ -35,6 +42,8 @@ public class PlayerServerQuitListener implements Listener {
 				PersistenceUtils.saveAvatarBinds();
 			}
 		}
+
+
 
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;

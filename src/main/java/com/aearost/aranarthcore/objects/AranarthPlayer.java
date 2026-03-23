@@ -76,6 +76,7 @@ public class AranarthPlayer {
 	private int votePointsSpent = 0;
 	private UUID lastReceivedMessage = null;
 	private boolean isUsingSpawnBoost = true;
+	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -132,6 +133,7 @@ public class AranarthPlayer {
 		this.afkLocation = null;
 		this.lastReceivedMessage = null;
 		this.isUsingSpawnBoost = true;
+		this.combatLogTime = new HashMap<>();
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -194,6 +196,7 @@ public class AranarthPlayer {
 		this.afkLocation = null;
 		this.lastReceivedMessage = null;
 		this.isUsingSpawnBoost = isUsingSpawnBoost;
+		this.combatLogTime = new HashMap<>();
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1146,5 +1149,21 @@ public class AranarthPlayer {
 	 */
 	public void setUsingSpawnBoost(boolean usingSpawnBoost) {
 		isUsingSpawnBoost = usingSpawnBoost;
+	}
+
+	/**
+	 * Provides the player and the time that combat logged the Aranarth Player.
+	 * @return The player and the time that combat logged the Aranarth Player.
+	 */
+	public HashMap<UUID, Long> getCombatLogTime() {
+		return combatLogTime;
+	}
+
+	/**
+	 * The player and the time that combat logged the Aranarth Player.
+	 * @param combatLogTime The player and the time that combat logged the Aranarth Player.
+	 */
+	public void setCombatLogTime(HashMap<UUID, Long> combatLogTime) {
+		this.combatLogTime = combatLogTime;
 	}
 }
