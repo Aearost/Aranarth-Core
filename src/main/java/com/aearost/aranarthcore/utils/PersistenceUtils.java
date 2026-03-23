@@ -561,13 +561,6 @@ public class PersistenceUtils {
 //					aranarthPlayer.setTogglingTp(true);
 				}
 
-				// Ping
-				if (fields[11].equals("0")) {
-//					aranarthPlayer.setTogglingTp(false);
-				} else {
-//					aranarthPlayer.setTogglingTp(true);
-				}
-
 				// Keep blue fire toggle at the end and add before this
 				// No need to update the index as it will be dynamic
 				if (fields[lastIndex].equals("0")) {
@@ -615,7 +608,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|ping|bluefire\n");
+					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -624,19 +617,17 @@ public class PersistenceUtils {
 						String chat = aranarthPlayer.isTogglingChat() ? "1" : "0";
 						String messages = aranarthPlayer.isTogglingMessages() ? "1" : "0";
 						String teleport = aranarthPlayer.isTogglingTp() ? "1" : "0";
-						String spawnboost = aranarthPlayer.isUsingSpawnBoost() ? "0" : "1"; // Reverse use of field
+						String spawnboost = aranarthPlayer.isUsingSpawnBoost() ? "0" : "1";
 						String changeClaim = aranarthPlayer.isTogglingChangeClaim() ? "1" : "0";
 						String inventory = "0";
 						String shulker = aranarthPlayer.isAddingToShulker() ? "0" : "1";
 						String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
 						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
 						String chestLock = "0";
-						String ping = "0";
 						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
 
 						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
-								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock
-								+ "|" + ping + "|"
+								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
 								+ bluefire + "\n";
 						writer.write(row);
 					}

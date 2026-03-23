@@ -77,6 +77,7 @@ public class AranarthPlayer {
 	private UUID lastReceivedMessage = null;
 	private boolean isUsingSpawnBoost = true;
 	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
+	private boolean isShowingPingInTab = true;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -134,6 +135,7 @@ public class AranarthPlayer {
 		this.lastReceivedMessage = null;
 		this.isUsingSpawnBoost = true;
 		this.combatLogTime = new HashMap<>();
+		this.isShowingPingInTab = true;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -1165,5 +1167,21 @@ public class AranarthPlayer {
 	 */
 	public void setCombatLogTime(HashMap<UUID, Long> combatLogTime) {
 		this.combatLogTime = combatLogTime;
+	}
+
+	/**
+	 * Provides the value tracking if ping should be shown in the player's tab list.
+	 * @return The value tracking if ping should be shown in the player's tab list.
+	 */
+	public boolean isShowingPingInTab() {
+		return isShowingPingInTab;
+	}
+
+	/**
+	 * Updates the value tracking if ping should be shown in the player's tab list.
+	 * @param showingPingInTab The value tracking if ping should be shown in the player's tab list.
+	 */
+	public void setShowingPingInTab(boolean showingPingInTab) {
+		isShowingPingInTab = showingPingInTab;
 	}
 }

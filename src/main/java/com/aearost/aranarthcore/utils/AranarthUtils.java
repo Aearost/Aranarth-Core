@@ -2613,6 +2613,7 @@ public class AranarthUtils {
 		for (Player player : onlinePlayers) {
 			UUID uuid = player.getUniqueId();
 			String display = ChatUtils.providePrefixAndName(uuid);
+
 			int ping = player.getPing();
 			if (ping <= 120) {
 				display += " &8[&a" + ping + "ms&8]";

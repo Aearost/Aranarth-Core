@@ -137,8 +137,6 @@ public class CommandToggle implements CommandExecutor {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
 					// TODO to implement
-				} else if (args[0].equalsIgnoreCase("ping")) {
-					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("bluefire")) {
 					// Will need to remove blue fire entirely and re-enable based on perk
 					if (aranarthPlayer.getPerks().get(Perk.BLUEFIRE) == 1) {
