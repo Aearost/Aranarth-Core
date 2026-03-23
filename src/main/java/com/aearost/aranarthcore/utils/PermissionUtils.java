@@ -209,7 +209,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.tables", false);
 		perms.setPermission("aranarth.itemname", false);
 		perms.setPermission("aranarth.itemname.gradient", false);
-		perms.setPermission("aranarth.compress", false);
+		perms.setPermission("aranarth.compressor", false);
 		perms.setPermission("aranarth.mute", false);
 		perms.setPermission("aranarth.give", false);
 		perms.setPermission("aranarth.whereis", false);
@@ -394,7 +394,7 @@ public class PermissionUtils {
 
 		// Compressor
 		if (perks.get(Perk.COMPRESSOR) == 1) {
-			perms.setPermission("aranarth.compress", true);
+			perms.setPermission("aranarth.compressor", true);
 		}
 		// Randomizer
 		if (perks.get(Perk.RANDOMIZER) == 1) {
@@ -595,7 +595,7 @@ public class PermissionUtils {
 		if (saintRank >= 3) {
 			perms.setPermission("aranarth.nick.gradient", true);
 			perms.setPermission("aranarth.itemname.gradient", true);
-			perms.setPermission("aranarth.compress", true);
+			perms.setPermission("aranarth.compressor", true);
 			perms.setPermission("aranarth.randomizer", true);
 			perms.setPermission("aranarth.inventory", true);
 		} else {

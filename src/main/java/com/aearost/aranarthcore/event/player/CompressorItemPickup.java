@@ -22,7 +22,7 @@ public class CompressorItemPickup {
 
 	public void execute(EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
-			if (!player.hasPermission("aranarth.compress")) {
+			if (!player.hasPermission("aranarth.compressor")) {
 				return;
 			}
 

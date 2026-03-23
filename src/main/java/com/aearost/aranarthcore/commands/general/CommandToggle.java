@@ -127,7 +127,14 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
-					// TODO to implement
+					if (aranarthPlayer.isCompressingItems()) {
+						aranarthPlayer.setCompressingItems(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
+					} else {
+						aranarthPlayer.setCompressingItems(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
 					// TODO to implement
 				} else if (args[0].equalsIgnoreCase("ping")) {
