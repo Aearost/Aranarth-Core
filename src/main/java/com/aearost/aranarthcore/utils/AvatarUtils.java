@@ -138,16 +138,6 @@ public class AvatarUtils {
 
 				// Try again upon next execution
 				if (attempts == 1000) {
-					if (recentAvatar != null) {
-						char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
-						Bukkit.getLogger().info("No other avatar found, defaulting to this one");
-						avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
-								DateUtils.getRawInRealLifeDate(), "", playerElement);
-						avatars.remove(avatars.size() - 1); // Removing the null placeholder
-						setNewAvatar(avatar);
-						DiscordUtils.addAvatarMessageToDiscord(avatar, true);
-						return true;
-					}
 					return false;
 				}
 
@@ -161,24 +151,18 @@ public class AvatarUtils {
 					continue;
 				} else {
 					char playerElement = bendingPlayer.getElements().get(0).getName().charAt(0);
-
 					if (playerElement == newAvatarElement) {
 						// An avatar was selected
 						if (!isOneOfLastFiveAvatars(player.getUniqueId())) {
-
 							avatar = new Avatar(player.getUniqueId(), DateUtils.getRawInGameDate(), "",
 									DateUtils.getRawInRealLifeDate(), "", playerElement);
 							avatars.remove(avatars.size() - 1); // Removing the null placeholder
 							setNewAvatar(avatar);
 							DiscordUtils.addAvatarMessageToDiscord(avatar, true);
 							return true;
-						} else {
-							recentAvatar = player.getUniqueId();
-							attempts++;
 						}
-					} else {
-						attempts++;
 					}
+					attempts++;
 				}
 			}
 		}
@@ -197,6 +181,10 @@ public class AvatarUtils {
 				continue;
 			}
 			lastFive.add(avatars.get(i).getUuid());
+
+			if (lastFive.size() == 5) {
+				break;
+			}
 		}
 
 		return lastFive.contains(uuid);
