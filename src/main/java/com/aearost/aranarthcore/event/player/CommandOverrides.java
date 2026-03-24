@@ -1,9 +1,11 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
@@ -16,6 +18,17 @@ public class CommandOverrides {
         Player player = e.getPlayer();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         String[] parts = e.getMessage().split(" ");
+
+        if (!parts[0].equals("/afk")) {
+            if (aranarthPlayer.getAfkLocation() != null && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+                    @Override
+                    public void run() {
+                        AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+                    }
+                }, 1);
+            }
+        }
 
         if (aranarthPlayer.getCouncilRank() != 3) {
             if (parts[0].equals("/w")) {
@@ -41,10 +54,12 @@ public class CommandOverrides {
         // Adding and removing the sub-elements upon changing element without relogging
         if (parts[0].startsWith("/b")) {
             if (parts[0].equalsIgnoreCase("/b") || parts[0].toLowerCase().startsWith("/bend")) {
-                if (parts[1].equalsIgnoreCase("ch") || parts[1].equalsIgnoreCase("choose")) {
-                    // Player executing this in the arena world prevents sub-elements from being removed when changing world
-                    if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
-                        PermissionUtils.evaluatePlayerPermissions(player);
+                if (parts.length > 1) {
+                    if (parts[1].equalsIgnoreCase("ch") || parts[1].equalsIgnoreCase("choose")) {
+                        // Player executing this in the arena world prevents sub-elements from being removed when changing world
+                        if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
+                            PermissionUtils.evaluatePlayerPermissions(player);
+                        }
                     }
                 }
             }
