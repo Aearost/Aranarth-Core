@@ -78,6 +78,24 @@ public class CommandToggleCompleter implements TabCompleter {
 			} else {
 				displayedOptions = displayNoResults();
 			}
+		} else if (args.length == 2) {
+			if (args[1].isEmpty()) {
+				displayedOptions.add("off");
+				displayedOptions.add("ignore");
+				displayedOptions.add("trash");
+			} else {
+				if ("off".startsWith(args[1])) {
+					displayedOptions.add("off");
+				} else if ("ignore".startsWith(args[1])) {
+					displayedOptions.add("ignore");
+				} else if ("trash".startsWith(args[1])) {
+					displayedOptions.add("trash");
+				} else {
+					displayedOptions.add("off");
+					displayedOptions.add("ignore");
+					displayedOptions.add("trash");
+				}
+			}
 		}
 		return displayedOptions;
 	}

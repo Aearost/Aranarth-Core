@@ -116,20 +116,24 @@ public class CommandToggle implements CommandExecutor {
 					}
 				} else if (args[0].equalsIgnoreCase("blacklist")) {
 					if (player.hasPermission("aranarth.blacklist")) {
-						if (args[1].equals("ignore")) {
-							aranarthPlayer.setBlacklistingMethod(0);
-							player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
-						} else if (args[1].equals("trash")) {
-							aranarthPlayer.setBlacklistingMethod(1);
-							player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
-						} else if (args[1].equals("off")) {
-							aranarthPlayer.setBlacklistingMethod(-1);
-							player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now &cdisabled"));
-						} else {
+						if (args.length == 1) {
 							player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
-							return true;
+						} else {
+							if (args[1].equals("ignore")) {
+								aranarthPlayer.setBlacklistingMethod(0);
+								player.sendMessage(ChatUtils.chatMessage("&7You will now ignore blacklisted items"));
+							} else if (args[1].equals("trash")) {
+								aranarthPlayer.setBlacklistingMethod(1);
+								player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
+							} else if (args[1].equals("off")) {
+								aranarthPlayer.setBlacklistingMethod(-1);
+								player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now &cdisabled"));
+							} else {
+								player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
+								return true;
+							}
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						}
-						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 					}

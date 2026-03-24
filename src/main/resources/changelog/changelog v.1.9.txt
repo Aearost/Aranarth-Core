@@ -122,6 +122,7 @@ Minor Features
 [+] Added /toggle compressor
 [+] Added /toggle inventory
 [+] Added /toggle chestlock
+[+] Added toggled info to the motd when joining the server
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

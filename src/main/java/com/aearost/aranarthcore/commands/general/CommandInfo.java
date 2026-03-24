@@ -110,7 +110,6 @@ public class CommandInfo implements CommandExecutor {
 				pronouns = pronouns.substring(0, 1).toUpperCase() + pronouns.substring(1).toLowerCase();
 				sender.sendMessage(ChatUtils.translateToColor("&6Pronouns: &e" + pronouns));
 
-				// changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire
 				List<String> toggling = new ArrayList<>();
 				if (aranarthPlayer.isTogglingChat()) {
 					toggling.add("&eChat Messages");

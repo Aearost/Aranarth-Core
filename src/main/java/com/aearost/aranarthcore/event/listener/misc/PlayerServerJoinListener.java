@@ -15,8 +15,10 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -134,6 +136,56 @@ public class PlayerServerJoinListener implements Listener {
 		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		List<String> toggling = new ArrayList<>();
+		if (aranarthPlayer.isTogglingChat()) {
+			toggling.add("&e&oChat Messages");
+		}
+		if (aranarthPlayer.isTogglingMessages()) {
+			toggling.add("&e&oDirect Messages");
+		}
+		if (aranarthPlayer.isTogglingTp()) {
+			toggling.add("&e&oTeleport Requests");
+		}
+		if (!aranarthPlayer.isUsingSpawnBoost()) {
+			toggling.add("&e&oSpawn Boost");
+		}
+		if (aranarthPlayer.isTogglingChangeClaim()) {
+			toggling.add("&e&oClaim Changes");
+		}
+		if (aranarthPlayer.isTogglingInventoryAssist()) {
+			toggling.add("&e&oInventory Assist");
+		}
+		if (!aranarthPlayer.isAddingToShulker()) {
+			toggling.add("&e&oShulker Assist");
+		}
+		if (aranarthPlayer.getBlacklistingMethod() == -1) {
+			toggling.add("&e&oBlacklist");
+		}
+		if (aranarthPlayer.isCompressingItems()) {
+			toggling.add("&e&oCompressor");
+		}
+		if (!aranarthPlayer.isAutoLockingChests()) {
+			toggling.add("&e&oChest Locks");
+		}
+		if (aranarthPlayer.hasBlueFireDisabled()) {
+			toggling.add("&e&oBlue Fire");
+		}
+
+		if (!toggling.isEmpty()) {
+			String toggledFeatures = "  &7&oYou currently have ";
+			for (int i = 0; i < toggling.size(); i++) {
+				toggledFeatures += toggling.get(i);
+				if  (i < toggling.size() - 2) {
+					toggledFeatures += "&7&o, ";
+				} else if (i < toggling.size() - 1) {
+					toggledFeatures += " &7&oand ";
+				}
+			}
+			toggledFeatures += " &7&otoggled";
+			player.sendMessage(ChatUtils.translateToColor(toggledFeatures));
+		}
+
 		Avatar avatar = AvatarUtils.getCurrentAvatar();
 		if (avatar == null) {
 			player.sendMessage(ChatUtils.translateToColor("  &7&oAranarth is currently without an Avatar..."));
@@ -153,7 +205,6 @@ public class PlayerServerJoinListener implements Listener {
 					"  &5&lThe current Avatar is " + element + " &d" + avatarNickname + " " + element));
 		}
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
