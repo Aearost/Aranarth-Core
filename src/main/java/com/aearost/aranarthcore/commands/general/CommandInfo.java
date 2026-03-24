@@ -110,6 +110,7 @@ public class CommandInfo implements CommandExecutor {
 				pronouns = pronouns.substring(0, 1).toUpperCase() + pronouns.substring(1).toLowerCase();
 				sender.sendMessage(ChatUtils.translateToColor("&6Pronouns: &e" + pronouns));
 
+				// changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire
 				List<String> toggling = new ArrayList<>();
 				if (aranarthPlayer.isTogglingChat()) {
 					toggling.add("&eChat Messages");
@@ -119,6 +120,30 @@ public class CommandInfo implements CommandExecutor {
 				}
 				if (aranarthPlayer.isTogglingTp()) {
 					toggling.add("&eTeleport Requests");
+				}
+				if (!aranarthPlayer.isUsingSpawnBoost()) {
+					toggling.add("&eSpawn Boost");
+				}
+				if (aranarthPlayer.isTogglingChangeClaim()) {
+					toggling.add("&eClaim Changes");
+				}
+				if (aranarthPlayer.isTogglingInventoryAssist()) {
+					toggling.add("&eInventory Assist");
+				}
+				if (!aranarthPlayer.isAddingToShulker()) {
+					toggling.add("&eShulker Assist");
+				}
+				if (aranarthPlayer.getBlacklistingMethod() == -1) {
+					toggling.add("&eBlacklist");
+				}
+				if (aranarthPlayer.isCompressingItems()) {
+					toggling.add("&eCompressor");
+				}
+				if (!aranarthPlayer.isAutoLockingChests()) {
+					toggling.add("&eChest Locks");
+				}
+				if (aranarthPlayer.hasBlueFireDisabled()) {
+					toggling.add("&eBlue Fire");
 				}
 				String toggledFeatures = "";
 				if (toggling.isEmpty()) {
