@@ -219,8 +219,14 @@ public class SpawnProtectionListener implements Listener {
 	@EventHandler
 	private void onEnderPearlThrow(ProjectileLaunchEvent e) {
 		if (e.getLocation().getWorld().getName().equals("spawn")) {
-			if (e.getEntityType() == EntityType.ENDER_PEARL) {
-				if (e.getEntity().getShooter() instanceof Player player) {
+			if (e.getEntityType() == EntityType.ENDER_PEARL || e.getEntityType() == EntityType.ARROW
+				|| e.getEntityType() == EntityType.SPECTRAL_ARROW || e.getEntityType() == EntityType.TRIDENT
+				|| e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
+				|| e.getEntityType() == EntityType.DRAGON_FIREBALL || e.getEntityType() == EntityType.WITHER_SKULL
+				|| e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION
+				|| e.getEntityType() == EntityType.FISHING_BOBBER || e.getEntityType() == EntityType.FIREWORK_ROCKET) {
+
+				if (e.getEntity().getShooter() != null && e.getEntity().getShooter() instanceof Player player) {
 					e.setCancelled(true);
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this item at spawn!"));
 				}
