@@ -27,36 +27,74 @@ public class CommandToggleCompleter implements TabCompleter {
 				displayedOptions.add("messages");
 			} else if (!args[0].isEmpty() && "teleport".startsWith(args[0])) {
 				displayedOptions.add("teleport");
-			} else if (!args[0].isEmpty() && "bluefire".startsWith(args[0])) {
-				displayedOptions.add("bluefire");
-			} else if (!args[0].isEmpty() && "spawnboost".startsWith(args[0])) {
-				displayedOptions.add("spawnboost");
-			} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
-				if (!args[0].isEmpty() && (args[0].equalsIgnoreCase("c")
-						|| args[0].equalsIgnoreCase("ch") || args[0].equalsIgnoreCase("cha"))) {
-					displayedOptions.add("chat");
-					displayedOptions.add("changeclaim");
-				} else if (!args[0].isEmpty() && "chat".startsWith(args[0])) {
-					displayedOptions.add("chat");
-				} else if (!args[0].isEmpty() && "changeclaim".startsWith(args[0])) {
-					displayedOptions.add("changeclaim");
-				} else {
-					displayedOptions.add("messages");
-					displayedOptions.add("chat");
-					displayedOptions.add("teleport");
-					displayedOptions.add("changeclaim");
+			} else if (!args[0].isEmpty() && (args[0].startsWith("b") || args[0].startsWith("bl"))) {
+				if (args[0].equals("b") || args[0].equals("bl")) {
 					displayedOptions.add("bluefire");
+					displayedOptions.add("blacklist");
+				} else if ("bluefire".startsWith(args[0])) {
+					displayedOptions.add("bluefire");
+				} else if ("blacklist".startsWith(args[0])) {
+					displayedOptions.add("blacklist");
+				} else {
+					displayedOptions = displayNoResults();
+				}
+			} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
+				if (args[0].equals("s")) {
 					displayedOptions.add("spawnboost");
+					displayedOptions.add("shulker");
+				} else if ("spawnboost".startsWith(args[0])) {
+					displayedOptions.add("spawnboost");
+				} else if ("shulker".startsWith(args[0])) {
+					displayedOptions.add("shulker");
+				} else {
+					displayedOptions = displayNoResults();
+				}
+			} else if (!args[0].isEmpty() && "inventory".startsWith(args[0])) {
+				displayedOptions.add("inventory");
+			} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
+				if (args[0].equals("c")) {
+					displayedOptions.add("chat");
+					displayedOptions.add("changeclaim");
+					displayedOptions.add("compressor");
+					displayedOptions.add("chestlock");
+				} else if (args[0].equalsIgnoreCase("ch")) {
+					displayedOptions.add("chat");
+					displayedOptions.add("changeclaim");
+					displayedOptions.add("chestlock");
+				} else if (args[0].equalsIgnoreCase("cha")) {
+					displayedOptions.add("chat");
+					displayedOptions.add("changeclaim");
+				} else if ("chat".startsWith(args[0])) {
+					displayedOptions.add("chat");
+				} else if ("changeclaim".startsWith(args[0])) {
+					displayedOptions.add("changeclaim");
+				} else if ("compressor".startsWith(args[0])) {
+					displayedOptions.add("compressor");
+				} else if ("chestlock".startsWith(args[0])) {
+					displayedOptions.add("chestlock");
+				} else {
+					displayedOptions = displayNoResults();
 				}
 			} else {
-				displayedOptions.add("messages");
-				displayedOptions.add("chat");
-				displayedOptions.add("teleport");
-				displayedOptions.add("changeclaim");
-				displayedOptions.add("bluefire");
-				displayedOptions.add("spawnboost");
+				displayedOptions = displayNoResults();
 			}
 		}
+		return displayedOptions;
+	}
+
+	private List<String> displayNoResults() {
+		List<String> displayedOptions = new ArrayList<>();
+		displayedOptions.add("messages");
+		displayedOptions.add("chat");
+		displayedOptions.add("teleport");
+		displayedOptions.add("changeclaim");
+		displayedOptions.add("bluefire");
+		displayedOptions.add("spawnboost");
+		displayedOptions.add("inventory");
+		displayedOptions.add("shulker");
+		displayedOptions.add("blacklist");
+		displayedOptions.add("compressor");
+		displayedOptions.add("chestlock");
 		return displayedOptions;
 	}
 }

@@ -31,10 +31,10 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.toggle.chat")) {
 						if (aranarthPlayer.isTogglingChat()) {
 							aranarthPlayer.setTogglingChat(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled chat messages"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7chat messages"));
 						} else {
 							aranarthPlayer.setTogglingChat(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You have disabled chat messages"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7chat messages"));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
@@ -45,10 +45,10 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.toggle.msg")) {
 						if (aranarthPlayer.isTogglingMessages()) {
 							aranarthPlayer.setTogglingMessages(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled private messages"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7private messages"));
 						} else {
 							aranarthPlayer.setTogglingMessages(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You have disabled private messages"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7private messages"));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
@@ -59,10 +59,10 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.toggle.tp")) {
 						if (aranarthPlayer.isTogglingTp()) {
 							aranarthPlayer.setTogglingTp(false);
-							player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled teleport requests"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7teleport requests"));
 						} else {
 							aranarthPlayer.setTogglingTp(true);
-							player.sendMessage(ChatUtils.chatMessage("&7You have disabled teleport requests"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7teleport requests"));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
@@ -73,42 +73,42 @@ public class CommandToggle implements CommandExecutor {
 					// Everyone has access
 					if (aranarthPlayer.isUsingSpawnBoost()) {
 						aranarthPlayer.setUsingSpawnBoost(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You have disabled the spawn boost effects"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the spawn boost effects"));
 						if (AranarthUtils.isSpawnLocation(player.getLocation())) {
 							player.clearActivePotionEffects();
 						}
 					} else {
 						aranarthPlayer.setUsingSpawnBoost(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You have enabled the spawn boost effects"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the spawn boost effects"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("changeclaim")) {
 					// Everyone has access
 					if (aranarthPlayer.isTogglingChangeClaim()) {
 						aranarthPlayer.setTogglingChangeClaim(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You have re-enabled Dominion claim change messages"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7Dominion claim change messages"));
 					} else {
 						aranarthPlayer.setTogglingChangeClaim(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You have disabled Dominion claim change messages"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7Dominion claim change messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("inventory")) {
 					if (aranarthPlayer.isTogglingInventoryAssist()) {
 						aranarthPlayer.setTogglingInventoryAssist(false);
-						player.sendMessage(ChatUtils.chatMessage("&7Your inventory assist perk is now &aenabled"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the inventory assist perk"));
 					} else {
 						aranarthPlayer.setTogglingInventoryAssist(true);
-						player.sendMessage(ChatUtils.chatMessage("&7Your inventory assist perk is now &cdisabled"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the inventory assist perk"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("shulker")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isAddingToShulker()) {
 							aranarthPlayer.setAddingToShulker(false);
-							player.sendMessage(ChatUtils.chatMessage("&7Your shulker assist perk is now &cdisabled"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the shulker assist perk"));
 						} else {
 							aranarthPlayer.setAddingToShulker(true);
-							player.sendMessage(ChatUtils.chatMessage("&7Your shulker assist perk is now &aenabled"));
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the shulker assist perk"));
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
@@ -124,7 +124,7 @@ public class CommandToggle implements CommandExecutor {
 							player.sendMessage(ChatUtils.chatMessage("&7You will now trash blacklisted items"));
 						} else if (args[1].equals("off")) {
 							aranarthPlayer.setBlacklistingMethod(-1);
-							player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now disabled"));
+							player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now &cdisabled"));
 						} else {
 							player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
 							return true;
@@ -136,19 +136,19 @@ public class CommandToggle implements CommandExecutor {
 				} else if (args[0].equalsIgnoreCase("compressor")) {
 					if (aranarthPlayer.isCompressingItems()) {
 						aranarthPlayer.setCompressingItems(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You are no longer compressing items"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the compressor"));
 					} else {
 						aranarthPlayer.setCompressingItems(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You are now compressing items"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the compressor"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
 					if (aranarthPlayer.isAutoLockingChests()) {
 						aranarthPlayer.setAutoLockingChests(false);
-						player.sendMessage(ChatUtils.chatMessage("&7Automatic chest locking is now &cdisabled"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7automatic chest locking"));
 					} else {
 						aranarthPlayer.setAutoLockingChests(true);
-						player.sendMessage(ChatUtils.chatMessage("&7Automatic chest locking is now &aenabled"));
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7automatic chest locking"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("bluefire")) {
