@@ -2615,9 +2615,9 @@ public class AranarthUtils {
 			String display = ChatUtils.providePrefixAndName(uuid);
 
 			int ping = player.getPing();
-			if (ping <= 120) {
+			if (ping <= 150) {
 				display += " &8[&a" + ping + "ms&8]";
-			} else if (ping <= 200) {
+			} else if (ping <= 250) {
 				display += " &8[&e" + ping + "ms&8]";
 			} else {
 				display += " &8[&c" + ping + "ms&8]";

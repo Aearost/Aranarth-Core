@@ -24,9 +24,9 @@ public class CommandPing implements CommandExecutor {
 		if (args.length == 0) {
 			if (sender instanceof Player player) {
 				int ping = player.getPing();
-				if (ping <= 120) {
+				if (ping <= 150) {
 					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
-				} else if (ping <= 200) {
+				} else if (ping <= 250) {
 					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
@@ -42,9 +42,9 @@ public class CommandPing implements CommandExecutor {
 				// If the user is running the command on themselves
 				if (sender.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
-					if (ping <= 120) {
+					if (ping <= 150) {
 						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &a" + ping + "ms"));
-					} else if (ping <= 200) {
+					} else if (ping <= 250) {
 						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &e" + ping + "ms"));
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&7Your ping is &c" + ping + "ms"));
@@ -54,9 +54,9 @@ public class CommandPing implements CommandExecutor {
 				// If the user is running the command on another player
 				else if (onlinePlayer.getName().equalsIgnoreCase(args[0])) {
 					int ping = onlinePlayer.getPing();
-					if (ping <= 120) {
+					if (ping <= 150) {
 						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &a" + ping + "ms"));
-					} else if (ping <= 200) {
+					} else if (ping <= 250) {
 						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &e" + ping + "ms"));
 					} else {
 						sender.sendMessage(ChatUtils.chatMessage("&e" + onlinePlayer.getName() +"'s &7ping is &c" + ping + "ms"));
