@@ -227,11 +227,9 @@ public class GuiVoteShopPurchaseClick {
      * @param item   The item being added.
      */
     private void addOrDropItem(Player player, ItemStack item) {
-        Bukkit.getLogger().info("B");
         HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
         // If the player's inventory was full, drop it to the ground
         if (!leftover.isEmpty()) {
-            Bukkit.getLogger().info("C");
             player.getLocation().getWorld().dropItemNaturally(player.getLocation(), leftover.get(0));
             player.sendMessage(ChatUtils.chatMessage("&7The item was dropped as you don't have enough space!"));
         }

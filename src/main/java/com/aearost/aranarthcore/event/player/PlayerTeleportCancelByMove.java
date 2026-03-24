@@ -31,7 +31,6 @@ public class PlayerTeleportCancelByMove {
 
 				// /ac tphere was sent
 				if (aranarthPlayer.getTeleportToUuid() != null) {
-					Bukkit.getLogger().info("A");
 					Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
 					if (target != null) {
 						target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));

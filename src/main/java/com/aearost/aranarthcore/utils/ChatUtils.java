@@ -2,6 +2,10 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -473,5 +477,20 @@ public class ChatUtils {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
 			}
 		}
+	}
+
+	/**
+	 * Builds a clickable chat component that suggests a command on click.
+	 *
+	 * @param displayComponent The visible text in chat (supports & color codes)
+	 * @param hoverText The tooltip shown on hover (supports & color codes)
+	 * @param command The command to suggest or run (include the leading /)
+	 * @param suggest true = fills chat bar, false = executes immediately
+	 */
+	public static Component clickableCommand(Component displayComponent, String hoverText, String command, boolean suggest) {
+		Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverText);
+		return displayComponent.hoverEvent(HoverEvent.showText(hover))
+								.clickEvent(suggest ? ClickEvent.suggestCommand(command) : ClickEvent.runCommand(command)
+		);
 	}
 }

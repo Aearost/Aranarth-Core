@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -102,9 +104,24 @@ public class PlayerChatListener implements Listener {
 
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
-        String msg = prefix + chatMessage;
-        msg = msg.replaceAll("%", "%%"); // Throws exception with only one
-        e.setFormat(msg);
+        chatMessage = chatMessage.replaceAll("%", "%%"); // Throws exception with only one
+
+        e.setCancelled(true);
+
+        Bukkit.getLogger().info(prefix);
+
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + aranarthPlayer.getNickname() + "&e's &7info");
+        // Deserialize with legacySection() since formatChatPrefix has already translated & → §
+        Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
+        prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
+
+        Component fullMessage = prefixComponent.append(LegacyComponentSerializer.legacySection().deserialize(chatMessage));
+
+        for (Player recipient : e.getRecipients()) {
+            recipient.sendMessage(fullMessage);
+        }
+
+        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(prefix + chatMessage));
     }
 
     /**

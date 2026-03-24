@@ -123,6 +123,7 @@ Minor Features
 [+] Added /toggle inventory
 [+] Added /toggle chestlock
 [+] Added toggled info to the motd when joining the server
+[+] Added clickable chat for /info
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
