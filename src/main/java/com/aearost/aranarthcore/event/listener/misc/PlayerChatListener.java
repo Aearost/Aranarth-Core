@@ -121,7 +121,8 @@ public class PlayerChatListener implements Listener {
             recipient.sendMessage(fullMessage);
         }
 
-        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(prefix + chatMessage));
+        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
+                ChatUtils.stripColorFormatting(prefix + chatMessage)));
     }
 
     /**

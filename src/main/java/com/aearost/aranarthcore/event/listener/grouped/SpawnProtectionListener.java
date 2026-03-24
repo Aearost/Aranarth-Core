@@ -14,10 +14,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
@@ -224,7 +221,8 @@ public class SpawnProtectionListener implements Listener {
 				|| e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
 				|| e.getEntityType() == EntityType.DRAGON_FIREBALL || e.getEntityType() == EntityType.WITHER_SKULL
 				|| e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION
-				|| e.getEntityType() == EntityType.FISHING_BOBBER || e.getEntityType() == EntityType.FIREWORK_ROCKET) {
+				|| e.getEntityType() == EntityType.FISHING_BOBBER || e.getEntityType() == EntityType.FIREWORK_ROCKET
+				|| e.getEntityType() == EntityType.WIND_CHARGE) {
 
 				if (e.getEntity().getShooter() != null && e.getEntity().getShooter() instanceof Player player) {
 					e.setCancelled(true);
@@ -233,6 +231,8 @@ public class SpawnProtectionListener implements Listener {
 			}
 		}
 	}
+
+
 
 	/**
 	 * Prevents chorus fruits from being eaten in the spawn world.
@@ -593,6 +593,19 @@ public class SpawnProtectionListener implements Listener {
 	private void onWaterFlow(BlockFromToEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
 			if (e.getBlock().getType() == Material.WATER) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents vines from being grown in the spawn world.
+	 */
+	@EventHandler
+	public void onVineGrow(BlockSpreadEvent e) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("spawn")) {
+			Material material = e.getSource().getType();
+			if (material == Material.VINE || material == Material.CAVE_VINES_PLANT) {
 				e.setCancelled(true);
 			}
 		}

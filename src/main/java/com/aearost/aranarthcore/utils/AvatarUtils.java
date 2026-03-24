@@ -325,7 +325,7 @@ public class AvatarUtils {
 		mannequinIndex = spawnAvatar(new Location(spawn, 1.5, 112, 12.5, 0, 0), mannequinIndex);
 		mannequinIndex = spawnAvatar(new Location(spawn, 4.5, 113, 10.5, 0, 0), mannequinIndex);
 		mannequinIndex = spawnAvatar(new Location(spawn, 7.5, 113, 9.5, 0, 0), mannequinIndex);
-		mannequinIndex = spawnAvatar(new Location(spawn, 10.5, 113, 10.5, 0, 0), mannequinIndex);
+		mannequinIndex = spawnAvatar(new Location(spawn, 10.5, 114, 10.5, 0, 0), mannequinIndex);
 		mannequinIndex = spawnAvatar(new Location(spawn, 13.5, 114, 11.5, 0, 0), mannequinIndex);
 		mannequinIndex = spawnAvatar(new Location(spawn, 16.5, 114, 12.5, 90, 0), mannequinIndex);
 	}
