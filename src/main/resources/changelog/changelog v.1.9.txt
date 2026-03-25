@@ -124,6 +124,7 @@ Minor Features
 [+] Added /toggle chestlock
 [+] Added toggled info to the motd when joining the server
 [+] Added clickable chat for /info
+[~] Fixed bug where extra ore and cluster drops were still dropping when a dominion block was destroyed
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

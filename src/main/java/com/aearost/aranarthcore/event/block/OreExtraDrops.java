@@ -1,7 +1,9 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.Boost;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -33,6 +35,15 @@ public class OreExtraDrops {
 
 		// Only apply in the survival worlds
 		if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp") || loc.getWorld().getName().startsWith("resource")) {
+			Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+			if (chunkDominion != null) {
+				if (dominion == null || !dominion.getLeader().equals(chunkDominion.getLeader())) {
+					e.setCancelled(true);
+					return;
+				}
+			}
+
 			ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
 			Material materialToAdd = Material.AIR;
 			if (!heldItem.containsEnchantment(Enchantment.SILK_TOUCH)) {
