@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -121,6 +122,8 @@ public class PlayerChatListener implements Listener {
 
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
                 ChatUtils.translateToColor(prefix + chatMessage)));
+
+        DiscordUtils.sendChatMessage(prefix + chatMessage);
     }
 
     /**

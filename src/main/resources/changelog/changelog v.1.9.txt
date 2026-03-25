@@ -126,6 +126,7 @@ Minor Features
 [+] Added clickable chat for /info
 [~] Fixed bug where extra ore and cluster drops were still dropping when a dominion block was destroyed
 [~] Fixed issue where the old avatar's elements weren't getting removed when they would be offline
+[~] Added custom Discord server chat logic
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

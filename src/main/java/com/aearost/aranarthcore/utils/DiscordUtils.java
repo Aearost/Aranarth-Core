@@ -40,6 +40,13 @@ public class DiscordUtils {
 		return jda.getGuildById("664319732446396416");
 	}
 
+	public static void sendChatMessage(String message) {
+		Guild guild = getGuild();
+		EmbedBuilder embed = new EmbedBuilder();
+
+		serverChatChannel.sendMessage(ChatUtils.stripColorFormatting(message)).queue();
+	}
+
 	/**
 	 * Updates the player's in-game rank accordingly in Discord's roles.
 	 * Updates #server-chat and #role-changes in Discord.
