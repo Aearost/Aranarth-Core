@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -41,7 +43,18 @@ public class IncantationPlentifulBlockBreak {
 		// Cancels the original event
 		e.setCancelled(true);
 
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		for (Block block : blocks) {
+			Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+			if (chunkDominion != null) {
+				if (dominion == null || !dominion.getLeader().equals(chunkDominion.getLeader())) {
+					// If it is not harvestable, the counter must be manually reduced regardless
+					aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					continue;
+				}
+			}
+
 			String name = heldItem.getType().name();
 			if (name.endsWith("_PICKAXE") && AranarthUtils.isHarvestableWithPickaxe(block.getType())) {
 				callNewBlockBreakEvent(block, player, true);
