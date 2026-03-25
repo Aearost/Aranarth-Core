@@ -241,6 +241,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.shop.modify", false);
 		perms.setPermission("aranarth.time", false);
 		perms.setPermission("aranarth.skull", false);
+		perms.setPermission("aranarth.sudo", false);
 	}
 
 	/**
@@ -631,6 +632,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.nick.hex", true);
 			perms.setPermission("aranarth.nick.gradient", true);
+			setSaintPermissions(perms, 1);
 		} else {
 			return;
 		}
@@ -646,6 +648,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.shop.modify", true);
 			perms.setPermission("aranarth.time", true);
 			perms.setPermission("aranarth.skull", true);
+			setSaintPermissions(perms, 2);
 		} else {
 			return;
 		}
@@ -658,6 +661,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.avatar.set", true);
 			perms.setPermission("aranarth.boosts.modify", true);
 			perms.setPermission("aranarth.vote.test", true);
+			perms.setPermission("aranarth.sudo", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {
