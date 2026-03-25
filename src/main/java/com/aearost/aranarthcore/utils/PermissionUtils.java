@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
-import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -40,6 +39,13 @@ public class PermissionUtils {
 		// If the player is the avatar
 		if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
 			updateAvatarPermissions(player.getUniqueId(), false);
+		}
+		// If elements were removed while the old avatar was offline
+		else if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
+			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+			if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
+				updateAvatarPermissions(player.getUniqueId(), true);
+			}
 		}
 
 		// Must update arena permissions after base permissions apply
@@ -243,137 +249,141 @@ public class PermissionUtils {
 	 */
 	public static void updateAvatarPermissions(UUID uuid, boolean isRemoval) {
 		OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-		OfflineBendingPlayer bendingPlayer = BendingPlayer.getOfflineBendingPlayer(player.getName());
-
-		if (bendingPlayer == null) {
-			return;
-		}
-
-		// Remove the old avatar's permissions
-		if (isRemoval) {
-			Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
-			// Removes all elements and sub-elements
-			bendingPlayer.getSubElements().clear();
-			bendingPlayer.saveSubElements();
-			bendingPlayer.getElements().clear();
-			bendingPlayer.saveElements();
-
-			// Adds back their original element
-			char element = previousAvatar.getElement();
-			Element elementToAdd = null;
-			if (element == 'A') {
-				elementToAdd = Element.AIR;
-			} else if (element == 'W') {
-				elementToAdd = Element.WATER;
-			} else if (element == 'E') {
-				elementToAdd = Element.EARTH;
-			} else if (element == 'F') {
-				elementToAdd = Element.FIRE;
-			}
-			bendingPlayer.addElement(elementToAdd);
-			bendingPlayer.saveElements();
-
-			// Permissions will be reloaded once they join back if they are not online
-			if (player.isOnline()) {
-				Player onlinePlayer = (Player) player;
-				PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
-
-				// Allow manual element changes for the avatar
-				perms.setPermission("bending.command.choose", true);
-				perms.setPermission("bending.command.rechoose", true);
-
-				// Removing avatar-exclusive permissions
-				perms.setPermission("bending.avatar", false);
-				perms.setPermission("bending.ability.avatarstate", false);
-				perms.setPermission("bending.ability.elementsphere", false);
-				perms.setPermission("bending.ability.elementsphere.air", false);
-				perms.setPermission("bending.ability.elementsphere.earth", false);
-				perms.setPermission("bending.ability.elementsphere.fire", false);
-				perms.setPermission("bending.ability.elementsphere.water", false);
-				perms.setPermission("bending.ability.elementsphere.stream", false);
-				perms.setPermission("bending.ability.spiritbeam", false);
-				perms.setPermission("bending.earth.lavaflux", true);
-
-				evaluatePlayerPermissions((Player) player);
-			}
-		}
-		// A new avatar
-		else {
-			if (!bendingPlayer.getElements().contains(Element.AIR)) {
-				bendingPlayer.addElement(Element.AIR);
-			}
-			if (!bendingPlayer.getElements().contains(Element.WATER)) {
-				bendingPlayer.addElement(Element.WATER);
-			}
-			if (!bendingPlayer.getElements().contains(Element.EARTH)) {
-				bendingPlayer.addElement(Element.EARTH);
-			}
-			if (!bendingPlayer.getElements().contains(Element.FIRE)) {
-				bendingPlayer.addElement(Element.FIRE);
+		BendingPlayer.getOrLoadOfflineAsync(player).thenAccept(bendingPlayer -> {
+			if (bendingPlayer == null) {
+				return;
 			}
 
-			for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
-				// Skips bloodbending, flight, and blue fire
-				if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
-					if (subElement == Element.SubElement.BLUE_FIRE) {
-						if (player.isOnline()) {
-							Player onlinePlayer = player.getPlayer();
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							if (!onlinePlayer.hasPermission("bending.fire.bluefirebending")) {
-								// Removes if they have the sub-element but not the permission (they toggled it)
-								if (bendingPlayer.hasSubElement(Element.SubElement.BLUE_FIRE)) {
-									bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
-									continue;
+			Bukkit.getLogger().info("Has elements: " + bendingPlayer.getElements().size());
+
+			// Remove the old avatar's permissions
+			if (isRemoval) {
+				Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);
+				// Removes all elements and sub-elements
+				bendingPlayer.getSubElements().clear();
+				bendingPlayer.saveSubElements();
+				bendingPlayer.getElements().clear();
+				bendingPlayer.saveElements();
+
+				// Adds back their original element
+				char element = previousAvatar.getElement();
+				Element elementToAdd = null;
+				if (element == 'A') {
+					elementToAdd = Element.AIR;
+				} else if (element == 'W') {
+					elementToAdd = Element.WATER;
+				} else if (element == 'E') {
+					elementToAdd = Element.EARTH;
+				} else if (element == 'F') {
+					elementToAdd = Element.FIRE;
+				}
+				bendingPlayer.addElement(elementToAdd);
+				bendingPlayer.saveElements();
+
+				// Permissions will be reloaded once they join back if they are not online
+				if (player.isOnline()) {
+					PermissionAttachment perms = player.getPlayer().addAttachment(AranarthCore.getInstance());
+
+					// Allow manual element changes for the avatar
+					perms.setPermission("bending.command.choose", true);
+					perms.setPermission("bending.command.rechoose", true);
+
+					// Removing avatar-exclusive permissions
+					perms.setPermission("bending.avatar", false);
+					perms.setPermission("bending.ability.avatarstate", false);
+					perms.setPermission("bending.ability.elementsphere", false);
+					perms.setPermission("bending.ability.elementsphere.air", false);
+					perms.setPermission("bending.ability.elementsphere.earth", false);
+					perms.setPermission("bending.ability.elementsphere.fire", false);
+					perms.setPermission("bending.ability.elementsphere.water", false);
+					perms.setPermission("bending.ability.elementsphere.stream", false);
+					perms.setPermission("bending.ability.spiritbeam", false);
+					perms.setPermission("bending.earth.lavaflux", true);
+
+					evaluatePlayerPermissions(player.getPlayer());
+				}
+			}
+			// A new avatar
+			else {
+				if (!bendingPlayer.getElements().contains(Element.AIR)) {
+					bendingPlayer.addElement(Element.AIR);
+				}
+				if (!bendingPlayer.getElements().contains(Element.WATER)) {
+					bendingPlayer.addElement(Element.WATER);
+				}
+				if (!bendingPlayer.getElements().contains(Element.EARTH)) {
+					bendingPlayer.addElement(Element.EARTH);
+				}
+				if (!bendingPlayer.getElements().contains(Element.FIRE)) {
+					bendingPlayer.addElement(Element.FIRE);
+				}
+
+				for (Element.SubElement subElement : Element.SubElement.getSubElements()) {
+					// Skips bloodbending, flight, and blue fire
+					if (subElement != Element.SubElement.BLOOD && subElement != Element.SubElement.FLIGHT) {
+						if (subElement == Element.SubElement.BLUE_FIRE) {
+							if (player.isOnline()) {
+								Player onlinePlayer = player.getPlayer();
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+								if (!onlinePlayer.hasPermission("bending.fire.bluefirebending")) {
+									// Removes if they have the sub-element but not the permission (they toggled it)
+									if (bendingPlayer.hasSubElement(Element.SubElement.BLUE_FIRE)) {
+										bendingPlayer.getSubElements().remove(Element.SubElement.BLUE_FIRE);
+										continue;
+									}
 								}
 							}
 						}
-					}
 
-					if (!bendingPlayer.hasSubElement(subElement)) {
-						bendingPlayer.addSubElement(subElement);
+						if (!bendingPlayer.hasSubElement(subElement)) {
+							bendingPlayer.addSubElement(subElement);
+						}
 					}
 				}
+				bendingPlayer.saveSubElements();
+				bendingPlayer.saveElements();
+
+				if (player.isOnline()) {
+					Player onlinePlayer = (Player) player;
+					PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
+
+					// Do not allow manual element changes for the avatar
+					perms.setPermission("bending.command.choose", false);
+					perms.setPermission("bending.command.rechoose", false);
+
+					// Enable all sub-elements
+					perms.setPermission("bending.water.healing", true);
+					perms.setPermission("bending.water.plantbending", true);
+					perms.setPermission("bending.fire.combustionbending", true);
+					perms.setPermission("bending.fire.lightningbending", true);
+					perms.setPermission("bending.earth.metalbending", true);
+					perms.setPermission("bending.earth.lavabending", true);
+					perms.setPermission("bending.earth.sandbending", true);
+					perms.setPermission("bending.air.spiritual", true);
+
+					// Enable all abilities
+					perms.setPermission("bending.ability.waterarms", true);
+					perms.setPermission("bending.ability.firecomet", true);
+					perms.setPermission("bending.ability.metalclips", true);
+					perms.setPermission("bending.ability.sonicblast", true);
+					perms.setPermission("bending.ability.suffocate", true);
+
+					// Adding avatar-exclusive permissions
+					perms.setPermission("bending.avatar", true);
+					perms.setPermission("bending.ability.avatarstate", true);
+					perms.setPermission("bending.ability.elementsphere", true);
+					perms.setPermission("bending.ability.spiritbeam", true);
+					perms.setPermission("bending.ability.elementsphere.air", true);
+					perms.setPermission("bending.ability.elementsphere.earth", true);
+					perms.setPermission("bending.ability.elementsphere.fire", true);
+					perms.setPermission("bending.ability.elementsphere.water", true);
+					perms.setPermission("bending.ability.elementsphere.stream", true);
+				}
 			}
-			bendingPlayer.saveSubElements();
-			bendingPlayer.saveElements();
+		});
 
-			if (player.isOnline()) {
-				Player onlinePlayer = (Player) player;
-				PermissionAttachment perms = onlinePlayer.addAttachment(AranarthCore.getInstance());
 
-				// Do not allow manual element changes for the avatar
-				perms.setPermission("bending.command.choose", false);
-				perms.setPermission("bending.command.rechoose", false);
-
-				// Enable all sub-elements
-				perms.setPermission("bending.water.healing", true);
-				perms.setPermission("bending.water.plantbending", true);
-				perms.setPermission("bending.fire.combustionbending", true);
-				perms.setPermission("bending.fire.lightningbending", true);
-				perms.setPermission("bending.earth.metalbending", true);
-				perms.setPermission("bending.earth.lavabending", true);
-				perms.setPermission("bending.earth.sandbending", true);
-				perms.setPermission("bending.air.spiritual", true);
-
-				// Enable all abilities
-				perms.setPermission("bending.ability.waterarms", true);
-				perms.setPermission("bending.ability.firecomet", true);
-				perms.setPermission("bending.ability.metalclips", true);
-				perms.setPermission("bending.ability.sonicblast", true);
-				perms.setPermission("bending.ability.suffocate", true);
-
-				// Adding avatar-exclusive permissions
-				perms.setPermission("bending.avatar", true);
-				perms.setPermission("bending.ability.avatarstate", true);
-				perms.setPermission("bending.ability.elementsphere", true);
-				perms.setPermission("bending.ability.spiritbeam", true);
-				perms.setPermission("bending.ability.elementsphere.air", true);
-				perms.setPermission("bending.ability.elementsphere.earth", true);
-				perms.setPermission("bending.ability.elementsphere.fire", true);
-				perms.setPermission("bending.ability.elementsphere.water", true);
-				perms.setPermission("bending.ability.elementsphere.stream", true);
-			}
-		}
+		return;
 	}
 
 	/**

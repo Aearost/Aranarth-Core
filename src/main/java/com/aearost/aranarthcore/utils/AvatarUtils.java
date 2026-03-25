@@ -65,16 +65,17 @@ public class AvatarUtils {
 	 * @return Confirmation if a new Avatar was selected.
 	 */
 	public static boolean selectAvatar() {
-		if (Bukkit.getOnlinePlayers().isEmpty()) {
+		// Nobody online to select as a new avatar
+		if (Bukkit.getOnlinePlayers().isEmpty() && getCurrentAvatar() == null) {
 			return false;
 		}
 
 		Random random = new Random();
-		int index = random.nextInt(Bukkit.getOnlinePlayers().size());
+		int index = 0;
 		Avatar avatar = null;
 
-		if (Bukkit.getOnlinePlayers().size() == 1) {
-			index = 0;
+		if (Bukkit.getOnlinePlayers().size() > 1) {
+			index = random.nextInt(Bukkit.getOnlinePlayers().size());
 		}
 
 		int attempts = 0;

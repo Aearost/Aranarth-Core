@@ -108,8 +108,6 @@ public class PlayerChatListener implements Listener {
 
         e.setCancelled(true);
 
-        Bukkit.getLogger().info(prefix);
-
         String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + aranarthPlayer.getNickname() + "&e's &7info");
         // Deserialize with legacySection() since formatChatPrefix has already translated & → §
         Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
@@ -122,7 +120,7 @@ public class PlayerChatListener implements Listener {
         }
 
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
-                ChatUtils.stripColorFormatting(prefix + chatMessage)));
+                ChatUtils.translateToColor(prefix + chatMessage)));
     }
 
     /**
