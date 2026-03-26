@@ -133,6 +133,7 @@ Minor Features
 [+] Added Saint I to Helpers and Saint II to Moderators
 [~] Fixed referential error for Dominions being auto disbanded on a new day
 [-] Removed redundant biome check for old Ardorvor functionality of forest fires
+[~] Optimized weather functionality for better performance
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
