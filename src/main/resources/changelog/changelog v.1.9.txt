@@ -32,8 +32,6 @@ Major Features
 [-] Removed the Nametag recipe as a vanilla recipe is being created or already exists for it
 [-] Removed the Saddle recipes as a vanilla recipe is being created or already exists for it
 [+] Added combat tag system
-[+] Added /ac sudo
-[+] Added Saint I to Helpers and Saint II to Moderators
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
@@ -130,6 +128,9 @@ Minor Features
 [~] Fixed issue where the old avatar's elements weren't getting removed when they would be offline
 [~] Added custom Discord server chat logic
 [~] Fixed Dwarven Aranarthium Chestplates having a missing texture
+[~] Prevented items from being placed in shelves at spawn and in Dominions
+[+] Added /ac sudo
+[+] Added Saint I to Helpers and Saint II to Moderators
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

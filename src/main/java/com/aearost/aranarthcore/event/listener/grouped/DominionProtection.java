@@ -260,7 +260,7 @@ public class DominionProtection implements Listener {
 		return AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
 			|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
 			|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
-			|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON")
+			|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_SHELF")
 			|| block.getType().name().endsWith("_GATE") || block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER;
 	}
 
