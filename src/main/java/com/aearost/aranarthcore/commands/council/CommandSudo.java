@@ -27,6 +27,12 @@ public class CommandSudo {
 		if (args.length >= 3) {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (player.getName().equalsIgnoreCase(args[1])) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer.getCouncilRank() >= 2) {
+						sender.sendMessage(ChatUtils.chatMessage("&cYou cannot execute this command on this player!"));
+						return true;
+					}
+
 					String command = "";
 					for (int i = 2; i < args.length; i++) {
 						command += args[i];
@@ -40,7 +46,6 @@ public class CommandSudo {
 					}
 
 					player.performCommand(command);
-					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has run &e/" + command));
 					return true;
 				}
