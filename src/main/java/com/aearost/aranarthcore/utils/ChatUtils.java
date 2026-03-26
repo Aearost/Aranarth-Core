@@ -107,7 +107,7 @@ public class ChatUtils {
 				// Calculate the interpolation factor between the two colors (0 to 1)
 				int startOfSection = colorIndex * sectionSize;
 				int endOfSection = (colorIndex + 1) * sectionSize;
-				double x = (i - startOfSection) / (double) (endOfSection - startOfSection);
+				double x = Math.min(1.0, (i - startOfSection) / (double) (endOfSection - startOfSection));
 
 				// Interpolate the color at position i
 				String interpolatedColor = interpolateColor(startColor, endColor, x);

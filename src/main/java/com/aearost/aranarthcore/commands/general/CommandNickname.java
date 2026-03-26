@@ -94,7 +94,7 @@ public class CommandNickname implements CommandExecutor {
 					}
 
 					if (Objects.nonNull(nickname)) {
-						if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
+						if (nicknameSB.toString().length() > 20) {
 							player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
 							return true;
 						}
