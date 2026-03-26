@@ -137,6 +137,7 @@ Minor Features
 [+] Added copper chests to the list of containers
 [~] Updated all references of containers to be in the one centralized method
 [~] Fixed items that were both compressible and in a shulker interfering and not going into shulkers while compression was disabled
+[+] Added sound effect when blacklist items are trashed
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
