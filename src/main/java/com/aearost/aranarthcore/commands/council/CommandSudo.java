@@ -43,12 +43,10 @@ public class CommandSudo {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					sender.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has run &e/" + command));
 					return true;
-				} else {
-					sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
 				}
 			}
-
-			return false;
+			sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac sudo <player> <command>"));
 			return true;
