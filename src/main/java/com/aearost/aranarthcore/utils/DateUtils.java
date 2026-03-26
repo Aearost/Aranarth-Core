@@ -2009,17 +2009,6 @@ public class DateUtils {
 	}
 
 	/**
-	 * Confirms if the current biome is suitable for a random forest fire.
-	 * @param biome The biome.
-	 * @return Confirmation whether the biome is suitable for a random forest fire.
-	 */
-	private boolean isBiomeForForestFire(Biome biome) {
-		return biome == Biome.FOREST || biome == Biome.BIRCH_FOREST || biome == Biome.OLD_GROWTH_BIRCH_FOREST
-				|| biome == Biome.DARK_FOREST || biome == Biome.SAVANNA || biome == Biome.SAVANNA_PLATEAU
-				|| biome == Biome.WOODED_BADLANDS;
-	}
-
-	/**
 	 * Confirms if the current biome is suitable for cherry leaf particles.
 	 * @param biome The biome.
 	 * @return Confirmation whether the biome is suitable for cherry leaf particles.
