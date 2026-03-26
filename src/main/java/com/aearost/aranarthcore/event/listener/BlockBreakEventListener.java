@@ -32,26 +32,7 @@ public class BlockBreakEventListener implements Listener {
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
-        String worldName = e.getBlock().getWorld().getName();
-        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
-            UUID uuid = e.getPlayer().getUniqueId();
-            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-
-            // Prevents recursive calls, limits special functionality i.e extra ore drops to only the destroyed block itself
-            if (aranarthPlayer.getPlentifulBlocksToDestroy() > 0) {
-                aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
-            } else {
-                ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
-                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-                    if (type.equals("incantation_plentiful")) {
-                        aranarthPlayer.setPlentifulBlocksToDestroy(9);
-                        new IncantationPlentifulBlockBreak().execute(e);
-                    }
-                }
-            }
-            AranarthUtils.setPlayer(uuid, aranarthPlayer);
-        }
+        handlePlentifulBreak(e);
 
         // Blocks that are not necessarily destroyed
         if (AranarthUtils.isBlockCrop(e.getBlock().getType())) {
@@ -80,6 +61,33 @@ public class BlockBreakEventListener implements Listener {
             if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
                 new LogExtraDrops().execute(e);
             }
+        }
+    }
+
+    /**
+     * Handles the logic for an Incantation of Plentiful block break.
+     * @param e The event.
+     */
+    private void handlePlentifulBreak(BlockBreakEvent e) {
+        String worldName = e.getBlock().getWorld().getName();
+        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+            UUID uuid = e.getPlayer().getUniqueId();
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+
+            // Prevents recursive calls, limits special functionality i.e extra ore drops to only the destroyed block itself
+            if (aranarthPlayer.getPlentifulBlocksToDestroy() > 0) {
+                aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
+            } else {
+                ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+                if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
+                    String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+                    if (type.equals("incantation_plentiful")) {
+                        aranarthPlayer.setPlentifulBlocksToDestroy(9);
+                        new IncantationPlentifulBlockBreak().execute(e);
+                    }
+                }
+            }
+            AranarthUtils.setPlayer(uuid, aranarthPlayer);
         }
     }
 

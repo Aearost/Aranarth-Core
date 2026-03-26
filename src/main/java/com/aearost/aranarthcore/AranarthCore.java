@@ -210,7 +210,7 @@ public class AranarthCore extends JavaPlugin {
 		new CraftingOverridesListener(this);
 		new PotionConsumeListener(this);
 		new PlayerRespawnEventListener(this);
-		new DominionProtection(this);
+		new DominionProtectionListener(this);
 		new SpawnProtectionListener(this);
 		new PortalEventListener(this);
 		new ArenaProtection(this);

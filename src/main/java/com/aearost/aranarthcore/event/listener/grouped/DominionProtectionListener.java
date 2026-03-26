@@ -24,9 +24,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 /**
  * Prevents crops from being trampled by both players and other mobs
  */
-public class DominionProtection implements Listener {
+public class DominionProtectionListener implements Listener {
 
-	public DominionProtection(AranarthCore plugin) {
+	public DominionProtectionListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 

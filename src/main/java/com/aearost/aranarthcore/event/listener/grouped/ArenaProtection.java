@@ -233,57 +233,62 @@ public class ArenaProtection implements Listener {
 	@EventHandler
 	public void onSignClick(PlayerInteractEvent e) {
 		if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
-			e.setCancelled(true);
 			Player player = e.getPlayer();
 			Location loc = e.getClickedBlock().getLocation();
-			// Small arena
-			if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
-				Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
-					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eSmall Arena"));
-					}
-				});
-			}
-			// Large arena
-			else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
-				Location arenaLoc = null;
-				int locationNum = new Random().nextInt(5);
-				if (locationNum == 0) {
-					arenaLoc = new Location(Bukkit.getWorld("arena"), -1000, 101, -1000);
-				} else if (locationNum == 1) {
-					arenaLoc = new Location(Bukkit.getWorld("arena"), -960, 104, -1050, 45, 0);
-				} else if (locationNum == 2) {
-					arenaLoc = new Location(Bukkit.getWorld("arena"), -1068, 105, -1026, -45, 0);
-				} else if (locationNum == 3) {
-					arenaLoc = new Location(Bukkit.getWorld("arena"), -1042, 103, -937, -135, 0);
-				} else if (locationNum == 4) {
-					arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
+			if (loc.getWorld().getName().equalsIgnoreCase("arena")) {
+				// Small arena
+				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
+					e.setCancelled(true);
+					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+						if (success) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eSmall Arena"));
+						}
+					});
 				}
-				AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
-					if (success) {
-						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eLarge Arena"));
+				// Large arena
+				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
+					e.setCancelled(true);
+					Location arenaLoc = null;
+					int locationNum = new Random().nextInt(5);
+					if (locationNum == 0) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1000, 101, -1000);
+					} else if (locationNum == 1) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -960, 104, -1050, 45, 0);
+					} else if (locationNum == 2) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1068, 105, -1026, -45, 0);
+					} else if (locationNum == 3) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1042, 103, -937, -135, 0);
+					} else if (locationNum == 4) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
 					}
-				});
-			}
-			// Arrows
-			else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
-				for (int i = 0; i < 9; i++) {
-					player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+						if (success) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eLarge Arena"));
+						}
+					});
 				}
-			}
-			// Water Bottles
-			else if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
-				ItemStack bottle = new ItemStack(Material.POTION);
-				PotionMeta meta = (PotionMeta) bottle.getItemMeta();
-				meta.setBasePotionType(PotionType.WATER);
-				bottle.setItemMeta(meta);
-				for (int i = 0; i < 9; i++) {
-					player.getInventory().addItem(bottle);
+				// Arrows
+				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+					e.setCancelled(true);
+					for (int i = 0; i < 9; i++) {
+						player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
+					}
+				}
+				// Water Bottles
+				else if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+					e.setCancelled(true);
+					ItemStack bottle = new ItemStack(Material.POTION);
+					PotionMeta meta = (PotionMeta) bottle.getItemMeta();
+					meta.setBasePotionType(PotionType.WATER);
+					bottle.setItemMeta(meta);
+					for (int i = 0; i < 9; i++) {
+						player.getInventory().addItem(bottle);
+					}
 				}
 			}
 		}
