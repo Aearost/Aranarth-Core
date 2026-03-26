@@ -131,6 +131,7 @@ Minor Features
 [~] Prevented items from being placed in shelves at spawn and in Dominions
 [+] Added /ac sudo
 [+] Added Saint I to Helpers and Saint II to Moderators
+[~] Fixed referential error for Dominions being auto disbanded on a new day
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -437,7 +437,7 @@ public class DominionUtils {
 			}
 		}
 
-		for (Dominion dominion : getDominions()) {
+		for (Dominion dominion : new ArrayList<>(getDominions())) {
 			int totalFoodPower = getTotalFoodPower(dominion);
 
 			int powerBeingConsumed = 0;
@@ -473,6 +473,7 @@ public class DominionUtils {
 						// Last chunk was consumed
 						else {
 							updateDominionLeader(dominion, null, true);
+							break;
 						}
 					}
 				}
