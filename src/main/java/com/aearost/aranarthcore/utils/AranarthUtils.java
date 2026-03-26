@@ -1062,6 +1062,14 @@ public class AranarthUtils {
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
 				|| block.getType() == Material.BARREL
+				|| block.getType() == Material.COPPER_CHEST
+				|| block.getType() == Material.EXPOSED_COPPER_CHEST
+				|| block.getType() == Material.WEATHERED_COPPER_CHEST
+				|| block.getType() == Material.OXIDIZED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_EXPOSED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_WEATHERED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_OXIDIZED_COPPER_CHEST
 				|| block.getType().name().endsWith("SHULKER_BOX");
 	}
 

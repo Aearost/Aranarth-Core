@@ -5,11 +5,8 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -21,7 +18,7 @@ public class ContainerBreak {
     public void execute(BlockBreakEvent e) {
         Player player = e.getPlayer();
         Block block = e.getBlock();
-        if (block.getState() instanceof Chest || block.getState() instanceof ShulkerBox || block.getType() == Material.BARREL) {
+        if (AranarthUtils.isContainerBlock(block)) {
             if (AranarthUtils.getLockedContainers() != null) {
                 LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(e.getBlock());
                 if (lockedContainer == null) {

@@ -79,7 +79,7 @@ public class ContainerAutoLock {
 
 
         // Logic to create a locked container for single chests or for shulkers or barrels
-        if (placed.getState() instanceof Chest || placed.getState() instanceof ShulkerBox || placed.getType() == Material.BARREL) {
+        if (AranarthUtils.isContainerBlock(placed)) {
             List<UUID> trusted = new ArrayList<>();
             trusted.add(e.getPlayer().getUniqueId());
             LockedContainer lockedContainer = new LockedContainer(e.getPlayer().getUniqueId(), trusted, new Location[] { placed.getLocation(), null });

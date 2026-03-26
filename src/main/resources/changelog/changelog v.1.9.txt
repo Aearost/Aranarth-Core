@@ -134,6 +134,8 @@ Minor Features
 [~] Fixed referential error for Dominions being auto disbanded on a new day
 [-] Removed redundant biome check for old Ardorvor functionality of forest fires
 [~] Optimized weather functionality for better performance
+[+] Added copper chests to the list of containers
+[~] Updated all references of containers to be in the one centralized method
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
