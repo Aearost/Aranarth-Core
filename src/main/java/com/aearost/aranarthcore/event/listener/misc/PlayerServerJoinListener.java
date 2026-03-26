@@ -162,7 +162,7 @@ public class PlayerServerJoinListener implements Listener {
 		if (aranarthPlayer.getBlacklistingMethod() == -1) {
 			toggling.add("&e&oBlacklist");
 		}
-		if (aranarthPlayer.isCompressingItems()) {
+		if (!aranarthPlayer.isCompressingItems()) {
 			toggling.add("&e&oCompressor");
 		}
 		if (!aranarthPlayer.isAutoLockingChests()) {
