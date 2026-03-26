@@ -143,7 +143,7 @@ public class CompressorItemPickup {
 					// Ensures the item gets correctly picked up when it is not being compressed
 					e.getItem().setItemStack(null);
 					e.getItem().remove();
-					player.getInventory().addItem(pickupClone);
+					addResultsToInventory(player, pickupClone);
 				}
 			}
 			// Fallback method to pick up normally if it's a non-compressible item that's picked up
@@ -316,11 +316,13 @@ public class CompressorItemPickup {
 								}
 								im.setBlockState(shulker);
 								inventoryItem.setItemMeta(im);
-								break;
+								if (remainingToAdd == 0) {
+									break;
+								}
 							}
 						}
 					} else {
-						break;
+						continue;
 					}
 				}
 			}
