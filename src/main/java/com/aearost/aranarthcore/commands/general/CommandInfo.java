@@ -135,7 +135,7 @@ public class CommandInfo implements CommandExecutor {
 				if (aranarthPlayer.getBlacklistingMethod() == -1) {
 					toggling.add("&eBlacklist");
 				}
-				if (aranarthPlayer.isCompressingItems()) {
+				if (!aranarthPlayer.isCompressingItems()) {
 					toggling.add("&eCompressor");
 				}
 				if (!aranarthPlayer.isAutoLockingChests()) {
