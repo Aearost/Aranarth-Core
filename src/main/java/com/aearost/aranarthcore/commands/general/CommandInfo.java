@@ -37,8 +37,12 @@ public class CommandInfo implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/info <username>"));
-			return false;
+			if (sender instanceof Player player) {
+				sendInfo(player.getUniqueId(), sender);
+			} else {
+				sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/info <player>"));
+				return false;
+			}
 		} else {
 			UUID uuid = null;
 			// Cycles through usernames first
@@ -64,139 +68,7 @@ public class CommandInfo implements CommandExecutor {
 			}
 
 			if (uuid != null) {
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
-				boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(offlinePlayer.getName());
-				String username = !isNicknameSameAsUsername ? " &e(" + offlinePlayer.getName() + "&e)" : "";
-				sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
-						+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
-
-				Dominion dominion = DominionUtils.getPlayerDominion(uuid);
-				String dominionName = "None";
-				if (dominion != null) {
-					dominionName = dominion.getName();
-				}
-				sender.sendMessage(ChatUtils.translateToColor("&6Dominion: &e" + dominionName));
-
-				NumberFormat formatter = NumberFormat.getCurrencyInstance();
-				sender.sendMessage(ChatUtils.translateToColor("&6Balance: &e" + formatter.format(aranarthPlayer.getBalance())));
-
-				String elementString = "";
-				if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(uuid)) {
-					elementString = "&c火 &7気 &b水 &a土 &5The Current Avatar &a土 &b水 &7気 &c火";
-				} else {
-					OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(offlinePlayer.getName());
-					if (offlineBendingPlayer == null || offlineBendingPlayer.getElements().isEmpty()) {
-						elementString = "&eNone";
-					} else {
-						Element element = offlineBendingPlayer.getElements().getFirst();
-						if (element == Element.WATER) {
-							elementString = "&b水 Water 水";
-						} else if (element == Element.EARTH) {
-							elementString = "&a土 Earth 土";
-						} else if (element == Element.FIRE) {
-							elementString = "&c火 Fire 火";
-						} else if (element == Element.CHI) {
-							elementString = "&6ち Chi ち";
-						} else {
-							elementString = "&7気 Air 気";
-						}
-					}
-				}
-				sender.sendMessage(ChatUtils.translateToColor("&6Element: " + elementString));
-
-				String pronouns = aranarthPlayer.getPronouns().name();
-				pronouns = pronouns.substring(0, 1).toUpperCase() + pronouns.substring(1).toLowerCase();
-				sender.sendMessage(ChatUtils.translateToColor("&6Pronouns: &e" + pronouns));
-
-				List<String> toggling = new ArrayList<>();
-				if (aranarthPlayer.isTogglingChat()) {
-					toggling.add("&eChat Messages");
-				}
-				if (aranarthPlayer.isTogglingMessages()) {
-					toggling.add("&eDirect Messages");
-				}
-				if (aranarthPlayer.isTogglingTp()) {
-					toggling.add("&eTeleport Requests");
-				}
-				if (!aranarthPlayer.isUsingSpawnBoost()) {
-					toggling.add("&eSpawn Boost");
-				}
-				if (aranarthPlayer.isTogglingChangeClaim()) {
-					toggling.add("&eClaim Changes");
-				}
-				if (aranarthPlayer.isTogglingInventoryAssist()) {
-					toggling.add("&eInventory Assist");
-				}
-				if (!aranarthPlayer.isAddingToShulker()) {
-					toggling.add("&eShulker Assist");
-				}
-				if (aranarthPlayer.getBlacklistingMethod() == -1) {
-					toggling.add("&eBlacklist");
-				}
-				if (!aranarthPlayer.isCompressingItems()) {
-					toggling.add("&eCompressor");
-				}
-				if (!aranarthPlayer.isAutoLockingChests()) {
-					toggling.add("&eChest Locks");
-				}
-				if (aranarthPlayer.hasBlueFireDisabled()) {
-					toggling.add("&eBlue Fire");
-				}
-				String toggledFeatures = "";
-				if (toggling.isEmpty()) {
-					toggledFeatures = "&eNone";
-				} else {
-					for (int i = 0; i < toggling.size(); i++) {
-						toggledFeatures += toggling.get(i);
-						if  (i < toggling.size() - 2) {
-							toggledFeatures += ", ";
-						} else if (i < toggling.size() - 1) {
-							toggledFeatures += " and ";
-						}
-					}
-				}
-				sender.sendMessage(ChatUtils.translateToColor("&6Currently toggling: &e" + toggledFeatures));
-
-				if (sender instanceof Player player) {
-					if (player.hasPermission("aranarth.seen")) {
-						if (offlinePlayer.isOnline()) {
-							Player onlinePlayer = offlinePlayer.getPlayer();
-							boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
-									AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
-							if (isAfk) {
-								sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
-							} else {
-								sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
-							}
-						} else {
-							AranarthUtils.getPlayerTimezone(player, zoneId -> {
-								String result = CommandSeen.calculateDisplayDate(
-										offlinePlayer,
-										aranarthPlayer,
-										zoneId,
-										sender
-								);
-								sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
-							});
-						}
-					}
-				} else {
-					if (offlinePlayer.isOnline()) {
-						Player onlinePlayer = offlinePlayer.getPlayer();
-						boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
-								&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
-						if (isAfk) {
-							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
-						} else {
-							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
-						}
-					} else {
-						String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
-					}
-				}
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
@@ -231,6 +103,147 @@ public class CommandInfo implements CommandExecutor {
 				return "Spawn";
 			}
         }
+	}
+
+	/**
+	 * Lists the information to be displayed in the command.
+	 * @param uuid The UUID of the player being displayed.
+	 * @param sender The user that entered the command.
+	 */
+	private static void sendInfo(UUID uuid, CommandSender sender) {
+		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+
+		boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(offlinePlayer.getName());
+		String username = !isNicknameSameAsUsername ? " &e(" + offlinePlayer.getName() + "&e)" : "";
+		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
+				+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
+
+		Dominion dominion = DominionUtils.getPlayerDominion(uuid);
+		String dominionName = "None";
+		if (dominion != null) {
+			dominionName = dominion.getName();
+		}
+		sender.sendMessage(ChatUtils.translateToColor("&6Dominion: &e" + dominionName));
+
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		sender.sendMessage(ChatUtils.translateToColor("&6Balance: &e" + formatter.format(aranarthPlayer.getBalance())));
+
+		String elementString = "";
+		if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(uuid)) {
+			elementString = "&c火 &7気 &b水 &a土 &5The Current Avatar &a土 &b水 &7気 &c火";
+		} else {
+			OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(offlinePlayer.getName());
+			if (offlineBendingPlayer == null || offlineBendingPlayer.getElements().isEmpty()) {
+				elementString = "&eNone";
+			} else {
+				Element element = offlineBendingPlayer.getElements().getFirst();
+				if (element == Element.WATER) {
+					elementString = "&b水 Water 水";
+				} else if (element == Element.EARTH) {
+					elementString = "&a土 Earth 土";
+				} else if (element == Element.FIRE) {
+					elementString = "&c火 Fire 火";
+				} else if (element == Element.CHI) {
+					elementString = "&6ち Chi ち";
+				} else {
+					elementString = "&7気 Air 気";
+				}
+			}
+		}
+		sender.sendMessage(ChatUtils.translateToColor("&6Element: " + elementString));
+
+		String pronouns = aranarthPlayer.getPronouns().name();
+		pronouns = pronouns.substring(0, 1).toUpperCase() + pronouns.substring(1).toLowerCase();
+		sender.sendMessage(ChatUtils.translateToColor("&6Pronouns: &e" + pronouns));
+
+		List<String> toggling = new ArrayList<>();
+		if (aranarthPlayer.isTogglingChat()) {
+			toggling.add("&eChat Messages");
+		}
+		if (aranarthPlayer.isTogglingMessages()) {
+			toggling.add("&eDirect Messages");
+		}
+		if (aranarthPlayer.isTogglingTp()) {
+			toggling.add("&eTeleport Requests");
+		}
+		if (!aranarthPlayer.isUsingSpawnBoost()) {
+			toggling.add("&eSpawn Boost");
+		}
+		if (aranarthPlayer.isTogglingChangeClaim()) {
+			toggling.add("&eClaim Changes");
+		}
+		if (aranarthPlayer.isTogglingInventoryAssist()) {
+			toggling.add("&eInventory Assist");
+		}
+		if (!aranarthPlayer.isAddingToShulker()) {
+			toggling.add("&eShulker Assist");
+		}
+		if (aranarthPlayer.getBlacklistingMethod() == -1) {
+			toggling.add("&eBlacklist");
+		}
+		if (!aranarthPlayer.isCompressingItems()) {
+			toggling.add("&eCompressor");
+		}
+		if (!aranarthPlayer.isAutoLockingChests()) {
+			toggling.add("&eChest Locks");
+		}
+		if (aranarthPlayer.hasBlueFireDisabled()) {
+			toggling.add("&eBlue Fire");
+		}
+		String toggledFeatures = "";
+		if (toggling.isEmpty()) {
+			toggledFeatures = "&eNone";
+		} else {
+			for (int i = 0; i < toggling.size(); i++) {
+				toggledFeatures += toggling.get(i);
+				if  (i < toggling.size() - 2) {
+					toggledFeatures += ", ";
+				} else if (i < toggling.size() - 1) {
+					toggledFeatures += " and ";
+				}
+			}
+		}
+		sender.sendMessage(ChatUtils.translateToColor("&6Currently toggling: &e" + toggledFeatures));
+
+		if (sender instanceof Player player) {
+			if (player.hasPermission("aranarth.seen")) {
+				if (offlinePlayer.isOnline()) {
+					Player onlinePlayer = offlinePlayer.getPlayer();
+					boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
+							AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+					if (isAfk) {
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+					} else {
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+					}
+				} else {
+					AranarthUtils.getPlayerTimezone(player, zoneId -> {
+						String result = CommandSeen.calculateDisplayDate(
+								offlinePlayer,
+								aranarthPlayer,
+								zoneId,
+								sender
+						);
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+					});
+				}
+			}
+		} else {
+			if (offlinePlayer.isOnline()) {
+				Player onlinePlayer = offlinePlayer.getPlayer();
+				boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
+						&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
+				if (isAfk) {
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+				} else {
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+				}
+			} else {
+				String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
+				sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+			}
+		}
 	}
 
 }
