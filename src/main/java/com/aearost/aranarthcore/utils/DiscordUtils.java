@@ -41,10 +41,12 @@ public class DiscordUtils {
 	}
 
 	public static void sendChatMessage(String message) {
-		Guild guild = getGuild();
-		EmbedBuilder embed = new EmbedBuilder();
-
-		serverChatChannel.sendMessage(ChatUtils.stripColorFormatting(message)).queue();
+		String discordMessage = ChatUtils.stripColorFormatting(message);
+		// Architect symbol - force text presentation
+		discordMessage = discordMessage.replace("\uD83D\uDD28", "\uD83D\uDD28\uFE0E");
+		// Saint symbol - force text presentation
+		discordMessage = discordMessage.replace("\u269C", "\u269C\uFE0E");
+		serverChatChannel.sendMessage(discordMessage).queue();
 	}
 
 	/**
