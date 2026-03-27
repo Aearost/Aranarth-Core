@@ -27,6 +27,7 @@ import java.util.Random;
 public class AranarthCore extends JavaPlugin {
 
 	private static AranarthCore plugin;
+	private DiscordChatListener discordChatListener;
 
 	/**
 	 * Called when the plugin is first enabled on server startup.
@@ -228,6 +229,7 @@ public class AranarthCore extends JavaPlugin {
 		new PlayerServerJoinListener(this);
 		new PlayerServerQuitListener(this);
 		new PlayerChatListener(this);
+		discordChatListener = new DiscordChatListener(this);
 		new MobDestroyDoorListener(this);
 		new PlayerTeleportBetweenWorldsListener(this);
 		new ExpGainPreventListener(this);
@@ -520,6 +522,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveShopLocations();
 
 		Bukkit.resetRecipes();
+		discordChatListener.unsubscribe();
 	}
 
 }
