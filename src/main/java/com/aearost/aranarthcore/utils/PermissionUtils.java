@@ -255,8 +255,6 @@ public class PermissionUtils {
 				return;
 			}
 
-			Bukkit.getLogger().info("Has elements: " + bendingPlayer.getElements().size());
-
 			// Remove the old avatar's permissions
 			if (isRemoval) {
 				Avatar previousAvatar = AvatarUtils.getAvatars().get(AvatarUtils.getAvatars().size() - 2);

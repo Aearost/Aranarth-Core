@@ -12,10 +12,7 @@ import org.bukkit.block.data.Levelled;
 import org.bukkit.block.data.type.Slab;
 import org.bukkit.block.data.type.Snow;
 import org.bukkit.block.data.type.Stairs;
-import org.bukkit.entity.Animals;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -33,6 +30,12 @@ public class DateUtils {
 	private final int irlMonth;
 	private final int irlDay;
 	private final Random random = new Random();
+
+	private static boolean spawnBasesCached = false;
+	private static int  baseAnimalLimit  = 0;
+	private static int  baseMonsterLimit = 0;
+	private static long baseAnimalTicks  = 0;
+	private static long baseMonsterTicks = 0;
 
 	private static final Set<Material> INVALID_SURFACE_BLOCKS;
 
@@ -536,6 +539,7 @@ public class DateUtils {
 	 * Applies the effects of the given month on Aranarth.
 	 */
 	private void determineMonthEffects() {
+		applyMobSpawnRates(AranarthUtils.getMonth());
         switch (AranarthUtils.getMonth()) {
 			case Month.IGNIVOR -> applyIgnivorEffects();
 			case Month.AQUINVOR -> applyAquinvorEffects();
@@ -554,6 +558,74 @@ public class DateUtils {
 			case Month.OBSCURVOR -> applyObscurvorEffects();
             default -> Bukkit.getLogger().info("Something went wrong with applying the " + AranarthUtils.getMonth() + "'s effects!");
         }
+	}
+
+	/**
+	 * Applies seasonal mob spawn rate multipliers for the given month to all survival worlds.
+	 * Both spawn limits and ticks-per-spawn are scaled: limit controls density,
+	 * ticks control replenishment speed. Changing both produces a stronger seasonal contrast.
+	 * @param month The current server month.
+	 */
+	private void applyMobSpawnRates(Month month) {
+		// Cache the server's configured spawn values on the first call, before any modification,
+		// so that 1x always means vanilla/configured rates rather than hardcoded constants.
+		World referenceWorld = Bukkit.getWorld("world");
+		if (referenceWorld == null) return;
+		if (!spawnBasesCached) {
+			// World returns -1 when it defers to the global server setting; fall back to the server-wide value in that case.
+			int worldAnimalLimit   = referenceWorld.getSpawnLimit(SpawnCategory.ANIMAL);
+			int worldMonsterLimit  = referenceWorld.getSpawnLimit(SpawnCategory.MONSTER);
+			long worldAnimalTicks  = referenceWorld.getTicksPerSpawns(SpawnCategory.ANIMAL);
+			long worldMonsterTicks = referenceWorld.getTicksPerSpawns(SpawnCategory.MONSTER);
+			baseAnimalLimit  = worldAnimalLimit  >= 0 ? worldAnimalLimit  : Bukkit.getServer().getSpawnLimit(SpawnCategory.ANIMAL);
+			baseMonsterLimit = worldMonsterLimit >= 0 ? worldMonsterLimit : Bukkit.getServer().getSpawnLimit(SpawnCategory.MONSTER);
+			baseAnimalTicks  = worldAnimalTicks  >= 0 ? worldAnimalTicks  : Bukkit.getServer().getTicksPerSpawns(SpawnCategory.ANIMAL);
+			baseMonsterTicks = worldMonsterTicks >= 0 ? worldMonsterTicks : Bukkit.getServer().getTicksPerSpawns(SpawnCategory.MONSTER);
+			spawnBasesCached = true;
+		}
+
+		double animalMultiplier = switch (month) {
+			case FAUNIVOR                     -> 3.00;
+			case FRUCTIVOR, FOLLIVOR          -> 2.00;
+			case ARDORVOR, SOLARVOR, CALORVOR -> 1.50;
+			case AESTIVOR                     -> 1.25;
+			case AQUINVOR, VENTIVOR, FLORIVOR -> 1.00;
+			case IGNIVOR                      -> 0.60;
+			case UMBRAVOR                     -> 0.75;
+			case GLACIVOR                     -> 0.50;
+			case OBSCURVOR                    -> 0.40;
+			case FRIGORVOR                    -> 0.25;
+		};
+
+		double monsterMultiplier = switch (month) {
+			case ARDORVOR                          -> 0.50;
+			case CALORVOR, SOLARVOR                -> 0.60;
+			case AESTIVOR, FRUCTIVOR               -> 0.75;
+			case FOLLIVOR                          -> 0.85;
+			case FAUNIVOR                          -> 0.90;
+			case AQUINVOR, VENTIVOR, FLORIVOR      -> 1.00;
+			case UMBRAVOR                          -> 1.15;
+			case IGNIVOR                           -> 1.2;
+			case GLACIVOR                          -> 1.4;
+			case OBSCURVOR                         -> 1.35;
+			case FRIGORVOR                         -> 1.65;
+		};
+
+		int animalLimit  = Math.max(1, (int)(baseAnimalLimit  * animalMultiplier));
+		int monsterLimit = Math.max(1, (int)(baseMonsterLimit * monsterMultiplier));
+		int animalTicks  = (int) Math.max(1, (long)(baseAnimalTicks  / animalMultiplier));
+		int monsterTicks = (int) Math.max(1, (long)(baseMonsterTicks / monsterMultiplier));
+
+		for (String worldName : new String[]{ "world", "smp", "resource" }) {
+			World world = Bukkit.getWorld(worldName);
+			if (world == null) {
+				continue;
+			}
+			world.setSpawnLimit(SpawnCategory.ANIMAL,  animalLimit);
+			world.setSpawnLimit(SpawnCategory.MONSTER, monsterLimit);
+			world.setTicksPerSpawns(SpawnCategory.ANIMAL,  animalTicks);
+			world.setTicksPerSpawns(SpawnCategory.MONSTER, monsterTicks);
+		}
 	}
 
 	/**
