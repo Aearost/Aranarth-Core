@@ -1018,7 +1018,7 @@ public class DateUtils {
 									duration = random.nextInt(24000) + 12000;
 								case Month.FRIGORVOR ->
                                     // At least 0.75 days, no more than 2 days
-									duration = random.nextInt(30000) + 18000;
+										duration = random.nextInt(30000) + 18000;
 								case Month.OBSCURVOR ->
 									// At least 0.25 days, no more than 1 day
 									duration = random.nextInt(18000) + 6000;
@@ -1895,6 +1895,9 @@ public class DateUtils {
 				resource.setStorm(true);
 				resource.setThundering(false);
 				resource.setWeatherDuration(duration);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					playRainStartSound(player);
+				}
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
 			} else if (type == Weather.THUNDER) {
 				world.setClearWeatherDuration(0);
@@ -1912,6 +1915,9 @@ public class DateUtils {
 				resource.setThundering(true);
 				resource.setWeatherDuration(duration);
 				resource.setThunderDuration(duration);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					playThunderStartSound(player);
+				}
 				message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
 			} else if (type == Weather.SNOW) {
 				world.setThunderDuration(0);
@@ -1929,6 +1935,9 @@ public class DateUtils {
 				resource.setThundering(false);
 				resource.setStorm(false);
 				resource.setClearWeatherDuration(duration);
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					playSnowStartSound(player);
+				}
 				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
 			} else {
 				Bukkit.getLogger().info("Something went wrong with starting the storm...");
@@ -1952,6 +1961,9 @@ public class DateUtils {
 			resource.setStorm(false);
 			resource.setClearWeatherDuration(duration);
 			AranarthUtils.setWeather(type);
+			for (Player player : Bukkit.getOnlinePlayers()) {
+				playClearSound(player);
+			}
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
 		Bukkit.broadcastMessage(message);
@@ -2003,6 +2015,88 @@ public class DateUtils {
 		} else if (runs == 19) {
 			player.playSound(player, Sound.ITEM_ELYTRA_FLYING, 0.01F, 0.5F);
 		}
+	}
+
+	/**
+	 * Plays a soft descending chime melody for a player when rain begins.
+	 * Notes descend A4 → G4 → E4 → D4, evoking the melancholic patter of raindrops.
+	 * @param player The player to play the sound to.
+	 */
+	private void playRainStartSound(Player player) {
+		// A4 (pitch 1.1892)
+		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 1.1892f);
+		// G4 (pitch 1.0595) — 0.3s later
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 1.0595f), 6L);
+		// E4 (pitch 0.8909) — 0.6s later
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 0.8909f), 12L);
+		// D4 (pitch 0.7937) — 0.9s later
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 0.7937f), 18L);
+	}
+
+	/**
+	 * Plays a dramatic bass rumble followed by a sharp chime crack for a player when a thunderstorm begins.
+	 * Bass notes B3 → A3 build ominous tension; chimes Bb4 → G4 → E4 evoke a lightning flash.
+	 * @param player The player to play the sound to.
+	 */
+	private void playThunderStartSound(Player player) {
+		// D5 (pitch 1.5874) — sharp crack (eighth note 1)
+		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.5874f);
+		// C#5 (pitch 1.4983) — dissonant semitone follow (eighth note 2, +6 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.55f, 1.4983f), 6L);
+		// B4 (pitch 1.3348) — tension resolving (eighth note 3, +12 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.3348f), 12L);
+		// G4 (pitch 1.0595) — fading (quarter note, +24 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 1.0595f), 24L);
+		// E4 (pitch 0.8909) — dying echo (quarter note, +36 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3f, 0.8909f), 36L);
+	}
+
+	/**
+	 * Plays a slow, ethereal high chime descent for a player when snow begins.
+	 * Notes descend F#5 → D5 → B4 → G4, evoking the hush and magic of falling snow.
+	 * @param player The player to play the sound to.
+	 */
+	private void playSnowStartSound(Player player) {
+		// F#5 (pitch 2.0) — high and airy (quarter note 1)
+		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.35f, 2.0f);
+		// D5 (pitch 1.5874) — quarter note 2 (+12 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.35f, 1.5874f), 12L);
+		// B4 (pitch 1.3348) — quarter note 3 (+24 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.35f, 1.3348f), 24L);
+		// G4 (pitch 1.0595) — quarter note 4 (+36 ticks), soft landing
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.3f, 1.0595f), 36L);
+	}
+
+	/**
+	 * Plays a bright ascending chime arpeggio for a player when the sky clears.
+	 * Notes ascend C4 → E4 → G4 → C5 → E5 with accelerating gaps, evoking sunlight breaking through.
+	 * @param player The player to play the sound to.
+	 */
+	private void playClearSound(Player player) {
+		// C4 (pitch 0.7071) — eighth note 1
+		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.7071f);
+		// E4 (pitch 0.8909) — eighth note 2 (+6 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.8909f), 6L);
+		// G4 (pitch 1.0595) — eighth note 3 (+12 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.0595f), 12L);
+		// C5 (pitch 1.4142) — eighth note 4 (+18 ticks)
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.4142f), 18L);
+		// E5 (pitch 1.7818) — eighth note 5 (+24 ticks), bright finish
+		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () ->
+				player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1.7818f), 24L);
 	}
 
 	/**

@@ -138,6 +138,7 @@ Minor Features
 [~] Updated all references of containers to be in the one centralized method
 [~] Fixed items that were both compressible and in a shulker interfering and not going into shulkers while compression was disabled
 [+] Added sound effect when blacklist items are trashed
+[+] Added sound effect for changes to the weather effects
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
