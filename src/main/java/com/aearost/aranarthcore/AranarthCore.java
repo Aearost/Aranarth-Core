@@ -135,6 +135,11 @@ public class AranarthCore extends JavaPlugin {
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
 				dateUtils.calculateServerDate();
+
+				// Use the updated date to refresh all player inventories
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					CropUtils.refreshInventory(player.getInventory());
+				}
 			}
 		}, 0, 100);
 
@@ -243,6 +248,7 @@ public class AranarthCore extends JavaPlugin {
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
 		new ArmorStandItemAddListener(this);
+		new CropInfoEventListener(this);
 	}
 
 	/**

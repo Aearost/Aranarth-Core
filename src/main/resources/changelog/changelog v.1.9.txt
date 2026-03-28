@@ -33,6 +33,7 @@ Major Features
 [-] Removed the Saddle recipes as a vanilla recipe is being created or already exists for it
 [+] Added combat tag system
 [+] Added varying hostile and passive mob spawn rates depending on the month
+[+] Implemented functionality for dynamic crop growth and yields
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
@@ -141,6 +142,7 @@ Minor Features
 [+] Added sound effect when blacklist items are trashed
 [+] Added sound effect for changes to the weather effects
 [+] Added /ac tpf to force teleport self regardless of coordinates/unsafe location
+[+] Manually implemented discord to in-game messages
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
