@@ -230,8 +230,8 @@ public class DateUtils {
 					case Month.CALORVOR -> description = DateUtils.getCalorvorDescription();
 					case Month.ARDORVOR -> description = DateUtils.getArdorvorDescription();
 					case Month.SOLARVOR -> description = DateUtils.getSolarvorDescription();
-					case Month.FRUCTIVOR -> description = DateUtils.getFructivorDescription();
 					case Month.FOLLIVOR -> description = DateUtils.getFollivorDescription();
+					case Month.STRIGAVOR -> description = DateUtils.getStrigavorDescription();
 					case Month.FAUNIVOR -> description = DateUtils.getFaunivorDescription();
 					case Month.UMBRAVOR -> description = DateUtils.getUmbravorDescription();
 					case Month.GLACIVOR -> description = DateUtils.getGlacivorDescription();
@@ -299,10 +299,10 @@ public class DateUtils {
 			return "Ardorvór";
 		} else if (month == Month.SOLARVOR) {
 			return "Solarvór";
-		} else if (month == Month.FRUCTIVOR) {
-			return "Fructivór";
 		} else if (month == Month.FOLLIVOR) {
 			return "Follivór";
+		} else if (month == Month.STRIGAVOR) {
+			return "Strigavór";
 		} else if (month == Month.FAUNIVOR) {
 			return "Faunivór";
 		} else if (month == Month.UMBRAVOR) {
@@ -358,64 +358,35 @@ public class DateUtils {
 	 * @return Whether the day is exceeding the current month's length.
 	 */
 	private boolean checkIfExceedsMonth(int day, Month month) {
-		// Ignivór
 		if (month == Month.IGNIVOR) {
             return day > 147;
-		}
-		// Aquinvór
-		else if (month == Month.AQUINVOR) {
+		} else if (month == Month.AQUINVOR) {
             return day > 147;
-		}
-		// Ventirór
-		else if (month == Month.VENTIVOR) {
+		} else if (month == Month.VENTIVOR) {
             return day > 146;
-		}
-		// Florivór
-		else if (month == Month.FLORIVOR) {
+		} else if (month == Month.FLORIVOR) {
             return day > 145;
-		}
-		// Aestivór
-		else if (month == Month.AESTIVOR) {
+		} else if (month == Month.AESTIVOR) {
             return day > 146;
-		}
-		// Calorvór
-		else if (month == Month.CALORVOR) {
+		} else if (month == Month.CALORVOR) {
             return day > 145;
-		}
-		// Ardorvór
-		else if (month == Month.ARDORVOR) {
+		} else if (month == Month.ARDORVOR) {
             return day > 146;
-		}
-		// Solarvór
-		else if (month == Month.SOLARVOR) {
+		} else if (month == Month.SOLARVOR) {
 			return day > 146;
-		}
-		// Fructivór
-		else if (month == Month.FRUCTIVOR) {
+		} else if (month == Month.FOLLIVOR) {
             return day > 146;
-		}
-		// Follivór
-		else if (month == Month.FOLLIVOR) {
+		} else if (month == Month.STRIGAVOR) {
 			return day > 146;
-		}
-		// Faunivór
-		else if (month == Month.FAUNIVOR) {
+		} else if (month == Month.FAUNIVOR) {
             return day > 146;
-		}
-		// Umbravór
-		else if (month == Month.UMBRAVOR) {
+		} else if (month == Month.UMBRAVOR) {
             return day > 146;
-		}
-		// Glacivór
-		else if (month == Month.GLACIVOR) {
+		} else if (month == Month.GLACIVOR) {
             return day > 146;
-		}
-		// Frigorvór
-		else if (month == Month.FRIGORVOR) {
+		} else if (month == Month.FRIGORVOR) {
             return day > 147;
-		}
-		// Obscurvór
-		else if (month == Month.OBSCURVOR) {
+		} else if (month == Month.OBSCURVOR) {
             return day > 147;
 		}
 		return false;
@@ -549,8 +520,8 @@ public class DateUtils {
 			case Month.CALORVOR -> applyCalorvorEffects();
 			case Month.ARDORVOR -> applyArdorvorEffects();
 			case Month.SOLARVOR -> applySolarvorEffects();
-			case Month.FRUCTIVOR -> applyFructivorEffects();
 			case Month.FOLLIVOR -> applyFollivorEffects();
+			case Month.STRIGAVOR -> applyStrigavorEffects();
 			case Month.FAUNIVOR -> applyFaunivorEffects();
 			case Month.UMBRAVOR -> applyUmbravorEffects();
 			case Month.GLACIVOR -> applyGlacivorEffects();
@@ -586,7 +557,7 @@ public class DateUtils {
 
 		double animalMultiplier = switch (month) {
 			case FAUNIVOR                     -> 3.00;
-			case FRUCTIVOR, FOLLIVOR          -> 2.00;
+			case FOLLIVOR, STRIGAVOR -> 2.00;
 			case ARDORVOR, SOLARVOR, CALORVOR -> 1.50;
 			case AESTIVOR                     -> 1.25;
 			case AQUINVOR, VENTIVOR, FLORIVOR -> 1.00;
@@ -600,8 +571,8 @@ public class DateUtils {
 		double monsterMultiplier = switch (month) {
 			case ARDORVOR                          -> 0.50;
 			case CALORVOR, SOLARVOR                -> 0.60;
-			case AESTIVOR, FRUCTIVOR               -> 0.75;
-			case FOLLIVOR                          -> 0.85;
+			case AESTIVOR, FOLLIVOR -> 0.75;
+			case STRIGAVOR -> 0.85;
 			case FAUNIVOR                          -> 0.90;
 			case AQUINVOR, VENTIVOR, FLORIVOR      -> 1.00;
 			case UMBRAVOR                          -> 1.15;
@@ -805,22 +776,6 @@ public class DateUtils {
 	}
 
 	/**
-	 * Apply the effects during the ninth month of Fructivor.
-	 */
-	private void applyFructivorEffects() {
-		meltSnow(4);
-		applyRain();
-	}
-
-	/**
-	 * Provides the Description of the month of Fructivor.
-	 * @return The Description of the month.
-	 */
-	public static String getFructivorDescription() {
-		return "The month of Fructivór is not for the lazy. Crop yields are doubled, and Farmer villagers favor the vendor by providing improved crop sell rates.";
-	}
-
-	/**
 	 * Apply the effects during the tenth month of Follivor.
 	 */
 	private void applyFollivorEffects() {
@@ -834,6 +789,22 @@ public class DateUtils {
 	 */
 	public static String getFollivorDescription() {
 		return "The month of Follivór introduces the start of autumn. Trees provide more EXP and additional log drops, and saplings grow at quicker speeds.";
+	}
+
+	/**
+	 * Apply the effects during the ninth month of Strigavor.
+	 */
+	private void applyStrigavorEffects() {
+		meltSnow(4);
+		applyRain();
+	}
+
+	/**
+	 * Provides the Description of the month of Strigavor.
+	 * @return The Description of the month.
+	 */
+	public static String getStrigavorDescription() {
+		return "The month of Strigavór is for witchcraft, providing increased positive effects during the day, and increased negative effects during the night.";
 	}
 
 	/**

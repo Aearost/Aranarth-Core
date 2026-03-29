@@ -40,8 +40,8 @@ public class CommandCalendar implements CommandExecutor {
 			meta.addPage(calorvor());
 			meta.addPage(ardorvor());
 			meta.addPage(solarvor());
-			meta.addPage(fructivor());
 			meta.addPage(follivor());
+			meta.addPage(strigavor());
 			meta.addPage(faunivor());
 			meta.addPage(umbravor());
 			meta.addPage(glacivor());
@@ -132,19 +132,19 @@ public class CommandCalendar implements CommandExecutor {
 		);
 	}
 
-	private static String fructivor() {
-		return ChatUtils.translateToColor(
-				"&lFructivór (9)" +
-						"\n&r&oThe Harvest" +
-						"\n\n&r" + DateUtils.getFructivorDescription()
-		);
-	}
-
 	private static String follivor() {
 		return ChatUtils.translateToColor(
 				"&lFollivór (10)" +
 						"\n&r&oThe Lumbered" +
 						"\n\n&r" + DateUtils.getFollivorDescription()
+		);
+	}
+
+	private static String strigavor() {
+		return ChatUtils.translateToColor(
+				"&lStrigavór (9)" +
+						"\n&r&oThe Wicked" +
+						"\n\n&r" + DateUtils.getStrigavorDescription()
 		);
 	}
 
