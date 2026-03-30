@@ -92,8 +92,12 @@ public class CropUtils {
 		}
 
 		List<String> lore = new ArrayList<>();
-		lore.add(formatMultiplierLine(growthSpeed, "speed"));
-		lore.add(formatMultiplierLine(yieldMultiplier, "yield"));
+		if (growthSpeed != 1) {
+			lore.add(formatMultiplierLine(growthSpeed, "speed"));
+		}
+		if (yieldMultiplier != 1) {
+			lore.add(formatMultiplierLine(yieldMultiplier, "yield"));
+		}
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 	}
