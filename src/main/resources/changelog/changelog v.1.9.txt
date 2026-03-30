@@ -149,6 +149,7 @@ Minor Features
 [+] Added sound effect for changes to the weather effects
 [+] Added /ac tpf to force teleport self regardless of coordinates/unsafe location
 [+] Manually implemented discord to in-game messages
+[+] Added extra God Apple Fragment drops while a Boost of the Harvest is active
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
