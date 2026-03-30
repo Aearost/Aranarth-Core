@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -221,7 +222,9 @@ public class ShopInteract {
 						continue;
 					}
 
-					if (inventoryItem.isSimilar(shop.getItem())) {
+					// Each month changes the lore of crop seeds, must consider that
+					boolean isSameCropSeed = inventoryItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(inventoryItem.getType());
+					if (inventoryItem.isSimilar(shop.getItem()) || isSameCropSeed) {
 						spaceForShopItemInPlayerInventory += inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
 					}
 				}
@@ -323,7 +326,9 @@ public class ShopInteract {
 						continue;
 					}
 
-					if (chestItem.isSimilar(shop.getItem())) {
+					// Each month changes the lore of crop seeds, must consider that
+					boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
+					if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
 						spaceForShopItemInChestInventory += chestItem.getMaxStackSize() - chestItem.getAmount();
 					}
 				}
@@ -419,7 +424,9 @@ public class ShopInteract {
 		ItemStack[] contents = items.toArray(new ItemStack[0]);
 
 		for (int i = contents.length - 1; i >= 0; i--) {
-			if (contents[i] != null && contents[i].isSimilar(playerShop.getItem())) {
+			// Each month changes the lore of crop seeds, must consider that
+			boolean isSameCropSeed = contents[i] != null && contents[i].getType() == playerShop.getItem().getType() && CropUtils.isCropSeed(playerShop.getItem().getType());
+			if (contents[i] != null && (contents[i].isSimilar(playerShop.getItem()) || isSameCropSeed)) {
 				// If the first single slot of the item in the chest contains enough inventory
 				if (contents[i].getAmount() >= playerShop.getQuantity() && summedQuantityOfItem == 0) {
 					int newAmount = contents[i].getAmount() - playerShop.getQuantity();

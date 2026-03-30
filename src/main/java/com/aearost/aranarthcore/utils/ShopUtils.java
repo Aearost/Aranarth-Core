@@ -324,7 +324,9 @@ public class ShopUtils {
                 continue;
             }
 
-            if (inventoryItem.isSimilar(shop.getItem())) {
+            // Each month changes the lore of crop seeds, must consider that
+            boolean isSameCropSeed = inventoryItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(inventoryItem.getType());
+            if (inventoryItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                 playerQuantityOfShopItem += inventoryItem.getAmount();
                 int extraSpaceInStack = inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
                 if (extraSpaceInStack > 0) {
@@ -353,7 +355,9 @@ public class ShopUtils {
                     continue;
                 }
 
-                if (chestItem.isSimilar(shop.getItem())) {
+                // Each month changes the lore of crop seeds, must consider that
+                boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
+                if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                     chestQuantityOfShopItem += chestItem.getAmount();
                     int extraSpaceInStack = chestItem.getMaxStackSize() - chestItem.getAmount();
                     if (extraSpaceInStack > 0) {
