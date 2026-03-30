@@ -80,6 +80,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final int afkSecondsAmount = 300;
+	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -3166,6 +3167,123 @@ public class AranarthUtils {
 	 */
 	public static int getAfkSecondsAmount() {
 		return afkSecondsAmount;
+	}
+
+	/**
+	 * Provides the HashMap of the kills and deaths of all players across all worlds.
+	 * @return The HashMap of the kills and deaths of all players across all worlds.
+	 */
+	public static HashMap<UUID, List<PlayerKillDeathScore>> getKillDeathScores() {
+		return killDeathScores;
+	}
+
+	/**
+	 * Adds the player's kills and deaths to the HashMap.
+	 * @param pkds The player's kills and deaths to be added to the HashMap.
+	 */
+	public static void addPlayerKillDeathScore(PlayerKillDeathScore pkds) {
+		List<PlayerKillDeathScore> list = killDeathScores.get(pkds.getUuid());
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			PlayerKillDeathScore inList = list.get(i);
+			if (inList.getWorldPrefix().equals(pkds.getWorldPrefix())) {
+				// Combines the two
+				inList.setKills(inList.getKills() + pkds.getKills());
+				inList.setDeaths(inList.getDeaths() + pkds.getDeaths());
+				list.set(i, inList);
+				killDeathScores.put(pkds.getUuid(), list);
+				return;
+			}
+		}
+
+		// Only adds if it isn't already in the list
+		list.add(pkds);
+		killDeathScores.put(pkds.getUuid(), list);
+	}
+
+	/**
+	 * Provides the number of kills/deaths the player has in the input world.
+	 * @param uuid The UUID of the player.
+	 * @param worldName The world to verify the number of kills/deaths in.
+	 * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
+	 * @return The number of kills/deaths the player has in the input world.
+	 */
+	public static int getKillsOrDeathsInWorld(UUID uuid, String worldName, boolean isGettingKills) {
+		if (killDeathScores.get(uuid) == null) {
+			killDeathScores.put(uuid, new ArrayList<>());
+			return 0;
+		}
+
+		List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
+		for (PlayerKillDeathScore pkds : scores) {
+			if (pkds.getWorldPrefix().equals(worldName)) {
+				if (isGettingKills) {
+					return pkds.getKills();
+				} else {
+					return pkds.getDeaths();
+				}
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Updates the number of kills and deaths of the input players based on who was the killer and who was the victim.
+	 * @param killer The player who did the killing.
+	 * @param victim The player who died.
+	 * @param world The world that the player was killed in.
+	 */
+	public static void updateKillAndDeath(Player killer, Player victim, World world) {
+		String deathWorld = victim.getWorld().getName().split("_")[0];
+
+		boolean wasKillerScoreUpdated = false;
+		if (killer != null && killDeathScores.get(killer.getUniqueId()) == null) {
+			PlayerKillDeathScore pkds = new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0);
+			List<PlayerKillDeathScore> list = new ArrayList<>();
+			list.add(pkds);
+			killDeathScores.put(killer.getUniqueId(), list);
+			wasKillerScoreUpdated = true;
+		}
+
+		boolean wasVictimScoreUpdated = false;
+		if (killDeathScores.get(victim.getUniqueId()) == null) {
+			PlayerKillDeathScore pkds = new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1);
+			List<PlayerKillDeathScore> list = new ArrayList<>();
+			list.add(pkds);
+			killDeathScores.put(victim.getUniqueId(), list);
+			wasVictimScoreUpdated = true;
+		}
+
+		// Increases the killer's kill count by 1 in the world
+		if (killer != null && !wasKillerScoreUpdated) {
+			List<PlayerKillDeathScore> list = killDeathScores.get(killer.getUniqueId());
+			for (int i = 0; i < list.size(); i++) {
+				PlayerKillDeathScore pkds = list.get(i);
+				if (deathWorld.equals(pkds.getWorldPrefix())) {
+					pkds.setKills(pkds.getKills() + 1);
+					list.set(i, pkds);
+					break;
+				}
+			}
+			killDeathScores.put(killer.getUniqueId(), list);
+		}
+		// Increases the victim's death count by 1 in the world
+		if (!wasVictimScoreUpdated) {
+			List<PlayerKillDeathScore> list = killDeathScores.get(victim.getUniqueId());
+			for (int i = 0; i < list.size(); i++) {
+				PlayerKillDeathScore pkds = list.get(i);
+				if (deathWorld.equals(pkds.getWorldPrefix())) {
+					pkds.setDeaths(pkds.getDeaths() + 1);
+					list.set(i, pkds);
+					break;
+				}
+			}
+			killDeathScores.put(victim.getUniqueId(), list);
+		}
+
 	}
 
 }

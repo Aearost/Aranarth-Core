@@ -141,7 +141,6 @@ public class PersistenceUtils {
 	 * Initializes the players HashMap based on the contents of aranarth_players.txt.
 	 */
 	public static void loadAranarthPlayers() {
-
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
 				+ "aranarth_players.txt";
@@ -2165,6 +2164,99 @@ public class PersistenceUtils {
 				writer.close();
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the sentinels");
+			}
+		}
+	}
+
+	/**
+	 * Initializes the kill and death counts based on the contents of kills_and_deaths.txt.
+	 */
+	public static void loadKillDeathCount() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "kills_and_deaths.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the kills and deaths file...");
+			HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|worldPrefix|kills|deaths
+				String[] fields = row.split("\\|");
+
+				UUID uuid = UUID.fromString(fields[0]);
+				String worldPrefix = fields[1];
+				int kills = Integer.parseInt(fields[2]);
+				int deaths = Integer.parseInt(fields[3]);
+
+				PlayerKillDeathScore pkds = new PlayerKillDeathScore(uuid, worldPrefix, kills, deaths);
+				AranarthUtils.addPlayerKillDeathScore(pkds);
+			}
+			Bukkit.getLogger().info("All kills and deaths have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the kills and deaths!");
+		}
+	}
+
+	/**
+	 * Saves the kill and death counts to the kills_and_deaths.txt file.
+	 */
+	public static void saveKillDeathCount() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "kills_and_deaths.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new kills_and_deaths.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of kills_and_deaths.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+
+				writer.write("#uuid|worldPrefix|kills|deaths\n");
+
+				for (UUID uuid : AranarthUtils.getKillDeathScores().keySet()) {
+					for (PlayerKillDeathScore pkds : AranarthUtils.getKillDeathScores().get(uuid)) {
+						String world = pkds.getWorldPrefix();
+						int kills = pkds.getKills();
+						int deaths = pkds.getDeaths();
+
+						writer.write(uuid + "|" + world + "|" + kills + "|" + deaths + "\n");
+					}
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the kills and deaths");
 			}
 		}
 	}
