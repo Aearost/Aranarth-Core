@@ -218,10 +218,6 @@ public class MountStatsListener implements Listener {
 			double childJump = calculateValue(MOUNT_JUMP, child, fatherJump, motherJump);
 			double childSpeed = calculateValue(MOUNT_SPEED, child, fatherSpeed, motherSpeed);
 
-			Bukkit.getLogger().info("Calculated health: " + childHealth);
-			Bukkit.getLogger().info("Calculated jump: " + childJump);
-			Bukkit.getLogger().info("Calculated speed: " + childSpeed);
-
 			child.getAttribute(Attribute.MAX_HEALTH).setBaseValue(childHealth);
 			child.getPersistentDataContainer().set(MOUNT_HEALTH, PersistentDataType.DOUBLE, childHealth);
 			child.getAttribute(JUMP_STRENGTH).setBaseValue(childJump);

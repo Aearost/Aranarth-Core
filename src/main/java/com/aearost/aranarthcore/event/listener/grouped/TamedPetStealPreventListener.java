@@ -27,7 +27,7 @@ public class TamedPetStealPreventListener implements Listener {
 	public void onMobLeash(PlayerLeashEntityEvent e) {
 		Player player = e.getPlayer();
 		if (e.getEntity() instanceof Tameable tameable) {
-			if (!tameable.getOwner().getUniqueId().equals(player.getUniqueId())) {
+			if (tameable.getOwner() != null && !tameable.getOwner().getUniqueId().equals(player.getUniqueId())) {
 				isAttemptingToLeash = true;
 				e.setCancelled(true);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(tameable.getOwner().getUniqueId());

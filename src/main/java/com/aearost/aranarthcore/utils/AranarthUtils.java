@@ -2873,13 +2873,15 @@ public class AranarthUtils {
 
 			// Goat horns are heard up to 256 blocks away, inform nearby players
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getName().equals(player.getName())) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
-					continue;
-				}
+				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+					if (onlinePlayer.getName().equals(player.getName())) {
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+						continue;
+					}
 
-				if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+					if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+					}
 				}
 			}
 

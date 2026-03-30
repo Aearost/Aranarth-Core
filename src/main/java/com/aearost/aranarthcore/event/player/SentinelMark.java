@@ -101,7 +101,7 @@ public class SentinelMark {
 						if (meta.getInstrument() == MusicInstrument.YEARN_GOAT_HORN) {
 							e.setCancelled(true);
 
-							if (!horse.isTamed() || !horse.getOwnerUniqueId().equals(player.getUniqueId())) {
+							if (!horse.isTamed() || (horse.getOwnerUniqueId() != null && !horse.getOwnerUniqueId().equals(player.getUniqueId()))) {
 								player.sendMessage(ChatUtils.chatMessage("&cYou do not own this &eHorse!"));
 								return;
 							}

@@ -37,6 +37,8 @@ Major Features
 [-] Removed Fructivor and replaced it with Strigavor, the month of Witchcraft
 [~] Switched the order of Follivor and Strigavor
 [+] Added functionality to Strigavor for the extra potion buffs
+[~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
+[~] Fixed error with /dominion info caused by a missing AranarthPlayer
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed

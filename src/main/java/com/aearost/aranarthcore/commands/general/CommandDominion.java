@@ -1016,6 +1016,10 @@ public class CommandDominion implements CommandExecutor {
 				}
 
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getMembers().get(i));
+				// Fixes issue where old players don't have entries and haven't joined since
+				if (aranarthPlayer == null) {
+					continue;
+				}
 				String displayedName = "";
 				displayedName += AranarthUtils.getSaintRank(aranarthPlayer);
 				displayedName += AranarthUtils.getArchitectRank(aranarthPlayer);
