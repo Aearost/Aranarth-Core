@@ -23,7 +23,7 @@ public class LogExtraDrops {
 
 		if (AranarthUtils.isHarvestableWithAxe(e.getBlock().getType())) {
 			String worldName = e.getBlock().getLocation().getWorld().getName();
-			if (worldName.startsWith("world") || worldName.startsWith("smp")) {
+			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
 				Location loc = e.getBlock().getLocation();
 				boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
 				if (isEligible) {

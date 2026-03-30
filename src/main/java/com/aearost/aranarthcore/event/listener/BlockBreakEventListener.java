@@ -61,6 +61,9 @@ public class BlockBreakEventListener implements Listener {
             if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
                 new LogExtraDrops().execute(e);
             }
+            if (AranarthUtils.getMonth() == Month.FLORIVOR) {
+                new FlowerDestroy().execute(e);
+            }
         }
     }
 
