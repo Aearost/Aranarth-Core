@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,7 +24,6 @@ public class CombatLog {
 						@Override
 						public void run() {
 							if (player.getHealth() > 0) {
-								Bukkit.getLogger().info("Didn't die");
 								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 								AranarthPlayer attackerAranarthPlayer = AranarthUtils.getPlayer(attacker.getUniqueId());
 
@@ -82,8 +80,6 @@ public class CombatLog {
 										}
 									}
 								}.runTaskLater(AranarthCore.getInstance(), 200);
-							} else {
-								Bukkit.getLogger().info("Died");
 							}
 						}
 					}.runTaskLater(AranarthCore.getInstance(), 2);
