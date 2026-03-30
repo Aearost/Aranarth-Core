@@ -77,6 +77,8 @@ public class InventoryClickEventListener implements Listener {
                     new BannerExtendPatternLimit().execute(e);
                 } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Fletching Table")) {
                     new FletchingTableCraft().execute(e);
+                } else if (e.getView().getType() == InventoryType.BREWING) {
+                    new OrderChaosPotionBrewingPrevent().execute(e);
                 }
             }
         }

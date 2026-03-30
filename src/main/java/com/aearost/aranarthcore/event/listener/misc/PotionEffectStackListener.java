@@ -157,7 +157,7 @@ public class PotionEffectStackListener implements Listener {
 	private int getStackedAmplifier(PotionEffect oldEffect, PotionEffect newEffect) {
 		int stackedAmplifier = 0;
 		int oldAmplifier = oldEffect == null ? 0 : oldEffect.getAmplifier();
-		int newAmplifier = newEffect.getAmplifier();
+		int newAmplifier = newEffect == null ? 0 : newEffect.getAmplifier();
 
 		if (oldAmplifier == 0 && newAmplifier == 0) {
 			stackedAmplifier = 1;
