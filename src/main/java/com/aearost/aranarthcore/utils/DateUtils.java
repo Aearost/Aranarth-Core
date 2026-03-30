@@ -538,63 +538,63 @@ public class DateUtils {
 	 * @param month The current server month.
 	 */
 	private void applyMobSpawnRates(Month month) {
-		// Cache the server's configured spawn values on the first call, before any modification,
-		// so that 1x always means vanilla/configured rates rather than hardcoded constants.
-		World referenceWorld = Bukkit.getWorld("world");
-		if (referenceWorld == null) return;
 		if (!spawnBasesCached) {
-			// World returns -1 when it defers to the global server setting; fall back to the server-wide value in that case.
-			int worldAnimalLimit   = referenceWorld.getSpawnLimit(SpawnCategory.ANIMAL);
-			int worldMonsterLimit  = referenceWorld.getSpawnLimit(SpawnCategory.MONSTER);
-			long worldAnimalTicks  = referenceWorld.getTicksPerSpawns(SpawnCategory.ANIMAL);
-			long worldMonsterTicks = referenceWorld.getTicksPerSpawns(SpawnCategory.MONSTER);
-			baseAnimalLimit  = worldAnimalLimit  >= 0 ? worldAnimalLimit  : Bukkit.getServer().getSpawnLimit(SpawnCategory.ANIMAL);
-			baseMonsterLimit = worldMonsterLimit >= 0 ? worldMonsterLimit : Bukkit.getServer().getSpawnLimit(SpawnCategory.MONSTER);
-			baseAnimalTicks  = worldAnimalTicks  >= 0 ? worldAnimalTicks  : Bukkit.getServer().getTicksPerSpawns(SpawnCategory.ANIMAL);
-			baseMonsterTicks = worldMonsterTicks >= 0 ? worldMonsterTicks : Bukkit.getServer().getTicksPerSpawns(SpawnCategory.MONSTER);
+			World world = Bukkit.getWorld("world");
+			if (world == null) {
+				return;
+			}
+
+			baseAnimalLimit = world.getSpawnLimit(SpawnCategory.ANIMAL);
+			baseMonsterLimit = world.getSpawnLimit(SpawnCategory.MONSTER);
+			baseAnimalTicks = world.getTicksPerSpawns(SpawnCategory.ANIMAL);
+			baseMonsterTicks = world.getTicksPerSpawns(SpawnCategory.MONSTER);
+
 			spawnBasesCached = true;
 		}
 
 		double animalMultiplier = switch (month) {
-			case FAUNIVOR                     -> 3.00;
+			case FAUNIVOR -> 3.00;
 			case FOLLIVOR, STRIGAVOR -> 2.00;
 			case ARDORVOR, SOLARVOR, CALORVOR -> 1.50;
-			case AESTIVOR                     -> 1.25;
+			case AESTIVOR -> 1.25;
 			case AQUINVOR, VENTIVOR, FLORIVOR -> 1.00;
-			case IGNIVOR                      -> 0.60;
-			case UMBRAVOR                     -> 0.75;
-			case GLACIVOR                     -> 0.50;
-			case OBSCURVOR                    -> 0.40;
-			case FRIGORVOR                    -> 0.25;
+			case IGNIVOR -> 0.60;
+			case UMBRAVOR -> 0.75;
+			case GLACIVOR -> 0.50;
+			case OBSCURVOR -> 0.40;
+			case FRIGORVOR -> 0.25;
 		};
 
 		double monsterMultiplier = switch (month) {
-			case ARDORVOR                          -> 0.50;
-			case CALORVOR, SOLARVOR                -> 0.60;
+			case ARDORVOR -> 0.50;
+			case CALORVOR, SOLARVOR -> 0.60;
 			case AESTIVOR, FOLLIVOR -> 0.75;
 			case STRIGAVOR -> 0.85;
-			case FAUNIVOR                          -> 0.90;
-			case AQUINVOR, VENTIVOR, FLORIVOR      -> 1.00;
-			case UMBRAVOR                          -> 1.15;
-			case IGNIVOR                           -> 1.2;
-			case GLACIVOR                          -> 1.4;
-			case OBSCURVOR                         -> 1.35;
-			case FRIGORVOR                         -> 1.65;
+			case FAUNIVOR -> 0.90;
+			case AQUINVOR, VENTIVOR, FLORIVOR -> 1.00;
+			case UMBRAVOR -> 1.15;
+			case IGNIVOR -> 1.20;
+			case GLACIVOR -> 1.40;
+			case OBSCURVOR -> 1.35;
+			case FRIGORVOR -> 1.65;
 		};
 
-		int animalLimit  = Math.max(1, (int)(baseAnimalLimit  * animalMultiplier));
-		int monsterLimit = Math.max(1, (int)(baseMonsterLimit * monsterMultiplier));
-		int animalTicks  = (int) Math.max(1, (long)(baseAnimalTicks  / animalMultiplier));
-		int monsterTicks = (int) Math.max(1, (long)(baseMonsterTicks / monsterMultiplier));
+		int animalLimit = Math.max(5, (int) Math.round(baseAnimalLimit * animalMultiplier));
+		int monsterLimit = Math.max(20, (int) Math.round(baseMonsterLimit * monsterMultiplier));
 
-		for (String worldName : new String[]{ "world", "smp", "resource" }) {
+		int animalTicks = Math.max(1, (int) Math.round(baseAnimalTicks / animalMultiplier));
+		int monsterTicks = Math.max(1, (int) Math.round(baseMonsterTicks / monsterMultiplier));
+
+		animalTicks = Math.min(animalTicks, 1200); // Max of 60 seconds
+		monsterTicks = Math.min(monsterTicks, 400); // Max of 20 seconds
+
+		for (String worldName : new String[]{"world", "smp", "resource"}) {
 			World world = Bukkit.getWorld(worldName);
-			if (world == null) {
-				continue;
-			}
-			world.setSpawnLimit(SpawnCategory.ANIMAL,  animalLimit);
+			if (world == null) continue;
+
+			world.setSpawnLimit(SpawnCategory.ANIMAL, animalLimit);
 			world.setSpawnLimit(SpawnCategory.MONSTER, monsterLimit);
-			world.setTicksPerSpawns(SpawnCategory.ANIMAL,  animalTicks);
+			world.setTicksPerSpawns(SpawnCategory.ANIMAL, animalTicks);
 			world.setTicksPerSpawns(SpawnCategory.MONSTER, monsterTicks);
 		}
 	}
