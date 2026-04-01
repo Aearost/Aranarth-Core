@@ -68,7 +68,7 @@ public class CommandInfo implements CommandExecutor {
 			}
 
 			if (uuid != null) {
-
+				sendInfo(uuid, sender);
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
