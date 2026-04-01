@@ -40,6 +40,8 @@ commands:
     description: Teleports the player to the Creative world
   date:
     description: Lists the current Aranarth calendar date
+  deaths:
+    description: Shows the number of deaths the input player has
   delhome:
     description: Deletes the player's specified home
   dominion:
@@ -55,6 +57,8 @@ commands:
     description: Provides information about the input player
   itemname:
     description: Updates the held item to the input name
+  kills:
+    description: Shows the number of kills the input player has
   lock:
     description: Locks the next-clicked chest block
   message:
@@ -109,6 +113,12 @@ commands:
   teleport:
     description: Sends a teleport request to the input player
     aliases: [tp]
+  topkills:
+    description: Shows the players with the most kills
+    aliases: [tk]
+  topdeaths:
+    description: Shows the players with the most deaths
+    aliases: [td]
   tpaccept:
     description: Allows the player to accept a teleport request
     aliases: [tpa]

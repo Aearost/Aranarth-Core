@@ -68,6 +68,10 @@ public class InventoryClickEventListener implements Listener {
                 new GuiVoteShopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Vote Shop Purchase")) {
                 new GuiVoteShopPurchaseClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+                new GuiTopDeathsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
+                new GuiTopKillsClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

@@ -11,7 +11,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * Handles the teleport logic for homes.
+ * Handles the logic when clicking in the vote shop GUI.
  */
 public class GuiVoteShopClick {
 	public void execute(InventoryClickEvent e) {

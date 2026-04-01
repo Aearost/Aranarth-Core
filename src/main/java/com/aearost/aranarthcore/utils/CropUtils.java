@@ -409,8 +409,8 @@ public class CropUtils {
 			};
 		} else if (type == Material.NETHER_WART) {
 			return switch (month) {
-				case IGNIVOR   -> 0.1;
-				case AQUINVOR  -> 0.1;
+				case IGNIVOR   -> 1.5;
+				case AQUINVOR  -> 0.25;
 				case VENTIVOR  -> 0.1;
 				case FLORIVOR  -> 0.1;
 				case AESTIVOR  -> 0.1;
@@ -419,11 +419,11 @@ public class CropUtils {
 				case SOLARVOR  -> 0.1;
 				case FOLLIVOR -> 0.1;
 				case STRIGAVOR -> 0.1;
-				case FAUNIVOR  -> 0.1;
-				case UMBRAVOR  -> 1.0;
-				case GLACIVOR  -> 2.0;
-				case FRIGORVOR -> 3.0;
-				case OBSCURVOR -> 1.5;
+				case FAUNIVOR  -> 0.5;
+				case UMBRAVOR  -> 2.0;
+				case GLACIVOR  -> 3.0;
+				case FRIGORVOR -> 5.0;
+				case OBSCURVOR -> 3.5;
 			};
 		} else if (type == Material.CACTUS) {
 			return switch (month) {

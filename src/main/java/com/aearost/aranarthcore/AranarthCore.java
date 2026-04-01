@@ -340,6 +340,8 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("compressor").setExecutor(new CommandCompressor());
 		getCommand("creative").setExecutor(new CommandCreative());
 		getCommand("date").setExecutor(new CommandDate());
+		getCommand("deaths").setExecutor(new CommandDeaths());
+		getCommand("deaths").setTabCompleter(new CommandDeathsCompleter());
 		getCommand("delhome").setExecutor(new CommandDelhome());
 		getCommand("delhome").setTabCompleter(new CommandDelhomeCompleter());
 		getCommand("dominion").setExecutor(new CommandDominion());
@@ -352,6 +354,8 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("info").setTabCompleter(new CommandInfoCompleter());
 		getCommand("itemname").setExecutor(new CommandItemName());
 		getCommand("itemname").setTabCompleter(new CommandItemNameCompleter());
+		getCommand("kills").setExecutor(new CommandKills());
+		getCommand("kills").setTabCompleter(new CommandKillsCompleter());
 		getCommand("lock").setExecutor(new CommandLock());
 		getCommand("message").setExecutor(new CommandMessage());
 		getCommand("message").setTabCompleter(new CommandMessageCompleter());
@@ -389,6 +393,8 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("teleport").setTabCompleter(new CommandTeleportCompleter());
 		getCommand("toggle").setExecutor(new CommandToggle());
 		getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
+		getCommand("topdeaths").setExecutor(new CommandTopDeaths());
+		getCommand("topkills").setExecutor(new CommandTopKills());
 		getCommand("tpaccept").setExecutor(new CommandTpAccept());
 		getCommand("tpdeny").setExecutor(new CommandTpDeny());
 		getCommand("tphere").setExecutor(new CommandTpHere());

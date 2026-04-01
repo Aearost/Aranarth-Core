@@ -40,6 +40,7 @@ Major Features
 [+] Introduced and limited the brewing of the Potion of Order and the Potion of Chaos to the month of Florivor
 [~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
 [~] Fixed error with /dominion info caused by a missing AranarthPlayer
+[+] Implemented /kills, /deaths, /topkills, and /topdeaths
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed

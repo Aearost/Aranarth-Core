@@ -2880,8 +2880,10 @@ public class AranarthUtils {
 						continue;
 					}
 
-					if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+					if (player.getWorld().equals(onlinePlayer.getWorld())) {
+						if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+						}
 					}
 				}
 			}
@@ -3207,11 +3209,11 @@ public class AranarthUtils {
 	/**
 	 * Provides the number of kills/deaths the player has in the input world.
 	 * @param uuid The UUID of the player.
-	 * @param worldName The world to verify the number of kills/deaths in.
+	 * @param world The world to verify the number of kills/deaths in.
 	 * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
 	 * @return The number of kills/deaths the player has in the input world.
 	 */
-	public static int getKillsOrDeathsInWorld(UUID uuid, String worldName, boolean isGettingKills) {
+	public static int getKillsOrDeathsInWorld(UUID uuid, World world, boolean isGettingKills) {
 		if (killDeathScores.get(uuid) == null) {
 			killDeathScores.put(uuid, new ArrayList<>());
 			return 0;
@@ -3219,7 +3221,7 @@ public class AranarthUtils {
 
 		List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
 		for (PlayerKillDeathScore pkds : scores) {
-			if (pkds.getWorldPrefix().equals(worldName)) {
+			if (pkds.getWorldPrefix().equals(world.getName().split("_")[0])) {
 				if (isGettingKills) {
 					return pkds.getKills();
 				} else {
@@ -3284,6 +3286,68 @@ public class AranarthUtils {
 			killDeathScores.put(victim.getUniqueId(), list);
 		}
 
+	}
+
+	/**
+	 * Provides a list of the UUIDs of the players with the most kills, sorted by kills.
+	 * @param world The world to verify the kills in.
+	 * @return The list of the UUIDs of the players with the most kills, sorted by kills.
+	 */
+	public static List<UUID> getTopKills(World world) {
+		String worldName = world.getName().split("_")[0];
+		Map<UUID, Integer> totalKills = new HashMap<>();
+		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+			int sum = 0;
+
+			for (PlayerKillDeathScore score : entry.getValue()) {
+				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+					sum += score.getKills();
+				}
+			}
+
+			// Only include players who actually have kills
+			if (sum > 0) {
+				totalKills.put(entry.getKey(), sum);
+			}
+		}
+
+		// Sort by kills descending and return UUIDs
+		return totalKills.entrySet()
+				.stream()
+				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.map(Map.Entry::getKey)
+				.toList();
+	}
+
+	/**
+	 * Provides a list of the UUIDs of the players with the most deaths, sorted by deaths.
+	 * @param world The world to verify the deaths in.
+	 * @return The list of the UUIDs of the players with the most deaths, sorted by deaths.
+	 */
+	public static List<UUID> getTopDeaths(World world) {
+		String worldName = world.getName().split("_")[0];
+		Map<UUID, Integer> totalDeaths = new HashMap<>();
+		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+			int sum = 0;
+
+			for (PlayerKillDeathScore score : entry.getValue()) {
+				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+					sum += score.getDeaths();
+				}
+			}
+
+			// Only include players who actually have deaths
+			if (sum > 0) {
+				totalDeaths.put(entry.getKey(), sum);
+			}
+		}
+
+		// Sort by deaths descending and return UUIDs
+		return totalDeaths.entrySet()
+				.stream()
+				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.map(Map.Entry::getKey)
+				.toList();
 	}
 
 }
