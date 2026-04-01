@@ -88,6 +88,7 @@ public class CropHarvest {
 
 			for (ItemStack drop : drops) {
 				if (drop.getAmount() > 0) {
+					CropUtils.updateSeedLore(drop);
 					block.getWorld().dropItemNaturally(block.getLocation(), drop);
 				}
 			}
@@ -109,6 +110,7 @@ public class CropHarvest {
 			e.setCancelled(true);
 
 			for (ItemStack drop : drops) {
+				CropUtils.updateSeedLore(drop);
 				block.getWorld().dropItemNaturally(block.getLocation(), drop);
 			}
 

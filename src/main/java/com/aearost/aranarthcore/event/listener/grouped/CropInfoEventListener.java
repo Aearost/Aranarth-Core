@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.listener.misc;
+package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.CropUtils;
@@ -30,6 +30,5 @@ public class CropInfoEventListener implements Listener {
 			CropUtils.refreshInventory(player.getInventory());
 		}
 	}
-
 }
 
