@@ -47,7 +47,7 @@ public class CompressorItemPickup {
 					continue;
 				}
 
-				int result = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, inventoryItem);
+				int result = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, inventoryItem);
 				if (result >= 0) {
 					continue;
 				}
@@ -63,7 +63,7 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									int shulkerResult = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, shulkerItem);
+									int shulkerResult = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, shulkerItem);
 									if (shulkerResult >= 0) {
 										continue;
 									}
@@ -119,7 +119,7 @@ public class CompressorItemPickup {
 			// Include the actual item being picked up
 			if (AranarthUtils.isCompressible(pickupClone, true)) {
 				if (AranarthUtils.isItemBeingCompressed(player.getUniqueId(), pickupClone.getType())) {
-					int result = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupClone);
+					int result = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, pickupClone);
 					if (result == 0) {
 						e.getItem().setItemStack(null);
 						e.getItem().remove();

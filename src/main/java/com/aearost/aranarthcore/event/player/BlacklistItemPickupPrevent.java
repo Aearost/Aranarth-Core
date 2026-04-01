@@ -22,7 +22,7 @@ public class BlacklistItemPickupPrevent {
 			}
 
 			if (!aranarthPlayer.getBlacklist().isEmpty()) {
-				int result = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, e.getItem().getItemStack());
+				int result = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, e.getItem().getItemStack());
 				if (result == 1) {
 					e.getItem().remove();
 					e.getItem().setItemStack(null);

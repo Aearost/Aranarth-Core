@@ -2086,7 +2086,7 @@ public class AranarthUtils {
 	 * @param item The item that is attempting to be picked up.
 	 * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
 	 */
-	public static int isBlacklistingItem(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
+	public static int getBlacklistMethod(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
 		if (!player.hasPermission("aranarth.blacklist")) {
 			return -1;
 		}
@@ -2097,7 +2097,7 @@ public class AranarthUtils {
 		}
 
 		for (ItemStack is : blacklistedItems) {
-			if (is.isSimilar(item)) {
+			if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
 				return aranarthPlayer.getBlacklistingMethod();
 			}
 		}
