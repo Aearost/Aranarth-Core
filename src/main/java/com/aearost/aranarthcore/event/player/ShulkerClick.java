@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiShulker;
+import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
@@ -32,6 +33,7 @@ public class ShulkerClick {
 								e.setCancelled(true);
 								player.playSound(player, Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
 								Inventory shulkerInventory = shulker.getInventory();
+								CropUtils.refreshInventory(shulkerInventory);
 								GuiShulker gui = new GuiShulker(player, shulkerInventory);
 								gui.openGui();
 								return;
