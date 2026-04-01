@@ -41,6 +41,7 @@ Major Features
 [~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
 [~] Fixed error with /dominion info caused by a missing AranarthPlayer
 [+] Implemented /kills, /deaths, /topkills, and /topdeaths
+[~] Increased minimum mcMMO required per rank
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
