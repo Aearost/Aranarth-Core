@@ -11,7 +11,9 @@ import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.BanList;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.ban.ProfileBanList;
+import org.bukkit.entity.Player;
 
 import java.awt.*;
 import java.time.Instant;
@@ -19,6 +21,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Provides a variety of utility methods for everything related to Discord integration.
@@ -557,6 +560,11 @@ public class DiscordUtils {
 	 * @param uuid The UUID of the player who donated.
 	 */
 	public static void donationNotification(String message, UUID uuid, Color color) {
+		// Plays a donation sound for all online players
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP , 1F, ThreadLocalRandom.current().nextFloat(1.2F, 1.6F));
+		}
+
 		Guild guild = getGuild();
 		EmbedBuilder embed = new EmbedBuilder();
 		message = ChatUtils.stripColorFormatting(message);

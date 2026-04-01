@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Handles the logic behind a player vote being received by the server.
@@ -68,6 +70,7 @@ public class VotifierListener implements Listener {
 				} else {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(player.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
 				}
+				onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
 			}
 
 			// Adds their vote
