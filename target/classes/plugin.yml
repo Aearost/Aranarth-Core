@@ -42,6 +42,7 @@ commands:
     aliases: [comp, compress]
   craft:
     description: Opens a crafting table GUI
+    aliases: [workbench, wb, ct]
   creative:
     description: Teleports the player to the Creative world
   date:

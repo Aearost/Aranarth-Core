@@ -124,9 +124,11 @@ public class CommandDominion implements CommandExecutor {
 					int i = 0;
 					for (Dominion dominionFromList : DominionUtils.getDominions()) {
 						i++;
+						NumberFormat formatter = NumberFormat.getCurrencyInstance();
+						String valueWithTwoDecimals = formatter.format(dominion.getBalance());
 						player.sendMessage(ChatUtils.translateToColor("&7" + i + ". &e" + dominionFromList.getName() + "&7, ruled by &e"
 								+ AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
-								+ " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6$" + dominionFromList.getBalance()));
+								+ " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6" + valueWithTwoDecimals));
 					}
 				}
 				else if (args[0].equalsIgnoreCase("info")) {
