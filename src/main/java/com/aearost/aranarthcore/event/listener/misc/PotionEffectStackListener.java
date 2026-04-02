@@ -42,7 +42,14 @@ public class PotionEffectStackListener implements Listener {
 		}
 
 		if (newEffect != null && newEffect.getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
+			// Do not apply mining fatigue from Elder guardians
 			if (e.getEntity() instanceof Player player) {
+				if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
+					if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
+						e.setCancelled(true);
+					}
+				}
+
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				Long lastUsed = aranarthPlayer.getHorns().get(MusicInstrument.DREAM_GOAT_HORN);
 				// If the effect of the horn is still active, prevent new effects from being added
