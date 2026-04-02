@@ -433,7 +433,8 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
-			if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
+			boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
+			if (isRaining || player.isInWater()) {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
 			}
