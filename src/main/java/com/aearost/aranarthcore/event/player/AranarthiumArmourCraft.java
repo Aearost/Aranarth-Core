@@ -12,6 +12,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -342,8 +343,20 @@ public class AranarthiumArmourCraft {
         }
 		Map<Enchantment, Integer> enchantments = armor.getEnchantments();
 		for (Enchantment enchantment : enchantments.keySet()) {
-			enhancedAranarthiumArmor.addEnchantment(enchantment, enchantments.get(enchantment));
+			if (enhancedAranarthiumArmor.containsEnchantment(enchantment)) {
+				int aranarthiumEnchantmentLevel = enhancedAranarthiumArmor.getEnchantmentLevel(enchantment);
+				int armorLevel = enchantments.get(enchantment);
+				if (aranarthiumEnchantmentLevel > armorLevel) {
+					ArmorMeta meta = (ArmorMeta) enhancedAranarthiumArmor.getItemMeta();
+					meta.addEnchant(enchantment, aranarthiumEnchantmentLevel, true);
+				} else {
+					enhancedAranarthiumArmor.addEnchantment(enchantment, enchantments.get(enchantment));
+				}
+			} else {
+				enhancedAranarthiumArmor.addEnchantment(enchantment, enchantments.get(enchantment));
+			}
 		}
+
 
 		return enhancedAranarthiumArmor;
 	}

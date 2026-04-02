@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
@@ -32,6 +33,7 @@ public class ScorchedAranarthiumBoots implements AranarthItem {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_scorched_boots");
 			meta.setItemModel(key);
 			meta.setTrim(new ArmorTrim(TrimMaterial.RESIN, TrimPattern.SNOUT));
+			meta.addEnchant(Enchantment.SOUL_SPEED, 5, true);
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "scorched");
 

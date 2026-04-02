@@ -453,6 +453,10 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			if (player.getWorld().getName().endsWith("_nether")) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			}
 		} else if (isWearingArmorType(player, "soulbound")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		}
