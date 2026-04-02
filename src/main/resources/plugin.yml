@@ -11,6 +11,8 @@ commands:
     description: All underlying commands regarding the plugin
   afk:
     description: Manually places the player in AFK mode
+  anvil:
+    description: Opens an anvil GUI
   aranarthium:
     description: Provides a written book containing information about Aranarthium
   arena:
@@ -33,9 +35,14 @@ commands:
   calendar:
     description: Provides a written book containing information about the calendar system
     aliases: [cal]
+  cartography:
+    description: Opens a cartography table GUI
   compressor:
     description: Opens the compressor GUI to toggle compressible items
     aliases: [comp, compress]
+  craft:
+    description: Opens a crafting table GUI
+    aliases: [workbench, wb, ct]
   creative:
     description: Teleports the player to the Creative world
   date:
@@ -47,6 +54,10 @@ commands:
   dominion:
     description: The master command for Aranarth dominions
     aliases: [d]
+  fletching:
+    description: Opens a fletching table GUI
+  grindstone:
+    description: Opens a grindstone GUI
   hat:
     description: Places the held item on the player's head as a hat
   home:
@@ -61,6 +72,8 @@ commands:
     description: Shows the number of kills the input player has
   lock:
     description: Locks the next-clicked chest block
+  loom:
+    description: Opens a loom GUI
   message:
     description: Messages the input player the provided message
     aliases: [msg]
@@ -97,10 +110,14 @@ commands:
     description: Creates a new home
   shop:
     description: Opens the GUI to players' shops
+  smithing:
+    description: Opens a smithing table GUI
   smp:
     description: Teleports the player to the SMP world
   spawn:
     description: Teleports the player to the Spawn world
+  stonecutter:
+    description: Opens a stonecutter GUI
   store:
     description: Provides the player with a GUI of the server's store
   survival:

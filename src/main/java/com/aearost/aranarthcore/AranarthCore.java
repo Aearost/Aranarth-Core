@@ -325,6 +325,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("ac").setExecutor(new CommandAC());
 		getCommand("ac").setTabCompleter(new CommandACCompleter());
 		getCommand("afk").setExecutor(new CommandAfk());
+		getCommand("anvil").setExecutor(new CommandAnvil());
 		getCommand("aranarthium").setExecutor(new CommandAranarthium());
 		getCommand("arena").setExecutor(new CommandArena());
 		getCommand("avatar").setExecutor(new CommandAvatar());
@@ -337,7 +338,9 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("boosts").setExecutor(new CommandBoosts());
 		getCommand("boosts").setTabCompleter(new CommandBoostsCompleter());
 		getCommand("calendar").setExecutor(new CommandCalendar());
+		getCommand("cartography").setExecutor(new CommandCartography());
 		getCommand("compressor").setExecutor(new CommandCompressor());
+		getCommand("craft").setExecutor(new CommandCraft());
 		getCommand("creative").setExecutor(new CommandCreative());
 		getCommand("date").setExecutor(new CommandDate());
 		getCommand("deaths").setExecutor(new CommandDeaths());
@@ -346,6 +349,8 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("delhome").setTabCompleter(new CommandDelhomeCompleter());
 		getCommand("dominion").setExecutor(new CommandDominion());
 		getCommand("dominion").setTabCompleter(new CommandDominionCompleter());
+		getCommand("fletching").setExecutor(new CommandFletching());
+		getCommand("grindstone").setExecutor(new CommandGrindstone());
 		getCommand("hat").setExecutor(new CommandHat());
 		getCommand("home").setExecutor(new CommandHome());
 		getCommand("home").setTabCompleter(new CommandHomeCompleter());
@@ -357,6 +362,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("kills").setExecutor(new CommandKills());
 		getCommand("kills").setTabCompleter(new CommandKillsCompleter());
 		getCommand("lock").setExecutor(new CommandLock());
+		getCommand("loom").setExecutor(new CommandLoom());
 		getCommand("message").setExecutor(new CommandMessage());
 		getCommand("message").setTabCompleter(new CommandMessageCompleter());
 		getCommand("nickname").setExecutor(new CommandNickname());
@@ -384,8 +390,10 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("sethome").setTabCompleter(new CommandSethomeCompleter());
 		getCommand("shop").setExecutor(new CommandShop());
 		getCommand("shop").setTabCompleter(new CommandShopCompleter());
+		getCommand("smithing").setExecutor(new CommandSmithing());
 		getCommand("smp").setExecutor(new CommandSMP());
 		getCommand("spawn").setExecutor(new CommandSpawn());
+		getCommand("stonecutter").setExecutor(new CommandStonecutter());
 		getCommand("store").setExecutor(new CommandStore());
 		getCommand("survival").setExecutor(new CommandSurvival());
 		getCommand("tables").setExecutor(new CommandTables());

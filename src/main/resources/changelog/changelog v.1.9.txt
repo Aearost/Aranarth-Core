@@ -36,6 +36,7 @@ Major Features
 [~] Switched the order of Follivor and Strigavor
 [+] Introduced and limited the brewing of the Potion of Order and the Potion of Chaos to the month of Florivor
 [+] Implemented /kills, /deaths, /topkills, and /topdeaths
+[+] Added individual commands for all of the different /tables options
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
