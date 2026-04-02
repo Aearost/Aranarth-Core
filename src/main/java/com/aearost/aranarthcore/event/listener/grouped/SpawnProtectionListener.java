@@ -176,7 +176,8 @@ public class SpawnProtectionListener implements Listener {
 						|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
 						|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
 						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")
-						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")) {
+						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")
+						|| block.getType() == Material.DECORATED_POT || block.getType() == Material.FLOWER_POT) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 					if (!aranarthPlayer.isInAdminMode()) {
 						// Allow server shops to be used at spawn

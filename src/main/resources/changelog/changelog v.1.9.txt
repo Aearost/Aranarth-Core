@@ -25,8 +25,6 @@ Major Features
 [+] Added in an avatar room and functionality to cycle through the avatars
 [~] Removed the /prefix from commands and shifted them all to be under their own commands
 [+] Added in /reply to quickly reply to messages
-[~] Made the rooted dirt recipe require 2 seeds
-[~] Added String to the recipe for a Bell
 [~] Set the apple in the God Apple recipe to be using a golden apple and not a normal apple
 [-] Removed the Lodestone recipe as a vanilla recipe is being created or already exists for it
 [-] Removed the Nametag recipe as a vanilla recipe is being created or already exists for it
@@ -36,13 +34,8 @@ Major Features
 [+] Implemented functionality for dynamic crop growth and yields
 [-] Removed Fructivor and replaced it with Strigavor, the month of Witchcraft
 [~] Switched the order of Follivor and Strigavor
-[+] Added functionality to Strigavor for the extra potion buffs
 [+] Introduced and limited the brewing of the Potion of Order and the Potion of Chaos to the month of Florivor
-[~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
-[~] Fixed error with /dominion info caused by a missing AranarthPlayer
 [+] Implemented /kills, /deaths, /topkills, and /topdeaths
-[~] Increased minimum mcMMO required per rank
-[+] Added sound effects when players vote and when they donate
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
@@ -153,6 +146,12 @@ Minor Features
 [+] Added /ac tpf to force teleport self regardless of coordinates/unsafe location
 [+] Manually implemented discord to in-game messages
 [+] Added extra God Apple Fragment drops while a Boost of the Harvest is active
+[+] Added decorated pots and flower pots as protected blocks at Spawn and Dominions
+[~] Made the rooted dirt recipe require 2 seeds
+[~] Added String to the recipe for a Bell
+[~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
+[~] Fixed error with /dominion info caused by a missing AranarthPlayer
+[+] Added sound effects when players vote and when they donate
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
