@@ -47,6 +47,8 @@ public class PotionEffectStackListener implements Listener {
 				if (AranarthUtils.isWearingArmorType(player, "aquatic")) {
 					if (newEffect.getType() == PotionEffectType.MINING_FATIGUE && e.getCause() == Cause.ATTACK) {
 						e.setCancelled(true);
+						player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+						return;
 					}
 				}
 

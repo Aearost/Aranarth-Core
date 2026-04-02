@@ -155,6 +155,7 @@ Minor Features
 [+] Added sound effects when players vote and when they donate
 [~] Fixed the formatting of balances in /dominion list
 [~] Prevented Aquatic Aranarthium wearers from getting Mining Fatigue from Elder Guardians (still will receive it during Ardorvor)
+[+] Added speed and strength buffs while raining for Aquatic Aranarthium wearers
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

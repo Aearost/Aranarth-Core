@@ -433,6 +433,10 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			if (AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			}
 		} else if (isWearingArmorType(player, "ardent")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));

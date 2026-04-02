@@ -64,7 +64,7 @@ public class CommandAranarthium implements CommandExecutor {
 	private static String aquaticArmour() {
 		return ChatUtils.translateToColor(
 				"&lAquatic Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oDolphin's Grace&r and the &oConduit Power&r.\n\nAdditionally yields increased damage when using a &lTrident&r, and results in immunity of &oMining Fatigue."
+						"Provides the wearer with &oDolphin's Grace&r & &oConduit Power&r. If raining or in water, will also provide &oSpeed III &rand &oStrength II.\n\nIncreases &lTrident&r damage, and provides &oMining Fatigue &rimmunity from Elder Guardians."
 		);
 	}
 
