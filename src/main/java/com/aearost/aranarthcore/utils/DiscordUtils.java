@@ -6,6 +6,7 @@ import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.EmbedBuilder;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Guild;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Member;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.Role;
 import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import org.bukkit.BanList;
@@ -19,6 +20,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,11 +47,60 @@ public class DiscordUtils {
 
 	public static void sendChatMessage(String message) {
 		String discordMessage = ChatUtils.stripColorFormatting(message);
+		List<String> indexRangesOfTaggedPlayers = new ArrayList<>();
+
+		char[] characters = discordMessage.toCharArray();
+		int pingStart = -1;
+		String finalMessage = "";
+		for (int i = 0; i < discordMessage.length(); i++) {
+			if (characters[i] == '@') {
+				pingStart = i;
+			}
+			// Not currently trying to find a user ID
+			else if (pingStart == -1) {
+				finalMessage += characters[i];
+			} else {
+				// If the ping ended
+				if (characters[i] == ' ' || i == discordMessage.length() - 1) {
+					String fullInputUsername = "";
+					// Start after the @ and end at the last character
+					for (int j = pingStart + 1; j <= i; j++) {
+						fullInputUsername += characters[j];
+					}
+
+					if (fullInputUsername.endsWith(" ")) {
+						fullInputUsername = fullInputUsername.substring(0, fullInputUsername.length() - 1);
+					}
+					String id = findMemberToPing(fullInputUsername);
+					if (id != null) {
+						finalMessage += "<@" + id + "> ";
+					} else {
+						finalMessage += fullInputUsername;
+					}
+					pingStart = -1;
+				}
+			}
+		}
+
 		// Architect symbol - force text presentation
-		discordMessage = discordMessage.replace("\uD83D\uDD28", "\uD83D\uDD28\uFE0E");
+		finalMessage = finalMessage.replace("\uD83D\uDD28", "\uD83D\uDD28\uFE0E");
 		// Saint symbol - force text presentation
-		discordMessage = discordMessage.replace("\u269C", "\u269C\uFE0E");
-		serverChatChannel.sendMessage(discordMessage).queue();
+		finalMessage = finalMessage.replace("\u269C", "\u269C\uFE0E");
+		serverChatChannel.sendMessage(finalMessage).queue();
+	}
+
+	/**
+	 * Provides the ID of the user to ping based on the input String.
+	 * @param input The string that
+	 * @return The ID associated to the input username.
+	 */
+	private static String findMemberToPing(String input) {
+		List<Member> username = getGuild().getMembersByName(input, true);
+		if (!username.isEmpty()) {
+			return username.getFirst().getId();
+		}
+
+		return null;
 	}
 
 	/**
