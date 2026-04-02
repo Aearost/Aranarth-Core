@@ -139,11 +139,13 @@ public class PotionEffectStackListener implements Listener {
 					}
 				}
 
-				int stackedAmplifier = getStackedAmplifier(oldEffect, newEffect);
-				// Adds amplifier restrictions based on the potion's type
-				stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
-				// This will call the event recursively
-				entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
+				if (newEffect != null) {
+					int stackedAmplifier = getStackedAmplifier(oldEffect, newEffect);
+					// Adds amplifier restrictions based on the potion's type
+					stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
+					// This will call the event recursively
+					entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
+				}
 			}
 		}
 	}
