@@ -2965,7 +2965,9 @@ public class AranarthUtils {
 	 */
 	public static void refreshSentinels() {
 		for (AranarthPlayer aranarthPlayer : players.values()) {
+			UUID uuid = AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayer);
 			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+			List<Integer> sentinelsToRemove = new ArrayList<>();
 			for (EntityType type : sentinels.keySet()) {
 				for (int i = 0; i < sentinels.get(type).size(); i++) {
 					Sentinel sentinel = sentinels.get(type).get(i);
@@ -2974,11 +2976,27 @@ public class AranarthUtils {
 					Chunk chunk = sentinel.getLocation().getChunk();
 					if (chunk.isLoaded()) {
 						Entity entity = Bukkit.getEntity(sentinel.getUuid());
-						sentinel.setLocation(entity.getLocation());
-						sentinels.get(type).set(i, sentinel);
+						// Cleans up any sentinels that have died
+						if (entity == null) {
+							sentinelsToRemove.add(i);
+						}
+						// Updates the location of the sentinel
+						else {
+							sentinel.setLocation(entity.getLocation());
+							sentinels.get(type).set(i, sentinel);
+						}
 					}
 				}
+
+				// Remove in reverse order to avoid shifting indexes
+				for (int i = sentinelsToRemove.size() - 1; i >= 0; i--) {
+					int index = sentinelsToRemove.get(i);
+					sentinels.get(type).remove(index);
+				}
+				sentinelsToRemove.clear();
 			}
+			aranarthPlayer.setSentinels(sentinels);
+			AranarthUtils.setPlayer(uuid, aranarthPlayer);
 		}
 	}
 
