@@ -119,6 +119,8 @@ public class PlayerServerJoinListener implements Listener {
 							+ "\n                    &7to the &6&lRealm of Aranarth!"));
 					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
 					Bukkit.broadcastMessage("");
+
+					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
