@@ -134,7 +134,10 @@ public class AranarthUtils {
 		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
 				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
 				|| uuid.equals(getUUIDFromUsername("SachsiBua")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
-				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))) {
+				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))
+				|| uuid.equals(getUUIDFromUsername("Keos36")) || uuid.equals(getUUIDFromUsername("WitchEggDog"))
+				|| uuid.equals(getUUIDFromUsername("MasterlySnake")) || uuid.equals(getUUIDFromUsername("CosmicBlur"))
+				|| uuid.equals(getUUIDFromUsername("B3nnett_B"))) {
 			originalPlayers.add(uuid);
 		}
 	}

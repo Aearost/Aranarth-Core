@@ -15,6 +15,7 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -37,6 +38,10 @@ public class PlayerServerJoinListener implements Listener {
 		boolean isNewPlayer = false;
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
+			LocalDateTime now = LocalDateTime.now();
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			aranarthPlayer.setFirstJoinDate(now.getMonthValue() + "/" + now.getDayOfMonth() + "/" + now.getYear());
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 			player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
 			isNewPlayer = true;
 		}

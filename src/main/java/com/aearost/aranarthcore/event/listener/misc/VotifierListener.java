@@ -35,9 +35,9 @@ public class VotifierListener implements Listener {
 		if (uuid != null) {
 			Vote vote = e.getVote();
 			// If it was a test vote, do not increase the number of votes the player has
-//			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) { TODO
-//				return;
-//			}
+			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
+				return;
+			}
 
 			Player player = Bukkit.getPlayer(uuid);
 			ItemStack key = new KeyVote().getItem();

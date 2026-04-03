@@ -8,7 +8,6 @@ import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
-import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
@@ -19,9 +18,6 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
@@ -93,26 +89,27 @@ public class AranarthCore extends JavaPlugin {
 			public void run() {
 				ChatUtils.sendServerTips();
 
-				// Attempts to automatically assign an avatar if there currently is none
-				if (AvatarUtils.getCurrentAvatar() == null) {
-					boolean wasAvatarFound = AvatarUtils.selectAvatar();
-					if (!wasAvatarFound) {
-						Bukkit.getLogger().info("A new Avatar could not be selected");
-					}
-				} else {
-					// Automatically removes an Avatar once they've been inactive for 7 days
-					Avatar avatar = AvatarUtils.getCurrentAvatar();
-					OfflinePlayer player = Bukkit.getOfflinePlayer(avatar.getUuid());
-					if (!player.isOnline()) {
-						Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
-						LocalDateTime playerLastPlayDate = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
-						LocalDateTime currentDate = LocalDateTime.now();
-						if (playerLastPlayDate.plusDays(7).isBefore(currentDate)) {
-							Bukkit.getLogger().info("Avatar " + player.getName() + " has been inactive for 7 days");
-							AvatarUtils.removeCurrentAvatar();
-						}
-					}
-				}
+				// TODO Re-enable once we do the Avatar event
+//				// Attempts to automatically assign an avatar if there currently is none
+//				if (AvatarUtils.getCurrentAvatar() == null) {
+//					boolean wasAvatarFound = AvatarUtils.selectAvatar();
+//					if (!wasAvatarFound) {
+//						Bukkit.getLogger().info("A new Avatar could not be selected");
+//					}
+//				} else {
+//					// Automatically removes an Avatar once they've been inactive for 7 days
+//					Avatar avatar = AvatarUtils.getCurrentAvatar();
+//					OfflinePlayer player = Bukkit.getOfflinePlayer(avatar.getUuid());
+//					if (!player.isOnline()) {
+//						Instant lastPlayed = Instant.ofEpochMilli(player.getLastPlayed());
+//						LocalDateTime playerLastPlayDate = LocalDateTime.ofInstant(lastPlayed, ZoneId.systemDefault());
+//						LocalDateTime currentDate = LocalDateTime.now();
+//						if (playerLastPlayDate.plusDays(7).isBefore(currentDate)) {
+//							Bukkit.getLogger().info("Avatar " + player.getName() + " has been inactive for 7 days");
+//							AvatarUtils.removeCurrentAvatar();
+//						}
+//					}
+//				}
 
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					PermissionUtils.reEvaluateMonthlySaints(player);

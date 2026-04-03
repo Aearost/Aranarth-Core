@@ -511,9 +511,8 @@ public class SpawnProtectionListener implements Listener {
 			}
 			else {
 				boolean isTooLow = e.getTo().getY() <= 50;
-//				boolean isLeavingSpawnBoundaries = (x < -170 || x > 170) || (z > 130 || z < -220); TODO also consider the tutorials
-//				if (isTooLow || isLeavingSpawnBoundaries) { TODO might be best to just check if they're within a range of x/z coordinates so the far out tutorials will work fine
-				if (isTooLow) {
+				boolean isLeavingSpawnBoundaries = ((x < -170 || x > 170) && (x > -250 && x < 250)) || ((z > 130 || z < -220) && ((z > -300 || z < 200)));
+				if (isTooLow || isLeavingSpawnBoundaries) {
 					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
 					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
 					e.getPlayer().teleport(locToTeleportTo);

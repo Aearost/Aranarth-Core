@@ -80,6 +80,7 @@ public class AranarthPlayer {
 	private boolean isShowingPingInTab = true;
 	private boolean isTogglingInventoryAssist = false;
 	private boolean isAutoLockingChests = true;
+	private String firstJoinDate = "";
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -139,6 +140,7 @@ public class AranarthPlayer {
 		this.combatLogTime = new HashMap<>();
 		this.isTogglingInventoryAssist = false;
 		this.isAutoLockingChests = true;
+		this.firstJoinDate = "";
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -146,7 +148,7 @@ public class AranarthPlayer {
 						  List<ItemStack> blacklist, int blacklistingMethod, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
 						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems,
-						  int votePointsSpent, boolean isUsingSpawnBoost,
+						  int votePointsSpent, boolean isUsingSpawnBoost, String firstJoinDate,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -204,6 +206,7 @@ public class AranarthPlayer {
 		this.combatLogTime = new HashMap<>();
 		this.isTogglingInventoryAssist = false;
 		this.isAutoLockingChests = true;
+		this.firstJoinDate = firstJoinDate;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1220,5 +1223,21 @@ public class AranarthPlayer {
 	 */
 	public void setAutoLockingChests(boolean autoLockingChests) {
 		isAutoLockingChests = autoLockingChests;
+	}
+
+	/**
+	 * Provides the date that the player first joined the server.
+	 * @return The date that the player first joined the server.
+	 */
+	public String getFirstJoinDate() {
+		return firstJoinDate;
+	}
+
+	/**
+	 * Updates the date that the player first joined the server.
+	 * @param firstJoinDate The date that the player first joined the server.
+	 */
+	public void setFirstJoinDate(String firstJoinDate) {
+		this.firstJoinDate = firstJoinDate;
 	}
 }

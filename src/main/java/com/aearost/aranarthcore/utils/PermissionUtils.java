@@ -401,6 +401,12 @@ public class PermissionUtils {
 			return;
 		}
 
+		for (Perk perk : Perk.values()) {
+			if (perks.get(perk) == null) {
+				perks.put(perk, 0);
+			}
+		}
+
 		// Compressor
 		if (perks.get(Perk.COMPRESSOR) == 1) {
 			perms.setPermission("aranarth.compressor", true);

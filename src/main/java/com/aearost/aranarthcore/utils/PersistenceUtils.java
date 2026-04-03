@@ -164,7 +164,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|firstJoinDate|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -269,6 +269,8 @@ public class PersistenceUtils {
 				int spawnBoostValue = Integer.parseInt(fields[21]);
 				boolean isUsingSpawnBoost = spawnBoostValue == 1;
 
+				String firstJoinDate = fields[22];
+
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
 				Pronouns pronouns = Pronouns.MALE;
@@ -282,7 +284,8 @@ public class PersistenceUtils {
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
 						blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
 						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
-						pronouns));
+						firstJoinDate,
+						pronouns)); // Keep pronouns at the end
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -321,7 +324,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -428,6 +431,8 @@ public class PersistenceUtils {
 						boolean isUsingSpawnBoost = aranarthPlayer.isUsingSpawnBoost();
 						int spawnBoostValue = isUsingSpawnBoost ? 1 : 0;
 
+						String firstJoinDate = aranarthPlayer.getFirstJoinDate();
+
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
 						if (aranarthPlayer.getPronouns() == Pronouns.FEMALE) {
@@ -441,6 +446,7 @@ public class PersistenceUtils {
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
 								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
 								+ "|" + isCompressingItems + "|" + votePointsSpent + "|" + spawnBoostValue + "|"
+								+ firstJoinDate + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);
@@ -2021,6 +2027,10 @@ public class PersistenceUtils {
 				String[] playerParts = row.split("\\|");
 				UUID playerUuid = UUID.fromString(playerParts[0]);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+				if (aranarthPlayer == null) {
+					continue;
+				}
+
 				HashMap<EntityType, List<Sentinel>> sentinels = new HashMap<>();
 
 				List<Sentinel> horse = new ArrayList<>();
