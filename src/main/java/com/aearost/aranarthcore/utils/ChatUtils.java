@@ -454,28 +454,39 @@ public class ChatUtils {
 		}
 		String assembledMsg = msg.toString();
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-		String prefixStart = "&7⊰&r";
-		String prefixEnd = "&7⊱&r";
-		String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
-		String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
+		// If sending the message to yourself
+		if (player.getUniqueId().equals(target.getUniqueId())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			String prefixStart = "&7⊰&r";
+			String prefixEnd = "&7⊱&r";
+			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e");
+			// Formats to color if the player sending has the permissions
+			String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
+			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
+		} else {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+			String prefixStart = "&7⊰&r";
+			String prefixEnd = "&7⊱&r";
+			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
+			String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
 
-		// Formats to color if the player sending has the permissions
-		String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
+			// Formats to color if the player sending has the permissions
+			String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
 
-		player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
-		target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
+			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
+			target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
 
-		targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
-		AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
+			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
+			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
 
-		String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
-		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-			if (onlineAranarthPlayer.isInAdminMode()) {
-				if (!player.getUniqueId().equals(onlinePlayer.getUniqueId()) && !target.getUniqueId().equals(onlinePlayer.getUniqueId())) {
-					onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
+			String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+				if (onlineAranarthPlayer.isInAdminMode()) {
+					if (!player.getUniqueId().equals(onlinePlayer.getUniqueId()) && !target.getUniqueId().equals(onlinePlayer.getUniqueId())) {
+						onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
+					}
 				}
 			}
 		}
