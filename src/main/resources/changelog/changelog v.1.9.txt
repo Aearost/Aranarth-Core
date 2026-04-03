@@ -167,6 +167,7 @@ Minor Features
 [~] Ensured that the AFK timer resets when the player messages in chat regardless of them being AFK or not
 [+] Added /ac vanish
 [~] Added extra message to new players to read rules and check out the tutorials
+[+] Added cycling server tip to use the vote shop
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

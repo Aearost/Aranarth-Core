@@ -421,6 +421,7 @@ public class ChatUtils {
 			tips.add("&7&oSell your items at &e&o/warp Market &7&oto earn &a&omoney");
 			tips.add("&7&oView the available &d&oin-game ranks &7&oat &e&o/ranks");
 			tips.add("&7&oBe sure to follow the rules seen in &e&o/rules");
+			tips.add("&7&oSpend your &a&ovote points &7&oin the &e&o/voteshop");
 			tips.add("&7&oWant to create your &e&o/shop&7? Reach out to &6&oThe Council");
 
 			Collections.shuffle(tips);
