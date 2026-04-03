@@ -91,10 +91,17 @@ public class PlayerChatListener implements Listener {
         }
         e.getRecipients().removeAll(toRemove);
 
-        // Automatically un-afk the player if they type a message
-        if (aranarthPlayer.getAfkLocation() != null
-                && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-            AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+
+        if (aranarthPlayer.getAfkLocation() != null) {
+            // Automatically un-afk the player if they type a message
+            if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+            }
+            // Reset their AFK timer
+            else {
+                aranarthPlayer.setAfkLocation(null);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
         }
 
         if (ChatUtils.isPlayerMuted(player)) {
