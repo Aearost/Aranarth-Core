@@ -159,6 +159,7 @@ Minor Features
 [+] Added speed and strength buffs while raining or in water for Aquatic Aranarthium wearers
 [+] Added Speed III and Strength II when a Scorched Aranarthium wearer is in the nether
 [+] Ensured that the superior enchantment is applied when upgrading aranarthium
+[+] Added sweet berries and glow berries to the list of blocks that are protected at spawn and in dominions
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
