@@ -75,7 +75,7 @@ public class DiscordUtils {
 					if (id != null) {
 						finalMessage += "<@" + id + "> ";
 					} else {
-						finalMessage += fullInputUsername;
+						finalMessage += fullInputUsername + " ";
 					}
 					pingStart = -1;
 				}
@@ -98,6 +98,11 @@ public class DiscordUtils {
 		List<Member> username = getGuild().getMembersByName(input, true);
 		if (!username.isEmpty()) {
 			return username.getFirst().getId();
+		}
+
+		List<Member> nickname = getGuild().getMembersByNickname(input, true);
+		if (!nickname.isEmpty()) {
+			return nickname.getFirst().getId();
 		}
 
 		return null;
