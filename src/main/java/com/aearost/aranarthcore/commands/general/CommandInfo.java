@@ -85,22 +85,22 @@ public class CommandInfo implements CommandExecutor {
 	private static String getWorldName(String name) {
 		switch (name) {
 			case "world", "world_nether", "world_the_end" -> {
-				return "Survival";
+				return "in &eSurvival";
 			}
 			case "resource", "resource_nether", "resource_the_end" -> {
-				return "Resource";
+				return "in the &eResource World";
 			}
 			case "smp", "smp_nether", "smp_the_end" -> {
-				return "SMP";
+				return "in the &eSMP";
 			}
 			case "arena" -> {
-				return "Arena";
+				return "in the &eArena";
 			}
 			case "creative" -> {
-				return "Creative";
+				return "in &eCreative";
 			}
 			default -> {
-				return "Spawn";
+				return "at &eSpawn";
 			}
         }
 	}
@@ -213,9 +213,9 @@ public class CommandInfo implements CommandExecutor {
 					boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null &&
 							AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
 					if (isAfk) {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
 					} else {
-						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
 					}
 				} else {
 					AranarthUtils.getPlayerTimezone(player, zoneId -> {
@@ -235,9 +235,9 @@ public class CommandInfo implements CommandExecutor {
 				boolean isAfk = AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation() != null
 						&& AranarthUtils.getPlayer(onlinePlayer.getUniqueId()).getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount();
 				if (isAfk) {
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
 				} else {
-					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online in &e" + getWorldName(onlinePlayer.getWorld().getName())));
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
 				}
 			} else {
 				String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
