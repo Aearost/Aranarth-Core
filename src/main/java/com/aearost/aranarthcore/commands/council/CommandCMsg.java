@@ -34,7 +34,7 @@ public class CommandCMsg {
 
 	private static void evaluateMessage(CommandSender sender, String[] args) {
 		if (args.length == 1) {
-			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac cmsg <message>"));
+			sender.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac msg <message>"));
 		} else {
 			StringBuilder msg = new StringBuilder();
 			for (int i = 1; i < args.length; i++) {

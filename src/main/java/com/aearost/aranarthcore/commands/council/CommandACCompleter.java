@@ -96,8 +96,15 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("warn");
 				}
 			}
-		} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
-			displayedOptions.add("mute");
+		} else if (!args[0].isEmpty() && args[0].startsWith("m")) {
+			if (args[0].equals("m")) {
+				displayedOptions.add("mute");
+				displayedOptions.add("msg");
+			} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
+				displayedOptions.add("mute");
+			} else if (!args[0].isEmpty() && "msg".startsWith(args[0])) {
+				displayedOptions.add("msg");
+			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
 			if (args[0].equals("b")) {
 				displayedOptions.add("ban");
@@ -136,11 +143,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
 			if (args[0].equalsIgnoreCase("c")) {
-				displayedOptions.add("cmsg");
 				displayedOptions.add("clearchat");
-			} else if (!args[0].isEmpty() && "cmsg".startsWith(args[0])) {
-				displayedOptions.add("cmsg");
-			} else if (!args[0].isEmpty() && "clearchat".startsWith(args[0])) {
+			}  else if (!args[0].isEmpty() && "clearchat".startsWith(args[0])) {
 				displayedOptions.add("clearchat");
 			}
 		} else if (!args[0].isEmpty() && "speed".startsWith(args[0])) {
@@ -374,7 +378,7 @@ public class CommandACCompleter implements TabCompleter {
 					}
 				}
 			}
-			case "cmsg" -> {
+			case "msg" -> {
 				if (args[1].isEmpty()) {
 					displayedOptions.add("message");
 				}
@@ -457,7 +461,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("punishments");
 		displayedOptions.add("perks");
 		displayedOptions.add("admin");
-		displayedOptions.add("cmsg");
+		displayedOptions.add("msg");
 		displayedOptions.add("speed");
 		displayedOptions.add("time");
 		displayedOptions.add("tp");
