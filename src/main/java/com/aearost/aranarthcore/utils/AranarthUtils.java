@@ -2618,22 +2618,57 @@ public class AranarthUtils {
 	public static void updateTab() {
 		List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
-		int onlineNum = onlinePlayers.size();
-		String playerOrPlayers = onlineNum <= 1 ? "player" : "players";
+		int onlineNum = (int) onlinePlayers.stream()
+				.filter(player -> {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					return !aranarthPlayer.isVanished();
+				})
+				.count();
+		String playerOrPlayers = onlineNum == 1 ? "player" : "players";
 		String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
-		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps; // Gets the TPS over the last minute
+		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
+
+		// Header / Footer
 		for (Player player : onlinePlayers) {
-			player.setPlayerListHeader(ChatUtils.translateToColor("&8&l---------------------\n&6&lThe Realm of Aranarth\n" + infoLine));
+			player.setPlayerListHeader(ChatUtils.translateToColor(
+					"&8&l---------------------\n&6&lThe Realm of Aranarth\n" + infoLine));
 			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
 		}
 
-		// Sorts the list of players from the highest to lowest rank
+		// Handle vanish visibility
+		for (Player player : onlinePlayers) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			for (Player hiddenPlayer : onlinePlayers) {
+				AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
+
+				if (hiddenAranarthPlayer.isVanished()) {
+					if (aranarthPlayer.getCouncilRank() == 3) {
+						player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+					} else {
+						player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);
+					}
+				} else {
+					// Always show non-vanished players
+					player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+				}
+			}
+		}
+
+		// Remove vanished players from tab
+		onlinePlayers.removeIf(player -> {
+			AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
+			return data.isVanished();
+		});
+
+		// Sort by rank priority (highest first)
 		onlinePlayers.sort((a, b) -> {
 			int first = getRankPriority(getPlayer(a.getUniqueId()));
 			int second = getRankPriority(getPlayer(b.getUniqueId()));
 			return Integer.compare(first, second);
 		});
 
+		// Apply display and order
 		int order = 0;
 		for (Player player : onlinePlayers) {
 			UUID uuid = player.getUniqueId();

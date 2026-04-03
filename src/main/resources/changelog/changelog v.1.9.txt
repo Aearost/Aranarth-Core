@@ -165,6 +165,7 @@ Minor Features
 [~] Updated formatting when you /msg yourself
 [+] Added info line in tab showing online player num and the current TPS
 [~] Ensured that the AFK timer resets when the player messages in chat regardless of them being AFK or not
+[+] Added /ac vanish
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

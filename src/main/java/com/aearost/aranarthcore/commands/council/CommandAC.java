@@ -91,6 +91,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandClearChat.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("sudo")) {
 			commandResult = CommandSudo.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("vanish")) {
+			commandResult = CommandVanish.onCommand(sender, args);
 		}
 		return commandResult;
 	}

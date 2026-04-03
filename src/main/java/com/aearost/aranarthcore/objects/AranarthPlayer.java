@@ -80,6 +80,7 @@ public class AranarthPlayer {
 	private boolean isTogglingInventoryAssist = false;
 	private boolean isAutoLockingChests = true;
 	private String firstJoinDate = "";
+	private boolean isVanished = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -140,6 +141,7 @@ public class AranarthPlayer {
 		this.isTogglingInventoryAssist = false;
 		this.isAutoLockingChests = true;
 		this.firstJoinDate = "";
+		this.isVanished = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -206,6 +208,7 @@ public class AranarthPlayer {
 		this.isTogglingInventoryAssist = false;
 		this.isAutoLockingChests = true;
 		this.firstJoinDate = firstJoinDate;
+		this.isVanished = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1222,5 +1225,21 @@ public class AranarthPlayer {
 	 */
 	public void setFirstJoinDate(String firstJoinDate) {
 		this.firstJoinDate = firstJoinDate;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is vanished or not.
+	 * @return The variable tracking whether the player is vanished or not.
+	 */
+	public boolean isVanished() {
+		return isVanished;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is vanished or not.
+	 * @param isVanished The variable tracking whether the player is vanished or not.
+	 */
+	public void setVanished(boolean isVanished) {
+		this.isVanished = isVanished;
 	}
 }

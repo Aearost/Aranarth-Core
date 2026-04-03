@@ -43,8 +43,6 @@ public class PlayerServerQuitListener implements Listener {
 			}
 		}
 
-
-
 		DateUtils dateUtils = new DateUtils();
 		String nameToDisplay;
 		nameToDisplay = "&7" + AranarthUtils.getNickname(player);

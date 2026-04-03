@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
@@ -137,6 +138,11 @@ public class AranarthCore extends JavaPlugin {
 				// Use the updated date to refresh all player inventories
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					CropUtils.refreshInventory(player.getInventory());
+					// Fallback if the player goes offline while vanished
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (!aranarthPlayer.isVanished() && player.isInvisible()) {
+						player.setInvisible(false);
+					}
 				}
 			}
 		}, 0, 100);

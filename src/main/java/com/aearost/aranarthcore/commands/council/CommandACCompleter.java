@@ -160,6 +160,8 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		} else if (!args[0].isEmpty() && "dateset".startsWith(args[0])) {
 			displayedOptions.add("dateset");
+		} else if (!args[0].isEmpty() && "vanish".startsWith(args[0])) {
+			displayedOptions.add("vanish");
 		}
 		return displayedOptions;
 	}
@@ -467,6 +469,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("tp");
 		displayedOptions.add("clearchat");
 		displayedOptions.add("dateset");
+		displayedOptions.add("vanish");
 		return displayedOptions;
 	}
 
