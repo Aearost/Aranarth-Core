@@ -474,7 +474,9 @@ public class ChatUtils {
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
 			if (onlineAranarthPlayer.isInAdminMode()) {
-				onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
+				if (!player.getUniqueId().equals(onlinePlayer.getUniqueId()) && !target.getUniqueId().equals(onlinePlayer.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
+				}
 			}
 		}
 	}
