@@ -77,7 +77,6 @@ public class AranarthPlayer {
 	private UUID lastReceivedMessage = null;
 	private boolean isUsingSpawnBoost = true;
 	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
-	private boolean isShowingPingInTab = true;
 	private boolean isTogglingInventoryAssist = false;
 	private boolean isAutoLockingChests = true;
 	private String firstJoinDate = "";
@@ -1175,22 +1174,6 @@ public class AranarthPlayer {
 	 */
 	public void setCombatLogTime(HashMap<UUID, Long> combatLogTime) {
 		this.combatLogTime = combatLogTime;
-	}
-
-	/**
-	 * Provides the value tracking if ping should be shown in the player's tab list.
-	 * @return The value tracking if ping should be shown in the player's tab list.
-	 */
-	public boolean isShowingPingInTab() {
-		return isShowingPingInTab;
-	}
-
-	/**
-	 * Updates the value tracking if ping should be shown in the player's tab list.
-	 * @param showingPingInTab The value tracking if ping should be shown in the player's tab list.
-	 */
-	public void setShowingPingInTab(boolean showingPingInTab) {
-		isShowingPingInTab = showingPingInTab;
 	}
 
 	/**

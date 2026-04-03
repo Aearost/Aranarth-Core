@@ -2618,8 +2618,12 @@ public class AranarthUtils {
 	public static void updateTab() {
 		List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
 
+		int onlineNum = onlinePlayers.size();
+		String playerOrPlayers = onlineNum <= 1 ? "player" : "players";
+		String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
+		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps; // Gets the TPS over the last minute
 		for (Player player : onlinePlayers) {
-			player.setPlayerListHeader(ChatUtils.translateToColor("&8&l---------------------\n&6&lThe Realm of Aranarth"));
+			player.setPlayerListHeader(ChatUtils.translateToColor("&8&l---------------------\n&6&lThe Realm of Aranarth\n" + infoLine));
 			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
 		}
 

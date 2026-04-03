@@ -163,6 +163,7 @@ Minor Features
 [~] Renamed /ac cmsg to /ac msg
 [~] Prevented spy mode in /msg from appearing if the person in spy mode is the sender or the target of the message
 [~] Updated formatting when you /msg yourself
+[+] Added info line in tab showing online player num and the current TPS
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
