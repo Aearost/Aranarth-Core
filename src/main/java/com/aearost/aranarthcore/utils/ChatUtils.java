@@ -493,4 +493,17 @@ public class ChatUtils {
 								.clickEvent(suggest ? ClickEvent.suggestCommand(command) : ClickEvent.runCommand(command)
 		);
 	}
+
+	/**
+	 * Builds a clickable chat component that opens a URL in the player's browser on click.
+	 *
+	 * @param displayComponent The visible text in chat
+	 * @param hoverText The tooltip shown on hover (supports § color codes)
+	 * @param url The URL to open
+	 */
+	public static Component clickableUrl(Component displayComponent, String hoverText, String url) {
+		Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverText);
+		return displayComponent.hoverEvent(HoverEvent.showText(hover))
+								.clickEvent(ClickEvent.openUrl(url));
+	}
 }

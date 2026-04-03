@@ -114,7 +114,11 @@ public class PlayerChatListener implements Listener {
         Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
         prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
 
-        Component fullMessage = prefixComponent.append(LegacyComponentSerializer.legacySection().deserialize(chatMessage));
+        // Use Component.empty() as root so chatMessage is a sibling of prefixComponent, not a child.
+        // Children inherit hover/click from their parent, siblings do not.
+        Component fullMessage = Component.empty()
+                .append(prefixComponent)
+                .append(LegacyComponentSerializer.legacySection().deserialize(chatMessage));
 
         for (Player recipient : e.getRecipients()) {
             recipient.sendMessage(fullMessage);

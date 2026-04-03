@@ -3,6 +3,8 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -62,12 +64,28 @@ public class CommandVote implements CommandExecutor {
 	 */
 	private void displayVoteLinks(Player player) {
 		player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lVote Links &8- - -"));
-		player.sendMessage(ChatUtils.translateToColor("&cLINK #1"));
-		player.sendMessage(ChatUtils.translateToColor("&6LINK #2"));
-		player.sendMessage(ChatUtils.translateToColor("&eLINK #3"));
-		player.sendMessage(ChatUtils.translateToColor("&aLINK #4"));
-		player.sendMessage(ChatUtils.translateToColor("&bLINK #5"));
-		player.sendMessage(ChatUtils.translateToColor("&5LINK #6"));
-		player.sendMessage(ChatUtils.translateToColor("&dLINK #7"));
+		player.sendMessage(buildVoteLink("&7&lPlanet Minecraft: ", "https://tinyurl.com/5n7wezr9"));
+		player.sendMessage(buildVoteLink("&7&lMC Server List: ", "https://tinyurl.com/ynsp6zm2"));
+		player.sendMessage(buildVoteLink("&7&lMC Servers: ", "https://tinyurl.com/4r97nrsa"));
+		player.sendMessage(buildVoteLink("&7&lMineList: ", "https://tinyurl.com/f8wfzbj6"));
+		player.sendMessage(buildVoteLink("&7&lMinecraft MP: ", "https://tinyurl.com/3c8hfadt"));
+		player.sendMessage(buildVoteLink("&7&lTopG: ", "https://tinyurl.com/5c2yxkzj"));
+		player.sendMessage(buildVoteLink("&7&lMinecraft Buzz: ", "https://tinyurl.com/4ve6h5zn"));
+	}
+
+	/**
+	 * Builds a chat component with a plain label and a clickable URL that opens in the browser.
+	 * @param label The label text (supports & color codes).
+	 * @param url The URL to display and open on click.
+	 */
+	private Component buildVoteLink(String label, String url) {
+		Component labelComponent = LegacyComponentSerializer.legacySection().deserialize(
+				ChatUtils.translateToColor(label));
+		Component urlComponent = ChatUtils.clickableUrl(
+				LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor("&e" + url)),
+				ChatUtils.translateToColor("&7Click to open in browser"),
+				url
+		);
+		return Component.empty().append(labelComponent).append(urlComponent);
 	}
 }
