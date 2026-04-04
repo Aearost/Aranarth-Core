@@ -171,6 +171,7 @@ Minor Features
 [~] Slightly tweaked how charged creepers spawn to be during the tracked thunder storms, not actual weather
 [~] Fixed issue where depositing and withdrawing wasn't following actual balance restrictions
 [~] Fixed error with distance calculation of goat horns due to players being in different worlds
+[~] Fixed issue where Dominions' balance wasn't displaying correctly in /dominion list and was causing null pointers
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
