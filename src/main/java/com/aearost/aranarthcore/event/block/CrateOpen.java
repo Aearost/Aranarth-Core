@@ -442,6 +442,7 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Vote Crate"));
             });
         }
     }
@@ -527,6 +528,7 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Rare Crate"));
             });
         }
     }
@@ -656,6 +658,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                    Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
                     return;
                 } else {
                     reward = new KeyGodly().getItem();
@@ -776,6 +779,7 @@ public class CrateOpen {
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                 player.getInventory().addItem(reward);
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Godly Crate"));
             });
         }
     }
