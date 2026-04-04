@@ -161,7 +161,9 @@ public class CommandRankSet {
 							rankName = "Saint";
 						}
 
-						if (args[1].equals("council")) {
+						if (args[1].equals("saint")) {
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has donated and become a &d&lSaint!"));
+						} else if (args[1].equals("council")) {
 							if (args[3].equals("1")) {
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has become a &3&lHelper &7of &e&lThe Council!"));
 							} else if (args[3].equals("2")) {
