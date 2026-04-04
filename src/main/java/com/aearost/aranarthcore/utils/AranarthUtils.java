@@ -1256,7 +1256,7 @@ public class AranarthUtils {
 				continue;
 			}
 
-			if (getPlayer(uuid).getUsername().equals(username)) {
+			if (getPlayer(uuid).getUsername().equalsIgnoreCase(username)) {
 				return uuid;
 			}
 		}
