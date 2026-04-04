@@ -196,7 +196,6 @@ public class PermissionUtils {
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);
 		perms.setPermission("aranarth.seen", false);
-		perms.setPermission("aranarth.msg", false);
 		perms.setPermission("aranarth.back", false);
 		perms.setPermission("aranarth.tphere", false);
 		perms.setPermission("aranarth.nick", false);
@@ -490,7 +489,6 @@ public class PermissionUtils {
 		if (rank >= 2) {
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("aranarth.exp", true);
-			perms.setPermission("aranarth.msg", true);
 		} else {
 			return;
 		}

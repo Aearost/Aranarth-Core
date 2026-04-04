@@ -116,7 +116,6 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /msg"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
