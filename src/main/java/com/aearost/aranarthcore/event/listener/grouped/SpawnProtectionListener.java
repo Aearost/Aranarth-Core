@@ -511,9 +511,12 @@ public class SpawnProtectionListener implements Listener {
 				return;
 			}
 			else {
+				boolean inSpawn = (x >= -170 && x <= 170) && (z >= -220 && z <= 130);
+				boolean inOuterBounds = (x >= -250 && x <= 250) && (z >= -300 && z <= 200);
+				boolean inBufferZone = inOuterBounds && !inSpawn;
 				boolean isTooLow = e.getTo().getY() <= 50;
-				boolean isLeavingSpawnBoundaries = ((x < -170 || x > 170) && (x > -250 && x < 250)) || ((z > 130 || z < -220) && ((z > -300 || z < 200)));
-				if (isTooLow || isLeavingSpawnBoundaries) {
+
+				if (isTooLow || inBufferZone) {
 					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
 					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
 					e.getPlayer().teleport(locToTeleportTo);
