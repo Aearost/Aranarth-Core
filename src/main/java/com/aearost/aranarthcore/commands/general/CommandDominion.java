@@ -1122,21 +1122,30 @@ public class CommandDominion implements CommandExecutor {
 				amount = Double.parseDouble(args[1]);
 				String valueWithTwoDecimals = df.format(amount);
 				double trimmedAmount = Double.parseDouble(valueWithTwoDecimals);
-
-				dominion.setBalance(dominion.getBalance() + trimmedAmount);
-				DominionUtils.updateDominion(dominion);
-				aranarthPlayer.setBalance(aranarthPlayer.getBalance() - trimmedAmount);
-				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
 				NumberFormat formatter = NumberFormat.getCurrencyInstance();
-				player.sendMessage(ChatUtils.chatMessage("&7You have deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
-				for (UUID uuid : dominion.getMembers()) {
-					if (!uuid.equals(player.getUniqueId())) {
-						if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-							Player member = Bukkit.getPlayer(uuid);
-							member.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
+
+				if (trimmedAmount == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot deposit &6$0.00"));
+					return;
+				}
+
+				if (aranarthPlayer.getBalance() >= trimmedAmount) {
+					dominion.setBalance(dominion.getBalance() + trimmedAmount);
+					DominionUtils.updateDominion(dominion);
+					aranarthPlayer.setBalance(aranarthPlayer.getBalance() - trimmedAmount);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+					player.sendMessage(ChatUtils.chatMessage("&7You have deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
+					for (UUID uuid : dominion.getMembers()) {
+						if (!uuid.equals(player.getUniqueId())) {
+							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+								Player member = Bukkit.getPlayer(uuid);
+								member.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has deposited &6" + formatter.format(trimmedAmount) + " &7to your Dominion"));
+							}
 						}
 					}
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have &6" + formatter.format(trimmedAmount) + " &cto deposit!"));
 				}
 			} catch (NumberFormatException e) {
 				player.sendMessage(ChatUtils.chatMessage("&cThat amount is invalid!"));
@@ -1162,21 +1171,30 @@ public class CommandDominion implements CommandExecutor {
 					amount = Double.parseDouble(args[1]);
 					String valueWithTwoDecimals = df.format(amount);
 					double trimmedAmount = Double.parseDouble(valueWithTwoDecimals);
-
-					dominion.setBalance(dominion.getBalance() - trimmedAmount);
-					DominionUtils.updateDominion(dominion);
-					aranarthPlayer.setBalance(aranarthPlayer.getBalance() + trimmedAmount);
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
 					NumberFormat formatter = NumberFormat.getCurrencyInstance();
-					player.sendMessage(ChatUtils.chatMessage("&7You have withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
-					for (UUID uuid : dominion.getMembers()) {
-						if (!uuid.equals(player.getUniqueId())) {
-							if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
-								Player member = Bukkit.getPlayer(uuid);
-								member.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
+
+					if (trimmedAmount == 0) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot withdraw &6$0.00"));
+						return;
+					}
+
+					if (dominion.getBalance() >= trimmedAmount) {
+						dominion.setBalance(dominion.getBalance() - trimmedAmount);
+						DominionUtils.updateDominion(dominion);
+						aranarthPlayer.setBalance(aranarthPlayer.getBalance() + trimmedAmount);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+						player.sendMessage(ChatUtils.chatMessage("&7You have withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
+						for (UUID uuid : dominion.getMembers()) {
+							if (!uuid.equals(player.getUniqueId())) {
+								if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
+									Player member = Bukkit.getPlayer(uuid);
+									member.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has withdrawn &6" + formatter.format(trimmedAmount) + " &7from your Dominion"));
+								}
 							}
 						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYour Dominion does not have &6" + formatter.format(trimmedAmount) + " &cto withdraw!"));
 					}
 				} catch (NumberFormatException e) {
 					player.sendMessage(ChatUtils.chatMessage("&cThat amount is invalid!"));

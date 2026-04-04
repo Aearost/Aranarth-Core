@@ -169,6 +169,7 @@ Minor Features
 [~] Added extra message to new players to read rules and check out the tutorials
 [+] Added cycling server tip to use the vote shop
 [~] Slightly tweaked how charged creepers spawn to be during the tracked thunder storms, not actual weather
+[~] Fixed issue where depositing and withdrawing wasn't following actual balance restrictions
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
