@@ -17,9 +17,10 @@ import java.util.concurrent.ThreadLocalRandom;
 public class CropGrowBoost {
 
 	public void execute(BlockGrowEvent e) {
+//		Bukkit.getLogger().info("BLOCK GREW: " + e.getBlock().getLocation().getBlockX() + "|" + e.getBlock().getLocation().getBlockY()
+//		 + "|" + e.getBlock().getLocation().getBlockZ());
 		Block block = e.getBlock();
-		Material seedKey = getSeedKeyForBlock(block.getType());
-		if (seedKey == null) return;
+		Material seedKey = CropUtils.getSeedMaterial(block.getType());
 
 		double speed = CropUtils.getCropGrowthSpeed(AranarthUtils.getMonth(), seedKey);
 
@@ -39,27 +40,5 @@ public class CropGrowBoost {
 			crop.setAge(newAge);
 			block.setBlockData(crop);
 		}
-	}
-
-	/**
-	 * Maps a crop block material to the corresponding seed key used in getCropGrowthSpeed.
-	 * @param type The block material.
-	 * @return The seed key material, or null if the block is not a tracked crop.
-	 */
-	private Material getSeedKeyForBlock(Material type) {
-		return switch (type) {
-			case WHEAT -> Material.WHEAT_SEEDS;
-			case CARROTS -> Material.CARROT;
-			case POTATOES -> Material.POTATO;
-			case BEETROOTS -> Material.BEETROOT_SEEDS;
-			case NETHER_WART -> Material.NETHER_WART;
-			case CACTUS -> Material.CACTUS;
-			case COCOA -> Material.COCOA_BEANS;
-			case SUGAR_CANE -> Material.SUGAR_CANE;
-			case MELON_STEM -> Material.MELON_SEEDS;
-			case PUMPKIN_STEM -> Material.PUMPKIN_SEEDS;
-			case SWEET_BERRY_BUSH -> Material.SWEET_BERRIES;
-			default -> null;
-		};
 	}
 }
