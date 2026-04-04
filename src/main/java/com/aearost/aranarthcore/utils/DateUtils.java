@@ -1917,6 +1917,9 @@ public class DateUtils {
 		World smp = Bukkit.getWorld("smp");
 		World resource = Bukkit.getWorld("resource");
 
+		int time = (int) (world.getTime() / 20);
+		boolean isNewDay = time >= 0 && time < 5;
+
 		// Start of a new weather
 		if (type != Weather.CLEAR) {
 			AranarthUtils.setWeather(type);
@@ -1933,8 +1936,10 @@ public class DateUtils {
 				resource.setStorm(true);
 				resource.setThundering(false);
 				resource.setWeatherDuration(duration);
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					playRainStartSound(player);
+				if (!isNewDay) {
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						playRainStartSound(player);
+					}
 				}
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
 			} else if (type == Weather.THUNDER) {
@@ -1953,8 +1958,10 @@ public class DateUtils {
 				resource.setThundering(true);
 				resource.setWeatherDuration(duration);
 				resource.setThunderDuration(duration);
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					playThunderStartSound(player);
+				if (!isNewDay) {
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						playThunderStartSound(player);
+					}
 				}
 				message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
 			} else if (type == Weather.SNOW) {
@@ -1973,8 +1980,10 @@ public class DateUtils {
 				resource.setThundering(false);
 				resource.setStorm(false);
 				resource.setClearWeatherDuration(duration);
-				for (Player player : Bukkit.getOnlinePlayers()) {
-					playSnowStartSound(player);
+				if (!isNewDay) {
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						playSnowStartSound(player);
+					}
 				}
 				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
 			} else {
@@ -1999,8 +2008,10 @@ public class DateUtils {
 			resource.setStorm(false);
 			resource.setClearWeatherDuration(duration);
 			AranarthUtils.setWeather(type);
-			for (Player player : Bukkit.getOnlinePlayers()) {
-				playClearSound(player);
+			if (!isNewDay) {
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					playClearSound(player);
+				}
 			}
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
