@@ -745,7 +745,9 @@ public class AranarthUtils {
 	public static boolean isBlockCrop(Material type) {
 		return type == Material.WHEAT || type == Material.CARROTS
 				|| type == Material.POTATOES || type == Material.BEETROOTS
-				|| type == Material.NETHER_WART;
+				|| type == Material.NETHER_WART || type == Material.COCOA
+				|| type == Material.CACTUS || type == Material.SUGAR_CANE
+				|| type == Material.MELON || type == Material.PUMPKIN;
 	}
 
 	/**

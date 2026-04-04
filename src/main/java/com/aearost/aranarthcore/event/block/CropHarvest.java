@@ -51,7 +51,13 @@ public class CropHarvest {
 
 		Block block = e.getBlock();
 
-		// Prevent block destruction if sneaking
+		// Non-Ageable crops have no maturity stages and no replanting behaviour
+		if (!(block.getBlockData() instanceof Ageable crop)) {
+			handleNonAgeableCrop(e, player, block);
+			return;
+		}
+
+		// Prevent block destruction if sneaking (protects immature Ageable crops)
 		if (player.isSneaking()) {
 			e.setCancelled(true);
 		}
@@ -73,9 +79,7 @@ public class CropHarvest {
 			drop.setAmount(Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled)));
 		}
 
-		Ageable crop = (Ageable) block.getBlockData();
-
-		// Auto-replant functionality
+        // Auto-replant functionality
 		if (player.isSneaking()) {
 			// Consume one seed from the drops for replanting
 			Material seedMaterial = CropUtils.getSeedMaterial(block.getType());
@@ -125,6 +129,40 @@ public class CropHarvest {
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Handles scaling for non-Ageable crops (cactus, sugar cane, melon, pumpkin).
+	 * These have no maturity stage and no auto-replant behaviour.
+	 */
+	private void handleNonAgeableCrop(BlockBreakEvent e, Player player, Block block) {
+		e.setCancelled(true);
+
+		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
+		Month month = AranarthUtils.getMonth();
+		double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
+		boolean isWinterMonth = DateUtils.isWinterMonth(month) || month == Month.IGNIVOR;
+		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
+
+		for (ItemStack drop : drops) {
+			double scaled = drop.getAmount() * multiplier * boostMultiplier;
+			drop.setAmount(Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled)));
+		}
+
+		for (ItemStack drop : drops) {
+			CropUtils.updateSeedLore(drop);
+			block.getWorld().dropItemNaturally(block.getLocation(), drop);
+		}
+
+		McMMOPlayer mcmmoPlayer = EventUtils.getMcMMOPlayer(player);
+		if (mcmmoPlayer != null) {
+			HerbalismManager herbalismManager = new HerbalismManager(mcmmoPlayer);
+			HashSet<Block> brokenBlocks = new HashSet<>();
+			brokenBlocks.add(block);
+			herbalismManager.awardXPForPlantBlocks(brokenBlocks);
+		}
+
+		block.setType(Material.AIR);
 	}
 
 

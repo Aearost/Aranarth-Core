@@ -61,8 +61,8 @@ public class CropUtils {
 			case CACTUS -> Material.CACTUS;
 			case COCOA -> Material.COCOA_BEANS;
 			case SUGAR_CANE -> Material.SUGAR_CANE;
-			case MELON_STEM -> Material.MELON_SEEDS;
-			case PUMPKIN_STEM -> Material.PUMPKIN_SEEDS;
+			case MELON, MELON_STEM -> Material.MELON_SEEDS;
+			case PUMPKIN, PUMPKIN_STEM -> Material.PUMPKIN_SEEDS;
 			case SWEET_BERRY_BUSH -> Material.SWEET_BERRIES;
 			default -> blockType;
 		};
