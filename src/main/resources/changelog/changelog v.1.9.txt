@@ -177,6 +177,7 @@ Minor Features
 [+] Added ping sound when nicknames are written in chat as well
 [~] Made sure username or nickname pings in chat are case insensitive
 [~] Fixed issue where bone mealing a melon or pumpkin stem caused an error relating to bone mealing nether fungus
+[+] Added emoji reactions to the role changes channel when a player becomes a Saint
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

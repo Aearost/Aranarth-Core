@@ -212,7 +212,10 @@ public class DiscordUtils {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor(player.getName() + " has donated and become a Saint!", null, url)
 						.setColor(Color.MAGENTA);
-				roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+				roleChangesChannel.sendMessageEmbeds(embed.build()).queue(message -> {
+					message.addReaction("⚜").queue();
+					message.addReaction("\uD83D\uDC9C").queue();
+				});
 			}
 		}
 	}
