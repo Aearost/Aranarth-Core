@@ -181,6 +181,7 @@ Minor Features
 [~] Ensured /msg is not exclusive to any ranks
 [~] You can now access /back as a Knight
 [~] You can now only store EXP in bottles as of Count/Countess
+[~] Limited beacon effects to only those that are in/allied/truced with the Dominion
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

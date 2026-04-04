@@ -3,9 +3,12 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.MusicInstrument;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -20,9 +23,9 @@ import org.bukkit.potion.PotionEffectTypeCategory;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class PotionEffectStackListener implements Listener {
+public class PottionEffectListener implements Listener {
 
-	public PotionEffectStackListener(AranarthCore plugin) {
+	public PottionEffectListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -39,6 +42,39 @@ public class PotionEffectStackListener implements Listener {
 		// Potentially could add manual checks i.e if it's a beacon, stack logic and ignore below, preventing infinite recursive calls
 		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN) {
 			return;
+		}
+
+		// Only applies beacon effects if there are no Dominion conflicts
+		if (e.getCause() == Cause.BEACON && newEffect != null) {
+			if (e.getEntity() instanceof Player player) {
+				Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+				int chunkX = player.getLocation().getChunk().getX();
+				int chunkZ = player.getLocation().getChunk().getZ();
+				for (int x = chunkX - 1; x <= chunkX + 1; x++) {
+					for (int z = chunkZ - 1; z <= chunkZ + 1; z++) {
+						Chunk chunk = player.getWorld().getChunkAt(x, z);
+						Dominion chunkDominion = DominionUtils.getDominionOfChunk(chunk);
+
+						if (chunkDominion == null) {
+							continue;
+						}
+
+						if (dominion == null) {
+							e.setCancelled(true);
+							return;
+						}
+
+						boolean isSameDominion = dominion.getLeader().equals(chunkDominion.getLeader());
+						boolean isAlliedDominion = dominion.getAllied().contains(chunkDominion.getLeader());
+						boolean isTrucedDominion = dominion.getTruced().contains(chunkDominion.getLeader());
+
+						if (!isSameDominion && !isAlliedDominion && !isTrucedDominion) {
+							e.setCancelled(true);
+							return;
+						}
+					}
+				}
+			}
 		}
 
 		if (newEffect != null && newEffect.getType().getCategory() == PotionEffectTypeCategory.HARMFUL) {
