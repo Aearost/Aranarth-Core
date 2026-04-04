@@ -57,7 +57,7 @@ public class AranarthPlayer {
 	private HashMap<Perk, Integer> perks = new HashMap<>();
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
-	private boolean isCompressingItems = false;
+	private boolean isCompressingItems = true;
 	private int bulkTransactionNum = 0;
 	private boolean isOpeningCrateWithCyclingItem = false;
 	private CrateType crateTypeBeingOpened = null;
@@ -93,7 +93,7 @@ public class AranarthPlayer {
 		this.potions = null;
 		this.arrows = null;
 		this.blacklist = null;
-		this.blacklistingMethod = -1;
+		this.blacklistingMethod = 0;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = new ArrayList<>();
@@ -121,7 +121,7 @@ public class AranarthPlayer {
 		this.perks = new HashMap<>();
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
-		this.isCompressingItems = false;
+		this.isCompressingItems = true;
 		this.bulkTransactionNum = 0;
 		this.votePointsSpent = 0;
 		this.isAutoClaimEnabled = false;
