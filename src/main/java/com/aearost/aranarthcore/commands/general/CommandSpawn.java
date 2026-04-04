@@ -31,7 +31,7 @@ public class CommandSpawn implements CommandExecutor {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0);
+			Location spawn = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
 			AranarthUtils.teleportPlayer(player, player.getLocation(), spawn, aranarthPlayer.isInAdminMode(), success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eSpawn"));

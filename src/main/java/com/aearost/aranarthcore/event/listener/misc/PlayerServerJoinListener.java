@@ -42,7 +42,7 @@ public class PlayerServerJoinListener implements Listener {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			aranarthPlayer.setFirstJoinDate(now.getMonthValue() + "/" + now.getDayOfMonth() + "/" + now.getYear());
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-			player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
+			player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
 			isNewPlayer = true;
 		}
 		// If the player changed their username
