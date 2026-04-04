@@ -167,7 +167,10 @@ public class DiscordUtils {
 					.setColor(Color.LIGHT_GRAY);
 
 			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
+			roleChangesChannel.sendMessageEmbeds(embed.build()).queue(message -> {
+				message.addReaction("\uD83C\uDF89").queue();
+				message.addReaction("❤").queue();
+			});
 		}
     }
 
