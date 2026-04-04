@@ -2624,6 +2624,15 @@ public class AranarthUtils {
 					return !aranarthPlayer.isVanished();
 				})
 				.count();
+
+		int day = AranarthUtils.getDay();
+		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
+		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
+		int year = AranarthUtils.getYear();
+		String dateLine = DateUtils.determineServerDate(day, weekday, month, year)[1];
+		String[] parts = ChatUtils.stripColorFormatting(dateLine).split(" ");
+		dateLine = "&e" + parts[0] + " &f" + parts[1] + " " + parts[2] + " " + parts[3] + " " + parts[4] + " &e" + parts[5];
+
 		String playerOrPlayers = onlineNum == 1 ? "player" : "players";
 		String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
 		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
@@ -2631,7 +2640,7 @@ public class AranarthUtils {
 		// Header / Footer
 		for (Player player : onlinePlayers) {
 			player.setPlayerListHeader(ChatUtils.translateToColor(
-					"&8&l---------------------\n&6&lThe Realm of Aranarth\n" + infoLine));
+					"&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
 			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
 		}
 
