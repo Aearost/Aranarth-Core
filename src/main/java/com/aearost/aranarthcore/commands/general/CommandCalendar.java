@@ -134,7 +134,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String follivor() {
 		return ChatUtils.translateToColor(
-				"&lFollivór (10)" +
+				"&lFollivór (9)" +
 						"\n&r&oThe Lumbered" +
 						"\n\n&r" + DateUtils.getFollivorDescription()
 		);
@@ -142,7 +142,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String strigavor() {
 		return ChatUtils.translateToColor(
-				"&lStrigavór (9)" +
+				"&lStrigavór (10)" +
 						"\n&r&oThe Wicked" +
 						"\n\n&r" + DateUtils.getStrigavorDescription()
 		);

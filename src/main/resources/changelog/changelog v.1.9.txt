@@ -176,6 +176,7 @@ Minor Features
 [+] Added message in-game to display when a player donates and becomes a Saint
 [+] Added ping sound when nicknames are written in chat as well
 [~] Made sure username or nickname pings in chat are case insensitive
+[~] Fixed issue where bone mealing a melon or pumpkin stem caused an error relating to bone mealing nether fungus
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
