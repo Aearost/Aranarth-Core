@@ -2945,8 +2945,10 @@ public class AranarthUtils {
 		else {
 			// Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
-					onlinePlayer.stopSound(SoundCategory.RECORDS);
+				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+					if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+						onlinePlayer.stopSound(SoundCategory.RECORDS);
+					}
 				}
 			}
 			long remainder = (lastHornUseOnCooldown + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
