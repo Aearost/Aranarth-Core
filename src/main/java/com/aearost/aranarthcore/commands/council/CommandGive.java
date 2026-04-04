@@ -2,8 +2,6 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.incantation.Incantation;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Bukkit;
@@ -114,8 +112,8 @@ public class CommandGive {
 					}
 
 					if (isKey) {
-						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						DiscordUtils.donationNotification(player.getName() + " has purchased " + item.getItemMeta().getDisplayName() + " x3", player.getUniqueId(), Color.CYAN);
+						Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + item.getItemMeta().getDisplayName() + " x3"));
 					}
 				} else if (instance instanceof Incantation incantation) {
 					ItemStack item = incantation.getItem();
