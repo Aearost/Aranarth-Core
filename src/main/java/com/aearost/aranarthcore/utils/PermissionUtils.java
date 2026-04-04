@@ -488,7 +488,7 @@ public class PermissionUtils {
 		// Knight
 		if (rank >= 2) {
 			perms.setPermission("bending.earth.metalbending", true);
-			perms.setPermission("aranarth.exp", true);
+			perms.setPermission("aranarth.back", true);
 		} else {
 			return;
 		}
@@ -506,7 +506,7 @@ public class PermissionUtils {
 		// Count
 		if (rank >= 4) {
 			perms.setPermission("bending.ability.sonicblast", true);
-			perms.setPermission("aranarth.back", true);
+			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("bending.command.preset.create.10", true);
 		} else {
 			return;

@@ -179,6 +179,8 @@ Minor Features
 [~] Fixed issue where bone mealing a melon or pumpkin stem caused an error relating to bone mealing nether fungus
 [+] Added emoji reactions to the role changes channel when a player becomes a Saint
 [~] Ensured /msg is not exclusive to any ranks
+[~] You can now access /back as a Knight
+[~] You can now only store EXP in bottles as of Count/Countess
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

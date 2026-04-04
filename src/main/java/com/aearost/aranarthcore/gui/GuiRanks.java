@@ -115,7 +115,7 @@ public class GuiRanks {
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- /back"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
@@ -174,7 +174,7 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &7&oSonicBlast"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		countLore.add(ChatUtils.translateToColor("&f&o- /back"));
+		countLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
