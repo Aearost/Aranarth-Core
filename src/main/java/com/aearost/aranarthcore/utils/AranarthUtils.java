@@ -2673,6 +2673,11 @@ public class AranarthUtils {
 		for (Player player : onlinePlayers) {
 			UUID uuid = player.getUniqueId();
 			String display = ChatUtils.providePrefixAndName(uuid);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+			// If the player is AFK
+			if (aranarthPlayer.getAfkLocation() != null && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+				display += " &7[AFK]";
+			}
 
 			int ping = player.getPing();
 			if (ping <= 150) {
