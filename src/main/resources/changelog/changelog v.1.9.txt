@@ -174,6 +174,7 @@ Minor Features
 [~] Fixed issue where Dominions' balance wasn't displaying correctly in /dominion list and was causing null pointers
 [~] Fixed issue where votes weren't being considered if the username didn't match with the case
 [+] Added message in-game to display when a player donates and becomes a Saint
+[+] Added ping sound when nicknames are written in chat as well
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

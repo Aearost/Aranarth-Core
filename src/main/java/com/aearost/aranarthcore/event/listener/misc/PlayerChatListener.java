@@ -85,7 +85,9 @@ public class PlayerChatListener implements Listener {
                 }
             }
 
-            if (message.contains(recipient.getDisplayName()) && !player.getDisplayName().equals(recipient.getDisplayName())) {
+            boolean isSenderTheRecipient = player.getDisplayName().equals(recipient.getDisplayName());
+            String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
+            if (!isSenderTheRecipient && (message.contains(recipient.getDisplayName()) || message.contains(strippedNickname))) {
                 recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
