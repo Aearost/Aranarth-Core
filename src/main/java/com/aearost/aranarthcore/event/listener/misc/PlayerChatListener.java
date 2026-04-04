@@ -87,7 +87,8 @@ public class PlayerChatListener implements Listener {
 
             boolean isSenderTheRecipient = player.getDisplayName().equals(recipient.getDisplayName());
             String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
-            if (!isSenderTheRecipient && (message.contains(recipient.getDisplayName()) || message.contains(strippedNickname))) {
+            if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
+                    || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
                 recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
