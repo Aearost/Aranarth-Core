@@ -184,6 +184,7 @@ Minor Features
 [~] Limited beacon effects to only those that are in/allied/truced with the Dominion
 [~] Added celebration and heart emoji to in-game rank changes
 [~] Made all prefixes bold (in both chat and tab)
+[~] Fixed null pointer issues relating to a null Member fetch in Discord
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -100,13 +100,9 @@ public class DiscordUtils {
 			return username.getFirst().getId();
 		}
 
-		Bukkit.getLogger().info("Input: |" + input + "|");
 		List<Member> nickname = getGuild().getMembersByNickname(input, true);
 		if (!nickname.isEmpty()) {
-			Bukkit.getLogger().info("Nickname not empty");
 			return nickname.getFirst().getId();
-		} else {
-			Bukkit.getLogger().info("Nickname empty");
 		}
 
 		return null;
@@ -138,7 +134,7 @@ public class DiscordUtils {
             default -> guild.getRoleById("1436839882268872744"); // Peasant
         };
 
-		if (playerDiscordId != null) {
+		if (playerDiscordId != null && guild.getMemberById(playerDiscordId) != null) {
 			List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
 			for (Role role : playerDiscordRoles) {
 				// Any of the rank-based roles
@@ -390,11 +386,11 @@ public class DiscordUtils {
 	 */
 	private static void updateAvatar(OfflinePlayer player) {
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
-		if (playerDiscordId == null) {
+		Guild guild = getGuild();
+		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 		}
 
-		Guild guild = getGuild();
 		Role role = guild.getRoleById("1440165603687137461"); // Avatar
 		List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
 		if (playerDiscordRoles.contains(role)) {
