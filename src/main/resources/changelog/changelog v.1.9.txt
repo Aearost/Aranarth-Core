@@ -183,6 +183,7 @@ Minor Features
 [~] You can now only store EXP in bottles as of Count/Countess
 [~] Limited beacon effects to only those that are in/allied/truced with the Dominion
 [~] Added celebration and heart emoji to in-game rank changes
+[~] Made all prefixes bold (in both chat and tab)
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

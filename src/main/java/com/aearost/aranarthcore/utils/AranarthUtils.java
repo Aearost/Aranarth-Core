@@ -1504,28 +1504,28 @@ public class AranarthUtils {
 		int rank = aranarthPlayer.getRank();
 		if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
 			switch (rank) {
-				case 1: return "&d[&aEsquire&d] &r";
-				case 2: return "&7[&fKnight&7] &r";
-				case 3: return "&5[&dBaron&5] &r";
-				case 4: return "&8[&7Count&8] &r";
-				case 5: return "&6[&eDuke&6] &r";
-				case 6: return "&6[&bPrince&6] &r";
-				case 7: return "&6[&9King&6] &r";
-				case 8: return "&6[&4Emperor&6] &r";
+				case 1: return "&d&l[&a&lEsquire&d&l] &r";
+				case 2: return "&7&l[&f&lKnight&7&l] &r";
+				case 3: return "&5&l[&d&lBaron&5&l] &r";
+				case 4: return "&8&l[&7&lCount&8&l] &r";
+				case 5: return "&6&l[&e&lDuke&6&l] &r";
+				case 6: return "&6&l[&b&lPrince&6&l] &r";
+				case 7: return "&6&l[&9&lKing&6&l] &r";
+				case 8: return "&6&l[&4&lEmperor&6&l] &r";
 			}
 		} else {
 			switch (rank) {
-				case 1: return "&d[&aEsquire&d] &r";
-				case 2: return "&7[&fKnight&7] &r";
-				case 3: return "&5[&dBaroness&5] &r";
-				case 4: return "&8[&7Countess&8] &r";
-				case 5: return "&6[&eDuchess&6] &r";
-				case 6: return "&6[&bPrincess&6] &r";
-				case 7: return "&6[&9Queen&6] &r";
-				case 8: return "&6[&4Empress&6] &r";
+				case 1: return "&d&l[&a&lEsquire&d&l] &r";
+				case 2: return "&7&l[&f&lKnight&7&l] &r";
+				case 3: return "&5&l[&d&lBaroness&5&l] &r";
+				case 4: return "&8&l[&7&lCountess&8&l] &r";
+				case 5: return "&6&l[&e&lDuchess&6&l] &r";
+				case 6: return "&6&l[&b&lPrincess&6&l] &r";
+				case 7: return "&6&l[&9&lQueen&6&l] &r";
+				case 8: return "&6&l[&4&lEmpress&6&l] &r";
 			}
 		}
-		return "&8[&aPeasant&8] &r";
+		return "&8&l[&a&lPeasant&8&l] &r";
 	}
 
 	/**
