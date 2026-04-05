@@ -100,9 +100,13 @@ public class DiscordUtils {
 			return username.getFirst().getId();
 		}
 
+		Bukkit.getLogger().info("Input: |" + input + "|");
 		List<Member> nickname = getGuild().getMembersByNickname(input, true);
 		if (!nickname.isEmpty()) {
+			Bukkit.getLogger().info("Nickname not empty");
 			return nickname.getFirst().getId();
+		} else {
+			Bukkit.getLogger().info("Nickname empty");
 		}
 
 		return null;
@@ -155,7 +159,7 @@ public class DiscordUtils {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			String rankName = AranarthUtils.getRank(aranarthPlayer).substring(5);
 			String[] rankNameNoBrackets = rankName.split("]");
-			rankName = rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 2);
+			rankName = ChatUtils.stripColorFormatting(rankNameNoBrackets[0].substring(0, rankNameNoBrackets[0].length() - 4));
 			if (rankName.equals("Esquire") || rankName.equals("Emperor") || rankName.equals("Empress")) {
 				aOrAn = "an";
 			}
