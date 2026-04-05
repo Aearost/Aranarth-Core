@@ -26,19 +26,33 @@ public class CommandAdminTeleport {
 				return true;
 			}
 
+			// /ac tp x y z yaw pitch
+
 			if (args[0].equalsIgnoreCase("tpf")) {
-				if (args.length == 4) {
+				if (args.length == 4 || args.length == 6) {
 					double x, y, z;
+					float yaw = 0;
+					float pitch = 0;
 					try {
 						x = Double.parseDouble(args[1]);
 						y = Double.parseDouble(args[2]);
 						z = Double.parseDouble(args[3]);
+
+						if (args.length == 6) {
+							yaw = Float.parseFloat(args[4]);
+							pitch = Float.parseFloat(args[5]);
+						}
 					} catch (NumberFormatException e) {
 						player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
 						return true;
 					}
 
-					Location loc = new Location(player.getWorld(), x, y, z);
+					Location loc = null;
+					if (args.length == 4) {
+						loc = new Location(player.getWorld(), x, y, z);
+					} else {
+						loc = new Location(player.getWorld(), x, y, z, yaw, pitch);
+					}
 					player.teleport(loc);
 					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
 				} else {
@@ -95,18 +109,30 @@ public class CommandAdminTeleport {
 				}
 				// Teleports self to the input coordinates
 				// /ac tp x y z
-				else if (args.length == 4) {
+				else if (args.length == 4 || args.length == 6) {
 					double x, y, z;
+					float yaw = 0;
+					float pitch = 0;
 					try {
 						x = Double.parseDouble(args[1]);
 						y = Double.parseDouble(args[2]);
 						z = Double.parseDouble(args[3]);
+
+						if (args.length == 6) {
+							yaw = Float.parseFloat(args[4]);
+							pitch = Float.parseFloat(args[5]);
+						}
 					} catch (NumberFormatException e) {
 						player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
 						return true;
 					}
 
-					Location loc = new Location(player.getWorld(), x, y, z);
+					Location loc = null;
+					if (args.length == 4) {
+						loc = new Location(player.getWorld(), x, y, z);
+					} else {
+						loc = new Location(player.getWorld(), x, y, z, yaw, pitch);
+					}
 					AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
@@ -114,6 +140,8 @@ public class CommandAdminTeleport {
 							player.sendMessage(ChatUtils.chatMessage("&cThe teleportation failed"));
 						}
 					});
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
 				}
 				return true;
 			}

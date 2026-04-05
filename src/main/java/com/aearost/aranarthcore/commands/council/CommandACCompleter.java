@@ -147,16 +147,31 @@ public class CommandACCompleter implements TabCompleter {
 			}  else if (!args[0].isEmpty() && "clearchat".startsWith(args[0])) {
 				displayedOptions.add("clearchat");
 			}
-		} else if (!args[0].isEmpty() && "speed".startsWith(args[0])) {
-			displayedOptions.add("speed");
+		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
+			if (args[0].equals("s")) {
+				displayedOptions.add("speed");
+				displayedOptions.add("sudo");
+			} else if (!args[0].isEmpty() && "speed".startsWith(args[0])) {
+				displayedOptions.add("speed");
+			} else if (!args[0].isEmpty() && "sudo".startsWith(args[0])) {
+				displayedOptions.add("sudo");
+			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("t")) {
 			if (args[0].equalsIgnoreCase("t")) {
 				displayedOptions.add("time");
 				displayedOptions.add("tp");
+				displayedOptions.add("tpf");
 			} else if (!args[0].isEmpty() && "time".startsWith(args[0])) {
 				displayedOptions.add("time");
-			} else if (!args[0].isEmpty() && "tp".startsWith(args[0])) {
-				displayedOptions.add("tp");
+			} else if (!args[0].isEmpty() && args[0].startsWith("tp")) {
+				if (args[0].equalsIgnoreCase("tp")) {
+					displayedOptions.add("tp");
+					displayedOptions.add("tpf");
+				} else if (!args[0].isEmpty() && "tp".startsWith(args[0])) {
+					displayedOptions.add("tp");
+				} else if (!args[0].isEmpty() && "tpf".startsWith(args[0])) {
+					displayedOptions.add("tpf");
+				}
 			}
 		} else if (!args[0].isEmpty() && "dateset".startsWith(args[0])) {
 			displayedOptions.add("dateset");
@@ -174,7 +189,7 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
 		switch (args[0]) {
-			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks" -> {
+			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks", "sudo" -> {
 				// List of online players
 				if (args.length == 2) {
 					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
@@ -317,6 +332,11 @@ public class CommandACCompleter implements TabCompleter {
 								}
 							}
 						}
+						case "sudo" -> {
+							if (args[2].isEmpty()) {
+								displayedOptions.add("command");
+							}
+						}
 					}
 				}
 			}
@@ -399,10 +419,12 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("midnight");
 				}
 			}
-			case "tp" -> {
+			case "tp", "tpf" -> {
 				if (args.length == 2) {
 					if (args[1].isEmpty()) {
-						displayedOptions.add("username");
+						if (args[0].equalsIgnoreCase("tp")) {
+							displayedOptions.add("username");
+						}
 						displayedOptions.add("x");
 					}
 				} else if (args.length == 3) {
@@ -417,7 +439,9 @@ public class CommandACCompleter implements TabCompleter {
 					// If teleporting players
 					if (hasOnlinePlayer) {
 						if (args[2].isEmpty()) {
-							displayedOptions.add("username");
+							if (args[0].equalsIgnoreCase("tp")) {
+								displayedOptions.add("username");
+							}
 						}
 					}
 					// If teleporting self to coordinates
@@ -429,6 +453,14 @@ public class CommandACCompleter implements TabCompleter {
 				} else if (args.length == 4) {
 					if (args[3].isEmpty()) {
 						displayedOptions.add("z");
+					}
+				}  else if (args.length == 5) {
+					if (args[4].isEmpty()) {
+						displayedOptions.add("yaw");
+					}
+				}  else if (args.length == 6) {
+					if (args[5].isEmpty()) {
+						displayedOptions.add("pitch");
 					}
 				}
 			}
@@ -467,9 +499,11 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("speed");
 		displayedOptions.add("time");
 		displayedOptions.add("tp");
+		displayedOptions.add("tpf");
 		displayedOptions.add("clearchat");
 		displayedOptions.add("dateset");
 		displayedOptions.add("vanish");
+		displayedOptions.add("sudo");
 		return displayedOptions;
 	}
 
