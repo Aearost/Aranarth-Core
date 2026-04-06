@@ -241,6 +241,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.time", false);
 		perms.setPermission("aranarth.skull", false);
 		perms.setPermission("aranarth.sudo", false);
+		perms.setPermission("aranarth.trash", false);
 	}
 
 	/**
@@ -489,6 +490,7 @@ public class PermissionUtils {
 		if (rank >= 2) {
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("aranarth.back", true);
+			perms.setPermission("aranarth.trash", true);
 		} else {
 			return;
 		}
@@ -592,6 +594,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.color", true);
 			perms.setPermission("aranarth.blacklist", true);
 			perms.setPermission("aranarth.tables", true);
+			perms.setPermission("aranarth.trash", true);
 		} else {
 			return;
 		}

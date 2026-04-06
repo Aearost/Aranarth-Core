@@ -145,6 +145,8 @@ commands:
   tphere:
     description: Allows the player to request another player teleports to them
     aliases: [tph]
+  trash:
+    description: Allows players to dispense of items
   trust:
     description: Trusts the input player to the next clicked chest
   unlock:

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
+import com.aearost.aranarthcore.commands.council.CommandTrash;
 import com.aearost.aranarthcore.commands.general.*;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.event.listener.*;
@@ -436,7 +437,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("tpaccept").setExecutor(new CommandTpAccept());
 		getCommand("tpdeny").setExecutor(new CommandTpDeny());
 		getCommand("tphere").setExecutor(new CommandTpHere());
-		getCommand("trust").setExecutor(new CommandTrust());
+		getCommand("trash").setExecutor(new CommandTrash());
 		getCommand("trust").setTabCompleter(new CommandTrustCompleter());
 		getCommand("unlock").setExecutor(new CommandUnlock());
 		getCommand("untrust").setExecutor(new CommandUntrust());
