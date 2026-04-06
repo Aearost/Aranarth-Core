@@ -14,10 +14,16 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.api.JDA;
+import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMemberJoinEvent;
+import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMemberLeaveEvent;
+import github.scarsz.discordsrv.dependencies.jda.api.hooks.ListenerAdapter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
@@ -254,6 +260,27 @@ public class AranarthCore extends JavaPlugin {
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
 		new ArmorStandItemAddListener(this);
+
+		// Discord server join and quit messages
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				JDA jda = DiscordSRV.getPlugin().getJda();
+				jda.addEventListener(new ListenerAdapter() {
+					@Override
+					public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+						DiscordUtils.discordServerJoin(event.getUser().getAsMention());
+					}
+				});
+
+				jda.addEventListener(new ListenerAdapter() {
+					@Override
+					public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
+						DiscordUtils.discordServerQuit(event.getUser().getAsMention());
+					}
+				});
+			}
+		}.runTaskLater(AranarthCore.getInstance(), 1);
 	}
 
 	/**

@@ -186,6 +186,7 @@ Minor Features
 [~] Made all prefixes bold (in both chat and tab)
 [~] Fixed null pointer issues relating to a null Member fetch in Discord
 [~] Prevented teleport requests from being accepted in creative if the player doesn't have access to it
+[+] Added custom discord server join and quit messages with emoji reactions
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
