@@ -113,13 +113,21 @@ public class CropUtils {
 			return;
 		}
 
+		boolean hasNoMultipliers = true;
 		List<String> lore = new ArrayList<>();
 		if (growthSpeed != 1) {
+			hasNoMultipliers = false;
 			lore.add(formatMultiplierLine(growthSpeed, "speed"));
 		}
 		if (yieldMultiplier != 1) {
+			hasNoMultipliers = false;
 			lore.add(formatMultiplierLine(yieldMultiplier, "yield"));
 		}
+
+		if (hasNoMultipliers) {
+			lore.add(ChatUtils.translateToColor("&7&oNormal growth"));
+		}
+
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 	}
