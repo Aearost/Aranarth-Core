@@ -28,8 +28,8 @@ public class CropInfoEventListener implements Listener {
 	@EventHandler
 	public void onInventoryOpen(InventoryOpenEvent e) {
 		if (e.getPlayer() instanceof Player player) {
-			CropUtils.refreshInventory(e.getInventory());
-			CropUtils.refreshInventory(player.getInventory());
+			CropUtils.refreshInventory(e.getInventory(), e.getPlayer().getWorld());
+			CropUtils.refreshInventory(player.getInventory(), e.getPlayer().getWorld());
 		}
 	}
 

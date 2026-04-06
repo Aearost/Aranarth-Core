@@ -570,8 +570,9 @@ public class CropUtils {
 	/**
 	 * Scans an inventory and updates the lore on every crop seed stack found.
 	 * @param inventory The inventory to refresh.
+	 * @param world The world the inventory is in.
 	 */
-	public static void refreshInventory(Inventory inventory) {
+	public static void refreshInventory(Inventory inventory, World world) {
 		ItemStack[] contents = inventory.getContents();
 		for (int i = 0; i < contents.length; i++) {
 			if (contents[i] != null && CropUtils.isCropSeed(contents[i].getType())) {

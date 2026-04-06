@@ -33,7 +33,7 @@ public class ShulkerClick {
 								e.setCancelled(true);
 								player.playSound(player, Sound.BLOCK_SHULKER_BOX_OPEN, 1F, 1F);
 								Inventory shulkerInventory = shulker.getInventory();
-								CropUtils.refreshInventory(shulkerInventory);
+								CropUtils.refreshInventory(shulkerInventory, player.getWorld());
 								GuiShulker gui = new GuiShulker(player, shulkerInventory);
 								gui.openGui();
 								return;

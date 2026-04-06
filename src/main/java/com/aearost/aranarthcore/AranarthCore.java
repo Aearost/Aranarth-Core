@@ -143,7 +143,7 @@ public class AranarthCore extends JavaPlugin {
 
 				// Use the updated date to refresh all player inventories
 				for (Player player : Bukkit.getOnlinePlayers()) {
-					CropUtils.refreshInventory(player.getInventory());
+					CropUtils.refreshInventory(player.getInventory(), player.getWorld());
 					// Fallback if the player goes offline while vanished
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					if (!aranarthPlayer.isVanished() && player.isInvisible()) {
