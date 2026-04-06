@@ -613,7 +613,7 @@ public class CommandDominion implements CommandExecutor {
 							DominionUtils.updateDominion(dominion);
 							DominionUtils.updateDominion(dominionFromList);
 
-							Bukkit.broadcastMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName());
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &5allied &7with &e" + dominionFromList.getName()));
 							DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now allied with " + dominionFromList.getName(), new Color(170, 0, 170));
 						}
 						// If sending a new request for an alliance
@@ -704,7 +704,7 @@ public class CommandDominion implements CommandExecutor {
 							DominionUtils.updateDominion(dominion);
 							DominionUtils.updateDominion(dominionFromList);
 
-							Bukkit.broadcastMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName());
+							Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The Dominion of &e" + dominion.getName() + " &7is now &dtruced &7with &e" + dominionFromList.getName()));
 							DiscordUtils.dominionMessage(dominion, "The Dominion of " + dominion.getName() + " is now truced with " + dominionFromList.getName(), new Color(255, 85, 255));
 						}
 						// If sending a new request for a truce
