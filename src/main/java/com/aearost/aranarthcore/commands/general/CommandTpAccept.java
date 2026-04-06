@@ -32,7 +32,8 @@ public class CommandTpAccept implements CommandExecutor {
 				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportToUuid()));
 				// If both players are still online
 				if (target != null) {
-					if (target.getLocation().getWorld().getName().startsWith("smp")) {
+					String destinationWorld = target.getLocation().getWorld().getName();
+					if (destinationWorld.startsWith("smp") || destinationWorld.equals("creative")) {
 						if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
 							target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
@@ -65,7 +66,8 @@ public class CommandTpAccept implements CommandExecutor {
 				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 				// If both players are still online
 				if (target != null) {
-					if (player.getLocation().getWorld().getName().startsWith("smp")) {
+					String destinationWorld = player.getLocation().getWorld().getName();
+					if (destinationWorld.startsWith("smp") || destinationWorld.equals("creative")) {
 						if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
 							target.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
 							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
