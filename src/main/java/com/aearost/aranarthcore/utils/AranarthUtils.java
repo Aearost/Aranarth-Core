@@ -3349,26 +3349,36 @@ public class AranarthUtils {
 		// Increases the killer's kill count by 1 in the world
 		if (killer != null && !wasKillerScoreUpdated) {
 			List<PlayerKillDeathScore> list = killDeathScores.get(killer.getUniqueId());
+			boolean foundKillerWorld = false;
 			for (int i = 0; i < list.size(); i++) {
 				PlayerKillDeathScore pkds = list.get(i);
 				if (deathWorld.equals(pkds.getWorldPrefix())) {
 					pkds.setKills(pkds.getKills() + 1);
 					list.set(i, pkds);
+					foundKillerWorld = true;
 					break;
 				}
+			}
+			if (!foundKillerWorld) {
+				list.add(new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0));
 			}
 			killDeathScores.put(killer.getUniqueId(), list);
 		}
 		// Increases the victim's death count by 1 in the world
 		if (!wasVictimScoreUpdated) {
 			List<PlayerKillDeathScore> list = killDeathScores.get(victim.getUniqueId());
+			boolean foundVictimWorld = false;
 			for (int i = 0; i < list.size(); i++) {
 				PlayerKillDeathScore pkds = list.get(i);
 				if (deathWorld.equals(pkds.getWorldPrefix())) {
 					pkds.setDeaths(pkds.getDeaths() + 1);
 					list.set(i, pkds);
+					foundVictimWorld = true;
 					break;
 				}
+			}
+			if (!foundVictimWorld) {
+				list.add(new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1));
 			}
 			killDeathScores.put(victim.getUniqueId(), list);
 		}
