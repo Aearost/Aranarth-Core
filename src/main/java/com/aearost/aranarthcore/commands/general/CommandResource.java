@@ -48,8 +48,8 @@ public class CommandResource implements CommandExecutor {
 			Location selectedLocation = null;
 			boolean isLocationFound = false;
 			while (!isLocationFound) {
-				int x = random.nextInt(5001) - 2500;
-				int z = random.nextInt(5001) - 2500;
+				int x = random.nextInt(4501) - 2500;
+				int z = random.nextInt(4501) - 2500;
 				if (resource.getHighestBlockAt(x, z).getType() != Material.WATER) {
 					isLocationFound = true;
 					selectedLocation = resource.getHighestBlockAt(x, z).getLocation();
