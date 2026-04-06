@@ -189,6 +189,7 @@ Minor Features
 [+] Added custom discord server join and quit messages with emoji reactions
 [~] Prevented hostile mobs from spawning in dominion land
 [~] Fixed /resource sometimes putting you in the world border
+[~] Fixed issue where the incorrect rank's mcMMO requirements were being used
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

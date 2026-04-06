@@ -123,12 +123,12 @@ public class GuiRankupClick {
 		switch (aranarthPlayer.getRank()) {
 			case 0 -> minimum = 0;
 			case 1 -> minimum = 0;
-			case 2 -> minimum = 0;
-			case 3 -> minimum = 25;
-			case 4 -> minimum = 50;
-			case 5 -> minimum = 125;
-			case 6 -> minimum = 250;
-			case 7 -> minimum = 500;
+			case 2 -> minimum = 25;
+			case 3 -> minimum = 50;
+			case 4 -> minimum = 125;
+			case 5 -> minimum = 250;
+			case 6 -> minimum = 500;
+			case 7 -> minimum = 1000;
 			default -> minimum = 1000;
 		}
 
