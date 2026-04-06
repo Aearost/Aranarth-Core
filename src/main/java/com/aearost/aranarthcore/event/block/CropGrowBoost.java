@@ -46,6 +46,11 @@ public class CropGrowBoost {
 		double speed = CropUtils.getCropGrowthSpeed(AranarthUtils.getMonth(), seedKey);
 
 		if (speed < 1.0) {
+			// Speed should not go below 1x in the nether
+			if (seedKey == Material.NETHER_WART && block.getWorld().getName().endsWith("_nether")) {
+				return;
+			}
+
 			// Dynamically cancel growth to simulate a slower growth rate
 			if (ThreadLocalRandom.current().nextDouble() < 1.0 - speed) {
 				e.setCancelled(true);

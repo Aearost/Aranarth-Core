@@ -71,6 +71,14 @@ public class CropHarvest {
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
 		Month month = AranarthUtils.getMonth();
 		double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
+
+		// Yield should not go below 1x in the nether
+		if (block.getType() == Material.NETHER_WART && block.getWorld().getName().endsWith("_nether")) {
+			if (multiplier < 1) {
+				multiplier = 1;
+			}
+		}
+
 		boolean isWinterMonth = DateUtils.isWinterMonth(month) || month == Month.IGNIVOR;
 		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
 
@@ -92,7 +100,7 @@ public class CropHarvest {
 
 			for (ItemStack drop : drops) {
 				if (drop.getAmount() > 0) {
-					CropUtils.updateSeedLore(drop);
+					CropUtils.updateSeedLore(drop, block.getWorld());
 					block.getWorld().dropItemNaturally(block.getLocation(), drop);
 				}
 			}
@@ -114,7 +122,7 @@ public class CropHarvest {
 			e.setCancelled(true);
 
 			for (ItemStack drop : drops) {
-				CropUtils.updateSeedLore(drop);
+				CropUtils.updateSeedLore(drop, block.getWorld());
 				block.getWorld().dropItemNaturally(block.getLocation(), drop);
 			}
 
@@ -150,7 +158,7 @@ public class CropHarvest {
 		}
 
 		for (ItemStack drop : drops) {
-			CropUtils.updateSeedLore(drop);
+			CropUtils.updateSeedLore(drop, block.getWorld());
 			block.getWorld().dropItemNaturally(block.getLocation(), drop);
 		}
 

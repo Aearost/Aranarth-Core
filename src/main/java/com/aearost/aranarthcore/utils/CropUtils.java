@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.inventory.Inventory;
@@ -80,8 +81,9 @@ public class CropUtils {
 	/**
 	 * Displays the current month's crop grow speed and crop yield modifiers.
 	 * @param item The item.
+	 * @param world The world that the item is in.
 	 */
-	public static void updateSeedLore(ItemStack item) {
+	public static void updateSeedLore(ItemStack item, World world) {
 		if (item == null || item.getType() == Material.AIR) {
 			return;
 		}
@@ -91,7 +93,20 @@ public class CropUtils {
 		}
 
 		double growthSpeed = getCropGrowthSpeed(AranarthUtils.getMonth(), item.getType());
+		// Speed should not go below 1x in the nether
+		if (item.getType() == Material.NETHER_WART && world.getName().endsWith("_nether")) {
+			if (growthSpeed < 1) {
+				growthSpeed = 1;
+			}
+		}
+
 		double yieldMultiplier = getCropYieldMultiplier(AranarthUtils.getMonth(), item.getType());
+		// Yield should not go below 1x in the nether
+		if (item.getType() == Material.NETHER_WART && world.getName().endsWith("_nether")) {
+			if (yieldMultiplier < 1) {
+				yieldMultiplier = 1;
+			}
+		}
 
 		ItemMeta meta = item.getItemMeta();
 		if (meta == null) {
@@ -207,17 +222,17 @@ public class CropUtils {
 			};
 		} else if (type == Material.NETHER_WART) {
 			return switch (month) {
-				case IGNIVOR   -> 0.1;
-				case AQUINVOR  -> 0.1;
-				case VENTIVOR  -> 0.1;
-				case FLORIVOR  -> 0.1;
-				case AESTIVOR  -> 0.1;
-				case CALORVOR  -> 0.1;
-				case ARDORVOR  -> 0.1;
-				case SOLARVOR  -> 0.1;
-				case FOLLIVOR -> 0.1;
-				case STRIGAVOR -> 0.1;
-				case FAUNIVOR  -> 0.1;
+				case IGNIVOR   -> 0.25;
+				case AQUINVOR  -> 0.25;
+				case VENTIVOR  -> 0.25;
+				case FLORIVOR  -> 0.25;
+				case AESTIVOR  -> 0.25;
+				case CALORVOR  -> 0.25;
+				case ARDORVOR  -> 0.25;
+				case SOLARVOR  -> 0.25;
+				case FOLLIVOR -> 0.25;
+				case STRIGAVOR -> 0.25;
+				case FAUNIVOR  -> 0.25;
 				case UMBRAVOR  -> 1.0;
 				case GLACIVOR  -> 1.75;
 				case FRIGORVOR -> 2.5;
@@ -417,15 +432,15 @@ public class CropUtils {
 		} else if (type == Material.NETHER_WART) {
 			return switch (month) {
 				case IGNIVOR   -> 1.5;
-				case AQUINVOR  -> 0.25;
-				case VENTIVOR  -> 0.1;
-				case FLORIVOR  -> 0.1;
-				case AESTIVOR  -> 0.1;
-				case CALORVOR  -> 0.1;
-				case ARDORVOR  -> 0.1;
-				case SOLARVOR  -> 0.1;
-				case FOLLIVOR -> 0.1;
-				case STRIGAVOR -> 0.1;
+				case AQUINVOR  -> 0.5;
+				case VENTIVOR  -> 0.25;
+				case FLORIVOR  -> 0.25;
+				case AESTIVOR  -> 0.25;
+				case CALORVOR  -> 0.25;
+				case ARDORVOR  -> 0.25;
+				case SOLARVOR  -> 0.25;
+				case FOLLIVOR -> 0.25;
+				case STRIGAVOR -> 0.25;
 				case FAUNIVOR  -> 0.5;
 				case UMBRAVOR  -> 2.0;
 				case GLACIVOR  -> 3.0;
@@ -552,7 +567,7 @@ public class CropUtils {
 		ItemStack[] contents = inventory.getContents();
 		for (int i = 0; i < contents.length; i++) {
 			if (contents[i] != null && CropUtils.isCropSeed(contents[i].getType())) {
-				CropUtils.updateSeedLore(contents[i]);
+				CropUtils.updateSeedLore(contents[i], inventory.getLocation().getWorld());
 				inventory.setItem(i, contents[i]);
 			}
 		}

@@ -74,7 +74,7 @@ public class SweetBerryHarvest {
 			int finalAmount = Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled));
 
 			ItemStack berries = new ItemStack(Material.SWEET_BERRIES, finalAmount);
-			CropUtils.updateSeedLore(berries);
+			CropUtils.updateSeedLore(berries, block.getWorld());
 			block.getWorld().dropItemNaturally(block.getLocation(), berries);
 
 			// Reset bush to age 1 (vanilla post-harvest state)
