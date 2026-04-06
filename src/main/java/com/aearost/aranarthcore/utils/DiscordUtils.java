@@ -390,6 +390,7 @@ public class DiscordUtils {
 		Guild guild = getGuild();
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			return;
 		}
 
 		Role role = guild.getRoleById("1440165603687137461"); // Avatar

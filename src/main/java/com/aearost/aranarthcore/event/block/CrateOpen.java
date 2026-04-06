@@ -563,7 +563,7 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = getCycledEpicIncantation(new Random().nextInt(2));
+                    reward = getCycledEpicIncantation(new Random().nextInt(3));
                     name = reward.getItemMeta().getDisplayName();
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
