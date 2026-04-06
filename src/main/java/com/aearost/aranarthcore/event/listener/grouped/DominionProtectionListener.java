@@ -15,6 +15,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
@@ -294,6 +295,21 @@ public class DominionProtectionListener implements Listener {
 			boolean isActionPrevented = applyLogic(e.getPlayer(), null, e.getRightClicked());
 			if (isActionPrevented) {
 				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents mobs from spawning in Dominions.
+	 */
+	@EventHandler
+	public void onMobSpawn(CreatureSpawnEvent e) {
+		if (e.getEntityType() != EntityType.ARMOR_STAND) {
+			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
+			if (chunkDominion != null) {
+				if (e.getEntity().getSpawnCategory() == SpawnCategory.MONSTER) {
+					e.setCancelled(true);
+				}
 			}
 		}
 	}
