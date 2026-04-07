@@ -176,21 +176,21 @@ public class CropUtils {
 			};
 		} else if (type == Material.BEETROOT_SEEDS) {
 			return switch (month) {
-				case IGNIVOR   -> 1.0;
-				case AQUINVOR  -> 1.0;
-				case VENTIVOR  -> 1.0;
+				case IGNIVOR   -> 0.5;
+				case AQUINVOR  -> 0.75;
+				case VENTIVOR  -> 0.75;
 				case FLORIVOR  -> 1.0;
-				case AESTIVOR  -> 1.25;
-				case CALORVOR  -> 1.5;
-				case ARDORVOR  -> 2.0;
-				case SOLARVOR  -> 2.5;
-				case FOLLIVOR  -> 2.75;
-				case STRIGAVOR -> 3.0;
-				case FAUNIVOR  -> 3.0;
-				case UMBRAVOR  -> 3.0;
+				case AESTIVOR  -> 1.0;
+				case CALORVOR  -> 1.25;
+				case ARDORVOR  -> 1.25;
+				case SOLARVOR  -> 1.5;
+				case FOLLIVOR  -> 1.5;
+				case STRIGAVOR -> 2.0;
+				case FAUNIVOR  -> 2.0;
+				case UMBRAVOR  -> 2.0;
 				case GLACIVOR  -> 2.0;
-				case FRIGORVOR -> 1.25;
-				case OBSCURVOR -> 1.0;
+				case FRIGORVOR -> 1.0;
+				case OBSCURVOR -> 0.75;
 			};
 		} else if (type == Material.CARROT) {
 			return switch (month) {
