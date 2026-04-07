@@ -576,7 +576,7 @@ public class CropUtils {
 		ItemStack[] contents = inventory.getContents();
 		for (int i = 0; i < contents.length; i++) {
 			if (contents[i] != null && CropUtils.isCropSeed(contents[i].getType())) {
-				CropUtils.updateSeedLore(contents[i], inventory.getLocation().getWorld());
+				CropUtils.updateSeedLore(contents[i], world);
 				inventory.setItem(i, contents[i]);
 			}
 		}
