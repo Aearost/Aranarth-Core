@@ -49,7 +49,7 @@ public class BlockBreakEventListener implements Listener {
             } else if (type == Material.PITCHER_PLANT || type == Material.PITCHER_CROP || hasLightCropAbove(e.getBlock(), "PITCHER_PLANT")) {
                 new PitcherPlantBreak().execute(e);
             } else {
-                if (e.getBlock().getType().name().endsWith("_ORE")) {
+                if (e.getBlock().getType().name().endsWith("_ORE") || e.getBlock().getType() == Material.ANCIENT_DEBRIS) {
                     new OreClusterDrops().execute(e);
                     new OreExtraDrops().execute(e);
                 }

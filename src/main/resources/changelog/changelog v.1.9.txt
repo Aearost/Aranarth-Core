@@ -192,6 +192,7 @@ Minor Features
 [~] Fixed issue where the incorrect rank's mcMMO requirements were being used
 [~] Added /trash for Knights and Saints
 [~] Fixed error due to null discord user trying to update avatar roles
+[~] Fixed issue where Ancient Debris was not dropped with higher probability when mined wearing dwarven aranarthium or with the boost of the miner
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
