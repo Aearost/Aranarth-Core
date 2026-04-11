@@ -35,7 +35,7 @@ public class IncantationPlentifulBlockBreak {
 
 		ItemStack heldItem = player.getInventory().getItemInMainHand();
 		// 3x3x1 based on the direction the player is looking
-		// 45 degrees and -45 degrees (do both checks i.e looking up vs down vs straight ahead
+		// 35 degrees and -35 degrees (do both checks i.e looking up vs down vs straight ahead
 		float yaw = player.getLocation().getYaw();
 		float pitch = player.getLocation().getPitch();
 		List<Block> blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch);
@@ -124,9 +124,9 @@ public class IncantationPlentifulBlockBreak {
 		int centerY = location.getBlockY();
 		int centerZ = location.getBlockZ();
 
-		boolean isFacingStraightAhead = pitch > -45 && pitch <= 45;
+		boolean isFacingStraightAhead = pitch > -30 && pitch <= 30;
 		boolean isFacingNorthSouth = ((yaw > -180 && yaw <= -135) || (yaw > 135 && yaw <= 180)) // Facing North
-										|| (yaw > -45 && yaw <= 45); // Facing South
+										|| (yaw > -30 && yaw <= 30); // Facing South
 
 		if (isFacingStraightAhead) {
 			if (isFacingNorthSouth) {
