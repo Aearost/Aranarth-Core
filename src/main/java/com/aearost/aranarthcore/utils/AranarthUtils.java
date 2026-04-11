@@ -766,7 +766,13 @@ public class AranarthUtils {
 				|| type == Material.BASALT || type == Material.SMOOTH_BASALT
 				|| type == Material.END_STONE || type == Material.ANCIENT_DEBRIS
 				|| type == Material.AMETHYST_BLOCK || type == Material.BUDDING_AMETHYST
-				|| type.name().endsWith("_ORE");
+				|| type == Material.ICE || type == Material.PACKED_ICE || type == Material.BLUE_ICE
+				|| type == Material.PRISMARINE_BRICKS || type == Material.PRISMARINE
+				|| type == Material.BONE_BLOCK || type == Material.OBSIDIAN
+				|| type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
+				|| type == Material.BLACKSTONE || type == Material.GLOWSTONE
+
+				|| type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
 	}
 
 	/**
