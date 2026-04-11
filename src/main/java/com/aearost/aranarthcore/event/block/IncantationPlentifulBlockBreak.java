@@ -56,8 +56,10 @@ public class IncantationPlentifulBlockBreak {
 			}
 
 			String name = heldItem.getType().name();
-			if (name.endsWith("_PICKAXE") && AranarthUtils.isHarvestableWithPickaxe(block.getType())) {
-				callNewBlockBreakEvent(block, player, true);
+			if (name.endsWith("_PICKAXE")) {
+				if (block.getType().getHardness() >= 1.5f) {
+					callNewBlockBreakEvent(block, player, true);
+				}
 			} else if (name.endsWith("_AXE") && AranarthUtils.isHarvestableWithAxe(block.getType())) {
 				callNewBlockBreakEvent(block, player, true);
 			} else if (name.endsWith("_SHOVEL") && AranarthUtils.isHarvestableWithShovel(block.getType())) {
@@ -165,6 +167,7 @@ public class IncantationPlentifulBlockBreak {
 	 * @param hasDrops Whether the block will be dropped or not.
 	 */
 	private void callNewBlockBreakEvent(Block block, Player player, boolean hasDrops) {
+		block.getWorld().playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
 		Bukkit.getServer().getPluginManager().callEvent(new BlockBreakEvent(block, player));
 		if (hasDrops) {
 			new BukkitRunnable() {
