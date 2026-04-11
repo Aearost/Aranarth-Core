@@ -333,9 +333,9 @@ public class SpawnProtectionListener implements Listener {
 			int z = e.getTo().getBlockZ();
 
 			// World portals
-			boolean isEnteringSurvivalPortal = (x >= -3 && x <= 3) && (y >= 101 && y <= 111) && (z == -100);
-			boolean isEnteringResourcePortal = (x >= -23 && x <= -17) && (y >= 107 && y <= 117) && (z == -109);
-			boolean isEnteringArenaPortal = (x >= 16 && x <= 22) && (y >= 112 && y <= 121) && (z == -94);
+			boolean isEnteringSurvivalPortal = (x >= -4 && x <= 5) && (y >= 101 && y <= 111) && (z == -100);
+			boolean isEnteringResourcePortal = (x >= -24 && x <= -15) && (y >= 107 && y <= 117) && (z == -109);
+			boolean isEnteringArenaPortal = (x >= 16 && x <= 24) && (y >= 112 && y <= 121) && (z == -97);
 
 			// Tutorial entry portals
 			boolean isEnteringBendingPortal = (x >= 50 && x <= 52) && (y >= 103 && y <= 106) && z == -59;
