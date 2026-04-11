@@ -194,6 +194,8 @@ Minor Features
 [~] Fixed error due to null discord user trying to update avatar roles
 [~] Fixed issue where Ancient Debris was not dropped with higher probability when mined wearing dwarven aranarthium or with the boost of the miner
 [~] Seemingly fixed redundant DiscordSRV errors due to a non existing member
+[+] Added support to mass shift-click into/out of the potions add GUI
+[~] Fixed issue where shift clicking from the potions add GUI would make the potion disappear if the player's inventory was full
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
