@@ -183,12 +183,12 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
 	 */
 	public static void updateSaint(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
-		if (playerDiscordId == null) {
+		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 		}
 
-		Guild guild = getGuild();
 		boolean isSaint = false;
 
 		// If they are a Saint
@@ -232,24 +232,21 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
 	 */
 	public static void updateArchitect(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
-		if (playerDiscordId == null) {
+		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			return;
 		}
 
-		Guild guild = getGuild();
 		boolean isArchitect = false;
 
 		// If they are an Architect
 		if (newRankNum > 0) {
 			isArchitect = true;
-			if (playerDiscordId != null) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
-			}
+			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
 		} else {
-			if (playerDiscordId != null) {
-				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
-			}
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
 		}
 
 		// Only display intentional changes in Discord, not auto-assign
@@ -277,12 +274,13 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
 	 */
 	public static void updateCouncil(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
-		if (playerDiscordId == null) {
+		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			return;
 		}
 
-		Guild guild = getGuild();
 		boolean isHelper = false;
 		boolean isModerator = false;
 		boolean isAdmin = false;
@@ -367,13 +365,13 @@ public class DiscordUtils {
 	 * @param aranarthPlayer The AranarthPlayer object of the player.
 	 */
 	public static void updateDiscordRole(OfflinePlayer player, AranarthPlayer aranarthPlayer) {
+		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
-		if (playerDiscordId == null) {
+		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord role could not be updated as they have not linked their Discord");
 			return;
 		}
 
-		Guild guild = getGuild();
 		if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 1) {
 			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
 		} else {
