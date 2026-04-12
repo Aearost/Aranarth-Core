@@ -199,6 +199,7 @@ Minor Features
 [+] Added chiseled bookshelf to the list of items that cannot be interacted with at spawn and in dominions
 [+] Added support for clickable links in chat
 [+] Added /enderchest for Saint II and above
+[~] Added support to update the location of a home with /sethome despite already using the maximum available homes
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
