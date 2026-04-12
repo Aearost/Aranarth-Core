@@ -420,46 +420,62 @@ public class CommandACCompleter implements TabCompleter {
 				}
 			}
 			case "tp", "tpf" -> {
+				// arg1: username or x-coordinate
 				if (args.length == 2) {
-					if (args[1].isEmpty()) {
+					displayedOptions.add("username");
+					displayedOptions.add("x");
+				}
+				// arg2: depends on whether arg1 was a player
+				//   tp  username → username2 (player-to-player) or x (player-to-coords)
+				//   tpf username → x (player-to-coords)
+				//   tp/tpf x    → y
+				else if (args.length == 3) {
+					if (isOnlinePlayer(args[1])) {
 						if (args[0].equalsIgnoreCase("tp")) {
 							displayedOptions.add("username");
 						}
 						displayedOptions.add("x");
+					} else {
+						displayedOptions.add("y");
 					}
-				} else if (args.length == 3) {
-					boolean hasOnlinePlayer = false;
-					// Checks to see if the field is an online player's username
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						if (args[1].equalsIgnoreCase(onlinePlayer.getName())) {
-							hasOnlinePlayer = true;
-						}
-					}
-
-					// If teleporting players
-					if (hasOnlinePlayer) {
-						if (args[2].isEmpty()) {
-							if (args[0].equalsIgnoreCase("tp")) {
-								displayedOptions.add("username");
-							}
-						}
-					}
-					// If teleporting self to coordinates
-					else {
-						if (args[2].isEmpty()) {
+				}
+				// arg3: depends on arg1 and arg2
+				//   username x    → y
+				//   username user → (player-to-player complete, no further args)
+				//   x y           → z
+				else if (args.length == 4) {
+					if (isOnlinePlayer(args[1])) {
+						if (!isOnlinePlayer(args[2])) {
 							displayedOptions.add("y");
 						}
-					}
-				} else if (args.length == 4) {
-					if (args[3].isEmpty()) {
+					} else {
 						displayedOptions.add("z");
 					}
-				}  else if (args.length == 5) {
-					if (args[4].isEmpty()) {
+				}
+				// arg4:
+				//   username x y → z
+				//   x y z        → yaw (optional)
+				else if (args.length == 5) {
+					if (isOnlinePlayer(args[1])) {
+						displayedOptions.add("z");
+					} else {
 						displayedOptions.add("yaw");
 					}
-				}  else if (args.length == 6) {
-					if (args[5].isEmpty()) {
+				}
+				// arg5:
+				//   username x y z → yaw (optional)
+				//   x y z yaw      → pitch
+				else if (args.length == 6) {
+					if (isOnlinePlayer(args[1])) {
+						displayedOptions.add("yaw");
+					} else {
+						displayedOptions.add("pitch");
+					}
+				}
+				// arg6:
+				//   username x y z yaw → pitch
+				else if (args.length == 7) {
+					if (isOnlinePlayer(args[1])) {
 						displayedOptions.add("pitch");
 					}
 				}
@@ -474,6 +490,15 @@ public class CommandACCompleter implements TabCompleter {
 			}
 		}
 		return displayedOptions;
+	}
+
+	private boolean isOnlinePlayer(String name) {
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			if (onlinePlayer.getName().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

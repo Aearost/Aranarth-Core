@@ -201,6 +201,7 @@ Minor Features
 [+] Added /enderchest for Saint II and above
 [~] Added support to update the location of a home with /sethome despite already using the maximum available homes
 [~] Fixed issue when teleporting between worlds that caused inventories to be cleared or gamemodes not to be changed correctly
+[~] Added support to /ac tp and /ac tpf players to input coordinates
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

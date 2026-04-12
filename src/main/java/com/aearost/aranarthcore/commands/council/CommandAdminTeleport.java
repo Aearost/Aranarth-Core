@@ -26,9 +26,8 @@ public class CommandAdminTeleport {
 				return true;
 			}
 
-			// /ac tp x y z yaw pitch
-
 			if (args[0].equalsIgnoreCase("tpf")) {
+				// /ac tpf x y z [<yaw> <pitch>]
 				if (args.length == 4 || args.length == 6) {
 					double x, y, z;
 					float yaw = 0;
@@ -55,13 +54,43 @@ public class CommandAdminTeleport {
 					}
 					player.teleport(loc);
 					player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
+				}
+				// /ac tpf username x y z [<yaw> <pitch>]
+				else if (args.length == 5 || args.length == 7) {
+					Player target = Bukkit.getPlayer(args[1]);
+					if (target == null) {
+						player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+						return true;
+					}
+					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+					double x, y, z;
+					float yaw = 0;
+					float pitch = 0;
+					try {
+						x = Double.parseDouble(args[2]);
+						y = Double.parseDouble(args[3]);
+						z = Double.parseDouble(args[4]);
+						if (args.length == 7) {
+							yaw = Float.parseFloat(args[5]);
+							pitch = Float.parseFloat(args[6]);
+						}
+					} catch (NumberFormatException e) {
+						player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+						return true;
+					}
+					Location loc = args.length == 5
+							? new Location(target.getWorld(), x, y, z)
+							: new Location(target.getWorld(), x, y, z, yaw, pitch);
+					target.teleport(loc);
+					player.sendMessage(ChatUtils.chatMessage("&7You have teleported &e" + targetAranarthPlayer.getNickname() + " &7to the input coordinates"));
+					target.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the input coordinates"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
 				}
 				return true;
 			} else {
 				// Teleports the sender to the player
-				// /ac tp player1
+				// /ac tp username
 				if (args.length == 2) {
 					Player target = Bukkit.getPlayer(args[1]);
 					if (target != null) {
@@ -80,7 +109,7 @@ public class CommandAdminTeleport {
 					return true;
 				}
 				// Teleports the first player to the second player
-				// /ac tp player1 player2
+				// /ac tp username1 username2
 				else if (args.length == 3) {
 					Player target1 = Bukkit.getPlayer(args[1]);
 					Player target2 = Bukkit.getPlayer(args[2]);
@@ -107,8 +136,44 @@ public class CommandAdminTeleport {
 					}
 					return true;
 				}
+				// Teleports the target player to the input coordinates
+				// /ac tf username x y z [<yaw> <pitch>]
+				else if (args.length == 5 || args.length == 7) {
+					Player target = Bukkit.getPlayer(args[1]);
+					if (target == null) {
+						player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+						return true;
+					}
+					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+					double x, y, z;
+					float yaw = 0;
+					float pitch = 0;
+					try {
+						x = Double.parseDouble(args[2]);
+						y = Double.parseDouble(args[3]);
+						z = Double.parseDouble(args[4]);
+						if (args.length == 7) {
+							yaw = Float.parseFloat(args[5]);
+							pitch = Float.parseFloat(args[6]);
+						}
+					} catch (NumberFormatException e) {
+						player.sendMessage(ChatUtils.chatMessage("&cThose coordinates are invalid"));
+						return true;
+					}
+					Location loc = args.length == 5
+							? new Location(target.getWorld(), x, y, z)
+							: new Location(target.getWorld(), x, y, z, yaw, pitch);
+					AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, success -> {
+						if (success) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have teleported &e" + targetAranarthPlayer.getNickname() + " &7to the input coordinates"));
+							target.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the input coordinates"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cThe teleportation failed"));
+						}
+					});
+				}
 				// Teleports self to the input coordinates
-				// /ac tp x y z
+				// /ac tp x y z [<yaw> <pitch>]
 				else if (args.length == 4 || args.length == 6) {
 					double x, y, z;
 					float yaw = 0;
