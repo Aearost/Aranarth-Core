@@ -38,7 +38,21 @@ public class IncantationPlentifulBlockBreak {
 		// 35 degrees and -35 degrees (do both checks i.e looking up vs down vs straight ahead
 		float yaw = player.getLocation().getYaw();
 		float pitch = player.getLocation().getPitch();
-		List<Block> blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch);
+		String name = heldItem.getType().name();
+		List<Block> blocks = new ArrayList<>();
+
+		if (name.endsWith("_AXE") || name.endsWith("_HOE")) {
+			blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch, true);
+		} else {
+			blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch, false);
+		}
+
+		// Set the counter to the total number of blocks being processed so it is never
+		// exhausted before the loop finishes (e.g. hoe processes 27 blocks but the
+		// counter was only initialised to 9, causing it to go negative and re-trigger
+		// execute on subsequent inner BlockBreakEvents).
+		aranarthPlayer.setPlentifulBlocksToDestroy(blocks.size());
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 		// Cancels the original event
 		e.setCancelled(true);
@@ -55,7 +69,6 @@ public class IncantationPlentifulBlockBreak {
 				}
 			}
 
-			String name = heldItem.getType().name();
 			if (name.endsWith("_PICKAXE")) {
 				if (block.getType().getHardness() >= 1.5f) {
 					callNewBlockBreakEvent(block, player, true);
@@ -111,6 +124,12 @@ public class IncantationPlentifulBlockBreak {
 				heldItem.setItemMeta(damageableItemMeta);
 			}
 		}
+
+		// Ensure the counter is zeroed out after the loop so that any skipped blocks
+		// (e.g. soft blocks with a pickaxe) don't leave it positive and cause the next
+		// regular block break to be misidentified as a recursive plentiful call.
+		aranarthPlayer.setPlentifulBlocksToDestroy(0);
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
 
 	/**
@@ -118,41 +137,53 @@ public class IncantationPlentifulBlockBreak {
 	 * @param location The location of the initial block that was destroyed.
 	 * @param yaw The yaw of the player.
 	 * @param pitch The pitch of the player.
+	 * @param isBreakingLarger If the blocks should be broken in a 3x3x3 shape.
 	 * @return The list of blocks that will be in the 3x3x1 grid harvested when the block is destroyed.
 	 */
-	private List<Block> getBlocksToDestroy(Location location, float yaw, float pitch) {
+	private List<Block> getBlocksToDestroy(Location location, float yaw, float pitch, boolean isBreakingLarger) {
 		List<Block> blocks = new ArrayList<>();
 		int centerX = location.getBlockX();
 		int centerY = location.getBlockY();
 		int centerZ = location.getBlockZ();
 
-		boolean isFacingStraightAhead = pitch > -30 && pitch <= 30;
-		boolean isFacingNorthSouth = ((yaw > -180 && yaw <= -135) || (yaw > 135 && yaw <= 180)) // Facing North
-										|| (yaw > -30 && yaw <= 30); // Facing South
+		// Breaking 3x3x1
+		if (!isBreakingLarger) {
+			boolean isFacingStraightAhead = pitch > -30 && pitch <= 30;
+			boolean isFacingNorthSouth = ((yaw > -180 && yaw <= -135) || (yaw > 135 && yaw <= 180)) // Facing North
+					|| (yaw > -30 && yaw <= 30); // Facing South
 
-		if (isFacingStraightAhead) {
-			if (isFacingNorthSouth) {
-				// Does not change the zz-axis
-				for (int x = centerX - 1; x <= centerX + 1; x++) {
-					for (int y = centerY - 1; y <= centerY + 1; y++) {
-						blocks.add(location.getWorld().getBlockAt(x, y, centerZ));
+			if (isFacingStraightAhead) {
+				if (isFacingNorthSouth) {
+					// Does not change the zz-axis
+					for (int x = centerX - 1; x <= centerX + 1; x++) {
+						for (int y = centerY - 1; y <= centerY + 1; y++) {
+							blocks.add(location.getWorld().getBlockAt(x, y, centerZ));
+						}
 					}
-				}
-			} else {
-				// Does not change the X-axis
-				for (int z = centerZ - 1; z <= centerZ + 1; z++) {
-					for (int y = centerY - 1; y <= centerY + 1; y++) {
-						blocks.add(location.getWorld().getBlockAt(centerX, y, z));
+				} else {
+					// Does not change the X-axis
+					for (int z = centerZ - 1; z <= centerZ + 1; z++) {
+						for (int y = centerY - 1; y <= centerY + 1; y++) {
+							blocks.add(location.getWorld().getBlockAt(centerX, y, z));
+						}
 					}
 				}
 			}
-		}
-		// Looking up or down
-		else {
-			// Does not change the Y-axis
+			// Looking up or down
+			else {
+				// Does not change the Y-axis
+				for (int x = centerX - 1; x <= centerX + 1; x++) {
+					for (int z = centerZ - 1; z <= centerZ + 1; z++) {
+						blocks.add(location.getWorld().getBlockAt(x, centerY, z));
+					}
+				}
+			}
+		} else {
 			for (int x = centerX - 1; x <= centerX + 1; x++) {
-				for (int z = centerZ - 1; z <= centerZ + 1; z++) {
-					blocks.add(location.getWorld().getBlockAt(x, centerY, z));
+				for (int y = centerY - 1; y <= centerY + 1; y++) {
+					for (int z = centerZ - 1; z <= centerZ + 1; z++) {
+						blocks.add(location.getWorld().getBlockAt(x, y, z));
+					}
 				}
 			}
 		}
