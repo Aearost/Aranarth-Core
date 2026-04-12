@@ -25,24 +25,28 @@ public class PlayerHeadDrop {
                         Random random = new Random();
                         ItemStack weapon = attacker.getInventory().getItemInMainHand();
 
-                        // 10% chance
-                        int range = 50;
+                        // 5% base chance (1/20)
+                        int threshold = 1;
+                        int range = 20;
                         if (AranarthUtils.hasIncantation(weapon, "incantation_beheading")) {
                             int level = AranarthUtils.getIncantationLevel(weapon);
                             if (level == 1) {
-                                // 20% chance
-                                range = 25;
+                                // 25% chance
+                                threshold = 1;
+                                range = 4;
                             } else if (level == 2) {
-                                // 33% chance
-                                range = 15;
-                            } else if (level == 3) {
                                 // 50% chance
-                                range = 10;
+                                threshold = 1;
+                                range = 2;
+                            } else if (level == 3) {
+                                // 75% chance
+                                threshold = 3;
+                                range = 4;
                             }
                         }
 
                         int chance = random.nextInt(range) + 1;
-                        if (chance <= 5) {
+                        if (chance <= threshold) {
                             ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
                             SkullMeta meta = (SkullMeta) skull.getItemMeta();
                             meta.setOwningPlayer(player);
