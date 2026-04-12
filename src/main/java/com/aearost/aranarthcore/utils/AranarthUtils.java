@@ -757,6 +757,7 @@ public class AranarthUtils {
 	 */
 	public static boolean isHarvestableWithPickaxe(Material type) {
 		return type == Material.STONE || type == Material.DEEPSLATE
+				|| type == Material.COBBLESTONE || type == Material.COBBLED_DEEPSLATE
 				|| type == Material.SANDSTONE || type == Material.RED_SANDSTONE
 				|| type == Material.GRANITE || type == Material.DIORITE
 				|| type == Material.ANDESITE || type == Material.CALCITE
@@ -771,7 +772,6 @@ public class AranarthUtils {
 				|| type == Material.BONE_BLOCK || type == Material.OBSIDIAN
 				|| type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
 				|| type == Material.BLACKSTONE || type == Material.GLOWSTONE
-
 				|| type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
 	}
 

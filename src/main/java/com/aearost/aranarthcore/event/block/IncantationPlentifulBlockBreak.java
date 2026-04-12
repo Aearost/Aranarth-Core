@@ -35,7 +35,7 @@ public class IncantationPlentifulBlockBreak {
 
 		ItemStack heldItem = player.getInventory().getItemInMainHand();
 		// 3x3x1 based on the direction the player is looking
-		// 35 degrees and -35 degrees (do both checks i.e looking up vs down vs straight ahead
+		// 30 degrees and -30 degrees (do both checks i.e looking up vs down vs straight ahead
 		float yaw = player.getLocation().getYaw();
 		float pitch = player.getLocation().getPitch();
 		String name = heldItem.getType().name();
@@ -70,7 +70,9 @@ public class IncantationPlentifulBlockBreak {
 			}
 
 			if (name.endsWith("_PICKAXE")) {
-				callNewBlockBreakEvent(block, player, true);
+				if (AranarthUtils.isHarvestableWithPickaxe(block.getType())) {
+					callNewBlockBreakEvent(block, player, true);
+				}
 			} else if (name.endsWith("_AXE") && AranarthUtils.isHarvestableWithAxe(block.getType())) {
 				callNewBlockBreakEvent(block, player, true);
 			} else if (name.endsWith("_SHOVEL") && AranarthUtils.isHarvestableWithShovel(block.getType())) {
@@ -196,6 +198,11 @@ public class IncantationPlentifulBlockBreak {
 	 * @param hasDrops Whether the block will be dropped or not.
 	 */
 	private void callNewBlockBreakEvent(Block block, Player player, boolean hasDrops) {
+		// Prevents unbreakable blocks from being destroyed
+		if (block.getType().getHardness() < 0 || block.getType().isAir()) {
+			return;
+		}
+
 		block.getWorld().playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
 		Bukkit.getServer().getPluginManager().callEvent(new BlockBreakEvent(block, player));
 		if (hasDrops) {
