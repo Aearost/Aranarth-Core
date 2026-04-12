@@ -203,6 +203,7 @@ Minor Features
 [~] Fixed issue when teleporting between worlds that caused inventories to be cleared or gamemodes not to be changed correctly
 [+] Added support to /ac tp and /ac tpf players to input coordinates
 [~] Made it so Scorched Aranarthium wearers do not experience any fire ticks
+[~] Allowed the use of buttons at spawn
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

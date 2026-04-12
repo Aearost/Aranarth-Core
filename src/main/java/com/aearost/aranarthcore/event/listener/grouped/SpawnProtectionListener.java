@@ -168,14 +168,14 @@ public class SpawnProtectionListener implements Listener {
 	 * Prevents containers from being opened at spawn.
 	 */
 	@EventHandler
-	public void onContainerOpen(PlayerInteractEvent e) {
+	public void onInteract(PlayerInteractEvent e) {
 		Block block = e.getClickedBlock();
 		if (block != null) {
 			if (AranarthUtils.isSpawnLocation(block.getLocation())) {
 				if (AranarthUtils.isContainerBlock(block) || block.getType().name().endsWith("_SIGN") || block.getType() == Material.NOTE_BLOCK
 						|| block.getType() == Material.SMOKER || block.getType() == Material.BLAST_FURNACE || block.getType() == Material.FURNACE
 						|| block.getType() == Material.JUKEBOX || block.getType() == Material.LEVER || block.getType().name().endsWith("_TRAPDOOR")
-						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_BUTTON") || block.getType().name().endsWith("_GATE")
+						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_GATE")
 						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")
 						|| block.getType() == Material.DECORATED_POT || block.getType() == Material.FLOWER_POT || block.getType() == Material.CHISELED_BOOKSHELF
 						|| block.getType() == Material.SWEET_BERRY_BUSH || block.getType() == Material.CAVE_VINES || block.getType() == Material.CAVE_VINES_PLANT) {
