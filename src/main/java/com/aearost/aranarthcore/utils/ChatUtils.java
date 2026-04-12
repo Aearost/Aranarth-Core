@@ -520,4 +520,41 @@ public class ChatUtils {
 		return displayComponent.hoverEvent(HoverEvent.showText(hover))
 								.clickEvent(ClickEvent.openUrl(url));
 	}
+
+	private static final Pattern URL_PATTERN = Pattern.compile("https?://\\S+");
+
+	/**
+	 * Deserializes a legacy-formatted chat message into a Component, replacing any URLs with
+	 * clickable components that open the link in the player's browser.
+	 *
+	 * @param legacyMessage The message string with § color codes
+	 * @return A Component with embedded clickable URL components
+	 */
+	public static Component buildMessageWithUrls(String legacyMessage) {
+		Matcher matcher = URL_PATTERN.matcher(legacyMessage);
+		Component result = Component.empty();
+		int lastEnd = 0;
+		String hoverText = translateToColor("&7Open the link in your browser");
+
+		while (matcher.find()) {
+			// Append any text before this URL
+			if (matcher.start() > lastEnd) {
+				result = result.append(LegacyComponentSerializer.legacySection()
+						.deserialize(legacyMessage.substring(lastEnd, matcher.start())));
+			}
+
+			String url = matcher.group();
+			Component urlComponent = LegacyComponentSerializer.legacySection().deserialize(url);
+			result = result.append(clickableUrl(urlComponent, hoverText, url));
+			lastEnd = matcher.end();
+		}
+
+		// Append any remaining text after the last URL
+		if (lastEnd < legacyMessage.length()) {
+			result = result.append(LegacyComponentSerializer.legacySection()
+					.deserialize(legacyMessage.substring(lastEnd)));
+		}
+
+		return result;
+	}
 }

@@ -128,7 +128,7 @@ public class PlayerChatListener implements Listener {
         // Children inherit hover/click from their parent, siblings do not.
         Component fullMessage = Component.empty()
                 .append(prefixComponent)
-                .append(LegacyComponentSerializer.legacySection().deserialize(chatMessage));
+                .append(ChatUtils.buildMessageWithUrls(chatMessage));
 
         for (Player recipient : e.getRecipients()) {
             recipient.sendMessage(fullMessage);
