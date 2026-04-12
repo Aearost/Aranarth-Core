@@ -70,9 +70,7 @@ public class IncantationPlentifulBlockBreak {
 			}
 
 			if (name.endsWith("_PICKAXE")) {
-				if (block.getType().getHardness() >= 1.5f) {
-					callNewBlockBreakEvent(block, player, true);
-				}
+				callNewBlockBreakEvent(block, player, true);
 			} else if (name.endsWith("_AXE") && AranarthUtils.isHarvestableWithAxe(block.getType())) {
 				callNewBlockBreakEvent(block, player, true);
 			} else if (name.endsWith("_SHOVEL") && AranarthUtils.isHarvestableWithShovel(block.getType())) {
