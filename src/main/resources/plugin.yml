@@ -54,6 +54,9 @@ commands:
   dominion:
     description: The master command for Aranarth dominions
     aliases: [d]
+  enderchest:
+    description: Opens the player's ender chest remotely
+    aliases: [ec]
   fletching:
     description: Opens a fletching table GUI
   grindstone:

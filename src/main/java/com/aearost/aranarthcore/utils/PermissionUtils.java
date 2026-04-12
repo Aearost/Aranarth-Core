@@ -242,6 +242,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.skull", false);
 		perms.setPermission("aranarth.sudo", false);
 		perms.setPermission("aranarth.trash", false);
+		perms.setPermission("aranarth.enderchest", false);
 	}
 
 	/**
@@ -600,6 +601,7 @@ public class PermissionUtils {
 		}
 
 		if (saintRank >= 2) {
+			perms.setPermission("aranarth.enderchest", true);
 			perms.setPermission("aranarth.itemname", true);
 			perms.setPermission("aranarth.chat.hex", true);
 			perms.setPermission("aranarth.nick.hex", true);
