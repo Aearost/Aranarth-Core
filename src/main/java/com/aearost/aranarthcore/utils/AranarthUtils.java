@@ -346,9 +346,11 @@ public class AranarthUtils {
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-					player.setGameMode(GameMode.CREATIVE);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.CREATIVE);
+				return;
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
@@ -356,20 +358,24 @@ public class AranarthUtils {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					PermissionUtils.toggleArenaBendingPermissions(player, false);
-					PermissionUtils.updateSubElements(player);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.SURVIVAL);
+				PermissionUtils.toggleArenaBendingPermissions(player, false);
+				PermissionUtils.updateSubElements(player);
+				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-					player.setGameMode(GameMode.CREATIVE);
-					PermissionUtils.toggleArenaBendingPermissions(player, false);
-					PermissionUtils.updateSubElements(player);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.CREATIVE);
+				PermissionUtils.toggleArenaBendingPermissions(player, false);
+				PermissionUtils.updateSubElements(player);
+				return;
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
@@ -377,9 +383,11 @@ public class AranarthUtils {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.SURVIVAL);
+				return;
 			} else if (destinationWorld.startsWith("arena")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
