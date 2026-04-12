@@ -781,10 +781,11 @@ public class AranarthUtils {
 	 * @return Confirmation of whether the input item can be harvested by an axe.
 	 */
 	public static boolean isHarvestableWithAxe(Material type) {
-		if (type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) {
+		if ((type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) || type.name().endsWith("_LEAVES")) {
 			return true;
 		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
-				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE) {
+				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE
+				|| type == Material.NETHER_WART_BLOCK || type == Material.WARPED_WART_BLOCK) {
 			return true;
 		}
 		return false;
