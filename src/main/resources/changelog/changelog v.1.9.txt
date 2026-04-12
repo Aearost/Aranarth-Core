@@ -196,6 +196,7 @@ Minor Features
 [~] Seemingly fixed redundant DiscordSRV errors due to a non existing member
 [+] Added support to mass shift-click into/out of the potions add GUI
 [~] Fixed issue where shift clicking from the potions add GUI would make the potion disappear if the player's inventory was full
+[+] Added chiseled bookshelf to the list of items that cannot be interacted with at spawn and in dominions
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
