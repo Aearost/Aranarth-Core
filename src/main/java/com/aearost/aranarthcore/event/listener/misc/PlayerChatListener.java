@@ -94,7 +94,6 @@ public class PlayerChatListener implements Listener {
         }
         e.getRecipients().removeAll(toRemove);
 
-
         if (aranarthPlayer.getAfkLocation() != null) {
             // Automatically un-afk the player if they type a message
             if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
@@ -115,6 +114,7 @@ public class PlayerChatListener implements Listener {
 
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
+        String councilChatMessage = chatMessage; // preserve unescaped form for council routing
         chatMessage = chatMessage.replaceAll("%", "%%"); // Throws exception with only one
 
         e.setCancelled(true);
@@ -130,8 +130,13 @@ public class PlayerChatListener implements Listener {
                 .append(prefixComponent)
                 .append(ChatUtils.buildMessageWithUrls(chatMessage));
 
-        for (Player recipient : e.getRecipients()) {
-            recipient.sendMessage(fullMessage);
+        if (aranarthPlayer.isInCouncilChat()) {
+            // Council chat toggle is on — route to council chat once (evaluateCouncilMessage sends to all council members)
+            ChatUtils.evaluateCouncilMessage(player, councilChatMessage.split(" "), false);
+        } else {
+            for (Player recipient : e.getRecipients()) {
+                recipient.sendMessage(fullMessage);
+            }
         }
 
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(

@@ -80,7 +80,7 @@ public class CommandAC implements CommandExecutor {
 		} else if (args[0].equalsIgnoreCase("rankset")) {
 			commandResult = CommandRankSet.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("msg")) {
-			commandResult = CommandCMsg.onCommand(sender, args);
+			commandResult = CommandCouncilMessage.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("skull")) {
 			commandResult = CommandSkull.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("dateset")) {

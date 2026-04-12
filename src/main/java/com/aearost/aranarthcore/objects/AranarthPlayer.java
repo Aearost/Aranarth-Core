@@ -81,6 +81,7 @@ public class AranarthPlayer {
 	private boolean isAutoLockingChests = true;
 	private String firstJoinDate = "";
 	private boolean isVanished = false;
+	private boolean isInCouncilChat = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -142,6 +143,7 @@ public class AranarthPlayer {
 		this.isAutoLockingChests = true;
 		this.firstJoinDate = "";
 		this.isVanished = false;
+		this.isInCouncilChat = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -209,6 +211,7 @@ public class AranarthPlayer {
 		this.isAutoLockingChests = true;
 		this.firstJoinDate = firstJoinDate;
 		this.isVanished = false;
+		this.isInCouncilChat = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1241,5 +1244,21 @@ public class AranarthPlayer {
 	 */
 	public void setVanished(boolean isVanished) {
 		this.isVanished = isVanished;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is sending messages in council chat or not.
+	 * @return The temporary variable tracking whether the player is sending messages in council chat or not.
+	 */
+	public boolean isInCouncilChat() {
+		return isInCouncilChat;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is sending messages in council chat or not.
+	 * @param inCouncilChat The temporary variable tracking whether the player is sending messages in council chat or not.
+	 */
+	public void setInCouncilChat(boolean inCouncilChat) {
+		isInCouncilChat = inCouncilChat;
 	}
 }

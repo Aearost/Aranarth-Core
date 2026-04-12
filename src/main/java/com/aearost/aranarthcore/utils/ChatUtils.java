@@ -9,6 +9,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
@@ -556,5 +557,58 @@ public class ChatUtils {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Helper method to evaluate a message for council members.
+	 * @param sender The sender of the message.
+	 * @param args The arguments of the command.
+	 * @param isSingleMessage If the message is one single message or if messages are toggled.
+	 */
+	public static void evaluateCouncilMessage(CommandSender sender, String[] args, boolean isSingleMessage) {
+		if (isSingleMessage) {
+			if (args.length == 1) {
+				if (sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					String onOrOffMessage = aranarthPlayer.isInCouncilChat() ? "&coff" : "&aon";
+					sender.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Council Chat"));
+					aranarthPlayer.setInCouncilChat(!aranarthPlayer.isInCouncilChat());
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else {
+					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can toggle Council Chat"));
+				}
+				return;
+			}
+		}
+
+		int startIndex = isSingleMessage ? 1 : 0;
+		StringBuilder msg = new StringBuilder();
+		for (int i = startIndex; i < args.length; i++) {
+			msg.append(args[i]);
+			if (i < args.length - 1) {
+				msg.append(" ");
+			}
+		}
+		String assembledMsg = msg.toString();
+
+		String nickname = "";
+		Player player = null;
+		if (sender instanceof Player) {
+			player = (Player) sender;
+			nickname = AranarthUtils.getPlayer(player.getUniqueId()).getNickname();
+		} else {
+			nickname = "&4&lCONSOLE";
+		}
+
+		String prefixStart = "&7⊰&r";
+		String prefixEnd = "&7⊱&r";
+		String prefixReceive = ChatUtils.translateToColor(prefixStart + "&8&lCouncil &e" + nickname + prefixEnd + " &7&o>> &6&o");
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+			if (onlineAranarthPlayer.getCouncilRank() > 0) {
+				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
+			}
+		}
 	}
 }
