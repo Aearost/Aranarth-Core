@@ -83,6 +83,9 @@ public class AranarthPlayer {
 	private boolean isVanished = false;
 	private boolean isInCouncilChat = false;
 	private boolean isHurtingOwnPets = false;
+	private boolean isGradientChatEnabled = false;
+	private String gradientChatColors = "";
+	private boolean isGradientChatBold = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -146,6 +149,9 @@ public class AranarthPlayer {
 		this.isVanished = false;
 		this.isInCouncilChat = false;
 		this.isHurtingOwnPets = false;
+		this.isGradientChatEnabled = false;
+		this.gradientChatColors = "";
+		this.isGradientChatBold = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -215,6 +221,9 @@ public class AranarthPlayer {
 		this.isVanished = false;
 		this.isInCouncilChat = false;
 		this.isHurtingOwnPets = false;
+		this.isGradientChatEnabled = false;
+		this.gradientChatColors = "";
+		this.isGradientChatBold = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1279,5 +1288,53 @@ public class AranarthPlayer {
 	 */
 	public void setHurtingOwnPets(boolean isHurtingOwnPets) {
 		this.isHurtingOwnPets = isHurtingOwnPets;
+	}
+
+	/**
+	 * Provides whether the player has gradient chat enabled.
+	 * @return Whether gradient chat is enabled.
+	 */
+	public boolean isGradientChatEnabled() {
+		return isGradientChatEnabled;
+	}
+
+	/**
+	 * Updates whether the player has gradient chat enabled.
+	 * @param isGradientChatEnabled Whether gradient chat is enabled.
+	 */
+	public void setGradientChatEnabled(boolean isGradientChatEnabled) {
+		this.isGradientChatEnabled = isGradientChatEnabled;
+	}
+
+	/**
+	 * Provides the player's saved gradient chat colors as a comma-separated hex string.
+	 * @return The gradient chat colors (e.g. "#FF0000,#00FF00,#0000FF"), or empty string if none set.
+	 */
+	public String getGradientChatColors() {
+		return gradientChatColors;
+	}
+
+	/**
+	 * Updates the player's saved gradient chat colors.
+	 * @param gradientChatColors Comma-separated hex color string (e.g. "#FF0000,#00FF00").
+	 */
+	public void setGradientChatColors(String gradientChatColors) {
+		this.gradientChatColors = gradientChatColors;
+	}
+
+	/**
+	 * Provides whether the player has gradient chat bold mode enabled.
+	 * @return Whether gradient chat bold is enabled.
+	 */
+	public boolean isGradientChatBold() {
+		return isGradientChatBold;
+	}
+
+	/**
+	 * Updates whether the player has gradient chat bold mode enabled.
+	 * @param isGradientChatBold Whether gradient chat bold is enabled.
+	 */
+	public void setGradientChatBold(boolean isGradientChatBold) {
+		this.isGradientChatBold = isGradientChatBold;
 	}
 }

@@ -566,12 +566,22 @@ public class PersistenceUtils {
 					aranarthPlayer.setAutoLockingChests(false);
 				}
 
-				// Keep blue fire toggle at the end and add before this
-				// No need to update the index as it will be dynamic
-				if (fields[lastIndex].equals("0")) {
-					aranarthPlayer.setBlueFireDisabled(false);
-				} else {
-					aranarthPlayer.setBlueFireDisabled(true);
+				// Fields from index 11 onward are optional — checked with fields.length > N so that
+				// existing files without the field load fine and use the default from the constructor.
+
+				// Blue Fire (index 11)
+				if (fields.length > 11) {
+					aranarthPlayer.setBlueFireDisabled(!fields[11].equals("0"));
+				}
+
+				// Gradient Chat Enabled (index 12)
+				if (fields.length > 12) {
+					aranarthPlayer.setGradientChatEnabled(!fields[12].equals("0"));
+				}
+
+				// Gradient Chat Colors (index 13)
+				if (fields.length > 13 && !fields[13].equals("none")) {
+					aranarthPlayer.setGradientChatColors(fields[13]);
 				}
 
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
@@ -613,7 +623,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire\n");
+					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -630,10 +640,12 @@ public class PersistenceUtils {
 						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
 						String chestLock = aranarthPlayer.isAutoLockingChests() ? "0" : "1";
 						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
+						String gradientEnabled = aranarthPlayer.isGradientChatEnabled() ? "1" : "0";
+						String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
 
 						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
 								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
-								+ bluefire + "\n";
+								+ bluefire + "|" + gradientEnabled + "|" + gradientColors + "\n";
 						writer.write(row);
 					}
 					writer.close();

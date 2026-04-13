@@ -53,6 +53,8 @@ public class CommandToggleCompleter implements TabCompleter {
 				displayedOptions.add("inventory");
 			} else if (!args[0].isEmpty() && "pethurt".startsWith(args[0])) {
 				displayedOptions.add("pethurt");
+			} else if (!args[0].isEmpty() && "gradientchat".startsWith(args[0])) {
+				displayedOptions.add("gradientchat");
 			} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
 				if (args[0].equals("c")) {
 					displayedOptions.add("chat");
@@ -81,21 +83,32 @@ public class CommandToggleCompleter implements TabCompleter {
 				displayedOptions = displayNoResults();
 			}
 		} else if (args.length == 2) {
-			if (args[1].isEmpty()) {
-				displayedOptions.add("off");
-				displayedOptions.add("ignore");
-				displayedOptions.add("trash");
+			if (args[0].equalsIgnoreCase("gradientchat")) {
+				if (args[1].isEmpty()) {
+					displayedOptions.add("bold");
+					displayedOptions.add("#hex1,#hex2,...");
+				} else if ("bold".startsWith(args[1].toLowerCase())) {
+					displayedOptions.add("bold");
+				} else {
+					displayedOptions.add("#hex1,#hex2,...");
+				}
 			} else {
-				if ("off".startsWith(args[1])) {
+				if (args[1].isEmpty()) {
 					displayedOptions.add("off");
-				} else if ("ignore".startsWith(args[1])) {
 					displayedOptions.add("ignore");
-				} else if ("trash".startsWith(args[1])) {
 					displayedOptions.add("trash");
 				} else {
-					displayedOptions.add("off");
-					displayedOptions.add("ignore");
-					displayedOptions.add("trash");
+					if ("off".startsWith(args[1])) {
+						displayedOptions.add("off");
+					} else if ("ignore".startsWith(args[1])) {
+						displayedOptions.add("ignore");
+					} else if ("trash".startsWith(args[1])) {
+						displayedOptions.add("trash");
+					} else {
+						displayedOptions.add("off");
+						displayedOptions.add("ignore");
+						displayedOptions.add("trash");
+					}
 				}
 			}
 		}
@@ -116,6 +129,7 @@ public class CommandToggleCompleter implements TabCompleter {
 		displayedOptions.add("compressor");
 		displayedOptions.add("chestlock");
 		displayedOptions.add("pethurt");
+		displayedOptions.add("gradientchat");
 		return displayedOptions;
 	}
 }

@@ -179,6 +179,55 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the ability to hurt your own pets"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("gradientchat")) {
+					if (args.length >= 2) {
+						if (args[1].equalsIgnoreCase("bold")) {
+							if (aranarthPlayer.isGradientChatBold()) {
+								aranarthPlayer.setGradientChatBold(false);
+								player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7gradient chat bold"));
+							} else {
+								aranarthPlayer.setGradientChatBold(true);
+								player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7gradient chat bold"));
+							}
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							return true;
+						}
+						// Validate and save new color pattern, then enable
+						String colors = args[1];
+						String[] colorArray = colors.split(",");
+						if (colorArray.length < 2) {
+							player.sendMessage(ChatUtils.chatMessage("&cAt least 2 colors are required! Use: &e/toggle gradientchat #hex1,#hex2,..."));
+							return true;
+						}
+						boolean validColors = true;
+						for (String color : colorArray) {
+							if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+								validColors = false;
+								break;
+							}
+						}
+						if (!validColors) {
+							player.sendMessage(ChatUtils.chatMessage("&cThe entered hex codes are not valid"));
+							return true;
+						}
+						aranarthPlayer.setGradientChatColors(colors);
+						aranarthPlayer.setGradientChatEnabled(true);
+						player.sendMessage(ChatUtils.chatMessage(ChatUtils.translateToGradient(colors, "Your gradient chat colors have been updated", false)));
+					} else {
+						// Toggle on/off using the saved pattern
+						if (aranarthPlayer.isGradientChatEnabled()) {
+							aranarthPlayer.setGradientChatEnabled(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7gradient chat"));
+						} else {
+							if (aranarthPlayer.getGradientChatColors().isEmpty()) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou have not saved any gradient colors yet"));
+								return true;
+							}
+							aranarthPlayer.setGradientChatEnabled(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7gradient chat"));
+						}
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

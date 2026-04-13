@@ -40,7 +40,7 @@ public class CommandItemNameCompleter implements TabCompleter {
 			if (args.length == 2) {
 				if (args[0].startsWith("gradient")) {
 					if (args[1].isEmpty()) {
-						displayedOptions.add("color1,color2,color3");
+						displayedOptions.add("#hex1,#hex2,...");
 					}
 				}
 			} else if (args.length == 3) {

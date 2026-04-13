@@ -340,6 +340,13 @@ public class ChatUtils {
 	 * @return The formatted message.
 	 */
 	public static String formatChatMessage(Player player, String msg) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
+			String gradientMsg = translateToGradientPreservingUrls(aranarthPlayer.getGradientChatColors(), msg, aranarthPlayer.isGradientChatBold());
+			if (gradientMsg != null) {
+				return gradientMsg;
+			}
+		}
 		if (player.hasPermission("aranarth.chat.hex")) {
 			msg = ChatUtils.translateToColor(msg);
 		} else if (player.hasPermission("aranarth.chat.color")) {
@@ -522,7 +529,41 @@ public class ChatUtils {
 								.clickEvent(ClickEvent.openUrl(url));
 	}
 
-	private static final Pattern URL_PATTERN = Pattern.compile("https?://\\S+");
+	private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s\u00A7]+");
+
+	/**
+	 * Applies gradient formatting to a message while keeping any URLs intact as plain text
+	 * so that {@link #buildMessageWithUrls} can still detect and make them clickable.
+	 *
+	 * @param gradientColors Comma-separated hex color string.
+	 * @param msg The raw (unformatted) message.
+	 * @param isBold Whether to apply bold formatting.
+	 * @return The formatted string, or null if the message cannot be gradient-formatted.
+	 */
+	private static String translateToGradientPreservingUrls(String gradientColors, String msg, boolean isBold) {
+		Matcher matcher = URL_PATTERN.matcher(msg);
+		if (!matcher.find()) {
+			return translateToGradient(gradientColors, msg, isBold);
+		}
+		StringBuilder result = new StringBuilder();
+		int lastEnd = 0;
+		matcher.reset();
+		while (matcher.find()) {
+			if (matcher.start() > lastEnd) {
+				String textPart = msg.substring(lastEnd, matcher.start());
+				String gradientPart = translateToGradient(gradientColors, textPart, isBold);
+				result.append(gradientPart != null ? gradientPart : textPart);
+			}
+			result.append(matcher.group());
+			lastEnd = matcher.end();
+		}
+		if (lastEnd < msg.length()) {
+			String textPart = msg.substring(lastEnd);
+			String gradientPart = translateToGradient(gradientColors, textPart, isBold);
+			result.append(gradientPart != null ? gradientPart : textPart);
+		}
+		return result.toString();
+	}
 
 	/**
 	 * Deserializes a legacy-formatted chat message into a Component, replacing any URLs with
