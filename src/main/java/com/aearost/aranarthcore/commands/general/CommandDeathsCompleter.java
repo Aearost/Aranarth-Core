@@ -6,8 +6,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /deaths command.
@@ -23,29 +23,16 @@ public class CommandDeathsCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-			Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-			boolean wasPlayerFound = false;
-			for (Player onlinePlayer : onlinePlayers) {
-				// Only display the name if it aligns with one that is currently online
-				if (onlinePlayer.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-					wasPlayerFound = true;
-					displayedOptions.add(onlinePlayer.getName());
-				} else if (args[0].isEmpty()) {
-					wasPlayerFound = true;
-					displayedOptions.add(onlinePlayer.getName());
-				}
-			}
-
-			if (!wasPlayerFound) {
-				for (Player onlinePlayer : onlinePlayers) {
-					displayedOptions.add(onlinePlayer.getName());
-				}
-			}
+			return filterPlayers(args[0]);
 		}
+		return List.of();
+	}
 
-		return displayedOptions;
+	private static List<String> filterPlayers(String input) {
+		return Bukkit.getOnlinePlayers().stream()
+			.map(Player::getName)
+			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

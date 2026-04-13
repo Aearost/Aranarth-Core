@@ -6,13 +6,15 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /shop command.
  */
 public class CommandShopCompleter implements TabCompleter {
+
+	private static final List<String> MODIFY_OPTIONS = List.of("create", "delete");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -23,55 +25,34 @@ public class CommandShopCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
-		if (sender instanceof Player player) {
-			if (args.length == 1) {
-				if (args[0].isEmpty()) {
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						displayedOptions.add(onlinePlayer.getName());
-					}
-					if (player.hasPermission("aranarth.shop.modify")) {
-						displayedOptions.add("create");
-						displayedOptions.add("delete");
-					}
-				} else {
-					boolean wasShopFound = false;
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						if (onlinePlayer.getName().toLowerCase().startsWith(args[0].toLowerCase())) {
-							displayedOptions.add(onlinePlayer.getName());
-							wasShopFound = true;
-						}
-					}
-					if (!wasShopFound) {
-						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							displayedOptions.add(onlinePlayer.getName());
-						}
-					}
-
-					if (player.hasPermission("aranarth.warp.modify")) {
-						if ("create".startsWith(args[0].toLowerCase())) {
-							displayedOptions.add("create");
-						} else if ("delete".startsWith(args[0].toLowerCase())) {
-							displayedOptions.add("delete");
-						}
-					}
-				}
-			} else {
-				if (player.hasPermission("aranarth.warp.modify")) {
-					if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("delete")) {
-						if (args[0].equalsIgnoreCase("create")) {
-							if (args[1].isEmpty()) {
-								displayedOptions.add("username");
-							}
-						} else if (args[0].equalsIgnoreCase("delete")) {
-							if (args[1].isEmpty()) {
-								displayedOptions.add("username");
-							}
-						}
-					}
-				}
+		if (!(sender instanceof Player player)) {
+			return List.of();
+		}
+		if (args.length == 1) {
+			List<String> options = filterPlayers(args[0]);
+			if (player.hasPermission("aranarth.shop.modify")) {
+                options.addAll(filter(MODIFY_OPTIONS, args[0]));
+			}
+			return options;
+		}
+		if (args.length == 2 && player.hasPermission("aranarth.warp.modify")) {
+			if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("delete")) {
+				return args[1].isEmpty() ? List.of("username") : List.of();
 			}
 		}
-		return displayedOptions;
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		return options.stream()
+			.filter(s -> input.isEmpty() || s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
+	}
+
+	private static List<String> filterPlayers(String input) {
+		return Bukkit.getOnlinePlayers().stream()
+			.map(Player::getName)
+			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

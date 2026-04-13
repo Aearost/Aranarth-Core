@@ -6,11 +6,14 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /blacklist command.
  */
 public class CommandBlacklistCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("ignore", "off", "trash");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,20 +24,18 @@ public class CommandBlacklistCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			if (!args[0].isEmpty() && "ignore".startsWith(args[0])) {
-				displayedOptions.add("ignore");
-			} else if (!args[0].isEmpty() && "trash".startsWith(args[0])) {
-				displayedOptions.add("trash");
-			} else if (!args[0].isEmpty() && "off".startsWith(args[0])) {
-				displayedOptions.add("off");
-			} else {
-				displayedOptions.add("ignore");
-				displayedOptions.add("trash");
-				displayedOptions.add("off");
-			}
+			return filter(OPTIONS, args[0]);
 		}
-		return displayedOptions;
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
+		}
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

@@ -224,3 +224,5 @@ Backend Code Changes
 - Fixed stripColorFormatting() in ChatUtils not stripping bold and other formatting
 - Added an AranarthVote class tracking the timestamp and the number of vote points that are rewarded in the vote
 - Added log message to console to track what is rolled in crates for historical/confirmation of results
+- Updated all command completion to be more compact and clean
+- Tweaked aranarth player persistence logic to easily support new fields being added

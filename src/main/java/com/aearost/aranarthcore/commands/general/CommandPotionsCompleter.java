@@ -6,11 +6,14 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /potions command.
  */
 public class CommandPotionsCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("add", "list", "remove");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,24 +24,21 @@ public class CommandPotionsCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			if (!args[0].isEmpty() && "add".startsWith(args[0])) {
-				displayedOptions.add("add");
-			} else if (!args[0].isEmpty() && "list".startsWith(args[0])) {
-				displayedOptions.add("list");
-			} else if (!args[0].isEmpty() && "remove".startsWith(args[0])) {
-				displayedOptions.add("remove");
-			} else {
-				displayedOptions.add("add");
-				displayedOptions.add("list");
-				displayedOptions.add("remove");
-			}
-		} else if (args.length == 2) {
-			if (args[0].equals("remove") && args[1].isEmpty()) {
-				displayedOptions.add("qty");
-			}
+			return filter(OPTIONS, args[0]);
 		}
-		return displayedOptions;
+		if (args.length == 2 && args[0].equalsIgnoreCase("remove") && args[1].isEmpty()) {
+			return List.of("qty");
+		}
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
+		}
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

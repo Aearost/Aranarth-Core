@@ -11,11 +11,25 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /ac command.
  */
 public class CommandACCompleter implements TabCompleter {
+
+	private static final List<String> COUNCIL_OPTIONS = List.of(
+		"admin", "ban", "broadcast", "clearchat", "dateset", "give",
+		"invsee", "msg", "mute", "perks", "punishments", "rankset",
+		"speed", "sudo", "time", "tp", "tpf", "unban", "unmute",
+		"vanish", "warn", "weather", "whereis"
+	);
+
+	private static final List<String> PERK_OPTIONS = List.of(
+		"blacklist", "bluefire", "chat", "compressor", "discord",
+		"homes", "inventory", "itemframe", "itemname", "randomizer",
+		"shulker", "tables"
+	);
 
 	/**
 	 * @param sender The user that entered the command.
@@ -26,552 +40,112 @@ public class CommandACCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
+		boolean isAuthorized = false;
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			// Additional commands will display for council
-			if (aranarthPlayer.getCouncilRank() > 0) {
-				if (args.length == 1) {
-					displayedOptions = council(player, displayedOptions, args);
-					if (displayedOptions.isEmpty()) {
-						displayedOptions = noResultsCouncil(displayedOptions);
-					}
-				} else {
-					displayedOptions = councilArgs(sender, displayedOptions, args);
-				}
-			}
+			isAuthorized = aranarthPlayer.getCouncilRank() > 0;
 		} else if (sender instanceof ConsoleCommandSender) {
-			displayedOptions = council(sender, displayedOptions, args);
-			if (displayedOptions.isEmpty()) {
-				displayedOptions = noResultsCouncil(displayedOptions);
-			}
+			isAuthorized = true;
 		}
-		return displayedOptions;
+		if (!isAuthorized) {
+			return List.of();
+		}
+		if (args.length == 1) {
+			return filter(COUNCIL_OPTIONS, args[0]);
+		}
+		return councilArgs(sender, args);
 	}
 
 	/**
-	 * Displays the commands only available to specified players, as well as all other commands.
+	 * Provides completions for the second argument and beyond based on the sub-command.
 	 * @param sender The user that entered the command.
-	 * @param displayedOptions The list of options to be displayed.
 	 * @param args The arguments of the command.
-	 * @return The updated list of options to be displayed.
+	 * @return The list of completions to display.
 	 */
-	private List<String> council(CommandSender sender, List<String> displayedOptions, String[] args) {
-		if (!args[0].isEmpty() && args[0].startsWith("r")) {
-			if (args[0].equals("r")) {
-				displayedOptions.add("rankset");
-			} else {
-				if (args[0].equals("ra")) {
-					displayedOptions.add("rankset");
-				} else {
-					if (args[0].equals("ran")) {
-						displayedOptions.add("rankset");
-					} else {
-						if (args[0].equals("rank")) {
-							displayedOptions.add("rankset");
-						} else {
-							if (args[0].equals("ranks")) {
-								displayedOptions.add("rankset");
-							} else {
-								if ("rankset".startsWith(args[0])) {
-									displayedOptions.add("rankset");
-								}
-							}
-						}
-					}
-				}
-			}
-		} else if (!args[0].isEmpty() && "give".startsWith(args[0])) {
-			displayedOptions.add("give");
-		} else if (!args[0].isEmpty() && "admin".startsWith(args[0])) {
-			displayedOptions.add("admin");
-		} else if (!args[0].isEmpty() && args[0].startsWith("w")) {
-			if (args[0].equals("w")) {
-				displayedOptions.add("whereis");
-				displayedOptions.add("warn");
-				displayedOptions.add("weather");
-			} else {
-				if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
-					displayedOptions.add("whereis");
-				} else if (!args[0].isEmpty() && "warn".startsWith(args[0])) {
-					displayedOptions.add("warn");
-				} else if (!args[0].isEmpty() && "weather".startsWith(args[0])) {
-					displayedOptions.add("weather");
-				}
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("m")) {
-			if (args[0].equals("m")) {
-				displayedOptions.add("mute");
-				displayedOptions.add("msg");
-			} else if (!args[0].isEmpty() && "mute".startsWith(args[0])) {
-				displayedOptions.add("mute");
-			} else if (!args[0].isEmpty() && "msg".startsWith(args[0])) {
-				displayedOptions.add("msg");
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("b")) {
-			if (args[0].equals("b")) {
-				displayedOptions.add("ban");
-				displayedOptions.add("broadcast");
-			} else if (!args[0].isEmpty() && "ban".startsWith(args[0])) {
-				displayedOptions.add("ban");
-			} else if (!args[0].isEmpty() && "broadcast".startsWith(args[0])) {
-				displayedOptions.add("broadcast");
-			}
-		} else if (!args[0].isEmpty() && "invsee".startsWith(args[0])) {
-			displayedOptions.add("invsee");
-		} else if (!args[0].isEmpty() && args[0].startsWith("u")) {
-			if (args[0].equals("u")) {
-				displayedOptions.add("unmute");
-				displayedOptions.add("unban");
-			} else {
-				if (args[0].equals("un")) {
-					displayedOptions.add("unmute");
-					displayedOptions.add("unban");
-				} else {
-					if ("unmute".startsWith(args[0])) {
-						displayedOptions.add("unmute");
-					} else if ("unban".startsWith(args[0])) {
-						displayedOptions.add("unban");
-					}
-				}
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("p")) {
-			if (args[0].equals("p")) {
-				displayedOptions.add("punishments");
-				displayedOptions.add("perks");
-			} else if (!args[0].isEmpty() && "punishments".startsWith(args[0])) {
-				displayedOptions.add("punishments");
-			} else if (!args[0].isEmpty() && "perks".startsWith(args[0])) {
-				displayedOptions.add("perks");
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
-			if (args[0].equalsIgnoreCase("c")) {
-				displayedOptions.add("clearchat");
-			}  else if (!args[0].isEmpty() && "clearchat".startsWith(args[0])) {
-				displayedOptions.add("clearchat");
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("s")) {
-			if (args[0].equals("s")) {
-				displayedOptions.add("speed");
-				displayedOptions.add("sudo");
-			} else if (!args[0].isEmpty() && "speed".startsWith(args[0])) {
-				displayedOptions.add("speed");
-			} else if (!args[0].isEmpty() && "sudo".startsWith(args[0])) {
-				displayedOptions.add("sudo");
-			}
-		} else if (!args[0].isEmpty() && args[0].startsWith("t")) {
-			if (args[0].equalsIgnoreCase("t")) {
-				displayedOptions.add("time");
-				displayedOptions.add("tp");
-				displayedOptions.add("tpf");
-			} else if (!args[0].isEmpty() && "time".startsWith(args[0])) {
-				displayedOptions.add("time");
-			} else if (!args[0].isEmpty() && args[0].startsWith("tp")) {
-				if (args[0].equalsIgnoreCase("tp")) {
-					displayedOptions.add("tp");
-					displayedOptions.add("tpf");
-				} else if (!args[0].isEmpty() && "tp".startsWith(args[0])) {
-					displayedOptions.add("tp");
-				} else if (!args[0].isEmpty() && "tpf".startsWith(args[0])) {
-					displayedOptions.add("tpf");
-				}
-			}
-		} else if (!args[0].isEmpty() && "dateset".startsWith(args[0])) {
-			displayedOptions.add("dateset");
-		} else if (!args[0].isEmpty() && "vanish".startsWith(args[0])) {
-			displayedOptions.add("vanish");
-		}
-		return displayedOptions;
-	}
-
-	/**
-	 * Displays the sub-commands available for the given command.
-	 * @param displayedOptions The list of options to be displayed.
-	 * @param args The arguments of the command.
-	 * @return The updated list of options to be displayed.
-	 */
-	private List<String> councilArgs(CommandSender sender, List<String> displayedOptions, String[] args) {
-		switch (args[0]) {
+	private List<String> councilArgs(CommandSender sender, String[] args) {
+		return switch (args[0].toLowerCase()) {
 			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks", "sudo" -> {
-				// List of online players
-				if (args.length == 2) {
-					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-					boolean wasPlayerFound = false;
-					for (Player onlinePlayer : onlinePlayers) {
-						// Only display the name if it aligns with one that is currently online
-						if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-							displayedOptions.add(onlinePlayer.getName());
-							wasPlayerFound = true;
-						} else if (args[1].isEmpty()) {
-							displayedOptions.add(onlinePlayer.getName());
-							wasPlayerFound = true;
-						}
+				if (args.length == 2) yield filterPlayers(args[1]);
+				yield switch (args[0].toLowerCase()) {
+					case "give" -> args[2].isEmpty() ? List.of("item") : List.of();
+					case "mute", "ban" -> {
+						if (args.length == 3) yield args[2].isEmpty() ? List.of("1m", "1h", "1d", "1w", "-1") : List.of();
+						if (args.length == 4) yield args[3].isEmpty() ? List.of("reason") : List.of();
+						yield List.of();
 					}
-					if (!wasPlayerFound) {
-						for (Player onlinePlayer : onlinePlayers) {
-							displayedOptions.add(onlinePlayer.getName());
-						}
+					case "warn" -> args[2].isEmpty() ? List.of("reason") : List.of();
+					case "punishments" -> {
+						if (args.length == 3) yield List.of("remove");
+						if (args.length == 4) yield args[3].isEmpty() ? List.of("number") : List.of();
+						yield List.of();
 					}
-				}
-				// More than 1 sub-command
-				else {
-					switch (args[0]) {
-						case "give" -> {
-							if (args[2].isEmpty()) {
-								displayedOptions.add("item");
-							}
-						}
-						case "mute", "ban" -> {
-							if (args.length == 3) {
-								if (args[2].isEmpty()) {
-									displayedOptions.add("1m");
-									displayedOptions.add("1h");
-									displayedOptions.add("1d");
-									displayedOptions.add("1w");
-									displayedOptions.add("-1");
-								}
-							} else if (args.length == 4) {
-								if (args[3].isEmpty()) {
-									displayedOptions.add("reason");
-								}
-							}
-						}
-						case "warn" -> {
-							if (args[2].isEmpty()) {
-								displayedOptions.add("reason");
-							}
-						}
-						case "punishments" -> {
-							if (args.length == 3) {
-								if (!args[2].isEmpty() && "remove".startsWith(args[2])) {
-									displayedOptions.add("remove");
-								} else {
-									displayedOptions.add("remove");
-								}
-							} else if (args.length == 4) {
-								if (args[3].isEmpty()) {
-									displayedOptions.add("number");
-								}
-							}
-						}
-						case "perks" -> {
-							// /ac perks <player> <perk> <value>
-							// Specifying the perk
-							if (args.length == 3) {
-								if (args[2].isEmpty()) {
-									displayedOptions.add("compressor");
-									displayedOptions.add("randomizer");
-									displayedOptions.add("blacklist");
-									displayedOptions.add("tables");
-									displayedOptions.add("itemname");
-									displayedOptions.add("chat");
-									displayedOptions.add("shulker");
-									displayedOptions.add("inventory");
-									displayedOptions.add("homes");
-									displayedOptions.add("itemframe");
-									displayedOptions.add("bluefire");
-									displayedOptions.add("discord");
-								} else if ("randomizer".startsWith(args[2])) {
-									displayedOptions.add("randomizer");
-								} else if (args[2].startsWith("b")) {
-									if (args[2].equals("b") || args[2].equals("bl")) {
-										displayedOptions.add("blacklist");
-										displayedOptions.add("bluefire");
-									} else if ("blacklist".startsWith(args[2])) {
-										displayedOptions.add("blacklist");
-									} else if ("bluefire".startsWith(args[2])) {
-										displayedOptions.add("bluefire");
-									}
-								} else if ("tables".startsWith(args[2])) {
-									displayedOptions.add("tables");
-								} else if ("shulker".startsWith(args[2])) {
-									displayedOptions.add("shulker");
-								} else if ("homes".startsWith(args[2])) {
-									displayedOptions.add("homes");
-								} else if ("discord".startsWith(args[2])) {
-									displayedOptions.add("discord");
-								} else if (args[2].startsWith("c")) {
-									if (args[2].equals("c")) {
-										displayedOptions.add("compress");
-										displayedOptions.add("chat");
-									} else if ("chat".startsWith(args[2])) {
-										displayedOptions.add("chat");
-									} else if ("compressor".startsWith(args[2])) {
-										displayedOptions.add("compressor");
-									}
-								} else if (args[2].startsWith("i")) {
-									if (args[2].equals("i")) {
-										displayedOptions.add("inventory");
-										displayedOptions.add("itemname");
-										displayedOptions.add("itemframe");
-									} else if ("inventory".startsWith(args[2])) {
-										displayedOptions.add("inventory");
-									} else {
-										if ("item".startsWith(args[2])) {
-											displayedOptions.add("itemname");
-											displayedOptions.add("itemframe");
-										} else {
-											if ("itemname".startsWith(args[2])) {
-												displayedOptions.add("itemname");
-											} else if ("itemframe".startsWith(args[2])) {
-												displayedOptions.add("itemframe");
-											}
-										}
-									}
-								} else {
-									displayedOptions.add("compressor");
-									displayedOptions.add("randomizer");
-									displayedOptions.add("blacklist");
-									displayedOptions.add("tables");
-									displayedOptions.add("itemname");
-									displayedOptions.add("chat");
-									displayedOptions.add("shulker");
-									displayedOptions.add("inventory");
-									displayedOptions.add("homes");
-									displayedOptions.add("itemframe");
-									displayedOptions.add("bluefire");
-									displayedOptions.add("discord");
-								}
-							}
-						}
-						case "sudo" -> {
-							if (args[2].isEmpty()) {
-								displayedOptions.add("command");
-							}
-						}
-					}
-				}
+					case "perks" -> args.length == 3 ? filter(PERK_OPTIONS, args[2]) : List.of();
+					case "sudo" -> args[2].isEmpty() ? List.of("command") : List.of();
+					default -> List.of();
+				};
 			}
-			case "avatar" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("set");
-				} else if ("set".startsWith(args[1])) {
-					displayedOptions.add("set");
-				}
-			}
-			case "broadcast" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("msg");
-				}
-			}
+			case "avatar" -> filter(List.of("set"), args[1]);
+			case "broadcast" -> args[1].isEmpty() ? List.of("msg") : List.of();
 			case "boosts" -> {
-				if (args.length == 2) {
-					if (args[1].isEmpty()) {
-						displayedOptions.add("add");
-						displayedOptions.add("remove");
-					} else if ("add".startsWith(args[1])) {
-						displayedOptions.add("add");
-					} else if ("remove".startsWith(args[1])) {
-						displayedOptions.add("remove");
-					} else {
-						displayedOptions.add("add");
-						displayedOptions.add("remove");
-					}
-				} else if (args.length == 3) {
-					displayedOptions.add("MINER");
-					displayedOptions.add("HARVEST");
-					displayedOptions.add("HUNTER");
-					displayedOptions.add("CHI");
-				} else if (args.length == 4) {
-					Player[] onlinePlayers = new Player[Bukkit.getOnlinePlayers().size()];
-					Bukkit.getOnlinePlayers().toArray(onlinePlayers);
-					boolean wasPlayerFound = false;
-					for (Player onlinePlayer : onlinePlayers) {
-						// Only display the name if it aligns with one that is currently online
-						if (onlinePlayer.getName().toLowerCase().startsWith(args[1].toLowerCase())) {
-							displayedOptions.add(onlinePlayer.getName());
-							wasPlayerFound = true;
-						} else if (args[1].isEmpty()) {
-							displayedOptions.add(onlinePlayer.getName());
-							wasPlayerFound = true;
-						}
-					}
-					if (!wasPlayerFound) {
-						for (Player onlinePlayer : onlinePlayers) {
-							displayedOptions.add(onlinePlayer.getName());
-						}
-					}
-				}
+				if (args.length == 2) yield filter(List.of("add", "remove"), args[1]);
+				if (args.length == 3) yield new ArrayList<>(List.of("CHI", "HARVEST", "HUNTER", "MINER"));
+				if (args.length == 4) yield filterPlayers(args[3]);
+				yield List.of();
 			}
-			case "vote" -> {
-				if (args.length == 2) {
-					if (!args[1].isEmpty() && "test".startsWith(args[1])) {
-						displayedOptions.add("test");
-					} else {
-						displayedOptions.add("test");
-					}
+			case "vote" -> args.length == 2 ? filter(List.of("test"), args[1]) : List.of();
+			case "msg" -> args[1].isEmpty() ? List.of("message") : List.of();
+			case "speed" -> args.length == 2 ? filter(List.of("1", "10"), args[1]) : List.of();
+			case "time" -> args.length == 2 ? filter(List.of("day", "midnight", "night", "noon"), args[1]) : List.of();
+			case "dateset" -> args.length == 2 ? filter(List.of("day", "month", "weekday", "year"), args[1]) : List.of();
+			case "weather" -> {
+				if (args.length == 2) yield filter(List.of("CLEAR", "DELAY", "DURATION", "RAIN", "THUNDER"), args[1]);
+				if (args.length == 3 && (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY"))) {
+					yield args[2].isEmpty() ? List.of("100", "1200", "6000") : List.of();
 				}
-			}
-			case "msg" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("message");
-				}
-			}
-			case "speed" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("1");
-					displayedOptions.add("10");
-				}
-			}
-			case "time" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("day");
-					displayedOptions.add("noon");
-					displayedOptions.add("night");
-					displayedOptions.add("midnight");
-				}
+				yield List.of();
 			}
 			case "tp", "tpf" -> {
-				// arg1: username or x-coordinate
-				if (args.length == 2) {
-					displayedOptions.add("username");
-					displayedOptions.add("x");
-				}
-				// arg2: depends on whether arg1 was a player
-				//   tp  username → username2 (player-to-player) or x (player-to-coords)
-				//   tpf username → x (player-to-coords)
-				//   tp/tpf x    → y
-				else if (args.length == 3) {
+				if (args.length == 2) yield List.of("username", "x");
+				if (args.length == 3) {
 					if (isOnlinePlayer(args[1])) {
-						if (args[0].equalsIgnoreCase("tp")) {
-							displayedOptions.add("username");
-						}
-						displayedOptions.add("x");
-					} else {
-						displayedOptions.add("y");
+						List<String> options = new ArrayList<>();
+						if (args[0].equalsIgnoreCase("tp")) options.add("username");
+						options.add("x");
+						yield options;
 					}
+					yield List.of("y");
 				}
-				// arg3: depends on arg1 and arg2
-				//   username x    → y
-				//   username user → (player-to-player complete, no further args)
-				//   x y           → z
-				else if (args.length == 4) {
-					if (isOnlinePlayer(args[1])) {
-						if (!isOnlinePlayer(args[2])) {
-							displayedOptions.add("y");
-						}
-					} else {
-						displayedOptions.add("z");
-					}
+				if (args.length == 4) {
+					if (isOnlinePlayer(args[1])) yield !isOnlinePlayer(args[2]) ? List.of("y") : List.of();
+					yield List.of("z");
 				}
-				// arg4:
-				//   username x y → z
-				//   x y z        → yaw (optional)
-				else if (args.length == 5) {
-					if (isOnlinePlayer(args[1])) {
-						displayedOptions.add("z");
-					} else {
-						displayedOptions.add("yaw");
-					}
-				}
-				// arg5:
-				//   username x y z → yaw (optional)
-				//   x y z yaw      → pitch
-				else if (args.length == 6) {
-					if (isOnlinePlayer(args[1])) {
-						displayedOptions.add("yaw");
-					} else {
-						displayedOptions.add("pitch");
-					}
-				}
-				// arg6:
-				//   username x y z yaw → pitch
-				else if (args.length == 7) {
-					if (isOnlinePlayer(args[1])) {
-						displayedOptions.add("pitch");
-					}
-				}
+				if (args.length == 5) yield isOnlinePlayer(args[1]) ? List.of("z") : List.of("yaw");
+				if (args.length == 6) yield isOnlinePlayer(args[1]) ? List.of("yaw") : List.of("pitch");
+				if (args.length == 7) yield isOnlinePlayer(args[1]) ? List.of("pitch") : List.of();
+				yield List.of();
 			}
-			case "dateset" -> {
-				if (args[1].isEmpty()) {
-					displayedOptions.add("month");
-					displayedOptions.add("day");
-					displayedOptions.add("weekday");
-					displayedOptions.add("year");
-				}
-			}
-			case "weather" -> {
-				if (args.length == 2) {
-					if (args[1].isEmpty()) {
-						displayedOptions.add("CLEAR");
-						displayedOptions.add("RAIN");
-						displayedOptions.add("THUNDER");
-						displayedOptions.add("DURATION");
-						displayedOptions.add("DELAY");
-					} else if ("CLEAR".startsWith(args[1].toUpperCase())) {
-						displayedOptions.add("CLEAR");
-					} else if ("RAIN".startsWith(args[1].toUpperCase())) {
-						displayedOptions.add("RAIN");
-					} else if ("THUNDER".startsWith(args[1].toUpperCase())) {
-						displayedOptions.add("THUNDER");
-					} else if (args[1].equalsIgnoreCase("D")) {
-						displayedOptions.add("DURATION");
-						displayedOptions.add("DELAY");
-					} else if ("DURATION".startsWith(args[1].toUpperCase())) {
-						displayedOptions.add("DURATION");
-					} else if ("DELAY".startsWith(args[1].toUpperCase())) {
-						displayedOptions.add("DELAY");
-					} else {
-						displayedOptions.add("CLEAR");
-						displayedOptions.add("RAIN");
-						displayedOptions.add("THUNDER");
-						displayedOptions.add("DURATION");
-						displayedOptions.add("DELAY");
-					}
-				} else if (args.length == 3) {
-					if (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY")) {
-						if (args[2].isEmpty()) {
-							displayedOptions.add("100");
-							displayedOptions.add("1200");
-							displayedOptions.add("6000");
-						}
-					}
-				}
-			}
+			default -> List.of();
+		};
+	}
+
+	private static boolean isOnlinePlayer(String name) {
+		return Bukkit.getOnlinePlayers().stream()
+			.anyMatch(p -> p.getName().equalsIgnoreCase(name));
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
 		}
-		return displayedOptions;
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 
-	private boolean isOnlinePlayer(String name) {
-		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			if (onlinePlayer.getName().equalsIgnoreCase(name)) {
-				return true;
-			}
-		}
-		return false;
+	private static List<String> filterPlayers(String input) {
+		return Bukkit.getOnlinePlayers().stream()
+			.map(Player::getName)
+			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
-
-	/**
-	 * Displays the commands available to council members when the input does not match an existing command.
-	 * @param displayedOptions The list of options to be displayed.
-	 * @return The updated list of options to be displayed.
-	 */
-	private List<String> noResultsCouncil(List<String> displayedOptions) {
-		// Council-specific commands only
-		displayedOptions.add("whereis");
-		displayedOptions.add("give");
-		displayedOptions.add("mute");
-		displayedOptions.add("unmute");
-		displayedOptions.add("ban");
-		displayedOptions.add("unban");
-		displayedOptions.add("invsee");
-		displayedOptions.add("warn");
-		displayedOptions.add("broadcast");
-		displayedOptions.add("punishments");
-		displayedOptions.add("perks");
-		displayedOptions.add("admin");
-		displayedOptions.add("msg");
-		displayedOptions.add("speed");
-		displayedOptions.add("time");
-		displayedOptions.add("tp");
-		displayedOptions.add("tpf");
-		displayedOptions.add("clearchat");
-		displayedOptions.add("dateset");
-		displayedOptions.add("vanish");
-		displayedOptions.add("sudo");
-		displayedOptions.add("weather");
-		return displayedOptions;
-	}
-
 }

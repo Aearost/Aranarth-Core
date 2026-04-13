@@ -6,11 +6,14 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /pronouns command.
  */
 public class CommandPronounsCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("female", "male");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,17 +24,18 @@ public class CommandPronounsCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			if (!args[0].isEmpty() && "male".startsWith(args[0])) {
-				displayedOptions.add("male");
-			} else if (!args[0].isEmpty() && "female".startsWith(args[0])) {
-				displayedOptions.add("female");
-			} else {
-				displayedOptions.add("male");
-				displayedOptions.add("female");
-			}
+			return filter(OPTIONS, args[0]);
 		}
-		return displayedOptions;
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
+		}
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

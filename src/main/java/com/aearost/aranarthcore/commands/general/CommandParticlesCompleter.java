@@ -4,13 +4,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Handles the auto complete functionality while using the /particles command.
  */
 public class CommandParticlesCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("0", "10", "100", "200");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,13 +22,9 @@ public class CommandParticlesCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			displayedOptions.add("0");
-			displayedOptions.add("10");
-			displayedOptions.add("100");
-			displayedOptions.add("200");
+			return OPTIONS;
 		}
-		return displayedOptions;
+		return List.of();
 	}
 }

@@ -6,11 +6,14 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /itemname command.
  */
 public class CommandItemNameCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("gradient", "gradientbold", "name", "remove");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,37 +24,26 @@ public class CommandItemNameCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			if (args[0].isEmpty()) {
-				displayedOptions.add("remove");
-				displayedOptions.add("name");
-				displayedOptions.add("gradient");
-				displayedOptions.add("gradientbold");
-			} else if ("gradient".startsWith(args[0])) {
-				displayedOptions.add("gradient");
-				displayedOptions.add("gradientbold");
-			} else if ("gradientbold".startsWith(args[0])) {
-				displayedOptions.add("gradientbold");
-			} else if ("remove".startsWith(args[0])) {
-				displayedOptions.add("remove");
-			}
-		} else {
-			if (args.length == 2) {
-				if (args[0].startsWith("gradient")) {
-					if (args[1].isEmpty()) {
-						displayedOptions.add("#hex1,#hex2,...");
-					}
-				}
-			} else if (args.length == 3) {
-				if (args[0].startsWith("gradient")) {
-					if (args[2].isEmpty()) {
-						displayedOptions.add("name");
-					}
-				}
-			}
-
+			return filter(OPTIONS, args[0]);
 		}
-		return displayedOptions;
+		if (args[0].startsWith("gradient")) {
+			if (args.length == 2) {
+				return args[1].isEmpty() ? List.of("#hex1,#hex2,...") : List.of();
+			}
+			if (args.length == 3) {
+				return args[2].isEmpty() ? List.of("name") : List.of();
+			}
+		}
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
+		}
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }

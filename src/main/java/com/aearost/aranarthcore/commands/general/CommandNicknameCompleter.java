@@ -6,11 +6,14 @@ import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /nickname command.
  */
 public class CommandNicknameCompleter implements TabCompleter {
+
+	private static final List<String> OPTIONS = List.of("gradient", "gradientbold", "nickname");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -21,33 +24,26 @@ public class CommandNicknameCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		List<String> displayedOptions = new ArrayList<>();
 		if (args.length == 1) {
-			if (args[0].isEmpty()) {
-				displayedOptions.add("nickname");
-				displayedOptions.add("gradient");
-				displayedOptions.add("gradientbold");
-			} else if ("gradient".startsWith(args[0])) {
-				displayedOptions.add("gradient");
-				displayedOptions.add("gradientbold");
-			} else if ("gradientbold".startsWith(args[0])) {
-				displayedOptions.add("gradientbold");
-			}
-		} else {
+			return filter(OPTIONS, args[0]);
+		}
+		if (args[0].startsWith("gradient")) {
 			if (args.length == 2) {
-				if (args[0].startsWith("gradient")) {
-					if (args[1].isEmpty()) {
-						displayedOptions.add("hex1,hex2,hex3");
-					}
-				}
-			} else if (args.length == 3) {
-				if (args[0].startsWith("gradient")) {
-					if (args[2].isEmpty()) {
-						displayedOptions.add("nickname");
-					}
-				}
+				return args[1].isEmpty() ? List.of("hex1,hex2,hex3") : List.of();
+			}
+			if (args.length == 3) {
+				return args[2].isEmpty() ? List.of("nickname") : List.of();
 			}
 		}
-		return displayedOptions;
+		return List.of();
+	}
+
+	private static List<String> filter(List<String> options, String input) {
+		if (input.isEmpty()) {
+			return new ArrayList<>(options);
+		}
+		return options.stream()
+			.filter(s -> s.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
 	}
 }
