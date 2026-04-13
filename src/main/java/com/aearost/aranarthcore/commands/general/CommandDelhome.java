@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiDelhome;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -43,7 +44,13 @@ public class CommandDelhome implements CommandExecutor {
 				}
 				player.sendMessage(ChatUtils.chatMessage("&cThis home could not be found!"));
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cYou must specify a home name to delete!"));
+				if (aranarthPlayer.getHomes().isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&7You do not have any homes"));
+				} else {
+					GuiDelhome gui = new GuiDelhome(player);
+					gui.openGui();
+					return true;
+				}
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));

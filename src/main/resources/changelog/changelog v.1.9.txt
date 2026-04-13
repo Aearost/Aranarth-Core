@@ -204,6 +204,7 @@ Minor Features
 [~] Made it so Scorched Aranarthium wearers do not experience any fire ticks
 [~] Allowed the use of buttons at spawn
 [~] Added a toggle option for /ac msg to send all messages to council chat
+[+] Added a GUI for /delhome
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
