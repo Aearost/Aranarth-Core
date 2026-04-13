@@ -189,7 +189,6 @@ Minor Features
 [+] Added custom discord server join and quit messages with emoji reactions
 [~] Prevented hostile mobs from spawning in dominion land
 [~] Fixed /resource sometimes putting you in the world border
-[~] Fixed issue where the incorrect rank's mcMMO requirements were being used
 [~] Added /trash for Knights and Saints
 [~] Fixed error due to null discord user trying to update avatar roles
 [~] Fixed issue where Ancient Debris was not dropped with higher probability when mined wearing dwarven aranarthium or with the boost of the miner

@@ -64,7 +64,7 @@ public class GuiRankupClick {
 						player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.0F);
 						player.closeInventory();
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per skill!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not meet the mcMMO requirements per category!"));
 						player.closeInventory();
 					}
 				} else {
@@ -111,9 +111,10 @@ public class GuiRankupClick {
 	}
 
 	/**
-	 * Determines if the player has the minimum amount of mcMMO levels per skill to rank up.
+	 * Determines if the player has the minimum sum of mcMMO levels per category to rank up.
+	 * Each of the three categories (Gathering, Combat, Miscellaneous) must independently meet the minimum.
 	 * @param player The player attempting to rank up.
-	 * @return Confirmation if the player has the minimum amount of mcMMO levels per skill to rank up.
+	 * @return Confirmation if the player has the minimum sum of mcMMO levels per category to rank up.
 	 */
 	private boolean hasMinimumMcmmoPerSkill(Player player) {
 		McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -123,25 +124,41 @@ public class GuiRankupClick {
 		switch (aranarthPlayer.getRank()) {
 			case 0 -> minimum = 0;
 			case 1 -> minimum = 0;
-			case 2 -> minimum = 25;
-			case 3 -> minimum = 50;
-			case 4 -> minimum = 125;
-			case 5 -> minimum = 250;
-			case 6 -> minimum = 500;
-			case 7 -> minimum = 1000;
-			default -> minimum = 1000;
+			case 2 -> minimum = 150;
+			case 3 -> minimum = 375;
+			case 4 -> minimum = 750;
+			case 5 -> minimum = 1250;
+			case 6 -> minimum = 2500;
+			case 7 -> minimum = 5000;
+			default -> minimum = 5000;
 		}
 
-		for (PrimarySkillType skill : PrimarySkillType.values()) {
-			if (skill == PrimarySkillType.SALVAGE || skill == PrimarySkillType.SMELTING) {
-				continue;
-			}
-
-			if (mcMMOPlayer.getSkillLevel(skill) < minimum) {
-				return false;
-			}
+		if (minimum == 0) {
+			return true;
 		}
 
-		return true;
+		int gatheringSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.EXCAVATION)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.FISHING)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.HERBALISM)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.MINING)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.WOODCUTTING);
+
+		int combatSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ARCHERY)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.AXES)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.CROSSBOWS)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.MACES)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SWORDS)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SPEARS)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.TAMING)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.TRIDENTS)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.UNARMED);
+
+		int miscSkillsLevelTotal = mcMMOPlayer.getSkillLevel(PrimarySkillType.ACROBATICS)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.ALCHEMY)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.REPAIR)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SALVAGE)
+				+ mcMMOPlayer.getSkillLevel(PrimarySkillType.SMELTING);
+
+		return gatheringSkillsLevelTotal >= minimum && combatSkillsLevelTotal >= minimum && miscSkillsLevelTotal >= minimum;
 	}
 }
