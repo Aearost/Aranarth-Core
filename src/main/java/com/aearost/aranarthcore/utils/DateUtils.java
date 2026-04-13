@@ -56,6 +56,7 @@ public class DateUtils {
 				Material.DEAD_BUSH, Material.AZALEA, Material.FLOWERING_AZALEA, Material.COBWEB, Material.BROWN_MUSHROOM, Material.RED_MUSHROOM,
 				Material.DECORATED_POT, Material.LIGHT, Material.DANDELION, Material.POPPY, Material.BLUE_ORCHID, Material.ALLIUM, Material.AZURE_BLUET,
 				Material.OXEYE_DAISY, Material.CORNFLOWER, Material.LILY_OF_THE_VALLEY, Material.CLOSED_EYEBLOSSOM, Material.OPEN_EYEBLOSSOM,
+				Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP, Material.PINK_TULIP,
 				Material.WITHER_ROSE, Material.PINK_PETALS, Material.SUNFLOWER, Material.LILAC, Material.PEONY, Material.ROSE_BUSH, Material.SNOW, Material.AIR,
 				Material.ICE, Material.PACKED_ICE, Material.BLUE_ICE, Material.LARGE_FERN, Material.SWEET_BERRY_BUSH, Material.WILDFLOWERS,
 				Material.LEAF_LITTER, Material.FIREFLY_BUSH, Material.BUSH, Material.PALE_HANGING_MOSS, Material.TALL_GRASS
