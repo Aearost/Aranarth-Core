@@ -210,6 +210,8 @@ Minor Features
 [~] Made it so extra damage effects on tamed pets when the attacker is the owner and pethurt are disabled
 [-] Removed Happy Ghast harm prevention
 [+] Made it so aranarthium clusters and aranarthium ingots are immune to being destroyed in lava like netherite is
+[~] Switched the Trial Key for Vote Points +3 in the Vote Crate rewards
+[-] Removed vote crate key message donation message as it is not a donation item
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

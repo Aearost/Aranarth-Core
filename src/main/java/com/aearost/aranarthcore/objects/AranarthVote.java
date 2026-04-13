@@ -11,9 +11,9 @@ public class AranarthVote {
     private int pointsRewarded;
     private long timestamp;
 
-    public AranarthVote(UUID uuid, int keysRewarded, long timestamp) {
+    public AranarthVote(UUID uuid, int pointsRewarded, long timestamp) {
         this.uuid = uuid;
-        this.pointsRewarded = keysRewarded;
+        this.pointsRewarded = pointsRewarded;
         this.timestamp = timestamp;
     }
 

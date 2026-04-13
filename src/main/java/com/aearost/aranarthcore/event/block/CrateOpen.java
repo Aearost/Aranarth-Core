@@ -13,6 +13,7 @@ import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -423,8 +424,14 @@ public class CrateOpen {
                     reward = new ItemStack(Material.EXPERIENCE_BOTTLE, 16);
                     name = "#c1e377&lBottle o' Enchanting x16";
                 } else if (chance <= 85) {
-                    reward = new ItemStack(Material.TRIAL_KEY, 1);
-                    name = "#515950&lTrial Key x1";
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.VOTE);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 3, System.currentTimeMillis()));
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +3"));
+                    return;
                 } else if (chance <= 90) {
                     reward = new ItemStack(Material.BLAZE_ROD, 8);
                     name = "#fcbf00&lBlaze Rod x8";

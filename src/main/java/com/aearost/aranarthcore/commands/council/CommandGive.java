@@ -111,7 +111,7 @@ public class CommandGive {
 						}
 					}
 
-					if (isKey) {
+					if (isKey && !args[2].equals("KeyVote")) {
 						DiscordUtils.donationNotification(player.getName() + " has purchased " + item.getItemMeta().getDisplayName() + " x3", player.getUniqueId(), Color.CYAN);
 						Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + item.getItemMeta().getDisplayName() + " x3"));
 					}
