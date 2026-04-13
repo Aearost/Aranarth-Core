@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Consumer;
 
 /**
  * Provides a variety of utility methods for everything related to Discord integration.
@@ -36,6 +37,24 @@ public class DiscordUtils {
 	private static final TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
 	private static final TextChannel dominions = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("dominions");
 	private static final TextChannel welcome = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("welcome");
+
+	/**
+	 * Returns a failure handler for role operations that automatically unlinks a player's
+	 * Discord account if they are no longer in the server (error 10007: Unknown Member).
+	 * @param uuid The Minecraft UUID of the player whose role is being updated.
+	 */
+	private static Consumer<Throwable> unlinkIfUnknownMember(UUID uuid) {
+		return error -> {
+			String msg = error.getMessage();
+			if (msg != null && (msg.contains("10007") || msg.contains("Unknown Member"))) {
+				Bukkit.getLogger().info("[DiscordUtils] Unlinking " + Bukkit.getOfflinePlayer(uuid).getName()
+						+ " as they are no longer in the Discord server");
+				DiscordSRV.getPlugin().getAccountLinkManager().unlink(uuid);
+			} else {
+				Bukkit.getLogger().warning("[DiscordUtils] Role update failed for " + uuid + ": " + msg);
+			}
+		};
+	}
 
 	/**
 	 * Provides the Discord Guild.
@@ -144,10 +163,10 @@ public class DiscordUtils {
 						|| role.getId().equals("1436840444771438752") || role.getId().equals("1436840565982498968")
 						|| role.getId().equals("1436840642331410634") || role.getId().equals("1436840682881945630")
 						|| role.getId().equals("1436839882268872744")) {
-					guild.removeRoleFromMember(playerDiscordId, role).queue();
+					guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 				}
 			}
-			guild.addRoleToMember(playerDiscordId, roleToAdd).queue();
+			guild.addRoleToMember(playerDiscordId, roleToAdd).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		}
 
 		// Only display intentional changes in Discord, not auto-assign
@@ -195,13 +214,13 @@ public class DiscordUtils {
 		if (newRankNum > 0) {
 			isSaint = true;
 			if (playerDiscordId != null) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			}
 		} else {
 			if (playerDiscordId != null) {
-				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue();
-				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436839449626542161")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+				guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			}
 		}
 
@@ -244,9 +263,9 @@ public class DiscordUtils {
 		// If they are an Architect
 		if (newRankNum > 0) {
 			isArchitect = true;
-			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
+			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		} else {
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue();
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842029274632293")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		}
 
 		// Only display intentional changes in Discord, not auto-assign
@@ -287,21 +306,21 @@ public class DiscordUtils {
 
 		if (playerDiscordId != null) {
 			// Remove all council ranks
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(); // The Council role
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue(); // The Helper role
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue(); // The Moderator role
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue(); // The Admin role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(null, unlinkIfUnknownMember(player.getUniqueId())); // The Council role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue(null, unlinkIfUnknownMember(player.getUniqueId())); // The Helper role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue(null, unlinkIfUnknownMember(player.getUniqueId())); // The Moderator role
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue(null, unlinkIfUnknownMember(player.getUniqueId())); // The Admin role
 
 			// If they are a Council member
 			if (newRankNum == 1) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436841788634697922")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			} else if (newRankNum == 2) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842179594031358")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			} else if (newRankNum == 3) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue();
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue();
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436877816796020836")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+				guild.addRoleToMember(playerDiscordId, guild.getRoleById("1436842548412027011")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			}
 		}
 
@@ -373,9 +392,9 @@ public class DiscordUtils {
 		}
 
 		if (aranarthPlayer.getPerks().get(Perk.DISCORD) == 1) {
-			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+			guild.addRoleToMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		} else {
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue();
+			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById("1444160739769061528")).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		}
 	}
 
@@ -396,12 +415,12 @@ public class DiscordUtils {
 		if (playerDiscordRoles.contains(role)) {
 			// If the player is the current Avatar
 			if (AvatarUtils.getCurrentAvatar() == null || !AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-				guild.removeRoleFromMember(playerDiscordId,role).queue();
+				guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			}
 		} else {
 			// If the player is the current Avatar
 			if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(player.getUniqueId())) {
-				guild.addRoleToMember(playerDiscordId, role).queue();
+				guild.addRoleToMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 			}
 		}
 	}
@@ -551,7 +570,7 @@ public class DiscordUtils {
 					.setAuthor("Avatar " + username + " has risen!", null, url)
 					.setColor(Color.MAGENTA);
 			if (playerDiscordId != null) {
-				guild.addRoleToMember(playerDiscordId, role).queue();
+				guild.addRoleToMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
 			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
@@ -563,7 +582,7 @@ public class DiscordUtils {
 					.setAuthor("Avatar " + username + " has deceased...", null, url)
 					.setColor(Color.MAGENTA);
 			if (playerDiscordId != null) {
-				guild.removeRoleFromMember(playerDiscordId, role).queue();
+				guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(avatar.getUuid()));
 			}
 			serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 			roleChangesChannel.sendMessageEmbeds(embed.build()).queue();
@@ -706,9 +725,9 @@ public class DiscordUtils {
 			Bukkit.getLogger().info("The Muted role could not be applied to " + Bukkit.getOfflinePlayer(uuid).getName() + " as they are not linked to Discord");
 		} else {
 			if (isApplyingMute) {
-				guild.addRoleToMember(playerDiscordId, mutedRole).queue();
+				guild.addRoleToMember(playerDiscordId, mutedRole).queue(null, unlinkIfUnknownMember(uuid));
 			} else {
-				guild.removeRoleFromMember(playerDiscordId, mutedRole).queue();
+				guild.removeRoleFromMember(playerDiscordId, mutedRole).queue(null, unlinkIfUnknownMember(uuid));
 			}
 		}
 	}

@@ -32,6 +32,8 @@ public class AranarthCore extends JavaPlugin {
 
 	private static AranarthCore plugin;
 	private DiscordChatListener discordChatListener;
+	private ListenerAdapter discordMemberJoinListener;
+	private ListenerAdapter discordMemberLeaveListener;
 
 	/**
 	 * Called when the plugin is first enabled on server startup.
@@ -268,19 +270,20 @@ public class AranarthCore extends JavaPlugin {
 			@Override
 			public void run() {
 				JDA jda = DiscordSRV.getPlugin().getJda();
-				jda.addEventListener(new ListenerAdapter() {
+				discordMemberJoinListener = new ListenerAdapter() {
 					@Override
 					public void onGuildMemberJoin(GuildMemberJoinEvent event) {
 						DiscordUtils.discordServerJoin(event.getUser().getAsMention());
 					}
-				});
-
-				jda.addEventListener(new ListenerAdapter() {
+				};
+				discordMemberLeaveListener = new ListenerAdapter() {
 					@Override
 					public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
 						DiscordUtils.discordServerQuit(event.getUser().getAsMention());
 					}
-				});
+				};
+				jda.addEventListener(discordMemberJoinListener);
+				jda.addEventListener(discordMemberLeaveListener);
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1);
 	}
@@ -581,6 +584,16 @@ public class AranarthCore extends JavaPlugin {
 
 		Bukkit.resetRecipes();
 		discordChatListener.unsubscribe();
+
+		JDA jda = DiscordSRV.getPlugin().getJda();
+		if (jda != null) {
+			if (discordMemberJoinListener != null) {
+				jda.removeEventListener(discordMemberJoinListener);
+			}
+			if (discordMemberLeaveListener != null) {
+				jda.removeEventListener(discordMemberLeaveListener);
+			}
+		}
 	}
 
 }
