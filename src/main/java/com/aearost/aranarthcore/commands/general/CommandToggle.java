@@ -170,6 +170,15 @@ public class CommandToggle implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to the blue fire perk"));
 					}
+				} else if (args[0].equalsIgnoreCase("pethurt")) {
+					if (aranarthPlayer.isHurtingOwnPets()) {
+						aranarthPlayer.setHurtingOwnPets(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the ability to hurt your own pets"));
+					} else {
+						aranarthPlayer.setHurtingOwnPets(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the ability to hurt your own pets"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

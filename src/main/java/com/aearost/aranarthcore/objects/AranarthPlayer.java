@@ -82,6 +82,7 @@ public class AranarthPlayer {
 	private String firstJoinDate = "";
 	private boolean isVanished = false;
 	private boolean isInCouncilChat = false;
+	private boolean isHurtingOwnPets = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -144,6 +145,7 @@ public class AranarthPlayer {
 		this.firstJoinDate = "";
 		this.isVanished = false;
 		this.isInCouncilChat = false;
+		this.isHurtingOwnPets = false;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -212,6 +214,7 @@ public class AranarthPlayer {
 		this.firstJoinDate = firstJoinDate;
 		this.isVanished = false;
 		this.isInCouncilChat = false;
+		this.isHurtingOwnPets = false;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1260,5 +1263,21 @@ public class AranarthPlayer {
 	 */
 	public void setInCouncilChat(boolean inCouncilChat) {
 		isInCouncilChat = inCouncilChat;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is allowed to hurt their own pets or not.
+	 * @return Whether the player is allowed to hurt their own pets or not.
+	 */
+	public boolean isHurtingOwnPets() {
+		return isHurtingOwnPets;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is allowed to hurt their own pets or not.
+	 * @param isHurtingOwnPets Whether the player is allowed to hurt their own pets or not.
+	 */
+	public void setHurtingOwnPets(boolean isHurtingOwnPets) {
+		this.isHurtingOwnPets = isHurtingOwnPets;
 	}
 }

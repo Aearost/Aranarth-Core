@@ -51,6 +51,8 @@ public class CommandToggleCompleter implements TabCompleter {
 				}
 			} else if (!args[0].isEmpty() && "inventory".startsWith(args[0])) {
 				displayedOptions.add("inventory");
+			} else if (!args[0].isEmpty() && "pethurt".startsWith(args[0])) {
+				displayedOptions.add("pethurt");
 			} else if (!args[0].isEmpty() && args[0].startsWith("c")) {
 				if (args[0].equals("c")) {
 					displayedOptions.add("chat");
@@ -113,6 +115,7 @@ public class CommandToggleCompleter implements TabCompleter {
 		displayedOptions.add("blacklist");
 		displayedOptions.add("compressor");
 		displayedOptions.add("chestlock");
+		displayedOptions.add("pethurt");
 		return displayedOptions;
 	}
 }
