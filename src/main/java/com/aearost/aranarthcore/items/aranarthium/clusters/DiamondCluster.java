@@ -29,6 +29,7 @@ public class DiamondCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "diamond");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			item.setItemMeta(meta);
 		}
 	    return item;

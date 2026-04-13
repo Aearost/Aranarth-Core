@@ -33,6 +33,7 @@ public class AranarthiumIngot implements AranarthItem {
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
+			meta.setFireResistant(true);
 			item.setItemMeta(meta);
 		}
 	    return item;

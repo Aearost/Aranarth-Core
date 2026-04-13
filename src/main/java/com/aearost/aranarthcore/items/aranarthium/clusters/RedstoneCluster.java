@@ -29,6 +29,7 @@ public class RedstoneCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "redstone");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			redstoneCluster.setItemMeta(meta);
 		}
 	    return redstoneCluster;

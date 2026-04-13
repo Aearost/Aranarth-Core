@@ -29,6 +29,7 @@ public class LapisCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "lapis");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			lapisCluster.setItemMeta(meta);
 		}
 	    return lapisCluster;

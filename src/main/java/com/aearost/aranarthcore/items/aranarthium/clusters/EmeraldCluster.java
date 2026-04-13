@@ -29,6 +29,7 @@ public class EmeraldCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "emerald");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			item.setItemMeta(meta);
 		}
 	    return item;

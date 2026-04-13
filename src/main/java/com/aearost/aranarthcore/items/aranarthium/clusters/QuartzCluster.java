@@ -29,6 +29,7 @@ public class QuartzCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "quartz");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			quartzCluster.setItemMeta(meta);
 		}
 	    return quartzCluster;

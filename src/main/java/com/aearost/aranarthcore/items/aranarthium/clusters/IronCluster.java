@@ -29,6 +29,7 @@ public class IronCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "iron");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			ironFragment.setItemMeta(meta);
 		}
 	    return ironFragment;

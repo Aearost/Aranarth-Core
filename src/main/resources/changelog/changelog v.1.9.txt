@@ -209,6 +209,7 @@ Minor Features
 [+] Added /toggle pethurt
 [~] Made it so extra damage effects on tamed pets when the attacker is the owner and pethurt are disabled
 [-] Removed Happy Ghast harm prevention
+[+] Made it so aranarthium clusters and aranarthium ingots are immune to being destroyed in lava like netherite is
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
