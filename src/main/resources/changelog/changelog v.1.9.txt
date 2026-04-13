@@ -208,6 +208,7 @@ Minor Features
 [+] Added /ac weather command, allowing admins to change the current weather, and the duration/delay
 [+] Added /toggle pethurt
 [~] Made it so extra damage effects on tamed pets when the attacker is the owner and pethurt are disabled
+[-] Removed Happy Ghast harm prevention
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
