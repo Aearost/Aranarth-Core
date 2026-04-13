@@ -1,13 +1,16 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.inventory.ItemStack;
@@ -27,6 +30,17 @@ public class WeaponsExtraDamage {
 		if (isPlayerCausedDamage(e.getCause())) {
 			if (e.getDamageSource().getCausingEntity() != null) {
 				if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+					// Skip extra damage effects on tamed pets when the attacker is the owner and pethurt is disabled
+					if (entity instanceof Tameable tameable && tameable.isTamed()) {
+						if (tameable.getOwner() instanceof OfflinePlayer owner) {
+							if (owner.getUniqueId().equals(attacker.getUniqueId())) {
+								AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+								if (!aranarthAttacker.isHurtingOwnPets()) {
+									return;
+								}
+							}
+						}
+					}
 					Random random = new Random();
 					ItemStack weapon = attacker.getInventory().getItemInMainHand();
 					Material weaponType = attacker.getInventory().getItemInMainHand().getType();
