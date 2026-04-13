@@ -2929,14 +2929,13 @@ public class AranarthUtils {
 			lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
 		}
 
-		long lastHornUseOnCooldown = 0;
 		MusicInstrument hornWithLongestCooldown = null;
 		// Ensures only one horn can be used at a time (limiting stacking)
 		for (MusicInstrument hornOnCooldown : horns.keySet()) {
-			lastHornUseOnCooldown = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
+			long lastUse = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
 
 			// If the horn is actively on cooldown
-			if (lastHornUseOnCooldown + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
+			if (lastUse + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
 				if (hornWithLongestCooldown == null) {
 					hornWithLongestCooldown = hornOnCooldown;
 				}
@@ -2982,7 +2981,7 @@ public class AranarthUtils {
 					}
 				}
 			}
-			long remainder = (lastHornUseOnCooldown + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
+			long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
 			remainder = remainder / 1000;
 			int seconds = (int) remainder;
 			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
