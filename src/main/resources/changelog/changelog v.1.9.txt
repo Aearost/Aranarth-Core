@@ -205,6 +205,7 @@ Minor Features
 [~] Allowed the use of buttons at spawn
 [~] Added a toggle option for /ac msg to send all messages to council chat
 [+] Added a GUI for /delhome
+[+] Added /ac weather command, allowing admins to change the current weather, and the duration/delay
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

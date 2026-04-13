@@ -93,6 +93,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandSudo.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("vanish")) {
 			commandResult = CommandVanish.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("weather")) {
+			commandResult = CommandWeather.onCommand(sender, args);
 		}
 		return commandResult;
 	}

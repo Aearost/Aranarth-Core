@@ -89,11 +89,14 @@ public class CommandACCompleter implements TabCompleter {
 			if (args[0].equals("w")) {
 				displayedOptions.add("whereis");
 				displayedOptions.add("warn");
+				displayedOptions.add("weather");
 			} else {
 				if (!args[0].isEmpty() && "whereis".startsWith(args[0])) {
 					displayedOptions.add("whereis");
 				} else if (!args[0].isEmpty() && "warn".startsWith(args[0])) {
 					displayedOptions.add("warn");
+				} else if (!args[0].isEmpty() && "weather".startsWith(args[0])) {
+					displayedOptions.add("weather");
 				}
 			}
 		} else if (!args[0].isEmpty() && args[0].startsWith("m")) {
@@ -488,6 +491,44 @@ public class CommandACCompleter implements TabCompleter {
 					displayedOptions.add("year");
 				}
 			}
+			case "weather" -> {
+				if (args.length == 2) {
+					if (args[1].isEmpty()) {
+						displayedOptions.add("CLEAR");
+						displayedOptions.add("RAIN");
+						displayedOptions.add("THUNDER");
+						displayedOptions.add("DURATION");
+						displayedOptions.add("DELAY");
+					} else if ("CLEAR".startsWith(args[1].toUpperCase())) {
+						displayedOptions.add("CLEAR");
+					} else if ("RAIN".startsWith(args[1].toUpperCase())) {
+						displayedOptions.add("RAIN");
+					} else if ("THUNDER".startsWith(args[1].toUpperCase())) {
+						displayedOptions.add("THUNDER");
+					} else if (args[1].equalsIgnoreCase("D")) {
+						displayedOptions.add("DURATION");
+						displayedOptions.add("DELAY");
+					} else if ("DURATION".startsWith(args[1].toUpperCase())) {
+						displayedOptions.add("DURATION");
+					} else if ("DELAY".startsWith(args[1].toUpperCase())) {
+						displayedOptions.add("DELAY");
+					} else {
+						displayedOptions.add("CLEAR");
+						displayedOptions.add("RAIN");
+						displayedOptions.add("THUNDER");
+						displayedOptions.add("DURATION");
+						displayedOptions.add("DELAY");
+					}
+				} else if (args.length == 3) {
+					if (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY")) {
+						if (args[2].isEmpty()) {
+							displayedOptions.add("100");
+							displayedOptions.add("1200");
+							displayedOptions.add("6000");
+						}
+					}
+				}
+			}
 		}
 		return displayedOptions;
 	}
@@ -529,6 +570,7 @@ public class CommandACCompleter implements TabCompleter {
 		displayedOptions.add("dateset");
 		displayedOptions.add("vanish");
 		displayedOptions.add("sudo");
+		displayedOptions.add("weather");
 		return displayedOptions;
 	}
 
