@@ -243,6 +243,8 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.sudo", false);
 		perms.setPermission("aranarth.trash", false);
 		perms.setPermission("aranarth.enderchest", false);
+		perms.setPermission("aranarth.chat.gradient", false);
+		perms.setPermission("aranarth.chat.gradientbold", false);
 	}
 
 	/**
@@ -606,6 +608,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.chat.hex", true);
 			perms.setPermission("aranarth.nick.hex", true);
 			perms.setPermission("aranarth.shulker", true);
+			perms.setPermission("aranarth.chat.gradient", true);
 		} else {
 			return;
 		}
@@ -616,6 +619,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.compressor", true);
 			perms.setPermission("aranarth.randomizer", true);
 			perms.setPermission("aranarth.inventory", true);
+			perms.setPermission("aranarth.chat.gradientbold", true);
 		} else {
 			return;
 		}
