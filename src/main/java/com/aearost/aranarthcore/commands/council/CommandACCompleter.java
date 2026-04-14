@@ -9,8 +9,15 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.io.File;
+import java.lang.reflect.Modifier;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +31,33 @@ public class CommandACCompleter implements TabCompleter {
 		"speed", "sudo", "time", "tp", "tpf", "unban", "unmute",
 		"vanish", "warn", "weather", "whereis"
 	);
+
+	private static final List<String> ITEM_NAMES;
+
+	static {
+		List<String> names = new ArrayList<>();
+		String packagePath = "com/aearost/aranarthcore/items/";
+		try {
+			URL location = CommandACCompleter.class.getProtectionDomain().getCodeSource().getLocation();
+			try (JarFile jar = new JarFile(new File(location.toURI()))) {
+				Enumeration<JarEntry> entries = jar.entries();
+				while (entries.hasMoreElements()) {
+					String entryName = entries.nextElement().getName();
+					if (entryName.startsWith(packagePath) && entryName.endsWith(".class") && !entryName.contains("$")) {
+						String className = entryName.replace('/', '.').replace(".class", "");
+						try {
+							Class<?> clazz = Class.forName(className);
+							if (!clazz.isInterface() && !Modifier.isAbstract(clazz.getModifiers())) {
+								names.add(clazz.getSimpleName());
+							}
+						} catch (ClassNotFoundException ignored) {}
+					}
+				}
+			}
+		} catch (Exception ignored) {}
+		Collections.sort(names);
+		ITEM_NAMES = Collections.unmodifiableList(names);
+	}
 
 	private static final List<String> PERK_OPTIONS = List.of(
 		"blacklist", "bluefire", "chat", "compressor", "discord",
@@ -67,7 +101,7 @@ public class CommandACCompleter implements TabCompleter {
 			case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks", "sudo" -> {
 				if (args.length == 2) yield filterPlayers(args[1]);
 				yield switch (args[0].toLowerCase()) {
-					case "give" -> args[2].isEmpty() ? List.of("item") : List.of();
+					case "give" -> args.length == 3 ? filter(ITEM_NAMES, args[2]) : List.of();
 					case "mute", "ban" -> {
 						if (args.length == 3) yield args[2].isEmpty() ? List.of("1m", "1h", "1d", "1w", "-1") : List.of();
 						if (args.length == 4) yield args[3].isEmpty() ? List.of("reason") : List.of();
