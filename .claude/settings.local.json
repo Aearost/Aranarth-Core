@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"\\\\$jarPath = 'C:\\\\\\\\Users\\\\\\\\liamh\\\\\\\\.m2\\\\\\\\repository\\\\\\\\com\\\\\\\\gmail\\\\\\\\nossr50\\\\\\\\mcMMO\\\\\\\\mcMMO\\\\\\\\2.2.048\\\\\\\\mcMMO-2.2.048.jar'; Add-Type -AssemblyName System.IO.Compression.FileSystem; \\\\$zip = [System.IO.Compression.ZipFile]::OpenRead\\(\\\\$jarPath\\); \\\\$zip.Entries | Where-Object { \\\\$_.FullName -match 'mining' -or \\\\$_.FullName -match 'Mining' } | ForEach-Object { \\\\$_.FullName }; \\\\$zip.Dispose\\(\\)\")",
+      "Bash(powershell.exe -Command \"\n\\\\$jarPath = 'C:\\\\Users\\\\liamh\\\\.m2\\\\repository\\\\com\\\\gmail\\\\nossr50\\\\mcMMO\\\\mcMMO\\\\2.2.048\\\\mcMMO-2.2.048.jar'\nAdd-Type -AssemblyName System.IO.Compression.FileSystem\n\\\\$zip = [System.IO.Compression.ZipFile]::OpenRead\\(\\\\$jarPath\\)\n\\\\$zip.Entries | ForEach-Object { \\\\$_.FullName }\n\\\\$zip.Dispose\\(\\)\n\" 2>&1)"
+    ]
+  }
+}
