@@ -1,22 +1,14 @@
 package com.aearost.aranarthcore.event.block;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,59 +63,29 @@ public class IncantationPlentifulBlockBreak {
 				}
 			}
 
+			boolean harvestable;
 			if (name.endsWith("_PICKAXE")) {
-				if (AranarthUtils.isHarvestableWithPickaxe(block.getType())) {
-					callNewBlockBreakEvent(block, player);
-				}
-			} else if (name.endsWith("_AXE") && AranarthUtils.isHarvestableWithAxe(block.getType())) {
-				callNewBlockBreakEvent(block, player);
-			} else if (name.endsWith("_SHOVEL") && AranarthUtils.isHarvestableWithShovel(block.getType())) {
-				callNewBlockBreakEvent(block, player);
-			} else if (name.endsWith("_HOE") && AranarthUtils.isBlockCrop(block.getType())) {
-				callNewBlockBreakEvent(block, player);
+				harvestable = AranarthUtils.isHarvestableWithPickaxe(block.getType());
+			} else if (name.endsWith("_AXE")) {
+				harvestable = AranarthUtils.isHarvestableWithAxe(block.getType());
+			} else if (name.endsWith("_SHOVEL")) {
+				harvestable = AranarthUtils.isHarvestableWithShovel(block.getType());
+			} else if (name.endsWith("_HOE")) {
+				harvestable = AranarthUtils.isBlockCrop(block.getType());
+			} else {
+				harvestable = false;
+			}
+
+			if (harvestable) {
+				// player.breakBlock fires the full pipeline (BlockBreakEvent → BlockDropItemEvent)
+				// so mcMMO awards XP and applies double/triple drops naturally, exactly as if
+				// the player mined each block themselves. The recursion guard in handlePlentifulBreak
+				// (plentifulBlocksToDestroy > 0) prevents re-executing this logic for the inner event.
+				player.breakBlock(block);
 			} else {
 				// If it is not harvestable, the counter must be manually reduced regardless
 				aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-			}
-		}
-
-		if (heldItem.getItemMeta() instanceof Damageable damageableItemMeta) {
-			int maxDurability = heldItem.getType().getMaxDurability();
-			int damageToReduceBy = 5;
-
-			// Decreased durability consumption for unbreaking
-			if (heldItem.containsEnchantment(Enchantment.UNBREAKING)) {
-				int level = heldItem.getEnchantmentLevel(Enchantment.UNBREAKING);
-				if (level == 1) {
-					damageToReduceBy = 3;
-				} else if (level == 2) {
-					damageToReduceBy = 2;
-				} else if (level == 3) {
-					damageToReduceBy = 1;
-				}
-			}
-
-			int newDamage = 0;
-			if (!damageableItemMeta.hasDamage()) {
-				newDamage = damageToReduceBy;
-			} else {
-				newDamage = damageableItemMeta.getDamage() + damageToReduceBy;
-			}
-
-			boolean willToolBreak = (maxDurability - newDamage) <= 0;
-			if (willToolBreak) {
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						player.getInventory().setItemInMainHand(null);
-						player.playSound(player.getLocation(), Sound.ENTITY_ITEM_BREAK, 1F, 1F);
-						player.swingMainHand();
-					}
-				}.runTaskLater(AranarthCore.getInstance(), 1);
-			} else {
-				damageableItemMeta.setDamage(newDamage);
-				heldItem.setItemMeta(damageableItemMeta);
 			}
 		}
 
@@ -135,7 +97,7 @@ public class IncantationPlentifulBlockBreak {
 	}
 
 	/**
-	 * Provides the list of blocks that will be in the 3x3x1 grid harvested when the block is destroyed.
+	 * Returns the list of blocks in the 3x3x1 (or 3x3x3) grid centred on the broken block.
 	 * @param location The location of the initial block that was destroyed.
 	 * @param yaw The yaw of the player.
 	 * @param pitch The pitch of the player.
@@ -193,56 +155,4 @@ public class IncantationPlentifulBlockBreak {
 		return blocks;
 	}
 
-	/**
-	 * Calls a plain BlockBreakEvent for the given block so the full event pipeline
-	 * (protection plugins, our own handlers, mcMMO XP and double-drop marking) fires
-	 * for each surrounding block just as if the player had mined it themselves.
-	 *
-	 * mcMMO applies double/triple drops by setting "mcMMO: Double Drops" metadata (int
-	 * multiplier) on the block during BlockBreakEvent at LOW priority, then multiplying
-	 * the spawned item stacks inside BlockDropItemEvent at LOWEST. Because
-	 * block.breakNaturally() does NOT fire BlockDropItemEvent, we read the metadata
-	 * ourselves and drop the extra items before breaking, then clear the metadata so
-	 * mcMMO does not attempt to apply it a second time.
-	 * @param block The block that will call the event.
-	 * @param player The player.
-	 */
-	private void callNewBlockBreakEvent(Block block, Player player) {
-		// Prevents unbreakable blocks from being destroyed
-		if (block.getType().getHardness() < 0 || block.getType().isAir()) {
-			return;
-		}
-
-		block.getWorld().playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
-
-		BlockBreakEvent breakEvent = new BlockBreakEvent(block, player);
-		Bukkit.getServer().getPluginManager().callEvent(breakEvent);
-
-		if (breakEvent.isCancelled()) {
-			return;
-		}
-
-		// mcMMO sets "mcMMO: Double Drops" metadata during the event (multiplier 2 = double,
-		// 3 = triple). block.breakNaturally() skips BlockDropItemEvent, so we apply the extra
-		// drops manually and clear the metadata to prevent a second application.
-		List<MetadataValue> bonusMeta = block.getMetadata("mcMMO: Double Drops");
-		if (!bonusMeta.isEmpty()) {
-			int multiplier = bonusMeta.get(0).asInt();
-			if (multiplier > 1) {
-				ItemStack tool = player.getInventory().getItemInMainHand();
-				for (ItemStack drop : block.getDrops(tool)) {
-					ItemStack extra = drop.clone();
-					extra.setAmount(drop.getAmount() * (multiplier - 1));
-					block.getWorld().dropItemNaturally(block.getLocation(), extra);
-				}
-			}
-			block.removeMetadata("mcMMO: Double Drops", Bukkit.getPluginManager().getPlugin("mcMMO"));
-		}
-
-		if (breakEvent.isDropItems()) {
-			block.breakNaturally(player.getInventory().getItemInMainHand());
-		} else {
-			block.setType(Material.AIR);
-		}
-	}
 }
