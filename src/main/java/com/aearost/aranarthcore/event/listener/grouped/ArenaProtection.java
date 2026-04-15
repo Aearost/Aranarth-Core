@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -139,6 +140,36 @@ public class ArenaProtection implements Listener {
 		int z = loc.getBlockZ();
 
 		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
+	}
+
+	/**
+	 * Reduces bending ability damage in the arena world using a tiered scale.
+	 * Damage is expressed in health points (2 HP = 1 heart).
+	 */
+	@EventHandler
+	public void onBendingDamageInArena(AbilityDamageEntityEvent e) {
+		if (!e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+			return;
+		}
+
+		double hearts = e.getDamage() / 2.0;
+
+		double reducedHp;
+		if (hearts <= 0.5) {
+			return;                // 0.5 hearts or less — keep as is
+		} else if (hearts <= 1.5) {
+			reducedHp = 2.0;       // cap at 1 heart
+		} else if (hearts <= 3.0) {
+			reducedHp = 3.0;       // cap at 1.5 hearts
+		} else if (hearts <= 6.0) {
+			reducedHp = 4.0;       // cap at 2 hearts
+		} else if (hearts <= 10.0) {
+			reducedHp = 5.0;       // cap at 2.5 hearts
+		} else {
+			reducedHp = 6.0;       // cap at 3 hearts (hard max)
+		}
+
+		e.setDamage(reducedHp);
 	}
 
 	/**
