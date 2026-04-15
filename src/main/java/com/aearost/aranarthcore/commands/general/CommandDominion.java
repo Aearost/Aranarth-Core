@@ -206,6 +206,8 @@ public class CommandDominion implements CommandExecutor {
 					rebel(args, dominion, player);
 				} else if (args[0].equalsIgnoreCase("retreat")) {
 					retreat(args, dominion, player);
+				} else if (args[0].equalsIgnoreCase("guide")) {
+					CommandDominions.giveBook(player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
