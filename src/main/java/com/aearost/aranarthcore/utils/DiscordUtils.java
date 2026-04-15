@@ -115,6 +115,10 @@ public class DiscordUtils {
 	 * @return The ID associated to the input username.
 	 */
 	private static String findMemberToPing(String input) {
+		if (input == null || input.isBlank()) {
+			return null;
+		}
+
 		List<Member> username = getGuild().getMembersByName(input, true);
 		if (!username.isEmpty()) {
 			return username.getFirst().getId();
@@ -123,6 +127,11 @@ public class DiscordUtils {
 		List<Member> nickname = getGuild().getMembersByNickname(input, true);
 		if (!nickname.isEmpty()) {
 			return nickname.getFirst().getId();
+		}
+
+		List<Member> effectiveName = getGuild().getMembersByEffectiveName(input, true);
+		if (!effectiveName.isEmpty()) {
+			return effectiveName.getFirst().getId();
 		}
 
 		return null;
