@@ -215,6 +215,7 @@ Minor Features
 [+] Added /toggle gradientchat to allow players to default all messages to be sent as a gradient
 [+] Added tulips to the list of invalid surface blocks for snow to form
 [+] Added command completion for all items in /ac give
+[+] Added adapted bone meal rates for the different months and crops
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
