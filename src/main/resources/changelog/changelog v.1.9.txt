@@ -218,6 +218,7 @@ Minor Features
 [+] Added adapted bone meal rates for the different months and crops
 [~] Adjusted bending damage to be lower in the arena world
 [-] Removed iron armor from the arena world
+[~] Tweaked how horse teleporting works on a homepad
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
