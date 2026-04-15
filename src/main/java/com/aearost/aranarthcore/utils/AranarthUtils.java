@@ -1307,9 +1307,11 @@ public class AranarthUtils {
 
 		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
 			saintHomeNum = 1;
-		} else if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
+		}
+		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
 			saintHomeNum = 3;
-		} else if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
+		}
+		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
 			saintHomeNum = 5;
 		}
 
