@@ -1135,8 +1135,8 @@ public class PersistenceUtils {
 					}
 				}
 
-				boolean memberPvpEnabled = fields.length > 19 && Boolean.parseBoolean(fields[19]);
-				boolean mobSpawningEnabled = fields.length > 20 && Boolean.parseBoolean(fields[20]);
+				boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
+				boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
 
 				Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
 						x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1280,7 +1280,7 @@ public class PersistenceUtils {
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
 									+ conquered + "|"
 									// Keep balance before memberRanks
-									+ balance + "|" + memberRanksString + "|" + dominion.isMemberPvpEnabled() + "|" + dominion.isMobSpawningEnabled() + "\n";
+									+ balance + "|" + memberRanksString + "|" + (dominion.isMemberPvpEnabled() ? "1" : "0") + "|" + (dominion.isMobSpawningEnabled() ? "1" : "0") + "\n";
 							writer.write(row);
 						}
 					}
