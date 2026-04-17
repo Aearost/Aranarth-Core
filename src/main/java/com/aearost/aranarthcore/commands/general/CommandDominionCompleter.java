@@ -84,7 +84,7 @@ public class CommandDominionCompleter implements TabCompleter {
 					yield List.of();
 				}
 				if (args.length == 3) {
-					yield filter(List.of("Newcomer", "Citizen", "Clergy"), args[2]);
+					yield filter(List.of("Newcomer", "Citizen", "Lieutenant"), args[2]);
 				}
 				yield List.of();
 			}

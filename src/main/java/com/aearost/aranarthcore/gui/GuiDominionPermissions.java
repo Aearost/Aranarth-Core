@@ -113,7 +113,7 @@ public class GuiDominionPermissions {
         return "Perms for " + switch (rank) {
             case NEWCOMER -> "Newcomers";
             case CITIZEN -> "Citizens";
-            case CLERGY -> "the Clergy";
+            case LIEUTENANT -> "the Lieutenant";
             case LEADER -> "the Leader";
             case ALLIED -> "Allied Dominions";
             case TRUCED -> "Truced Dominions";
@@ -218,7 +218,7 @@ public class GuiDominionPermissions {
         // Row 1: Rank groups
         gui.setItem(12, buildGroupItem(Material.IRON_BLOCK, DominionUtils.getFormattedRankName(DominionRank.NEWCOMER), "&7Click to manage permissions"));
         gui.setItem(13, buildGroupItem(Material.GOLD_BLOCK, DominionUtils.getFormattedRankName(DominionRank.CITIZEN), "&7Click to manage permissions"));
-        gui.setItem(14, buildGroupItem(Material.DIAMOND_BLOCK, DominionUtils.getFormattedRankName(DominionRank.CLERGY), "&7Click to manage permissions"));
+        gui.setItem(14, buildGroupItem(Material.DIAMOND_BLOCK, DominionUtils.getFormattedRankName(DominionRank.LIEUTENANT), "&7Click to manage permissions"));
 
         // Row 2: Relation groups
         gui.setItem(20, buildGroupItem(Material.PURPLE_BANNER, DominionUtils.getFormattedRankName(DominionRank.ALLIED) + " &rDominions", "&7Click to manage permissions"));

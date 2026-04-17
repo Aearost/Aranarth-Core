@@ -176,7 +176,7 @@ public class DominionUtils {
 
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
-			if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.CLERGY) {
+			if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
 				if (dominionOfChunk == null) {
 					int claimPrice = 250;
 					if (playerDominion.getBalance() >= claimPrice) {
@@ -207,7 +207,7 @@ public class DominionUtils {
 					}
 				}
 			} else {
-				return "&cOnly the Leader or Clergy can claim land!";
+				return "&cOnly the Leader or Lieutenant can claim land!";
 			}
 		} else {
 			return "&cYou are not part of a dominion!";
@@ -235,7 +235,7 @@ public class DominionUtils {
 			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
 				if (playerDominion.getId().equals(dominionOfChunk.getId())) {
-					if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.CLERGY) {
+					if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
 						Chunk homeChunk = playerDominion.getDominionHome().getChunk();
 						if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
 							return "&cYou cannot unclaim the chunk that the home is in!";
@@ -253,7 +253,7 @@ public class DominionUtils {
 							}
 						}
 					} else {
-						return "&cOnly the Leader or Clergy can unclaim land!";
+						return "&cOnly the Leader or Lieutenant can unclaim land!";
 					}
 				} else {
 					return "&cThis chunk not claimed by " + dominionOfChunk.getName() + "!";
@@ -526,8 +526,8 @@ public class DominionUtils {
 			updateDominion(dominion);
 		}
 		if (!isDeleting) {
-			// Demote old leader to Clergy and promote new leader
-			dominionBeingUpdated.setMemberRank(oldLeader, DominionRank.CLERGY);
+			// Demote old leader to Lieutenant and promote new leader
+			dominionBeingUpdated.setMemberRank(oldLeader, DominionRank.LIEUTENANT);
 			dominionBeingUpdated.setMemberRank(newLeader, DominionRank.LEADER);
 			dominionBeingUpdated.setLeader(newLeader);
 			updateDominion(dominionBeingUpdated);
@@ -1979,7 +1979,7 @@ public class DominionUtils {
 	public static String getRankColor(DominionRank rank) {
 		return switch (rank) {
 			case LEADER -> "&6";
-			case CLERGY -> "&b";
+			case LIEUTENANT -> "&b";
 			case CITIZEN -> "&a";
 			case NEWCOMER -> "&7";
 			case ALLIED -> "&5";

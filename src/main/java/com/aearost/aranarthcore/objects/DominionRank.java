@@ -12,6 +12,6 @@ public enum DominionRank {
     ALLIED,
     NEWCOMER,
     CITIZEN,
-    CLERGY,
+    LIEUTENANT,
     LEADER
 }

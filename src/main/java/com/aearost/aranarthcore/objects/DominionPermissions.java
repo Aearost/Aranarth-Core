@@ -4,7 +4,7 @@ import java.util.*;
 
 /**
  * Holds the configurable permission sets for each DominionRank, including both member ranks
- * (NEWCOMER, CITIZEN, CLERGY, LEADER) and inter-dominion relation ranks
+ * (NEWCOMER, CITIZEN, LIEUTENANT, LEADER) and inter-dominion relation ranks
  * (ALLIED, TRUCED, NEUTRAL, WANDERER, ENEMIED).
  */
 public class DominionPermissions {
@@ -38,14 +38,14 @@ public class DominionPermissions {
         // LEADER gets all permissions
         perms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
 
-        // CLERGY gets most permissions — excluded: WITHDRAW
-        Set<DominionPermission> clergyPerms = new HashSet<>(fullInteraction);
-        clergyPerms.addAll(Arrays.asList(
+        // LIEUTENANT gets most permissions — excluded: WITHDRAW
+        Set<DominionPermission> lieutenantPerms = new HashSet<>(fullInteraction);
+        lieutenantPerms.addAll(Arrays.asList(
                 DominionPermission.BUILD,
                 DominionPermission.HOME, DominionPermission.FOOD,
                 DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER
         ));
-        perms.put(DominionRank.CLERGY, clergyPerms);
+        perms.put(DominionRank.LIEUTENANT, lieutenantPerms);
 
         // CITIZEN gets basic permissions
         Set<DominionPermission> citizenPerms = new HashSet<>(fullInteraction);
@@ -62,7 +62,6 @@ public class DominionPermissions {
 
         // ALLIED dominions get full interaction access, building rights, and home access
         Set<DominionPermission> alliedPerms = new HashSet<>(fullInteraction);
-        alliedPerms.add(DominionPermission.BUILD);
         alliedPerms.add(DominionPermission.HOME);
         perms.put(DominionRank.ALLIED, alliedPerms);
 

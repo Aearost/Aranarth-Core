@@ -73,7 +73,7 @@ public class GuiDominionPermissionsClick {
             switch (itemName) {
                 case "Newcomer" -> GuiDominionPermissions.openRankGui(player, DominionRank.NEWCOMER);
                 case "Citizen" -> GuiDominionPermissions.openRankGui(player, DominionRank.CITIZEN);
-                case "Clergy" -> GuiDominionPermissions.openRankGui(player, DominionRank.CLERGY);
+                case "Lieutenant" -> GuiDominionPermissions.openRankGui(player, DominionRank.LIEUTENANT);
                 case "Allied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ALLIED);
                 case "Truced Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.TRUCED);
                 case "Neutral Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);

@@ -21,7 +21,7 @@ import java.util.UUID;
 
 /**
  * Handles click events for the Dominion Members GUI.
- * Clicking a skull cycles that member's rank: NEWCOMER → CITIZEN → CLERGY → NEWCOMER.
+ * Clicking a skull cycles that member's rank: NEWCOMER → CITIZEN → LIEUTENANT → NEWCOMER.
  * The leader's skull cannot be cycled here.
  */
 public class GuiDominionMembersClick {
@@ -104,7 +104,7 @@ public class GuiDominionMembersClick {
     }
 
     /**
-     * Cycles a rank upward, wrapping around from CLERGY back to NEWCOMER.
+     * Cycles a rank upward, wrapping around from LIEUTENANT back to NEWCOMER.
      * LEADER is not included in the cycle.
      */
     private DominionRank cycleRank(DominionRank rank) {
@@ -115,8 +115,8 @@ public class GuiDominionMembersClick {
             case TRUCED -> DominionRank.TRUCED;
             case ALLIED -> DominionRank.ALLIED;
             case NEWCOMER -> DominionRank.CITIZEN;
-            case CITIZEN -> DominionRank.CLERGY;
-            case CLERGY -> DominionRank.NEWCOMER;
+            case CITIZEN -> DominionRank.LIEUTENANT;
+            case LIEUTENANT -> DominionRank.NEWCOMER;
             case LEADER -> DominionRank.LEADER;
         };
     }

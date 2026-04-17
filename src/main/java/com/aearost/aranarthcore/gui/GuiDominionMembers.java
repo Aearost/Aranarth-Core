@@ -19,7 +19,7 @@ import java.util.UUID;
 
 /**
  * Shows a list of all Dominion members with their current rank.
- * The leader can click a member to cycle their rank (NEWCOMER → CITIZEN → CLERGY).
+ * The leader can click a member to cycle their rank (NEWCOMER → CITIZEN → LIEUTENANT).
  * Title: "Dominion Members"
  */
 public class GuiDominionMembers {
