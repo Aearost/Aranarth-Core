@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.text.NumberFormat;
+import java.util.UUID;
 
 /**
  * Allows the player to pay another player.
@@ -31,8 +32,13 @@ public class CommandPay implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax! &e/pay <player> <amount>"));
 				return true;
 			} else {
-				OfflinePlayer target = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[0]));
-				if (target != null) {
+				UUID uuid = AranarthUtils.getUUIDFromUsername(args[0]);
+				OfflinePlayer target = null;
+				if (uuid != null) {
+					target = Bukkit.getOfflinePlayer(uuid);
+				}
+
+				if (uuid != null && target != null) {
 					if (target.getUniqueId().equals(player.getUniqueId())) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot pay yourself!"));
 						return false;
@@ -76,7 +82,7 @@ public class CommandPay implements CommandExecutor {
 						}
 					}
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+					player.sendMessage(ChatUtils.chatMessage("&e" + args[0] + " &ccould not be found"));
 					return true;
 				}
 			}
