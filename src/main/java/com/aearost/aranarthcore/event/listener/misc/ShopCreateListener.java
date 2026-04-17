@@ -113,7 +113,7 @@ public class ShopCreateListener implements Listener {
 						int[] validSignFormatResult = validSignFormat(lines, player, false);
 						// If all the lines were entered correctly
 						if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
-							ItemStack heldItem = player.getInventory().getItemInMainHand();
+							ItemStack heldItem = player.getInventory().getItemInMainHand().clone();
 
 							if (heldItem != null && heldItem.getType() != Material.AIR) {
 								if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
