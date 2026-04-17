@@ -181,7 +181,14 @@ public class CommandToggle implements CommandExecutor {
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("gradientchat")) {
 					if (args.length >= 2) {
-						if (args[1].equalsIgnoreCase("bold")) {
+						if (args[1].equalsIgnoreCase("get")) {
+							if (aranarthPlayer.getGradientChatColors().isEmpty()) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou have not saved any gradient colors yet"));
+								return true;
+							}
+							player.sendMessage(ChatUtils.chatMessage(ChatUtils.formatGradientColorsDisplay(aranarthPlayer.getGradientChatColors())));
+							return true;
+						} else if (args[1].equalsIgnoreCase("bold")) {
 							if (aranarthPlayer.isGradientChatBold()) {
 								aranarthPlayer.setGradientChatBold(false);
 								player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7gradient chat bold"));

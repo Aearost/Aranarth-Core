@@ -156,6 +156,30 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Builds a display string where each saved gradient hex code is shown as plain text
+	 * colored in its own color (e.g. "#FF0000" rendered in red).
+	 *
+	 * @param gradientColors Comma-separated hex codes (e.g. "#FF0000,#00FF00").
+	 * @return A pre-escaped string ready to pass into chatMessage().
+	 */
+	public static String formatGradientColorsDisplay(String gradientColors) {
+		String[] colorArray = gradientColors.split(",");
+		StringBuilder formatted = new StringBuilder();
+		for (int i = 0; i < colorArray.length; i++) {
+			String color = colorArray[i]; // e.g. "#FF0000"
+			String escape = ChatColor.of(color) + "";
+			// escape is the §-prefixed sequence; inserting it between "#" and the hex digits
+			// means checkForHex won't re-match the display text (pattern needs # followed
+			// immediately by 6 hex chars, but here it's followed by a § escape char).
+			formatted.append(escape).append("#").append(escape).append(color.substring(1));
+			if (i < colorArray.length - 1) {
+				formatted.append(ChatColor.GRAY).append(", ");
+			}
+		}
+		return formatted.toString();
+	}
+
+	/**
 	 * Removes the formatting from messages.
 	 * 
 	 * @param msg The message to remove formatting.
