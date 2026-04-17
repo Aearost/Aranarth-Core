@@ -22,7 +22,7 @@ import java.util.*;
  * <p>The main screen shows selectable groups (ranks and relations).
  * Clicking a group opens the permissions list for that group.
  *
- * <p>Title format for the main screen: "{dominionName}'s Permissions"
+ * <p>Title format for the main screen: "Dominion Permissions"
  * Title format for a rank screen: "Permissions: {RANK_NAME}"
  * Title format for a relation screen: "Permissions: {RELATION_NAME}"
  */
@@ -55,7 +55,7 @@ public class GuiDominionPermissions {
                 DominionPermission.TRAPDOOR, DominionPermission.LEVER, DominionPermission.PRESSURE_PLATE,
                 DominionPermission.CONTAINER, DominionPermission.MISC_INTERACT,
                 DominionPermission.ARMOR_STAND, DominionPermission.ITEM_FRAME, DominionPermission.VILLAGER,
-                DominionPermission.PVP, DominionPermission.MOB_SPAWNING,
+                DominionPermission.MOB_SPAWNING,
                 DominionPermission.HOME, DominionPermission.FOOD,
                 DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER
         };
@@ -160,10 +160,10 @@ public class GuiDominionPermissions {
     private Inventory initializeMainGui(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            return Bukkit.createInventory(player, 9, ChatUtils.translateToColor("&ePermissions"));
+            return Bukkit.createInventory(player, 9, ChatUtils.translateToColor("Permissions"));
         }
 
-        String title = ChatUtils.translateToColor("&e" + dominion.getName() + "&r's Permissions");
+        String title = ChatUtils.translateToColor("Dominion Permissions");
         Inventory gui = Bukkit.createInventory(player, 27, title);
 
         // Row 0: Rank groups
@@ -178,7 +178,8 @@ public class GuiDominionPermissions {
         gui.setItem(14, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", ""));
         gui.setItem(15, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", ""));
 
-        // Row 2: Members button
+        // Row 2: Member PvP toggle and Members button
+        gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
         gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(dominion.getLeader()));
 
         return gui;
@@ -211,6 +212,20 @@ public class GuiDominionPermissions {
                 index[0]++;
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 20L);
+    }
+
+    /**
+     * Builds the Member PvP toggle item for the main screen.
+     */
+    public static ItemStack buildMemberPvpToggleItem(boolean enabled) {
+        ItemStack item = new ItemStack(Material.IRON_SWORD);
+        ItemMeta meta = item.getItemMeta();
+        String statusColor = enabled ? "&a" : "&c";
+        String statusText = enabled ? "Enabled" : "Disabled";
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lMember PvP &7&l- " + statusColor + "&l" + statusText));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Allows dominion members to harm each other")));
+        item.setItemMeta(meta);
+        return item;
     }
 
     private static ItemStack buildMembersHeadItem(UUID memberUuid) {

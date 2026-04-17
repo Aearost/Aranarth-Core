@@ -66,7 +66,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Permissions")
                     || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Perms for ")) {
                 new GuiDominionPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {

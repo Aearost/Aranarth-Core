@@ -36,6 +36,8 @@ public class Dominion {
 	private UUID conqueredRequest;
 	private UUID rebelRequest;
 
+	private boolean memberPvpEnabled;
+
 	// Keep balance at the end
 	private double balance;
 
@@ -303,6 +305,22 @@ public class Dominion {
 	 */
 	public void setDominionHome(Location dominionHome) {
 		this.dominionHome = dominionHome;
+	}
+
+	/**
+	 * Returns whether PvP between members of this dominion is enabled.
+	 * @return True if member PvP is enabled.
+	 */
+	public boolean isMemberPvpEnabled() {
+		return memberPvpEnabled;
+	}
+
+	/**
+	 * Sets whether PvP between members of this dominion is enabled.
+	 * @param memberPvpEnabled True to allow members to harm each other.
+	 */
+	public void setMemberPvpEnabled(boolean memberPvpEnabled) {
+		this.memberPvpEnabled = memberPvpEnabled;
 	}
 
 	/**

@@ -1135,10 +1135,14 @@ public class PersistenceUtils {
 					}
 				}
 
-				DominionUtils.createDominion(new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
+				boolean memberPvpEnabled = fields.length > 19 && Boolean.parseBoolean(fields[19]);
+
+				Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
 						x, y, z, yaw, pitch, food, claimableResources, conquered, null,
 						// Keep balance at the end
-						balance));
+						balance);
+				dominion.setMemberPvpEnabled(memberPvpEnabled);
+				DominionUtils.createDominion(dominion);
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
 			reader.close();
@@ -1179,7 +1183,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks\n");
+					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -1274,7 +1278,7 @@ public class PersistenceUtils {
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
 									+ conquered + "|"
 									// Keep balance before memberRanks
-									+ balance + "|" + memberRanksString + "\n";
+									+ balance + "|" + memberRanksString + "|" + dominion.isMemberPvpEnabled() + "\n";
 							writer.write(row);
 						}
 					}

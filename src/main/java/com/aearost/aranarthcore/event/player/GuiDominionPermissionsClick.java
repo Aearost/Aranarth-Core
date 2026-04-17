@@ -48,8 +48,17 @@ public class GuiDominionPermissionsClick {
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
 
         // Main permissions screen — navigate to rank or relation sub-screens
-        if (title.endsWith("'s Permissions")) {
+        if (title.equals("Dominion Permissions")) {
             String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+            if (itemName.startsWith("Member PvP")) {
+                boolean newState = !dominion.isMemberPvpEnabled();
+                dominion.setMemberPvpEnabled(newState);
+                DominionUtils.updateDominion(dominion);
+                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildMemberPvpToggleItem(newState));
+                player.updateInventory();
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
+                return;
+            }
             switch (itemName) {
                 case "Newcomer" -> GuiDominionPermissions.openRankGui(player, DominionRank.NEWCOMER);
                 case "Citizen" -> GuiDominionPermissions.openRankGui(player, DominionRank.CITIZEN);
