@@ -2,8 +2,11 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -18,6 +21,17 @@ public class CombatLog {
 	public void execute(EntityDamageByEntityEvent e) {
 		if (e.getDamager() instanceof Player attacker) {
 			if (e.getEntity() instanceof Player player) {
+				Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+				Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+				if (playerDominion != null) {
+					if (attackerDominion != null && attackerDominion.getId().equals(playerDominion.getId())) {
+						if (!playerDominion.isMemberPvpEnabled()) {
+							return;
+						}
+					} else if (!DominionUtils.hasPermission(attacker, playerDominion, DominionPermission.PVP)) {
+						return;
+					}
+				}
 				if (!player.getWorld().getName().startsWith("resource") && !player.getWorld().getName().equals("creative")
 					&& !player.getWorld().getName().equals("spawn")) {
 					new BukkitRunnable() {
