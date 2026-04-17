@@ -471,8 +471,15 @@ public class ChatUtils {
 			String prefixStart = "&7⊰&r";
 			String prefixEnd = "&7⊱&r";
 			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e");
-			// Formats to color if the player sending has the permissions
-			String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
+			// Formats to color if the player sending has the permissions (no gradient for private messages)
+			String formattedMsg;
+			if (player.hasPermission("aranarth.chat.hex")) {
+				formattedMsg = ChatUtils.translateToColor(assembledMsg);
+			} else if (player.hasPermission("aranarth.chat.color")) {
+				formattedMsg = ChatUtils.playerColorChat(assembledMsg);
+			} else {
+				formattedMsg = assembledMsg;
+			}
 			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
 		} else {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -482,8 +489,15 @@ public class ChatUtils {
 			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
 			String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
 
-			// Formats to color if the player sending has the permissions
-			String formattedMsg = ChatUtils.formatChatMessage(player, assembledMsg);
+			// Formats to color if the player sending has the permissions (no gradient for private messages)
+			String formattedMsg;
+			if (player.hasPermission("aranarth.chat.hex")) {
+				formattedMsg = ChatUtils.translateToColor(assembledMsg);
+			} else if (player.hasPermission("aranarth.chat.color")) {
+				formattedMsg = ChatUtils.playerColorChat(assembledMsg);
+			} else {
+				formattedMsg = assembledMsg;
+			}
 
 			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
 			target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));

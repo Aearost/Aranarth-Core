@@ -132,7 +132,8 @@ public class PlayerChatListener implements Listener {
 
         if (aranarthPlayer.isInCouncilChat()) {
             // Council chat toggle is on — route to council chat once (evaluateCouncilMessage sends to all council members)
-            ChatUtils.evaluateCouncilMessage(player, councilChatMessage.split(" "), false);
+            // Pass raw message (no gradient) since council chat is not public chat
+            ChatUtils.evaluateCouncilMessage(player, message.split(" "), false);
         } else if (aranarthPlayer.isInDominionChat()) {
             // Dominion chat toggle is on — route to dominion chat
             ChatUtils.evaluateDominionMessage(player, councilChatMessage.split(" "), false);
