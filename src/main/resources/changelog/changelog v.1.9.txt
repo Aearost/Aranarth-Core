@@ -222,6 +222,8 @@ Minor Features
 [+] Added /dominion guide
 [+] Implemented dominion permission system
 [~] Fixed issue where paying an invalid player would throw an error
+[~] Fixed issue when removing an offline player from your dominion
+[~] Added missing condition where you'd get a message stating a player was removed from your dominion when they never were in it
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

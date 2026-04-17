@@ -596,6 +596,11 @@ public class CommandDominion implements CommandExecutor {
 				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[1]);
 				if (inputUuid != null) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
+					if (!dominion.getMembers().contains(inputUuid)) {
+						player.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not in your Dominion!"));
+						return;
+					}
+
 					DominionUtils.removePlayerFromDominion(inputUuid);
 					dominion.getMembers().remove(inputUuid);
 					dominion.getMemberRanks().remove(inputUuid);
@@ -606,9 +611,9 @@ public class CommandDominion implements CommandExecutor {
 						}
 					}
 
-					Player removedPlayer = Bukkit.getPlayer(inputUuid);
+					OfflinePlayer removedPlayer = Bukkit.getOfflinePlayer(inputUuid);
 					if (removedPlayer.isOnline()) {
-						removedPlayer.sendMessage(ChatUtils.chatMessage("&7You have been removed from the Dominion of &e" + dominion.getName()));
+						removedPlayer.getPlayer().sendMessage(ChatUtils.chatMessage("&7You have been removed from the Dominion of &e" + dominion.getName()));
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
