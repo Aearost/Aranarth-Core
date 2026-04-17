@@ -117,6 +117,16 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Removes a player from the playerToDominion lookup map.
+	 * Use this when removing a member from a dominion before calling updateDominion,
+	 * since updateDominion uses the same object reference and can't detect the removal.
+	 * @param uuid The player's UUID.
+	 */
+	public static void removePlayerFromDominion(UUID uuid) {
+		playerToDominion.remove(uuid);
+	}
+
+	/**
 	 * Updates an existing dominion with new values, keeping all lookup maps in sync.
 	 * @param dominion The updated dominion.
 	 */

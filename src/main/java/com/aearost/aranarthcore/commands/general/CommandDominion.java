@@ -559,6 +559,7 @@ public class CommandDominion implements CommandExecutor {
 			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			DominionUtils.removePlayerFromDominion(player.getUniqueId());
 			dominion.getMembers().remove(player.getUniqueId());
 			dominion.getMemberRanks().remove(player.getUniqueId());
 			DominionUtils.updateDominion(dominion);
@@ -595,6 +596,7 @@ public class CommandDominion implements CommandExecutor {
 				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[1]);
 				if (inputUuid != null) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
+					DominionUtils.removePlayerFromDominion(inputUuid);
 					dominion.getMembers().remove(inputUuid);
 					dominion.getMemberRanks().remove(inputUuid);
 					DominionUtils.updateDominion(dominion);
