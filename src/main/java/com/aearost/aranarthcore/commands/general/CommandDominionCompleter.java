@@ -43,6 +43,21 @@ public class CommandDominionCompleter implements TabCompleter {
 		}
 		return switch (args[0].toLowerCase()) {
 			case "invite", "who" -> filterPlayers(args[1]);
+			case "home" -> {
+				if (sender instanceof Player player) {
+					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+					if (dominion != null) {
+						String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+						yield dominion.getAllied().stream()
+							.map(DominionUtils::getDominionById)
+							.filter(d -> d != null)
+							.map(d -> ChatUtils.stripColorFormatting(d.getName()))
+							.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
+							.collect(Collectors.toList());
+					}
+				}
+				yield List.of();
+			}
 			case "remove", "setleader" -> {
 				if (sender instanceof Player player) {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());

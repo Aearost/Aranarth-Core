@@ -60,9 +60,10 @@ public class DominionPermissions {
                 DominionPermission.HOME
         )));
 
-        // ALLIED dominions get full interaction access and building rights
+        // ALLIED dominions get full interaction access, building rights, and home access
         Set<DominionPermission> alliedPerms = new HashSet<>(fullInteraction);
         alliedPerms.add(DominionPermission.BUILD);
+        alliedPerms.add(DominionPermission.HOME);
         perms.put(DominionRank.ALLIED, alliedPerms);
 
         // TRUCED dominions — no access by default

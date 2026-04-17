@@ -37,6 +37,7 @@ public class Dominion {
 	private UUID rebelRequest;
 
 	private boolean memberPvpEnabled;
+	private boolean mobSpawningEnabled;
 
 	// Keep balance at the end
 	private double balance;
@@ -321,6 +322,22 @@ public class Dominion {
 	 */
 	public void setMemberPvpEnabled(boolean memberPvpEnabled) {
 		this.memberPvpEnabled = memberPvpEnabled;
+	}
+
+	/**
+	 * Returns whether mob spawning is allowed in this dominion's chunks.
+	 * @return True if mob spawning is allowed.
+	 */
+	public boolean isMobSpawningEnabled() {
+		return mobSpawningEnabled;
+	}
+
+	/**
+	 * Sets whether mob spawning is allowed in this dominion's chunks.
+	 * @param mobSpawningEnabled True to allow mobs to spawn.
+	 */
+	public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
+		this.mobSpawningEnabled = mobSpawningEnabled;
 	}
 
 	/**

@@ -20,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.text.NumberFormat;
 import java.util.*;
 
@@ -113,7 +114,12 @@ public class CommandDominion implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
 						return true;
 					}
-					teleportToDominionHome(player);
+					if (args.length >= 2) {
+						String targetName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+						teleportToAllyDominionHome(player, targetName);
+					} else {
+						teleportToDominionHome(player);
+					}
 				}
 				else if (args[0].equalsIgnoreCase("sethome")) {
 					updateDominionHome(dominion, player);
@@ -250,6 +256,45 @@ public class CommandDominion implements CommandExecutor {
 		} else {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 		}
+	}
+
+	/**
+	 * Teleports the player to an allied dominion's home if that dominion has HOME enabled for allies.
+	 * @param player The player.
+	 * @param targetDominionName The name of the allied dominion.
+	 */
+	private static void teleportToAllyDominionHome(Player player, String targetDominionName) {
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (playerDominion == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		Dominion target = DominionUtils.getDominions().stream().filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetDominionName)).findFirst().orElse(null);
+
+        if (target == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat dominion could not be found!"));
+			return;
+		}
+
+		if (!DominionUtils.areAllied(playerDominion, target)) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
+			return;
+		}
+
+		if (!target.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME)) {
+			player.sendMessage(ChatUtils.chatMessage("&e" + target.getName() + " &chas not enabled home access for allies!"));
+			return;
+		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), aranarthPlayer.isInAdminMode(), success -> {
+			if (success) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + target.getName()));
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + target.getName()));
+			}
+		});
 	}
 
 	/**

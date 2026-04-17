@@ -25,9 +25,6 @@ public enum DominionPermission {
     // Combat
     PVP,
 
-    // World events
-    MOB_SPAWNING,
-
     // Member commands
     HOME,
     FOOD,

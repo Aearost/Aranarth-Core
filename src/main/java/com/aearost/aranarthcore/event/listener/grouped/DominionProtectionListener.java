@@ -407,7 +407,7 @@ public class DominionProtectionListener implements Listener {
 	}
 
 	/**
-	 * Controls mob spawning in Dominions using the MOB_SPAWNING permission (checked against WANDERER rank).
+	 * Controls mob spawning in Dominions using the dominion-wide mob spawning toggle.
 	 */
 	@EventHandler
 	public void onMobSpawn(CreatureSpawnEvent e) {
@@ -419,7 +419,7 @@ public class DominionProtectionListener implements Listener {
 		}
 		Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
 		if (chunkDominion != null) {
-			if (!chunkDominion.getDominionPermissions().hasPermission(DominionRank.WANDERER, DominionPermission.MOB_SPAWNING)) {
+			if (!chunkDominion.isMobSpawningEnabled()) {
 				e.setCancelled(true);
 			}
 		}

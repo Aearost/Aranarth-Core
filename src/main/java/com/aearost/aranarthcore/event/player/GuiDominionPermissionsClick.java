@@ -14,6 +14,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Map;
+
 /**
  * Handles click events for the Dominion Permissions GUI screens.
  */
@@ -50,6 +52,15 @@ public class GuiDominionPermissionsClick {
         // Main permissions screen — navigate to rank or relation sub-screens
         if (title.equals("Dominion Permissions")) {
             String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+            if (itemName.startsWith("Mob Spawning")) {
+                boolean newState = !dominion.isMobSpawningEnabled();
+                dominion.setMobSpawningEnabled(newState);
+                DominionUtils.updateDominion(dominion);
+                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildMobSpawningToggleItem(newState));
+                player.updateInventory();
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
+                return;
+            }
             if (itemName.startsWith("Member PvP")) {
                 boolean newState = !dominion.isMemberPvpEnabled();
                 dominion.setMemberPvpEnabled(newState);
@@ -112,17 +123,13 @@ public class GuiDominionPermissionsClick {
     }
 
     /**
-     * Gets the DominionPermission corresponding to a slot index.
-     * Uses the relation display permissions list for relations, rank display permissions for ranks.
+     * Gets the DominionPermission corresponding to a slot index using the grouped slot maps.
      */
     private DominionPermission getPermissionFromSlot(int slot, boolean isRelation) {
-        DominionPermission[] perms = isRelation
-                ? GuiDominionPermissions.getRelationDisplayPermissions()
-                : GuiDominionPermissions.getRankDisplayPermissions();
-        if (slot >= 0 && slot < perms.length) {
-            return perms[slot];
-        }
-        return null;
+        Map<Integer, DominionPermission> slotMap = isRelation
+                ? GuiDominionPermissions.getRelationSlotPermissions()
+                : GuiDominionPermissions.getRankSlotPermissions();
+        return slotMap.get(slot);
     }
 
     /**
