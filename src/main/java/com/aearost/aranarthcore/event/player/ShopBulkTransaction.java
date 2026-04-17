@@ -43,6 +43,10 @@ public class ShopBulkTransaction {
 			NumberFormat formatter = NumberFormat.getCurrencyInstance();
 			String saleOrPurchase = "";
 			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if (shop.getBuyPrice() <= 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support buying"));
+					return;
+				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk purchase of this item"));
@@ -51,6 +55,10 @@ public class ShopBulkTransaction {
 				saleOrPurchase = "purchase";
 				player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getBuyPrice()) + "?"));
 			} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (shop.getSellPrice() <= 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support selling"));
+					return;
+				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
