@@ -2,8 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
@@ -19,6 +18,11 @@ public class DominionUtils {
 
 	private static final List<Dominion> dominions = new ArrayList<>();
 
+	// O(1) lookup maps
+	private static final Map<UUID, Dominion> dominionById = new HashMap<>();
+	private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
+	private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
+
 	/**
 	 * Provides the list of Dominions.
 	 * @return The list of dominions
@@ -33,16 +37,68 @@ public class DominionUtils {
 	 * @return The Dominion that the player is in.
 	 */
 	public static Dominion getPlayerDominion(UUID uuid) {
-		Dominion playerDominion = null;
-		for (Dominion dominion : dominions) {
-			for (UUID memberUuid : dominion.getMembers()) {
-                if (memberUuid.equals(uuid)) {
-                    playerDominion = dominion;
-                    break;
-                }
+		return playerToDominion.get(uuid);
+	}
+
+	/**
+	 * Provides the Dominion with the given stable ID.
+	 * @param id The dominion's stable UUID.
+	 * @return The Dominion, or null if not found.
+	 */
+	public static Dominion getDominionById(UUID id) {
+		return dominionById.get(id);
+	}
+
+	/**
+	 * Generates the chunk lookup key for the given chunk.
+	 * @param chunk The chunk.
+	 * @return The lookup key string.
+	 */
+	private static String getChunkKey(Chunk chunk) {
+		return chunk.getWorld().getName() + ":" + chunk.getX() + ":" + chunk.getZ();
+	}
+
+	/**
+	 * Checks whether a player has a specific permission within the given dominion.
+	 * Considers the player's rank if they are a member, or the inter-dominion relation if they are an outsider.
+	 * @param player The player to check.
+	 * @param dominion The dominion to check permissions in.
+	 * @param permission The permission to verify.
+	 * @return True if the player has the permission.
+	 */
+	public static boolean hasPermission(Player player, Dominion dominion, DominionPermission permission) {
+		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
+		if (playerDominion != null && playerDominion.getId().equals(dominion.getId())) {
+			DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+			if (rank == null) {
+				rank = DominionRank.NEWCOMER;
 			}
+			return dominion.getDominionPermissions().hasPermission(rank, permission);
 		}
-		return playerDominion;
+		DominionRank relation = getRelationKey(playerDominion, dominion);
+		return dominion.getDominionPermissions().hasPermission(relation, permission);
+	}
+
+	/**
+	 * Determines the relation rank between two dominions for the purposes of permission lookups.
+	 * @param playerDominion The dominion of the acting player (may be null).
+	 * @param targetDominion The dominion being acted upon.
+	 * @return The relation rank: ALLIED, TRUCED, ENEMIED, NEUTRAL, or WANDERER.
+	 */
+	public static DominionRank getRelationKey(Dominion playerDominion, Dominion targetDominion) {
+		if (playerDominion == null) {
+			return DominionRank.WANDERER;
+		}
+		if (areAllied(playerDominion, targetDominion)) {
+			return DominionRank.ALLIED;
+		}
+		if (areTruced(playerDominion, targetDominion)) {
+			return DominionRank.TRUCED;
+		}
+		if (areEnemied(playerDominion, targetDominion)) {
+			return DominionRank.ENEMIED;
+		}
+		return DominionRank.NEUTRAL;
 	}
 
 	/**
@@ -51,21 +107,52 @@ public class DominionUtils {
 	 */
 	public static void createDominion(Dominion dominion) {
 		dominions.add(dominion);
+		dominionById.put(dominion.getId(), dominion);
+		for (UUID memberUuid : dominion.getMembers()) {
+			playerToDominion.put(memberUuid, dominion);
+		}
+		for (Chunk chunk : dominion.getChunks()) {
+			chunkKeyToDominion.put(getChunkKey(chunk), dominion);
+		}
 	}
 
 	/**
-	 * Updates an existing dominion with new values.
-	 * @param dominion The new value of the dominion.
+	 * Updates an existing dominion with new values, keeping all lookup maps in sync.
+	 * @param dominion The updated dominion.
 	 */
 	public static void updateDominion(Dominion dominion) {
 		int i = 0;
 		while (i < dominions.size()) {
-			if (dominions.get(i).getLeader().equals(dominion.getLeader())) {
+			if (dominions.get(i).getId().equals(dominion.getId())) {
 				break;
 			}
 			i++;
 		}
-		dominions.set(i, dominion);
+		if (i < dominions.size()) {
+			Dominion old = dominions.get(i);
+
+			// Remove old member entries
+			for (UUID memberUuid : old.getMembers()) {
+				playerToDominion.remove(memberUuid);
+			}
+			// Remove old chunk entries
+			for (Chunk chunk : old.getChunks()) {
+				chunkKeyToDominion.remove(getChunkKey(chunk));
+			}
+
+			dominions.set(i, dominion);
+		} else {
+			dominions.add(dominion);
+		}
+
+		// Re-populate maps with updated dominion
+		dominionById.put(dominion.getId(), dominion);
+		for (UUID memberUuid : dominion.getMembers()) {
+			playerToDominion.put(memberUuid, dominion);
+		}
+		for (Chunk chunk : dominion.getChunks()) {
+			chunkKeyToDominion.put(getChunkKey(chunk), dominion);
+		}
 	}
 
 	/**
@@ -79,7 +166,7 @@ public class DominionUtils {
 
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
-			if (playerDominion.getLeader().equals(player.getUniqueId())) {
+			if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.CLERGY) {
 				if (dominionOfChunk == null) {
 					int claimPrice = 250;
 					if (playerDominion.getBalance() >= claimPrice) {
@@ -89,6 +176,7 @@ public class DominionUtils {
 								playerDominion.setBalance(newBalance);
 								List<Chunk> chunks = playerDominion.getChunks();
 								chunks.add(chunkToClaim);
+								chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
 								updateDominion(playerDominion);
 								return "&e" + playerDominion.getName() + " &7has claimed &e" +
 										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
@@ -109,7 +197,7 @@ public class DominionUtils {
 					}
 				}
 			} else {
-				return "&cOnly the owner of the dominion can claim land!";
+				return "&cOnly the Leader or Clergy can claim land!";
 			}
 		} else {
 			return "&cYou are not part of a dominion!";
@@ -122,12 +210,7 @@ public class DominionUtils {
 	 * @return The dominion that owns the chunk.
 	 */
 	public static Dominion getDominionOfChunk(Chunk chunk) {
-		for (Dominion dominion : dominions) {
-			if (dominion.getChunks().contains(chunk)) {
-				return dominion;
-			}
-		}
-		return null;
+		return chunkKeyToDominion.get(getChunkKey(chunk));
 	}
 
 	/**
@@ -141,21 +224,26 @@ public class DominionUtils {
 		if (dominionOfChunk != null) {
 			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
-				if (playerDominion.getLeader().equals(dominionOfChunk.getLeader())) {
-					Chunk homeChunk = playerDominion.getDominionHome().getChunk();
-					if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
-						return "&cYou cannot unclaim the chunk that the home is in!";
-					} else {
-						if (isAllClaimsConnectedAfterUnclaiming(dominionOfChunk, chunk)) {
-							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 125);
-							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							playerDominion.getChunks().remove(chunk);
-							updateDominion(playerDominion);
-							return "&7This chunk has been unclaimed successfully";
+				if (playerDominion.getId().equals(dominionOfChunk.getId())) {
+					if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.CLERGY) {
+						Chunk homeChunk = playerDominion.getDominionHome().getChunk();
+						if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
+							return "&cYou cannot unclaim the chunk that the home is in!";
 						} else {
-							return "&cYou cannot unclaim this chunk as they all must remain connected!";
+							if (isAllClaimsConnectedAfterUnclaiming(dominionOfChunk, chunk)) {
+								AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+								aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 125);
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+								playerDominion.getChunks().remove(chunk);
+								chunkKeyToDominion.remove(getChunkKey(chunk));
+								updateDominion(playerDominion);
+								return "&7This chunk has been unclaimed successfully";
+							} else {
+								return "&cYou cannot unclaim this chunk as they all must remain connected!";
+							}
 						}
+					} else {
+						return "&cOnly the Leader or Clergy can unclaim land!";
 					}
 				} else {
 					return "&cThis chunk not claimed by " + dominionOfChunk.getName() + "!";
@@ -183,6 +271,15 @@ public class DominionUtils {
 
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
+		}
+
+		// Clean up lookup maps
+		dominionById.remove(dominion.getId());
+		for (UUID memberUuid : dominion.getMembers()) {
+			playerToDominion.remove(memberUuid);
+		}
+		for (Chunk chunk : dominion.getChunks()) {
+			chunkKeyToDominion.remove(getChunkKey(chunk));
 		}
 
 		dominions.remove(dominion);
@@ -419,6 +516,9 @@ public class DominionUtils {
 			updateDominion(dominion);
 		}
 		if (!isDeleting) {
+			// Demote old leader to Clergy and promote new leader
+			dominionBeingUpdated.setMemberRank(oldLeader, DominionRank.CLERGY);
+			dominionBeingUpdated.setMemberRank(newLeader, DominionRank.LEADER);
 			dominionBeingUpdated.setLeader(newLeader);
 			updateDominion(dominionBeingUpdated);
 		} else {
@@ -1859,5 +1959,33 @@ public class DominionUtils {
 
 		// Always allowed to claim if not conquered
 		return true;
+	}
+
+	/**
+	 * Provides the color code for the given rank.
+	 * @param rank The rank.
+	 * @return The color code string.
+	 */
+	public static String getRankColor(DominionRank rank) {
+		return switch (rank) {
+			case LEADER -> "&6";
+			case CLERGY -> "&b";
+			case CITIZEN -> "&a";
+			case NEWCOMER -> "&7";
+			case ALLIED -> "&5";
+			case TRUCED -> "&d";
+			case NEUTRAL -> "&f";
+			case WANDERER -> "&e";
+			case ENEMIED -> "&c";
+		};
+	}
+
+	/**
+	 * Provides the formatted Dominion rank name.
+	 * @param rank The rank.
+	 * @return The formatted Dominion rank name.
+	 */
+	public static String getFormattedRankName(DominionRank rank) {
+		return getRankColor(rank) + (rank.name().toUpperCase()).charAt(0) + (rank.name().toLowerCase()).substring(1);
 	}
 }

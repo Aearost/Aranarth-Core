@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
@@ -29,10 +30,10 @@ public class ArmorStandSwitchListener implements Listener {
 		if (e.getRightClicked() instanceof ArmorStand armorStand) {
 			Player player = e.getPlayer();
 			Dominion dominion = DominionUtils.getDominionOfChunk(e.getRightClicked().getLocation().getChunk());
-			// Do not proceed if it is in a claimed dominion that the player is not in
+			// Do not proceed if the player lacks ARMOR_STAND permission in this dominion
 			if (dominion != null) {
-				if (!dominion.getMembers().contains(player.getUniqueId())) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou are not in the Dominion of &e" + dominion.getName()));
+				if (!DominionUtils.hasPermission(player, dominion, DominionPermission.ARMOR_STAND)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
 					e.setCancelled(true);
 					return;
 				}

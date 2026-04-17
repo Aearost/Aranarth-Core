@@ -67,6 +67,8 @@ commands:
     description: Opens the GUI or teleports the player to their specified home
   homepad:
     description: Defines a homepad
+  incantations:
+    description: Provides a written book containing information about the incantations system
   info:
     description: Provides information about the input player
   itemname:

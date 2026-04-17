@@ -82,6 +82,8 @@ public class AranarthPlayer {
 	private String firstJoinDate = "";
 	private boolean isVanished = false;
 	private boolean isInCouncilChat = false;
+	private boolean isInDominionChat = false;
+	private String dominionChatType = "dominion";
 	private boolean isHurtingOwnPets = false;
 	private boolean isGradientChatEnabled = false;
 	private String gradientChatColors = "";
@@ -1272,6 +1274,40 @@ public class AranarthPlayer {
 	 */
 	public void setInCouncilChat(boolean inCouncilChat) {
 		isInCouncilChat = inCouncilChat;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 * @return The temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 */
+	public boolean isInDominionChat() {
+		return isInDominionChat;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 * @param inDominionChat The temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 */
+	public void setInDominionChat(boolean inDominionChat) {
+		isInDominionChat = inDominionChat;
+	}
+
+	/**
+	 * Provides the current dominion chat type for the player.
+	 * Valid values are: "dominion", "ally", "truce", "allytruce".
+	 * @return The dominion chat type.
+	 */
+	public String getDominionChatType() {
+		return dominionChatType;
+	}
+
+	/**
+	 * Updates the current dominion chat type for the player.
+	 * Valid values are: "dominion", "ally", "truce", "allytruce".
+	 * @param dominionChatType The new dominion chat type.
+	 */
+	public void setDominionChatType(String dominionChatType) {
+		this.dominionChatType = dominionChatType;
 	}
 
 	/**

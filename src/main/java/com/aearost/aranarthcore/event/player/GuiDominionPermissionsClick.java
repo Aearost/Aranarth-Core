@@ -1,0 +1,127 @@
+package com.aearost.aranarthcore.event.player;
+
+import com.aearost.aranarthcore.gui.GuiDominionMembers;
+import com.aearost.aranarthcore.gui.GuiDominionPermissions;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ * Handles click events for the Dominion Permissions GUI screens.
+ */
+public class GuiDominionPermissionsClick {
+
+    private static final String RANK_PREFIX = "Perms for ";
+
+    public void execute(InventoryClickEvent e) {
+        e.setCancelled(true);
+
+        if (e.getClickedInventory() == null || e.getClickedInventory().getType() != InventoryType.CHEST) {
+            return;
+        }
+
+        Player player = (Player) e.getWhoClicked();
+        Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (dominion == null) {
+            return;
+        }
+
+        // Only the leader can use this GUI
+        if (!dominion.getLeader().equals(player.getUniqueId())) {
+            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage permissions!"));
+            return;
+        }
+
+        ItemStack clicked = e.getCurrentItem();
+        if (clicked == null || !clicked.hasItemMeta() || !clicked.getItemMeta().hasDisplayName()) {
+            return;
+        }
+
+        String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
+
+        // Main permissions screen — navigate to rank or relation sub-screens
+        if (title.endsWith("'s Permissions")) {
+            String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+            switch (itemName) {
+                case "Newcomer" -> GuiDominionPermissions.openRankGui(player, DominionRank.NEWCOMER);
+                case "Citizen" -> GuiDominionPermissions.openRankGui(player, DominionRank.CITIZEN);
+                case "Clergy" -> GuiDominionPermissions.openRankGui(player, DominionRank.CLERGY);
+                case "Allied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ALLIED);
+                case "Truced Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.TRUCED);
+                case "Neutral Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);
+                case "Enemied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ENEMIED);
+                case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
+                case "Members" -> new GuiDominionMembers(player).openGui();
+            }
+            player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+            return;
+        }
+
+        // Rank/relation permissions sub-screen — "Permissions: {RANK_NAME}"
+        if (title.startsWith(RANK_PREFIX)) {
+            // Back button
+            if (clicked.getType() == Material.BARRIER) {
+                new GuiDominionPermissions(player).openGui();
+                player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                return;
+            }
+
+            DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+            if (rank == null) {
+                return;
+            }
+
+            if (rank == DominionRank.LEADER) {
+                player.sendMessage(ChatUtils.chatMessage("&cThe Leader rank always has full permissions!"));
+                return;
+            }
+
+            boolean isRelation = isRelationRank(rank);
+            DominionPermission perm = getPermissionFromSlot(e.getSlot(), isRelation);
+            if (perm == null) {
+                return;
+            }
+
+            dominion.getDominionPermissions().togglePermission(rank, perm);
+            DominionUtils.updateDominion(dominion);
+
+            if (isRelation) {
+                GuiDominionPermissions.openRelationGui(player, rank);
+            } else {
+                GuiDominionPermissions.openRankGui(player, rank);
+            }
+            player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
+        }
+    }
+
+    /**
+     * Gets the DominionPermission corresponding to a slot index.
+     * Uses the relation display permissions list for relations, rank display permissions for ranks.
+     */
+    private DominionPermission getPermissionFromSlot(int slot, boolean isRelation) {
+        DominionPermission[] perms = isRelation
+                ? GuiDominionPermissions.getRelationDisplayPermissions()
+                : GuiDominionPermissions.getRankDisplayPermissions();
+        if (slot >= 0 && slot < perms.length) {
+            return perms[slot];
+        }
+        return null;
+    }
+
+    /**
+     * Returns true if the rank is a relation (non-member) rank.
+     */
+    private boolean isRelationRank(DominionRank rank) {
+        return rank == DominionRank.ALLIED || rank == DominionRank.TRUCED
+                || rank == DominionRank.NEUTRAL || rank == DominionRank.WANDERER
+                || rank == DominionRank.ENEMIED;
+    }
+}

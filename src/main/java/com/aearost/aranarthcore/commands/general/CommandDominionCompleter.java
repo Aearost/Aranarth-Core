@@ -22,10 +22,12 @@ public class CommandDominionCompleter implements TabCompleter {
 	private static final List<String> DOMINION_OPTIONS = List.of(
 		"accept", "ally", "autoclaim", "balance", "claim", "conquer", "create",
 		"deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
-		"leave", "list", "map", "neutral", "rebel", "remove", "rename",
-		"resources", "retreat", "sethome", "setleader", "surrender",
-		"truce", "unclaim", "who", "withdraw"
+		"leave", "list", "map", "msg", "neutral", "permissions", "perms", "rank",
+		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
+		"surrender", "truce", "unclaim", "who", "withdraw"
 	);
+
+	private static final List<String> DOMINION_CHAT_TYPES = List.of("dominion", "ally", "truce", "allytruce");
 
 	/**
 	 * @param sender The user that entered the command.
@@ -53,6 +55,25 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
+			case "rank" -> {
+				if (args.length == 2) {
+					if (sender instanceof Player player) {
+						Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+						if (dominion != null) {
+							yield dominion.getMembers().stream()
+								.map(uuid -> Bukkit.getOfflinePlayer(uuid).getName())
+								.filter(name -> name != null && (args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())))
+								.collect(Collectors.toList());
+						}
+					}
+					yield List.of();
+				}
+				if (args.length == 3) {
+					yield filter(List.of("Newcomer", "Citizen", "Clergy"), args[2]);
+				}
+				yield List.of();
+			}
+			case "msg" -> filter(DOMINION_CHAT_TYPES, args[1]);
 			case "info", "ally", "truce", "enemy", "neutral", "conquer", "surrender", "rebel", "retreat" -> {
 				String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 				yield DominionUtils.getDominions().stream()

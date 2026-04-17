@@ -75,6 +75,7 @@ public class AranarthCore extends JavaPlugin {
 				ShopUtils.removeAllHolograms();
 				ShopUtils.initializeAllHolograms();
 				PersistenceUtils.saveDominions();
+				PersistenceUtils.saveDominionPermissions();
 				PersistenceUtils.saveWarps();
 				PersistenceUtils.savePunishments();
 				PersistenceUtils.saveAvatars();
@@ -179,6 +180,7 @@ public class AranarthCore extends JavaPlugin {
 		ShopUtils.initializeAllHolograms();
 		PersistenceUtils.loadLockedContainers();
 		PersistenceUtils.loadDominions();
+		PersistenceUtils.loadDominionPermissions();
 		PersistenceUtils.loadWarps();
 		PersistenceUtils.loadPunishments();
 		PersistenceUtils.loadAvatars();
@@ -575,6 +577,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveShops();
 		PersistenceUtils.saveLockedContainers();
 		PersistenceUtils.saveDominions();
+		PersistenceUtils.saveDominionPermissions();
 		PersistenceUtils.saveWarps();
 		PersistenceUtils.savePunishments();
 		PersistenceUtils.saveAvatars();

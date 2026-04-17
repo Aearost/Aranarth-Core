@@ -220,6 +220,7 @@ Minor Features
 [-] Removed iron armor from the arena world
 [~] Tweaked how horse teleporting works on a homepad
 [+] Added /dominion guide
+[+] Implemented dominion permission system
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
@@ -233,3 +234,4 @@ Backend Code Changes
 - Added log message to console to track what is rolled in crates for historical/confirmation of results
 - Updated all command completion to be more compact and clean
 - Tweaked aranarth player persistence logic to easily support new fields being added
+- Restructured a lot of dominion functionality to cater to permissions, ranks, and dominion relations

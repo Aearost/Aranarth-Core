@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
+import java.util.stream.Collectors;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.EntityType;
@@ -1045,19 +1046,24 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance
+				// #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks
 				String[] fields = row.split("\\|");
 
-				String name = fields[0];
-				UUID leader = UUID.fromString(fields[1]);
+				UUID id = null;
+				if (!fields[0].isEmpty()) {
+					id = UUID.fromString(fields[0]);
+				}
+
+				String name = fields[1];
+				UUID leader = UUID.fromString(fields[2]);
 				List<UUID> members = new ArrayList<>();
-				String[] memberParts = fields[2].split("\\*\\*\\*");
+				String[] memberParts = fields[3].split("\\*\\*\\*");
 				for (String member : memberParts) {
 					members.add(UUID.fromString(member));
 				}
 
 				List<UUID> allies = new ArrayList<>();
-				String[] alliesParts = fields[3].split("\\*\\*\\*");
+				String[] alliesParts = fields[4].split("\\*\\*\\*");
 				if (!alliesParts[0].isEmpty()) {
 					for (String ally : alliesParts) {
 						allies.add(UUID.fromString(ally));
@@ -1065,7 +1071,7 @@ public class PersistenceUtils {
 				}
 
 				List<UUID> truced = new ArrayList<>();
-				String[] trucedParts = fields[4].split("\\*\\*\\*");
+				String[] trucedParts = fields[5].split("\\*\\*\\*");
 				if (!trucedParts[0].isEmpty()) {
 					for (String truce : trucedParts) {
 						truced.add(UUID.fromString(truce));
@@ -1073,36 +1079,36 @@ public class PersistenceUtils {
 				}
 
 				List<UUID> enemies = new ArrayList<>();
-				String[] enemyParts = fields[5].split("\\*\\*\\*");
+				String[] enemyParts = fields[6].split("\\*\\*\\*");
 				if (!enemyParts[0].isEmpty()) {
 					for (String enemy : enemyParts) {
 						enemies.add(UUID.fromString(enemy));
 					}
 				}
 
-				String worldName = fields[6];
+				String worldName = fields[7];
 				World world = Bukkit.getWorld(worldName);
 
 				List<Chunk> chunks = new ArrayList<>();
-				String[] claimedChunks = fields[7].split("\\*\\*\\*");
+				String[] claimedChunks = fields[8].split("\\*\\*\\*");
 				for (String chunk : claimedChunks) {
 					String[] coordinates = chunk.split(",");
 					int x = Integer.parseInt(coordinates[0]);
 					int z = Integer.parseInt(coordinates[1]);
 					chunks.add(world.getChunkAt(x, z));
 				}
-				double x = Double.parseDouble(fields[8]);
-				double y = Double.parseDouble(fields[9]);
-				double z = Double.parseDouble(fields[10]);
-				float yaw = Float.parseFloat(fields[11]);
-				float pitch = Float.parseFloat(fields[12]);
+				double x = Double.parseDouble(fields[9]);
+				double y = Double.parseDouble(fields[10]);
+				double z = Double.parseDouble(fields[11]);
+				float yaw = Float.parseFloat(fields[12]);
+				float pitch = Float.parseFloat(fields[13]);
 				ItemStack[] food = new ItemStack[54];
-				if (!fields[13].isEmpty()) {
-					food = ItemUtils.itemStackArrayFromBase64(fields[13]);
+				if (!fields[14].isEmpty()) {
+					food = ItemUtils.itemStackArrayFromBase64(fields[14]);
 				}
-				int claimableResources = Integer.parseInt(fields[14]);
+				int claimableResources = Integer.parseInt(fields[15]);
 				List<UUID> conquered = new ArrayList<>();
-				String[] conqueredUuids = fields[15].split("_");
+				String[] conqueredUuids = fields[16].split("_");
 				for (String uuid : conqueredUuids) {
 					if (!uuid.isEmpty()) {
 						conquered.add(UUID.fromString(uuid));
@@ -1110,10 +1116,27 @@ public class PersistenceUtils {
 				}
 
 				// Keep balance at the end
-				double balance = Double.parseDouble(fields[16]);
+				double balance = Double.parseDouble(fields[17]);
 
-				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks,
-						x, y, z, yaw, pitch, food, claimableResources, conquered,
+				Map<UUID, DominionRank> memberRanks = new HashMap<>();
+				if (fields.length > 18 && !fields[18].isEmpty()) {
+					for (String entry : fields[18].split("\\*\\*\\*")) {
+						String[] parts = entry.split(":");
+						if (parts.length == 2) {
+							memberRanks.put(UUID.fromString(parts[0]), DominionRank.valueOf(parts[1]));
+						}
+					}
+				}
+
+				// Back-fill ranks for any members not found in the persisted map
+				for (UUID memberUuid : members) {
+					if (!memberRanks.containsKey(memberUuid)) {
+						memberRanks.put(memberUuid, memberUuid.equals(leader) ? DominionRank.LEADER : DominionRank.CITIZEN);
+					}
+				}
+
+				DominionUtils.createDominion(new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
+						x, y, z, yaw, pitch, food, claimableResources, conquered, null,
 						// Keep balance at the end
 						balance));
 			}
@@ -1156,7 +1179,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance\n");
+					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -1232,15 +1255,26 @@ public class PersistenceUtils {
 								}
 							}
 
-							// Keep at the end
+							// Keep balance at the end
 							String balance = dominion.getBalance() + "";
 
-							String row = name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
+							String dominionId = dominion.getId().toString();
+
+							StringBuilder memberRanksBuilder = new StringBuilder();
+							for (Map.Entry<UUID, DominionRank> entry : dominion.getMemberRanks().entrySet()) {
+								if (!memberRanksBuilder.isEmpty()) {
+									memberRanksBuilder.append("***");
+								}
+								memberRanksBuilder.append(entry.getKey()).append(":").append(entry.getValue().name());
+							}
+							String memberRanksString = memberRanksBuilder.toString();
+
+							String row = dominionId + "|" + name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
 									+ enemiesString + "|" + worldName + "|" + chunksString + "|"
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
 									+ conquered + "|"
-									// Keep balance at the end
-									+ balance + "\n";
+									// Keep balance before memberRanks
+									+ balance + "|" + memberRanksString + "\n";
 							writer.write(row);
 						}
 					}
@@ -1248,6 +1282,136 @@ public class PersistenceUtils {
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the dominions!");
 				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes dominion permissions from dominions_permissions.txt.
+	 * Must be called after loadDominions().
+	 */
+	public static void loadDominionPermissions() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "dominions_permissions.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the dominions_permissions file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// Format: dominionId|permissions
+				// permissions: NEWCOMER:PERM1,PERM2;CITIZEN:PERM3;ALLIED:PERM4,...
+				String[] fields = row.split("\\|", -1);
+				if (fields.length < 2) {
+					continue;
+				}
+
+				UUID dominionId = UUID.fromString(fields[0]);
+				Dominion dominion = DominionUtils.getDominionById(dominionId);
+				if (dominion == null) {
+					continue;
+				}
+
+				Map<DominionRank, Set<DominionPermission>> allPerms = new EnumMap<>(DominionRank.class);
+				if (!fields[1].isEmpty()) {
+					for (String rankEntry : fields[1].split(";")) {
+						String[] parts = rankEntry.split(":", 2);
+						if (parts.length == 2) {
+							try {
+								DominionRank rank = DominionRank.valueOf(parts[0]);
+								Set<DominionPermission> perms = new HashSet<>();
+								if (!parts[1].isEmpty()) {
+									for (String permName : parts[1].split(",")) {
+										try {
+											perms.add(DominionPermission.valueOf(permName));
+										} catch (IllegalArgumentException ignored) {}
+									}
+								}
+								allPerms.put(rank, perms);
+							} catch (IllegalArgumentException ignored) {}
+						}
+					}
+				}
+
+				dominion.setDominionPermissions(new DominionPermissions(allPerms));
+			}
+			Bukkit.getLogger().info("All dominion permissions have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading dominion permissions!");
+		}
+	}
+
+	/**
+	 * Saves dominion permissions to dominions_permissions.txt.
+	 */
+	public static void saveDominionPermissions() {
+		List<Dominion> dominions = DominionUtils.getDominions();
+		if (dominions == null || dominions.isEmpty()) {
+			return;
+		}
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "dominions_permissions.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new dominions_permissions.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred creating dominions_permissions.txt");
+				return;
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#dominionId|permissions\n");
+				writer.write("#permissions format: RANK:PERM1,PERM2;RANK2:PERM3,...\n");
+
+				for (Dominion dominion : dominions) {
+					DominionPermissions perms = dominion.getDominionPermissions();
+					if (perms == null) {
+						continue;
+					}
+
+					// Serialize all permissions (ranks and relations) into one field
+					StringBuilder builder = new StringBuilder();
+					for (Map.Entry<DominionRank, Set<DominionPermission>> entry : perms.getPermissionsMap().entrySet()) {
+						if (!builder.isEmpty()) {
+							builder.append(";");
+						}
+						String permList = entry.getValue().stream()
+								.map(DominionPermission::name)
+								.collect(Collectors.joining(","));
+						builder.append(entry.getKey().name()).append(":").append(permList);
+					}
+
+					writer.write(dominion.getId().toString() + "|" + builder + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error saving dominion permissions!");
 			}
 		}
 	}

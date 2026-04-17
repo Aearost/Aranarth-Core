@@ -7,18 +7,19 @@ import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Handles all necessary functionality relating to a dominion on Aranarth.
  */
 public class Dominion {
 
+	private final UUID id;
 	private String name;
 	private UUID leader;
 	private List<UUID> members;
+	private Map<UUID, DominionRank> memberRanks;
+	private DominionPermissions dominionPermissions;
 	private List<UUID> allied;
 	private List<UUID> allianceRequests;
 	private List<UUID> truced;
@@ -38,11 +39,14 @@ public class Dominion {
 	// Keep balance at the end
 	private double balance;
 
-	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+	public Dominion(UUID id, String name, UUID leader, List<UUID> members, Map<UUID, DominionRank> memberRanks,
+					List<UUID> allied, List<UUID> truced, List<UUID> enemied,
 					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
 					int claimableResources, List<UUID> conquered,
+					DominionPermissions dominionPermissions,
 					// Keep balance at the end
 					double balance) {
+		this.id = id != null ? id : UUID.randomUUID();
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
 		this.leader = leader;
@@ -53,6 +57,8 @@ public class Dominion {
 		this.enemied = enemied;
 		this.neutralRequests = new ArrayList<>();
 		this.members = members;
+		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
+		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
 		this.chunks = chunks;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
 		this.food = food;
@@ -63,6 +69,14 @@ public class Dominion {
 
 		// Keep balance at the end
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the dominion's stable unique ID.
+	 * @return The dominion's stable unique ID.
+	 */
+	public UUID getId() {
+		return id;
 	}
 
 	/**
@@ -111,6 +125,56 @@ public class Dominion {
 	 */
 	public void setMembers(List<UUID> members) {
 		this.members = members;
+	}
+
+	/**
+	 * Provides the map of member UUIDs to their respective ranks.
+	 * @return The map of member UUIDs to their ranks.
+	 */
+	public Map<UUID, DominionRank> getMemberRanks() {
+		return memberRanks;
+	}
+
+	/**
+	 * Updates the map of member UUIDs to their respective ranks.
+	 * @param memberRanks The new member ranks map.
+	 */
+	public void setMemberRanks(Map<UUID, DominionRank> memberRanks) {
+		this.memberRanks = memberRanks;
+	}
+
+	/**
+	 * Provides the rank of a specific member.
+	 * @param uuid The UUID of the member.
+	 * @return The rank of the member, or null if not found.
+	 */
+	public DominionRank getMemberRank(UUID uuid) {
+		return memberRanks.get(uuid);
+	}
+
+	/**
+	 * Sets the rank of a specific member.
+	 * @param uuid The UUID of the member.
+	 * @param rank The rank to assign.
+	 */
+	public void setMemberRank(UUID uuid, DominionRank rank) {
+		memberRanks.put(uuid, rank);
+	}
+
+	/**
+	 * Provides the permissions configuration for this dominion.
+	 * @return The DominionPermissions instance.
+	 */
+	public DominionPermissions getDominionPermissions() {
+		return dominionPermissions;
+	}
+
+	/**
+	 * Updates the permissions configuration for this dominion.
+	 * @param dominionPermissions The new DominionPermissions instance.
+	 */
+	public void setDominionPermissions(DominionPermissions dominionPermissions) {
+		this.dominionPermissions = dominionPermissions;
 	}
 
 	/**

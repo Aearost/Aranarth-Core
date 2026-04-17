@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionRank;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -598,6 +600,110 @@ public class ChatUtils {
 		}
 
 		return result;
+	}
+
+	/**
+	 * Helper method to evaluate a dominion chat message.
+	 * Handles toggling dominion chat, setting the chat type, and sending messages.
+	 * @param player The player sending the message.
+	 * @param args The arguments of the command.
+	 * @param isSingleMessage If the message is one single message or if messages are toggled.
+	 */
+	public static void evaluateDominionMessage(Player player, String[] args, boolean isSingleMessage) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+
+		if (dominion == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		if (isSingleMessage) {
+			if (args.length == 1) {
+				String onOrOffMessage = aranarthPlayer.isInDominionChat() ? "&coff" : "&aon";
+				player.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Dominion Chat"));
+				aranarthPlayer.setInDominionChat(!aranarthPlayer.isInDominionChat());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return;
+			}
+
+			if (args.length == 2) {
+				String typeArg = args[1].toLowerCase();
+				if (typeArg.equals("dominion") || typeArg.equals("ally") || typeArg.equals("truce") || typeArg.equals("allytruce")) {
+					aranarthPlayer.setDominionChatType(typeArg);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage("&7Dominion chat type set to &e" + typeArg));
+					return;
+				}
+			}
+		}
+
+		int startIndex = isSingleMessage ? 1 : 0;
+		StringBuilder msg = new StringBuilder();
+		for (int i = startIndex; i < args.length; i++) {
+			msg.append(args[i]);
+			if (i < args.length - 1) {
+				msg.append(" ");
+			}
+		}
+		String assembledMsg = msg.toString();
+
+		DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+		if (rank == null) {
+			rank = DominionRank.NEWCOMER;
+		}
+		String rankColor = DominionUtils.getRankColor(rank);
+		String nickname = aranarthPlayer.getNickname();
+		String dominionName = ChatUtils.stripColorFormatting(dominion.getName());
+		String chatType = aranarthPlayer.getDominionChatType();
+
+		String typeLabel = switch (chatType) {
+			case "ally" -> "&5[Ally] ";
+			case "truce" -> "&d[Truce] ";
+			case "allytruce" -> "&5[AllyTruce] ";
+			default -> "";
+		};
+
+		String prefixStart = "&7⊰&r";
+		String prefixEnd = "&7⊱&r";
+		String prefixReceive = ChatUtils.translateToColor(prefixStart + typeLabel + "&e" + dominionName + " &7| " + DominionUtils.getFormattedRankName(rank) + " &f" + nickname + prefixEnd + " &7&o>> &7&o");
+
+		List<UUID> recipientLeaders = new ArrayList<>();
+		recipientLeaders.add(dominion.getLeader());
+
+		if (chatType.equals("ally") || chatType.equals("allytruce")) {
+			for (UUID alliedLeader : dominion.getAllied()) {
+				Dominion alliedDominion = DominionUtils.getPlayerDominion(alliedLeader);
+				if (alliedDominion != null && DominionUtils.areAllied(dominion, alliedDominion)) {
+					recipientLeaders.add(alliedLeader);
+				}
+			}
+		}
+
+		if (chatType.equals("truce") || chatType.equals("allytruce")) {
+			for (UUID trucedLeader : dominion.getTruced()) {
+				Dominion trucedDominion = DominionUtils.getPlayerDominion(trucedLeader);
+				if (trucedDominion != null && DominionUtils.areTruced(dominion, trucedDominion)) {
+					if (!recipientLeaders.contains(trucedLeader)) {
+						recipientLeaders.add(trucedLeader);
+					}
+				}
+			}
+		}
+
+		List<UUID> recipientUuids = new ArrayList<>();
+		for (UUID leaderUuid : recipientLeaders) {
+			Dominion recipientDominion = DominionUtils.getPlayerDominion(leaderUuid);
+			if (recipientDominion != null) {
+				recipientUuids.addAll(recipientDominion.getMembers());
+			}
+		}
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			if (recipientUuids.contains(onlinePlayer.getUniqueId())) {
+				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
+			}
+		}
 	}
 
 	/**
