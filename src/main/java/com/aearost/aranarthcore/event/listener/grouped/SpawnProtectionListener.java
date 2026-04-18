@@ -76,6 +76,19 @@ public class SpawnProtectionListener implements Listener {
 	}
 
 	/**
+	 * Prevents players from taking or placing items on armor stands at spawn.
+	 */
+	@EventHandler
+	public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getRightClicked().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
 	 * Prevents players from placing entities at spawn.
 	 */
 	@EventHandler
