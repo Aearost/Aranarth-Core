@@ -68,7 +68,7 @@ public class DominionUtils {
 	 */
 	public static boolean hasPermission(Player player, Dominion dominion, DominionPermission permission) {
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
-		if (playerDominion != null && playerDominion.getId().equals(dominion.getId())) {
+		if (playerDominion != null && playerDominion.isSameDominion(dominion)) {
 			DominionRank rank = dominion.getMemberRank(player.getUniqueId());
 			if (rank == null) {
 				rank = DominionRank.NEWCOMER;
@@ -89,13 +89,13 @@ public class DominionUtils {
 		if (playerDominion == null) {
 			return DominionRank.WANDERER;
 		}
-		if (areAllied(playerDominion, targetDominion)) {
+		if (playerDominion.isAllied(targetDominion)) {
 			return DominionRank.ALLIED;
 		}
-		if (areTruced(playerDominion, targetDominion)) {
+		if (playerDominion.isTruced(targetDominion)) {
 			return DominionRank.TRUCED;
 		}
-		if (areEnemied(playerDominion, targetDominion)) {
+		if (playerDominion.isEnemied(targetDominion)) {
 			return DominionRank.ENEMIED;
 		}
 		return DominionRank.NEUTRAL;
@@ -133,7 +133,7 @@ public class DominionUtils {
 	public static void updateDominion(Dominion dominion) {
 		int i = 0;
 		while (i < dominions.size()) {
-			if (dominions.get(i).getId().equals(dominion.getId())) {
+			if (dominions.get(i).isSameDominion(dominion)) {
 				break;
 			}
 			i++;
@@ -200,7 +200,7 @@ public class DominionUtils {
 						return "&cYour dominion cannot afford this!";
 					}
 				} else {
-					if (playerDominion.getLeader().equals(dominionOfChunk.getLeader())) {
+					if (playerDominion.isSameDominion(dominionOfChunk)) {
 						return "&cThis chunk is already claimed by your dominion";
 					} else {
 						return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
@@ -234,7 +234,7 @@ public class DominionUtils {
 		if (dominionOfChunk != null) {
 			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 			if (playerDominion != null) {
-				if (playerDominion.getId().equals(dominionOfChunk.getId())) {
+				if (playerDominion.isSameDominion(dominionOfChunk)) {
 					if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
 						Chunk homeChunk = playerDominion.getDominionHome().getChunk();
 						if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
@@ -385,34 +385,12 @@ public class DominionUtils {
 	}
 
 	/**
-	 * Determines if the two Dominions are marked as allies of each other.
-	 * @param dominion1 The first Dominion.
-	 * @param dominion2 The second Dominion.
-	 * @return Confirmation if the two Dominions are marked as allies of each other.
+	 * Determines if the player is a wanderer — not a member of any Dominion.
+	 * @param uuid The player's UUID.
+	 * @return True if the player has no Dominion.
 	 */
-	public static boolean areAllied(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getAllied().contains(dominion2.getLeader()) && dominion2.getAllied().contains(dominion1.getLeader());
-	}
-
-	/**
-	 * Determines if the two Dominions are marked as enemies with each other.
-	 * @param dominion1 The first Dominion.
-	 * @param dominion2 The second Dominion.
-	 * @return Confirmation if the two Dominions are marked as enemies with each other.
-	 */
-	public static boolean areTruced(Dominion dominion1, Dominion dominion2) {
-		return dominion1.getTruced().contains(dominion2.getLeader()) && dominion2.getTruced().contains(dominion1.getLeader());
-	}
-
-	/**
-	 * Determines if the two Dominions are marked as enemies of each other.
-	 * @param dominion1 The first Dominion.
-	 * @param dominion2 The second Dominion.
-	 * @return Confirmation if the two Dominions are marked as enemies of each other.
-	 */
-	public static boolean areEnemied(Dominion dominion1, Dominion dominion2) {
-		//  Unlike ally and truced, if one of the two is enemied, both are considered enemies
-		return dominion1.getEnemied().contains(dominion2.getLeader()) || dominion2.getEnemied().contains(dominion1.getLeader());
+	public static boolean isWanderer(UUID uuid) {
+		return getPlayerDominion(uuid) == null;
 	}
 
 	/**

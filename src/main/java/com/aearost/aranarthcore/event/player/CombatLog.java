@@ -24,7 +24,7 @@ public class CombatLog {
 				Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 				Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
 				if (playerDominion != null) {
-					if (attackerDominion != null && attackerDominion.getId().equals(playerDominion.getId())) {
+					if (attackerDominion != null && attackerDominion.isSameDominion(playerDominion)) {
 						if (!playerDominion.isMemberPvpEnabled()) {
 							return;
 						}

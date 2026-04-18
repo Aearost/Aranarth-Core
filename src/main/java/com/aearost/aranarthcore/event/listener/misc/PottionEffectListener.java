@@ -64,9 +64,9 @@ public class PottionEffectListener implements Listener {
 							return;
 						}
 
-						boolean isSameDominion = dominion.getLeader().equals(chunkDominion.getLeader());
-						boolean isAlliedDominion = dominion.getAllied().contains(chunkDominion.getLeader());
-						boolean isTrucedDominion = dominion.getTruced().contains(chunkDominion.getLeader());
+						boolean isSameDominion = dominion.isSameDominion(chunkDominion);
+						boolean isAlliedDominion = dominion.isAllied(chunkDominion);
+						boolean isTrucedDominion = dominion.isTruced(chunkDominion);
 
 						if (!isSameDominion && !isAlliedDominion && !isTrucedDominion) {
 							e.setCancelled(true);

@@ -712,7 +712,7 @@ public class ChatUtils {
 		if (chatType.equals("ally") || chatType.equals("allytruce")) {
 			for (UUID alliedLeader : dominion.getAllied()) {
 				Dominion alliedDominion = DominionUtils.getPlayerDominion(alliedLeader);
-				if (alliedDominion != null && DominionUtils.areAllied(dominion, alliedDominion)) {
+				if (alliedDominion != null && dominion.isAllied(alliedDominion)) {
 					recipientLeaders.add(alliedLeader);
 				}
 			}
@@ -721,7 +721,7 @@ public class ChatUtils {
 		if (chatType.equals("truce") || chatType.equals("allytruce")) {
 			for (UUID trucedLeader : dominion.getTruced()) {
 				Dominion trucedDominion = DominionUtils.getPlayerDominion(trucedLeader);
-				if (trucedDominion != null && DominionUtils.areTruced(dominion, trucedDominion)) {
+				if (trucedDominion != null && dominion.isTruced(trucedDominion)) {
 					if (!recipientLeaders.contains(trucedLeader)) {
 						recipientLeaders.add(trucedLeader);
 					}

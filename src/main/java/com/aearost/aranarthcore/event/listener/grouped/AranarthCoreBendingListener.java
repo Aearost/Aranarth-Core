@@ -135,17 +135,7 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-		boolean areAllied = false;
-		for (int i = 0; i < dominion.getAllied().size(); i++) {
-			UUID uuid = dominion.getAllied().get(i);
-			Dominion alliedDominion = DominionUtils.getPlayerDominion(uuid);
-			if (alliedDominion.getLeader().equals(playerDominion.getLeader())) {
-				areAllied = true;
-				break;
-			}
-		}
-
-		boolean containsMember = dominion.getMembers().contains(player.getUniqueId());
+		boolean areAllied = playerDominion != null && dominion.isAllied(playerDominion);
 		return !dominion.getMembers().contains(player.getUniqueId()) && !areAllied;
 	}
 

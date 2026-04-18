@@ -40,7 +40,7 @@ public class CropHarvest {
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
 		if (blockDominion != null) {
-			if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
+			if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 				if (!aranarthPlayer.isInAdminMode()) {
 					e.setCancelled(true);

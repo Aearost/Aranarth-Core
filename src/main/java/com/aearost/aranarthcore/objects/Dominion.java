@@ -467,4 +467,53 @@ public class Dominion {
 	public void setRebelRequest(UUID rebelRequest) {
 		this.rebelRequest = rebelRequest;
 	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are mutual allies.
+	 * Both dominions must have each other in their allied lists.
+	 * @param other The other Dominion.
+	 * @return True if both dominions are allied with each other.
+	 */
+	public boolean isAllied(Dominion other) {
+		return this.allied.contains(other.leader) && other.allied.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion have a mutual truce.
+	 * Both dominions must have each other in their truced lists.
+	 * @param other The other Dominion.
+	 * @return True if both dominions are truced with each other.
+	 */
+	public boolean isTruced(Dominion other) {
+		return this.truced.contains(other.leader) && other.truced.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are enemies.
+	 * If either dominion has the other in their enemy list, both are considered enemies.
+	 * @param other The other Dominion.
+	 * @return True if either dominion has marked the other as an enemy.
+	 */
+	public boolean isEnemied(Dominion other) {
+		return this.enemied.contains(other.leader) || other.enemied.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are neutral with each other.
+	 * Two dominions are neutral if they are not allied, truced, or enemied.
+	 * @param other The other Dominion.
+	 * @return True if the two dominions have no active relationship.
+	 */
+	public boolean isNeutral(Dominion other) {
+		return !isAllied(other) && !isTruced(other) && !isEnemied(other);
+	}
+
+	/**
+	 * Determines if this Dominion is the same as the other Dominion.
+	 * @param other The other Dominion.
+	 * @return True if both dominions share the same stable ID.
+	 */
+	public boolean isSameDominion(Dominion other) {
+		return this.id.equals(other.id);
+	}
 }

@@ -301,9 +301,9 @@ public class GoatHornUse {
                     Dominion nearbyDominion = DominionUtils.getPlayerDominion(nearbyPlayer.getUniqueId());
 
                     if ((playerDominion == null || nearbyDominion == null) ||
-                            (!nearbyDominion.getLeader().equals(playerDominion.getLeader())
-                            && !DominionUtils.areAllied(playerDominion, nearbyDominion)
-                            && !DominionUtils.areTruced(playerDominion, nearbyDominion))) {
+                            (!nearbyDominion.isSameDominion(playerDominion)
+                            && !playerDominion.isAllied(nearbyDominion)
+                            && !playerDominion.isTruced(nearbyDominion))) {
                         closestPlayer = nearbyPlayer;
                         closestDistance = distance;
                     }

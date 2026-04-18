@@ -73,7 +73,7 @@ public class ArrowHit {
 						Dominion shooterDominion = DominionUtils.getPlayerDominion(shooter.getUniqueId());
 						Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 						if (chunkDominion == null
-								|| (shooterDominion != null && shooterDominion.getLeader().equals(chunkDominion.getLeader()))) {
+								|| (shooterDominion != null && shooterDominion.isSameDominion(chunkDominion))) {
 							int radius = 1; // 3x3 area (1 block in each direction)
 							int power = 5;
 							Location center = block.getLocation();
@@ -181,7 +181,7 @@ public class ArrowHit {
 					Dominion shooterDominion = DominionUtils.getPlayerDominion(shooter.getUniqueId());
 					Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 					if (chunkDominion == null || (shooterDominion == null && chunkDominion == null)
-							|| (shooterDominion != null && shooterDominion.getLeader().equals(chunkDominion.getLeader()))) {
+							|| (shooterDominion != null && shooterDominion.isSameDominion(chunkDominion))) {
 						boolean isIce = block.getType() == Material.ICE;
 
 						new BukkitRunnable() {

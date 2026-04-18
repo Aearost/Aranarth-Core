@@ -38,7 +38,7 @@ public class OreExtraDrops {
 			Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
 			if (chunkDominion != null) {
-				if (dominion == null || !dominion.getLeader().equals(chunkDominion.getLeader())) {
+				if (dominion == null || !dominion.isSameDominion(chunkDominion)) {
 					e.setCancelled(true);
 					return;
 				}

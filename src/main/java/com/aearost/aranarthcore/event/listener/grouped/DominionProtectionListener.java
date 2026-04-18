@@ -192,7 +192,7 @@ public class DominionProtectionListener implements Listener {
 
 		// Same dominion — check the single dominion-wide PvP flag
 		if (attackerDominion != null && targetDominion != null
-				&& attackerDominion.getId().equals(targetDominion.getId())) {
+				&& attackerDominion.isSameDominion(targetDominion)) {
 			if (!attackerDominion.isMemberPvpEnabled()) {
 				e.setCancelled(true);
 				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
@@ -228,8 +228,8 @@ public class DominionProtectionListener implements Listener {
 			return; // Outside all dominion land — no restrictions
 		}
 
-		boolean attackerIsMember = attackerDominion != null && attackerDominion.getId().equals(chunkDominion.getId());
-		boolean targetIsMember = targetDominion != null && targetDominion.getId().equals(chunkDominion.getId());
+		boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
+		boolean targetIsMember = targetDominion != null && targetDominion.isSameDominion(chunkDominion);
 
 		// Attacker is a member of the chunk dominion — may harm outsiders in their land
 		if (attackerIsMember) {
@@ -278,7 +278,7 @@ public class DominionProtectionListener implements Listener {
 		}
 
 		DominionRank attackerRelation;
-		if (attackerDominion.getId().equals(chunkDominion.getId())) {
+		if (attackerDominion.isSameDominion(chunkDominion)) {
 			attackerRelation = chunkDominion.getMemberRank(attacker.getUniqueId());
 			if (attackerRelation == null) attackerRelation = DominionRank.NEWCOMER;
 		} else {
@@ -291,7 +291,7 @@ public class DominionProtectionListener implements Listener {
 			e.setCancelled(true);
 			String petType = ChatUtils.getFormattedItemName(pet.getType().name());
 			String relationName = DominionUtils.getFormattedRankName(attackerRelation);
-			if (attackerDominion.getId().equals(chunkDominion.getId())) {
+			if (attackerDominion.isSameDominion(chunkDominion)) {
 				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7as you are both in &e" + chunkDominion.getName()));
 			} else {
 				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7in their lands as you are " + relationName));

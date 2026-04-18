@@ -277,7 +277,7 @@ public class CommandDominion implements CommandExecutor {
 			return;
 		}
 
-		if (!DominionUtils.areAllied(playerDominion, target)) {
+		if (!playerDominion.isAllied(target)) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
 			return;
 		}
@@ -502,7 +502,7 @@ public class CommandDominion implements CommandExecutor {
 						}
 					}
 				} else {
-					if (inputDominion.getLeader().equals(dominion.getLeader())) {
+					if (inputDominion.isSameDominion(dominion)) {
 						player.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already in your Dominion!"));
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis already in &e" + inputDominion.getName()));
@@ -646,7 +646,7 @@ public class CommandDominion implements CommandExecutor {
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &5Ally &cyour own Dominion!"));
 						return;
 					}
@@ -658,9 +658,9 @@ public class CommandDominion implements CommandExecutor {
 							return;
 						}
 
-						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
-						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
-						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
+						boolean wasAllied = dominion.isAllied(dominionFromList);
+						boolean wasTruced = dominion.isTruced(dominionFromList);
+						boolean wasEnemied = dominion.isEnemied(dominionFromList);
 
 						if (wasAllied) {
 							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already &5Allied &cwith &e" + dominionFromList.getName()));
@@ -737,7 +737,7 @@ public class CommandDominion implements CommandExecutor {
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &dTruce &cyour own Dominion!"));
 						return;
 					}
@@ -749,9 +749,9 @@ public class CommandDominion implements CommandExecutor {
 							return;
 						}
 
-						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
-						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
-						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
+						boolean wasAllied = dominion.isAllied(dominionFromList);
+						boolean wasTruced = dominion.isTruced(dominionFromList);
+						boolean wasEnemied = dominion.isEnemied(dominionFromList);
 
 						if (wasTruced) {
 							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is already &dTruced &cwith &e" + dominionFromList.getName()));
@@ -828,7 +828,7 @@ public class CommandDominion implements CommandExecutor {
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot Enemy your own Dominion!"));
 						return;
 					}
@@ -892,7 +892,7 @@ public class CommandDominion implements CommandExecutor {
 			boolean wasDominionFound = false;
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot request &fNeutrality &7with your own Dominion!"));
 						return;
 					}
@@ -904,9 +904,9 @@ public class CommandDominion implements CommandExecutor {
 							return;
 						}
 
-						boolean wasAllied = DominionUtils.areAllied(dominion, dominionFromList);
-						boolean wasTruced = DominionUtils.areTruced(dominion, dominionFromList);
-						boolean wasEnemied = DominionUtils.areEnemied(dominion, dominionFromList);
+						boolean wasAllied = dominion.isAllied(dominionFromList);
+						boolean wasTruced = dominion.isTruced(dominionFromList);
+						boolean wasEnemied = dominion.isEnemied(dominionFromList);
 
 						// If accepting a request for neutrality (only when currently enemied)
 						if (wasEnemied && dominion.getNeutralRequests().contains(dominionFromList.getLeader())) {
@@ -1003,7 +1003,7 @@ public class CommandDominion implements CommandExecutor {
 					if (uuid != null) {
 						OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 						Dominion offlinePlayerDominion = DominionUtils.getPlayerDominion(uuid);
-						if (offlinePlayerDominion != null && dominion.getLeader().equals(offlinePlayerDominion.getLeader())) {
+						if (offlinePlayerDominion != null && dominion.isSameDominion(offlinePlayerDominion)) {
 							if (!uuid.equals(dominion.getLeader())) {
 								AranarthPlayer oldLeader = AranarthUtils.getPlayer(player.getUniqueId());
 								AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
@@ -1107,7 +1107,7 @@ public class CommandDominion implements CommandExecutor {
 			for (int i = 0; i < dominion.getAllied().size(); i++) {
 				UUID uuid = dominion.getAllied().get(i);
 				Dominion alliedDominion = DominionUtils.getPlayerDominion(uuid);
-				if (DominionUtils.areAllied(dominion, alliedDominion)) {
+				if (dominion.isAllied(alliedDominion)) {
 					alliesBuilder.append("&5").append(alliedDominion.getName());
 					if (i < dominion.getAllied().size() - 1) {
 						alliesBuilder.append("&5, ");
@@ -1125,7 +1125,7 @@ public class CommandDominion implements CommandExecutor {
 			for (int i = 0; i < dominion.getTruced().size(); i++) {
 				UUID uuid = dominion.getTruced().get(i);
 				Dominion trucedDominion = DominionUtils.getPlayerDominion(uuid);
-				if (DominionUtils.areTruced(dominion, trucedDominion)) {
+				if (dominion.isTruced(trucedDominion)) {
 					trucedBuilder.append("&d").append(trucedDominion.getName());
 					if (i < dominion.getTruced().size() - 1) {
 						trucedBuilder.append("&d, ");
@@ -1350,13 +1350,13 @@ public class CommandDominion implements CommandExecutor {
 					}
 
 					if (playerDominion != null) {
-						if (DominionUtils.areAllied(playerDominion, chunkDominion)) {
+						if (playerDominion.isAllied(chunkDominion)) {
 							line[x] = "&5[] ";
-						} else if (DominionUtils.areTruced(playerDominion, chunkDominion)) {
+						} else if (playerDominion.isTruced(chunkDominion)) {
 							line[x] = "&d[] ";
-						} else if (DominionUtils.areEnemied(playerDominion, chunkDominion)) {
+						} else if (playerDominion.isEnemied(chunkDominion)) {
 							line[x] = "&c[] ";
-						} else if (playerDominion.getLeader().equals(chunkDominion.getLeader())) {
+						} else if (playerDominion.isSameDominion(chunkDominion)) {
 							line[x] = "&a[] ";
 						} else {
 							line[x] = "&f[] ";
@@ -1398,11 +1398,11 @@ public class CommandDominion implements CommandExecutor {
 
 		for (Dominion nearbyDominion : dominionsNearby) {
 			if (playerDominion != null) {
-				if (DominionUtils.areAllied(playerDominion, nearbyDominion)) {
+				if (playerDominion.isAllied(nearbyDominion)) {
 					player.sendMessage(ChatUtils.translateToColor("&5[] &7- &e" + nearbyDominion.getName()));
-				} else if (DominionUtils.areTruced(playerDominion, nearbyDominion)) {
+				} else if (playerDominion.isTruced(nearbyDominion)) {
 					player.sendMessage(ChatUtils.translateToColor("&d[] &7- &e" + nearbyDominion.getName()));
-				} else if (DominionUtils.areEnemied(playerDominion, nearbyDominion)) {
+				} else if (playerDominion.isEnemied(nearbyDominion)) {
 					player.sendMessage(ChatUtils.translateToColor("&c[] &7- &e" + nearbyDominion.getName()));
 				} else {
 					player.sendMessage(ChatUtils.translateToColor("&f[] &7- &e" + nearbyDominion.getName()));
@@ -1493,7 +1493,7 @@ public class CommandDominion implements CommandExecutor {
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
 					wasDominionFound = true;
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Conquer &cyour own Dominion!"));
 						return;
 					}
@@ -1568,7 +1568,7 @@ public class CommandDominion implements CommandExecutor {
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
 					wasDominionFound = true;
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Surrender &cto your own Dominion!"));
 						return;
 					}
@@ -1627,7 +1627,7 @@ public class CommandDominion implements CommandExecutor {
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
 					wasDominionFound = true;
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &5Rebel &cagainst your own Dominion!"));
 						return;
 					}
@@ -1690,7 +1690,7 @@ public class CommandDominion implements CommandExecutor {
 			for (Dominion dominionFromList : dominions) {
 				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
 					wasDominionFound = true;
-					if (dominion.getLeader().equals(dominionFromList.getLeader())) {
+					if (dominion.isSameDominion(dominionFromList)) {
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &dRetreat &cfrom your own Dominion!"));
 						return;
 					}

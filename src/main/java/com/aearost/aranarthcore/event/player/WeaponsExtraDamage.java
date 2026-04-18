@@ -85,9 +85,9 @@ public class WeaponsExtraDamage {
 								if (targetDominion != null) {
 									Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
 									if (attackerDominion != null) {
-										if (targetDominion.getLeader().equals(attackerDominion.getLeader())
-												|| DominionUtils.areAllied(targetDominion, attackerDominion)
-												|| DominionUtils.areTruced(targetDominion, attackerDominion)) {
+										if (targetDominion.isSameDominion(attackerDominion)
+												|| targetDominion.isAllied(attackerDominion)
+												|| targetDominion.isTruced(attackerDominion)) {
 											return;
 										}
 									}
