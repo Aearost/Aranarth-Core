@@ -2396,7 +2396,8 @@ public class AranarthUtils {
 				|| type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
 				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
 				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
-				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL;
+				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL
+				|| type == Material.QUARTZ;
 	}
 
 	/**
@@ -2431,6 +2432,7 @@ public class AranarthUtils {
 		addCompressibleItem(uuid, Material.BONE_MEAL);
 		addCompressibleItem(uuid, Material.SNOWBALL);
 		addCompressibleItem(uuid, Material.CLAY_BALL);
+		addCompressibleItem(uuid, Material.QUARTZ);
 	}
 
 	/**
@@ -2465,6 +2467,7 @@ public class AranarthUtils {
 		removeCompressibleItem(uuid, Material.BONE_MEAL);
 		removeCompressibleItem(uuid, Material.SNOWBALL);
 		removeCompressibleItem(uuid, Material.CLAY_BALL);
+		removeCompressibleItem(uuid, Material.QUARTZ);
 	}
 
 	/**

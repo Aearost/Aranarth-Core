@@ -182,6 +182,7 @@ public class CompressorItemPickup {
 					case Material.BONE_MEAL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.SNOWBALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 					case Material.CLAY_BALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+					case Material.QUARTZ -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 				}
 			}
 		}
@@ -436,6 +437,7 @@ public class CompressorItemPickup {
             case Material.BONE_MEAL -> Material.BONE_BLOCK;
             case Material.SNOWBALL -> Material.SNOW_BLOCK;
             case Material.CLAY_BALL -> Material.CLAY;
+            case Material.QUARTZ -> Material.QUARTZ_BLOCK;
             default -> null;
         };
 	}

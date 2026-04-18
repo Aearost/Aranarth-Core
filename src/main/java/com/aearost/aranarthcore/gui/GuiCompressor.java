@@ -33,7 +33,7 @@ public class GuiCompressor {
 		UUID uuid = player.getUniqueId();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Inventory gui = null;
-		int guiSize = 45;
+		int guiSize = 54;
 		String guiName = "Compressible Items";
 		gui = Bukkit.getServer().createInventory(player, guiSize, guiName);
 
@@ -253,6 +253,13 @@ public class GuiCompressor {
 		clayBall.setItemMeta(clayBallMeta);
 		gui.setItem(35, clayBall);
 
+		ItemStack quartz = new ItemStack(Material.QUARTZ);
+		String quartzActive = getStatusOfItem(uuid, quartz.getType());
+		ItemMeta quartzMeta = quartz.getItemMeta();
+		quartzMeta.setDisplayName(ChatUtils.translateToColor("&f&lNether Quartz &7&l- " + quartzActive));
+		quartz.setItemMeta(quartzMeta);
+		gui.setItem(36, quartz);
+
 		ItemStack exit = new ItemStack(Material.BARRIER);
 		ItemMeta exitMeta = exit.getItemMeta();
 		exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));
@@ -268,9 +275,9 @@ public class GuiCompressor {
 		disableAllMeta.setDisplayName(ChatUtils.translateToColor("&c&lDisable All"));
 		disableAll.setItemMeta(disableAllMeta);
 
-		gui.setItem(36, enableAll);
-		gui.setItem(40, exit);
-		gui.setItem(44, disableAll);
+		gui.setItem(45, enableAll);
+		gui.setItem(49, exit);
+		gui.setItem(53, disableAll);
 
 		return gui;
 	}

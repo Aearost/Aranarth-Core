@@ -317,6 +317,7 @@ public class AranarthCore extends JavaPlugin {
 		new RecipeDripstone(this);
 		new RecipeSugarcaneBlockCraft(this);
 		new RecipeSugarcaneBlockUncraft(this);
+		new RecipeQuartzBlockUncraft(this);
 		new RecipeBambooBlockUncraft(this);
 		new RecipeBambooPlanks(this);
 		new RecipeGildedBlackstone(this);

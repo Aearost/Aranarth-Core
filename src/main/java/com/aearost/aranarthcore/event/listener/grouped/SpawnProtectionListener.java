@@ -236,8 +236,7 @@ public class SpawnProtectionListener implements Listener {
 				|| e.getEntityType() == EntityType.FIREBALL || e.getEntityType() == EntityType.SMALL_FIREBALL
 				|| e.getEntityType() == EntityType.DRAGON_FIREBALL || e.getEntityType() == EntityType.WITHER_SKULL
 				|| e.getEntityType() == EntityType.SPLASH_POTION || e.getEntityType() == EntityType.LINGERING_POTION
-				|| e.getEntityType() == EntityType.FISHING_BOBBER || e.getEntityType() == EntityType.FIREWORK_ROCKET
-				|| e.getEntityType() == EntityType.WIND_CHARGE) {
+				|| e.getEntityType() == EntityType.FISHING_BOBBER || e.getEntityType() == EntityType.WIND_CHARGE) {
 
 				if (e.getEntity().getShooter() != null && e.getEntity().getShooter() instanceof Player player) {
 					e.setCancelled(true);
