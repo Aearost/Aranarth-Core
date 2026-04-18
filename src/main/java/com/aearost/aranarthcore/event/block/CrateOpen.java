@@ -38,6 +38,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -438,7 +439,13 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Vote Crate"));
             });
@@ -524,7 +531,13 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.RARE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Rare Crate"));
             });
@@ -607,7 +620,13 @@ public class CrateOpen {
                     }
                     for (ItemStack cluster : combined) {
                         if (cluster != null) {
-                            player.getInventory().addItem(cluster);
+                            HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(cluster);
+                            if (!remainder.isEmpty()) {
+                                player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                                for (ItemStack remain : remainder.values()) {
+                                    player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                                }
+                            }
                         }
                     }
                     aranarthPlayer.setCrateTypeBeingOpened(null);
@@ -667,7 +686,13 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
@@ -775,7 +800,13 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Godly Crate"));
             });
