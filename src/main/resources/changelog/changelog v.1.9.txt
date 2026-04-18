@@ -226,6 +226,7 @@ Minor Features
 [~] Added missing condition where you'd get a message stating a player was removed from your dominion when they never were in it
 [+] Prevented combat tagging when PvP is not enabled between the dominion ranks/relations
 [~] Prevented bulk purchase if there is no buy functionality, and vice-versa with selling
+[+] Allowed admin mode to break locked containers/locked shops
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

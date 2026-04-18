@@ -6,9 +6,11 @@ import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 
@@ -164,8 +166,8 @@ public class ContainerInteract {
         if (container == null) {
             player.sendMessage(ChatUtils.chatMessage("&cThis is not a locked container!"));
         } else {
-            // Only the owner can remove a lock
-            if (container.getOwner().equals(uuid)) {
+            // Owner or admin can remove a lock
+            if (container.getOwner().equals(uuid) || aranarthPlayer.isInAdminMode()) {
                 int breakResult = AranarthUtils.removeLockedContainer(container.getLocations());
                 if (breakResult == 0) {
                     player.sendMessage(ChatUtils.chatMessage("&7The lock was successfully removed from this container!"));
@@ -193,6 +195,11 @@ public class ContainerInteract {
 
         // Message is sent in DominionProtection already
         if (chunkDominion != null) {
+            return;
+        }
+
+        // Message is sent in ShopInteract already
+        if (ShopUtils.getShopFromLocation(block.getRelative(BlockFace.UP).getLocation()) != null) {
             return;
         }
 
