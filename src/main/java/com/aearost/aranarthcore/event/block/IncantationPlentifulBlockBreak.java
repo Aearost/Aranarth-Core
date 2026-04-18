@@ -82,6 +82,7 @@ public class IncantationPlentifulBlockBreak {
 				// the player mined each block themselves. The recursion guard in handlePlentifulBreak
 				// (plentifulBlocksToDestroy > 0) prevents re-executing this logic for the inner event.
 				player.breakBlock(block);
+				player.playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
 			} else {
 				// If it is not harvestable, the counter must be manually reduced regardless
 				aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
