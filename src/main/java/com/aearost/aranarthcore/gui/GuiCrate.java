@@ -134,14 +134,14 @@ public class GuiCrate {
 		emerald.setItemMeta(emeraldMeta);
 		gui.setItem(16, emerald);
 
-		ItemStack votePoints3 = new ItemStack(Material.PAPER, 1);
-		ItemMeta votePoints3Meta = votePoints3.getItemMeta();
-		votePoints3Meta.setDisplayName(ChatUtils.translateToColor("&a&lVote Points +3"));
-		List<String> votePoints3Lore = new ArrayList<>();
-		votePoints3Lore.add(ChatUtils.translateToColor("&c5% Chance"));
-		votePoints3Meta.setLore(votePoints3Lore);
-		votePoints3.setItemMeta(votePoints3Meta);
-		gui.setItem(20, votePoints3);
+		ItemStack votePoints10 = new ItemStack(Material.PAPER, 1);
+		ItemMeta votePoints10Meta = votePoints10.getItemMeta();
+		votePoints10Meta.setDisplayName(ChatUtils.translateToColor("&a&lVote Points +10"));
+		List<String> votePoints10Lore = new ArrayList<>();
+		votePoints10Lore.add(ChatUtils.translateToColor("&c5% Chance"));
+		votePoints10Meta.setLore(votePoints10Lore);
+		votePoints10.setItemMeta(votePoints10Meta);
+		gui.setItem(20, votePoints10);
 
 		ItemStack blazeRod = new ItemStack(Material.BLAZE_ROD, 8);
 		ItemMeta blazeRodMeta = blazeRod.getItemMeta();

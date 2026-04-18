@@ -419,9 +419,9 @@ public class CrateOpen {
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 3, System.currentTimeMillis()));
+                    AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 10, System.currentTimeMillis()));
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +3"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +10"));
                     return;
                 } else if (chance <= 90) {
                     reward = new ItemStack(Material.BLAZE_ROD, 8);
