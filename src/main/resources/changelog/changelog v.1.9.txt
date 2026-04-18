@@ -227,6 +227,7 @@ Minor Features
 [+] Prevented combat tagging when PvP is not enabled between the dominion ranks/relations
 [~] Prevented bulk purchase if there is no buy functionality, and vice-versa with selling
 [+] Allowed admin mode to break locked containers/locked shops
+[~] Made /dominion default to the info sub-command instead of the home command
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

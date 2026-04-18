@@ -38,15 +38,15 @@ public class CommandDominion implements CommandExecutor {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-		// Shorthand of /dominion home
+		// Shorthand of /dominion info
 		if (args.length == 0) {
 			if (sender instanceof Player player) {
-				if (!player.hasPermission("aranarth.dominion.home")) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
-					return false;
+				Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+				if (dominion != null) {
+					displayInfoForDominion(player, dominion);
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 				}
-
-				teleportToDominionHome(player);
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to execute this command!"));
