@@ -171,19 +171,17 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
-                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
-                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
 
                                             // Cycle through the next spawn egg iteration
                                             if (indexes.get(0) < 3) {
@@ -197,13 +195,6 @@ public class CrateOpen {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
-                                            }
-
-                                            // Cycle through the next incantation iteration
-                                            if (indexes.get(2) < 2) {
-                                                indexes.set(2, indexes.get(2) + 1);
-                                            } else {
-                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -516,11 +507,11 @@ public class CrateOpen {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
                     name = "#f5eba3&lTotem of Undying x1";
                 } else if (chance <= 85) {
-                    reward = new ItemStack(Material.DRIED_GHAST, 1);
-                    name = "#9b8d8d&lDried Ghast x1";
+                    reward = new IncantationBeheading().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
-                    reward = new ItemStack(Material.SNIFFER_EGG, 1);
-                    name = "#4e9c70&lSniffer Egg x1";
+                    reward = new IncantationLifesteal().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 95) {
                     reward = getCycledCluster(new Random().nextInt(8));
                     name = reward.getItemMeta().getDisplayName() + " x1";
@@ -570,8 +561,16 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = getCycledEpicIncantation(new Random().nextInt(3));
-                    name = reward.getItemMeta().getDisplayName();
+                    reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
+                    if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
+                    } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
+                    } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
+                    } else {
+                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                    }
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
                     name = "#3a383a&lNetherite Ingot x2";
@@ -585,16 +584,39 @@ public class CrateOpen {
                     reward = new ItemStack(Material.ELYTRA, 1);
                     name = "#7d7d96&lElytra x1";
                 } else if (chance <= 72) {
-                    reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
-                    if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
-                    } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
-                    } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
-                    } else {
-                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
+
+                    for (int i = 0; i < combined.length; i++) {
+                        if (combined[i] != null) {
+                            if (i == combined.length - 1) {
+                                name += "&7and ";
+                            }
+
+                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
+                        } else {
+                            continue;
+                        }
+
+                        if (i < combined.length - 1) {
+                            name += ", ";
+                        }
                     }
+                    for (ItemStack cluster : combined) {
+                        if (cluster != null) {
+                            player.getInventory().addItem(cluster);
+                        }
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                    Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
+                    return;
                 } else if (chance <= 80) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -634,39 +656,8 @@ public class CrateOpen {
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
-                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
-
-                    for (int i = 0; i < combined.length; i++) {
-                        if (combined[i] != null) {
-                            if (i == combined.length - 1) {
-                                name += "&7and ";
-                            }
-
-                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
-                        } else {
-                            continue;
-                        }
-
-                        if (i < combined.length - 1) {
-                            name += ", ";
-                        }
-                    }
-                    for (ItemStack cluster : combined) {
-                        if (cluster != null) {
-                            player.getInventory().addItem(cluster);
-                        }
-                    }
-                    aranarthPlayer.setCrateTypeBeingOpened(null);
-                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
-                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
-                    Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
-                    return;
+                    reward = new IncantationPlentiful().getItem();
+                    name = reward.getItemMeta().getDisplayName();
                 } else {
                     reward = new KeyGodly().getItem();
                     name = "&5&lGodly Crate Key x1";
@@ -890,21 +881,6 @@ public class CrateOpen {
             default -> ingot = new AranarthiumSoulbound().getItem();
         }
         return ingot;
-    }
-
-    /**
-     * Provides the incantation that is associated to the input index for Epic crate rewards.
-     * @param index The index of the incantation.
-     * @return The incantation.
-     */
-    private ItemStack getCycledEpicIncantation(int index) {
-        ItemStack incantation = null;
-        switch (index) {
-            case 1 -> incantation = new IncantationLifesteal().getItem();
-            case 2 -> incantation = new IncantationPlentiful().getItem();
-            default -> incantation = new IncantationBeheading().getItem();
-        }
-        return incantation;
     }
 
     /**

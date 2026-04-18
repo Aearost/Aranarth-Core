@@ -37,8 +37,8 @@ public class GuiCrate {
 			updateRareCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
-			// Updating the cluster and spawn eggs here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+			// Updating the spawn eggs and clusters here to allow for dynamic updates
+			updateEpicCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
@@ -255,23 +255,21 @@ public class GuiCrate {
 		totem.setItemMeta(totemMeta);
 		gui.setItem(16, totem);
 
-		ItemStack driedGhast = new ItemStack(Material.DRIED_GHAST, 1);
-		ItemMeta driedGhastMeta = driedGhast.getItemMeta();
-		driedGhastMeta.setDisplayName(ChatUtils.translateToColor("#9b8d8d&lDried Ghast"));
-		List<String> driedGhastLore = new ArrayList<>();
-		driedGhastLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		driedGhastMeta.setLore(driedGhastLore);
-		driedGhast.setItemMeta(driedGhastMeta);
-		gui.setItem(20, driedGhast);
+		ItemStack beheading = new IncantationBeheading().getItem();
+		ItemMeta beheadingMeta = beheading.getItemMeta();
+		List<String> beheadingLore = new ArrayList<>();
+		beheadingLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		beheadingMeta.setLore(beheadingLore);
+		beheading.setItemMeta(beheadingMeta);
+		gui.setItem(20, beheading);
 
-		ItemStack snifferEgg = new ItemStack(Material.SNIFFER_EGG, 1);
-		ItemMeta snifferEggMeta = snifferEgg.getItemMeta();
-		snifferEggMeta.setDisplayName(ChatUtils.translateToColor("#4e9c70&lSniffer Egg"));
-		List<String> snifferEggLore = new ArrayList<>();
-		snifferEggLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		snifferEggMeta.setLore(snifferEggLore);
-		snifferEgg.setItemMeta(snifferEggMeta);
-		gui.setItem(21, snifferEgg);
+		ItemStack lifesteal = new IncantationLifesteal().getItem();
+		ItemMeta lifestealMeta = lifesteal.getItemMeta();
+		List<String> lifestealLore = new ArrayList<>();
+		lifestealLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		lifestealMeta.setLore(lifestealLore);
+		lifesteal.setItemMeta(lifestealMeta);
+		gui.setItem(21, lifesteal);
 
 		ItemStack epicKey = new KeyEpic().getItem();
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
@@ -376,6 +374,14 @@ public class GuiCrate {
 		discount10.setItemMeta(discount10Meta);
 		gui.setItem(21, discount10);
 
+		ItemStack plentiful = new IncantationPlentiful().getItem();
+		ItemMeta plentifulMeta = plentiful.getItemMeta();
+		List<String> plentifulLore = new ArrayList<>();
+		plentifulLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		plentifulMeta.setLore(plentifulLore);
+		plentiful.setItemMeta(plentifulMeta);
+		gui.setItem(23, plentiful);
+
 		ItemStack godlyKey = new KeyGodly().getItem();
 		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
 		godlyKeyMeta.setDisplayName(ChatUtils.translateToColor("&5&lGodly Crate Key"));
@@ -440,7 +446,7 @@ public class GuiCrate {
 		mcmmo30Lore.add(ChatUtils.translateToColor("&e8% Chance"));
 		mcmmo30Meta.setLore(mcmmo30Lore);
 		mcmmo30.setItemMeta(mcmmo30Meta);
-		gui.setItem(10, mcmmo30);
+		gui.setItem(11, mcmmo30);
 
 		ItemStack netherStar = new ItemStack(Material.NETHER_STAR, 1);
 		ItemMeta netherStarMeta = netherStar.getItemMeta();
@@ -449,7 +455,7 @@ public class GuiCrate {
 		netherStarLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		netherStarMeta.setLore(netherStarLore);
 		netherStar.setItemMeta(netherStarMeta);
-		gui.setItem(11, netherStar);
+		gui.setItem(6, netherStar);
 
 		ItemStack heavyCore = new ItemStack(Material.HEAVY_CORE, 1);
 		ItemMeta heavyCoreMeta = heavyCore.getItemMeta();
@@ -575,12 +581,11 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the Cluster that is associated to the input index for an Epic Crate.
+	 * Provides the spawn egg and cluster that are associated to the input indexes for an Epic Crate.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
-	 * @param incantationIndex The index of the incantation.
 	 */
-	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex) {
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex) {
 		// Cycle through the spawn eggs
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -600,12 +605,11 @@ public class GuiCrate {
 		} else {
 			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#71915D&lZombie Spawn Egg"));
 		}
-		cycledEggMeta.setDisplayName(cycledEggMeta.getDisplayName());
 		List<String> cycledEggLore = new ArrayList<>();
-		cycledEggLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		cycledEggLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		cycledEggMeta.setLore(cycledEggLore);
 		egg.setItemMeta(cycledEggMeta);
-		initializedGui.setItem(15, egg);
+		initializedGui.setItem(3, egg);
 
 		// Cycle through the Clusters
 		ItemStack cluster = null;
@@ -623,34 +627,10 @@ public class GuiCrate {
 		ItemMeta cycledClusterMeta = cluster.getItemMeta();
 		cycledClusterMeta.setDisplayName(cycledClusterMeta.getDisplayName() + " (Mix)");
 		List<String> cycledClusterLore = new ArrayList<>();
-		cycledClusterLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledClusterLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		cycledClusterMeta.setLore(cycledClusterLore);
 		cluster.setItemMeta(cycledClusterMeta);
-		initializedGui.setItem(23, cluster);
-
-		// Cycle through the Incantations
-		ItemStack incantation = null;
-		switch (incantationIndex) {
-			case 1 -> incantation = new IncantationLifesteal().getItem();
-			case 2 -> incantation = new IncantationPlentiful().getItem();
-			default -> incantation = new IncantationBeheading().getItem();
-		}
-		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
-		String color = cycledIncantationMeta.getDisplayName();
-
-		if (color.substring(2).startsWith("Incantation")) {
-			color = color.substring(0, 2); // Basic color code
-		} else {
-			color = color.substring(0, 14); // Hex code
-		}
-		cycledIncantationMeta.setDisplayName(ChatUtils.translateToColor(
-				color + "&l" + ChatUtils.stripColorFormatting(cycledIncantationMeta.getDisplayName())));
-
-		List<String> cycledIncantationLore = new ArrayList<>();
-		cycledIncantationLore.add(ChatUtils.translateToColor("&a12% Chance"));
-		cycledIncantationMeta.setLore(cycledIncantationLore);
-		incantation.setItemMeta(cycledIncantationMeta);
-		initializedGui.setItem(3, incantation);
+		initializedGui.setItem(15, cluster);
 	}
 
 	/**
@@ -673,7 +653,7 @@ public class GuiCrate {
 		cycledIngotLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		cycledIngotMeta.setLore(cycledIngotLore);
 		ingot.setItemMeta(cycledIngotMeta);
-		initializedGui.setItem(6, ingot);
+		initializedGui.setItem(10, ingot);
 
 		ItemStack egg = null;
 		switch (eggIndex) {
