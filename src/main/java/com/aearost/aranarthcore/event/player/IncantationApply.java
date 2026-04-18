@@ -9,7 +9,6 @@ import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -35,178 +34,173 @@ public class IncantationApply {
 	public void execute(PlayerDropItemEvent e) {
 		Player player = e.getPlayer();
 		Item droppedItem = e.getItemDrop();
-		if (droppedItem.getItemStack().hasItemMeta()) {
-			ItemMeta droppedItemMeta = droppedItem.getItemStack().getItemMeta();
-			if (droppedItemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
-				new BukkitRunnable() {
-					@Override
-					public void run() {
-						Location incantationLoc = droppedItem.getLocation();
-						List<Entity> nearby = droppedItem.getNearbyEntities(0.25, 0, 0.25);
-						// Do not apply if there are several options
-						if (nearby.size() == 1) {
-							Entity entity = nearby.getFirst();
-							if (entity instanceof Item floorItem) {
-								ItemStack item = floorItem.getItemStack();
-								ItemMeta itemMeta = item.getItemMeta();
+		new BukkitRunnable() {
+			@Override
+			public void run() {
+				if (!droppedItem.isValid()) return;
+				// Collect all floor items in the area (the dropped item plus any already nearby)
+				List<Item> allItems = new ArrayList<>();
+				allItems.add(droppedItem);
+				for (Entity entity : droppedItem.getNearbyEntities(0.25, 0, 0.25)) {
+					if (entity instanceof Item nearby) {
+						allItems.add(nearby);
+					}
+				}
 
-								String incantationTypeOnItem = itemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-								String incantationTypeBeingApplied = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+				// Find an incantation among all items in the area
+				Item incantationFloorItem = null;
+				String incantationType = null;
+				ItemMeta incantationMeta = null;
+				for (Item floorItem : allItems) {
+					if (!floorItem.getItemStack().hasItemMeta()) continue;
+					ItemMeta meta = floorItem.getItemStack().getItemMeta();
+					if (meta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
+						incantationFloorItem = floorItem;
+						incantationMeta = meta;
+						incantationType = meta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+						break;
+					}
+				}
 
-								// Do not allow 2 different incantations to be applied to the same item
-								if (itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
-									if (!incantationTypeOnItem.equals(incantationTypeBeingApplied)) {
-										player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
-										return;
-									}
-								}
+				if (incantationFloorItem == null) return;
 
-								if (incantationTypeBeingApplied.equals("incantation_beheading")) {
-									if (isMeleeWeapon(item) && !isExceedingLevel(item)) {
-										Incantation incantation = new IncantationBeheading();
-										int level = 1;
-										// Increase the existing level
-										if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
-											level = itemMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-											level++;
-										}
-										// Applying as a new incantation
-										else {
-											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_beheading");
-										}
-										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
+				// Items other than the incantation
+				List<Item> targets = new ArrayList<>(allItems);
+				targets.remove(incantationFloorItem);
 
-										String fullIncantationName = ChatUtils.translateToColor(
-												incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
-										// Dynamically apply the incantation description on the item
-										List<String> lore = itemMeta.getLore();
-										if (lore == null) {
-											lore = new ArrayList<>();
-											lore.add(fullIncantationName);
-										} else {
-											for (int i = 0; i < lore.size(); i++) {
-												if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
-													lore.set(i, fullIncantationName);
-													break;
-												}
-											}
-										}
-										itemMeta.setLore(lore);
-										item.setItemMeta(itemMeta);
-										droppedItem.remove();
-										floorItem.setItemStack(item);
-										player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
-									}
-								}
-								else if (incantationTypeBeingApplied.equals("incantation_lifesteal")) {
-									if (isMeleeWeapon(item) && !isExceedingLevel(item)) {
-										Incantation incantation = new IncantationLifesteal();
-										int level = 1;
-										// Increase the existing level
-										if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
-											level = itemMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-											level++;
-										}
-										// Applying as a new incantation
-										else {
-											itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
-										}
-										itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
+				if (targets.size() == 1) {
+					Item floorItem = targets.get(0);
+					ItemStack item = floorItem.getItemStack();
+					ItemMeta itemMeta = item.getItemMeta();
 
-										String fullIncantationName = ChatUtils.translateToColor(
-												incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
-										// Dynamically apply the incantation description on the item
-										List<String> lore = itemMeta.getLore();
-										if (lore == null) {
-											lore = new ArrayList<>();
-											lore.add(fullIncantationName);
-										} else {
-											for (int i = 0; i < lore.size(); i++) {
-												if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
-													lore.set(i, fullIncantationName);
-													break;
-												}
-											}
-										}
-
-										itemMeta.setLore(lore);
-										item.setItemMeta(itemMeta);
-										droppedItem.remove();
-										floorItem.setItemStack(item);
-										player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-										player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
-									}
-								}
-							}
-						} else if (nearby.size() == 2) {
-							Entity entity1 = nearby.get(0);
-							Entity entity2 = nearby.get(1);
-							if (entity1 instanceof Item first && entity2 instanceof Item second) {
-								ItemStack tool = null;
-								ItemStack aranarthium = null;
-								if (isTool(first.getItemStack()) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
-									tool = first.getItemStack();
-									aranarthium = second.getItemStack();
-								} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && isTool(second.getItemStack())) {
-									aranarthium = first.getItemStack();
-									tool = second.getItemStack();
-								}
-
-								if (tool == null || aranarthium == null) {
-									return;
-								}
-
-								String incantationTypeOnItem = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-								String incantationTypeBeingApplied = droppedItemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
-
-								// Do not allow 2 different incantations to be applied to the same item
-								if (droppedItemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
-									if (!incantationTypeOnItem.equals(incantationTypeBeingApplied)) {
-										player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
-										return;
-									}
-								}
-
-								if (incantationTypeBeingApplied.equals("incantation_plentiful")) {
-									Incantation incantation = new IncantationPlentiful();
-									String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
-
-									// Dynamically apply the incantation description on the item
-									List<String> lore = droppedItemMeta.getLore();
-									if (lore == null) {
-										lore = new ArrayList<>();
-										lore.add(fullIncantationName);
-									}
-
-									if (isTool(first.getItemStack())) {
-										ItemMeta firstMeta = first.getItemStack().getItemMeta();
-										firstMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
-										firstMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
-										firstMeta.setLore(lore);
-										tool.setItemMeta(firstMeta);
-										first.setItemStack(tool);
-										second.remove();
-									} else {
-										ItemMeta secondMeta = second.getItemStack().getItemMeta();
-										secondMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
-										secondMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
-										secondMeta.setLore(lore);
-										tool.setItemMeta(secondMeta);
-										second.setItemStack(tool);
-										first.remove();
-									}
-
-									droppedItem.remove();
-									player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-									player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
-								}
-							}
+					// Do not allow 2 different incantations to be applied to the same item
+					if (itemMeta.getPersistentDataContainer().has(INCANTATION_TYPE)) {
+						String incantationTypeOnItem = itemMeta.getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+						if (!incantationTypeOnItem.equals(incantationType)) {
+							player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+							return;
 						}
 					}
-				}.runTaskLater(AranarthCore.getInstance(), 30L);
+
+					if (incantationType.equals("incantation_beheading")) {
+						if (isMeleeWeapon(item) && !isExceedingLevel(item)) {
+							Incantation incantation = new IncantationBeheading();
+							int level = 1;
+							// Increase the existing level
+							if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
+								level = itemMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+								level++;
+							}
+							// Applying as a new incantation
+							else {
+								itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_beheading");
+							}
+							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
+
+							String fullIncantationName = ChatUtils.translateToColor(
+									incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
+							// Dynamically apply the incantation description on the item
+							List<String> lore = itemMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+								lore.add(fullIncantationName);
+							} else {
+								for (int i = 0; i < lore.size(); i++) {
+									if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
+										lore.set(i, fullIncantationName);
+										break;
+									}
+								}
+							}
+							itemMeta.setLore(lore);
+							item.setItemMeta(itemMeta);
+							incantationFloorItem.remove();
+							floorItem.setItemStack(item);
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+						}
+					} else if (incantationType.equals("incantation_lifesteal")) {
+						if (isMeleeWeapon(item) && !isExceedingLevel(item)) {
+							Incantation incantation = new IncantationLifesteal();
+							int level = 1;
+							// Increase the existing level
+							if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
+								level = itemMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+								level++;
+							}
+							// Applying as a new incantation
+							else {
+								itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
+							}
+							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
+
+							String fullIncantationName = ChatUtils.translateToColor(
+									incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
+							// Dynamically apply the incantation description on the item
+							List<String> lore = itemMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+								lore.add(fullIncantationName);
+							} else {
+								for (int i = 0; i < lore.size(); i++) {
+									if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
+										lore.set(i, fullIncantationName);
+										break;
+									}
+								}
+							}
+							itemMeta.setLore(lore);
+							item.setItemMeta(itemMeta);
+							incantationFloorItem.remove();
+							floorItem.setItemStack(item);
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+						}
+					}
+				} else if (targets.size() == 2) {
+					Item first = targets.get(0);
+					Item second = targets.get(1);
+
+					Item toolItem = null;
+					Item aranarthiumItem = null;
+					if (isTool(first.getItemStack()) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
+						toolItem = first;
+						aranarthiumItem = second;
+					} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && isTool(second.getItemStack())) {
+						aranarthiumItem = first;
+						toolItem = second;
+					}
+
+					if (toolItem == null || aranarthiumItem == null) {
+						return;
+					}
+
+					if (incantationType.equals("incantation_plentiful")) {
+						Incantation incantation = new IncantationPlentiful();
+						String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+						// Dynamically apply the incantation description on the item
+						List<String> lore = incantationMeta.getLore();
+						if (lore == null) {
+							lore = new ArrayList<>();
+							lore.add(fullIncantationName);
+						}
+
+						ItemStack tool = toolItem.getItemStack();
+						ItemMeta toolMeta = tool.getItemMeta();
+						toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
+						toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+						toolMeta.setLore(lore);
+						tool.setItemMeta(toolMeta);
+						toolItem.setItemStack(tool);
+						aranarthiumItem.remove();
+						incantationFloorItem.remove();
+						player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+					}
+				}
 			}
-		}
+		}.runTaskLater(AranarthCore.getInstance(), 30L);
 	}
 
 	/**
