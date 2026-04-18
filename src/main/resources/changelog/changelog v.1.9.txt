@@ -233,6 +233,7 @@ Minor Features
 [~] Increased money amount from epic and godly crates
 [+] Added quartz as a compressible block
 [+] Added buy/sell support for shulker boxes
+[+] Added /enderchest <username> for council members to view players' enderchests
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
