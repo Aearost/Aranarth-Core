@@ -29,6 +29,11 @@ public class ArmorStandSwitchListener implements Listener {
 	public void execute(PlayerInteractAtEntityEvent e) {
 		if (e.getRightClicked() instanceof ArmorStand armorStand) {
 			Player player = e.getPlayer();
+			if (player.getWorld().getName().equals("spawn")) {
+				e.setCancelled(true);
+				return;
+			}
+
 			Dominion dominion = DominionUtils.getDominionOfChunk(e.getRightClicked().getLocation().getChunk());
 			// Do not proceed if the player lacks ARMOR_STAND permission in this dominion
 			if (dominion != null) {
