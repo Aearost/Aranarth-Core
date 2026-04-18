@@ -193,7 +193,7 @@ public class GuiCrate {
 
 		ItemStack money1000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money1000Meta = money1000.getItemMeta();
-		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1000 of In-Game Currency"));
+		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$1,000 of In-Game Currency"));
 		List<String> money1000Lore = new ArrayList<>();
 		money1000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money1000Meta.setLore(money1000Lore);
@@ -305,7 +305,7 @@ public class GuiCrate {
 
 		ItemStack money5000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money5000Meta = money5000.getItemMeta();
-		money5000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$5000 of In-Game Currency"));
+		money5000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$5,000 of In-Game Currency"));
 		List<String> money5000Lore = new ArrayList<>();
 		money5000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money5000Meta.setLore(money5000Lore);
@@ -406,14 +406,14 @@ public class GuiCrate {
 	private Inventory initializeGodlyCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Godly");
 
-		ItemStack money15000 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money15000Meta = money15000.getItemMeta();
-		money15000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$15000 of In-Game Currency"));
-		List<String> money15000Lore = new ArrayList<>();
-		money15000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money15000Meta.setLore(money15000Lore);
-		money15000.setItemMeta(money15000Meta);
-		gui.setItem(2, money15000);
+		ItemStack money25000 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money25000Meta = money25000.getItemMeta();
+		money25000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$25,000 of In-Game Currency"));
+		List<String> money25000Lore = new ArrayList<>();
+		money25000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money25000Meta.setLore(money25000Lore);
+		money25000.setItemMeta(money25000Meta);
+		gui.setItem(2, money25000);
 
 		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 32);
 		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();

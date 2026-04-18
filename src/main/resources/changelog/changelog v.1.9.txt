@@ -230,6 +230,7 @@ Minor Features
 [~] Made /dominion default to the info sub-command instead of the home command
 [~] Updated all references to dominion relations with relation helper methods
 [+] Players will steal money when killing another player
+[~] Increased money amount from epic and godly crates
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
