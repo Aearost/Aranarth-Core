@@ -81,6 +81,7 @@ public class AranarthUtils {
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final int afkSecondsAmount = 300;
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
+	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -3464,6 +3465,40 @@ public class AranarthUtils {
 				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
 				.map(Map.Entry::getKey)
 				.toList();
+	}
+
+	/**
+	 * Provides the map of pending vote keys awaiting claim.
+	 * @return The HashMap of UUID to pending key count.
+	 */
+	public static HashMap<UUID, Integer> getPendingVoteKeys() {
+		return pendingVoteKeys;
+	}
+
+	/**
+	 * Adds pending vote keys for a player.
+	 * @param uuid The UUID of the player.
+	 * @param amount The number of keys to add.
+	 */
+	public static void addPendingVoteKeys(UUID uuid, int amount) {
+		pendingVoteKeys.merge(uuid, amount, Integer::sum);
+	}
+
+	/**
+	 * Sets the pending vote key count for a player.
+	 * @param uuid The UUID of the player.
+	 * @param amount The number of pending keys.
+	 */
+	public static void setPendingVoteKeys(UUID uuid, int amount) {
+		pendingVoteKeys.put(uuid, amount);
+	}
+
+	/**
+	 * Removes a player's pending vote key entry entirely.
+	 * @param uuid The UUID of the player.
+	 */
+	public static void removePendingVoteKeys(UUID uuid) {
+		pendingVoteKeys.remove(uuid);
 	}
 
 }

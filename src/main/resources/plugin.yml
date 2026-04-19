@@ -73,6 +73,8 @@ commands:
     description: Provides information about the input player
   itemname:
     description: Updates the held item to the input name
+  keyclaim:
+    description: Claims any pending vote crate keys that could not be delivered at the time of voting
   kills:
     description: Shows the number of kills the input player has
   lock:

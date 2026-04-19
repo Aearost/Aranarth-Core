@@ -2453,4 +2453,79 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Loads the pending vote keys from vote_keys.txt.
+	 */
+	public static void loadVoteKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "vote_keys.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the vote keys file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				String[] parts = row.split("\\|");
+				UUID uuid = UUID.fromString(parts[0]);
+				int amount = Integer.parseInt(parts[1]);
+				AranarthUtils.setPendingVoteKeys(uuid, amount);
+			}
+			Bukkit.getLogger().info("All pending vote keys have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the vote keys!");
+		}
+	}
+
+	/**
+	 * Saves the pending vote keys to the vote_keys.txt file.
+	 */
+	public static void saveVoteKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "vote_keys.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new vote_keys.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of vote_keys.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|amount\n");
+				for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingVoteKeys().entrySet()) {
+					writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the vote keys");
+			}
+		}
+	}
+
 }

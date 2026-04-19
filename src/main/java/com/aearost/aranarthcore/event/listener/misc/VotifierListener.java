@@ -76,12 +76,19 @@ public class VotifierListener implements Listener {
 			// Adds their vote
 			AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), amount, System.currentTimeMillis()));
 
-			// If the player is online, add the keys
-			if (player != null) {
+			// Give the key if the player is online and in a valid world, otherwise store it as pending
+			String worldName = player != null ? player.getWorld().getName() : "";
+			boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource");
+			if (player != null && validWorld) {
 				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
 				if (!remainder.isEmpty()) {
-					player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remainder.get(0));
-					player.sendMessage(ChatUtils.chatMessage("&7Your crate key was dropped to the ground"));
+					AranarthUtils.addPendingVoteKeys(uuid, 1);
+					player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! Use &e/keyclaim &7to claim your vote key"));
+				}
+			} else {
+				AranarthUtils.addPendingVoteKeys(uuid, 1);
+				if (player != null) {
+					player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! Use &e/keyclaim &7in Survival!"));
 				}
 			}
 		} else {
