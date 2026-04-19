@@ -17,152 +17,146 @@ public class CommandDominions {
 		meta.setItemName(ChatUtils.translateToColor("&8&l--=&6&lDominions&8&l=--"));
 		meta.setAuthor(ChatUtils.translateToColor("&8Unknown"));
 
-		meta.addPage(title());
 		meta.addPage(introduction());
 		meta.addPage(creation());
 		meta.addPage(landClaiming());
 		meta.addPage(members());
-		meta.addPage(diplomacyAlliance());
+		meta.addPage(foodUpkeep1());
+		meta.addPage(foodUpkeep2());
+		meta.addPage(resources());
+		meta.addPage(diplomacyPeace());
 		meta.addPage(diplomacyEnmity());
 		meta.addPage(conquest());
+		meta.addPage(conquestEffects());
 		meta.addPage(rebellion());
-		meta.addPage(foodUpkeep());
-		meta.addPage(resources());
 		meta.addPage(mapAndInfo());
 
 		book.setItemMeta(meta);
 		player.getInventory().addItem(book);
 	}
 
-	private static String title() {
-		return ChatUtils.translateToColor("\n\n\n\n    &l&oDominions\n   of Aranarth");
-	}
-
 	private static String introduction() {
 		return ChatUtils.translateToColor(
-				"&lDominions&r are player-run territories in Aranarth. " +
-				"Claim land, recruit members, forge alliances, wage war, and manage resources.\n\n" +
-				"A Dominion's survival depends on keeping its food stores stocked and its treasury funded. " +
-				"Neglect either long enough, and it will crumble."
+				"&lDominions&r are the land-claiming system on Aranarth. " +
+						"In your dominion, you can recruit members, forge &5alliances&r, wage &cwar&r, and claim your land's resources.\n\n" +
+						"A Dominion's survival depends on keeping its &6food reserves &rstocked and its bank funded. "
 		);
 	}
 
 	private static String creation() {
 		return ChatUtils.translateToColor(
-				"&lFounding a Dominion&r\n\n" +
-				"Run &o/dominion create <name>&r to found your Dominion for &a$5,000&r. " +
-				"Names may be up to 30 characters.\n\n" +
-				"Stand at your chosen home point and run &o/dominion sethome&r. " +
-				"You may later use &o/dominion rename <name>&r to rename, " +
-				"or &o/dominion disband&r to dissolve it entirely."
+				"&lCreating a Dominion&r\n\n" +
+						"Use &o/dominion create <name>&r to create your Dominion for &6$5,000&r.\n\n" +
+						"Stand at your chosen home point and use &o/dominion sethome&r.\n\n" +
+						"To return to your Dominion's home, use &o/dominion home&r."
 		);
 	}
 
 	private static String landClaiming() {
 		return ChatUtils.translateToColor(
-				"&lLand Claiming&r\n\n" +
-				"Claim your current chunk with &o/dominion claim&r (&a$250&r). " +
-				"Unclaiming refunds &a$125&r directly to your wallet.\n\n" +
-				"Every new claim must be adjacent to an existing one — you cannot leave " +
-				"gaps in your territory. Your Dominion may hold up to &n25 chunks per member&r.\n\n" +
-				"Toggle &o/dominion autoclaim&r to claim chunks automatically as you walk."
+				"&lLand Claiming&r\n" +
+						"Claim the chunk you are currently in for &6$250 &rwith &o/dominion claim&r.\n\n" +
+						"Every new claim must be connected to an existing one - you cannot have any " +
+						"gaps in your territory. Your Dominion may hold up to &o25 chunks &rper member."
 		);
 	}
 
 	private static String members() {
 		return ChatUtils.translateToColor(
 				"&lMembers&r\n\n" +
-				"Invite players with &o/dominion invite <player>&r. " +
-				"The invited player accepts with &o/dominion accept&r.\n\n" +
-				"Members may build and interact freely on Dominion land. " +
-				"Remove a member with &o/dominion remove <player>&r, " +
-				"or hand over leadership with &o/dominion setleader <player>&r.\n\n" +
-				"Members may step down with &o/dominion leave&r."
+						"Invite players with &o/dominion invite <player>&r. " +
+						"The invited player accepts with &o/dominion accept&r.\n\n" +
+						"Members can be manually removed with &o/dominion remove <player>&r, " +
+						"or they may leave the Dominion with &o/dominion leave&r."
 		);
 	}
 
-	private static String diplomacyAlliance() {
+	private static String foodUpkeep1() {
 		return ChatUtils.translateToColor(
-				"&lDiplomacy \u2014 Peace&r\n\n" +
-				"Both Dominion leaders must run the same command to enter a peaceful relation.\n\n" +
-				"&a/dominion ally <dominion>&r — " +
-				"Sends or accepts an alliance request. Allied members cannot harm one another.\n\n" +
-				"&e/dominion truce <dominion>&r — " +
-				"Sends or accepts a truce. A lighter peace pact; truced members cannot harm each other."
+				"&lFood Upkeep&r\n\n" +
+						"Every Dominion consumes food daily. " +
+						"Stock the food stores using &o/dominion food&r.\n\n" +
+						"The daily consumption is by the number of claimed chunks:\n" +
+						"- \u226425 is &o100 power&r\n" +
+						"- 26-100 is &o250 power&r\n" +
+						"- >100 is &o500 power&r"
+		);
+	}
+
+	private static String foodUpkeep2() {
+		return ChatUtils.translateToColor(
+				"&lFood Upkeep&r\n\n" +
+						"If food runs out, money is spent ($250/day) from the Dominion's balance.\n\n" +
+						"If the balance is fully emptied, chunks are sold.\n\n" +
+						"When its last chunk is lost, the Dominion will be disbanded."
+		);
+	}
+
+	private static String resources() {
+		return ChatUtils.translateToColor(
+				"&lResources&r\n" +
+						"Harvested resources from the biomes in your Dominion chunks are claimable with &o/dominion resources&r. " +
+						"Dominions begin with 16 stored claims, gaining 8 more for each Dominion conquered. " +
+						"Conquered Dominions are capped at 8 claims with only a 50% claim success rate."
+		);
+	}
+
+	private static String diplomacyPeace() {
+		return ChatUtils.translateToColor(
+				"&lDiplomacy - Peace&r\n\n" +
+						"Both Dominion leaders must use the same command to enter a peaceful relation.\n\n" +
+						"&5Alliance: &r&o/dominion ally <dominion>&r\n" +
+						"&dTruce: &r&o/dominion truce <dominion>&r\n" +
+						"&7Neutrality: &r&o/dominion neutral <dominion>&r\n"
 		);
 	}
 
 	private static String diplomacyEnmity() {
 		return ChatUtils.translateToColor(
-				"&lDiplomacy \u2014 War&r\n\n" +
-				"&c/dominion enemy <dominion>&r — " +
-				"Declares war on another Dominion. Only one leader needs to act. " +
-				"Any existing alliance or truce is automatically broken.\n\n" +
-				"&7/dominion neutral <dominion>&r — " +
-				"Requests to reset all relations back to neutral. " +
-				"Both leaders must run this to resolve an enmity."
+				"&lDiplomacy - War&r\n\n" +
+						"Dominions can go to war if one of the two leaders declares the other as an enemy. " +
+						"Once declared, any existing alliance/truce is automatically broken.\n\n" +
+						"&cEnemy: &r&o/dominion enemy <dominion>&r"
 		);
 	}
 
 	private static String conquest() {
 		return ChatUtils.translateToColor(
 				"&lConquest&r\n\n" +
-				"Only a free (unconquered) Dominion may conquer another. " +
-				"The attacking leader runs &o/dominion conquer <dominion>&r.\n\n" +
-				"To complete the conquest, the defending leader must run " +
-				"&o/dominion surrender <attacker>&r. Until this is done the request remains open.\n\n" +
-				"A conquered Dominion suffers weakened food power and heavily limited resource claims."
+						"Only a free (unconquered) Dominion may conquer another. " +
+						"The attacking leader uses &o/dominion conquer <dominion>&r.\n\n" +
+						"To complete the conquest, the defending leader must use " +
+						"&o/dominion surrender <attacker>&r\n\n"
+		);
+	}
+
+	private static String conquestEffects() {
+		return ChatUtils.translateToColor(
+				"&lConquest&r\n\n" +
+						"A conquered Dominion has half of the available resource claims, and their food power is 25% lower.\n\n" +
+						"In addition to this, the conqueror's resource claim limit increases by 8 per conquered Dominion."
 		);
 	}
 
 	private static String rebellion() {
 		return ChatUtils.translateToColor(
 				"&lRebellion&r\n\n" +
-				"A conquered Dominion may seek freedom by running " +
-				"&o/dominion rebel <conqueror>&r.\n\n" +
-				"The conquering leader then chooses to accept by running " +
-				"&o/dominion retreat <rebel>&r, releasing the Dominion from conquest. " +
-				"If the conqueror does not retreat, the conquest persists.\n\n" +
-				"Upon independence, all conquest penalties are lifted."
-		);
-	}
-
-	private static String foodUpkeep() {
-		return ChatUtils.translateToColor(
-				"&lFood Upkeep&r\n\n" +
-				"Every Dominion consumes food daily. " +
-				"Stock the food stores via &o/dominion food&r.\n\n" +
-				"Daily consumption by size:\n" +
-				"  \u2264&n25 chunks:&r 100 power\n" +
-				"  &n26-100 chunks:&r 250 power\n" +
-				"  &n>100 chunks:&r 500 power\n\n" +
-				"If food runs out, money is spent ($250/day). " +
-				"If money runs out, chunks are sold. " +
-				"A Dominion that loses its last chunk disbands."
-		);
-	}
-
-	private static String resources() {
-		return ChatUtils.translateToColor(
-				"&lResources&r\n\n" +
-				"Leaders open the resource GUI with &o/dominion resources&r. " +
-				"Each claim draws materials from a biome present within your territory \u2014 " +
-				"different biomes yield different goods.\n\n" +
-				"A free Dominion starts with 16 claims, gaining more for each Dominion conquered. " +
-				"A conquered Dominion is capped at 8 claims with a 50% success rate per claim."
+						"A conquered Dominion may seek freedom by using " +
+						"&o/dominion rebel <conqueror>&r.\n\n" +
+						"The conquering leader then chooses to accept by using " +
+						"&o/dominion retreat <rebel>&r, releasing the Dominion from their conquest. "
 		);
 	}
 
 	private static String mapAndInfo() {
 		return ChatUtils.translateToColor(
 				"&lMap & Info&r\n\n" +
-				"&o/dominion map&r \u2014 shows a 15\u00d715 chunk view of your surroundings, " +
-				"colour-coded by relation: green (own), purple (allied), " +
-				"yellow (truced), red (enemy).\n\n" +
-				"&o/dominion info&r \u2014 detailed status\n" +
-				"&o/dominion balance&r \u2014 treasury\n" +
-				"&o/dominion who&r \u2014 chunk ownership\n" +
-				"&o/dominion list&r \u2014 all Dominions"
+						"You can use &o/dominion map&r to view your surrounding chunks, where the top is facing the North.\n\n" +
+						"The chunks are color-coded:\n" +
+						"- &a[] &r(your Dominion)\n" +
+						"- &5[] &r(allied Dominions)\n" +
+						"- &d[] &r(truced Dominions)\n" +
+						"- &c[] &r(enemy Dominions)"
 		);
 	}
 
