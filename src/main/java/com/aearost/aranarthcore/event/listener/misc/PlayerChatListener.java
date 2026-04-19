@@ -114,8 +114,7 @@ public class PlayerChatListener implements Listener {
 
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
-        String councilChatMessage = chatMessage; // preserve unescaped form for council routing
-        chatMessage = chatMessage.replaceAll("%", "%%"); // Throws exception with only one
+        // preserve unescaped form for council routing
 
         e.setCancelled(true);
 
@@ -136,7 +135,7 @@ public class PlayerChatListener implements Listener {
             ChatUtils.evaluateCouncilMessage(player, message.split(" "), false);
         } else if (aranarthPlayer.isInDominionChat()) {
             // Dominion chat toggle is on — route to dominion chat
-            ChatUtils.evaluateDominionMessage(player, councilChatMessage.split(" "), false);
+            ChatUtils.evaluateDominionMessage(player, chatMessage.split(" "), false);
         } else {
             for (Player recipient : e.getRecipients()) {
                 recipient.sendMessage(fullMessage);

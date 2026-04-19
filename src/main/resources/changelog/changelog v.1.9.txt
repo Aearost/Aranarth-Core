@@ -236,6 +236,7 @@ Minor Features
 [+] Added /enderchest <username> for council members to view players' enderchests
 [~] Ensured that loot from crates is dropped if you do not have enough inventory space
 [~] Made it so /back will be saved upon your last homepad teleportation
+[-] Removed now-redundant double % symbol in chat messages
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
