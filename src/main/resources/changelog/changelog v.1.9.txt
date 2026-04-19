@@ -239,6 +239,7 @@ Minor Features
 [-] Removed now-redundant double % symbol in chat messages
 [~] You can now only conquer a dominion if you are enemied
 [+] Added offline support for claiming vote keys
+[+] Added functionality to drop an item to the floor with /ac give if there is no inventory space
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

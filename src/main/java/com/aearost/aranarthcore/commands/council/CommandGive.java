@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.awt.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 
 /**
  * Provides a specified player an AranarthCore item.
@@ -94,7 +95,14 @@ public class CommandGive {
 						}
 					}
 
-					player.getInventory().addItem(item);
+					// Adds the item to inventory or drops to their feet
+					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(item);
+					boolean isInventoryFull = !remainder.isEmpty();
+					if (!remainder.isEmpty()) {
+						for (ItemStack value : remainder.values()) {
+							player.getWorld().dropItemNaturally(player.getLocation(), value);
+						}
+					}
 
 					ItemMeta meta = item.getItemMeta();
 					String itemName = ChatUtils.getFormattedItemName(item.getType().name());
@@ -104,7 +112,12 @@ public class CommandGive {
 						}
 					}
 
-					player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+					if (isInventoryFull) {
+						player.sendMessage(ChatUtils.chatMessage("&e" + itemName + " &7has been dropped to the floor"));
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+					}
+
 					if (sender instanceof Player playerSender) {
 						if (!playerSender.getUniqueId().equals(player.getUniqueId())) {
 							sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
