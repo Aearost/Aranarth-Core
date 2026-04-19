@@ -128,6 +128,7 @@ public class GuiHomepadClick {
 						if (player.isInsideVehicle()) {
 							Entity mount = player.getVehicle();
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+								aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
 								Location destination = home.getLocation();
 								player.leaveVehicle();
 								mount.teleport(destination);
@@ -143,12 +144,14 @@ public class GuiHomepadClick {
 								}.runTaskLater(AranarthCore.getInstance(), 2L);
 							}
 						} else {
+							aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
 							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 							player.teleport(home.getLocation());
 							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 							player.sendMessage(ChatUtils
 									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					}
 					player.closeInventory();
 				} else {
