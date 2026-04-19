@@ -1498,6 +1498,11 @@ public class CommandDominion implements CommandExecutor {
 						return;
 					}
 
+					if (!dominion.isEnemied(dominionFromList)) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou can only &4Conquer &ca Dominion that you are &4Enemied &cwith!"));
+						return;
+					}
+
 					if (DominionUtils.getConquerorOfDominion(dominion) != null) {
 						player.sendMessage(ChatUtils.chatMessage("&cA conquered Dominion cannot conquer another!"));
 						return;

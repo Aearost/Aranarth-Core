@@ -237,6 +237,7 @@ Minor Features
 [~] Ensured that loot from crates is dropped if you do not have enough inventory space
 [~] Made it so /back will be saved upon your last homepad teleportation
 [-] Removed now-redundant double % symbol in chat messages
+[~] You can now only conquer a dominion if you are enemied
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
