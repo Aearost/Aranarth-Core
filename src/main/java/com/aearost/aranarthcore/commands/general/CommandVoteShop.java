@@ -22,9 +22,16 @@ public class CommandVoteShop implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			GuiVoteShop gui = new GuiVoteShop(player);
-			gui.openGui();
-			return true;
+			String worldName = player.getWorld().getName();
+			if (worldName.startsWith("spawn") || worldName.startsWith("world")
+					|| worldName.startsWith("smp") || worldName.startsWith("resource")){
+				GuiVoteShop gui = new GuiVoteShop(player);
+				gui.openGui();
+				return true;
+			} else {
+				player.sendMessage(ChatUtils.chatMessage("&cThis command can only be used in &eSurvival!"));
+				return true;
+			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
 			return true;
