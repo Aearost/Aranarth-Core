@@ -29,8 +29,8 @@ public class CommandRules implements CommandExecutor {
 		sender.sendMessage(ChatUtils.translateToColor("&8[&67&8] &eDo not grief the world's terrain unnecessarily - use the resource world instead"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&68&8] &7No glitch abuse, hacking, auto-clickers, lag machines, or any sort of abuse of the game"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&69&8] &eVerify your mods with the Council before using them - only cosmetic mods are permitted (OptiFine, Shaders, or MiniHUD)"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&610&8] &7Do not impersonate or disrespect Staff (the Council)"));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&611&8] &eLarge-scaled automatic crop, mob, and spawner farms are not permitted. Contact the Council before building one!"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&610&8] &7Do not impersonate or disrespect the Council"));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&611&8] &eSmall-scaled automatic crop, mob, and spawner farms are permitted with Council approval. Large-scaled ones are not."));
 		return true;
 	}
 
