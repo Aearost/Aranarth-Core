@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import java.util.Map;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -92,8 +93,13 @@ public class ShulkerItemPickup {
 		// If there was quantity put in a shulker box and quantity remains
 		if (e.isCancelled()) {
 			player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
-			pickupItem.setAmount(amountRemaining);
-			player.getInventory().addItem(pickupItem);
+			if (amountRemaining > 0) {
+				pickupItem.setAmount(amountRemaining);
+				Map<Integer, ItemStack> leftovers = player.getInventory().addItem(pickupItem);
+				if (!leftovers.isEmpty()) {
+					leftovers.values().forEach(item -> player.getWorld().dropItem(player.getLocation(), item));
+				}
+			}
 		}
 	}
 }

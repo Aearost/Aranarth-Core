@@ -242,6 +242,8 @@ Minor Features
 [+] Added functionality to drop an item to the floor with /ac give if there is no inventory space
 [+] Implemented a basic quest system
 [+] Added the creative world to the fire protection listener
+[~] Prevented all movement of a shulker box in inventory while in the GuiShulker
+[+] Also added additional cautionary checks when picking up items in shulkers
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
