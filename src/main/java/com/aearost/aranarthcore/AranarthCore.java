@@ -206,6 +206,10 @@ public class AranarthCore extends JavaPlugin {
 	 * Initializes all AranarthCore events.
 	 */
 	private void initializeEvents() {
+		// Listeners that must run early
+		new CropInfoEventListener(this);
+		new QuestEventListener(this);
+
 		// General listeners
 		new BlockBreakEventListener(this);
 		new BlockPlaceEventListener(this);
@@ -255,8 +259,6 @@ public class AranarthCore extends JavaPlugin {
 		new PotionAlchemyExpListener(this);
 		new TamedPetStealPreventListener(this);
 		new RootingArrowMovePrevent(this);
-		new CropInfoEventListener(this);
-		new QuestEventListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);

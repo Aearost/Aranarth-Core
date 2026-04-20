@@ -6,7 +6,6 @@ import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
-import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
@@ -21,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Allows for the full harvest of a crop and automatic re-plant.
@@ -79,12 +79,14 @@ public class CropHarvest {
 			}
 		}
 
-		boolean isWinterMonth = DateUtils.isWinterMonth(month) || month == Month.IGNIVOR;
 		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
 
 		for (ItemStack drop : drops) {
 			double scaled = drop.getAmount() * multiplier * boostMultiplier;
-			drop.setAmount(Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled)));
+			int base = (int) scaled;
+			double frac = scaled - base;
+			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
+			drop.setAmount(Math.max(1, amount));
 		}
 
         // Auto-replant functionality
@@ -149,12 +151,14 @@ public class CropHarvest {
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
 		Month month = AranarthUtils.getMonth();
 		double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
-		boolean isWinterMonth = DateUtils.isWinterMonth(month) || month == Month.IGNIVOR;
 		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
 
 		for (ItemStack drop : drops) {
 			double scaled = drop.getAmount() * multiplier * boostMultiplier;
-			drop.setAmount(Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled)));
+			int base = (int) scaled;
+			double frac = scaled - base;
+			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
+			drop.setAmount(Math.max(1, amount));
 		}
 
 		for (ItemStack drop : drops) {

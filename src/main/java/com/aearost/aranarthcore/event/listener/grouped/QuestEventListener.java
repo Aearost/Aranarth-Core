@@ -3,13 +3,13 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.utils.QuestUtils;
+import com.gmail.nossr50.mcMMO;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -122,14 +122,19 @@ public class QuestEventListener implements Listener {
     // Block Break — logs, stone, ores, sand, dirt, gravel, crops, ancient debris
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
         if (!QuestUtils.isSurvivalWorld(worldName)) return;
 
-        Block block = e.getBlock();
-        Material type = block.getType();
+        Material type = e.getBlock().getType();
+
+        // Ensures the block wasn't placed by the player
+        boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
+        if (!isEligible) {
+            return;
+        }
 
         // Logs
         if (LOG_MATERIALS.contains(type)) {
@@ -194,7 +199,7 @@ public class QuestEventListener implements Listener {
 
         // Crop harvest — check if mature
         if (HARVESTABLE_CROP_MATERIALS.contains(type)) {
-            if (isMatureCrop(block)) {
+            if (isMatureCrop(e.getBlock())) {
                 QuestUtils.updateProgress(player, QuestTaskType.HARVEST_CROPS, 1);
             }
         }
@@ -204,7 +209,7 @@ public class QuestEventListener implements Listener {
     // Block Place — planting crops
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onBlockPlace(BlockPlaceEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
@@ -220,7 +225,7 @@ public class QuestEventListener implements Listener {
     // Entity Death — mob kills
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onEntityDeath(EntityDeathEvent e) {
         LivingEntity entity = e.getEntity();
 
@@ -285,7 +290,7 @@ public class QuestEventListener implements Listener {
     // Fishing
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onPlayerFish(PlayerFishEvent e) {
         if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
         Player player = e.getPlayer();
@@ -298,7 +303,7 @@ public class QuestEventListener implements Listener {
     // Cooking — track via furnace result slot click
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onFurnaceResultTake(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         if (e.getView().getTopInventory().getType() != InventoryType.FURNACE) return;
@@ -319,7 +324,7 @@ public class QuestEventListener implements Listener {
     // Crafting — uses before/after inventory snapshot to count shift-click correctly
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onCraftItem(CraftItemEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
         String worldName = player.getWorld().getName();
@@ -377,7 +382,7 @@ public class QuestEventListener implements Listener {
     // Animal Breeding
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onEntityBreed(EntityBreedEvent e) {
         if (!(e.getBreeder() instanceof Player player)) return;
         String worldName = player.getWorld().getName();
@@ -389,7 +394,7 @@ public class QuestEventListener implements Listener {
     // Travel
     // -------------------------------------------------------------------------
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
         // Only count when the player moves to a new block position
         if (e.getFrom().getBlockX() == e.getTo().getBlockX()

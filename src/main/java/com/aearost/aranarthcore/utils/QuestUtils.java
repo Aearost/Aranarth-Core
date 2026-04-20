@@ -79,7 +79,7 @@ public class QuestUtils {
         r0d.add(new Quest(QuestTaskType.CRAFT_PLANKS, 32, 0.0, QuestType.DAILY, 0, "Craft 32 Planks"));
         r0d.add(new Quest(QuestTaskType.CRAFT_TORCHES, 16, 0.0, QuestType.DAILY, 0, "Craft 16 Torches"));
         r0d.add(new Quest(QuestTaskType.HARVEST_CROPS, 32, 0.0, QuestType.DAILY, 0, "Harvest 32 Crops"));
-        r0d.add(new Quest(QuestTaskType.PLANT_CROPS, 32, 0.0, QuestType.DAILY, 0, "Plant 32 Crops"));
+        r0d.add(new Quest(QuestTaskType.HARVEST_CROPS, 64, 0.0, QuestType.DAILY, 0, "Harvest 64 Crops"));
         r0d.add(new Quest(QuestTaskType.FISH, 5, 0.0, QuestType.DAILY, 0, "Fish 5 Fish"));
         r0d.add(new Quest(QuestTaskType.COOK_FOOD, 16, 0.0, QuestType.DAILY, 0, "Cook 16 Food"));
         r0d.add(new Quest(QuestTaskType.BREED_ANIMALS, 3, 0.0, QuestType.DAILY, 0, "Breed 3 Animals"));
@@ -758,7 +758,8 @@ public class QuestUtils {
     public static boolean isSurvivalWorld(String worldName) {
         return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
                 || worldName.equals("smp") || worldName.equals("smp_nether") || worldName.equals("smp_the_end")
-                || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end");
+                || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
+                || worldName.equals("spawn");
     }
 
     /**
