@@ -702,7 +702,7 @@ public class DateUtils {
 	 * @return The Description of the month.
 	 */
 	public static String getFlorivorDescription() {
-		return "The month of Florivór smells of flower petals drifting in the wind. Aside from the cherry leaves across the world, there is also a doubled crop growth rate.";
+		return "The smells of flower petals will drift through the wind, spawning at random. Additionally, eyeblossoms can be used to brew the Potions of Order and Chaos using a base of a Mundane potion.";
 	}
 
 	/**
