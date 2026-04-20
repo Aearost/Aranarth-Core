@@ -38,7 +38,8 @@ public class FireProtectionListener implements Listener {
 	public void onFireSpread(BlockSpreadEvent e) {
 		String worldName = e.getBlock().getWorld().getName();
 		if (e.getSource().getType() == Material.FIRE) {
-			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+			if (worldName.startsWith("world") || worldName.startsWith("smp")
+					|| worldName.startsWith("resource") || worldName.startsWith("creative")) {
 				e.setCancelled(true);
 			}
 		}
@@ -50,7 +51,8 @@ public class FireProtectionListener implements Listener {
 	@EventHandler
 	public void onFireBurn(BlockBurnEvent e) {
 		String worldName = e.getBlock().getWorld().getName();
-		if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+		if (worldName.startsWith("world") || worldName.startsWith("smp")
+				|| worldName.startsWith("resource") || worldName.startsWith("creative")) {
 			e.setCancelled(true);
 		}
 	}

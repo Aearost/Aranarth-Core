@@ -241,6 +241,7 @@ Minor Features
 [+] Added offline support for claiming vote keys
 [+] Added functionality to drop an item to the floor with /ac give if there is no inventory space
 [+] Implemented a basic quest system
+[+] Added the creative world to the fire protection listener
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
