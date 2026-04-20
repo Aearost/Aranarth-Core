@@ -97,6 +97,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandWeather.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("questnpc")) {
 			commandResult = CommandQuestNpc.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("home")) {
+			commandResult = CommandAdminHome.onCommand(sender, args);
 		}
 		return commandResult;
 	}

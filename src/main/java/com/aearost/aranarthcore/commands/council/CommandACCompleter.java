@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -27,7 +29,7 @@ public class CommandACCompleter implements TabCompleter {
 
 	private static final List<String> COUNCIL_OPTIONS = List.of(
 		"admin", "ban", "broadcast", "clearchat", "dateset", "give",
-		"invsee", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
+		"home", "invsee", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
 		"speed", "sudo", "time", "tp", "tpf", "unban", "unmute",
 		"vanish", "warn", "weather", "whereis"
 	);
@@ -124,6 +126,19 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 2) yield filter(List.of("add", "remove"), args[1]);
 				if (args.length == 3) yield new ArrayList<>(List.of("CHI", "HARVEST", "HUNTER", "MINER"));
 				if (args.length == 4) yield filterPlayers(args[3]);
+				yield List.of();
+			}
+			case "home" -> {
+				if (args.length == 2) yield filterPlayers(args[1]);
+				if (args.length == 3) {
+					OfflinePlayer homeTarget = Bukkit.getOfflinePlayer(args[1]);
+					if (homeTarget != null) {
+						List<String> homeNames = AranarthUtils.getPlayer(homeTarget.getUniqueId()).getHomes().stream()
+							.map(h -> ChatUtils.stripColorFormatting(h.getName()))
+							.collect(Collectors.toList());
+						yield filter(homeNames, args[2]);
+					}
+				}
 				yield List.of();
 			}
 			case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();

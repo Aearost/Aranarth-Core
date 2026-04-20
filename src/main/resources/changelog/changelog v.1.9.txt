@@ -245,6 +245,7 @@ Minor Features
 [~] Prevented all movement of a shulker box in inventory while in the GuiShulker
 [+] Also added additional cautionary checks when picking up items in shulkers
 [+] Added /keyclaim to claim vote keys when provided in an invalid world or while offline
+[+] Added /ac home to view and teleport to a player's homes
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
