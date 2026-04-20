@@ -346,6 +346,7 @@ public class QuestUtils {
         if (!playerActiveWeeklyQuests.containsKey(uuid)) {
             assignWeeklyQuests(uuid, rank);
         }
+        playerQuestRank.putIfAbsent(uuid, rank);
     }
 
     private static void assignDailyQuests(UUID uuid, int rank) {
