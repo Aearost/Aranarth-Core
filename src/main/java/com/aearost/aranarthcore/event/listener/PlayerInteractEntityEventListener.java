@@ -4,7 +4,9 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.mob.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.mob.VillagerTradeOverrides;
+import com.aearost.aranarthcore.event.player.QuestNpcInteract;
 import com.aearost.aranarthcore.event.player.SentinelMark;
+import com.aearost.aranarthcore.utils.QuestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.IronGolem;
@@ -28,6 +30,11 @@ public class PlayerInteractEntityEventListener implements Listener {
     public void onPlayerInteract(PlayerInteractEntityEvent e) {
         if (e.getRightClicked() != null) {
             if (e.getRightClicked() instanceof Villager) {
+                // Quest NPC check must come first to prevent trade GUI from opening
+                if (QuestUtils.isQuestNpc(e.getRightClicked())) {
+                    new QuestNpcInteract().execute(e);
+                    return;
+                }
                 new VillagerTradeOverrides().execute(e);
                 new VillagerInventoryViewClick().execute(e);
                 new VillagerCamelPickup().execute(e);

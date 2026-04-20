@@ -97,6 +97,8 @@ commands:
     description: Opens the GUI of the player's potions
   pronouns:
     description: Allows the player to update their pronouns
+  quests:
+    description: Opens the Aranarth Quests GUI
   randomizer:
     description: Randomizes placed blocks
     aliases: [rand]

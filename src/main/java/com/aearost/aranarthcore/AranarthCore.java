@@ -14,6 +14,7 @@ import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.event.listener.QuestEventListener;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
@@ -84,6 +85,8 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveCompressible();
 				PersistenceUtils.saveShopLocations();
 				PersistenceUtils.saveKillDeathCount();
+				PersistenceUtils.saveQuestState();
+				PersistenceUtils.saveQuestProgress();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
 
@@ -141,6 +144,7 @@ public class AranarthCore extends JavaPlugin {
 				AranarthUtils.refreshSentinels();
 				AranarthUtils.updateAfkLocations();
 				AranarthUtils.updateTab();
+				QuestUtils.checkAndPerformResets();
 
 				// Seasons functionality
 				DateUtils dateUtils = new DateUtils();
@@ -193,6 +197,9 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadVoteKeys();
 		PersistenceUtils.loadToggledFeatures();
 		PersistenceUtils.loadKillDeathCount();
+		PersistenceUtils.loadQuestState();
+		QuestUtils.initialize();
+		PersistenceUtils.loadQuestProgress();
 	}
 
 	/**
@@ -268,6 +275,7 @@ public class AranarthCore extends JavaPlugin {
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
 		new ArmorStandItemAddListener(this);
+		new QuestEventListener(this);
 
 		// Discord server join and quit messages
 		new BukkitRunnable() {
@@ -459,6 +467,7 @@ public class AranarthCore extends JavaPlugin {
 		getCommand("voteshop").setExecutor(new CommandVoteShop());
 		getCommand("warp").setExecutor(new CommandWarp());
 		getCommand("warp").setTabCompleter(new CommandWarpCompleter());
+		getCommand("quests").setExecutor(new CommandQuests());
 	}
 
 	/**
@@ -589,6 +598,8 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveBoosts();
 		PersistenceUtils.saveCompressible();
 		PersistenceUtils.saveShopLocations();
+		PersistenceUtils.saveQuestState();
+		PersistenceUtils.saveQuestProgress();
 
 
 		Bukkit.resetRecipes();

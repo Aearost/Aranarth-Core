@@ -12,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
@@ -163,6 +164,15 @@ public class SpawnProtectionListener implements Listener {
 	public void onMobSpawn(CreatureSpawnEvent e) {
 		if (AranarthUtils.isSpawnLocation(e.getLocation())) {
 			if (e.getEntityType() != EntityType.ARMOR_STAND && e.getEntityType() != EntityType.MANNEQUIN) {
+				// Allow the spawning of the Quest NPC
+				if (e.getEntity() instanceof Villager villager) {
+					if (!ChatUtils.stripColorFormatting(villager.getCustomName()).equals("Quest Master")) {
+						e.setCancelled(true);
+					} else {
+						return;
+					}
+				}
+
 				// Cannot get the player who placed it but can get nearby players and prevent
 				List<Entity> nearby = e.getEntity().getNearbyEntities(8, 8, 8);
 				for (Entity entity : nearby) {

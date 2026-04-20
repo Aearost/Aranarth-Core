@@ -79,6 +79,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiTopDeathsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
                 new GuiTopKillsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
+                new GuiQuestsClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

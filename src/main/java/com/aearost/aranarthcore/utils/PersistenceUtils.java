@@ -2,7 +2,10 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
 import java.util.stream.Collectors;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
@@ -2525,6 +2528,284 @@ public class PersistenceUtils {
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the vote keys");
 			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Quest State Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads reset timestamps from quest_state.txt.
+	 */
+	public static void loadQuestState() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_state.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the quest_state file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				if (row.startsWith("lastDailyReset|")) {
+					QuestUtils.setLastDailyReset(Long.parseLong(row.split("\\|")[1]));
+				} else if (row.startsWith("lastWeeklyReset|")) {
+					QuestUtils.setLastWeeklyReset(Long.parseLong(row.split("\\|")[1]));
+				}
+			}
+
+			Bukkit.getLogger().info("Quest state has been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the quest state!");
+		}
+	}
+
+	/**
+	 * Saves reset timestamps to quest_state.txt.
+	 */
+	public static void saveQuestState() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_state.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			// If the file isn't already there
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new quest_state.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of quest_state.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#Quest state — do not edit manually\n");
+			writer.write("lastDailyReset|" + QuestUtils.getLastDailyReset() + "\n");
+			writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving the quest state");
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Quest Progress Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
+	 * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|d1prog|d1done|d1claimed|d2task|d2prog|d2done|d2claimed|
+	 *         w0task|w0prog|w0done|w0claimed|w1task|w1prog|w1done|w1claimed|w2task|w2prog|w2done|w2claimed
+	 */
+	public static void loadQuestProgress() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_progress.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the quest_progress file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				String[] fields = row.split("\\|");
+				if (fields.length < 26) continue;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				int rank = Integer.parseInt(fields[1]);
+
+				// New format (32 fields): task|reward|prog|done|claimed per quest slot
+				// Old format (26 fields): task|prog|done|claimed per quest slot (reward falls back to random)
+				boolean hasRewards = fields.length >= 32;
+
+				String[] dTasks;
+				double[] dRewards;
+				int[] dailyProgress;
+				boolean[] dailyCompleted, dailyClaimed;
+				String[] wTasks;
+				double[] wRewards;
+				int[] weeklyProgress;
+				boolean[] weeklyCompleted, weeklyClaimed;
+
+				if (hasRewards) {
+					dTasks = new String[]{ fields[2], fields[7], fields[12] };
+					dRewards = new double[]{ Double.parseDouble(fields[3]), Double.parseDouble(fields[8]), Double.parseDouble(fields[13]) };
+					dailyProgress = new int[]{ Integer.parseInt(fields[4]), Integer.parseInt(fields[9]), Integer.parseInt(fields[14]) };
+					dailyCompleted = new boolean[]{ fields[5].equals("1"), fields[10].equals("1"), fields[15].equals("1") };
+					dailyClaimed = new boolean[]{ fields[6].equals("1"), fields[11].equals("1"), fields[16].equals("1") };
+					wTasks = new String[]{ fields[17], fields[22], fields[27] };
+					wRewards = new double[]{ Double.parseDouble(fields[18]), Double.parseDouble(fields[23]), Double.parseDouble(fields[28]) };
+					weeklyProgress = new int[]{ Integer.parseInt(fields[19]), Integer.parseInt(fields[24]), Integer.parseInt(fields[29]) };
+					weeklyCompleted = new boolean[]{ fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1") };
+					weeklyClaimed = new boolean[]{ fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1") };
+				} else {
+					// Old format — rewards will be regenerated randomly
+					dTasks = new String[]{ fields[2], fields[6], fields[10] };
+					dRewards = new double[]{ 0.0, 0.0, 0.0 };
+					dailyProgress = new int[]{ Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11]) };
+					dailyCompleted = new boolean[]{ fields[4].equals("1"), fields[8].equals("1"), fields[12].equals("1") };
+					dailyClaimed = new boolean[]{ fields[5].equals("1"), fields[9].equals("1"), fields[13].equals("1") };
+					wTasks = new String[]{ fields[14], fields[18], fields[22] };
+					wRewards = new double[]{ 0.0, 0.0, 0.0 };
+					weeklyProgress = new int[]{ Integer.parseInt(fields[15]), Integer.parseInt(fields[19]), Integer.parseInt(fields[23]) };
+					weeklyCompleted = new boolean[]{ fields[16].equals("1"), fields[20].equals("1"), fields[24].equals("1") };
+					weeklyClaimed = new boolean[]{ fields[17].equals("1"), fields[21].equals("1"), fields[25].equals("1") };
+				}
+
+				// Restore active daily quests from the pool using stored task types and rewards
+				List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
+				List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
+
+				if (activeDailyQuests != null) QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
+				if (activeWeeklyQuests != null) QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
+
+				QuestUtils.getPlayerDailyProgress().put(uuid, dailyProgress);
+				QuestUtils.getPlayerDailyCompleted().put(uuid, dailyCompleted);
+				QuestUtils.getPlayerDailyClaimed().put(uuid, dailyClaimed);
+				QuestUtils.getPlayerWeeklyProgress().put(uuid, weeklyProgress);
+				QuestUtils.getPlayerWeeklyCompleted().put(uuid, weeklyCompleted);
+				QuestUtils.getPlayerWeeklyClaimed().put(uuid, weeklyClaimed);
+				QuestUtils.getPlayerQuestRank().put(uuid, rank);
+			}
+
+			Bukkit.getLogger().info("Quest progress has been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading quest progress!");
+		}
+	}
+
+	/**
+	 * Resolves Quest objects from the quest pool using stored task type names and rewards.
+	 * If a stored reward is 0 (old format), a new random reward is generated.
+	 * Returns null if no valid quests could be resolved.
+	 */
+	private static List<Quest> resolveQuestsFromPool(UUID uuid, int rank, String[] taskNames, double[] rewards, QuestType type) {
+		List<Quest> pool = type == QuestType.DAILY ? QuestUtils.getDailyQuestPool(rank) : QuestUtils.getWeeklyQuestPool(rank);
+		List<Quest> resolved = new ArrayList<>();
+		for (int i = 0; i < taskNames.length; i++) {
+			String taskName = taskNames[i];
+			if (taskName.equals("NONE")) continue;
+			try {
+				QuestTaskType taskType = QuestTaskType.valueOf(taskName);
+				Quest found = null;
+				for (Quest q : pool) {
+					if (q.getTaskType() == taskType) { found = q; break; }
+				}
+				if (found != null) {
+					double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
+					resolved.add(found.withReward(reward));
+				}
+			} catch (IllegalArgumentException ignored) {}
+		}
+		return resolved.isEmpty() ? null : resolved;
+	}
+
+	/**
+	 * Saves per-player quest progress (including active quest assignments) to quest_progress.txt.
+	 * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|...|w2task|w2prog|w2done|w2claimed
+	 */
+	public static void saveQuestProgress() {
+		HashMap<UUID, List<Quest>> activeDailyMap = QuestUtils.getPlayerActiveDailyQuestsMap();
+		HashMap<UUID, List<Quest>> activeWeeklyMap = QuestUtils.getPlayerActiveWeeklyQuestsMap();
+		HashMap<UUID, int[]> dailyProgress = QuestUtils.getPlayerDailyProgress();
+		HashMap<UUID, boolean[]> dailyCompleted = QuestUtils.getPlayerDailyCompleted();
+		HashMap<UUID, boolean[]> dailyClaimed = QuestUtils.getPlayerDailyClaimed();
+		HashMap<UUID, int[]> weeklyProgress = QuestUtils.getPlayerWeeklyProgress();
+		HashMap<UUID, boolean[]> weeklyCompleted = QuestUtils.getPlayerWeeklyCompleted();
+		HashMap<UUID, boolean[]> weeklyClaimed = QuestUtils.getPlayerWeeklyClaimed();
+		HashMap<UUID, Integer> questRanks = QuestUtils.getPlayerQuestRank();
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_progress.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			// If the file isn't already there
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new quest_progress.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of quest_progress.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#uuid|rank|d0task|d0reward|d0prog|d0done|d0claimed|d1task|d1reward|d1prog|d1done|d1claimed|d2task|d2reward|d2prog|d2done|d2claimed|w0task|w0reward|w0prog|w0done|w0claimed|w1task|w1reward|w1prog|w1done|w1claimed|w2task|w2reward|w2prog|w2done|w2claimed\n");
+
+			Set<UUID> allUuids = new HashSet<>();
+			allUuids.addAll(activeDailyMap.keySet());
+			allUuids.addAll(activeWeeklyMap.keySet());
+			allUuids.addAll(dailyProgress.keySet());
+			allUuids.addAll(weeklyProgress.keySet());
+
+			for (UUID uuid : allUuids) {
+				int rank = questRanks.getOrDefault(uuid, 0);
+
+				List<Quest> dq = activeDailyMap.getOrDefault(uuid, new ArrayList<>());
+				int[] dp = dailyProgress.getOrDefault(uuid, new int[3]);
+				boolean[] dc = dailyCompleted.getOrDefault(uuid, new boolean[3]);
+				boolean[] dClaim = dailyClaimed.getOrDefault(uuid, new boolean[3]);
+
+				List<Quest> wq = activeWeeklyMap.getOrDefault(uuid, new ArrayList<>());
+				int[] wp = weeklyProgress.getOrDefault(uuid, new int[3]);
+				boolean[] wc = weeklyCompleted.getOrDefault(uuid, new boolean[3]);
+				boolean[] wClaim = weeklyClaimed.getOrDefault(uuid, new boolean[3]);
+
+				StringBuilder row = new StringBuilder(uuid + "|" + rank);
+				for (int i = 0; i < 3; i++) {
+					String task = i < dq.size() ? dq.get(i).getTaskType().name() : "NONE";
+					int reward = i < dq.size() ? (int) dq.get(i).getReward() : 0;
+					int prog = i < dp.length ? dp[i] : 0;
+					int done = (i < dc.length && dc[i]) ? 1 : 0;
+					int claimed = (i < dClaim.length && dClaim[i]) ? 1 : 0;
+					row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
+				}
+				for (int i = 0; i < 3; i++) {
+					String task = i < wq.size() ? wq.get(i).getTaskType().name() : "NONE";
+					int reward = i < wq.size() ? (int) wq.get(i).getReward() : 0;
+					int prog = i < wp.length ? wp[i] : 0;
+					int done = (i < wc.length && wc[i]) ? 1 : 0;
+					int claimed = (i < wClaim.length && wClaim[i]) ? 1 : 0;
+					row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
+				}
+				writer.write(row + "\n");
+			}
+
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving quest progress");
 		}
 	}
 
