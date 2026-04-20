@@ -1641,8 +1641,11 @@ public class AranarthUtils {
 	 * @param onSuccess The method to be called once the timer ends to handle the actual teleportation.
 	 */
 	public static void initiateTeleport(Player player, Runnable onSuccess) {
-		// Override the previous task if exists with the new one
-		teleportingPlayers.remove(player.getUniqueId());
+		// Cancel and override the previous task if exists with the new one
+		BukkitTask existingTask = teleportingPlayers.remove(player.getUniqueId());
+		if (existingTask != null) {
+			existingTask.cancel();
+		}
 
 		// Initiate the teleportation after a 3 second delay, storing the task for the duration
 		BukkitTask task = new BukkitRunnable() {

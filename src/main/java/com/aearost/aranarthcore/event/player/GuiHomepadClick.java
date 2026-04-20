@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -128,6 +129,7 @@ public class GuiHomepadClick {
 						if (player.isInsideVehicle()) {
 							Entity mount = player.getVehicle();
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+								String fromWorld = player.getLocation().getWorld().getName();
 								aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
 								Location destination = home.getLocation();
 								player.leaveVehicle();
@@ -136,6 +138,11 @@ public class GuiHomepadClick {
 								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+								try {
+									AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
+								} catch (IOException ex) {
+									player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+								}
 								new BukkitRunnable() {
 									@Override
 									public void run() {
@@ -144,12 +151,18 @@ public class GuiHomepadClick {
 								}.runTaskLater(AranarthCore.getInstance(), 2L);
 							}
 						} else {
+							String fromWorld = player.getLocation().getWorld().getName();
 							aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
 							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
 							player.teleport(home.getLocation());
 							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 							player.sendMessage(ChatUtils
 									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+							try {
+								AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
+							} catch (IOException ex) {
+								player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+							}
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					}
