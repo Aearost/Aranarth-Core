@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.listener;
+package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.QuestTaskType;

@@ -14,7 +14,7 @@ import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
-import com.aearost.aranarthcore.event.listener.QuestEventListener;
+import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
@@ -256,6 +256,7 @@ public class AranarthCore extends JavaPlugin {
 		new TamedPetStealPreventListener(this);
 		new RootingArrowMovePrevent(this);
 		new CropInfoEventListener(this);
+		new QuestEventListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
@@ -275,7 +276,6 @@ public class AranarthCore extends JavaPlugin {
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
 		new ArmorStandItemAddListener(this);
-		new QuestEventListener(this);
 
 		// Discord server join and quit messages
 		new BukkitRunnable() {
