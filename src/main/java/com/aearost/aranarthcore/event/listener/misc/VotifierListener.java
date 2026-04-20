@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,7 +40,7 @@ public class VotifierListener implements Listener {
 				return;
 			}
 
-			Player player = Bukkit.getPlayer(uuid);
+			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 			ItemStack key = new KeyVote().getItem();
 			int amount = 1;
 			int random = new Random().nextInt(1000);
@@ -65,32 +66,40 @@ public class VotifierListener implements Listener {
 			}
 
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+				if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
 				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(player.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
 				}
 				onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
 			}
 
 			// Adds their vote
-			AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), amount, System.currentTimeMillis()));
+			AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
 
-			// Give the key if the player is online and in a valid world, otherwise store it as pending
-			String worldName = player != null ? player.getWorld().getName() : "";
-			boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource");
-			if (player != null && validWorld) {
-				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
-				if (!remainder.isEmpty()) {
-					AranarthUtils.addPendingVoteKeys(uuid, 1);
-					player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! Use &e/keyclaim &7to claim your vote key"));
-				}
-			} else {
+			if (!offlinePlayer.isOnline()) {
 				AranarthUtils.addPendingVoteKeys(uuid, 1);
-				if (player != null) {
-					player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! Use &e/keyclaim &7in Survival!"));
+				return;
+			} else {
+				Player player = Bukkit.getPlayer(uuid);
+				// Give the key if the player is online and in a valid world, otherwise store it as pending
+				String worldName = player.getWorld().getName();
+				boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp")
+						|| worldName.startsWith("resource") || worldName.startsWith("spawn");
+				if (offlinePlayer.isOnline() && validWorld) {
+					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
+					if (!remainder.isEmpty()) {
+						AranarthUtils.addPendingVoteKeys(uuid, 1);
+						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! Use &e/keyclaim &7to claim your vote key"));
+					}
+				} else {
+					AranarthUtils.addPendingVoteKeys(uuid, 1);
+					if (player != null) {
+						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! Use &e/keyclaim &7in Survival!"));
+					}
 				}
 			}
+
 		} else {
 			Bukkit.getLogger().info("Player " + username + " voted but has never joined the server before");
 		}

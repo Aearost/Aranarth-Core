@@ -244,6 +244,7 @@ Minor Features
 [+] Added the creative world to the fire protection listener
 [~] Prevented all movement of a shulker box in inventory while in the GuiShulker
 [+] Also added additional cautionary checks when picking up items in shulkers
+[+] Added /keyclaim to claim vote keys when provided in an invalid world or while offline
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

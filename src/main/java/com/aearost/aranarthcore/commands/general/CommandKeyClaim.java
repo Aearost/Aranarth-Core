@@ -33,7 +33,8 @@ public class CommandKeyClaim implements CommandExecutor {
 		}
 
 		String worldName = player.getWorld().getName();
-		if (!worldName.startsWith("world") && !worldName.startsWith("smp") && !worldName.startsWith("resource")) {
+		if (!worldName.startsWith("world") && !worldName.startsWith("smp")
+				&& !worldName.startsWith("resource") && !worldName.startsWith("spawn")) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou can only claim vote keys in survival worlds!"));
 			return true;
 		}
