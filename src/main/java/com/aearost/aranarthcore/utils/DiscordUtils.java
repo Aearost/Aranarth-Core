@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -774,13 +775,13 @@ public class DiscordUtils {
 		welcomeMessages.add("**A new challenger appears: " + user + "! ⚡**");
 
 		int index = ThreadLocalRandom.current().nextInt(welcomeMessages.size());
-		EmbedBuilder embed = new EmbedBuilder();
-		embed.setDescription(welcomeMessages.get(index)).setColor(Color.GREEN);
-		welcome.sendMessage(embed.build()).queue(message -> {
+		welcome.sendMessage(welcomeMessages.get(index))
+				.allowedMentions(Collections.emptyList())
+				.queue(message -> {
 					message.addReaction("\uD83D\uDC4B").queue();
 					message.addReaction("🎉").queue();
 					message.addReaction("\uD83C\uDF88").queue();
-		});
+				});
 	}
 
 	/**
@@ -799,11 +800,11 @@ public class DiscordUtils {
 		leaveMessages.add("**" + user + " rage quit 😤**");
 
 		int index = ThreadLocalRandom.current().nextInt(leaveMessages.size());
-		EmbedBuilder embed = new EmbedBuilder();
-		embed.setDescription(leaveMessages.get(index)).setColor(Color.RED);
-		welcome.sendMessage(embed.build()).queue(message -> {
+		welcome.sendMessage(leaveMessages.get(index))
+				.allowedMentions(Collections.emptyList())
+				.queue(message -> {
 					message.addReaction("\uD83D\uDC94").queue();
 					message.addReaction("\uD83D\uDE2D").queue();
-		});
+				});
 	}
 }
