@@ -6,7 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockFertilizeEvent;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -65,5 +67,19 @@ public class CropFertilize {
         e.setCancelled(true);
         currentCrop.setAge(newAge);
         block.setBlockData(currentCrop);
+
+        // Cancelling the event prevents vanilla from consuming the bone meal, so do it manually
+        Player player = e.getPlayer();
+        if (player != null) {
+            ItemStack mainHand = player.getInventory().getItemInMainHand();
+            if (mainHand.getType() == Material.BONE_MEAL) {
+                mainHand.setAmount(mainHand.getAmount() - 1);
+            } else {
+                ItemStack offHand = player.getInventory().getItemInOffHand();
+                if (offHand.getType() == Material.BONE_MEAL) {
+                    offHand.setAmount(offHand.getAmount() - 1);
+                }
+            }
+        }
     }
 }
