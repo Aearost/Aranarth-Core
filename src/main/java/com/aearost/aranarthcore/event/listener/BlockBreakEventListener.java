@@ -48,6 +48,8 @@ public class BlockBreakEventListener implements Listener {
                 new TorchflowerBreak().execute(e);
             } else if (type == Material.PITCHER_PLANT || type == Material.PITCHER_CROP || hasLightCropAbove(e.getBlock(), "PITCHER_PLANT")) {
                 new PitcherPlantBreak().execute(e);
+            } else if (type == Material.OPEN_EYEBLOSSOM || hasLightCropAbove(e.getBlock(), "EYEBLOSSOM")) {
+                new EyeblossomBreak().execute(e);
             } else {
                 if (e.getBlock().getType().name().endsWith("_ORE") || e.getBlock().getType() == Material.ANCIENT_DEBRIS) {
                     new OreClusterDrops().execute(e);
@@ -100,6 +102,8 @@ public class BlockBreakEventListener implements Listener {
         if (name.equals("TORCHFLOWER") && (locationAbove.getBlock().getType() == Material.TORCHFLOWER || locationAbove.getBlock().getType() == Material.TORCHFLOWER_CROP)) {
             return true;
         } else if (name.equals("PITCHER_PLANT") && (locationAbove.getBlock().getType() == Material.PITCHER_PLANT || locationAbove.getBlock().getType() == Material.PITCHER_CROP)) {
+            return true;
+        } else if (name.equals("EYEBLOSSOM") && (locationAbove.getBlock().getType() == Material.OPEN_EYEBLOSSOM)) {
             return true;
         }
         return false;

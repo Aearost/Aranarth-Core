@@ -36,6 +36,8 @@ public class BlockPlaceEventListener implements Listener {
                 new TorchflowerPlace().execute(e);
             } else if (is.getType() == Material.PITCHER_PLANT) {
                 new PitcherPlantPlace().execute(e);
+            } else if (is.getType() == Material.OPEN_EYEBLOSSOM) {
+                new EyeblossomPlace().execute(e);
             } else if (AranarthUtils.isContainerBlock(e.getBlock())) {
                 new ContainerAutoLock().execute(e);
             }

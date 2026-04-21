@@ -7,16 +7,16 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
- * Removes the light block above the torchflower.
+ * Removes a light block above open eyeblossoms when broken.
  */
-public class TorchflowerBreak {
+public class EyeblossomBreak {
 
 	public void execute(BlockBreakEvent e) {
 		Location location = e.getBlock().getLocation();
 		Location locationAbove = new Location(location.getWorld(), location.getX(), location.getY() + 1, location.getZ());
 
 		// Breaking the flower
-		if (location.getBlock().getType() == Material.TORCHFLOWER && locationAbove.getBlock().getType() == Material.LIGHT) {
+		if (location.getBlock().getType() == Material.OPEN_EYEBLOSSOM && locationAbove.getBlock().getType() == Material.LIGHT) {
 			locationAbove.getBlock().setType(Material.BARRIER);
 			new BukkitRunnable() {
 				@Override
@@ -26,16 +26,15 @@ public class TorchflowerBreak {
 			}.runTaskLater(AranarthCore.getInstance(), 1);
 		}
 		// Breaking the block under the flower
-		else if (locationAbove.getBlock().getType() == Material.TORCHFLOWER) {
-			Location locationAboveTorchflower = new Location(locationAbove.getWorld(), locationAbove.getX(), locationAbove.getY() + 1, locationAbove.getZ());
-			locationAboveTorchflower.getBlock().setType(Material.BARRIER);
+		else if (locationAbove.getBlock().getType() == Material.OPEN_EYEBLOSSOM) {
+			Location locationAboveOpenEyeblossom = new Location(locationAbove.getWorld(), locationAbove.getX(), locationAbove.getY() + 1, locationAbove.getZ());
+			locationAboveOpenEyeblossom.getBlock().setType(Material.BARRIER);
 			new BukkitRunnable() {
 				@Override
 				public void run() {
-					locationAboveTorchflower.getBlock().setType(Material.AIR);
+					locationAboveOpenEyeblossom.getBlock().setType(Material.AIR);
 				}
 			}.runTaskLater(AranarthCore.getInstance(), 1);
 		}
 	}
-
 }
