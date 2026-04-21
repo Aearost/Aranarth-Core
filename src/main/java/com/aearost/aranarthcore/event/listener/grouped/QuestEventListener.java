@@ -306,7 +306,8 @@ public class QuestEventListener implements Listener {
     @EventHandler
     public void onFurnaceResultTake(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (e.getView().getTopInventory().getType() != InventoryType.FURNACE) return;
+        InventoryType topType = e.getView().getTopInventory().getType();
+        if (topType != InventoryType.FURNACE && topType != InventoryType.SMOKER) return;
         // Result slot is raw slot 2
         if (e.getRawSlot() != 2) return;
 
@@ -317,7 +318,21 @@ public class QuestEventListener implements Listener {
         String worldName = player.getWorld().getName();
         if (!QuestUtils.isSurvivalWorld(worldName)) return;
 
-        QuestUtils.updateProgress(player, QuestTaskType.COOK_FOOD, result.getAmount());
+        Material type = result.getType();
+
+        if (e.isShiftClick()) {
+            // Snapshot before to correctly count what actually fits into the inventory
+            Map<Material, Integer> before = countRelevantItems(player, type);
+            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+                Map<Material, Integer> after = countRelevantItems(player, type);
+                int gained = after.getOrDefault(type, 0) - before.getOrDefault(type, 0);
+                if (gained > 0) {
+                    QuestUtils.updateProgress(player, QuestTaskType.COOK_FOOD, gained);
+                }
+            }, 1L);
+        } else {
+            QuestUtils.updateProgress(player, QuestTaskType.COOK_FOOD, result.getAmount());
+        }
     }
 
     // -------------------------------------------------------------------------

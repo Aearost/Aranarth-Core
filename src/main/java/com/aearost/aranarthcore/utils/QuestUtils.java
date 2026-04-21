@@ -247,20 +247,9 @@ public class QuestUtils {
         // ---- RANK 6 (getRank() == 6) — $500,000 ----
         List<Quest> r6d = new ArrayList<>();
         r6d.add(new Quest(QuestTaskType.MINE_DIAMOND, 40, 0.0, QuestType.DAILY, 6, "Mine 40 Diamonds"));
-        r6d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 80, 0.0, QuestType.DAILY, 6, "Mine 80 Gold Ore"));
-        r6d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 130, 0.0, QuestType.DAILY, 6, "Kill 130 Hostile Mobs"));
-        r6d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Mobs with a Sword"));
-        r6d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 25, 0.0, QuestType.DAILY, 6, "Kill 25 Endermen"));
-        r6d.add(new Quest(QuestTaskType.KILL_WITCH, 8, 0.0, QuestType.DAILY, 6, "Kill 8 Witches"));
-        r6d.add(new Quest(QuestTaskType.KILL_BLAZE, 12, 0.0, QuestType.DAILY, 6, "Kill 12 Blaze"));
-        r6d.add(new Quest(QuestTaskType.HARVEST_CROPS, 224, 0.0, QuestType.DAILY, 6, "Harvest 224 Crops"));
-        r6d.add(new Quest(QuestTaskType.BREED_ANIMALS, 18, 0.0, QuestType.DAILY, 6, "Breed 18 Animals"));
-        r6d.add(new Quest(QuestTaskType.FISH, 30, 0.0, QuestType.DAILY, 6, "Fish 30 Fish"));
-        r6d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 48, 0.0, QuestType.DAILY, 6, "Craft 48 Golden Apples"));
-        r6d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 96, 0.0, QuestType.DAILY, 6, "Mine 96 Iron Ore"));
-        r6d.add(new Quest(QuestTaskType.KILL_SKELETON, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Skeletons"));
         r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
-        r6d.add(new Quest(QuestTaskType.BREAK_LOG, 256, 0.0, QuestType.DAILY, 6, "Break 256 Logs"));
+        r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
+        r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
         r6d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 6, "Kill 5 Players"));
         dailyQuestPool.put(6, r6d);
 
