@@ -70,7 +70,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String ignivor() {
 		return ChatUtils.translateToColor(
-				"&lIgnivór (1)" +
+				"#ffe082&lIgnivór &r&l(1)" +
 						"\n&r&oThe New Fire" +
 						"\n\n&r" + DateUtils.getIgnivorDescription()
 		);
@@ -78,7 +78,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String aquinvor() {
 		return ChatUtils.translateToColor(
-				"&lAquinvór (2)" +
+				"&3&lAquinvór &r&l(2)" +
 						"\n&r&oThe Dampened" +
 						"\n\n&r" + DateUtils.getAquinvorDescription()
 		);
@@ -86,7 +86,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String ventivor() {
 		return ChatUtils.translateToColor(
-				"&lVentivór (3)" +
+				"#d1e5f4&lVentivór &r&l(3)" +
 						"\n&r&oThe Zephyr" +
 						"\n\n&r" + DateUtils.getVentivorDescription()
 		);
@@ -94,7 +94,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String florivor() {
 		return ChatUtils.translateToColor(
-				"&lFlorivór (4)" +
+				"#FDA4BA&lFlorivór &r&l(4)" +
 						"\n&r&oThe Blossoming" +
 						"\n\n&r" + DateUtils.getFlorivorDescription()
 		);
@@ -102,7 +102,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String aestivor() {
 		return ChatUtils.translateToColor(
-				"&lAestivór (5)" +
+				"&e&lAestivór &r&l(5)" +
 						"\n&r&oThe Electrified" +
 						"\n\n&r" + DateUtils.getAestivorDescription()
 		);
@@ -110,7 +110,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String calorvor() {
 		return ChatUtils.translateToColor(
-				"&lCalorvór (6)" +
+				"&6&lCalorvór &r&l(6)" +
 						"\n&r&oThe Warming" +
 						"\n\n&r" + DateUtils.getCalorvorDescription()
 		);
@@ -118,7 +118,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String ardorvor() {
 		return ChatUtils.translateToColor(
-				"&lArdorvór (7)" +
+				"#ff4500&lArdorvór &r&l(7)" +
 						"\n&r&oThe Enflamed" +
 						"\n\n&r" + DateUtils.getArdorvorDescription()
 		);
@@ -126,7 +126,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String solarvor() {
 		return ChatUtils.translateToColor(
-				"&lSolarvór (8)" +
+				"#BD5745&lSolarvór &r&l(8)" +
 						"\n&r&oThe Fruitful" +
 						"\n\n&r" + DateUtils.getSolarvorDescription()
 		);
@@ -134,7 +134,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String follivor() {
 		return ChatUtils.translateToColor(
-				"&lFollivór (9)" +
+				"#a17100&lFollivór &r&l(9)" +
 						"\n&r&oThe Lumbered" +
 						"\n\n&r" + DateUtils.getFollivorDescription()
 		);
@@ -142,7 +142,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String strigavor() {
 		return ChatUtils.translateToColor(
-				"&lStrigavór (10)" +
+				"#8a00c2&lStrigavór &r&l(10)" +
 						"\n&r&oThe Wicked" +
 						"\n\n&r" + DateUtils.getStrigavorDescription()
 		);
@@ -150,7 +150,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String faunivor() {
 		return ChatUtils.translateToColor(
-				"&lFaunivór (11)" +
+				"#5b0001&lFaunivór &r&l(11)" +
 						"\n&r&oThe Hunting" +
 						"\n\n&r" + DateUtils.getFaunivorDescription()
 		);
@@ -158,7 +158,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String umbravor() {
 		return ChatUtils.translateToColor(
-				"&lUmbravór (12)" +
+				"#2B3856&lUmbravór &r&l(12)" +
 						"\n&r&oThe Shadowed" +
 						"\n\n&r" + DateUtils.getUmbravorDescription()
 		);
@@ -166,7 +166,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String glacivor() {
 		return ChatUtils.translateToColor(
-				"&lGlacivór (13)" +
+				"#DBE9FA&lGlacivór &r&l(13)" +
 						"\n&r&oThe Frost" +
 						"\n\n&r" + DateUtils.getGlacivorDescription()
 		);
@@ -174,7 +174,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String frigorvor() {
 		return ChatUtils.translateToColor(
-				"&lFrigorvór (14)" +
+				"#79BAEC&lFrigorvór &r&l(14)" +
 						"\n&r&oThe Frozen" +
 						"\n\n&r" + DateUtils.getFrigorvorDescription()
 		);
@@ -182,7 +182,7 @@ public class CommandCalendar implements CommandExecutor {
 
 	private static String obscurvor() {
 		return ChatUtils.translateToColor(
-				"&lObscurvór (15)" +
+				"#2C041C&lObscurvór &r&l(15)" +
 						"\n&r&oThe Darkness" +
 						"\n\n&r" + DateUtils.getObscurvorDescription()
 		);

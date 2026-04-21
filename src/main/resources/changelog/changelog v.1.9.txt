@@ -249,6 +249,7 @@ Minor Features
 [+] Allowed special characters in dominion names and home names
 [+] Added functionality to place/break the light block of eyeblossoms
 [~] Fixed the lights not being properly destroyed above torchflowers and pitcher plants
+[~] Made each month name in /calendar appear in the month's color
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
