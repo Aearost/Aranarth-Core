@@ -246,6 +246,7 @@ Minor Features
 [+] Also added additional cautionary checks when picking up items in shulkers
 [+] Added /keyclaim to claim vote keys when provided in an invalid world or while offline
 [+] Added /ac home to view and teleport to a player's homes
+[+] Allowed special characters in dominion names and home names
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

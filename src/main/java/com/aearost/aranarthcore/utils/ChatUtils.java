@@ -208,7 +208,7 @@ public class ChatUtils {
 	 * @return The input string with all special characters removed.
 	 */
 	public static String removeSpecialCharacters(String value) {
-		return value.replaceAll("[^a-zA-Z0-9\\s&§#]", "");
+		return value.replaceAll("[^\\p{L}0-9 &§#]", "");
 	}
 
 	/**
