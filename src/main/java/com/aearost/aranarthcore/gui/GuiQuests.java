@@ -182,7 +182,11 @@ public class GuiQuests {
                 + quest.getQuestType().name().substring(1).toLowerCase() + " Quest"));
         lore.add("");
         lore.add(ChatUtils.translateToColor("&7Progress: &f" + progress + " &8/ &f" + quest.getRequired()));
-        lore.add(ChatUtils.translateToColor("&7Reward: &6$" + MONEY_FORMAT.format(quest.getReward())));
+        if (quest.hasItemReward()) {
+            lore.add(ChatUtils.translateToColor("&7Reward: &f" + QuestUtils.getItemRewardDisplayName(quest.getItemReward())));
+        } else {
+            lore.add(ChatUtils.translateToColor("&7Reward: &6$" + MONEY_FORMAT.format(quest.getReward())));
+        }
         lore.add("");
         lore.add(ChatUtils.translateToColor(statusColor + statusText));
 

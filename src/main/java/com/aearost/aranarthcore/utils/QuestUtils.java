@@ -2,13 +2,20 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
+import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
+import com.aearost.aranarthcore.items.key.KeyEpic;
+import com.aearost.aranarthcore.items.key.KeyGodly;
+import com.aearost.aranarthcore.items.key.KeyRare;
+import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Quest;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.text.NumberFormat;
@@ -361,7 +368,94 @@ public class QuestUtils {
         for (Quest q : selected) {
             assigned.add(q.withReward(generateRandomReward(rank, QuestType.WEEKLY)));
         }
+
+        // 25% chance that exactly one of the three weekly quests rewards an item instead of money
+        List<ItemStack> itemOptions = getWeeklyItemRewardOptions(rank);
+        if (!itemOptions.isEmpty() && RANDOM.nextFloat() < 0.25f) {
+            int itemIndex = RANDOM.nextInt(assigned.size());
+            ItemStack itemReward = itemOptions.get(RANDOM.nextInt(itemOptions.size()));
+            assigned.set(itemIndex, assigned.get(itemIndex).withItemReward(itemReward));
+        }
+
         playerActiveWeeklyQuests.put(uuid, assigned);
+    }
+
+    /**
+     * Returns the list of possible item rewards for a weekly quest of the given rank.
+     * Each item has equal probability of being selected when the 25% roll triggers.
+     */
+    private static List<ItemStack> getWeeklyItemRewardOptions(int rank) {
+        List<ItemStack> options = new ArrayList<>();
+        switch (rank) {
+            case 0 -> options.add(new KeyVote().getItem());
+            case 1 -> {
+                options.add(new KeyVote().getItem());
+                options.add(new ItemStack(Material.DIAMOND, 16));
+            }
+            case 2 -> {
+                options.add(new KeyVote().getItem());
+                options.add(new KeyRare().getItem());
+                options.add(new ItemStack(Material.DIAMOND, 24));
+            }
+            case 3 -> {
+                options.add(new KeyRare().getItem());
+                options.add(new ItemStack(Material.TRIDENT, 1));
+                options.add(new ItemStack(Material.HEART_OF_THE_SEA, 1));
+            }
+            case 4 -> {
+                options.add(new KeyRare().getItem());
+                options.add(new KeyEpic().getItem());
+                options.add(new ItemStack(Material.TRIDENT, 1));
+                options.add(new ItemStack(Material.NETHERITE_INGOT, 1));
+            }
+            case 5 -> {
+                options.add(new KeyEpic().getItem());
+                options.add(new ItemStack(Material.ELYTRA, 1));
+                options.add(new ItemStack(Material.NETHERITE_INGOT, 1));
+            }
+            case 6 -> {
+                options.add(new KeyEpic().getItem());
+                options.add(new KeyGodly().getItem());
+                options.add(new AranarthiumIngot().getItem());
+            }
+            case 7 -> {
+                options.add(new KeyGodly().getItem());
+                options.add(new AranarthiumIngot().getItem());
+                options.add(new ItemStack(Material.NETHER_STAR, 1));
+            }
+            case 8 -> {
+                options.add(new KeyGodly().getItem());
+                options.add(new AranarthiumIngot().getItem());
+                options.add(new ItemStack(Material.NETHER_STAR, 1));
+                options.add(new ItemStack(Material.HEAVY_CORE, 1));
+            }
+        }
+        return options;
+    }
+
+    /**
+     * Returns a human-readable display name for an item reward.
+     * Uses the item's custom display name if present, otherwise formats the material name.
+     * Prepends the amount when greater than 1.
+     */
+    public static String getItemRewardDisplayName(ItemStack item) {
+        String name;
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+            name = item.getItemMeta().getDisplayName();
+        } else {
+            String[] words = item.getType().name().split("_");
+            StringBuilder sb = new StringBuilder();
+            for (String word : words) {
+                if (!sb.isEmpty()) sb.append(" ");
+                sb.append(Character.toUpperCase(word.charAt(0)));
+                sb.append(word.substring(1).toLowerCase());
+            }
+            name = sb.toString();
+        }
+        if (item.getAmount() > 1) {
+            return item.getAmount() + "x " + name;
+        }
+        return name;
     }
 
     // -------------------------------------------------------------------------
@@ -571,14 +665,25 @@ public class QuestUtils {
         claimed[index] = true;
 
         Quest quest = active.get(index);
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-        aranarthPlayer.setBalance(aranarthPlayer.getBalance() + quest.getReward());
-        AranarthUtils.setPlayer(uuid, aranarthPlayer);
 
-        String periodLabel = type == QuestType.DAILY ? "Daily" : "Weekly";
-        String formattedReward = "$" + MONEY_FORMAT.format(quest.getReward());
-        player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &6" + formattedReward
-                + "&7 for completing the quest"));
+        if (quest.hasItemReward()) {
+            ItemStack rewardItem = quest.getItemReward().clone();
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(rewardItem);
+            for (ItemStack overflow : leftover.values()) {
+                player.getWorld().dropItemNaturally(player.getLocation(), overflow);
+            }
+            String itemName = getItemRewardDisplayName(rewardItem);
+            player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
+                    + " &7for completing the quest"));
+        } else {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+            aranarthPlayer.setBalance(aranarthPlayer.getBalance() + quest.getReward());
+            AranarthUtils.setPlayer(uuid, aranarthPlayer);
+
+            String formattedReward = "$" + MONEY_FORMAT.format(quest.getReward());
+            player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &6" + formattedReward
+                    + " &7for completing the quest"));
+        }
         return true;
     }
 
