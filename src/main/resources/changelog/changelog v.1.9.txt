@@ -250,6 +250,7 @@ Minor Features
 [+] Added functionality to place/break the light block of eyeblossoms
 [~] Fixed the lights not being properly destroyed above torchflowers and pitcher plants
 [~] Made each month name in /calendar appear in the month's color
+[~] Fixed issue where Honey Glazed ham was duplicating and also replacing items
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
