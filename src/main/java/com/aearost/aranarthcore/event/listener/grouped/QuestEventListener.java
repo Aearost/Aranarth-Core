@@ -245,7 +245,7 @@ public class QuestEventListener implements Listener {
         if (!QuestUtils.isAllowedKillWorld(worldName)) return;
 
         // Hostile mob kills
-        if (entity instanceof Monster) {
+        if (entity instanceof Enemy) {
             QuestUtils.updateProgress(killer, QuestTaskType.KILL_HOSTILE_MOB, 1);
 
             // Specific mob kills

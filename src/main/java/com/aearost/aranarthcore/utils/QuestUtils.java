@@ -300,22 +300,24 @@ public class QuestUtils {
 
         // ---- RANK 8 (getRank() == 8) — $10,000,000 ----
         List<Quest> r8d = new ArrayList<>();
-        r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
-        r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
-        r8d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 250, 0.0, QuestType.DAILY, 8, "Kill 250 Hostile Mobs"));
-        r8d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 75, 0.0, QuestType.DAILY, 8, "Kill 75 Mobs with a Sword"));
-        r8d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 8, "Kill 60 Mobs with a Bow"));
-        r8d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 50, 0.0, QuestType.DAILY, 8, "Kill 50 Endermen"));
-        r8d.add(new Quest(QuestTaskType.KILL_BLAZE, 30, 0.0, QuestType.DAILY, 8, "Kill 30 Blaze"));
+//        r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
+//        r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
+//        r8d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 250, 0.0, QuestType.DAILY, 8, "Kill 250 Hostile Mobs"));
+//        r8d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 75, 0.0, QuestType.DAILY, 8, "Kill 75 Mobs with a Sword"));
+//        r8d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 8, "Kill 60 Mobs with a Bow"));
+//        r8d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 50, 0.0, QuestType.DAILY, 8, "Kill 50 Endermen"));
+//        r8d.add(new Quest(QuestTaskType.KILL_BLAZE, 30, 0.0, QuestType.DAILY, 8, "Kill 30 Blaze"));
         r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
-        r8d.add(new Quest(QuestTaskType.HARVEST_CROPS, 352, 0.0, QuestType.DAILY, 8, "Harvest 352 Crops"));
-        r8d.add(new Quest(QuestTaskType.BREED_ANIMALS, 25, 0.0, QuestType.DAILY, 8, "Breed 25 Animals"));
-        r8d.add(new Quest(QuestTaskType.FISH, 45, 0.0, QuestType.DAILY, 8, "Fish 45 Fish"));
-        r8d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 128, 0.0, QuestType.DAILY, 8, "Craft 128 Golden Apples"));
-        r8d.add(new Quest(QuestTaskType.KILL_SKELETON, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Skeletons"));
-        r8d.add(new Quest(QuestTaskType.COOK_FOOD, 256, 0.0, QuestType.DAILY, 8, "Cook 256 Food"));
-        r8d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Zombies"));
-        r8d.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.DAILY, 8, "Kill 8 Players"));
+        r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
+        r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
+//        r8d.add(new Quest(QuestTaskType.HARVEST_CROPS, 352, 0.0, QuestType.DAILY, 8, "Harvest 352 Crops"));
+//        r8d.add(new Quest(QuestTaskType.BREED_ANIMALS, 25, 0.0, QuestType.DAILY, 8, "Breed 25 Animals"));
+//        r8d.add(new Quest(QuestTaskType.FISH, 45, 0.0, QuestType.DAILY, 8, "Fish 45 Fish"));
+//        r8d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 128, 0.0, QuestType.DAILY, 8, "Craft 128 Golden Apples"));
+//        r8d.add(new Quest(QuestTaskType.KILL_SKELETON, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Skeletons"));
+//        r8d.add(new Quest(QuestTaskType.COOK_FOOD, 256, 0.0, QuestType.DAILY, 8, "Cook 256 Food"));
+//        r8d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Zombies"));
+//        r8d.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.DAILY, 8, "Kill 8 Players"));
         dailyQuestPool.put(8, r8d);
 
         List<Quest> r8w = new ArrayList<>();
