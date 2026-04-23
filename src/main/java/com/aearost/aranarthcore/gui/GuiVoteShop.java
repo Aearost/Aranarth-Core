@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.gui;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -10,11 +11,13 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +35,41 @@ public class GuiVoteShop {
 	public void openGui() {
 		player.closeInventory();
 		player.openInventory(initializedGui);
+
+		int[] randomKeyIndex = {1};
+		int[] taskId = {-1};
+		taskId[0] = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), () -> {
+			if (player.getOpenInventory() != null
+					&& ChatUtils.stripColorFormatting(player.getOpenInventory().getTitle()).equals("Aranarth Vote Shop")) {
+				updateRandomKeyItem(randomKeyIndex[0]);
+				randomKeyIndex[0] = (randomKeyIndex[0] + 1) % 4;
+			} else {
+				Bukkit.getScheduler().cancelTask(taskId[0]);
+			}
+		}, 20, 20);
+	}
+
+	public void updateRandomKeyItem(int index) {
+		NamespacedKey randomKeyNSKey = new NamespacedKey(AranarthCore.getInstance(), "random_key");
+		ItemStack randomKey;
+		switch (index) {
+			case 1 -> randomKey = new KeyRare().getItem();
+			case 2 -> randomKey = new KeyEpic().getItem();
+			case 3 -> randomKey = new KeyGodly().getItem();
+			default -> randomKey = new KeyVote().getItem();
+		}
+		ItemMeta meta = randomKey.getItemMeta();
+		meta.setDisplayName(ChatUtils.translateToColor("&4&lRandom Crate Key"));
+		List<String> lore = new ArrayList<>();
+		lore.add(ChatUtils.translateToColor("&e15 vote points"));
+		lore.add(ChatUtils.translateToColor("&a&oVote &7&o- 65%"));
+		lore.add(ChatUtils.translateToColor("&6&oRare &7&o- 25%"));
+		lore.add(ChatUtils.translateToColor("&3&oEpic &7&o- 7%"));
+		lore.add(ChatUtils.translateToColor("&5&oGodly &7&o- 3%"));
+		meta.getPersistentDataContainer().set(randomKeyNSKey, PersistentDataType.STRING, "true");
+		meta.setLore(lore);
+		randomKey.setItemMeta(meta);
+		initializedGui.setItem(17, randomKey);
 	}
 	
 	private Inventory initializeGui(Player player) {
@@ -88,7 +126,22 @@ public class GuiVoteShop {
 		bendingChangeLore.add(ChatUtils.translateToColor("&e10 vote points"));
 		bendingChangeMeta.setLore(bendingChangeLore);
 		bendingChange.setItemMeta(bendingChangeMeta);
-		gui.setItem(13, bendingChange);
+		gui.setItem(9, bendingChange);
+
+		NamespacedKey randomKeyNSKey = new NamespacedKey(AranarthCore.getInstance(), "random_key");
+		ItemStack randomKey = new KeyVote().getItem();
+		ItemMeta randomKeyMeta = randomKey.getItemMeta();
+		randomKeyMeta.setDisplayName(ChatUtils.translateToColor("&4&lRandom Crate Key"));
+		List<String> randomKeyLore = new ArrayList<>();
+		randomKeyLore.add(ChatUtils.translateToColor("&e15 vote points"));
+		randomKeyLore.add(ChatUtils.translateToColor("&a&oVote &7&o- 65%"));
+		randomKeyLore.add(ChatUtils.translateToColor("&6&oRare &7&o- 25%"));
+		randomKeyLore.add(ChatUtils.translateToColor("&3&oEpic &7&o- 7%"));
+		randomKeyLore.add(ChatUtils.translateToColor("&5&oGodly &7&o- 3%"));
+		randomKeyMeta.getPersistentDataContainer().set(randomKeyNSKey, PersistentDataType.STRING, "true");
+		randomKeyMeta.setLore(randomKeyLore);
+		randomKey.setItemMeta(randomKeyMeta);
+		gui.setItem(17, randomKey);
 
 		ItemStack keyEpic = new KeyEpic().getItem();
 		ItemMeta keyEpicMeta = keyEpic.getItemMeta();

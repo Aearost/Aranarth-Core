@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiVoteShop;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -10,6 +11,8 @@ import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.datatypes.player.PlayerProfile;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
@@ -76,16 +79,30 @@ public class GuiVoteShopPurchaseClick {
 
                     // One of the crate keys was selected
                     if (clicked.getType() == Material.TRIAL_KEY) {
-                        String type = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).split(" ")[1].toLowerCase();
-                        Bukkit.getLogger().info(type);
-                        if (type.equals("vote")) {
-                            addOrDropItem(player, new KeyVote().getItem());
-                        } else if (type.equals("rare")) {
-                            addOrDropItem(player, new KeyRare().getItem());
-                        } else if (type.equals("epic")) {
-                            addOrDropItem(player, new KeyEpic().getItem());
-                        } else if (type.equals("godly")) {
-                            addOrDropItem(player, new KeyGodly().getItem());
+                        NamespacedKey randomKeyTag = new NamespacedKey(AranarthCore.getInstance(), "random_key");
+                        if (clicked.getItemMeta().getPersistentDataContainer().has(randomKeyTag, PersistentDataType.STRING)) {
+                            double roll = Math.random() * 100;
+                            if (roll < 65) {
+                                addOrDropItem(player, new KeyVote().getItem());
+                            } else if (roll < 90) {
+                                addOrDropItem(player, new KeyRare().getItem());
+                            } else if (roll < 97) {
+                                addOrDropItem(player, new KeyEpic().getItem());
+                            } else {
+                                addOrDropItem(player, new KeyGodly().getItem());
+                            }
+                        } else {
+                            String type = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).split(" ")[1].toLowerCase();
+                            Bukkit.getLogger().info(type);
+                            if (type.equals("vote")) {
+                                addOrDropItem(player, new KeyVote().getItem());
+                            } else if (type.equals("rare")) {
+                                addOrDropItem(player, new KeyRare().getItem());
+                            } else if (type.equals("epic")) {
+                                addOrDropItem(player, new KeyEpic().getItem());
+                            } else if (type.equals("godly")) {
+                                addOrDropItem(player, new KeyGodly().getItem());
+                            }
                         }
                     }
                     // Bending change
