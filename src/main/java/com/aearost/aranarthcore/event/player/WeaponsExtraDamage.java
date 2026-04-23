@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
@@ -92,6 +93,10 @@ public class WeaponsExtraDamage {
 										}
 									}
 								}
+							}
+
+							if (entity instanceof ArmorStand armorStand) {
+								return;
 							}
 
 							// Applies fire ticks for any source of melee damage
