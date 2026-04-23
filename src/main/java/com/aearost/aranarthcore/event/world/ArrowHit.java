@@ -6,6 +6,8 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -176,6 +178,20 @@ public class ArrowHit {
 
 		if (block != null) {
 			if (arrow.getShooter() instanceof Player shooter) {
+				// Will bypass functionality to break glass/ice if arrow is from MetalCable
+				BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(shooter);
+				if (bendingPlayer != null) {
+					CoreAbility ability = bendingPlayer.getBoundAbility();
+					if (ability != null) {
+						if (ability.getName().equalsIgnoreCase("metalcable")) {
+							if (ability.getRunningTicks() > 0) {
+								return;
+							}
+						}
+					}
+				}
+
+				// Functionality to break glass/ice with arrows
 				if (block.getType().name().endsWith("GLASS") || block.getType().name().endsWith("GLASS_PANE")
 						|| block.getType() == Material.ICE) {
 					Dominion shooterDominion = DominionUtils.getPlayerDominion(shooter.getUniqueId());
@@ -183,7 +199,6 @@ public class ArrowHit {
 					if (chunkDominion == null || (shooterDominion == null && chunkDominion == null)
 							|| (shooterDominion != null && shooterDominion.isSameDominion(chunkDominion))) {
 						boolean isIce = block.getType() == Material.ICE;
-
 						new BukkitRunnable() {
 							@Override
 							public void run() {
