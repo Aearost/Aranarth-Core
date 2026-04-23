@@ -103,7 +103,7 @@ public class QuestUtils {
         r0w.add(new Quest(QuestTaskType.HARVEST_CROPS, 150, 0.0, QuestType.WEEKLY, 0, "Harvest 150 Crops"));
         r0w.add(new Quest(QuestTaskType.FISH, 20, 0.0, QuestType.WEEKLY, 0, "Fish 20 Fish"));
         r0w.add(new Quest(QuestTaskType.BREED_ANIMALS, 10, 0.0, QuestType.WEEKLY, 0, "Breed 10 Animals"));
-        r0w.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.WEEKLY, 0, "Kill 3 Players"));
+        r0w.add(new Quest(QuestTaskType.KILL_PLAYER, 2, 0.0, QuestType.WEEKLY, 0, "Kill 2 Players"));
         weeklyQuestPool.put(0, r0w);
 
         // ---- RANK 1 (getRank() == 1) — $250 ----
@@ -132,7 +132,7 @@ public class QuestUtils {
         r1w.add(new Quest(QuestTaskType.HARVEST_CROPS, 350, 0.0, QuestType.WEEKLY, 1, "Harvest 350 Crops"));
         r1w.add(new Quest(QuestTaskType.BREED_ANIMALS, 20, 0.0, QuestType.WEEKLY, 1, "Breed 20 Animals"));
         r1w.add(new Quest(QuestTaskType.COOK_FOOD, 96, 0.0, QuestType.WEEKLY, 1, "Cook 96 Food"));
-        r1w.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.WEEKLY, 1, "Kill 5 Players"));
+        r1w.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.WEEKLY, 1, "Kill 3 Players"));
         weeklyQuestPool.put(1, r1w);
 
         // ---- RANK 2 (getRank() == 2) — $1,250 ----
@@ -161,7 +161,7 @@ public class QuestUtils {
         r2w.add(new Quest(QuestTaskType.KILL_WITH_BOW, 50, 0.0, QuestType.WEEKLY, 2, "Kill 50 Mobs with a Bow"));
         r2w.add(new Quest(QuestTaskType.HARVEST_CROPS, 500, 0.0, QuestType.WEEKLY, 2, "Harvest 500 Crops"));
         r2w.add(new Quest(QuestTaskType.FISH, 50, 0.0, QuestType.WEEKLY, 2, "Fish 50 Fish"));
-        r2w.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.WEEKLY, 2, "Kill 8 Players"));
+        r2w.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.WEEKLY, 2, "Kill 5 Players"));
         weeklyQuestPool.put(2, r2w);
 
         // ---- RANK 3 (getRank() == 3) — $5,000 ----
@@ -190,7 +190,7 @@ public class QuestUtils {
         r3w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 350, 0.0, QuestType.WEEKLY, 3, "Kill 350 Hostile Mobs"));
         r3w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 20, 0.0, QuestType.WEEKLY, 3, "Kill 20 Endermen"));
         r3w.add(new Quest(QuestTaskType.HARVEST_CROPS, 800, 0.0, QuestType.WEEKLY, 3, "Harvest 800 Crops"));
-        r3w.add(new Quest(QuestTaskType.KILL_PLAYER, 10, 0.0, QuestType.WEEKLY, 3, "Kill 10 Players"));
+        r3w.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.WEEKLY, 3, "Kill 8 Players"));
         weeklyQuestPool.put(3, r3w);
 
         // ---- RANK 4 (getRank() == 4) — $25,000 ----
@@ -219,7 +219,7 @@ public class QuestUtils {
         r4w.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 100, 0.0, QuestType.WEEKLY, 4, "Kill 100 Mobs with a Sword"));
         r4w.add(new Quest(QuestTaskType.HARVEST_CROPS, 1000, 0.0, QuestType.WEEKLY, 4, "Harvest 1000 Crops"));
         r4w.add(new Quest(QuestTaskType.CRAFT_IRON_INGOTS, 128, 0.0, QuestType.WEEKLY, 4, "Craft 128 Iron Ingots"));
-        r4w.add(new Quest(QuestTaskType.KILL_PLAYER, 15, 0.0, QuestType.WEEKLY, 4, "Kill 15 Players"));
+        r4w.add(new Quest(QuestTaskType.KILL_PLAYER, 10, 0.0, QuestType.WEEKLY, 4, "Kill 10 Players"));
         weeklyQuestPool.put(4, r4w);
 
         // ---- RANK 5 (getRank() == 5) — $100,000 ----
@@ -239,7 +239,7 @@ public class QuestUtils {
         r5d.add(new Quest(QuestTaskType.COOK_FOOD, 128, 0.0, QuestType.DAILY, 5, "Cook 128 Food"));
         r5d.add(new Quest(QuestTaskType.BREAK_LOG, 200, 0.0, QuestType.DAILY, 5, "Break 200 Logs"));
         r5d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 40, 0.0, QuestType.DAILY, 5, "Kill 40 Zombies"));
-        r5d.add(new Quest(QuestTaskType.KILL_PLAYER, 4, 0.0, QuestType.DAILY, 5, "Kill 4 Players"));
+        r5d.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.DAILY, 5, "Kill 3 Players"));
         dailyQuestPool.put(5, r5d);
 
         List<Quest> r5w = new ArrayList<>();
@@ -248,16 +248,27 @@ public class QuestUtils {
         r5w.add(new Quest(QuestTaskType.KILL_WITH_BOW, 150, 0.0, QuestType.WEEKLY, 5, "Kill 150 Mobs with a Bow"));
         r5w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 40, 0.0, QuestType.WEEKLY, 5, "Kill 40 Endermen"));
         r5w.add(new Quest(QuestTaskType.HARVEST_CROPS, 1400, 0.0, QuestType.WEEKLY, 5, "Harvest 1400 Crops"));
-        r5w.add(new Quest(QuestTaskType.KILL_PLAYER, 20, 0.0, QuestType.WEEKLY, 5, "Kill 20 Players"));
+        r5w.add(new Quest(QuestTaskType.KILL_PLAYER, 12, 0.0, QuestType.WEEKLY, 5, "Kill 12 Players"));
         weeklyQuestPool.put(5, r5w);
 
         // ---- RANK 6 (getRank() == 6) — $500,000 ----
         List<Quest> r6d = new ArrayList<>();
         r6d.add(new Quest(QuestTaskType.MINE_DIAMOND, 40, 0.0, QuestType.DAILY, 6, "Mine 40 Diamonds"));
+        r6d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 80, 0.0, QuestType.DAILY, 6, "Mine 80 Gold Ore"));
+        r6d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 150, 0.0, QuestType.DAILY, 6, "Kill 150 Hostile Mobs"));
+        r6d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Mobs with a Sword"));
+        r6d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 25, 0.0, QuestType.DAILY, 6, "Kill 25 Endermen"));
+        r6d.add(new Quest(QuestTaskType.KILL_WITCH, 8, 0.0, QuestType.DAILY, 6, "Kill 8 Witches"));
+        r6d.add(new Quest(QuestTaskType.KILL_BLAZE, 10, 0.0, QuestType.DAILY, 6, "Kill 10 Blaze"));
+        r6d.add(new Quest(QuestTaskType.HARVEST_CROPS, 160, 0.0, QuestType.DAILY, 6, "Harvest 160 Crops"));
+        r6d.add(new Quest(QuestTaskType.BREED_ANIMALS, 16, 0.0, QuestType.DAILY, 6, "Breed 16 Animals"));
+        r6d.add(new Quest(QuestTaskType.FISH, 20, 0.0, QuestType.DAILY, 6, "Fish 20 Fish"));
+        r6d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 48, 0.0, QuestType.DAILY, 6, "Craft 48 Golden Apples"));
+        r6d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 96, 0.0, QuestType.DAILY, 6, "Mine 96 Iron Ore"));
+        r6d.add(new Quest(QuestTaskType.KILL_SKELETON, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Skeletons"));
         r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
-        r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
-        r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
-        r6d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 6, "Kill 5 Players"));
+        r6d.add(new Quest(QuestTaskType.BREAK_LOG, 192, 0.0, QuestType.DAILY, 6, "Break 192 Logs"));
+        r6d.add(new Quest(QuestTaskType.KILL_PLAYER, 4, 0.0, QuestType.DAILY, 6, "Kill 4 Players"));
         dailyQuestPool.put(6, r6d);
 
         List<Quest> r6w = new ArrayList<>();
@@ -266,7 +277,7 @@ public class QuestUtils {
         r6w.add(new Quest(QuestTaskType.KILL_BLAZE, 40, 0.0, QuestType.WEEKLY, 6, "Kill 40 Blaze"));
         r6w.add(new Quest(QuestTaskType.KILL_WITCH, 50, 0.0, QuestType.WEEKLY, 6, "Kill 50 Witches"));
         r6w.add(new Quest(QuestTaskType.HARVEST_CROPS, 2000, 0.0, QuestType.WEEKLY, 6, "Harvest 2000 Crops"));
-        r6w.add(new Quest(QuestTaskType.KILL_PLAYER, 30, 0.0, QuestType.WEEKLY, 6, "Kill 30 Players"));
+        r6w.add(new Quest(QuestTaskType.KILL_PLAYER, 15, 0.0, QuestType.WEEKLY, 6, "Kill 15 Players"));
         weeklyQuestPool.put(6, r6w);
 
         // ---- RANK 7 (getRank() == 7) — $2,500,000 ----
@@ -286,7 +297,7 @@ public class QuestUtils {
         r7d.add(new Quest(QuestTaskType.COOK_FOOD, 192, 0.0, QuestType.DAILY, 7, "Cook 192 Food"));
         r7d.add(new Quest(QuestTaskType.BREAK_LOG, 320, 0.0, QuestType.DAILY, 7, "Break 320 Logs"));
         r7d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 75, 0.0, QuestType.DAILY, 7, "Kill 75 Zombies"));
-        r7d.add(new Quest(QuestTaskType.KILL_PLAYER, 6, 0.0, QuestType.DAILY, 7, "Kill 6 Players"));
+        r7d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 7, "Kill 5 Players"));
         dailyQuestPool.put(7, r7d);
 
         List<Quest> r7w = new ArrayList<>();
@@ -295,29 +306,27 @@ public class QuestUtils {
         r7w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 1100, 0.0, QuestType.WEEKLY, 7, "Kill 1100 Hostile Mobs"));
         r7w.add(new Quest(QuestTaskType.KILL_BLAZE, 50, 0.0, QuestType.WEEKLY, 7, "Kill 50 Blaze"));
         r7w.add(new Quest(QuestTaskType.HARVEST_CROPS, 2500, 0.0, QuestType.WEEKLY, 7, "Harvest 2500 Crops"));
-        r7w.add(new Quest(QuestTaskType.KILL_PLAYER, 40, 0.0, QuestType.WEEKLY, 7, "Kill 40 Players"));
+        r7w.add(new Quest(QuestTaskType.KILL_PLAYER, 18, 0.0, QuestType.WEEKLY, 7, "Kill 18 Players"));
         weeklyQuestPool.put(7, r7w);
 
         // ---- RANK 8 (getRank() == 8) — $10,000,000 ----
         List<Quest> r8d = new ArrayList<>();
-//        r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
-//        r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
-//        r8d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 250, 0.0, QuestType.DAILY, 8, "Kill 250 Hostile Mobs"));
-//        r8d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 75, 0.0, QuestType.DAILY, 8, "Kill 75 Mobs with a Sword"));
-//        r8d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 8, "Kill 60 Mobs with a Bow"));
-//        r8d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 50, 0.0, QuestType.DAILY, 8, "Kill 50 Endermen"));
-//        r8d.add(new Quest(QuestTaskType.KILL_BLAZE, 30, 0.0, QuestType.DAILY, 8, "Kill 30 Blaze"));
+        r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
+        r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
+        r8d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 250, 0.0, QuestType.DAILY, 8, "Kill 250 Hostile Mobs"));
+        r8d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 75, 0.0, QuestType.DAILY, 8, "Kill 75 Mobs with a Sword"));
+        r8d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 8, "Kill 60 Mobs with a Bow"));
+        r8d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 50, 0.0, QuestType.DAILY, 8, "Kill 50 Endermen"));
+        r8d.add(new Quest(QuestTaskType.KILL_BLAZE, 30, 0.0, QuestType.DAILY, 8, "Kill 30 Blaze"));
         r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
-        r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
-        r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
-//        r8d.add(new Quest(QuestTaskType.HARVEST_CROPS, 352, 0.0, QuestType.DAILY, 8, "Harvest 352 Crops"));
-//        r8d.add(new Quest(QuestTaskType.BREED_ANIMALS, 25, 0.0, QuestType.DAILY, 8, "Breed 25 Animals"));
-//        r8d.add(new Quest(QuestTaskType.FISH, 45, 0.0, QuestType.DAILY, 8, "Fish 45 Fish"));
-//        r8d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 128, 0.0, QuestType.DAILY, 8, "Craft 128 Golden Apples"));
-//        r8d.add(new Quest(QuestTaskType.KILL_SKELETON, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Skeletons"));
-//        r8d.add(new Quest(QuestTaskType.COOK_FOOD, 256, 0.0, QuestType.DAILY, 8, "Cook 256 Food"));
-//        r8d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Zombies"));
-//        r8d.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.DAILY, 8, "Kill 8 Players"));
+        r8d.add(new Quest(QuestTaskType.HARVEST_CROPS, 352, 0.0, QuestType.DAILY, 8, "Harvest 352 Crops"));
+        r8d.add(new Quest(QuestTaskType.BREED_ANIMALS, 25, 0.0, QuestType.DAILY, 8, "Breed 25 Animals"));
+        r8d.add(new Quest(QuestTaskType.FISH, 45, 0.0, QuestType.DAILY, 8, "Fish 45 Fish"));
+        r8d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 128, 0.0, QuestType.DAILY, 8, "Craft 128 Golden Apples"));
+        r8d.add(new Quest(QuestTaskType.KILL_SKELETON, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Skeletons"));
+        r8d.add(new Quest(QuestTaskType.COOK_FOOD, 256, 0.0, QuestType.DAILY, 8, "Cook 256 Food"));
+        r8d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Zombies"));
+        r8d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 8, "Kill 5 Players"));
         dailyQuestPool.put(8, r8d);
 
         List<Quest> r8w = new ArrayList<>();
@@ -326,7 +335,7 @@ public class QuestUtils {
         r8w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 1600, 0.0, QuestType.WEEKLY, 8, "Kill 1600 Hostile Mobs"));
         r8w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 100, 0.0, QuestType.WEEKLY, 8, "Kill 100 Endermen"));
         r8w.add(new Quest(QuestTaskType.HARVEST_CROPS, 3200, 0.0, QuestType.WEEKLY, 8, "Harvest 3200 Crops"));
-        r8w.add(new Quest(QuestTaskType.KILL_PLAYER, 60, 0.0, QuestType.WEEKLY, 8, "Kill 60 Players"));
+        r8w.add(new Quest(QuestTaskType.KILL_PLAYER, 20, 0.0, QuestType.WEEKLY, 8, "Kill 20 Players"));
         weeklyQuestPool.put(8, r8w);
     }
 
