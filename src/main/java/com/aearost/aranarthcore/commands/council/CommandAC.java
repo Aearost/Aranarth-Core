@@ -99,6 +99,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandQuestNpc.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("home")) {
 			commandResult = CommandAdminHome.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("vpedit")) {
+			commandResult = CommandVpEdit.onCommand(sender, args);
 		}
 		return commandResult;
 	}

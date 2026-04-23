@@ -31,7 +31,7 @@ public class CommandACCompleter implements TabCompleter {
 		"admin", "ban", "broadcast", "clearchat", "dateset", "give",
 		"home", "invsee", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
 		"speed", "sudo", "time", "tp", "tpf", "unban", "unmute",
-		"vanish", "warn", "weather", "whereis"
+		"vanish", "vpedit", "warn", "weather", "whereis"
 	);
 
 	private static final List<String> ITEM_NAMES;
@@ -143,6 +143,11 @@ public class CommandACCompleter implements TabCompleter {
 			}
 			case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();
 			case "vote" -> args.length == 2 ? filter(List.of("test"), args[1]) : List.of();
+			case "vpedit" -> {
+				if (args.length == 2) yield filterPlayers(args[1]);
+				if (args.length == 3) yield args[2].isEmpty() ? List.of("+10", "-10") : List.of();
+				yield List.of();
+			}
 
 			case "msg" -> args[1].isEmpty() ? List.of("message") : List.of();
 			case "speed" -> args.length == 2 ? filter(List.of("1", "10"), args[1]) : List.of();

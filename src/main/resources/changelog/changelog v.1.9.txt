@@ -253,6 +253,7 @@ Minor Features
 [~] Fixed issue where Honey Glazed ham was duplicating and also replacing items
 [~] Fixed null pointer caused by null Mannequin with AstralProjection
 [~] Removed world restriction of fire spread/destruction
+[+] Added /ac vpedit
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
