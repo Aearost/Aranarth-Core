@@ -184,6 +184,10 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility {
      * Ends the ability.
      */
     public void endAbility() {
+        if (mannequin == null) {
+            remove();
+            return;
+        }
         player.teleport(mannequin.getLocation());
         player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 1.3F);
         mannequin.remove();
