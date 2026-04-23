@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.VillagerCamelPickup;
 import com.aearost.aranarthcore.event.mob.VillagerInventoryViewClick;
 import com.aearost.aranarthcore.event.mob.VillagerTradeOverrides;
+import com.aearost.aranarthcore.event.player.MountStats;
 import com.aearost.aranarthcore.event.player.QuestNpcInteract;
 import com.aearost.aranarthcore.event.player.SentinelMark;
 import com.aearost.aranarthcore.utils.QuestUtils;
@@ -41,6 +42,7 @@ public class PlayerInteractEntityEventListener implements Listener {
             } else if (e.getRightClicked() instanceof AbstractHorse || e.getRightClicked() instanceof Wolf
                         || e.getRightClicked() instanceof IronGolem) {
                 new SentinelMark().execute(e);
+                new MountStats().execute(e);
             }
         }
     }

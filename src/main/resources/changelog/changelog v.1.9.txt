@@ -254,6 +254,7 @@ Minor Features
 [~] Fixed null pointer caused by null Mannequin with AstralProjection
 [~] Removed world restriction of fire spread/destruction
 [+] Added /ac vpedit
+[+] Added functionality to display a mount's owner, health, jump, and speed by shift-clicking them
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
