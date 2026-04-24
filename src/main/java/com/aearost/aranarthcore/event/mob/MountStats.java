@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.event.player;
+package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
