@@ -56,6 +56,9 @@ public class CommandNickname implements CommandExecutor {
 				if (ChatUtils.stripColorFormatting(args[0]).length() > 20) {
 					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
 					return true;
+				} else if (ChatUtils.stripColorFormatting(args[0]).isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
+					return true;
 				}
 
 				aranarthPlayer.setNickname(args[0]);
@@ -97,6 +100,9 @@ public class CommandNickname implements CommandExecutor {
 						if (nicknameSB.toString().length() > 20) {
 							player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
 							return true;
+						} else if (nicknameSB.toString().isEmpty()) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
+							return true;
 						}
 
 						aranarthPlayer.setNickname(nickname);
@@ -109,6 +115,9 @@ public class CommandNickname implements CommandExecutor {
 
 				if (ChatUtils.stripColorFormatting(nickname).length() > 20) {
 					player.sendMessage(ChatUtils.chatMessage("&cThis nickname is too long!"));
+					return true;
+				} else if (ChatUtils.stripColorFormatting(nickname).isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou must enter a nickname!"));
 					return true;
 				}
 

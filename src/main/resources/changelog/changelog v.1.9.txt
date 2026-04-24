@@ -256,6 +256,7 @@ Minor Features
 [+] Added /ac vpedit
 [+] Added functionality to display a mount's owner, health, jump, and speed by shift-clicking them
 [+] Implemented /votetop
+[~] Ensured that nickname lengths must be greater than 0
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
