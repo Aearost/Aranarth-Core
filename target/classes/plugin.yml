@@ -165,6 +165,9 @@ commands:
   vote:
     description: Provides the player with a list of vote links
     aliases: [v]
+  votetop:
+    description: Lists the top 10 players by vote count
+    aliases: [vtop]
   voteshop:
     description: Opens the vote shop GUI to spend vote points
     aliases: [vshop, vs]
