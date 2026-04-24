@@ -88,6 +88,7 @@ public class AranarthPlayer {
 	private boolean isGradientChatEnabled = false;
 	private String gradientChatColors = "";
 	private boolean isGradientChatBold = false;
+	private UUID petTransferUuid = null;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -154,6 +155,7 @@ public class AranarthPlayer {
 		this.isGradientChatEnabled = false;
 		this.gradientChatColors = "";
 		this.isGradientChatBold = false;
+		this.petTransferUuid = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
@@ -226,6 +228,7 @@ public class AranarthPlayer {
 		this.isGradientChatEnabled = false;
 		this.gradientChatColors = "";
 		this.isGradientChatBold = false;
+		this.petTransferUuid = null;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -1372,5 +1375,21 @@ public class AranarthPlayer {
 	 */
 	public void setGradientChatBold(boolean isGradientChatBold) {
 		this.isGradientChatBold = isGradientChatBold;
+	}
+
+	/**
+	 * Provides the UUID of the player that will become the owner of the next clicked pet.
+	 * @return The UUID of the player that will become the owner of the next clicked pet.
+	 */
+	public UUID getPetTransferUuid() {
+		return petTransferUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that will become the owner of the next clicked pet.
+	 * @param petTransferUuid The UUID of the player that will become the owner of the next clicked pet.
+	 */
+	public void setPetTransferUuid(UUID petTransferUuid) {
+		this.petTransferUuid = petTransferUuid;
 	}
 }
