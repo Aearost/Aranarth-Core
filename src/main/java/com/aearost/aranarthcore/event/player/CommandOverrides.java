@@ -20,13 +20,18 @@ public class CommandOverrides {
         String[] parts = e.getMessage().split(" ");
 
         if (!parts[0].equals("/afk")) {
-            if (aranarthPlayer.getAfkLocation() != null && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-                Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
-                    @Override
-                    public void run() {
-                        AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
-                    }
-                }, 1);
+            if (aranarthPlayer.getAfkLocation() != null) {
+                if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
+                        @Override
+                        public void run() {
+                            AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+                        }
+                    }, 1);
+                } else {
+                    aranarthPlayer.setAfkLocation(null);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                }
             }
         }
 
