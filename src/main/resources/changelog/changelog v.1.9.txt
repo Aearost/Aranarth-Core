@@ -262,6 +262,7 @@ Minor Features
 [~] Overhauled AstralProjection to be a multi-ability with different sub-abilities
 [~] Fixed issue where you'd get an invalid error message when modifying a sell-only server shop
 [+] Added support to automatically add an arrow from the Quiver to the player's inventory when arrow selection is used
+[~] Fixed issue where aranarthium armour being crafted and taken with shift-click didn't actually yield the result
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
