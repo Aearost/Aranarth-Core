@@ -91,6 +91,8 @@ commands:
     description: Controls the number of Aranarth particles that will be displayed
   pay:
     description: Pays the input player the specified amount
+  pettransfer:
+    description: Allows the player to specify a player to transfer their pet's ownership to
   ping:
     description: Shows the input player's ping
   potions:

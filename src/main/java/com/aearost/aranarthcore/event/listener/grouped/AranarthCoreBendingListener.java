@@ -17,13 +17,14 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,8 +32,6 @@ import java.util.UUID;
  * Handles all logic regarding the use of AranarthCore bending abilities.
  */
 public class AranarthCoreBendingListener implements Listener {
-
-	private final HashMap<UUID, AstralProjection> activeProjections = new HashMap<>();
 
 	public AranarthCoreBendingListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -52,11 +51,7 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
 	}
-	
-	/**
-	 * Deals with cancelling explosion block damage.
-	 * @param e The event.
-	 */
+
 	@EventHandler
 	public void onPlayerSneak(final PlayerToggleSneakEvent e) {
 		Player player = e.getPlayer();
@@ -77,8 +72,10 @@ public class AranarthCoreBendingListener implements Listener {
 			if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
 				if (ability instanceof SpiritualAbility) {
 					if (abilityName.equalsIgnoreCase("astralprojection")) {
-						AstralProjection astralProjection = new AstralProjection(e.getPlayer());
-						activeProjections.put(player.getUniqueId(), astralProjection);
+						// Guard: do not start a new projection while already projecting
+						if (!AstralProjection.isProjecting(player.getUniqueId())) {
+							new AstralProjection(e.getPlayer());
+						}
 					}
 				}
 			}
@@ -96,6 +93,28 @@ public class AranarthCoreBendingListener implements Listener {
 					e.setCancelled(preventEarthAbility(player));
 				}
 			}
+		}
+	}
+
+	/**
+	 * Handles left-click activation of AstralProjection sub-abilities via the multi-ability hotbar.
+	 * Slot 0 = Aura, Slot 1 = Scream, Slot 2 = Possess.
+	 */
+	@EventHandler
+	public void onLeftClick(PlayerAnimationEvent e) {
+		if (e.getAnimationType() != PlayerAnimationType.ARM_SWING) {
+			return;
+		}
+		Player player = e.getPlayer();
+		if (!AstralProjection.isProjecting(player.getUniqueId())) {
+			return;
+		}
+
+		AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
+		switch (player.getInventory().getHeldItemSlot()) {
+			case 0 -> projection.activateAura();
+			case 1 -> projection.activateScream();
+			case 2 -> projection.activatePossess();
 		}
 	}
 
@@ -139,94 +158,134 @@ public class AranarthCoreBendingListener implements Listener {
 		return !dominion.getMembers().contains(player.getUniqueId()) && !areAllied;
 	}
 
-	//  Below for AstralProjection overrides
+	// Below for AstralProjection overrides
+
+	/**
+	 * Prevents the projecting player from dealing any melee or projectile damage.
+	 * Their sub-abilities use living.damage() directly and are unaffected by this.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onDamageByProjector(EntityDamageByEntityEvent e) {
+		Entity damager = e.getDamager();
+		Player attacker = null;
+
+		if (damager instanceof Player p) {
+			attacker = p;
+		} else if (damager instanceof Projectile proj && proj.getShooter() instanceof Player p) {
+			attacker = p;
+		}
+
+		if (attacker != null && AstralProjection.isProjecting(attacker.getUniqueId())
+				&& !AstralProjection.isSubAbilityDamaging(attacker.getUniqueId())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Restores armor from PDC when the player joins, covering the case where the
+	 * server crashed while the player was mid-projection (so endAbility never ran).
+	 */
+	@EventHandler
+	public void onJoin(PlayerJoinEvent e) {
+		AstralProjection.restoreArmorFromPdc(e.getPlayer());
+	}
+
+	/**
+	 * When a mannequin belonging to a projection is damaged, the damage is transferred
+	 * to the projecting player and the projection ends.
+	 */
 	@EventHandler
 	public void onMannequinDamage(final EntityDamageEvent e) {
-		if (e.getEntityType() == EntityType.MANNEQUIN) {
-			if (e.getCause() == EntityDamageEvent.DamageCause.KILL) {
-				return;
-			}
+		if (e.getEntityType() != EntityType.MANNEQUIN) {
+			return;
+		}
+		if (e.getCause() == EntityDamageEvent.DamageCause.KILL) {
+			return;
+		}
 
-			e.setDamage(0);
-			UUID toRemove = null;
-			for (UUID uuid : activeProjections.keySet()) {
-				AstralProjection projection = activeProjections.get(uuid);
-				if (projection.getMannequin().equals(e.getEntity())) {
-					toRemove = uuid;
-				}
+		UUID projectorUuid = null;
+		for (UUID uuid : AstralProjection.getActiveProjections().keySet()) {
+			AstralProjection projection = AstralProjection.getActiveProjection(uuid);
+			if (projection.getMannequin() != null && projection.getMannequin().equals(e.getEntity())) {
+				projectorUuid = uuid;
+				break;
 			}
+		}
 
-			if (activeProjections.get(toRemove) != null) {
-				activeProjections.get(toRemove).endAbility();
-				activeProjections.remove(toRemove);
-			}
+		if (projectorUuid == null) {
+			return;
+		}
+
+		double damage = e.getFinalDamage();
+		e.setDamage(0);
+
+		AstralProjection projection = AstralProjection.getActiveProjection(projectorUuid);
+		if (projection != null) {
+			projection.endAbilityWithDamage(damage);
 		}
 	}
 
-	@EventHandler
-	public void onGamemodeChange(PlayerGameModeChangeEvent e) {
-		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR && e.getNewGameMode() == GameMode.SURVIVAL) {
-			if (e.getCause() == PlayerGameModeChangeEvent.Cause.PLUGIN) {
-                activeProjections.remove(e.getPlayer().getUniqueId());
-			}
-		}
-	}
-
-	@EventHandler
-	public void onSpectateEntity(PlayerInteractAtEntityEvent e) {
-		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) {
-			e.setCancelled(true);
-		}
-	}
-
-	@EventHandler
-	public void onSpectatePlayerAttempt(PlayerTeleportEvent e) {
-		Player player = e.getPlayer();
-		if (player.getGameMode() == GameMode.SPECTATOR) {
-			if (e.getCause() == PlayerTeleportEvent.TeleportCause.SPECTATE) {
-				e.setCancelled(true);
-				player.setSpectatorTarget(null);
-			}
-		}
-	}
-
+	/**
+	 * Cancels commands while the player is astral projecting.
+	 */
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
-		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) {
-			if (activeProjections.containsKey(e.getPlayer().getUniqueId())) {
-				e.setCancelled(true);
-				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
-			}
+		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
 		}
 	}
 
+	/**
+	 * Cancels all block interactions while the player is astral projecting.
+	 * Sub-ability activation uses PlayerAnimationEvent and is unaffected.
+	 */
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
-		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) {
+		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}
 
+	/**
+	 * Cancels inventory clicks while the player is astral projecting.
+	 */
 	@EventHandler
 	public void onInteract(InventoryClickEvent e) {
-		if (e.getWhoClicked() instanceof Player player && player.getGameMode() == GameMode.SPECTATOR) {
+		if (e.getWhoClicked() instanceof Player player && AstralProjection.isProjecting(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}
 
+	/**
+	 * Cancels item drops while the player is astral projecting.
+	 */
 	@EventHandler
-	public void onHotbarUse(PlayerItemHeldEvent e) {
-		if (e.getPlayer().getGameMode() == GameMode.SPECTATOR) {
+	public void onDropItem(PlayerDropItemEvent e) {
+		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}
 
+	/**
+	 * Ends the projection cleanly if the player dies while projecting.
+	 */
+	@EventHandler
+	public void onDeath(PlayerDeathEvent e) {
+		Player player = e.getPlayer();
+		if (AstralProjection.isProjecting(player.getUniqueId())) {
+			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
+		}
+	}
+
+	/**
+	 * Ends the projection when the player disconnects.
+	 */
 	@EventHandler
 	public void onDisconnect(PlayerQuitEvent e) {
 		Player player = e.getPlayer();
-		// Ends AstralProjections on the player disconnecting from the server
-		if (activeProjections.containsKey(player.getUniqueId())) {
-			activeProjections.get(player.getUniqueId()).endAbility();
+		if (AstralProjection.isProjecting(player.getUniqueId())) {
+			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 	}
 
