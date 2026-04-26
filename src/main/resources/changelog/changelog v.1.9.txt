@@ -258,6 +258,7 @@ Minor Features
 [+] Implemented /votetop
 [~] Ensured that nickname lengths must be greater than 0
 [+] Added /pettransfer
+[+] Added a server tips message to complete quests
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

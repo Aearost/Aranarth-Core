@@ -457,6 +457,7 @@ public class ChatUtils {
 			tips.add("&7&oBe sure to follow the rules seen in &e&o/rules");
 			tips.add("&7&oSpend your &a&ovote points &7&oin the &e&o/voteshop");
 			tips.add("&7&oWant to create your &e&o/shop&7? Reach out to &6&oThe Council");
+			tips.add("&7&oHave you completed your quests today? Check out &e&o/quests");
 
 			Collections.shuffle(tips);
 		}
