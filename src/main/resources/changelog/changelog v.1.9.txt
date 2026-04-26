@@ -260,6 +260,7 @@ Minor Features
 [+] Added /pettransfer
 [+] Added a server tips message to complete quests
 [~] Overhauled AstralProjection to be a multi-ability with different sub-abilities
+[~] Fixed issue where you'd get an invalid error message when modifying a sell-only server shop
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -20,6 +21,12 @@ public class ShopBulkTransaction {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Shop shop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
+
+		// Skip bulk transaction logic when an admin is modifying a server shop
+		if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
+				&& player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
+			return;
+		}
 
 		// If they click elsewhere after enabling the bulk transaction
 		if (aranarthPlayer.getBulkTransactionNum() == 1 && (shop == null || !player.isSneaking())) {
