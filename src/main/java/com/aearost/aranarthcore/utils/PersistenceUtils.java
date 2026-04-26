@@ -2809,4 +2809,98 @@ public class PersistenceUtils {
 		}
 	}
 
+	// -------------------------------------------------------------------------
+	// Login Streak Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads per-player login streak data from login_streaks.txt.
+	 * Format per line: uuid|currentDay|lastClaimEpochDay
+	 */
+	public static void loadLoginStreaks() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "login_streaks.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the login_streaks file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				String[] fields = row.split("\\|");
+				if (fields.length < 3) continue;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				int day = Integer.parseInt(fields[1]);
+				long lastClaim = Long.parseLong(fields[2]);
+
+				LoginStreakUtils.setStreakDay(uuid, day);
+				LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
+			}
+
+			Bukkit.getLogger().info("Login streaks have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading login streaks!");
+		}
+	}
+
+	/**
+	 * Saves per-player login streak data to login_streaks.txt.
+	 * Format per line: uuid|currentDay|lastClaimEpochDay
+	 */
+	public static void saveLoginStreaks() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "login_streaks.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new login_streaks.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of login_streaks.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#uuid|currentDay|lastClaimEpochDay\n");
+
+			HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
+			HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
+
+			for (UUID uuid : days.keySet()) {
+				int day = days.get(uuid);
+				long lastClaim = claims.getOrDefault(uuid, 0L);
+				writer.write(uuid + "|" + day + "|" + lastClaim + "\n");
+			}
+
+			// Also persist players who have a lastClaim but no explicit day entry
+			for (UUID uuid : claims.keySet()) {
+				if (!days.containsKey(uuid)) {
+					writer.write(uuid + "|1|" + claims.get(uuid) + "\n");
+				}
+			}
+
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving login streaks");
+		}
+	}
+
 }

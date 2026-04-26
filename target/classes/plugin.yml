@@ -131,6 +131,8 @@ commands:
     description: Opens a stonecutter GUI
   store:
     description: Provides the player with a GUI of the server's store
+  streak:
+    description: Opens the Login Streak GUI to view and claim daily streak rewards
   survival:
     description: Survival
     aliases: [rtp]

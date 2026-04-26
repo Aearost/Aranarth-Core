@@ -227,7 +227,15 @@ public class PlayerServerJoinListener implements Listener {
 		player.sendMessage("  " + messages[1]); // Date message
 
 		// Once mail is added in, use the below format
-//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
+//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail().size() + " &7messages in your mail!"));
+
+		// Login streak notification
+		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
+		if (streakReset) {
+			player.sendMessage(ChatUtils.chatMessage("&7Your login streak has been reset to Day 1"));
+		} else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
+			player.sendMessage(ChatUtils.chatMessage("&7Don't forget to claim your daily login reward with &e/streak"));
+		}
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 		player.sendMessage("");
