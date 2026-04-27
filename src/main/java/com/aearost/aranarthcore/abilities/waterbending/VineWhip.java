@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending;
 
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
@@ -464,10 +465,10 @@ public class VineWhip extends PlantAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Plant a seed of destruction — latch onto a nearby plant source, then launch a living vine of oak "
-                + "leaves toward your target. The vine curves with your gaze as it extends, and snaps back to its "
-                + "source once it reaches its limit or strikes a foe. Release sneak or switch abilities at any time "
-                + "to immediately withdraw the vine.\n"
-                + "Activation: Hold Sneak to select a plant source > Left-click to launch the vine.";
+        return "Latch onto a nearby plant source, and launch a vine of leaves toward your target." +
+                "The vine will curve with your gaze as it extends, and snaps back" +
+                "to its source once it reaches its limit or strikes a foe." +
+                "You can also left-click before your vine hits a target, pulling the caught mob towards you.\n" +
+                ChatUtils.translateToColor("&fUsage: Sneak (hold) > Left-click");
     }
 }

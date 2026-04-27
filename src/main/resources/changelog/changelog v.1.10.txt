@@ -5,6 +5,7 @@ Major Features
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
+[~] Updated the description of VineWhip
 
 Backend Code Changes
 - TBD
