@@ -13,10 +13,14 @@ import org.bukkit.event.entity.EntityPortalEvent;
 import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 
+import java.util.Set;
+
 /**
  * Overrides portal teleport behaviour between survival worlds.
  */
 public class PortalEventListener implements Listener {
+
+	private static final Set<String> NO_PORTAL_WORLDS = Set.of("creative", "arena");
 
 	public PortalEventListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -24,6 +28,11 @@ public class PortalEventListener implements Listener {
 
 	@EventHandler
 	public void onPlayerPortal(PlayerPortalEvent e) {
+		World fromWorld = e.getFrom().getWorld();
+		if (fromWorld != null && NO_PORTAL_WORLDS.contains(fromWorld.getName())) {
+			e.setCancelled(true);
+			return;
+		}
 		Location destination = determinePortalDestinationLocation(e.getFrom(), e.getPlayer(), e.getCause(), e);
 		if (destination != null) {
 			e.setTo(destination);
@@ -35,6 +44,10 @@ public class PortalEventListener implements Listener {
 		// No cause for entities, must get it from the environment
 		Entity entity = e.getEntity();
 		World fromWorld = e.getFrom().getWorld();
+		if (fromWorld != null && NO_PORTAL_WORLDS.contains(fromWorld.getName())) {
+			e.setCancelled(true);
+			return;
+		}
 		World toWorld = e.getTo().getWorld();
 		TeleportCause cause = determinePortalType(fromWorld, toWorld);
 		Location destination = determinePortalDestinationLocation(e.getFrom(), entity, cause, e);

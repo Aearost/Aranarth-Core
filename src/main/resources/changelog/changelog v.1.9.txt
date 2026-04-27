@@ -38,6 +38,14 @@ Major Features
 [+] Implemented /kills, /deaths, /topkills, and /topdeaths
 [+] Added individual commands for all of the different /tables options
 [+] Added clickable vote URLs via /vote
+[+] Implemented dominion permission system
+[+] Implemented a basic quest system
+[+] Added functionality to display a mount's owner, health, jump, and speed by shift-clicking them
+[+] Implemented /votetop
+[+] Added /pettransfer
+[~] Overhauled AstralProjection to be a multi-ability with different sub-abilities
+[+] Added daily login streaks
+[+] Implemented VineWhip
 
 Minor Features
 [+] Added functionality to drop a player's head at a rare rate when killed
@@ -220,7 +228,6 @@ Minor Features
 [-] Removed iron armor from the arena world
 [~] Tweaked how horse teleporting works on a homepad
 [+] Added /dominion guide
-[+] Implemented dominion permission system
 [~] Fixed issue where paying an invalid player would throw an error
 [~] Fixed issue when removing an offline player from your dominion
 [~] Added missing condition where you'd get a message stating a player was removed from your dominion when they never were in it
@@ -238,9 +245,7 @@ Minor Features
 [~] Made it so /back will be saved upon your last homepad teleportation
 [-] Removed now-redundant double % symbol in chat messages
 [~] You can now only conquer a dominion if you are enemied
-[+] Added offline support for claiming vote keys
 [+] Added functionality to drop an item to the floor with /ac give if there is no inventory space
-[+] Implemented a basic quest system
 [+] Added the creative world to the fire protection listener
 [~] Prevented all movement of a shulker box in inventory while in the GuiShulker
 [+] Also added additional cautionary checks when picking up items in shulkers
@@ -254,18 +259,13 @@ Minor Features
 [~] Fixed null pointer caused by null Mannequin with AstralProjection
 [~] Removed world restriction of fire spread/destruction
 [+] Added /ac vpedit
-[+] Added functionality to display a mount's owner, health, jump, and speed by shift-clicking them
-[+] Implemented /votetop
 [~] Ensured that nickname lengths must be greater than 0
-[+] Added /pettransfer
 [+] Added a server tips message to complete quests
-[~] Overhauled AstralProjection to be a multi-ability with different sub-abilities
 [~] Fixed issue where you'd get an invalid error message when modifying a sell-only server shop
 [+] Added support to automatically add an arrow from the Quiver to the player's inventory when arrow selection is used
 [~] Fixed issue where aranarthium armour being crafted and taken with shift-click didn't actually yield the result
 [~] Fixed issue where /ac msg wouldn't reset the AFK timer
-[+] Added daily login streaks
-[+] Implemented VineWhip
+[~] Prevented players from entering the nether or the end in the creative and arena worlds
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
