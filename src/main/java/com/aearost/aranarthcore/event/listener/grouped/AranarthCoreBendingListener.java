@@ -44,6 +44,10 @@ public class AranarthCoreBendingListener implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPKReload(final BendingReloadEvent event) {
+		// End all active projections before PK clears and re-registers abilities,
+		// so players are safely returned to their body location.
+		AstralProjection.endAllProjections();
+
 		new BukkitRunnable() {
 			@Override
 			public void run() {

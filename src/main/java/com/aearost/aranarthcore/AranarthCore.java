@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore;
 
+import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
 import com.aearost.aranarthcore.commands.council.CommandTrash;
@@ -609,6 +610,9 @@ public class AranarthCore extends JavaPlugin {
 	 */
 	@Override
 	public void onDisable() {
+		// End all active AstralProjections/cancel the abilities
+		AstralProjection.endAllProjections();
+
 		ShopUtils.removeAllHolograms();
 		PersistenceUtils.saveServerDate();
 		PersistenceUtils.saveHomepads();

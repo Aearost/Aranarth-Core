@@ -522,6 +522,15 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
         return subAbilityDamaging.contains(uuid);
     }
 
+    /**
+     * Ends all active AstralProjections, teleporting each player back to their
+     * mannequin location and restoring their state. Safe to call on PK reload or
+     * plugin disable.
+     */
+    public static void endAllProjections() {
+        new ArrayList<>(activeProjections.values()).forEach(AstralProjection::endAbility);
+    }
+
     // -------------------------------------------------------------------------
     // PK ability interface
     // -------------------------------------------------------------------------
