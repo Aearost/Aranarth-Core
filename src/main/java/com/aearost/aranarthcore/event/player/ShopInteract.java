@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -12,6 +13,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -93,7 +95,7 @@ public class ShopInteract {
 
 						if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
 							// If editing a server shop
-							if (aranarthPlayer.getCouncilRank() == 3 && player.isSneaking()) {
+							if (aranarthPlayer.getCouncilRank() == 3 && player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
 								if (e.getClickedBlock().getState() instanceof Sign sign) {
 									player.openSign(sign);
 								}
@@ -221,8 +223,25 @@ public class ShopInteract {
 						continue;
 					}
 
-					if (inventoryItem.isSimilar(shop.getItem())) {
+					// Each month changes the lore of crop seeds, must consider that
+					boolean isSameCropSeed = inventoryItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(inventoryItem.getType());
+					if (inventoryItem.isSimilar(shop.getItem()) || isSameCropSeed) {
 						spaceForShopItemInPlayerInventory += inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
+					}
+				}
+				// Also count non-full stacks inside shulker boxes if player has aranarth.shulker permission
+				if (player.hasPermission("aranarth.shulker") && !isShulkerBox(shop.getItem())) {
+					for (ItemStack inventoryItem : player.getInventory().getStorageContents()) {
+						if (!isShulkerBox(inventoryItem)) continue;
+						BlockStateMeta bsm = (BlockStateMeta) inventoryItem.getItemMeta();
+						ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+						for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+							if (shulkerItem == null) continue;
+							boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+							if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+								spaceForShopItemInPlayerInventory += shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
+							}
+						}
 					}
 				}
 				if (spaceForShopItemInPlayerInventory < shop.getQuantity()) {
@@ -241,11 +260,50 @@ public class ShopInteract {
 				}
 
 				// Logic to add items to player's inventory
-				ItemStack itemToAdd = shop.getItem().clone();
-				itemToAdd.setAmount(shop.getQuantity());
-				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(itemToAdd);
-				for (Integer index : remainder.keySet()) {
-					player.getWorld().dropItemNaturally(player.getLocation(), remainder.get(index));
+				int quantityToDistribute = shop.getQuantity();
+
+				// If player has aranarth.shulker, fill non-full stacks in shulker boxes first
+				if (player.hasPermission("aranarth.shulker") && !isShulkerBox(shop.getItem())) {
+					for (int slotIndex = 0; slotIndex < 36 && quantityToDistribute > 0; slotIndex++) {
+						ItemStack invItem = player.getInventory().getItem(slotIndex);
+						if (!isShulkerBox(invItem)) continue;
+						BlockStateMeta bsm = (BlockStateMeta) invItem.getItemMeta();
+						ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+						Inventory shulkerInv = shulker.getInventory();
+						boolean modified = false;
+
+						for (int shulkerSlot = 0; shulkerSlot < shulkerInv.getSize() && quantityToDistribute > 0; shulkerSlot++) {
+							ItemStack shulkerItem = shulkerInv.getItem(shulkerSlot);
+							if (shulkerItem == null) continue;
+							boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
+							if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+								int spaceInStack = shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
+								if (spaceInStack > 0) {
+									int addAmount = Math.min(spaceInStack, quantityToDistribute);
+									shulkerItem.setAmount(shulkerItem.getAmount() + addAmount);
+									quantityToDistribute -= addAmount;
+									shulkerInv.setItem(shulkerSlot, shulkerItem);
+									modified = true;
+								}
+							}
+						}
+
+						if (modified) {
+							bsm.setBlockState(shulker);
+							invItem.setItemMeta(bsm);
+							player.getInventory().setItem(slotIndex, invItem);
+						}
+					}
+				}
+
+				HashMap<Integer, ItemStack> remainder = new HashMap<>();
+				if (quantityToDistribute > 0) {
+					ItemStack itemToAdd = shop.getItem().clone();
+					itemToAdd.setAmount(quantityToDistribute);
+					remainder = player.getInventory().addItem(itemToAdd);
+					for (Integer index : remainder.keySet()) {
+						player.getWorld().dropItemNaturally(player.getLocation(), remainder.get(index));
+					}
 				}
 				String itemname = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
 				if (shop.getItem().hasItemMeta()) {
@@ -323,7 +381,9 @@ public class ShopInteract {
 						continue;
 					}
 
-					if (chestItem.isSimilar(shop.getItem())) {
+					// Each month changes the lore of crop seeds, must consider that
+					boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
+					if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
 						spaceForShopItemInChestInventory += chestItem.getMaxStackSize() - chestItem.getAmount();
 					}
 				}
@@ -396,61 +456,91 @@ public class ShopInteract {
 
 	/**
 	 * Verifies if the contents contains the full amount needed from the shop.
+	 * Also scans inside shulker boxes in the inventory for the required items.
 	 * @param inventory The contents to be verified.
 	 * @param playerShop The player shop being interacted with.
 	 * @return Confirmation if the contents contain the full amount from the shop.
 	 */
 	private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] inventory, Shop playerShop) {
-		boolean hasInventory = false;
-		int summedQuantityOfItem = 0;
-		ArrayList<Integer> indexesWithItem = new ArrayList<>();
-
 		// Avoids reference errors
 		List<ItemStack> items = new ArrayList<>();
 		for (ItemStack is : inventory) {
 			if (is == null) {
 				items.add(null);
-				continue;
 			} else {
-				ItemStack clone = is.clone();
-				items.add(clone);
+				items.add(is.clone());
 			}
 		}
 		ItemStack[] contents = items.toArray(new ItemStack[0]);
 
-		for (int i = contents.length - 1; i >= 0; i--) {
-			if (contents[i] != null && contents[i].isSimilar(playerShop.getItem())) {
-				// If the first single slot of the item in the chest contains enough inventory
-				if (contents[i].getAmount() >= playerShop.getQuantity() && summedQuantityOfItem == 0) {
-					int newAmount = contents[i].getAmount() - playerShop.getQuantity();
+		int needed = playerShop.getQuantity();
+		int collected = 0;
+		boolean shopItemIsShulker = isShulkerBox(playerShop.getItem());
 
-					// Updates the chest's inventory
+		// Phase 1: Scan regular (non-shulker) inventory slots from end to beginning
+		for (int i = contents.length - 1; i >= 0 && collected < needed; i--) {
+			if (contents[i] == null || isShulkerBox(contents[i])) continue;
+			boolean isSameCropSeed = contents[i].getType() == playerShop.getItem().getType() && CropUtils.isCropSeed(playerShop.getItem().getType());
+			if (contents[i].isSimilar(playerShop.getItem()) || isSameCropSeed) {
+				int take = Math.min(needed - collected, contents[i].getAmount());
+				collected += take;
+				int newAmount = contents[i].getAmount() - take;
+				if (newAmount <= 0) {
+					contents[i] = null;
+				} else {
 					contents[i].setAmount(newAmount);
-					hasInventory = true;
-					break;
-				}
-				// If more than one slot is needed
-				else {
-					// If the combined amount of slots has enough
-					if (summedQuantityOfItem + contents[i].getAmount() >= playerShop.getQuantity()) {
-						// Clears accumulated slots of the chest
-						for (Integer index : indexesWithItem) {
-							contents[index] = null;
-						}
-						int newAmount = contents[i].getAmount() - (playerShop.getQuantity() - summedQuantityOfItem);
-						contents[i].setAmount(newAmount);
-						hasInventory = true;
-						break;
-					} else {
-						summedQuantityOfItem += contents[i].getAmount();
-						indexesWithItem.add(i);
-					}
 				}
 			}
 		}
+
+		// Phase 2: Scan inside shulker boxes if still not enough (only when shop item is not itself a shulker)
+		if (!shopItemIsShulker) {
+			for (int i = contents.length - 1; i >= 0 && collected < needed; i--) {
+				if (contents[i] == null || !isShulkerBox(contents[i])) continue;
+				if (!(contents[i].getItemMeta() instanceof BlockStateMeta bsm)) continue;
+				if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) continue;
+
+				Inventory shulkerInv = shulker.getInventory();
+				ItemStack[] shulkerContents = shulkerInv.getContents().clone();
+				boolean modified = false;
+
+				for (int j = shulkerContents.length - 1; j >= 0 && collected < needed; j--) {
+					if (shulkerContents[j] == null) continue;
+					boolean isSameCropSeed = shulkerContents[j].getType() == playerShop.getItem().getType() && CropUtils.isCropSeed(playerShop.getItem().getType());
+					if (shulkerContents[j].isSimilar(playerShop.getItem()) || isSameCropSeed) {
+						int take = Math.min(needed - collected, shulkerContents[j].getAmount());
+						collected += take;
+						int newAmount = shulkerContents[j].getAmount() - take;
+						if (newAmount <= 0) {
+							shulkerContents[j] = null;
+						} else {
+							shulkerContents[j].setAmount(newAmount);
+						}
+						modified = true;
+					}
+				}
+
+				if (modified) {
+					shulkerInv.setContents(shulkerContents);
+					bsm.setBlockState(shulker);
+					contents[i].setItemMeta(bsm);
+				}
+			}
+		}
+
 		HashMap<Boolean, ItemStack[]> results = new HashMap<>();
-		results.put(hasInventory, contents);
+		results.put(collected >= needed, contents);
 		return results;
+	}
+
+	/**
+	 * Determines if the item is a shulker box (with block state meta).
+	 * @param item The item to check.
+	 * @return True if the item is a shulker box.
+	 */
+	private boolean isShulkerBox(ItemStack item) {
+		if (item == null) return false;
+		return item.getItemMeta() instanceof BlockStateMeta bsm && bsm.getBlockState() instanceof ShulkerBox;
 	}
 
 

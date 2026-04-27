@@ -45,7 +45,7 @@ public class InvisibleItemFrameListener implements Listener {
     public void onPlayerItemFrameInteract(PlayerInteractEvent e) {
         ItemStack is = e.getItem();
         if (is != null) {
-        	if (is.getType() == Material.ITEM_FRAME) {
+        	if (is.getType() == Material.GLOW_ITEM_FRAME) {
             	if (is.hasItemMeta()) {
             		if (is.getItemMeta().hasLore()) {
             	        Block block = e.getClickedBlock();
@@ -65,7 +65,7 @@ public class InvisibleItemFrameListener implements Listener {
 	 */
 	@EventHandler
 	public void onItemFramePlace(final HangingPlaceEvent e) {
-		if (e.getEntity().getType() == EntityType.ITEM_FRAME) {
+		if (e.getEntity().getType() == EntityType.GLOW_ITEM_FRAME) {
 			Location placedLocation = e.getBlock().getLocation();
 			BlockFace placedFace = e.getBlockFace();
 
@@ -141,7 +141,7 @@ public class InvisibleItemFrameListener implements Listener {
      */
     @EventHandler
     public void onItemFrameDrop(final ItemSpawnEvent e) {
-    	if (e.getEntity().getItemStack().getType() == Material.ITEM_FRAME) {
+    	if (e.getEntity().getItemStack().getType() == Material.GLOW_ITEM_FRAME) {
     		if (this.isInvisibleItemFrameDestroyed) {
     			e.getEntity().setItemStack(new InvisibleItemFrame().getItem());
     		}

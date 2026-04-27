@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"\\\\$jarPath = 'C:\\\\\\\\Users\\\\\\\\liamh\\\\\\\\.m2\\\\\\\\repository\\\\\\\\com\\\\\\\\gmail\\\\\\\\nossr50\\\\\\\\mcMMO\\\\\\\\mcMMO\\\\\\\\2.2.048\\\\\\\\mcMMO-2.2.048.jar'; Add-Type -AssemblyName System.IO.Compression.FileSystem; \\\\$zip = [System.IO.Compression.ZipFile]::OpenRead\\(\\\\$jarPath\\); \\\\$zip.Entries | Where-Object { \\\\$_.FullName -match 'mining' -or \\\\$_.FullName -match 'Mining' } | ForEach-Object { \\\\$_.FullName }; \\\\$zip.Dispose\\(\\)\")",
+      "Bash(powershell.exe -Command \"\n\\\\$jarPath = 'C:\\\\Users\\\\liamh\\\\.m2\\\\repository\\\\com\\\\gmail\\\\nossr50\\\\mcMMO\\\\mcMMO\\\\2.2.048\\\\mcMMO-2.2.048.jar'\nAdd-Type -AssemblyName System.IO.Compression.FileSystem\n\\\\$zip = [System.IO.Compression.ZipFile]::OpenRead\\(\\\\$jarPath\\)\n\\\\$zip.Entries | ForEach-Object { \\\\$_.FullName }\n\\\\$zip.Dispose\\(\\)\n\" 2>&1)",
+      "Bash(curl:*)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(xargs grep:*)",
+      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore/src\" -name \"*.java\" -type f -exec grep -l \"listener\\\\|event\" {})",
+      "Bash(jar tf:*)",
+      "Bash(cd /tmp)",
+      "Bash(mkdir -p jedcore_src)",
+      "Bash('/c/Program Files/Java/jdk-23/bin/jar.exe' xf '/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/JedCore.jar' -C jedcore_src)",
+      "Bash('/c/Program Files/Java/jdk-23/bin/jar.exe' tf '/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/JedCore.jar')",
+      "Read(//tmp/**)",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar.exe\" xf \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/JedCore.jar\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/javap.exe\" -c -p com/jedk1/jedcore/scoreboard/BendingBoard.class)",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/javap.exe\" -c -p /tmp/jedcore_src/com/jedk1/jedcore/scoreboard/BendingBoard.class)",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}

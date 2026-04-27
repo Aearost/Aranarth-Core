@@ -22,7 +22,7 @@ public class CompressorItemPickup {
 
 	public void execute(EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
-			if (!player.hasPermission("aranarth.compress")) {
+			if (!player.hasPermission("aranarth.compressor")) {
 				return;
 			}
 
@@ -47,7 +47,7 @@ public class CompressorItemPickup {
 					continue;
 				}
 
-				int result = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, inventoryItem);
+				int result = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, inventoryItem);
 				if (result >= 0) {
 					continue;
 				}
@@ -63,7 +63,7 @@ public class CompressorItemPickup {
 										continue;
 									}
 
-									int shulkerResult = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, shulkerItem);
+									int shulkerResult = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, shulkerItem);
 									if (shulkerResult >= 0) {
 										continue;
 									}
@@ -119,7 +119,7 @@ public class CompressorItemPickup {
 			// Include the actual item being picked up
 			if (AranarthUtils.isCompressible(pickupClone, true)) {
 				if (AranarthUtils.isItemBeingCompressed(player.getUniqueId(), pickupClone.getType())) {
-					int result = AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupClone);
+					int result = AranarthUtils.getBlacklistMethod(player, aranarthPlayer, pickupClone);
 					if (result == 0) {
 						e.getItem().setItemStack(null);
 						e.getItem().remove();
@@ -143,7 +143,7 @@ public class CompressorItemPickup {
 					// Ensures the item gets correctly picked up when it is not being compressed
 					e.getItem().setItemStack(null);
 					e.getItem().remove();
-					player.getInventory().addItem(pickupClone);
+					addResultsToInventory(player, pickupClone);
 				}
 			}
 			// Fallback method to pick up normally if it's a non-compressible item that's picked up
@@ -182,6 +182,7 @@ public class CompressorItemPickup {
 					case Material.BONE_MEAL -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 					case Material.SNOWBALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 					case Material.CLAY_BALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+					case Material.QUARTZ -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 				}
 			}
 		}
@@ -316,11 +317,13 @@ public class CompressorItemPickup {
 								}
 								im.setBlockState(shulker);
 								inventoryItem.setItemMeta(im);
-								break;
+								if (remainingToAdd == 0) {
+									break;
+								}
 							}
 						}
 					} else {
-						break;
+						continue;
 					}
 				}
 			}
@@ -434,6 +437,7 @@ public class CompressorItemPickup {
             case Material.BONE_MEAL -> Material.BONE_BLOCK;
             case Material.SNOWBALL -> Material.SNOW_BLOCK;
             case Material.CLAY_BALL -> Material.CLAY;
+            case Material.QUARTZ -> Material.QUARTZ_BLOCK;
             default -> null;
         };
 	}

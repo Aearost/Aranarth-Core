@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -20,6 +21,12 @@ public class ShopBulkTransaction {
 		Player player = e.getPlayer();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Shop shop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
+
+		// Skip bulk transaction logic when an admin is modifying a server shop
+		if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
+				&& player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
+			return;
+		}
 
 		// If they click elsewhere after enabling the bulk transaction
 		if (aranarthPlayer.getBulkTransactionNum() == 1 && (shop == null || !player.isSneaking())) {
@@ -43,6 +50,10 @@ public class ShopBulkTransaction {
 			NumberFormat formatter = NumberFormat.getCurrencyInstance();
 			String saleOrPurchase = "";
 			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+				if (shop.getBuyPrice() <= 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support buying"));
+					return;
+				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk purchase of this item"));
@@ -51,6 +62,10 @@ public class ShopBulkTransaction {
 				saleOrPurchase = "purchase";
 				player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getBuyPrice()) + "?"));
 			} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+				if (shop.getSellPrice() <= 0) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support selling"));
+					return;
+				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));

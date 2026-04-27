@@ -1,0 +1,66 @@
+package com.aearost.aranarthcore.commands.general;
+
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+/**
+ * Sends a request to the input player to have them teleport to the player's location.
+ */
+public class CommandTpHere implements CommandExecutor {
+
+	/**
+	 * @param sender The user that entered the command.
+	 * @param command The command itself.
+	 * @param alias The alias of the command.
+	 * @param args The arguments of the command.
+	 * @return Confirmation of whether the command was a success or not.
+	 */
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+		if (sender instanceof Player player) {
+			if (args.length == 0) {
+				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
+				return true;
+			} else {
+				if (AranarthUtils.getUUIDFromUsername(args[0]) != null) {
+					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsername(args[0]));
+					if (target != null) {
+						if (player.getUniqueId().equals(target.getUniqueId())) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
+							return true;
+						}
+
+						AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+						if (targetPlayer.isTogglingTp()) {
+							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis currently not accepting teleport requests"));
+							return true;
+						}
+
+						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						targetPlayer.setTeleportToUuid(player.getUniqueId());
+						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
+						player.sendMessage(ChatUtils.chatMessage("&7You have requested for &e" + targetPlayer.getNickname() + " &7to teleport to you"));
+						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested you teleport to them"));
+						target.sendMessage(ChatUtils.chatMessage("&7Use &e/tpaccept &7or &e/tpdeny"));
+						AranarthUtils.playTeleportSound(player);
+						AranarthUtils.playTeleportSound(target);
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+					}
+				}  else {
+					player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+				}
+			}
+		} else {
+			sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+		}
+		return true;
+	}
+
+}

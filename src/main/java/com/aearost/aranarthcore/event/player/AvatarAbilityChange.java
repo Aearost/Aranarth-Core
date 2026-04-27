@@ -49,7 +49,8 @@ public class AvatarAbilityChange {
     private boolean isSubAbility(String name) {
         return name.equals("Air") || name.equals("Earth") || name.equals("Fire") || name.equals("Water") || name.equals("Stream")
                 || name.equals("Pull") || name.equals("Punch") || name.equals("Grapple") || name.equals("Grab") || name.equals("Freeze")
-                || name.equals("Spear");
+                || name.equals("Spear")
+                || name.equals("Aura") || name.equals("Scream") || name.equals("Possess");
     }
 
 }

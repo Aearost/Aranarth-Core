@@ -34,7 +34,7 @@ public class GuiDominionFood {
 			size = 54;
 		}
 
-		Inventory gui = Bukkit.getServer().createInventory(player, size, ChatUtils.translateToColor("&e" + dominion.getName() +"'s &rFood Storage"));
+		Inventory gui = Bukkit.getServer().createInventory(player, size, ChatUtils.translateToColor("&e" + dominion.getName() +"'s &rFood"));
 		for (int i = 0; i < size; i++) {
 			gui.setItem(i, dominion.getFood()[i]);
 		}

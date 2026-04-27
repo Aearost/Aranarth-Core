@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Camel;
@@ -13,7 +15,9 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Horse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
@@ -125,30 +129,42 @@ public class GuiHomepadClick {
 						if (player.isInsideVehicle()) {
 							Entity mount = player.getVehicle();
 							if (player.getVehicle() instanceof Horse || player.getVehicle() instanceof Camel) {
+								String fromWorld = player.getLocation().getWorld().getName();
+								aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
+								Location destination = home.getLocation();
 								player.leaveVehicle();
-								mount.teleport(home.getLocation());
-								AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
+								mount.teleport(destination);
+								player.teleport(destination);
+								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
-								try {
-									Thread.sleep(20);
-								} catch (InterruptedException ex) {
-									Bukkit.getLogger().info("Something went wrong with the teleportation...");
-								}
-
 								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
-								mount.addPassenger(player);
+								try {
+									AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
+								} catch (IOException ex) {
+									player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+								}
+								new BukkitRunnable() {
+									@Override
+									public void run() {
+										mount.addPassenger(player);
+									}
+								}.runTaskLater(AranarthCore.getInstance(), 2L);
 							}
 						} else {
+							String fromWorld = player.getLocation().getWorld().getName();
+							aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
 							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
-							try {
-								Thread.sleep(20);
-							} catch (InterruptedException ex) {
-								Bukkit.getLogger().info("Something went wrong with the teleportation...");
-							}
-							AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation());
+							player.teleport(home.getLocation());
+							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 							player.sendMessage(ChatUtils
 									.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
+							try {
+								AranarthUtils.switchInventory(player, fromWorld, home.getLocation().getWorld().getName());
+							} catch (IOException ex) {
+								player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
+							}
 						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					}
 					player.closeInventory();
 				} else {

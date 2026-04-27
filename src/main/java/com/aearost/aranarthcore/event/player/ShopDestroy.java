@@ -151,6 +151,14 @@ public class ShopDestroy {
 				return 1;
 			}
 		}
+		// Admin override for any player shop
+		else {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (aranarthPlayer.isInAdminMode()) {
+				ShopUtils.removeShop(shop);
+				return 1;
+			}
+		}
 		return 0;
 	}
 

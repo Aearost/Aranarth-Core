@@ -9,7 +9,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.SUGARCANE_BLOCK;
+import static com.aearost.aranarthcore.objects.CustomKeys.SUGARCANE_BLOCK;
 
 /**
  * Provides the necessary components of a Sugarcane Block item.

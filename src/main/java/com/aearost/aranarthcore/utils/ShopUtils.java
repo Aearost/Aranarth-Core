@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
@@ -234,7 +235,7 @@ public class ShopUtils {
             }
             // Server shop
             else {
-                loc.add(0.5, 1, 0.5);
+                loc.add(0.5, 1.15, 0.5);
             }
 
             ItemDisplay hologram = loc.getWorld().spawn(loc, ItemDisplay.class);
@@ -283,6 +284,16 @@ public class ShopUtils {
     }
 
     /**
+     * Determines if the item is a shulker box (with block state meta).
+     * @param item The item to check.
+     * @return True if the item is a shulker box.
+     */
+    private static boolean isShulkerBox(ItemStack item) {
+        if (item == null) return false;
+        return item.getItemMeta() instanceof BlockStateMeta bsm && bsm.getBlockState() instanceof ShulkerBox;
+    }
+
+    /**
      * Creates all holograms for all shops.
      */
     public static void initializeAllHolograms() {
@@ -318,17 +329,51 @@ public class ShopUtils {
         int playerQuantityOfShopItem = 0;
 
         // Calculates the available space for the item, and the quantity already in the player's inventory
+        boolean shopItemIsShulker = isShulkerBox(shop.getItem());
         for (ItemStack inventoryItem : player.getInventory().getStorageContents().clone()) {
             if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
                 playerFreeInventorySpace += 64;
                 continue;
             }
 
-            if (inventoryItem.isSimilar(shop.getItem())) {
+            // Each month changes the lore of crop seeds, must consider that
+            boolean isSameCropSeed = inventoryItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(inventoryItem.getType());
+            if (inventoryItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                 playerQuantityOfShopItem += inventoryItem.getAmount();
                 int extraSpaceInStack = inventoryItem.getMaxStackSize() - inventoryItem.getAmount();
                 if (extraSpaceInStack > 0) {
                     playerFreeInventorySpace += extraSpaceInStack;
+                }
+            }
+        }
+
+        // Also count items inside shulker boxes in the player's inventory
+        if (!shopItemIsShulker) {
+            for (ItemStack inventoryItem : player.getInventory().getStorageContents().clone()) {
+                if (!isShulkerBox(inventoryItem)) continue;
+                BlockStateMeta bsm = (BlockStateMeta) inventoryItem.getItemMeta();
+                ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                    if (shulkerItem == null) continue;
+                    boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                    if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                        playerQuantityOfShopItem += shulkerItem.getAmount();
+                    }
+                }
+            }
+            // Also count non-full stacks inside shulker boxes as additional space for players with aranarth.shulker
+            if (player.hasPermission("aranarth.shulker")) {
+                for (ItemStack inventoryItem : player.getInventory().getStorageContents().clone()) {
+                    if (!isShulkerBox(inventoryItem)) continue;
+                    BlockStateMeta bsm = (BlockStateMeta) inventoryItem.getItemMeta();
+                    ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                    for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                        if (shulkerItem == null) continue;
+                        boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                        if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                            playerFreeInventorySpace += shulkerItem.getMaxStackSize() - shulkerItem.getAmount();
+                        }
+                    }
                 }
             }
         }
@@ -353,11 +398,29 @@ public class ShopUtils {
                     continue;
                 }
 
-                if (chestItem.isSimilar(shop.getItem())) {
+                // Each month changes the lore of crop seeds, must consider that
+                boolean isSameCropSeed = chestItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(chestItem.getType());
+                if (chestItem.isSimilar(shop.getItem()) || isSameCropSeed) {
                     chestQuantityOfShopItem += chestItem.getAmount();
                     int extraSpaceInStack = chestItem.getMaxStackSize() - chestItem.getAmount();
                     if (extraSpaceInStack > 0) {
                         chestFreeInventorySpace += extraSpaceInStack;
+                    }
+                }
+            }
+
+            // Also count items inside shulker boxes in the chest
+            if (!shopItemIsShulker) {
+                for (ItemStack chestItem : chestInventory.getContents()) {
+                    if (!isShulkerBox(chestItem)) continue;
+                    BlockStateMeta bsm = (BlockStateMeta) chestItem.getItemMeta();
+                    ShulkerBox shulker = (ShulkerBox) bsm.getBlockState();
+                    for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                        if (shulkerItem == null) continue;
+                        boolean isSameCropSeed = shulkerItem.getType() == shop.getItem().getType() && CropUtils.isCropSeed(shulkerItem.getType());
+                        if (shulkerItem.isSimilar(shop.getItem()) || isSameCropSeed) {
+                            chestQuantityOfShopItem += shulkerItem.getAmount();
+                        }
                     }
                 }
             }

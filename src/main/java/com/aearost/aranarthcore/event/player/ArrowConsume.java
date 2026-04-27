@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.QUIVER;
+import static com.aearost.aranarthcore.objects.CustomKeys.QUIVER;
 
 /**
  * Handles the auto-refill functionality when consuming of arrows.
@@ -85,7 +86,45 @@ public class ArrowConsume {
                         }
                     }
                 }
+
+                boolean hasArrowsInInventory = false;
+                for (ItemStack inventoryItem : player.getInventory().getStorageContents()) {
+                    if (inventoryItem != null) {
+                        if (isArrow(inventoryItem)) {
+                            hasArrowsInInventory = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!hasArrowsInInventory) {
+                    // If none match but there are arrows in the Quiver, provide the first stack
+                    for (ItemStack quiverArrow : arrows) {
+                        if (Objects.nonNull(quiverArrow)) {
+                            if (isArrow(quiverArrow)) {
+                                player.getInventory().addItem(quiverArrow.clone());
+
+                                // As the whole stack was taken, remove the whole stack from the Quiver
+                                arrows.remove(quiverArrow);
+
+                                aranarthPlayer.setArrows(arrows);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                return;
+                            }
+                        }
+                    }
+                }
             }
         }
+    }
+
+    /**
+     * Determines whether the input item is an arrow, spectral arrow, or tipped arrow.
+     * @param item The item.
+     * @return Whether the input item is an arrow, spectral arrow, or tipped arrow.
+     */
+    private boolean isArrow(ItemStack item) {
+        return item.getType() == Material.ARROW || item.getType() == Material.SPECTRAL_ARROW
+                || item.getType() == Material.TIPPED_ARROW;
     }
 }

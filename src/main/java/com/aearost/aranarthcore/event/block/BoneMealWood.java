@@ -27,7 +27,7 @@ public class BoneMealWood {
                     e.getClickedBlock().setType(Material.valueOf(asWood));
                 }
                 // Nether mushroom stems
-                else if (name.endsWith("_STEM") && !name.startsWith("MUSHROOM_")) {
+                else if (e.getClickedBlock().getType() == Material.CRIMSON_STEM || e.getClickedBlock().getType() == Material.WARPED_STEM) {
                     String nonStem = name.substring(0, name.length() - 5);
                     String asHyphae = nonStem + "_HYPHAE";
                     e.getClickedBlock().setType(Material.valueOf(asHyphae));

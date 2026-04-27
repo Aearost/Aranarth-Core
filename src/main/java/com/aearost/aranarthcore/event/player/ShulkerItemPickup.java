@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import java.util.Map;
 import org.bukkit.Sound;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
@@ -21,7 +22,7 @@ public class ShulkerItemPickup {
 		Player player = (Player) e.getEntity();
 		ItemStack pickupItem = e.getItem().getItemStack();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (AranarthUtils.isBlacklistingItem(player, aranarthPlayer, pickupItem) != -1) {
+		if (AranarthUtils.getBlacklistMethod(player, aranarthPlayer, pickupItem) != -1) {
 			return;
 		}
 
@@ -62,6 +63,7 @@ public class ShulkerItemPickup {
 							// Skips the slot in the shulker box if it's empty
 							if (shulkerStack != null) {
 								if (shulkerStack.isSimilar(pickupItem)) {
+									int amountBefore = amountRemaining;
 									// Logic to add to the shulker box stack
 									while (amountRemaining > 0) {
 										// Fill up an empty stack until it's full while removing one amount each
@@ -74,12 +76,17 @@ public class ShulkerItemPickup {
 											break;
 										}
 									}
-									// Prevents the default pickup behaviour and
-									e.setCancelled(true);
-									e.getItem().remove();
-									shulkerInventory.setItem(shulkerSlot, shulkerStack);
-									im.setBlockState(shulker);
-									is.setItemMeta(im);
+									// Only cancel and remove if something was actually placed into the shulker.
+									// If the matching stack was already full, amountRemaining is unchanged and
+									// we must not cancel, otherwise the item gets re-dropped in an infinite loop.
+									if (amountRemaining < amountBefore) {
+										e.setCancelled(true);
+										e.getItem().remove();
+										shulkerInventory.setItem(shulkerSlot, shulkerStack);
+										shulker.update();
+										im.setBlockState(shulker);
+										is.setItemMeta(im);
+									}
 								}
 							}
 						}
@@ -91,8 +98,13 @@ public class ShulkerItemPickup {
 		// If there was quantity put in a shulker box and quantity remains
 		if (e.isCancelled()) {
 			player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.2F, 2F);
-			pickupItem.setAmount(amountRemaining);
-			player.getInventory().addItem(pickupItem);
+			if (amountRemaining > 0) {
+				pickupItem.setAmount(amountRemaining);
+				Map<Integer, ItemStack> leftovers = player.getInventory().addItem(pickupItem);
+				if (!leftovers.isEmpty()) {
+					leftovers.values().forEach(item -> player.getWorld().dropItem(player.getLocation(), item));
+				}
+			}
 		}
 	}
 }

@@ -23,7 +23,7 @@ public class RecipeGodApple {
 
 		recipe.shape("GGG", "GAG", "GGG");
 
-		recipe.setIngredient('A', Material.APPLE);
+		recipe.setIngredient('A', Material.GOLDEN_APPLE);
 		recipe.setIngredient('G', Material.GOLD_NUGGET);
 		
 		Bukkit.addRecipe(recipe);

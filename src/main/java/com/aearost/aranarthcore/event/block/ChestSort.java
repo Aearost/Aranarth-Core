@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.ChestSortOrder;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -19,7 +19,7 @@ public class ChestSort {
 
     public void execute(PlayerInteractEvent e) {
         if (e.getHand() == EquipmentSlot.HAND) {
-            if (isContainer(e.getClickedBlock())) {
+            if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {
                 if (e.getPlayer().getGameMode() == GameMode.SURVIVAL && e.getPlayer().isSneaking()) {
                         e.getPlayer().sendMessage(ChatUtils.chatMessage("&cChest sort functionality is currently disabled"));
 //                    BlockState state = e.getClickedBlock().getState();
@@ -113,12 +113,5 @@ public class ChestSort {
             sortedItemsAsArray[i] = sortedItems.get(i);
         }
         return sortedItemsAsArray;
-    }
-
-    private boolean isContainer(Block block) {
-        return block.getType() == Material.CHEST
-                || block.getType() == Material.TRAPPED_CHEST
-                || block.getType() == Material.BARREL
-                || block.getType().name().endsWith("SHULKER_BOX");
     }
 }

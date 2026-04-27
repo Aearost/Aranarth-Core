@@ -37,12 +37,6 @@ public class ShopCreateListener implements Listener {
 		Block sign = e.getBlock();
 
 		if (sign.getState() instanceof Sign signState) {
-			// Only allow shop creation in Survival worlds
-			if (!player.getWorld().getName().startsWith("world") && !player.getWorld().getName().startsWith("smp")) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a shop here!"));
-				return;
-			}
-
 			// If placing a Player Shop
 			if (ChatUtils.stripColorFormatting(lines[0]).equals("[Shop]")) {
 				if (signState.getBlockData() instanceof WallSign wallSign) {
@@ -119,7 +113,7 @@ public class ShopCreateListener implements Listener {
 						int[] validSignFormatResult = validSignFormat(lines, player, false);
 						// If all the lines were entered correctly
 						if (validSignFormatResult[1] == 0 && validSignFormatResult[2] == 0 && validSignFormatResult[3] == 0) {
-							ItemStack heldItem = player.getInventory().getItemInMainHand();
+							ItemStack heldItem = player.getInventory().getItemInMainHand().clone();
 
 							if (heldItem != null && heldItem.getType() != Material.AIR) {
 								if (heldItem.getType().name().contains("BUNDLE") || heldItem.getType().name().contains("SHULKER_BOX")) {
@@ -182,7 +176,7 @@ public class ShopCreateListener implements Listener {
 		}
 
 		String name = e.getBlock().getLocation().getWorld().getName();
-		if (!name.startsWith("world") && !name.startsWith("smp")) {
+		if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("spawn")) {
 			return false;
 		}
 

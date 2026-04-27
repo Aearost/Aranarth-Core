@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -30,10 +31,13 @@ public class PetHurtPrevent {
 						OfflinePlayer owner = (OfflinePlayer) pet.getOwner();
 						// Prevent the player from attacking their own pet anywhere
 						if (owner.getUniqueId().equals(attacker.getUniqueId())) {
-							e.setCancelled(true);
-							attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt your own &7"
-									+ ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
-							return;
+							AranarthPlayer aranarthAttacker = AranarthUtils.getPlayer(attacker.getUniqueId());
+							if (!aranarthAttacker.isHurtingOwnPets()) {
+								e.setCancelled(true);
+								attacker.sendMessage(ChatUtils.chatMessage("&7You cannot hurt your own &7"
+										+ ChatUtils.getFormattedItemName(pet.getType().name()) + "!"));
+								return;
+							}
 						}
 						// Prevent damage to pets that are sitting in the chunk of any Dominion
 						else {

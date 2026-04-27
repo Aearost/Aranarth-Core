@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.BabyZombiePreventVillagerDamage;
 import com.aearost.aranarthcore.event.player.ArenaPlayerKill;
+import com.aearost.aranarthcore.event.player.CombatLog;
 import com.aearost.aranarthcore.event.player.FaunivorExtraAttackDamage;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -35,6 +36,7 @@ public class EntityDamageByEntityEventListener implements Listener {
             }
         }
 
-
+        // Regardless of world
+        new CombatLog().execute(e);
     }
 }

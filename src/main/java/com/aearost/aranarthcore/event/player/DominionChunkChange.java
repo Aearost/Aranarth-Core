@@ -52,7 +52,7 @@ public class DominionChunkChange {
 					}
 				} else if (dominionFrom != null && dominionTo != null) {
 					// If you are changing chunk within the same dominion
-					if (dominionFrom.getLeader().equals(dominionTo.getLeader())) {
+					if (dominionFrom.isSameDominion(dominionTo)) {
 						return;
 					}
 					// If entering one dominion next to another

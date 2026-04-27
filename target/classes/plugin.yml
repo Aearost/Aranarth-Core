@@ -1,5 +1,5 @@
 name: AranarthCore
-version: 1.8
+version: 1.9
 authors: [Aearost]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 1.21
@@ -9,3 +9,171 @@ loadbefore: [mcMMO]
 commands:
   ac:
     description: All underlying commands regarding the plugin
+  afk:
+    description: Manually places the player in AFK mode
+  anvil:
+    description: Opens an anvil GUI
+  aranarthium:
+    description: Provides a written book containing information about Aranarthium
+  arena:
+    description: Teleports the player to the arena world
+  avatar:
+    description: Provides the player with information pertaining to the current Avatar
+  back:
+    description: Sets the player back to their previous location
+  balance:
+    description: Provides the balance of the player or the input player
+    aliases: [bal]
+  balancetop:
+    description: Provides a list of the players with the highest to lowest balances
+    aliases: [baltop]
+  blacklist:
+    description: Provides the player's blacklist
+    aliases: [bl]
+  boosts:
+    description: Lists the active boosts on the server
+  calendar:
+    description: Provides a written book containing information about the calendar system
+    aliases: [cal]
+  cartography:
+    description: Opens a cartography table GUI
+  compressor:
+    description: Opens the compressor GUI to toggle compressible items
+    aliases: [comp, compress]
+  craft:
+    description: Opens a crafting table GUI
+    aliases: [workbench, wb, ct]
+  creative:
+    description: Teleports the player to the Creative world
+  date:
+    description: Lists the current Aranarth calendar date
+  deaths:
+    description: Shows the number of deaths the input player has
+  delhome:
+    description: Deletes the player's specified home
+  dominion:
+    description: The master command for Aranarth dominions
+    aliases: [d]
+  enderchest:
+    description: Opens the player's ender chest remotely
+    aliases: [ec]
+  fletching:
+    description: Opens a fletching table GUI
+  grindstone:
+    description: Opens a grindstone GUI
+  hat:
+    description: Places the held item on the player's head as a hat
+  home:
+    description: Opens the GUI or teleports the player to their specified home
+  homepad:
+    description: Defines a homepad
+  incantations:
+    description: Provides a written book containing information about the incantations system
+  info:
+    description: Provides information about the input player
+  itemname:
+    description: Updates the held item to the input name
+  keyclaim:
+    description: Claims any pending vote crate keys that could not be delivered at the time of voting
+  kills:
+    description: Shows the number of kills the input player has
+  lock:
+    description: Locks the next-clicked chest block
+  loom:
+    description: Opens a loom GUI
+  message:
+    description: Messages the input player the provided message
+    aliases: [msg]
+  nickname:
+    description: Updates the player's nickname
+    aliases: [nick]
+  particles:
+    description: Controls the number of Aranarth particles that will be displayed
+  pay:
+    description: Pays the input player the specified amount
+  pettransfer:
+    description: Allows the player to specify a player to transfer their pet's ownership to
+  ping:
+    description: Shows the input player's ping
+  potions:
+    description: Opens the GUI of the player's potions
+  pronouns:
+    description: Allows the player to update their pronouns
+  quests:
+    description: Opens the Aranarth Quests GUI
+  randomizer:
+    description: Randomizes placed blocks
+    aliases: [rand]
+  ranks:
+    description: Lists the in-game upgradable ranks
+  rankup:
+    description: Directly lists the next rank that the player can rank up to
+  reply:
+    description: Replies to the last received message
+    aliases: [r]
+  resource:
+    description: Teleports the player to the Resource world
+  rules:
+    description: Displays the server's rules
+  seen:
+    description: Displays the last time the player was seen online
+  sethome:
+    description: Creates a new home
+  shop:
+    description: Opens the GUI to players' shops
+  smithing:
+    description: Opens a smithing table GUI
+  smp:
+    description: Teleports the player to the SMP world
+  spawn:
+    description: Teleports the player to the Spawn world
+  stonecutter:
+    description: Opens a stonecutter GUI
+  store:
+    description: Provides the player with a GUI of the server's store
+  streak:
+    description: Opens the Login Streak GUI to view and claim daily streak rewards
+  survival:
+    description: Survival
+    aliases: [rtp]
+  tables:
+    description: Provides the player with access to a GUI with all forms of crafting tables
+  toggle:
+    description: Allows the player to toggle different functionality
+  teleport:
+    description: Sends a teleport request to the input player
+    aliases: [tp]
+  topkills:
+    description: Shows the players with the most kills
+    aliases: [tk]
+  topdeaths:
+    description: Shows the players with the most deaths
+    aliases: [td]
+  tpaccept:
+    description: Allows the player to accept a teleport request
+    aliases: [tpa]
+  tpdeny:
+    description: Allows the player to deny a teleport request
+    aliases: [tpd]
+  tphere:
+    description: Allows the player to request another player teleports to them
+    aliases: [tph]
+  trash:
+    description: Allows players to dispense of items
+  trust:
+    description: Trusts the input player to the next clicked chest
+  unlock:
+    description: Unlocks the next clicked chest
+  untrust:
+    description: Removes the input player from the next clicked chest's protection
+  vote:
+    description: Provides the player with a list of vote links
+    aliases: [v]
+  votetop:
+    description: Lists the top 10 players by vote count
+    aliases: [vtop]
+  voteshop:
+    description: Opens the vote shop GUI to spend vote points
+    aliases: [vshop, vs]
+  warp:
+    description: Warps the player to the input warp

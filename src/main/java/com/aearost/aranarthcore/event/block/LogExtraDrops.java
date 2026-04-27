@@ -1,12 +1,12 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
 import com.gmail.nossr50.mcMMO;
 import com.gmail.nossr50.skills.woodcutting.WoodcuttingManager;
 import com.gmail.nossr50.util.EventUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,9 +21,9 @@ public class LogExtraDrops {
 			return;
 		}
 
-		if (isLogBlock(e.getBlock().getType())) {
+		if (AranarthUtils.isHarvestableWithAxe(e.getBlock().getType())) {
 			String worldName = e.getBlock().getLocation().getWorld().getName();
-			if (worldName.startsWith("world") || worldName.startsWith("smp")) {
+			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
 				Location loc = e.getBlock().getLocation();
 				boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
 				if (isEligible) {
@@ -40,20 +40,5 @@ public class LogExtraDrops {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Determines if the input Material is a log block.
-	 * @param type The Material.
-	 * @return Confirmation if the input Material is a log block.
-	 */
-	private boolean isLogBlock(Material type) {
-		if (type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) {
-			return true;
-		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
-				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE) {
-			return true;
-		}
-		return false;
 	}
 }

@@ -15,8 +15,11 @@ import org.bukkit.inventory.Recipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.text.NumberFormat;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -35,7 +38,11 @@ public class PlayerServerJoinListener implements Listener {
 		boolean isNewPlayer = false;
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));
-			player.teleport(new Location(Bukkit.getWorld("world"), -29.5, 74, -73.5, 0, 0));
+			LocalDateTime now = LocalDateTime.now();
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			aranarthPlayer.setFirstJoinDate(now.getMonthValue() + "/" + now.getDayOfMonth() + "/" + now.getYear());
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
 			isNewPlayer = true;
 		}
 		// If the player changed their username
@@ -112,11 +119,14 @@ public class PlayerServerJoinListener implements Listener {
 							+ "\n                    &7to the &6&lRealm of Aranarth!"));
 					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
 					Bukkit.broadcastMessage("");
+
+					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
 
 		playJoinSound();
+		AranarthUtils.updateTab();
 	}
 
 	/**
@@ -132,6 +142,56 @@ public class PlayerServerJoinListener implements Listener {
 
 		String[] messages = DateUtils.determineServerDate(day, weekday, month, year);
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		List<String> toggling = new ArrayList<>();
+		if (aranarthPlayer.isTogglingChat()) {
+			toggling.add("&e&oChat Messages");
+		}
+		if (aranarthPlayer.isTogglingMessages()) {
+			toggling.add("&e&oDirect Messages");
+		}
+		if (aranarthPlayer.isTogglingTp()) {
+			toggling.add("&e&oTeleport Requests");
+		}
+		if (!aranarthPlayer.isUsingSpawnBoost()) {
+			toggling.add("&e&oSpawn Boost");
+		}
+		if (aranarthPlayer.isTogglingChangeClaim()) {
+			toggling.add("&e&oClaim Changes");
+		}
+		if (aranarthPlayer.isTogglingInventoryAssist()) {
+			toggling.add("&e&oInventory Assist");
+		}
+		if (!aranarthPlayer.isAddingToShulker()) {
+			toggling.add("&e&oShulker Assist");
+		}
+		if (aranarthPlayer.getBlacklistingMethod() == -1) {
+			toggling.add("&e&oBlacklist");
+		}
+		if (!aranarthPlayer.isCompressingItems()) {
+			toggling.add("&e&oCompressor");
+		}
+		if (!aranarthPlayer.isAutoLockingChests()) {
+			toggling.add("&e&oChest Locks");
+		}
+		if (aranarthPlayer.hasBlueFireDisabled()) {
+			toggling.add("&e&oBlue Fire");
+		}
+
+		if (!toggling.isEmpty()) {
+			String toggledFeatures = "  &7&oYou currently have ";
+			for (int i = 0; i < toggling.size(); i++) {
+				toggledFeatures += toggling.get(i);
+				if  (i < toggling.size() - 2) {
+					toggledFeatures += "&7&o, ";
+				} else if (i < toggling.size() - 1) {
+					toggledFeatures += " &7&oand ";
+				}
+			}
+			toggledFeatures += " &7&otoggled";
+			player.sendMessage(ChatUtils.translateToColor(toggledFeatures));
+		}
 
 		Avatar avatar = AvatarUtils.getCurrentAvatar();
 		if (avatar == null) {
@@ -152,7 +212,6 @@ public class PlayerServerJoinListener implements Listener {
 					"  &5&lThe current Avatar is " + element + " &d" + avatarNickname + " " + element));
 		}
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		player.sendMessage(ChatUtils.translateToColor("  &7&oYour balance is currently &6" + formatter.format(aranarthPlayer.getBalance())));
@@ -168,7 +227,15 @@ public class PlayerServerJoinListener implements Listener {
 		player.sendMessage("  " + messages[1]); // Date message
 
 		// Once mail is added in, use the below format
-//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail() + " &7messages in your mail!"));
+//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail().size() + " &7messages in your mail!"));
+
+		// Login streak notification
+		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
+		if (streakReset) {
+			player.sendMessage(ChatUtils.chatMessage("&7Your login streak has been reset to Day 1"));
+		} else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
+			player.sendMessage(ChatUtils.chatMessage("&7Don't forget to claim your daily login reward with &e/streak"));
+		}
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
 		player.sendMessage("");

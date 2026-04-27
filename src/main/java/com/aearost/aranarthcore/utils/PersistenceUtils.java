@@ -2,10 +2,15 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
+import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
+import java.util.stream.Collectors;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -140,7 +145,6 @@ public class PersistenceUtils {
 	 * Initializes the players HashMap based on the contents of aranarth_players.txt.
 	 */
 	public static void loadAranarthPlayers() {
-
 		String currentPath = System.getProperty("user.dir");
 		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
 				+ "aranarth_players.txt";
@@ -164,7 +168,7 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|voteTotal|votePoints|pronouns
+				// uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|firstJoinDate|pronouns
 				String[] fields = row.split("\\|");
 				int lastIndex = fields.length - 1;
 
@@ -218,11 +222,7 @@ public class PersistenceUtils {
 					blacklist = new LinkedList<>(Arrays.asList(blacklistAsItemStackArray));
 				}
 
-				boolean isDeletingBlacklistedItems = false;
-				if (fields[8].equals("1")) {
-					isDeletingBlacklistedItems = true;
-				}
-
+				int blacklistingMethod = Integer.parseInt(fields[8]);
 				double balance = Double.parseDouble(fields[9]);
 				int rank = Integer.parseInt(fields[10]);
 				int saintRank = Integer.parseInt(fields[11]);
@@ -268,8 +268,12 @@ public class PersistenceUtils {
 				if (fields[19].equals("1")) {
 					isCompressingItems = true;
 				}
-				int voteTotal = Integer.parseInt(fields[20]);
-				int votePoints = Integer.parseInt(fields[21]);
+
+				int votePointsSpent = Integer.parseInt(fields[20]);
+				int spawnBoostValue = Integer.parseInt(fields[21]);
+				boolean isUsingSpawnBoost = spawnBoostValue == 1;
+
+				String firstJoinDate = fields[22];
 
 				// Keep pronouns at the end and add before this
 				// No need to update the index as it will be dynamic
@@ -282,8 +286,10 @@ public class PersistenceUtils {
 
 				AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
 						survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
-						isDeletingBlacklistedItems, balance, rank, saintRank, councilRank, architectRank, homes,
-						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, voteTotal, votePoints, pronouns));
+						blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,
+						muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
+						firstJoinDate,
+						pronouns)); // Keep pronouns at the end
 			}
 			Bukkit.getLogger().info("All aranarth players have been initialized");
 			reader.close();
@@ -322,7 +328,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|voteTotal|votePoints|pronouns\n");
+					writer.write("#uuid|nickname|survivalInventory|arenaInventory|creativeInventory|potions|arrows|blacklist|isDeletingBlacklistedItems|balance|rank|saint|council|architect|homes|muteEndDate|particles|perks|saintExpirationDate|isCompressingItems|votePointsSpent|spawnBoostValue|firstJoinDate|pronouns\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -361,9 +367,13 @@ public class PersistenceUtils {
 						if (Objects.nonNull(aranarthPlayer.getBlacklist())) {
 							blacklist = ItemUtils.itemStackArrayToBase64(aranarthPlayer.getBlacklist().toArray(new ItemStack[0]));
 						}
-						String isDeletingBlacklistedItems = "0";
-						if (aranarthPlayer.isDeletingBlacklistedItems()) {
-							isDeletingBlacklistedItems = "1";
+						String blacklistingMethod = "0";
+						if (aranarthPlayer.getBlacklistingMethod() == -1) {
+							blacklistingMethod = "-1";
+						} else if (aranarthPlayer.getBlacklistingMethod() == 1) {
+							blacklistingMethod = "1";
+						} else {
+							blacklistingMethod = "0";
 						}
 						String balance = aranarthPlayer.getBalance() + "";
 						String rank = aranarthPlayer.getRank() + "";
@@ -404,7 +414,12 @@ public class PersistenceUtils {
 						String perks = "";
 						for (int i = 0; i < Perk.values().length; i++) {
 							Perk perk = Perk.values()[i];
-							perks += aranarthPlayer.getPerks().get(perk);
+							if (aranarthPlayer.getPerks().get(perk) == null) {
+								perks += 0;
+							} else {
+								// May be 0, 1, or a multiple of 3 if it's the homes perk
+								perks += aranarthPlayer.getPerks().get(perk);
+							}
 
 							if (i < aranarthPlayer.getPerks().size() - 1) {
 								perks += "*";
@@ -416,8 +431,11 @@ public class PersistenceUtils {
 						if (aranarthPlayer.isCompressingItems()) {
 							isCompressingItems = "1";
 						}
-						int voteTotal = aranarthPlayer.getVoteTotal();
-						int votePoints = aranarthPlayer.getVotePoints();
+						int votePointsSpent = aranarthPlayer.getVotePointsSpent();
+						boolean isUsingSpawnBoost = aranarthPlayer.isUsingSpawnBoost();
+						int spawnBoostValue = isUsingSpawnBoost ? 1 : 0;
+
+						String firstJoinDate = aranarthPlayer.getFirstJoinDate();
 
 						// Keep pronouns at the end and add before this
 						String pronouns = "M";
@@ -428,10 +446,11 @@ public class PersistenceUtils {
 						}
 
 						String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
-								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + isDeletingBlacklistedItems
+								+ creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
 								+ "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
 								+ allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
-								+ "|" + isCompressingItems + "|" + voteTotal + "|" + votePoints + "|"
+								+ "|" + isCompressingItems + "|" + votePointsSpent + "|" + spawnBoostValue + "|"
+								+ firstJoinDate + "|"
 								// Keep pronouns at the end and add before this
 								+ pronouns + "\n";
 						writer.write(row);
@@ -439,6 +458,203 @@ public class PersistenceUtils {
 					writer.close();
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the aranarth players!");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes the toggled features based on the contents of toggled.txt.
+	 */
+	public static void loadToggledFeatures() {
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "toggled.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the toggled file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|ping|bluefire
+				String[] fields = row.split("\\|");
+				int lastIndex = fields.length - 1;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+
+				// Chat
+				if (fields[1].equals("0")) {
+					aranarthPlayer.setTogglingChat(false);
+				} else {
+					aranarthPlayer.setTogglingChat(true);
+				}
+
+				// Messages
+				if (fields[2].equals("0")) {
+					aranarthPlayer.setTogglingMessages(false);
+				} else {
+					aranarthPlayer.setTogglingMessages(true);
+				}
+
+				// Teleport
+				if (fields[3].equals("0")) {
+					aranarthPlayer.setTogglingTp(false);
+				} else {
+					aranarthPlayer.setTogglingTp(true);
+				}
+
+				// Spawn Boost
+				if (fields[4].equals("0")) {
+					aranarthPlayer.setUsingSpawnBoost(true);
+				} else {
+					aranarthPlayer.setUsingSpawnBoost(false);
+				}
+
+				// Change Claim
+				if (fields[5].equals("0")) {
+					aranarthPlayer.setTogglingChangeClaim(false);
+				} else {
+					aranarthPlayer.setTogglingChangeClaim(true);
+				}
+
+				// Inventory
+				if (fields[6].equals("0")) {
+					aranarthPlayer.setTogglingInventoryAssist(false);
+				} else {
+					aranarthPlayer.setTogglingInventoryAssist(true);
+				}
+
+				// Shulker
+				if (fields[7].equals("0")) {
+					aranarthPlayer.setAddingToShulker(true);
+				} else {
+					aranarthPlayer.setAddingToShulker(false);
+				}
+
+				// Blacklist
+				if (fields[8].equals("-1")) {
+					aranarthPlayer.setBlacklistingMethod(-1);
+				} else if (fields[8].equals("1")) {
+					aranarthPlayer.setBlacklistingMethod(1);
+				} else {
+					aranarthPlayer.setBlacklistingMethod(0);
+				}
+
+				// Compressing
+				if (fields[9].equals("0")) {
+					aranarthPlayer.setCompressingItems(true);
+				} else {
+					aranarthPlayer.setCompressingItems(false);
+				}
+
+				// Chest Lock
+				if (fields[10].equals("0")) {
+					aranarthPlayer.setAutoLockingChests(true);
+				} else {
+					aranarthPlayer.setAutoLockingChests(false);
+				}
+
+				// Fields from index 11 onward are optional — checked with fields.length > N so that
+				// existing files without the field load fine and use the default from the constructor.
+
+				// Blue Fire (index 11)
+				if (fields.length > 11) {
+					aranarthPlayer.setBlueFireDisabled(!fields[11].equals("0"));
+				}
+
+				// Gradient Chat Enabled (index 12)
+				if (fields.length > 12) {
+					aranarthPlayer.setGradientChatEnabled(!fields[12].equals("0"));
+				}
+
+				// Gradient Chat Colors (index 13)
+				if (fields.length > 13 && !fields[13].equals("none")) {
+					aranarthPlayer.setGradientChatColors(fields[13]);
+				}
+
+				AranarthUtils.setPlayer(uuid, aranarthPlayer);
+			}
+			Bukkit.getLogger().info("All toggled features have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the toggled features!");
+		}
+	}
+
+	/**
+	 * Saves the toggled features to the toggled.txt file.
+	 */
+	public static void saveToggledFeatures() {
+		HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
+		if (!aranarthPlayers.isEmpty()) {
+			String currentPath = System.getProperty("user.dir");
+			String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+					+ File.separator + "toggled.txt";
+			File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+			File file = new File(filePath);
+
+			// If the directory exists
+			boolean isDirectoryCreated = true;
+			if (!pluginDirectory.isDirectory()) {
+				isDirectoryCreated = pluginDirectory.mkdir();
+			}
+			if (isDirectoryCreated) {
+				try {
+					// If the file isn't already there
+					if (file.createNewFile()) {
+						Bukkit.getLogger().info("A new toggled.txt file has been generated");
+					}
+				} catch (IOException e) {
+					Bukkit.getLogger().info("An error occurred in the creation of toggled.txt");
+				}
+
+				try {
+					FileWriter writer = new FileWriter(filePath);
+					// Template line
+					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors\n");
+
+					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
+						AranarthPlayer aranarthPlayer = entry.getValue();
+
+						String uuid = entry.getKey().toString();
+						String chat = aranarthPlayer.isTogglingChat() ? "1" : "0";
+						String messages = aranarthPlayer.isTogglingMessages() ? "1" : "0";
+						String teleport = aranarthPlayer.isTogglingTp() ? "1" : "0";
+						String spawnboost = aranarthPlayer.isUsingSpawnBoost() ? "0" : "1";
+						String changeClaim = aranarthPlayer.isTogglingChangeClaim() ? "1" : "0";
+						String inventory = aranarthPlayer.isTogglingInventoryAssist() ? "1" : "0";
+						String shulker = aranarthPlayer.isAddingToShulker() ? "0" : "1";
+						String blacklist = aranarthPlayer.getBlacklistingMethod() + "";
+						String compressing = aranarthPlayer.isCompressingItems() ? "0" : "1";
+						String chestLock = aranarthPlayer.isAutoLockingChests() ? "0" : "1";
+						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
+						String gradientEnabled = aranarthPlayer.isGradientChatEnabled() ? "1" : "0";
+						String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
+
+						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
+								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
+								+ bluefire + "|" + gradientEnabled + "|" + gradientColors + "\n";
+						writer.write(row);
+					}
+					writer.close();
+				} catch (IOException e) {
+					Bukkit.getLogger().info("There was an error in saving the toggled features!");
 				}
 			}
 		}
@@ -833,19 +1049,24 @@ public class PersistenceUtils {
 					continue;
 				}
 
-				// #name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|balance
+				// #id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks
 				String[] fields = row.split("\\|");
 
-				String name = fields[0];
-				UUID leader = UUID.fromString(fields[1]);
+				UUID id = null;
+				if (!fields[0].isEmpty()) {
+					id = UUID.fromString(fields[0]);
+				}
+
+				String name = fields[1];
+				UUID leader = UUID.fromString(fields[2]);
 				List<UUID> members = new ArrayList<>();
-				String[] memberParts = fields[2].split("\\*\\*\\*");
+				String[] memberParts = fields[3].split("\\*\\*\\*");
 				for (String member : memberParts) {
 					members.add(UUID.fromString(member));
 				}
 
 				List<UUID> allies = new ArrayList<>();
-				String[] alliesParts = fields[3].split("\\*\\*\\*");
+				String[] alliesParts = fields[4].split("\\*\\*\\*");
 				if (!alliesParts[0].isEmpty()) {
 					for (String ally : alliesParts) {
 						allies.add(UUID.fromString(ally));
@@ -853,7 +1074,7 @@ public class PersistenceUtils {
 				}
 
 				List<UUID> truced = new ArrayList<>();
-				String[] trucedParts = fields[4].split("\\*\\*\\*");
+				String[] trucedParts = fields[5].split("\\*\\*\\*");
 				if (!trucedParts[0].isEmpty()) {
 					for (String truce : trucedParts) {
 						truced.add(UUID.fromString(truce));
@@ -861,42 +1082,72 @@ public class PersistenceUtils {
 				}
 
 				List<UUID> enemies = new ArrayList<>();
-				String[] enemyParts = fields[5].split("\\*\\*\\*");
+				String[] enemyParts = fields[6].split("\\*\\*\\*");
 				if (!enemyParts[0].isEmpty()) {
 					for (String enemy : enemyParts) {
 						enemies.add(UUID.fromString(enemy));
 					}
 				}
 
-				String worldName = fields[6];
+				String worldName = fields[7];
 				World world = Bukkit.getWorld(worldName);
 
 				List<Chunk> chunks = new ArrayList<>();
-				String[] claimedChunks = fields[7].split("\\*\\*\\*");
+				String[] claimedChunks = fields[8].split("\\*\\*\\*");
 				for (String chunk : claimedChunks) {
 					String[] coordinates = chunk.split(",");
 					int x = Integer.parseInt(coordinates[0]);
 					int z = Integer.parseInt(coordinates[1]);
 					chunks.add(world.getChunkAt(x, z));
 				}
-				double x = Double.parseDouble(fields[8]);
-				double y = Double.parseDouble(fields[9]);
-				double z = Double.parseDouble(fields[10]);
-				float yaw = Float.parseFloat(fields[11]);
-				float pitch = Float.parseFloat(fields[12]);
+				double x = Double.parseDouble(fields[9]);
+				double y = Double.parseDouble(fields[10]);
+				double z = Double.parseDouble(fields[11]);
+				float yaw = Float.parseFloat(fields[12]);
+				float pitch = Float.parseFloat(fields[13]);
 				ItemStack[] food = new ItemStack[54];
-				if (!fields[13].isEmpty()) {
-					food = ItemUtils.itemStackArrayFromBase64(fields[13]);
+				if (!fields[14].isEmpty()) {
+					food = ItemUtils.itemStackArrayFromBase64(fields[14]);
 				}
-				int claimableResources = Integer.parseInt(fields[14]);
+				int claimableResources = Integer.parseInt(fields[15]);
+				List<UUID> conquered = new ArrayList<>();
+				String[] conqueredUuids = fields[16].split("_");
+				for (String uuid : conqueredUuids) {
+					if (!uuid.isEmpty()) {
+						conquered.add(UUID.fromString(uuid));
+					}
+				}
 
 				// Keep balance at the end
-				double balance = Double.parseDouble(fields[15]);
+				double balance = Double.parseDouble(fields[17]);
 
-				DominionUtils.createDominion(new Dominion(name, leader, members, allies, truced, enemies, worldName, chunks,
-						x, y, z, yaw, pitch, food, claimableResources,
+				Map<UUID, DominionRank> memberRanks = new HashMap<>();
+				if (fields.length > 18 && !fields[18].isEmpty()) {
+					for (String entry : fields[18].split("\\*\\*\\*")) {
+						String[] parts = entry.split(":");
+						if (parts.length == 2) {
+							memberRanks.put(UUID.fromString(parts[0]), DominionRank.valueOf(parts[1]));
+						}
+					}
+				}
+
+				// Back-fill ranks for any members not found in the persisted map
+				for (UUID memberUuid : members) {
+					if (!memberRanks.containsKey(memberUuid)) {
+						memberRanks.put(memberUuid, memberUuid.equals(leader) ? DominionRank.LEADER : DominionRank.CITIZEN);
+					}
+				}
+
+				boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
+				boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+
+				Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
+						x, y, z, yaw, pitch, food, claimableResources, conquered, null,
 						// Keep balance at the end
-						balance));
+						balance);
+				dominion.setMemberPvpEnabled(memberPvpEnabled);
+				dominion.setMobSpawningEnabled(mobSpawningEnabled);
+				DominionUtils.createDominion(dominion);
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
 			reader.close();
@@ -937,7 +1188,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|balance\n");
+					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -1005,14 +1256,34 @@ public class PersistenceUtils {
 							String foodString = ItemUtils.itemStackArrayToBase64(dominion.getFood());
 							int claimableResources = dominion.getClaimableResources();
 
-							// Keep at the end
+							String conquered = "";
+							for (int i = 0; i < dominion.getConquered().size(); i++) {
+								conquered += dominion.getConquered().get(i);
+								if (i < dominion.getConquered().size() - 1) {
+									conquered += "_";
+								}
+							}
+
+							// Keep balance at the end
 							String balance = dominion.getBalance() + "";
 
-							String row = name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
+							String dominionId = dominion.getId().toString();
+
+							StringBuilder memberRanksBuilder = new StringBuilder();
+							for (Map.Entry<UUID, DominionRank> entry : dominion.getMemberRanks().entrySet()) {
+								if (!memberRanksBuilder.isEmpty()) {
+									memberRanksBuilder.append("***");
+								}
+								memberRanksBuilder.append(entry.getKey()).append(":").append(entry.getValue().name());
+							}
+							String memberRanksString = memberRanksBuilder.toString();
+
+							String row = dominionId + "|" + name + "|" + leader + "|" + membersString + "|" + alliesString + "|" + trucedString + "|"
 									+ enemiesString + "|" + worldName + "|" + chunksString + "|"
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
-									// Keep balance at the end
-									+ balance + "\n";
+									+ conquered + "|"
+									// Keep balance before memberRanks
+									+ balance + "|" + memberRanksString + "|" + (dominion.isMemberPvpEnabled() ? "1" : "0") + "|" + (dominion.isMobSpawningEnabled() ? "1" : "0") + "\n";
 							writer.write(row);
 						}
 					}
@@ -1020,6 +1291,136 @@ public class PersistenceUtils {
 				} catch (IOException e) {
 					Bukkit.getLogger().info("There was an error in saving the dominions!");
 				}
+			}
+		}
+	}
+
+	/**
+	 * Initializes dominion permissions from dominions_permissions.txt.
+	 * Must be called after loadDominions().
+	 */
+	public static void loadDominionPermissions() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "dominions_permissions.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the dominions_permissions file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// Format: dominionId|permissions
+				// permissions: NEWCOMER:PERM1,PERM2;CITIZEN:PERM3;ALLIED:PERM4,...
+				String[] fields = row.split("\\|", -1);
+				if (fields.length < 2) {
+					continue;
+				}
+
+				UUID dominionId = UUID.fromString(fields[0]);
+				Dominion dominion = DominionUtils.getDominionById(dominionId);
+				if (dominion == null) {
+					continue;
+				}
+
+				Map<DominionRank, Set<DominionPermission>> allPerms = new EnumMap<>(DominionRank.class);
+				if (!fields[1].isEmpty()) {
+					for (String rankEntry : fields[1].split(";")) {
+						String[] parts = rankEntry.split(":", 2);
+						if (parts.length == 2) {
+							try {
+								DominionRank rank = DominionRank.valueOf(parts[0]);
+								Set<DominionPermission> perms = new HashSet<>();
+								if (!parts[1].isEmpty()) {
+									for (String permName : parts[1].split(",")) {
+										try {
+											perms.add(DominionPermission.valueOf(permName));
+										} catch (IllegalArgumentException ignored) {}
+									}
+								}
+								allPerms.put(rank, perms);
+							} catch (IllegalArgumentException ignored) {}
+						}
+					}
+				}
+
+				dominion.setDominionPermissions(new DominionPermissions(allPerms));
+			}
+			Bukkit.getLogger().info("All dominion permissions have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading dominion permissions!");
+		}
+	}
+
+	/**
+	 * Saves dominion permissions to dominions_permissions.txt.
+	 */
+	public static void saveDominionPermissions() {
+		List<Dominion> dominions = DominionUtils.getDominions();
+		if (dominions == null || dominions.isEmpty()) {
+			return;
+		}
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "dominions_permissions.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new dominions_permissions.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred creating dominions_permissions.txt");
+				return;
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#dominionId|permissions\n");
+				writer.write("#permissions format: RANK:PERM1,PERM2;RANK2:PERM3,...\n");
+
+				for (Dominion dominion : dominions) {
+					DominionPermissions perms = dominion.getDominionPermissions();
+					if (perms == null) {
+						continue;
+					}
+
+					// Serialize all permissions (ranks and relations) into one field
+					StringBuilder builder = new StringBuilder();
+					for (Map.Entry<DominionRank, Set<DominionPermission>> entry : perms.getPermissionsMap().entrySet()) {
+						if (!builder.isEmpty()) {
+							builder.append(";");
+						}
+						String permList = entry.getValue().stream()
+								.map(DominionPermission::name)
+								.collect(Collectors.joining(","));
+						builder.append(entry.getKey().name()).append(":").append(permList);
+					}
+
+					writer.write(dominion.getId().toString() + "|" + builder + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error saving dominion permissions!");
 			}
 		}
 	}
@@ -1701,6 +2102,804 @@ public class PersistenceUtils {
 			} catch (IOException e) {
 				Bukkit.getLogger().info("There was an error in saving the shop locations");
 			}
+		}
+	}
+
+	/**
+	 * Loads the votes on the contents of votes.txt.
+	 */
+	public static void loadVotes() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "votes.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the votes file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				String[] parts = row.split("\\|");
+				// #uuid|keyNum|timestamp
+				UUID uuid = UUID.fromString(parts[0]);
+				int keyNum = Integer.parseInt(parts[1]);
+				long timestamp = Long.parseLong(parts[2]);
+				AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
+			}
+			Bukkit.getLogger().info("The votes have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the votes");
+		}
+	}
+
+	/**
+	 * Saves the votes to the votes.txt file.
+	 */
+	public static void saveVotes() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "votes.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new votes.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of votes.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|keyNum|timestamp\n");
+				for (AranarthVote vote : AranarthUtils.getVotes()) {
+					UUID uuid = vote.getUuid();
+					int keyNum = vote.getPointsRewarded();
+					long timestamp = vote.getTimestamp();
+					writer.write(uuid.toString() + "|" + keyNum + "|" + timestamp + "\n");
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the votes");
+			}
+		}
+	}
+
+	/**
+	 * Loads the sentinels based on the contents of sentinels.txt.
+	 */
+	public static void loadSentinels() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "sentinels.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the sentinels file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				String[] playerParts = row.split("\\|");
+				UUID playerUuid = UUID.fromString(playerParts[0]);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+				if (aranarthPlayer == null) {
+					continue;
+				}
+
+				HashMap<EntityType, List<Sentinel>> sentinels = new HashMap<>();
+
+				List<Sentinel> horse = new ArrayList<>();
+				String[] horseParts = playerParts[1].split("___");
+				for (int i = 1; i < horseParts.length; i++) {
+					String[] parts = horseParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.HORSE, loc);
+					horse.add(sentinel);
+				}
+
+				List<Sentinel> ironGolems = new ArrayList<>();
+				String[] golemParts = playerParts[2].split("___");
+				for (int i = 1; i < golemParts.length; i++) {
+					String[] parts = golemParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.IRON_GOLEM, loc);
+					ironGolems.add(sentinel);
+				}
+
+				List<Sentinel> wolves = new ArrayList<>();
+				String[] wolfParts = playerParts[3].split("___");
+				for (int i = 1; i < wolfParts.length; i++) {
+					String[] parts = wolfParts[i].split("_");
+					UUID uuid = UUID.fromString(parts[0]);
+					World world = Bukkit.getWorld(parts[1]);
+					int x = Integer.parseInt(parts[2]);
+					int y = Integer.parseInt(parts[3]);
+					int z = Integer.parseInt(parts[4]);
+					Location loc = new Location(world, x, y, z);
+					Sentinel sentinel = new Sentinel(uuid, EntityType.WOLF, loc);
+					wolves.add(sentinel);
+				}
+
+				sentinels.put(EntityType.HORSE, horse);
+				sentinels.put(EntityType.IRON_GOLEM, ironGolems);
+				sentinels.put(EntityType.WOLF, wolves);
+				aranarthPlayer.setSentinels(sentinels);
+				AranarthUtils.setPlayer(playerUuid, aranarthPlayer);
+			}
+			Bukkit.getLogger().info("The sentinels have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the sentinels");
+		}
+	}
+
+	/**
+	 * Saves the sentinels to the sentinels.txt file.
+	 */
+	public static void saveSentinels() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "sentinels.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new sentinels.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of sentinels.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				HashMap<UUID, AranarthPlayer> aranarthPlayers = AranarthUtils.getAranarthPlayers();
+				for (UUID uuid : aranarthPlayers.keySet()) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+					HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+					if (sentinels == null || sentinels.isEmpty()) {
+						continue;
+					}
+
+					String playerSentinels = uuid + "|";
+
+					// Ensures that all types of sentinels have been initialized
+					if (sentinels.get(EntityType.HORSE) == null) {
+						sentinels.put(EntityType.HORSE, new ArrayList<>());
+					}
+					playerSentinels += EntityType.HORSE.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.HORSE)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
+					}
+					playerSentinels += "|";
+
+					if (sentinels.get(EntityType.IRON_GOLEM) == null) {
+						sentinels.put(EntityType.IRON_GOLEM, new ArrayList<>());
+					}
+					playerSentinels += EntityType.IRON_GOLEM.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.IRON_GOLEM)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
+					}
+					playerSentinels += "|";
+
+					if (sentinels.get(EntityType.WOLF) == null) {
+						sentinels.put(EntityType.WOLF, new ArrayList<>());
+					}
+					playerSentinels += EntityType.WOLF.name() + "___";
+					for (Sentinel sentinel : sentinels.get(EntityType.WOLF)) {
+						playerSentinels += sentinel.getUuid() + "_";
+						Location loc = sentinel.getLocation();
+						playerSentinels += loc.getWorld().getName() + "_";
+						playerSentinels += loc.getBlockX() + "_";
+						playerSentinels += loc.getBlockY() + "_";
+						playerSentinels += loc.getBlockZ() + "___";
+					}
+
+					playerSentinels += "\n";
+					writer.write(playerSentinels);
+				}
+
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the sentinels");
+			}
+		}
+	}
+
+	/**
+	 * Initializes the kill and death counts based on the contents of kills_and_deaths.txt.
+	 */
+	public static void loadKillDeathCount() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "kills_and_deaths.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+
+			Bukkit.getLogger().info("Attempting to read the kills and deaths file...");
+			HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+
+				// Skip any commented out lines
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				// uuid|worldPrefix|kills|deaths
+				String[] fields = row.split("\\|");
+
+				UUID uuid = UUID.fromString(fields[0]);
+				String worldPrefix = fields[1];
+				int kills = Integer.parseInt(fields[2]);
+				int deaths = Integer.parseInt(fields[3]);
+
+				PlayerKillDeathScore pkds = new PlayerKillDeathScore(uuid, worldPrefix, kills, deaths);
+				AranarthUtils.addPlayerKillDeathScore(pkds);
+			}
+			Bukkit.getLogger().info("All kills and deaths have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the kills and deaths!");
+		}
+	}
+
+	/**
+	 * Saves the kill and death counts to the kills_and_deaths.txt file.
+	 */
+	public static void saveKillDeathCount() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "kills_and_deaths.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new kills_and_deaths.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of kills_and_deaths.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+
+				writer.write("#uuid|worldPrefix|kills|deaths\n");
+
+				for (UUID uuid : AranarthUtils.getKillDeathScores().keySet()) {
+					for (PlayerKillDeathScore pkds : AranarthUtils.getKillDeathScores().get(uuid)) {
+						String world = pkds.getWorldPrefix();
+						int kills = pkds.getKills();
+						int deaths = pkds.getDeaths();
+
+						writer.write(uuid + "|" + world + "|" + kills + "|" + deaths + "\n");
+					}
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the kills and deaths");
+			}
+		}
+	}
+
+	/**
+	 * Loads the pending vote keys from vote_keys.txt.
+	 */
+	public static void loadVoteKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+				+ "vote_keys.txt";
+		File file = new File(filePath);
+
+		// First run of plugin
+		if (!file.exists()) {
+			return;
+		}
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the vote keys file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
+
+				String[] parts = row.split("\\|");
+				UUID uuid = UUID.fromString(parts[0]);
+				int amount = Integer.parseInt(parts[1]);
+				AranarthUtils.setPendingVoteKeys(uuid, amount);
+			}
+			Bukkit.getLogger().info("All pending vote keys have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the vote keys!");
+		}
+	}
+
+	/**
+	 * Saves the pending vote keys to the vote_keys.txt file.
+	 */
+	public static void saveVoteKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "vote_keys.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		// If the directory exists
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (isDirectoryCreated) {
+			try {
+				// If the file isn't already there
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new vote_keys.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of vote_keys.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|amount\n");
+				for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingVoteKeys().entrySet()) {
+					writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the vote keys");
+			}
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Quest State Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads reset timestamps from quest_state.txt.
+	 */
+	public static void loadQuestState() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_state.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the quest_state file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				if (row.startsWith("lastDailyReset|")) {
+					QuestUtils.setLastDailyReset(Long.parseLong(row.split("\\|")[1]));
+				} else if (row.startsWith("lastWeeklyReset|")) {
+					QuestUtils.setLastWeeklyReset(Long.parseLong(row.split("\\|")[1]));
+				}
+			}
+
+			Bukkit.getLogger().info("Quest state has been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the quest state!");
+		}
+	}
+
+	/**
+	 * Saves reset timestamps to quest_state.txt.
+	 */
+	public static void saveQuestState() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_state.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			// If the file isn't already there
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new quest_state.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of quest_state.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#Quest state — do not edit manually\n");
+			writer.write("lastDailyReset|" + QuestUtils.getLastDailyReset() + "\n");
+			writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving the quest state");
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Quest Progress Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads per-player quest progress (including active quest assignments) from quest_progress.txt.
+	 * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|d1prog|d1done|d1claimed|d2task|d2prog|d2done|d2claimed|
+	 *         w0task|w0prog|w0done|w0claimed|w1task|w1prog|w1done|w1claimed|w2task|w2prog|w2done|w2claimed
+	 */
+	public static void loadQuestProgress() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_progress.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the quest_progress file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				String[] fields = row.split("\\|");
+				if (fields.length < 26) continue;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				int rank = Integer.parseInt(fields[1]);
+
+				// New format (32 fields): task|reward|prog|done|claimed per quest slot
+				// Old format (26 fields): task|prog|done|claimed per quest slot (reward falls back to random)
+				boolean hasRewards = fields.length >= 32;
+
+				String[] dTasks;
+				double[] dRewards;
+				int[] dailyProgress;
+				boolean[] dailyCompleted, dailyClaimed;
+				String[] wTasks;
+				double[] wRewards;
+				int[] weeklyProgress;
+				boolean[] weeklyCompleted, weeklyClaimed;
+
+				if (hasRewards) {
+					dTasks = new String[]{ fields[2], fields[7], fields[12] };
+					dRewards = new double[]{ Double.parseDouble(fields[3]), Double.parseDouble(fields[8]), Double.parseDouble(fields[13]) };
+					dailyProgress = new int[]{ Integer.parseInt(fields[4]), Integer.parseInt(fields[9]), Integer.parseInt(fields[14]) };
+					dailyCompleted = new boolean[]{ fields[5].equals("1"), fields[10].equals("1"), fields[15].equals("1") };
+					dailyClaimed = new boolean[]{ fields[6].equals("1"), fields[11].equals("1"), fields[16].equals("1") };
+					wTasks = new String[]{ fields[17], fields[22], fields[27] };
+					wRewards = new double[]{ Double.parseDouble(fields[18]), Double.parseDouble(fields[23]), Double.parseDouble(fields[28]) };
+					weeklyProgress = new int[]{ Integer.parseInt(fields[19]), Integer.parseInt(fields[24]), Integer.parseInt(fields[29]) };
+					weeklyCompleted = new boolean[]{ fields[20].equals("1"), fields[25].equals("1"), fields[30].equals("1") };
+					weeklyClaimed = new boolean[]{ fields[21].equals("1"), fields[26].equals("1"), fields[31].equals("1") };
+				} else {
+					// Old format — rewards will be regenerated randomly
+					dTasks = new String[]{ fields[2], fields[6], fields[10] };
+					dRewards = new double[]{ 0.0, 0.0, 0.0 };
+					dailyProgress = new int[]{ Integer.parseInt(fields[3]), Integer.parseInt(fields[7]), Integer.parseInt(fields[11]) };
+					dailyCompleted = new boolean[]{ fields[4].equals("1"), fields[8].equals("1"), fields[12].equals("1") };
+					dailyClaimed = new boolean[]{ fields[5].equals("1"), fields[9].equals("1"), fields[13].equals("1") };
+					wTasks = new String[]{ fields[14], fields[18], fields[22] };
+					wRewards = new double[]{ 0.0, 0.0, 0.0 };
+					weeklyProgress = new int[]{ Integer.parseInt(fields[15]), Integer.parseInt(fields[19]), Integer.parseInt(fields[23]) };
+					weeklyCompleted = new boolean[]{ fields[16].equals("1"), fields[20].equals("1"), fields[24].equals("1") };
+					weeklyClaimed = new boolean[]{ fields[17].equals("1"), fields[21].equals("1"), fields[25].equals("1") };
+				}
+
+				// Restore active daily quests from the pool using stored task types and rewards
+				List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
+				List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
+
+				if (activeDailyQuests != null) QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
+				if (activeWeeklyQuests != null) QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
+
+				QuestUtils.getPlayerDailyProgress().put(uuid, dailyProgress);
+				QuestUtils.getPlayerDailyCompleted().put(uuid, dailyCompleted);
+				QuestUtils.getPlayerDailyClaimed().put(uuid, dailyClaimed);
+				QuestUtils.getPlayerWeeklyProgress().put(uuid, weeklyProgress);
+				QuestUtils.getPlayerWeeklyCompleted().put(uuid, weeklyCompleted);
+				QuestUtils.getPlayerWeeklyClaimed().put(uuid, weeklyClaimed);
+				QuestUtils.getPlayerQuestRank().put(uuid, rank);
+			}
+
+			Bukkit.getLogger().info("Quest progress has been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading quest progress!");
+		}
+	}
+
+	/**
+	 * Resolves Quest objects from the quest pool using stored task type names and rewards.
+	 * If a stored reward is 0 (old format), a new random reward is generated.
+	 * Returns null if no valid quests could be resolved.
+	 */
+	private static List<Quest> resolveQuestsFromPool(UUID uuid, int rank, String[] taskNames, double[] rewards, QuestType type) {
+		List<Quest> pool = type == QuestType.DAILY ? QuestUtils.getDailyQuestPool(rank) : QuestUtils.getWeeklyQuestPool(rank);
+		List<Quest> resolved = new ArrayList<>();
+		for (int i = 0; i < taskNames.length; i++) {
+			String taskName = taskNames[i];
+			if (taskName.equals("NONE")) continue;
+			try {
+				QuestTaskType taskType = QuestTaskType.valueOf(taskName);
+				Quest found = null;
+				for (Quest q : pool) {
+					if (q.getTaskType() == taskType) { found = q; break; }
+				}
+				if (found != null) {
+					double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
+					resolved.add(found.withReward(reward));
+				}
+			} catch (IllegalArgumentException ignored) {}
+		}
+		return resolved.isEmpty() ? null : resolved;
+	}
+
+	/**
+	 * Saves per-player quest progress (including active quest assignments) to quest_progress.txt.
+	 * Format: uuid|rank|d0task|d0prog|d0done|d0claimed|d1task|...|w2task|w2prog|w2done|w2claimed
+	 */
+	public static void saveQuestProgress() {
+		HashMap<UUID, List<Quest>> activeDailyMap = QuestUtils.getPlayerActiveDailyQuestsMap();
+		HashMap<UUID, List<Quest>> activeWeeklyMap = QuestUtils.getPlayerActiveWeeklyQuestsMap();
+		HashMap<UUID, int[]> dailyProgress = QuestUtils.getPlayerDailyProgress();
+		HashMap<UUID, boolean[]> dailyCompleted = QuestUtils.getPlayerDailyCompleted();
+		HashMap<UUID, boolean[]> dailyClaimed = QuestUtils.getPlayerDailyClaimed();
+		HashMap<UUID, int[]> weeklyProgress = QuestUtils.getPlayerWeeklyProgress();
+		HashMap<UUID, boolean[]> weeklyCompleted = QuestUtils.getPlayerWeeklyCompleted();
+		HashMap<UUID, boolean[]> weeklyClaimed = QuestUtils.getPlayerWeeklyClaimed();
+		HashMap<UUID, Integer> questRanks = QuestUtils.getPlayerQuestRank();
+
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "quest_progress.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			// If the file isn't already there
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new quest_progress.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of quest_progress.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#uuid|rank|d0task|d0reward|d0prog|d0done|d0claimed|d1task|d1reward|d1prog|d1done|d1claimed|d2task|d2reward|d2prog|d2done|d2claimed|w0task|w0reward|w0prog|w0done|w0claimed|w1task|w1reward|w1prog|w1done|w1claimed|w2task|w2reward|w2prog|w2done|w2claimed\n");
+
+			Set<UUID> allUuids = new HashSet<>();
+			allUuids.addAll(activeDailyMap.keySet());
+			allUuids.addAll(activeWeeklyMap.keySet());
+			allUuids.addAll(dailyProgress.keySet());
+			allUuids.addAll(weeklyProgress.keySet());
+
+			for (UUID uuid : allUuids) {
+				int rank = questRanks.getOrDefault(uuid, 0);
+
+				List<Quest> dq = activeDailyMap.getOrDefault(uuid, new ArrayList<>());
+				int[] dp = dailyProgress.getOrDefault(uuid, new int[3]);
+				boolean[] dc = dailyCompleted.getOrDefault(uuid, new boolean[3]);
+				boolean[] dClaim = dailyClaimed.getOrDefault(uuid, new boolean[3]);
+
+				List<Quest> wq = activeWeeklyMap.getOrDefault(uuid, new ArrayList<>());
+				int[] wp = weeklyProgress.getOrDefault(uuid, new int[3]);
+				boolean[] wc = weeklyCompleted.getOrDefault(uuid, new boolean[3]);
+				boolean[] wClaim = weeklyClaimed.getOrDefault(uuid, new boolean[3]);
+
+				StringBuilder row = new StringBuilder(uuid + "|" + rank);
+				for (int i = 0; i < 3; i++) {
+					String task = i < dq.size() ? dq.get(i).getTaskType().name() : "NONE";
+					int reward = i < dq.size() ? (int) dq.get(i).getReward() : 0;
+					int prog = i < dp.length ? dp[i] : 0;
+					int done = (i < dc.length && dc[i]) ? 1 : 0;
+					int claimed = (i < dClaim.length && dClaim[i]) ? 1 : 0;
+					row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
+				}
+				for (int i = 0; i < 3; i++) {
+					String task = i < wq.size() ? wq.get(i).getTaskType().name() : "NONE";
+					int reward = i < wq.size() ? (int) wq.get(i).getReward() : 0;
+					int prog = i < wp.length ? wp[i] : 0;
+					int done = (i < wc.length && wc[i]) ? 1 : 0;
+					int claimed = (i < wClaim.length && wClaim[i]) ? 1 : 0;
+					row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
+				}
+				writer.write(row + "\n");
+			}
+
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving quest progress");
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Login Streak Persistence
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Loads per-player login streak data from login_streaks.txt.
+	 * Format per line: uuid|currentDay|lastClaimEpochDay
+	 */
+	public static void loadLoginStreaks() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "login_streaks.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) return;
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the login_streaks file...");
+
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+
+				String[] fields = row.split("\\|");
+				if (fields.length < 3) continue;
+
+				UUID uuid = UUID.fromString(fields[0]);
+				int day = Integer.parseInt(fields[1]);
+				long lastClaim = Long.parseLong(fields[2]);
+
+				LoginStreakUtils.setStreakDay(uuid, day);
+				LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
+			}
+
+			Bukkit.getLogger().info("Login streaks have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading login streaks!");
+		}
+	}
+
+	/**
+	 * Saves per-player login streak data to login_streaks.txt.
+	 * Format per line: uuid|currentDay|lastClaimEpochDay
+	 */
+	public static void saveLoginStreaks() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "login_streaks.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+		if (!isDirectoryCreated) return;
+
+		try {
+			if (file.createNewFile()) {
+				Bukkit.getLogger().info("A new login_streaks.txt file has been generated");
+			}
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of login_streaks.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#uuid|currentDay|lastClaimEpochDay\n");
+
+			HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
+			HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
+
+			for (UUID uuid : days.keySet()) {
+				int day = days.get(uuid);
+				long lastClaim = claims.getOrDefault(uuid, 0L);
+				writer.write(uuid + "|" + day + "|" + lastClaim + "\n");
+			}
+
+			// Also persist players who have a lastClaim but no explicit day entry
+			for (UUID uuid : claims.keySet()) {
+				if (!days.containsKey(uuid)) {
+					writer.write(uuid + "|1|" + claims.get(uuid) + "\n");
+				}
+			}
+
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving login streaks");
 		}
 	}
 

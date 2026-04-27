@@ -48,6 +48,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiRankupClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Homes")) {
                 new GuiHomesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Delete Home")) {
+                new GuiDelhomeClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Warps")) {
                 new GuiWarpClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Tables")) {
@@ -60,10 +62,27 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
                 new GuiShopLocationClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food Storage")) {
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food")) {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Permissions")
+                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Perms for ")) {
+                new GuiDominionPermissionsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {
+                new GuiDominionMembersClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Vote Shop")) {
+                new GuiVoteShopClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Vote Shop Purchase")) {
+                new GuiVoteShopPurchaseClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+                new GuiTopDeathsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
+                new GuiTopKillsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
+                new GuiQuestsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Login Streak")) {
+                new GuiLoginStreakClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
@@ -73,6 +92,8 @@ public class InventoryClickEventListener implements Listener {
                     new BannerExtendPatternLimit().execute(e);
                 } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Fletching Table")) {
                     new FletchingTableCraft().execute(e);
+                } else if (e.getView().getType() == InventoryType.BREWING) {
+                    new OrderChaosPotionBrewingPrevent().execute(e);
                 }
             }
         }

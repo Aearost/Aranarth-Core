@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.items.aranarthium.armour;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
@@ -13,7 +15,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARMOR_TYPE;
 
 /**
  * Provides the necessary components of an Elven Aranarthium Chestplate item.
@@ -27,9 +29,9 @@ public class ElvenAranarthiumChestplate implements AranarthItem {
 		ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
 		if (Objects.nonNull(meta)) {
-//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven_chestplate");
-//			meta.setItemModel(key);
-			meta.setTrim(new ArmorTrim(TrimMaterial.QUARTZ, TrimPattern.BOLT));
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_elven_chestplate");
+			meta.setItemModel(key);
+			meta.setTrim(new ArmorTrim(TrimMaterial.EMERALD, TrimPattern.BOLT));
 			ArrayList<String> lore = new ArrayList<>();
 			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "elven");
 
@@ -42,7 +44,7 @@ public class ElvenAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#FAF0E6&lElven Aranarthium Chestplate");
+		return ChatUtils.translateToColor("#3F704D&lElven Aranarthium Chestplate");
 	}
 	
 	public String getLore() {

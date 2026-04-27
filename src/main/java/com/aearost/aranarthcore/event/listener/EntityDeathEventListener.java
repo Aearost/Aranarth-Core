@@ -2,10 +2,11 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.mob.FaunivorExtraDeathDrops;
-import com.aearost.aranarthcore.event.mob.GoatDeath;
-import com.aearost.aranarthcore.event.mob.WanderingTraderDeath;
-import com.aearost.aranarthcore.event.mob.ZombieHorseSpawn;
+import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.player.DominionDeath;
+import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
+import com.aearost.aranarthcore.event.player.PlayerKillDeathStats;
+import com.aearost.aranarthcore.event.player.PlayerKillMoneySteal;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Animals;
@@ -31,12 +32,26 @@ public class EntityDeathEventListener implements Listener {
             new WanderingTraderDeath().execute(e);
         } else if (e.getEntityType() == EntityType.GOAT) {
             new GoatDeath().execute(e);
+        } else if (e.getEntityType() == EntityType.PLAYER) {
+            new PlayerHeadDrop().execute(e);
+            new DominionDeath().execute(e);
+            new PlayerKillDeathStats().execute(e);
+            new PlayerKillMoneySteal().execute(e);
         }
 
-        if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
-            if (e.getEntity() instanceof Animals) {
+        // If the mob was a sentinel
+        if (e.getEntityType() == EntityType.HORSE || e.getEntityType() == EntityType.IRON_GOLEM
+                || e.getEntityType() == EntityType.WOLF) {
+            new SentinelDeath().execute(e);
+        }
+
+        if (e.getEntity() instanceof Animals) {
+            new ExtraDropsFromBoneArrow().execute(e);
+            // Applies even further buffs
+            if (AranarthUtils.getMonth() == Month.FAUNIVOR) {
                 new FaunivorExtraDeathDrops().execute(e);
             }
         }
+
     }
 }

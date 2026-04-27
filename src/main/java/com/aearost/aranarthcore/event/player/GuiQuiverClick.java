@@ -17,7 +17,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.List;
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 
 /**
  * Prevents players from adding non-arrow items to the arrows inventory.
@@ -143,6 +143,75 @@ public class GuiQuiverClick {
 												}
 											}
 											break;
+										}
+									}
+								}
+								player.closeInventory();
+								return;
+							}
+						}
+					}
+					// No arrows in player's inventory - try to add selected arrow from quiver
+					ItemStack selectedArrow = e.getCurrentItem();
+					if (selectedArrow != null) {
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						List<ItemStack> playerArrows = aranarthPlayer.getArrows();
+
+						for (int j = 0; j < playerArrows.size(); j++) {
+							if (playerArrows.get(j) != null && AranarthUtils.verifyIsSameArrow(playerArrows.get(j), selectedArrow) != null) {
+								int freeSlot = player.getInventory().firstEmpty();
+								if (freeSlot == -1) {
+									player.sendMessage(ChatUtils.chatMessage("&cThere are no free slots for any arrows"));
+								} else {
+									ItemStack stackFromQuiver = playerArrows.get(j).clone();
+									playerArrows.set(j, null);
+									player.getInventory().setItem(freeSlot, stackFromQuiver);
+
+									if (stackFromQuiver.hasItemMeta()) {
+										if (stackFromQuiver.getItemMeta() instanceof PotionMeta meta) {
+											if (meta.hasCustomEffects()) {
+												String arrowName = meta.getCustomEffects().getFirst().getType().getKey().getKey();
+												String newName = arrowName.substring(0, 1).toUpperCase();
+												newName = newName + arrowName.substring(1);
+												Color color = meta.getCustomEffects().getFirst().getType().getColor();
+												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
+												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newName + " &7Arrows"));
+												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+											} else {
+												StringBuilder newNameSB = new StringBuilder();
+												String[] splitArrowName = ChatUtils.getFormattedItemName(meta.getBasePotionType().name()).split(" ");
+												for (int k = 0; k < splitArrowName.length; k++) {
+													if (splitArrowName[k].equals("Long") || splitArrowName[k].equals("Strong")) {
+														continue;
+													}
+													newNameSB.append(splitArrowName[k]);
+													if (k == splitArrowName.length - 1) {
+														break;
+													} else {
+														newNameSB.append(" ");
+													}
+												}
+												Color color = meta.getBasePotionType().getPotionEffects().getFirst().getType().getColor();
+												String rgbAsHex = String.format("#%02X%02X%02X", color.getRed(), color.getGreen(), color.getBlue());
+												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + rgbAsHex + newNameSB + " &7Arrows"));
+												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+											}
+										} else {
+											if (stackFromQuiver.getItemMeta().getPersistentDataContainer().has(ARROW)) {
+												String type = stackFromQuiver.getItemMeta().getPersistentDataContainer().get(ARROW, PersistentDataType.STRING);
+												ItemStack arrowItem = AranarthUtils.getArrowFromType(type);
+												String arrowName = arrowItem.getItemMeta().getDisplayName() + "s";
+												player.sendMessage(ChatUtils.chatMessage("&7You will now use " + arrowName));
+												player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+											}
+										}
+									} else {
+										if (selectedArrow.getType() == Material.ARROW) {
+											player.sendMessage(ChatUtils.chatMessage("&7You will now use regular &eArrows"));
+											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
+										} else if (selectedArrow.getType() == Material.SPECTRAL_ARROW) {
+											player.sendMessage(ChatUtils.chatMessage("&7You will now use &eSpectral Arrows"));
+											player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 1F, 1);
 										}
 									}
 								}

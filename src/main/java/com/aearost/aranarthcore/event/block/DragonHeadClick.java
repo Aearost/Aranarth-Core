@@ -13,7 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.HashMap;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.CHORUS_DIAMOND;
+import static com.aearost.aranarthcore.objects.CustomKeys.CHORUS_DIAMOND;
 
 /**
  * Handles the logic to fill a bottle with dragon's breath when clicking on a dragon head.

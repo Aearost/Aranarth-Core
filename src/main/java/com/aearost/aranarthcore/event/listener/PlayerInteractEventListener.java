@@ -9,6 +9,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.meta.MusicInstrumentMeta;
 
 public class PlayerInteractEventListener implements Listener {
 
@@ -22,15 +23,22 @@ public class PlayerInteractEventListener implements Listener {
      */
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
+
         if (e.getItem() != null) {
             if (e.getItem().getType().name().equals("LEATHER")) {
                 new QuiverClick().execute(e);
             } else if (e.getItem().getType().name().contains("SHULKER_BOX")) {
                 new ShulkerClick().execute(e);
+            } else if (e.getItem().hasItemMeta()) {
+                if (e.getItem().getItemMeta() instanceof MusicInstrumentMeta) {
+                    new GoatHornUse().execute(e);
+                    return;
+                }
             }
         }
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            new SweetBerryHarvest().execute(e);
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
             new BoneMealWood().execute(e);

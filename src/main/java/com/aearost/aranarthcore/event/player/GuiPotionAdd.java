@@ -49,17 +49,83 @@ public class GuiPotionAdd {
 					e.getView().setTitle("Add Potions " + potionStats);
 				}
 			}
-			// Removing potion by shift-clicking it into player inventory
+			// Removing potion(s) by shift-clicking from potion inventory into player inventory
 			else if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-				if (hasSpaceInPotionGui) {
-					String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) - 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
-					// If there are too many potions in the pouch
-					if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
-						potionStats = "&c" + potionStats;
+				// Regular shift-click: no item on cursor
+				if (e.getCursor().getType() == Material.AIR) {
+					boolean hasSpaceInPlayerInventory = false;
+					// Do not consider armor slots
+					for (int i = 0; i < 36; i++) {
+						ItemStack item = player.getInventory().getItem(i);
+						if (item == null || item.getType() == Material.AIR) {
+							hasSpaceInPlayerInventory = true;
+							break;
+						}
 					}
 
-					removePotion(player, top, e.getCurrentItem(), e.getSlot(), false);
-					e.getView().setTitle("Add Potions " + potionStats);
+					if (hasSpaceInPlayerInventory) {
+						String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) - 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
+						// If there are too many potions in the pouch
+						if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
+							potionStats = "&c" + potionStats;
+						}
+
+						removePotion(player, top, e.getCurrentItem(), e.getSlot(), false);
+						e.getView().setTitle("Add Potions " + potionStats);
+					} else {
+						e.setCancelled(true);
+					}
+				}
+				// Shift double-click with cursor item: move all matching potions from chest into player inventory
+				else {
+					e.setCancelled(true);
+
+					ItemStack clickedItem = e.getCurrentItem();
+					if (clickedItem == null || !isValidPotion(clickedItem)) {
+						return;
+					}
+
+					Inventory newInventory = new GuiPotions(player, 1).getInitializedGui();
+					for (int i = 0; i < top.getContents().length; i++) {
+						if (top.getContents()[i] != null) {
+							newInventory.setItem(i, top.getContents()[i].clone());
+						}
+					}
+
+					Inventory bottom = e.getView().getBottomInventory();
+					int removedCount = 0;
+
+					for (int i = 0; i < top.getSize(); i++) {
+						ItemStack item = top.getItem(i);
+						if (item != null && item.isSimilar(clickedItem) && isValidPotion(item)) {
+							if (bottom.firstEmpty() == -1) {
+								break;
+							}
+
+							bottom.addItem(item.clone());
+							newInventory.setItem(i, null);
+							removedCount++;
+						}
+					}
+
+					if (removedCount > 0) {
+						String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) - removedCount + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
+						if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
+							potionStats = "&c" + potionStats;
+						}
+
+						ItemStack cursorCopy = e.getCursor().clone();
+						player.setItemOnCursor(null);
+						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						aranarthPlayer.setAddingPotions(true);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+						player.openInventory(newInventory);
+						player.setItemOnCursor(cursorCopy);
+						aranarthPlayer.setAddingPotions(false);
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+						e.getView().setTitle("Add Potions " + potionStats);
+					}
 				}
 			}
 			// Can be both adding AND removing
@@ -114,20 +180,81 @@ public class GuiPotionAdd {
 				e.getView().setTitle("Add Potions " + potionStats);
 			}
 		} else {
-			// Adding potion by shift-clicking it into the potion inventory
+			// Adding potion(s) by shift-clicking into the potion inventory
 			if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
 				if (hasSpaceInPotionGui) {
-					String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) + 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
-					// If there are too many potions in the pouch
-					if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
-						potionStats = "&c" + potionStats;
-					}
+					// Regular shift-click: no item on cursor
+					if (e.getCursor().getType() == Material.AIR) {
+						String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) + 1 + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
+						// If there are too many potions in the pouch
+						if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
+							potionStats = "&c" + potionStats;
+						}
 
-					boolean wasAdded = addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
-					if (wasAdded) {
-						e.getView().setTitle("Add Potions " + potionStats);
-					} else {
+						boolean wasAdded = addPotion(player, top, e.getCurrentItem(), e.getSlot(), false);
+						if (wasAdded) {
+							e.getView().setTitle("Add Potions " + potionStats);
+						} else {
+							e.setCancelled(true);
+						}
+					}
+					// Shift double-click with cursor item: move all matching potions from player inventory into chest
+					else {
 						e.setCancelled(true);
+
+						ItemStack clickedItem = e.getCurrentItem();
+						if (clickedItem == null || !isValidPotion(clickedItem)) {
+							return;
+						}
+
+						Inventory newInventory = new GuiPotions(player, 1).getInitializedGui();
+						for (int i = 0; i < top.getContents().length; i++) {
+							if (top.getContents()[i] != null) {
+								newInventory.setItem(i, top.getContents()[i].clone());
+							}
+						}
+
+						Inventory bottom = e.getView().getBottomInventory();
+						int addedCount = 0;
+
+						for (int i = 0; i < bottom.getSize(); i++) {
+							ItemStack item = bottom.getItem(i);
+							if (item != null && item.isSimilar(clickedItem) && isValidPotion(item)) {
+								boolean hasSpace = false;
+								for (ItemStack topItem : newInventory) {
+									if (topItem == null) {
+										hasSpace = true;
+										break;
+									}
+								}
+								if (!hasSpace) {
+									break;
+								}
+
+								newInventory.addItem(item.clone());
+								bottom.setItem(i, null);
+								addedCount++;
+							}
+						}
+
+						if (addedCount > 0) {
+							String potionStats = "(" + (AranarthUtils.getPlayerStoredPotionNum(player) + addedCount + filledPotionInventorySlotNum) + "/" + AranarthUtils.getMaxPotionNum(player) + ")";
+							if (AranarthUtils.getPlayerStoredPotionNum(player) + 1 > AranarthUtils.getMaxPotionNum(player)) {
+								potionStats = "&c" + potionStats;
+							}
+
+							ItemStack cursorCopy = e.getCursor().clone();
+							player.setItemOnCursor(null);
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							aranarthPlayer.setAddingPotions(true);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							player.openInventory(newInventory);
+							player.setItemOnCursor(cursorCopy);
+							aranarthPlayer.setAddingPotions(false);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+							e.getView().setTitle("Add Potions " + potionStats);
+						}
 					}
 				}
 			}

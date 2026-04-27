@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.SUGARCANE_BLOCK;
+import static com.aearost.aranarthcore.objects.CustomKeys.SUGARCANE_BLOCK;
 
 /**
  * Prevents the placement of Sugarcane Blocks.

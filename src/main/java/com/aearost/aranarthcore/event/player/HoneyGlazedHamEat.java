@@ -2,10 +2,11 @@ package com.aearost.aranarthcore.event.player;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.HONEY_GLAZED_HAM;
+import static com.aearost.aranarthcore.objects.CustomKeys.HONEY_GLAZED_HAM;
 
 /**
  * Provides additional perks when eating honey glazed ham.
@@ -20,7 +21,11 @@ public class HoneyGlazedHamEat {
 				ItemStack honeyGlazedHam = e.getItem();
 				honeyGlazedHam.setAmount(newAmount);
 				Player player = e.getPlayer();
-				player.getInventory().setItem(player.getInventory().getHeldItemSlot(), honeyGlazedHam);
+				if (e.getHand() == EquipmentSlot.HAND) {
+					player.getInventory().setItemInMainHand(honeyGlazedHam);
+				} else {
+					player.getInventory().setItemInOffHand(honeyGlazedHam);
+				}
 				int newHunger = player.getFoodLevel() + 10;
 				float newSaturation = player.getSaturation() + 15.0F;
 				if (newHunger > 20) {

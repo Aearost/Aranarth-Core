@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.objects.Boost;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -29,6 +31,15 @@ public class OreClusterDrops {
 
 		// Only apply in the survival worlds
 		if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp") || loc.getWorld().getName().startsWith("resource")) {
+			Dominion dominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
+			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+			if (chunkDominion != null) {
+				if (dominion == null || !dominion.isSameDominion(chunkDominion)) {
+					e.setCancelled(true);
+					return;
+				}
+			}
+
 			ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
 			if (!heldItem.containsEnchantment(Enchantment.SILK_TOUCH)) {
 				// Increased drop rate with fortune
@@ -79,7 +90,7 @@ public class OreClusterDrops {
 					}
 				} else if (material.name().endsWith("GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
-						double calculation = 250 * evaluatedReduction;
+						double calculation = 120 * evaluatedReduction;
 						if (calculation <= 0) {
 							return;
 						}
@@ -87,7 +98,7 @@ public class OreClusterDrops {
 							world.dropItemNaturally(loc, new GoldCluster().getItem());
 						}
 					} else {
-						double calculation = 50 * evaluatedReduction;
+						double calculation = 35 * evaluatedReduction;
 						if (calculation <= 0) {
 							return;
 						}
@@ -96,7 +107,7 @@ public class OreClusterDrops {
 						}
 					}
 				} else if (material == Material.IRON_ORE || material == Material.DEEPSLATE_IRON_ORE) {
-					double calculation = 50 * evaluatedReduction;
+					double calculation = 65 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -104,7 +115,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new IronCluster().getItem());
 					}
 				} else if (material == Material.COPPER_ORE || material == Material.DEEPSLATE_COPPER_ORE) {
-					double calculation = 180 * evaluatedReduction;
+					double calculation = 80 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -112,7 +123,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new CopperCluster().getItem());
 					}
 				} else if (material == Material.REDSTONE_ORE || material == Material.DEEPSLATE_REDSTONE_ORE) {
-					double calculation = 75 * evaluatedReduction;
+					double calculation = 130 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -120,7 +131,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new RedstoneCluster().getItem());
 					}
 				} else if (material == Material.LAPIS_ORE || material == Material.DEEPSLATE_LAPIS_ORE) {
-					double calculation = 40 * evaluatedReduction;
+					double calculation = 45 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}
@@ -128,7 +139,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new LapisCluster().getItem());
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
-					double calculation = 160 * evaluatedReduction;
+					double calculation = 125 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}

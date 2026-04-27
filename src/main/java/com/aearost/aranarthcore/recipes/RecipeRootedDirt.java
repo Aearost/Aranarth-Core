@@ -22,7 +22,7 @@ public class RecipeRootedDirt {
 		ShapelessRecipe recipe = new ShapelessRecipe(nk, new ItemStack(Material.ROOTED_DIRT, 1));
 		
 		recipe.addIngredient(1, Material.DIRT);
-		recipe.addIngredient(1, Material.WHEAT_SEEDS);
+		recipe.addIngredient(2, Material.WHEAT_SEEDS);
 		recipe.addIngredient(1, Material.BONE_MEAL);
 		
 		Bukkit.addRecipe(recipe);

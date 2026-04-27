@@ -5,11 +5,15 @@ import com.aearost.aranarthcore.gui.GuiCrate;
 import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
+import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
+import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -34,6 +38,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -50,7 +55,7 @@ public class CrateOpen {
 
         if (e.getHand() == EquipmentSlot.HAND) {
             if (block != null) {
-                if (AranarthUtils.isSpawnLocation(block.getLocation())) {
+                if (block.getWorld().getName().equals("spawn")) {
                     if (block.getType() == Material.CHEST) {
                         e.setCancelled(true);
                         ItemStack heldItem = player.getInventory().getItemInMainHand();
@@ -61,7 +66,7 @@ public class CrateOpen {
                         int emptySlotNum = getEmptySlotNum(player);
 
                         // Vote Crate
-                        if (x == -67 && y == 91 && z == 41) {
+                        if (x == -71 && y == 110 && z == -5) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -92,7 +97,7 @@ public class CrateOpen {
                             }
                         }
                         // Rare Crate
-                        else if (x == -57 && y == 94 && z == 45) {
+                        else if (x == -81 && y == 112 && z == -11) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -121,7 +126,7 @@ public class CrateOpen {
                                                 indexes.set(0, 0);
                                             }
 
-                                            // Cycle through the next iteration
+                                            // Cycle through the next cluster iteration
                                             if (indexes.get(1) < 7) {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
@@ -157,7 +162,7 @@ public class CrateOpen {
                             }
                         }
                         // Epic Crate
-                        else if (x == -64 && y == 99 && z == 49) {
+                        else if (x == -69 && y == 112 && z == -18) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -222,7 +227,7 @@ public class CrateOpen {
                             }
                         }
                         // Godly Crate
-                        else if (x == -74 && y == 105 && z == 53) {
+                        else if (x == -81 && y == 115 && z == -26) {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
@@ -411,8 +416,14 @@ public class CrateOpen {
                     reward = new ItemStack(Material.EXPERIENCE_BOTTLE, 16);
                     name = "#c1e377&lBottle o' Enchanting x16";
                 } else if (chance <= 85) {
-                    reward = new ItemStack(Material.TRIAL_KEY, 1);
-                    name = "#515950&lTrial Key x1";
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.VOTE);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 10, System.currentTimeMillis()));
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +10"));
+                    return;
                 } else if (chance <= 90) {
                     reward = new ItemStack(Material.BLAZE_ROD, 8);
                     name = "#fcbf00&lBlaze Rod x8";
@@ -428,8 +439,15 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Vote Crate"));
             });
         }
     }
@@ -496,11 +514,11 @@ public class CrateOpen {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
                     name = "#f5eba3&lTotem of Undying x1";
                 } else if (chance <= 85) {
-                    reward = new ItemStack(Material.DRIED_GHAST, 1);
-                    name = "#9b8d8d&lDried Ghast x1";
+                    reward = new IncantationBeheading().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
-                    reward = new ItemStack(Material.SNIFFER_EGG, 1);
-                    name = "#4e9c70&lSniffer Egg x1";
+                    reward = new IncantationLifesteal().getItem();
+                    name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 95) {
                     reward = getCycledCluster(new Random().nextInt(8));
                     name = reward.getItemMeta().getDisplayName() + " x1";
@@ -513,8 +531,15 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.RARE);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Rare Crate"));
             });
         }
     }
@@ -542,15 +567,23 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1500);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 5000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$1500 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.SHULKER_BOX, 1);
-                    name = "#956895&lShulker Box x1";
+                    reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
+                    if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
+                    } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
+                    } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
+                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
+                    } else {
+                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                    }
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
                     name = "#3a383a&lNetherite Ingot x2";
@@ -564,16 +597,45 @@ public class CrateOpen {
                     reward = new ItemStack(Material.ELYTRA, 1);
                     name = "#7d7d96&lElytra x1";
                 } else if (chance <= 72) {
-                    reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
-                    if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
-                    } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
-                    } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
-                    } else {
-                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
+                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
+
+                    for (int i = 0; i < combined.length; i++) {
+                        if (combined[i] != null) {
+                            if (i == combined.length - 1) {
+                                name += "&7and ";
+                            }
+
+                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
+                        } else {
+                            continue;
+                        }
+
+                        if (i < combined.length - 1) {
+                            name += ", ";
+                        }
                     }
+                    for (ItemStack cluster : combined) {
+                        if (cluster != null) {
+                            HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(cluster);
+                            if (!remainder.isEmpty()) {
+                                player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                                for (ItemStack remain : remainder.values()) {
+                                    player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                                }
+                            }
+                        }
+                    }
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                    Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
+                    return;
                 } else if (chance <= 80) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -613,38 +675,8 @@ public class CrateOpen {
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
-                    ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster3 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack cluster4 = getCycledCluster(new Random().nextInt(8));
-                    ItemStack[] combined = combineClusters(cluster1, cluster2, cluster3, cluster4);
-
-                    for (int i = 0; i < combined.length; i++) {
-                        if (combined[i] != null) {
-                            if (i == combined.length - 1) {
-                                name += "&7and ";
-                            }
-
-                            name += combined[i].getItemMeta().getDisplayName() + " x" + combined[i].getAmount();
-                        } else {
-                            continue;
-                        }
-
-                        if (i < combined.length - 1) {
-                            name += ", ";
-                        }
-                    }
-                    for (ItemStack cluster : combined) {
-                        if (cluster != null) {
-                            player.getInventory().addItem(cluster);
-                        }
-                    }
-                    aranarthPlayer.setCrateTypeBeingOpened(null);
-                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
-                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
-                    return;
+                    reward = new IncantationPlentiful().getItem();
+                    name = reward.getItemMeta().getDisplayName();
                 } else {
                     reward = new KeyGodly().getItem();
                     name = "&5&lGodly Crate Key x1";
@@ -654,7 +686,13 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
@@ -683,11 +721,11 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 15000);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 25000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$15000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
@@ -762,8 +800,15 @@ public class CrateOpen {
                 AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                player.getInventory().addItem(reward);
+                HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(reward);
+                if (!remainder.isEmpty()) {
+                    player.sendMessage(ChatUtils.chatMessage("&7The reward was dropped as you didn't have enough space!"));
+                    for (ItemStack remain : remainder.values()) {
+                        player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
+                    }
+                }
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
+                Bukkit.getLogger().info(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Godly Crate"));
             });
         }
     }
@@ -942,14 +987,6 @@ public class CrateOpen {
 
         // Nothing to remove with cluster 4
         combined[3] = cluster4;
-
-        for (ItemStack is : combined) {
-            if (is != null) {
-                Bukkit.getLogger().info(is.getItemMeta().getDisplayName() + " x" + is.getAmount());
-            } else {
-                Bukkit.getLogger().info("NULL");
-            }
-        }
 
         return combined;
     }

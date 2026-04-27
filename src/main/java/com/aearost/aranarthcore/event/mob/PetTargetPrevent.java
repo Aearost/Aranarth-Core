@@ -17,8 +17,8 @@ public class PetTargetPrevent {
 					Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
 					Dominion petOwnerDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
 					if (targetDominion != null && petOwnerDominion != null) {
-						if (targetDominion.getLeader().equals(petOwnerDominion.getLeader())
-							|| DominionUtils.areAllied(targetDominion, petOwnerDominion) || DominionUtils.areTruced(targetDominion, petOwnerDominion)) {
+						if (targetDominion.isSameDominion(petOwnerDominion)
+							|| targetDominion.isAllied(petOwnerDominion) || targetDominion.isTruced(petOwnerDominion)) {
 							e.setCancelled(true);
 						}
 					}

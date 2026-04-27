@@ -5,7 +5,10 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -82,11 +85,26 @@ public class PlayerChatListener implements Listener {
                 }
             }
 
-            if (message.contains(recipient.getDisplayName()) && !player.getDisplayName().equals(recipient.getDisplayName())) {
+            boolean isSenderTheRecipient = player.getDisplayName().equals(recipient.getDisplayName());
+            String strippedNickname = ChatUtils.stripColorFormatting(recipientAranarthPlayer.getNickname());
+            if (!isSenderTheRecipient && (message.toLowerCase().contains(recipient.getDisplayName().toLowerCase())
+                    || message.toLowerCase().contains(strippedNickname.toLowerCase()))) {
                 recipient.playSound(recipient, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
             }
         }
         e.getRecipients().removeAll(toRemove);
+
+        if (aranarthPlayer.getAfkLocation() != null) {
+            // Automatically un-afk the player if they type a message
+            if (aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+                AranarthUtils.toggleAfkStatus(player.getUniqueId(), false);
+            }
+            // Reset their AFK timer
+            else {
+                aranarthPlayer.setAfkLocation(null);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+        }
 
         if (ChatUtils.isPlayerMuted(player)) {
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot send any messages as you are muted!"));
@@ -96,9 +114,40 @@ public class PlayerChatListener implements Listener {
 
         String prefix = ChatUtils.formatChatPrefix(player);
         String chatMessage = ChatUtils.formatChatMessage(player, message);
-        String msg = prefix + chatMessage;
-        msg = msg.replaceAll("%", "%%"); // Throws exception with only one
-        e.setFormat(msg);
+        // preserve unescaped form for council routing
+
+        e.setCancelled(true);
+
+        String hoverMsg = ChatUtils.translateToColor("&7Click to view &e" + aranarthPlayer.getNickname() + "&e's &7info");
+        // Deserialize with legacySection() since formatChatPrefix has already translated & → §
+        Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
+        prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
+
+        // Use Component.empty() as root so chatMessage is a sibling of prefixComponent, not a child.
+        // Children inherit hover/click from their parent, siblings do not.
+        Component fullMessage = Component.empty()
+                .append(prefixComponent)
+                .append(ChatUtils.buildMessageWithUrls(chatMessage));
+
+        if (aranarthPlayer.isInCouncilChat()) {
+            // Council chat toggle is on — route to council chat once (evaluateCouncilMessage sends to all council members)
+            // Pass raw message (no gradient) since council chat is not public chat
+            ChatUtils.evaluateCouncilMessage(player, message.split(" "), false);
+        } else if (aranarthPlayer.isInDominionChat()) {
+            // Dominion chat toggle is on — route to dominion chat
+            ChatUtils.evaluateDominionMessage(player, chatMessage.split(" "), false);
+        } else {
+            for (Player recipient : e.getRecipients()) {
+                recipient.sendMessage(fullMessage);
+            }
+        }
+
+        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
+                ChatUtils.translateToColor(prefix + chatMessage)));
+
+        if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
+            DiscordUtils.sendChatMessage(prefix + chatMessage);
+        }
     }
 
     /**

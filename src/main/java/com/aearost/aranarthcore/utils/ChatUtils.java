@@ -2,15 +2,20 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionRank;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -105,7 +110,7 @@ public class ChatUtils {
 				// Calculate the interpolation factor between the two colors (0 to 1)
 				int startOfSection = colorIndex * sectionSize;
 				int endOfSection = (colorIndex + 1) * sectionSize;
-				double x = (i - startOfSection) / (double) (endOfSection - startOfSection);
+				double x = Math.min(1.0, (i - startOfSection) / (double) (endOfSection - startOfSection));
 
 				// Interpolate the color at position i
 				String interpolatedColor = interpolateColor(startColor, endColor, x);
@@ -151,16 +156,49 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Builds a display string where each saved gradient hex code is shown as plain text
+	 * colored in its own color (e.g. "#FF0000" rendered in red).
+	 *
+	 * @param gradientColors Comma-separated hex codes (e.g. "#FF0000,#00FF00").
+	 * @return A pre-escaped string ready to pass into chatMessage().
+	 */
+	public static String formatGradientColorsDisplay(String gradientColors) {
+		String[] colorArray = gradientColors.split(",");
+		StringBuilder formatted = new StringBuilder();
+		for (int i = 0; i < colorArray.length; i++) {
+			String color = colorArray[i]; // e.g. "#FF0000"
+			String escape = ChatColor.of(color) + "";
+			// escape is the §-prefixed sequence; inserting it between "#" and the hex digits
+			// means checkForHex won't re-match the display text (pattern needs # followed
+			// immediately by 6 hex chars, but here it's followed by a § escape char).
+			formatted.append(escape).append("#").append(escape).append(color.substring(1));
+			if (i < colorArray.length - 1) {
+				formatted.append(ChatColor.GRAY).append(", ");
+			}
+		}
+		return formatted.toString();
+	}
+
+	/**
 	 * Removes the formatting from messages.
 	 * 
 	 * @param msg The message to remove formatting.
 	 * @return The message without the formatting.
 	 */
 	public static String stripColorFormatting(String msg) {
+		// Removes basic color codes
 		String colorStripped = ChatColor.stripColor(msg);
-		while (colorStripped.startsWith("&")) {
-			colorStripped = colorStripped.substring(2);
+		if (colorStripped.contains("&")) {
+			String pattern = "&[0-9a-fk-or]";
+			colorStripped = colorStripped.replaceAll(pattern, "");
 		}
+
+		// Removes any manually added hex codes
+		if (colorStripped.contains("#")) {
+			String pattern = "#.{6}";
+			colorStripped = colorStripped.replaceAll(pattern, "");
+		}
+
 		return colorStripped;
 	}
 
@@ -170,7 +208,7 @@ public class ChatUtils {
 	 * @return The input string with all special characters removed.
 	 */
 	public static String removeSpecialCharacters(String value) {
-		return value.replaceAll("[^a-zA-Z0-9\\s&§#]", "");
+		return value.replaceAll("[^\\p{L}0-9 &§#]", "");
 	}
 
 	/**
@@ -254,9 +292,9 @@ public class ChatUtils {
 		
 		if (specialDay == SpecialDay.VALENTINES) {
 			messages[0] = displayName + " &7has left to spend time with their Valentine";
-			messages[1] = displayName + " &7 has left, along with their love...";
-			messages[2] = "The love story of " + displayName + " &7 is over";
-			messages[3] = "Hearts are broken; " + displayName + " &7has departed";
+			messages[1] = displayName + " &7has left, along with their love...";
+			messages[2] = "The love story of " + displayName + " &7is over";
+			messages[3] = "Hearts are broken, as " + displayName + " &7has departed";
 		} else if (specialDay == SpecialDay.EASTER) {
 			messages[0] = displayName + " &7has hopped off the server!";
 			messages[1] = displayName + " &7took all of the Easter eggs and ran away!";
@@ -283,7 +321,7 @@ public class ChatUtils {
 	 * @param player The player sending the message.
 	 * @return The formatted prefix.
 	 */
-	public static String formatChatPrefix(Player player) {
+	public static String formatChatPrefix(OfflinePlayer player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		String nickname = aranarthPlayer.getNickname();
 		String prefix = "&l⊰&r";
@@ -291,6 +329,8 @@ public class ChatUtils {
 		prefix += AranarthUtils.getCouncilRank(aranarthPlayer);
 		prefix += AranarthUtils.getArchitectRank(aranarthPlayer);
 		prefix += AranarthUtils.getSaintRank(aranarthPlayer);
+		prefix += AranarthUtils.getAvatarRank(aranarthPlayer);
+
 		if (!prefix.equals("&l⊰&r")) {
 			prefix += " ";
 		}
@@ -308,12 +348,31 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Provides the formatted prefix and the name of the player.
+	 * @param uuid The UUID of the player.
+	 * @return The formatted prefix and the name of the player.
+	 */
+	public static String providePrefixAndName(UUID uuid) {
+		String prefixAndName = ChatUtils.formatChatPrefix(Bukkit.getOfflinePlayer(uuid));
+		prefixAndName = prefixAndName.substring(5, prefixAndName.length() - 1);
+		prefixAndName = prefixAndName.substring(0, prefixAndName.length() - 7);
+		return prefixAndName;
+	}
+
+	/**
 	 * Formats the player's message based on their permissions.
 	 * @param player The player sending the message.
 	 * @param msg The message to be formatted.
 	 * @return The formatted message.
 	 */
 	public static String formatChatMessage(Player player, String msg) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
+			String gradientMsg = translateToGradientPreservingUrls(aranarthPlayer.getGradientChatColors(), msg, aranarthPlayer.isGradientChatBold());
+			if (gradientMsg != null) {
+				return gradientMsg;
+			}
+		}
 		if (player.hasPermission("aranarth.chat.hex")) {
 			msg = ChatUtils.translateToColor(msg);
 		} else if (player.hasPermission("aranarth.chat.color")) {
@@ -387,16 +446,19 @@ public class ChatUtils {
 	 */
 	public static void sendServerTips() {
 		if (tips.isEmpty()) {
-			tips.add("&7&oNeed some materials? Gather them in the resource world at &e&o/ac resource");
-			tips.add("&7&oGet your roles in Discord with &e&o/discord link");
-			tips.add("&7&oConfused about Aranarth? Check out &e&o/ac warp tutorial &7&ofor some help");
-			tips.add("&7&oInterested in some special perks? Check out our server store at &e&o/ac store");
-			tips.add("&7&oDon't forget to use &e&o/ac vote &7&oto get your daily vote crate keys");
-			tips.add("&7&oFound a bug or have an idea? Report it in our Discord server");
-			tips.add("&7&oEarn money by selling your items at &e&o/ac warp market");
-			tips.add("&7&oView the available in-game ranks at &e&o/ac ranks");
-			tips.add("&7&oBe sure to follow the rules at &e&o/ac rules");
-			tips.add("&7&oWant to create your &e&o/ac shop&7? Reach out to a Council member!");
+			tips.add("&7&oNeed some materials? Gather them in &e&o/resource");
+			tips.add("&7&oGet your roles in &5&oDiscord &7&owith &e&o/discord link");
+			tips.add("&7&oIf you're confused with &6&oAranarth&7&o, go to &e&o/warp Tutorial");
+			tips.add("&7&oInterested in special &d&operks? &7&oCheck out &e&o/store");
+			tips.add("&7&oDon't forget to use &e&o/vote &7&oto get daily &a&oVote Crate Keys");
+			tips.add("&7&oFound a &c&obug &7&oor have a &6&osuggestion&7&o? Log it in our &5&oDiscord");
+			tips.add("&7&oSell your items at &e&o/warp Market &7&oto earn &a&omoney");
+			tips.add("&7&oView the available &d&oin-game ranks &7&oat &e&o/ranks");
+			tips.add("&7&oBe sure to follow the rules seen in &e&o/rules");
+			tips.add("&7&oSpend your &a&ovote points &7&oin the &e&o/voteshop");
+			tips.add("&7&oWant to create your &e&o/shop&7? Reach out to &6&oThe Council");
+			tips.add("&7&oHave you completed your quests today? Check out &e&o/quests");
+			tips.add("&7&oMake sure you claim your &e&o/streak &7&oreward every day!");
 
 			Collections.shuffle(tips);
 		}
@@ -408,6 +470,332 @@ public class ChatUtils {
 			tipIndex = 0;
 
 			Collections.shuffle(tips);
+		}
+	}
+
+	/**
+	 * Sends a private message from the player to the target.
+	 * @param player The player sending the message.
+	 * @param target The player receiving the message.
+	 * @param args The arguments of the command.
+	 * @param isReply Whether the message is a reply to a previous message.
+	 */
+	public static void sendPrivateMessage(Player player, Player target, String[] args, boolean isReply) {
+		int startIndex = isReply ? 0 : 1;
+		StringBuilder msg = new StringBuilder();
+		for (int i = startIndex; i < args.length; i++) {
+			msg.append(args[i]);
+			if (i < args.length - 1) {
+				msg.append(" ");
+			}
+		}
+		String assembledMsg = msg.toString();
+
+		// If sending the message to yourself
+		if (player.getUniqueId().equals(target.getUniqueId())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			String prefixStart = "&7⊰&r";
+			String prefixEnd = "&7⊱&r";
+			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e");
+			// Formats to color if the player sending has the permissions (no gradient for private messages)
+			String formattedMsg;
+			if (player.hasPermission("aranarth.chat.hex")) {
+				formattedMsg = ChatUtils.translateToColor(assembledMsg);
+			} else if (player.hasPermission("aranarth.chat.color")) {
+				formattedMsg = ChatUtils.playerColorChat(assembledMsg);
+			} else {
+				formattedMsg = assembledMsg;
+			}
+			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
+		} else {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+			String prefixStart = "&7⊰&r";
+			String prefixEnd = "&7⊱&r";
+			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
+			String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
+
+			// Formats to color if the player sending has the permissions (no gradient for private messages)
+			String formattedMsg;
+			if (player.hasPermission("aranarth.chat.hex")) {
+				formattedMsg = ChatUtils.translateToColor(assembledMsg);
+			} else if (player.hasPermission("aranarth.chat.color")) {
+				formattedMsg = ChatUtils.playerColorChat(assembledMsg);
+			} else {
+				formattedMsg = assembledMsg;
+			}
+
+			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
+			target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
+
+			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
+			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
+
+			String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+				if (onlineAranarthPlayer.isInAdminMode()) {
+					if (!player.getUniqueId().equals(onlinePlayer.getUniqueId()) && !target.getUniqueId().equals(onlinePlayer.getUniqueId())) {
+						onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Builds a clickable chat component that suggests a command on click.
+	 *
+	 * @param displayComponent The visible text in chat (supports & color codes)
+	 * @param hoverText The tooltip shown on hover (supports & color codes)
+	 * @param command The command to suggest or run (include the leading /)
+	 * @param suggest true = fills chat bar, false = executes immediately
+	 */
+	public static Component clickableCommand(Component displayComponent, String hoverText, String command, boolean suggest) {
+		Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverText);
+		return displayComponent.hoverEvent(HoverEvent.showText(hover))
+								.clickEvent(suggest ? ClickEvent.suggestCommand(command) : ClickEvent.runCommand(command)
+		);
+	}
+
+	/**
+	 * Builds a clickable chat component that opens a URL in the player's browser on click.
+	 *
+	 * @param displayComponent The visible text in chat
+	 * @param hoverText The tooltip shown on hover (supports § color codes)
+	 * @param url The URL to open
+	 */
+	public static Component clickableUrl(Component displayComponent, String hoverText, String url) {
+		Component hover = LegacyComponentSerializer.legacySection().deserialize(hoverText);
+		return displayComponent.hoverEvent(HoverEvent.showText(hover))
+								.clickEvent(ClickEvent.openUrl(url));
+	}
+
+	private static final Pattern URL_PATTERN = Pattern.compile("https?://[^\\s\u00A7]+");
+
+	/**
+	 * Applies gradient formatting to a message while keeping any URLs intact as plain text
+	 * so that {@link #buildMessageWithUrls} can still detect and make them clickable.
+	 *
+	 * @param gradientColors Comma-separated hex color string.
+	 * @param msg The raw (unformatted) message.
+	 * @param isBold Whether to apply bold formatting.
+	 * @return The formatted string, or null if the message cannot be gradient-formatted.
+	 */
+	private static String translateToGradientPreservingUrls(String gradientColors, String msg, boolean isBold) {
+		Matcher matcher = URL_PATTERN.matcher(msg);
+		if (!matcher.find()) {
+			return translateToGradient(gradientColors, msg, isBold);
+		}
+		StringBuilder result = new StringBuilder();
+		int lastEnd = 0;
+		matcher.reset();
+		while (matcher.find()) {
+			if (matcher.start() > lastEnd) {
+				String textPart = msg.substring(lastEnd, matcher.start());
+				String gradientPart = translateToGradient(gradientColors, textPart, isBold);
+				result.append(gradientPart != null ? gradientPart : textPart);
+			}
+			result.append(matcher.group());
+			lastEnd = matcher.end();
+		}
+		if (lastEnd < msg.length()) {
+			String textPart = msg.substring(lastEnd);
+			String gradientPart = translateToGradient(gradientColors, textPart, isBold);
+			result.append(gradientPart != null ? gradientPart : textPart);
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Deserializes a legacy-formatted chat message into a Component, replacing any URLs with
+	 * clickable components that open the link in the player's browser.
+	 *
+	 * @param legacyMessage The message string with § color codes
+	 * @return A Component with embedded clickable URL components
+	 */
+	public static Component buildMessageWithUrls(String legacyMessage) {
+		Matcher matcher = URL_PATTERN.matcher(legacyMessage);
+		Component result = Component.empty();
+		int lastEnd = 0;
+		String hoverText = translateToColor("&7Open the link in your browser");
+
+		while (matcher.find()) {
+			// Append any text before this URL
+			if (matcher.start() > lastEnd) {
+				result = result.append(LegacyComponentSerializer.legacySection()
+						.deserialize(legacyMessage.substring(lastEnd, matcher.start())));
+			}
+
+			String url = matcher.group();
+			Component urlComponent = LegacyComponentSerializer.legacySection().deserialize(url);
+			result = result.append(clickableUrl(urlComponent, hoverText, url));
+			lastEnd = matcher.end();
+		}
+
+		// Append any remaining text after the last URL
+		if (lastEnd < legacyMessage.length()) {
+			result = result.append(LegacyComponentSerializer.legacySection()
+					.deserialize(legacyMessage.substring(lastEnd)));
+		}
+
+		return result;
+	}
+
+	/**
+	 * Helper method to evaluate a dominion chat message.
+	 * Handles toggling dominion chat, setting the chat type, and sending messages.
+	 * @param player The player sending the message.
+	 * @param args The arguments of the command.
+	 * @param isSingleMessage If the message is one single message or if messages are toggled.
+	 */
+	public static void evaluateDominionMessage(Player player, String[] args, boolean isSingleMessage) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+
+		if (dominion == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		if (isSingleMessage) {
+			if (args.length == 1) {
+				String onOrOffMessage = aranarthPlayer.isInDominionChat() ? "&coff" : "&aon";
+				player.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Dominion Chat"));
+				aranarthPlayer.setInDominionChat(!aranarthPlayer.isInDominionChat());
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return;
+			}
+
+			if (args.length == 2) {
+				String typeArg = args[1].toLowerCase();
+				if (typeArg.equals("dominion") || typeArg.equals("ally") || typeArg.equals("truce") || typeArg.equals("allytruce")) {
+					aranarthPlayer.setDominionChatType(typeArg);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.sendMessage(ChatUtils.chatMessage("&7Dominion chat type set to &e" + typeArg));
+					return;
+				}
+			}
+		}
+
+		int startIndex = isSingleMessage ? 1 : 0;
+		StringBuilder msg = new StringBuilder();
+		for (int i = startIndex; i < args.length; i++) {
+			msg.append(args[i]);
+			if (i < args.length - 1) {
+				msg.append(" ");
+			}
+		}
+		String assembledMsg = msg.toString();
+
+		DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+		if (rank == null) {
+			rank = DominionRank.NEWCOMER;
+		}
+		String rankColor = DominionUtils.getRankColor(rank);
+		String nickname = aranarthPlayer.getNickname();
+		String dominionName = ChatUtils.stripColorFormatting(dominion.getName());
+		String chatType = aranarthPlayer.getDominionChatType();
+
+		String typeLabel = switch (chatType) {
+			case "ally" -> "&5[Ally] ";
+			case "truce" -> "&d[Truce] ";
+			case "allytruce" -> "&5[AllyTruce] ";
+			default -> "";
+		};
+
+		String prefixStart = "&7⊰&r";
+		String prefixEnd = "&7⊱&r";
+		String prefixReceive = ChatUtils.translateToColor(prefixStart + typeLabel + "&e" + dominionName + " &7| " + DominionUtils.getFormattedRankName(rank) + " &f" + nickname + prefixEnd + " &7&o>> &7&o");
+
+		List<UUID> recipientLeaders = new ArrayList<>();
+		recipientLeaders.add(dominion.getLeader());
+
+		if (chatType.equals("ally") || chatType.equals("allytruce")) {
+			for (UUID alliedLeader : dominion.getAllied()) {
+				Dominion alliedDominion = DominionUtils.getPlayerDominion(alliedLeader);
+				if (alliedDominion != null && dominion.isAllied(alliedDominion)) {
+					recipientLeaders.add(alliedLeader);
+				}
+			}
+		}
+
+		if (chatType.equals("truce") || chatType.equals("allytruce")) {
+			for (UUID trucedLeader : dominion.getTruced()) {
+				Dominion trucedDominion = DominionUtils.getPlayerDominion(trucedLeader);
+				if (trucedDominion != null && dominion.isTruced(trucedDominion)) {
+					if (!recipientLeaders.contains(trucedLeader)) {
+						recipientLeaders.add(trucedLeader);
+					}
+				}
+			}
+		}
+
+		List<UUID> recipientUuids = new ArrayList<>();
+		for (UUID leaderUuid : recipientLeaders) {
+			Dominion recipientDominion = DominionUtils.getPlayerDominion(leaderUuid);
+			if (recipientDominion != null) {
+				recipientUuids.addAll(recipientDominion.getMembers());
+			}
+		}
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			if (recipientUuids.contains(onlinePlayer.getUniqueId())) {
+				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
+			}
+		}
+	}
+
+	/**
+	 * Helper method to evaluate a message for council members.
+	 * @param sender The sender of the message.
+	 * @param args The arguments of the command.
+	 * @param isSingleMessage If the message is one single message or if messages are toggled.
+	 */
+	public static void evaluateCouncilMessage(CommandSender sender, String[] args, boolean isSingleMessage) {
+		if (isSingleMessage) {
+			if (args.length == 1) {
+				if (sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					String onOrOffMessage = aranarthPlayer.isInCouncilChat() ? "&coff" : "&aon";
+					sender.sendMessage(ChatUtils.chatMessage("&7You have toggled " + onOrOffMessage + " &7Council Chat"));
+					aranarthPlayer.setInCouncilChat(!aranarthPlayer.isInCouncilChat());
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else {
+					sender.sendMessage(ChatUtils.chatMessage("&cOnly players can toggle Council Chat"));
+				}
+				return;
+			}
+		}
+
+		int startIndex = isSingleMessage ? 1 : 0;
+		StringBuilder msg = new StringBuilder();
+		for (int i = startIndex; i < args.length; i++) {
+			msg.append(args[i]);
+			if (i < args.length - 1) {
+				msg.append(" ");
+			}
+		}
+		String assembledMsg = msg.toString();
+
+		String nickname = "";
+		Player player = null;
+		if (sender instanceof Player) {
+			player = (Player) sender;
+			nickname = AranarthUtils.getPlayer(player.getUniqueId()).getNickname();
+		} else {
+			nickname = "&4&lCONSOLE";
+		}
+
+		String prefixStart = "&7⊰&r";
+		String prefixEnd = "&7⊱&r";
+		String prefixReceive = ChatUtils.translateToColor(prefixStart + "&8&lCouncil &e" + nickname + prefixEnd + " &7&o>> &6&o");
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+			if (onlineAranarthPlayer.getCouncilRank() > 0) {
+				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
+			}
 		}
 	}
 }

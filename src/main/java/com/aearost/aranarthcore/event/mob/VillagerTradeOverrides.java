@@ -1,7 +1,5 @@
 package com.aearost.aranarthcore.event.mob;
 
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.google.common.collect.Lists;
 import org.bukkit.Material;
 import org.bukkit.entity.Villager;
@@ -55,17 +53,18 @@ public class VillagerTradeOverrides {
 					newTrade = new MerchantRecipe(new ItemStack(Material.QUARTZ_PILLAR, 32), trade.getMaxUses());
 					newTrade.addIngredient(new ItemStack(Material.EMERALD, 8));
 				}
-			} else if (villager.getProfession() == Profession.FARMER) {
-				if (AranarthUtils.getMonth() == Month.FRUCTIVOR) {
-					// All trades to yield 3 emeralds instead of 1
-					if (trade.getIngredients().get(0).getType() == Material.WHEAT || trade.getIngredients().get(0).getType() == Material.POTATO
-							|| trade.getIngredients().get(0).getType() == Material.CARROT || trade.getIngredients().get(0).getType() == Material.BEETROOT
-							|| trade.getIngredients().get(0).getType() == Material.PUMPKIN || trade.getIngredients().get(0).getType() == Material.MELON) {
-						newTrade = new MerchantRecipe(new ItemStack(trade.getResult().getType(), 3), trade.getMaxUses());
-						newTrade.addIngredient(trade.getIngredients().get(0));
-					}
-				}
 			}
+//			else if (villager.getProfession() == Profession.FARMER) {
+//				if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
+//					// All trades to yield 3 emeralds instead of 1
+//					if (trade.getIngredients().get(0).getType() == Material.WHEAT || trade.getIngredients().get(0).getType() == Material.POTATO
+//							|| trade.getIngredients().get(0).getType() == Material.CARROT || trade.getIngredients().get(0).getType() == Material.BEETROOT
+//							|| trade.getIngredients().get(0).getType() == Material.PUMPKIN || trade.getIngredients().get(0).getType() == Material.MELON) {
+//						newTrade = new MerchantRecipe(new ItemStack(trade.getResult().getType(), 3), trade.getMaxUses());
+//						newTrade.addIngredient(trade.getIngredients().get(0));
+//					}
+//				}
+//			}
 			if (newTrade != null) {
 				newTrade.setExperienceReward(true);
 				newTrade.setVillagerExperience(trade.getVillagerExperience());

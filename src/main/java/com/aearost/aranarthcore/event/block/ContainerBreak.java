@@ -1,15 +1,13 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
-import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -21,7 +19,7 @@ public class ContainerBreak {
     public void execute(BlockBreakEvent e) {
         Player player = e.getPlayer();
         Block block = e.getBlock();
-        if (block.getState() instanceof Chest || block.getState() instanceof ShulkerBox || block.getType() == Material.BARREL) {
+        if (AranarthUtils.isContainerBlock(block)) {
             if (AranarthUtils.getLockedContainers() != null) {
                 LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(e.getBlock());
                 if (lockedContainer == null) {
@@ -41,18 +39,35 @@ public class ContainerBreak {
                 }
                 // Breaking someone else's locked container
                 else {
-                    // Getting the locations of the locked container
-                    Location[] locations = lockedContainer.getLocations();
-                    Location above1 = locations[0].getBlock().getRelative(BlockFace.UP).getLocation();
-                    Location above2 = null;
-                    if (locations[1] != null) {
-                        above2 = locations[1].getBlock().getRelative(BlockFace.UP).getLocation();
-                    }
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    if (aranarthPlayer.isInAdminMode()) {
+                        Location above = e.getBlock().getRelative(BlockFace.UP).getLocation();
+                        boolean hasShopAbove = ShopUtils.getShopFromLocation(above) != null;
+                        Location[] singleContainerLocation = new Location[] { e.getBlock().getLocation(), null };
+                        int breakResult = AranarthUtils.removeLockedContainer(singleContainerLocation);
+                        if (breakResult == 0) {
+                            // If there's a shop above, ShopDestroy will handle the success message
+                            if (!hasShopAbove) {
+                                player.sendMessage(ChatUtils.chatMessage("&7The locked container has been destroyed"));
+                            }
+                        } else if (breakResult == -1) {
+                            player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with destroying the container..."));
+                            e.setCancelled(true);
+                        }
+                    } else {
+                        // Getting the locations of the locked container
+                        Location[] locations = lockedContainer.getLocations();
+                        Location above1 = locations[0].getBlock().getRelative(BlockFace.UP).getLocation();
+                        Location above2 = null;
+                        if (locations[1] != null) {
+                            above2 = locations[1].getBlock().getRelative(BlockFace.UP).getLocation();
+                        }
 
-                    // Only display message if there are no shops above either of the locations
-                    if (ShopUtils.getShopFromLocation(above1) == null && (above2 == null || ShopUtils.getShopFromLocation(above2) == null)) {
-                        player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's locked container!"));
-                        e.setCancelled(true);
+                        // Only display message if there are no shops above either of the locations
+                        if (ShopUtils.getShopFromLocation(above1) == null && (above2 == null || ShopUtils.getShopFromLocation(above2) == null)) {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou cannot destroy someone else's locked container!"));
+                            e.setCancelled(true);
+                        }
                     }
                 }
             }

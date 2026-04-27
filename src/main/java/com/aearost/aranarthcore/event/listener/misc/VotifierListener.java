@@ -2,19 +2,23 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.items.key.KeyVote;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Handles the logic behind a player vote being received by the server.
@@ -32,45 +36,70 @@ public class VotifierListener implements Listener {
 		if (uuid != null) {
 			Vote vote = e.getVote();
 			// If it was a test vote, do not increase the number of votes the player has
-//			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
-//				return;
-//			}
+			if (vote.getServiceName().equals("AranarthCore") && vote.getAddress().equals("127.0.0.1")) {
+				return;
+			}
 
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			aranarthPlayer.setVoteTotal(aranarthPlayer.getVoteTotal() + 1);
-			aranarthPlayer.setVotePoints(aranarthPlayer.getVotePoints() + 1);
-			AranarthUtils.setPlayer(uuid, aranarthPlayer);
-
-			Player player = Bukkit.getPlayer(uuid);
+			OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 			ItemStack key = new KeyVote().getItem();
-			// If the player is online
-			if (player != null) {
-				HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
-				player.sendMessage(ChatUtils.chatMessage("&7You have voted and received a &e" + key.getItemMeta().getDisplayName() + "!"));
-				if (!remainder.isEmpty()) {
-					player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remainder.get(0));
-					player.sendMessage(ChatUtils.chatMessage("&7Your crate key was dropped to the ground"));
-				}
+			int amount = 1;
+			int random = new Random().nextInt(1000);
+			// 0.1% chance
+			if (random == 0) {
+				amount = 25;
+			}
+			// 0.5% chance
+			else if (random == 5) {
+				amount = 10;
+			}
+			// 1.2% chance
+			else if (random < 12) {
+				amount = 5;
+			}
+			// 5% chance
+			else if (random < 50) {
+				amount = 3;
+			}
+			// 15% chance
+			else if (random < 150) {
+				amount = 2;
 			}
 
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
-					continue;
+				if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
 				} else {
-					if (player != null && player.isOnline()) {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted and received a &e" + key.getItemMeta().getDisplayName() + "!"));
-					} else {
-						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has voted for the server!"));
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
+				}
+				onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
+			}
+
+			// Adds their vote
+			AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
+
+			if (!offlinePlayer.isOnline()) {
+				AranarthUtils.addPendingVoteKeys(uuid, 1);
+				return;
+			} else {
+				Player player = Bukkit.getPlayer(uuid);
+				// Give the key if the player is online and in a valid world, otherwise store it as pending
+				String worldName = player.getWorld().getName();
+				boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp")
+						|| worldName.startsWith("resource") || worldName.startsWith("spawn");
+				if (offlinePlayer.isOnline() && validWorld) {
+					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
+					if (!remainder.isEmpty()) {
+						AranarthUtils.addPendingVoteKeys(uuid, 1);
+						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! Use &e/keyclaim &7to claim your vote key"));
+					}
+				} else {
+					AranarthUtils.addPendingVoteKeys(uuid, 1);
+					if (player != null) {
+						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! Use &e/keyclaim &7in Survival!"));
 					}
 				}
 			}
 
-			// Probably good to make a VotePlayer class or something like that
-			// Store the date each vote was made i.e 1207251 --> December 7th 2025 on vote site #1
-			// Or it might just be better to store two more int in aranarth player which would be "totalVoteNum" and "votePoints"
-			// Using this and adding logic in the listener, I could make it so that it will add to a temporary variable in AranarthUtils
-			// i.e add to another separate file the totalVoteNumForAllPlayers whenever the vote event is done, and can have one row per month
-			// Make vote points be able to purchase perks or crate keys, or for expensive amounts, purchase monthly saint
 		} else {
 			Bukkit.getLogger().info("Player " + username + " voted but has never joined the server before");
 		}

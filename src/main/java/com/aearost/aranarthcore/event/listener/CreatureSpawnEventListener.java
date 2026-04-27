@@ -1,11 +1,9 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.event.mob.MountSpawn;
 import com.aearost.aranarthcore.event.mob.ParrotJumpCancelDismount;
 import com.aearost.aranarthcore.event.mob.PillagerOutpostSpawnCancel;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Parrot;
 import org.bukkit.entity.Pillager;
 import org.bukkit.event.EventHandler;
@@ -23,9 +21,7 @@ public class CreatureSpawnEventListener implements Listener {
      */
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent e) {
-        if (e.getEntity() instanceof AbstractHorse) {
-            new MountSpawn().execute(e);
-        } else if (e.getEntity() instanceof Pillager) {
+        if (e.getEntity() instanceof Pillager) {
             new PillagerOutpostSpawnCancel().execute(e);
         } else if (e.getEntity() instanceof Parrot) {
             new ParrotJumpCancelDismount().execute(e);

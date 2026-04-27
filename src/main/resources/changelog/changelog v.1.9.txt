@@ -1,0 +1,285 @@
+AranarthCore v. 1.9
+
+Major Features
+[+] Added in Dominion conquering functionality, providing increased and decreased perks to the involved Dominions
+[+] Implemented a Spawn world to separate the Survival spawn
+[+] Added in custom functionality for all Goat Horn variants
+[+] Introduced Incantations, limited to 1 incantation per item
+[+] Added the Incantation of Beheading
+[+] Added the Incantation of Lifesteal
+[+] Added the Incantation of Plentiful
+[+] Added functionality to beautify the tab list
+[+] Added random teleportation logic in Survival and Resource worlds
+[+] Added a 3-second delay to all teleport requests requiring players to stay in place
+[+] Added a 1-minute cooldown to players teleporting between worlds
+[+] Added mcMMO requirements to rank up
+[+] Added functionality for dominions to lose food, money, or claimed chunks when a player dies
+[+] Implemented functionality for bred mounts to take stats from both parents
+[+] Added in the Bone Arrow and Bone Arrowhead
+[+] Added in the Dragon's Breath Arrow and Dragon's Breath Arrowhead
+[+] Added in the Explosive Arrow and Explosive Arrowhead
+[+] Added in the Gust Arrow and Gust Arrowhead
+[+] Added in the Lightning Arrow and Lightning Arrowhead
+[+] Added in the Rooting Arrow and Rooting Lightning
+[+] Added in full /voteshop functionality
+[+] Added in an avatar room and functionality to cycle through the avatars
+[~] Removed the /prefix from commands and shifted them all to be under their own commands
+[+] Added in /reply to quickly reply to messages
+[~] Set the apple in the God Apple recipe to be using a golden apple and not a normal apple
+[-] Removed the Lodestone recipe as a vanilla recipe is being created or already exists for it
+[-] Removed the Nametag recipe as a vanilla recipe is being created or already exists for it
+[-] Removed the Saddle recipes as a vanilla recipe is being created or already exists for it
+[+] Added combat tag system
+[+] Added varying hostile and passive mob spawn rates depending on the month
+[+] Implemented functionality for dynamic crop growth and yields
+[-] Removed Fructivor and replaced it with Strigavor, the month of Witchcraft
+[~] Switched the order of Follivor and Strigavor
+[+] Introduced and limited the brewing of the Potion of Order and the Potion of Chaos to the month of Florivor
+[+] Implemented /kills, /deaths, /topkills, and /topdeaths
+[+] Added individual commands for all of the different /tables options
+[+] Added clickable vote URLs via /vote
+[+] Implemented dominion permission system
+[+] Implemented a basic quest system
+[+] Added functionality to display a mount's owner, health, jump, and speed by shift-clicking them
+[+] Implemented /votetop
+[+] Added /pettransfer
+[~] Overhauled AstralProjection to be a multi-ability with different sub-abilities
+[+] Added daily login streaks
+[+] Implemented VineWhip
+
+Minor Features
+[+] Added functionality to drop a player's head at a rare rate when killed
+[~] Restricted Aquinvor potion effects to only apply while it is raining
+[+] Added Discord nickname changes for Dukes
+[+] Added recipe for green dye using blue and yellow dye
+[+] Added functionality to replace a home if another one already uses that name
+[+] Added sound effect when a player sends/receives a teleport request
+[+] Added a sound effect for the player that is not teleporting in a tpaccept
+[+] Added additional calls to re-evaluate player permissions
+[+] Glass, glass panes, and ice will break when hit with an arrow
+[+] Added a Muted role in Discord and added auto-assigning functionality
+[~] Fixed bug with mute and ban commands that caused errors when the player did not exist
+[~] Adjusted the baltop format to show the full prefix of a player, and adjusted the ranking number display
+[+] Added recipe for mushroom stew using nether fungus
+[~] Slight tweaks to the farms rule
+[~] Updated the default spawn location to be in the Spawn world
+[~] Fixed issue where teleporting to creative from creative cleared inventory
+[~] Disabled PvP in the Resource World
+[+] Added /ac speed for the council
+[~] Adjusted the sub-elements and abilities display in /ranks
+[+] Added feedback message when a perk is manually removed from a player
+[~] Fixed issue where the itemname perk value would be displayed in /ac perks instead of the itemframe perk
+[~] Fixed issue where logging off while in an AstralProjection would not put the player back in Survival
+[~] Made it so the mannequin is sneaking when astral projecting (sitting is not possible)
+[~] Fixed issue where you could not run any commands in spectator mode dude to AstralProjection
+[~] Fixed issue where sub-elements were not being provided due to permissions changes with arena world
+[~] Fixed bug where bending would be untoggled when teleporting i.e dismounting a horse
+[~] Fixed crates not being openable due to invalid world
+[~] Replaced shulker boxes in the Epic crates with Incantations
+[~] Updated Elven Aranarthium to be green/emerald instead of white/quartz
+[+] Provided the reason to a player when they are warned or muted
+[~] Fixed error when an arrow breaks a block in a dominion while the shooter does not have a dominion
+[~] Quivers will auto-replenish arrows when the last arrow in inventory is consumed
+[+] Added /ac time
+[+] Hitting entities with potions will increase Alchemy
+[-] Removed /ac spy
+[+] Added /info
+[~] Added preventative measures to mitigate shulker box duplication bug
+[+] Players are immune to slowness from winter months while wearing Scorched Aranarthium
+[+] Added shorthand aliases for commands
+[~] Fixed issue where weather effects were applying in non-survival worlds
+[~] Fixed issue where bending was being untoggled incorrectly due to clashing toggleBending() calls
+[+] Added boundaries to spawn to teleport players back to the spawnpoint if exceeded
+[+] Added in /afk
+[+] Leashed mobs will now teleport with the player across survival worlds
+[+] Prevented players from leashing and riding mobs that they do not own
+[~] Fixed issue where clicking a Fletching Table's result slot when empty would clear the held item
+[~] Preventing collection to cursor in Fletching Tables as it would not consume ingredients correctly
+[~] Changed the base item of Invisible Item Frames to be Glow Item Frames instead of regular Item Frames
+[~] Fixed issue where the new month message would send to Discord once per online player
+[+] Coded in the Avatar symbol to chat
+[+] Added functionality to prevent water from flowing at spawn
+[~] Prevented bending at the arena spawn and corrected how it toggles bending
+[~] Fixed durability warnings not appearing
+[~] Renamed the GUI text of dominion's food to just say "Food" and not "Food Storage"
+[~] Alternated the colours of /rules with gray and yellow
+[+] Added in /ac tp for immediate teleporting to override /tp
+[~] Prevented Admins from being muted or banned
+[+] Implemented /ac invsee
+[+] Implemented /ac clearchat
+[+] Added /toggle spawnboost so that players can toggle the speed and jump effects provided while at spawn
+[~] Updated the recipes of Elven and Scorched Aranarthium
+[+] Added Council and Architect access to the creative world
+[+] Added warning message to enderchests being opened in creative
+[~] Made minor adjustments to the descriptions of certain months
+[~] Removed god apple fragment drops in non-survival worlds
+[~] Updated the location of the crates to their final location
+[~] Updated all Aranarthium recipes to use the block variant of the ingots
+[~] Made several changes to various Aranarthium recipes to be consistent with the recipe patterns
+[+] Added command completion for /ac dateset
+[~] Added code-based functionality to the arena signs rather than command blocks
+[-] Removed redundant shop creation error message when placing a sign
+[+] Added functionality to reset the two bending arenas automatically
+[+] Added Dominion Relations channel in Discord and integrated dominion changes to it
+[~] Made tweaks to arena spawn block break prevention to be based on Admin mode and not council level
+[+] Added enchantment glint to god apple fragments
+[~] Added 20 character limit to nicknames
+[~] Added color to /ping
+[~] Added hard cap to not allow one of the last 5 avatars to be avatar again
+[~] Slightly raised the height of the server shop holograms
+[~] Prevented EarthTunnel and Collapse from being used in other Dominions
+[~] Restructured blacklisting functionality to allow disabling of blacklist functionality all together
+[-] Removed /shulker
+[+] Added /toggle shulker to replace /shulker
+[+] Added /toggle blacklist as another way to toggle blacklist functionality
+[-] Removed the toggle sub-command of /compressor
+[+] Added /toggle compressor
+[+] Added /toggle inventory
+[+] Added /toggle chestlock
+[+] Added toggled info to the motd when joining the server
+[+] Added clickable chat for /info
+[~] Fixed bug where extra ore and cluster drops were still dropping when a dominion block was destroyed
+[~] Fixed issue where the old avatar's elements weren't getting removed when they would be offline
+[~] Added custom Discord server chat logic
+[~] Fixed Dwarven Aranarthium Chestplates having a missing texture
+[~] Prevented items from being placed in shelves at spawn and in Dominions
+[+] Added /ac sudo
+[+] Added Saint I to Helpers and Saint II to Moderators
+[~] Fixed referential error for Dominions being auto disbanded on a new day
+[-] Removed redundant biome check for old Ardorvor functionality of forest fires
+[~] Optimized weather functionality for better performance
+[+] Added copper chests to the list of containers
+[~] Updated all references of containers to be in the one centralized method
+[~] Fixed items that were both compressible and in a shulker interfering and not going into shulkers while compression was disabled
+[+] Added sound effect when blacklist items are trashed
+[+] Added sound effect for changes to the weather effects
+[+] Added /ac tpf to force teleport self regardless of coordinates/unsafe location
+[+] Manually implemented discord to in-game messages
+[+] Added extra God Apple Fragment drops while a Boost of the Harvest is active
+[+] Added decorated pots and flower pots as protected blocks at Spawn and Dominions
+[~] Made the rooted dirt recipe require 2 seeds
+[~] Added String to the recipe for a Bell
+[~] Fixed wandering trader spawning in a different world than the iterated online player causing invalid distance calculation
+[~] Fixed error with /dominion info caused by a missing AranarthPlayer
+[+] Added sound effects when players vote and when they donate
+[~] Fixed the formatting of balances in /dominion list
+[~] Prevented Aquatic Aranarthium wearers from getting Mining Fatigue from Elder Guardians (still will receive it during Ardorvor)
+[+] Added speed and strength buffs while raining or in water for Aquatic Aranarthium wearers
+[+] Added Speed III and Strength II when a Scorched Aranarthium wearer is in the nether
+[+] Ensured that the superior enchantment is applied when upgrading aranarthium
+[+] Added sweet berries and glow berries to the list of blocks that are protected at spawn and in dominions
+[~] Renamed /ac cmsg to /ac msg
+[~] Prevented spy mode in /msg from appearing if the person in spy mode is the sender or the target of the message
+[~] Updated formatting when you /msg yourself
+[+] Added info line in tab showing online player num and the current TPS
+[~] Ensured that the AFK timer resets when the player messages in chat regardless of them being AFK or not
+[+] Added /ac vanish
+[~] Added extra message to new players to read rules and check out the tutorials
+[+] Added cycling server tip to use the vote shop
+[~] Slightly tweaked how charged creepers spawn to be during the tracked thunder storms, not actual weather
+[~] Fixed issue where depositing and withdrawing wasn't following actual balance restrictions
+[~] Fixed error with distance calculation of goat horns due to players being in different worlds
+[~] Fixed issue where Dominions' balance wasn't displaying correctly in /dominion list and was causing null pointers
+[~] Fixed issue where votes weren't being considered if the username didn't match with the case
+[+] Added message in-game to display when a player donates and becomes a Saint
+[+] Added ping sound when nicknames are written in chat as well
+[~] Made sure username or nickname pings in chat are case insensitive
+[~] Fixed issue where bone mealing a melon or pumpkin stem caused an error relating to bone mealing nether fungus
+[+] Added emoji reactions to the role changes channel when a player becomes a Saint
+[~] Ensured /msg is not exclusive to any ranks
+[~] You can now access /back as a Knight
+[~] You can now only store EXP in bottles as of Count/Countess
+[~] Limited beacon effects to only those that are in/allied/truced with the Dominion
+[~] Added celebration and heart emoji to in-game rank changes
+[~] Made all prefixes bold (in both chat and tab)
+[~] Fixed null pointer issues relating to a null Member fetch in Discord
+[~] Prevented teleport requests from being accepted in creative if the player doesn't have access to it
+[+] Added custom discord server join and quit messages with emoji reactions
+[~] Prevented hostile mobs from spawning in dominion land
+[~] Fixed /resource sometimes putting you in the world border
+[~] Added /trash for Knights and Saints
+[~] Fixed error due to null discord user trying to update avatar roles
+[~] Fixed issue where Ancient Debris was not dropped with higher probability when mined wearing dwarven aranarthium or with the boost of the miner
+[~] Seemingly fixed redundant DiscordSRV errors due to a non existing member
+[+] Added support to mass shift-click into/out of the potions add GUI
+[~] Fixed issue where shift clicking from the potions add GUI would make the potion disappear if the player's inventory was full
+[+] Added chiseled bookshelf to the list of items that cannot be interacted with at spawn and in dominions
+[+] Added support for clickable links in chat
+[+] Added /enderchest for Saint II and above
+[~] Added support to update the location of a home with /sethome despite already using the maximum available homes
+[~] Fixed issue when teleporting between worlds that caused inventories to be cleared or gamemodes not to be changed correctly
+[+] Added support to /ac tp and /ac tpf players to input coordinates
+[~] Made it so Scorched Aranarthium wearers do not experience any fire ticks
+[~] Allowed the use of buttons at spawn
+[~] Added a toggle option for /ac msg to send all messages to council chat
+[+] Added a GUI for /delhome
+[+] Added /ac weather command, allowing admins to change the current weather, and the duration/delay
+[+] Added /toggle pethurt
+[~] Made it so extra damage effects on tamed pets when the attacker is the owner and pethurt are disabled
+[-] Removed Happy Ghast harm prevention
+[+] Made it so aranarthium clusters and aranarthium ingots are immune to being destroyed in lava like netherite is
+[~] Switched the Trial Key for Vote Points +3 in the Vote Crate rewards
+[-] Removed vote crate key message donation message as it is not a donation item
+[+] Added /toggle gradientchat to allow players to default all messages to be sent as a gradient
+[+] Added tulips to the list of invalid surface blocks for snow to form
+[+] Added command completion for all items in /ac give
+[+] Added adapted bone meal rates for the different months and crops
+[~] Adjusted bending damage to be lower in the arena world
+[-] Removed iron armor from the arena world
+[~] Tweaked how horse teleporting works on a homepad
+[+] Added /dominion guide
+[~] Fixed issue where paying an invalid player would throw an error
+[~] Fixed issue when removing an offline player from your dominion
+[~] Added missing condition where you'd get a message stating a player was removed from your dominion when they never were in it
+[+] Prevented combat tagging when PvP is not enabled between the dominion ranks/relations
+[~] Prevented bulk purchase if there is no buy functionality, and vice-versa with selling
+[+] Allowed admin mode to break locked containers/locked shops
+[~] Made /dominion default to the info sub-command instead of the home command
+[~] Updated all references to dominion relations with relation helper methods
+[+] Players will steal money when killing another player
+[~] Increased money amount from epic and godly crates
+[+] Added quartz as a compressible block
+[+] Added buy/sell support for shulker boxes
+[+] Added /enderchest <username> for council members to view players' enderchests
+[~] Ensured that loot from crates is dropped if you do not have enough inventory space
+[~] Made it so /back will be saved upon your last homepad teleportation
+[-] Removed now-redundant double % symbol in chat messages
+[~] You can now only conquer a dominion if you are enemied
+[+] Added functionality to drop an item to the floor with /ac give if there is no inventory space
+[+] Added the creative world to the fire protection listener
+[~] Prevented all movement of a shulker box in inventory while in the GuiShulker
+[+] Also added additional cautionary checks when picking up items in shulkers
+[+] Added /keyclaim to claim vote keys when provided in an invalid world or while offline
+[+] Added /ac home to view and teleport to a player's homes
+[+] Allowed special characters in dominion names and home names
+[+] Added functionality to place/break the light block of eyeblossoms
+[~] Fixed the lights not being properly destroyed above torchflowers and pitcher plants
+[~] Made each month name in /calendar appear in the month's color
+[~] Fixed issue where Honey Glazed ham was duplicating and also replacing items
+[~] Fixed null pointer caused by null Mannequin with AstralProjection
+[~] Removed world restriction of fire spread/destruction
+[+] Added /ac vpedit
+[~] Ensured that nickname lengths must be greater than 0
+[+] Added a server tips message to complete quests
+[~] Fixed issue where you'd get an invalid error message when modifying a sell-only server shop
+[+] Added support to automatically add an arrow from the Quiver to the player's inventory when arrow selection is used
+[~] Fixed issue where aranarthium armour being crafted and taken with shift-click didn't actually yield the result
+[~] Fixed issue where /ac msg wouldn't reset the AFK timer
+[~] Prevented players from entering the nether or the end in the creative and arena worlds
+[~] Fixed issue where items were infinitely getting dropped due to off-hand defect
+[~] Allowed OG players to set homes in creative and SMP worlds, but not others
+
+Backend Code Changes
+- Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
+- Restructured how mount stats are assigned when spawned in
+- Added in all custom item models for all custom items using vanilla textures to make them compatible for textures in the future
+- Added getColor() to the Incantation interface
+- Re-wrote the strip color formatting logic to correctly strip hex codes (was not supported)
+- Fixed getUuidOfAranarthPlayer in AranarthUtils not working correctly
+- Fixed stripColorFormatting() in ChatUtils not stripping bold and other formatting
+- Added an AranarthVote class tracking the timestamp and the number of vote points that are rewarded in the vote
+- Added log message to console to track what is rolled in crates for historical/confirmation of results
+- Updated all command completion to be more compact and clean
+- Tweaked aranarth player persistence logic to easily support new fields being added
+- Restructured a lot of dominion functionality to cater to permissions, ranks, and dominion relations
+- Added programmatic world border for world* and resource*, and achievements disabling for different worlds

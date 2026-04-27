@@ -21,13 +21,14 @@ public class RecipeElvenAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_ELVEN_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumElven().getItem());
 
-		recipe.shape("QPQ", "WEW", "FFF");
+		recipe.shape("APA", "WSW", "EFE");
 
-		recipe.setIngredient('Q', Material.QUARTZ);
+		recipe.setIngredient('A', Material.ENCHANTED_GOLDEN_APPLE);
 		recipe.setIngredient('P', Material.PHANTOM_MEMBRANE);
-		recipe.setIngredient('E', Material.ECHO_SHARD);
 		recipe.setIngredient('W', Material.WIND_CHARGE);
+		recipe.setIngredient('S', Material.ECHO_SHARD);
 		recipe.setIngredient('F', Material.FEATHER);
+		recipe.setIngredient('E', Material.EMERALD_BLOCK);
 
 		Bukkit.addRecipe(recipe);
 	}

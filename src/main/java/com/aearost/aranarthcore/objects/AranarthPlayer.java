@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.objects;
 
 import com.aearost.aranarthcore.enums.Pronouns;
 import org.bukkit.Location;
+import org.bukkit.MusicInstrument;
+import org.bukkit.entity.EntityType;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ public class AranarthPlayer {
 	private String survivalInventory;
 	private String arenaInventory;
 	private String creativeInventory;
-	private boolean isDeletingBlacklistedItems;
+	private int blacklistingMethod;
 	private HashMap<ItemStack, Integer> potions;
 	private List<ItemStack> arrows;
 	private List<ItemStack> blacklist;
@@ -55,18 +57,38 @@ public class AranarthPlayer {
 	private HashMap<Perk, Integer> perks = new HashMap<>();
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
-	private boolean isCompressingItems = false;
+	private boolean isCompressingItems = true;
 	private int bulkTransactionNum = 0;
 	private boolean isOpeningCrateWithCyclingItem = false;
 	private CrateType crateTypeBeingOpened = null;
-	private int voteTotal;
-	private int votePoints;
 	private boolean isAutoClaimEnabled = false;
 	private boolean isTogglingMessages = false;
 	private boolean isTogglingChat = false;
 	private boolean isTogglingTp = false;
 	private boolean isTogglingChangeClaim = false;
 	private boolean hasBlueFireDisabled = false;
+	private boolean isUsingGoatHorn = false;
+	private HashMap<MusicInstrument, Long> horns = new HashMap<>();
+	private long lastWorldCommandUse = 0;
+	private HashMap<EntityType, List<Sentinel>> sentinel = new HashMap<>();
+	private int plentifulBlocksToDestroy = 0;
+	private AfkLocation afkLocation = null;
+	private int votePointsSpent = 0;
+	private UUID lastReceivedMessage = null;
+	private boolean isUsingSpawnBoost = true;
+	private HashMap<UUID, Long> combatLogTime = new HashMap<>();
+	private boolean isTogglingInventoryAssist = false;
+	private boolean isAutoLockingChests = true;
+	private String firstJoinDate = "";
+	private boolean isVanished = false;
+	private boolean isInCouncilChat = false;
+	private boolean isInDominionChat = false;
+	private String dominionChatType = "dominion";
+	private boolean isHurtingOwnPets = false;
+	private boolean isGradientChatEnabled = false;
+	private String gradientChatColors = "";
+	private boolean isGradientChatBold = false;
+	private UUID petTransferUuid = null;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -79,7 +101,7 @@ public class AranarthPlayer {
 		this.potions = null;
 		this.arrows = null;
 		this.blacklist = null;
-		this.isDeletingBlacklistedItems = false;
+		this.blacklistingMethod = 0;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = new ArrayList<>();
@@ -107,24 +129,41 @@ public class AranarthPlayer {
 		this.perks = new HashMap<>();
 		this.isInAdminMode = false;
 		this.saintExpireDate = 0;
-		this.isCompressingItems = false;
+		this.isCompressingItems = true;
 		this.bulkTransactionNum = 0;
-		this.voteTotal = 0;
-		this.votePoints = 0;
+		this.votePointsSpent = 0;
 		this.isAutoClaimEnabled = false;
 		this.isTogglingMessages = false;
 		this.isTogglingChat = false;
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
 		this.hasBlueFireDisabled = false;
+		this.isUsingGoatHorn = false;
+		this.horns = new HashMap<>();
+		this.lastWorldCommandUse = 0;
+		this.sentinel = new HashMap<>();
+		this.afkLocation = null;
+		this.lastReceivedMessage = null;
+		this.isUsingSpawnBoost = true;
+		this.combatLogTime = new HashMap<>();
+		this.isTogglingInventoryAssist = false;
+		this.isAutoLockingChests = true;
+		this.firstJoinDate = "";
+		this.isVanished = false;
+		this.isInCouncilChat = false;
+		this.isHurtingOwnPets = false;
+		this.isGradientChatEnabled = false;
+		this.gradientChatColors = "";
+		this.isGradientChatBold = false;
+		this.petTransferUuid = null;
 	}
 
 	public AranarthPlayer(String username, String nickname, String survivalInventory, String arenaInventory,
 						  String creativeInventory, HashMap<ItemStack, Integer> potions, List<ItemStack> arrows,
-						  List<ItemStack> blacklist, boolean isDeletingBlacklistedItems, double balance, int rank,
+						  List<ItemStack> blacklist, int blacklistingMethod, double balance, int rank,
 						  int saintRank, int councilRank, int architectRank, List<Home> homes, String muteEndDate,
-						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems, int voteTotal,
-						  int votePoints,
+						  int particleNum, HashMap<Perk, Integer> perks, long saintExpireDate, boolean isCompressingItems,
+						  int votePointsSpent, boolean isUsingSpawnBoost, String firstJoinDate,
 						  Pronouns pronouns) {
 		this.username = username;
 		this.isStandingOnHomePad = false;
@@ -136,7 +175,7 @@ public class AranarthPlayer {
 		this.potions = potions;
 		this.arrows = arrows;
 		this.blacklist = blacklist;
-		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+		this.blacklistingMethod = blacklistingMethod;
 		this.isHitByTippedArrow = false;
 		this.isAddingToShulker = true;
 		this.randomItems = null;
@@ -165,14 +204,31 @@ public class AranarthPlayer {
 		this.saintExpireDate = saintExpireDate;
 		this.isCompressingItems = isCompressingItems;
 		this.bulkTransactionNum = 0;
-		this.voteTotal = voteTotal;
-		this.votePoints = votePoints;
+		this.votePointsSpent = votePointsSpent;
 		this.isAutoClaimEnabled = false;
 		this.isTogglingMessages = false;
 		this.isTogglingChat = false;
 		this.isTogglingTp = false;
 		this.isTogglingChangeClaim = false;
 		this.hasBlueFireDisabled = false;
+		this.isUsingGoatHorn = false;
+		this.horns = new HashMap<>();
+		this.lastWorldCommandUse = 0;
+		this.sentinel = new HashMap<>();
+		this.afkLocation = null;
+		this.lastReceivedMessage = null;
+		this.isUsingSpawnBoost = isUsingSpawnBoost;
+		this.combatLogTime = new HashMap<>();
+		this.isTogglingInventoryAssist = false;
+		this.isAutoLockingChests = true;
+		this.firstJoinDate = firstJoinDate;
+		this.isVanished = false;
+		this.isInCouncilChat = false;
+		this.isHurtingOwnPets = false;
+		this.isGradientChatEnabled = false;
+		this.gradientChatColors = "";
+		this.isGradientChatBold = false;
+		this.petTransferUuid = null;
 
 		// Keep pronouns at the end
 		this.pronouns = pronouns;
@@ -231,7 +287,7 @@ public class AranarthPlayer {
 	 * @return The current nickname.
 	 */
 	public String getNickname() {
-		return (nickname == null || nickname.isEmpty()) ? username : nickname;
+		return (nickname == null || nickname.isEmpty()) ? getUsername() : nickname;
 	}
 
 	/**
@@ -292,19 +348,19 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides confirmation whether the player is deleting blacklisted items or not.
-	 * @return Confirmation of whether they are deleting the items or not.
+	 * Provides the blacklisting method used by the player.
+	 * @return The blacklisting method used by the player.
 	 */
-	public boolean isDeletingBlacklistedItems() {
-		return isDeletingBlacklistedItems;
+	public int getBlacklistingMethod() {
+		return blacklistingMethod;
 	}
 
 	/**
-	 * Updates whether the player will be deleting blacklisted items or not.
-	 * @param isDeletingBlacklistedItems The new value.
+	 * Updates the blacklisting method used by the player.
+	 * @param blacklistingMethod The blacklisting method used by the player.
 	 */
-	public void setDeletingBlacklistedItems(boolean isDeletingBlacklistedItems) {
-		this.isDeletingBlacklistedItems = isDeletingBlacklistedItems;
+	public void setBlacklistingMethod(int blacklistingMethod) {
+		this.blacklistingMethod = blacklistingMethod;
 	}
 
 	/**
@@ -415,7 +471,7 @@ public class AranarthPlayer {
 	 * Setting the temporary variable tracking whether the player is adding to their shulker box.
 	 * @param isAddingToShulker Whether the player is adding to their shulker box.
 	 */
-	public void isAddingToShulker(boolean isAddingToShulker) {
+	public void setAddingToShulker(boolean isAddingToShulker) {
 		this.isAddingToShulker = isAddingToShulker;
 	}
 
@@ -484,7 +540,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * Provides the temporary amount of the potion to be removed from the /potions remove command.
 	 * @return The quantity to be removed.
 	 */
 	public int getPotionQuantityToRemove() {
@@ -492,7 +548,7 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Updates the temporary amount of the potion to be removed from the /ac potions remove command.
+	 * Updates the temporary amount of the potion to be removed from the /potions remove command.
 	 * @param potionQuantityToRemove The quantity of the potion to be removed.
 	 */
 	public void setPotionQuantityToRemove(int potionQuantityToRemove) {
@@ -888,38 +944,6 @@ public class AranarthPlayer {
 	}
 
 	/**
-	 * Provides the number of times the player has voted.
-	 * @return The number of times the player has voted.
-	 */
-	public int getVoteTotal() {
-		return voteTotal;
-	}
-
-	/**
-	 * Updates the number of times the player has voted.
-	 * @param voteTotal The number of times the player has voted.
-	 */
-	public void setVoteTotal(int voteTotal) {
-		this.voteTotal = voteTotal;
-	}
-
-	/**
-	 * Provides the number of vote points the player has.
-	 * @return The number of vote points the player has.
-	 */
-	public int getVotePoints() {
-		return votePoints;
-	}
-
-	/**
-	 * Updates the number of vote points the player has.
-	 * @param votePoints The number of vote points the player has.
-	 */
-	public void setVotePoints(int votePoints) {
-		this.votePoints = votePoints;
-	}
-
-	/**
 	 * Provides the value tracking whether the player is claiming chunks.
 	 * @return The value tracking whether the player is claiming chunks.
 	 */
@@ -1015,4 +1039,357 @@ public class AranarthPlayer {
 		this.hasBlueFireDisabled = hasBlueFireDisabled;
 	}
 
+	/**
+	 * Provides the HashMap tracking the last executions of each horn.
+	 * @return The HashMap tracking the last executions of each horn.
+	 */
+	public HashMap<MusicInstrument, Long> getHorns() {
+		return horns;
+	}
+
+	/**
+	 * Updates the HashMap tracking the last executions of each horn.
+	 * @param horns The HashMap tracking the last executions of each horn.
+	 */
+	public void setHorns(HashMap<MusicInstrument, Long> horns) {
+		this.horns = horns;
+	}
+
+	/**
+	 * Provides the value tracking whether the player has just used a Goat Horn.
+	 * @return The value tracking whether the player has just used a Goat Horn.
+	 */
+	public boolean isUsingGoatHorn() {
+		return isUsingGoatHorn;
+	}
+
+	/**
+	 * Updates the value tracking whether the player has just used a Goat Horn.
+	 * @param usingGoatHorn The value tracking whether the player has just used a Goat Horn.
+	 */
+	public void setUsingGoatHorn(boolean usingGoatHorn) {
+		isUsingGoatHorn = usingGoatHorn;
+	}
+
+	/**
+	 * Provides the last time that the player changed world via commands.
+	 * @return The last time that the player changed world via commands.
+	 */
+	public long getLastWorldCommandUse() {
+		return lastWorldCommandUse;
+	}
+
+	/**
+	 * Updates the last time that the player changed world via commands.
+	 * @param lastWorldCommandUse The last time that the player changed world via commands.
+	 */
+	public void setLastWorldCommandUse(long lastWorldCommandUse) {
+		this.lastWorldCommandUse = lastWorldCommandUse;
+	}
+
+	/**
+	 * Provides the HashMap of the player's designated sentinels to be summoned by a horn.
+	 * @return The HashMap of the player's designated sentinels to be summoned by a horn.
+	 */
+	public HashMap<EntityType, List<Sentinel>> getSentinels() {
+		return sentinel;
+	}
+
+	/**
+	 * Updates the HashMap of the player's designated sentinels to be summoned by a horn.
+	 * @param sentinels The HashMap of the player's designated sentinels to be summoned by a horn.
+	 */
+	public void setSentinels(HashMap<EntityType, List<Sentinel>> sentinels) {
+		this.sentinel = sentinels;
+	}
+
+	/**
+	 * Provides the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 * @return The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 */
+	public int getPlentifulBlocksToDestroy() {
+		return plentifulBlocksToDestroy;
+	}
+
+	/**
+	 * Updates the temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 * @param plentifulBlocksToDestroy The temporary variable tracking the number of blocks to destroy from the Incantation of Plentiful.
+	 */
+	public void setPlentifulBlocksToDestroy(int plentifulBlocksToDestroy) {
+		this.plentifulBlocksToDestroy = plentifulBlocksToDestroy;
+	}
+
+	/**
+	 * Provides the AFK Location tracking where the player is currently located.
+	 * @return The AFK Location tracking where the player is currently located.
+	 */
+	public AfkLocation getAfkLocation() {
+		return afkLocation;
+	}
+
+	/**
+	 * Updates the AFK Location tracking where the player is currently located.
+	 * @param afkLocation The AFK Location tracking where the player is currently located.
+	 */
+	public void setAfkLocation(AfkLocation afkLocation) {
+		this.afkLocation = afkLocation;
+	}
+
+	/**
+	 * Provides the number of vote points that have been spent by the player.
+	 * @return The number of vote points that have been spent by the player.
+	 */
+	public int getVotePointsSpent() {
+		return votePointsSpent;
+	}
+
+	/**
+	 * Updates the number of vote points that have been spent by the player.
+	 * @param votePointsSpent The number of vote points that have been spent by the player.
+	 */
+	public void setVotePointsSpent(int votePointsSpent) {
+		this.votePointsSpent = votePointsSpent;
+	}
+
+	/**
+	 * Provides the UUID of the player who last messaged this player.
+	 * @return The UUID of the player who last messaged this player.
+	 */
+	public UUID getLastReceivedMessage() {
+		return lastReceivedMessage;
+	}
+
+	/**
+	 * Updates the UUID of the player who last messaged this player.
+	 * @param lastReceivedMessage The UUID of the player who last messaged this player.
+	 */
+	public void setLastReceivedMessage(UUID lastReceivedMessage) {
+		this.lastReceivedMessage = lastReceivedMessage;
+	}
+
+	/**
+	 * Provides the value tracking if the player is using the spawn boost effects.
+	 * @return The value tracking if the player is using the spawn boost effects.
+	 */
+	public boolean isUsingSpawnBoost() {
+		return isUsingSpawnBoost;
+	}
+
+	/**
+	 * Updates the value tracking if the player is using the spawn boost effects.
+	 * @param usingSpawnBoost The value tracking if the player is using the spawn boost effects.
+	 */
+	public void setUsingSpawnBoost(boolean usingSpawnBoost) {
+		isUsingSpawnBoost = usingSpawnBoost;
+	}
+
+	/**
+	 * Provides the player and the time that combat logged the Aranarth Player.
+	 * @return The player and the time that combat logged the Aranarth Player.
+	 */
+	public HashMap<UUID, Long> getCombatLogTime() {
+		return combatLogTime;
+	}
+
+	/**
+	 * The player and the time that combat logged the Aranarth Player.
+	 * @param combatLogTime The player and the time that combat logged the Aranarth Player.
+	 */
+	public void setCombatLogTime(HashMap<UUID, Long> combatLogTime) {
+		this.combatLogTime = combatLogTime;
+	}
+
+	/**
+	 * Provides the value tracking if the player's inventory assist is disabled.
+	 * @return The value tracking if the player's inventory assist is disabled.
+	 */
+	public boolean isTogglingInventoryAssist() {
+		return isTogglingInventoryAssist;
+	}
+
+	/**
+	 * Updates the value tracking if the player's inventory assist is disabled.
+	 * @param togglingInventoryAssist The value tracking if the player's inventory assist is disabled.
+	 */
+	public void setTogglingInventoryAssist(boolean togglingInventoryAssist) {
+		isTogglingInventoryAssist = togglingInventoryAssist;
+	}
+
+	/**
+	 * Provides the value tracking if the player is automatically locking places chests.
+	 * @return The value tracking if the player is automatically locking places chests.
+	 */
+	public boolean isAutoLockingChests() {
+		return isAutoLockingChests;
+	}
+
+	/**
+	 * Updates the value tracking if the player is automatically locking places chests.
+	 * @param autoLockingChests The value tracking if the player is automatically locking places chests.
+	 */
+	public void setAutoLockingChests(boolean autoLockingChests) {
+		isAutoLockingChests = autoLockingChests;
+	}
+
+	/**
+	 * Provides the date that the player first joined the server.
+	 * @return The date that the player first joined the server.
+	 */
+	public String getFirstJoinDate() {
+		return firstJoinDate;
+	}
+
+	/**
+	 * Updates the date that the player first joined the server.
+	 * @param firstJoinDate The date that the player first joined the server.
+	 */
+	public void setFirstJoinDate(String firstJoinDate) {
+		this.firstJoinDate = firstJoinDate;
+	}
+
+	/**
+	 * Provides the variable tracking whether the player is vanished or not.
+	 * @return The variable tracking whether the player is vanished or not.
+	 */
+	public boolean isVanished() {
+		return isVanished;
+	}
+
+	/**
+	 * Updates the variable tracking whether the player is vanished or not.
+	 * @param isVanished The variable tracking whether the player is vanished or not.
+	 */
+	public void setVanished(boolean isVanished) {
+		this.isVanished = isVanished;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is sending messages in council chat or not.
+	 * @return The temporary variable tracking whether the player is sending messages in council chat or not.
+	 */
+	public boolean isInCouncilChat() {
+		return isInCouncilChat;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is sending messages in council chat or not.
+	 * @param inCouncilChat The temporary variable tracking whether the player is sending messages in council chat or not.
+	 */
+	public void setInCouncilChat(boolean inCouncilChat) {
+		isInCouncilChat = inCouncilChat;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 * @return The temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 */
+	public boolean isInDominionChat() {
+		return isInDominionChat;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 * @param inDominionChat The temporary variable tracking whether the player is sending messages in dominion chat or not.
+	 */
+	public void setInDominionChat(boolean inDominionChat) {
+		isInDominionChat = inDominionChat;
+	}
+
+	/**
+	 * Provides the current dominion chat type for the player.
+	 * Valid values are: "dominion", "ally", "truce", "allytruce".
+	 * @return The dominion chat type.
+	 */
+	public String getDominionChatType() {
+		return dominionChatType;
+	}
+
+	/**
+	 * Updates the current dominion chat type for the player.
+	 * Valid values are: "dominion", "ally", "truce", "allytruce".
+	 * @param dominionChatType The new dominion chat type.
+	 */
+	public void setDominionChatType(String dominionChatType) {
+		this.dominionChatType = dominionChatType;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is allowed to hurt their own pets or not.
+	 * @return Whether the player is allowed to hurt their own pets or not.
+	 */
+	public boolean isHurtingOwnPets() {
+		return isHurtingOwnPets;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is allowed to hurt their own pets or not.
+	 * @param isHurtingOwnPets Whether the player is allowed to hurt their own pets or not.
+	 */
+	public void setHurtingOwnPets(boolean isHurtingOwnPets) {
+		this.isHurtingOwnPets = isHurtingOwnPets;
+	}
+
+	/**
+	 * Provides whether the player has gradient chat enabled.
+	 * @return Whether gradient chat is enabled.
+	 */
+	public boolean isGradientChatEnabled() {
+		return isGradientChatEnabled;
+	}
+
+	/**
+	 * Updates whether the player has gradient chat enabled.
+	 * @param isGradientChatEnabled Whether gradient chat is enabled.
+	 */
+	public void setGradientChatEnabled(boolean isGradientChatEnabled) {
+		this.isGradientChatEnabled = isGradientChatEnabled;
+	}
+
+	/**
+	 * Provides the player's saved gradient chat colors as a comma-separated hex string.
+	 * @return The gradient chat colors (e.g. "#FF0000,#00FF00,#0000FF"), or empty string if none set.
+	 */
+	public String getGradientChatColors() {
+		return gradientChatColors;
+	}
+
+	/**
+	 * Updates the player's saved gradient chat colors.
+	 * @param gradientChatColors Comma-separated hex color string (e.g. "#FF0000,#00FF00").
+	 */
+	public void setGradientChatColors(String gradientChatColors) {
+		this.gradientChatColors = gradientChatColors;
+	}
+
+	/**
+	 * Provides whether the player has gradient chat bold mode enabled.
+	 * @return Whether gradient chat bold is enabled.
+	 */
+	public boolean isGradientChatBold() {
+		return isGradientChatBold;
+	}
+
+	/**
+	 * Updates whether the player has gradient chat bold mode enabled.
+	 * @param isGradientChatBold Whether gradient chat bold is enabled.
+	 */
+	public void setGradientChatBold(boolean isGradientChatBold) {
+		this.isGradientChatBold = isGradientChatBold;
+	}
+
+	/**
+	 * Provides the UUID of the player that will become the owner of the next clicked pet.
+	 * @return The UUID of the player that will become the owner of the next clicked pet.
+	 */
+	public UUID getPetTransferUuid() {
+		return petTransferUuid;
+	}
+
+	/**
+	 * Updates the UUID of the player that will become the owner of the next clicked pet.
+	 * @param petTransferUuid The UUID of the player that will become the owner of the next clicked pet.
+	 */
+	public void setPetTransferUuid(UUID petTransferUuid) {
+		this.petTransferUuid = petTransferUuid;
+	}
 }

@@ -7,7 +7,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.HOMEPAD;
+import static com.aearost.aranarthcore.objects.CustomKeys.HOMEPAD;
 
 /**
  * Handles the overrides when crafting involving Homepads.

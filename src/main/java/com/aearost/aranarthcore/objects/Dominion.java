@@ -7,18 +7,19 @@ import org.bukkit.Location;
 import org.bukkit.block.Biome;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Handles all necessary functionality relating to a dominion on Aranarth.
  */
 public class Dominion {
 
+	private final UUID id;
 	private String name;
 	private UUID leader;
 	private List<UUID> members;
+	private Map<UUID, DominionRank> memberRanks;
+	private DominionPermissions dominionPermissions;
 	private List<UUID> allied;
 	private List<UUID> allianceRequests;
 	private List<UUID> truced;
@@ -31,14 +32,24 @@ public class Dominion {
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
 	private Biome biomeResourcesBeingClaimed;
+	private List<UUID> conquered;
+	private UUID conqueredRequest;
+	private UUID rebelRequest;
+
+	private boolean memberPvpEnabled;
+	private boolean mobSpawningEnabled;
 
 	// Keep balance at the end
 	private double balance;
 
-	public Dominion(String name, UUID leader, List<UUID> members, List<UUID> allied, List<UUID> truced, List<UUID> enemied,
-					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food, int claimableResources,
+	public Dominion(UUID id, String name, UUID leader, List<UUID> members, Map<UUID, DominionRank> memberRanks,
+					List<UUID> allied, List<UUID> truced, List<UUID> enemied,
+					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
+					int claimableResources, List<UUID> conquered,
+					DominionPermissions dominionPermissions,
 					// Keep balance at the end
 					double balance) {
+		this.id = id != null ? id : UUID.randomUUID();
 		name = ChatUtils.removeSpecialCharacters(name);
 		this.name = name;
 		this.leader = leader;
@@ -49,14 +60,26 @@ public class Dominion {
 		this.enemied = enemied;
 		this.neutralRequests = new ArrayList<>();
 		this.members = members;
+		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
+		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
 		this.chunks = chunks;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
 		this.food = food;
 		this.claimableResources = claimableResources;
 		this.biomeResourcesBeingClaimed = null;
+		this.conquered = conquered;
+		this.conqueredRequest = null;
 
 		// Keep balance at the end
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the dominion's stable unique ID.
+	 * @return The dominion's stable unique ID.
+	 */
+	public UUID getId() {
+		return id;
 	}
 
 	/**
@@ -105,6 +128,56 @@ public class Dominion {
 	 */
 	public void setMembers(List<UUID> members) {
 		this.members = members;
+	}
+
+	/**
+	 * Provides the map of member UUIDs to their respective ranks.
+	 * @return The map of member UUIDs to their ranks.
+	 */
+	public Map<UUID, DominionRank> getMemberRanks() {
+		return memberRanks;
+	}
+
+	/**
+	 * Updates the map of member UUIDs to their respective ranks.
+	 * @param memberRanks The new member ranks map.
+	 */
+	public void setMemberRanks(Map<UUID, DominionRank> memberRanks) {
+		this.memberRanks = memberRanks;
+	}
+
+	/**
+	 * Provides the rank of a specific member.
+	 * @param uuid The UUID of the member.
+	 * @return The rank of the member, or null if not found.
+	 */
+	public DominionRank getMemberRank(UUID uuid) {
+		return memberRanks.get(uuid);
+	}
+
+	/**
+	 * Sets the rank of a specific member.
+	 * @param uuid The UUID of the member.
+	 * @param rank The rank to assign.
+	 */
+	public void setMemberRank(UUID uuid, DominionRank rank) {
+		memberRanks.put(uuid, rank);
+	}
+
+	/**
+	 * Provides the permissions configuration for this dominion.
+	 * @return The DominionPermissions instance.
+	 */
+	public DominionPermissions getDominionPermissions() {
+		return dominionPermissions;
+	}
+
+	/**
+	 * Updates the permissions configuration for this dominion.
+	 * @param dominionPermissions The new DominionPermissions instance.
+	 */
+	public void setDominionPermissions(DominionPermissions dominionPermissions) {
+		this.dominionPermissions = dominionPermissions;
 	}
 
 	/**
@@ -236,6 +309,38 @@ public class Dominion {
 	}
 
 	/**
+	 * Returns whether PvP between members of this dominion is enabled.
+	 * @return True if member PvP is enabled.
+	 */
+	public boolean isMemberPvpEnabled() {
+		return memberPvpEnabled;
+	}
+
+	/**
+	 * Sets whether PvP between members of this dominion is enabled.
+	 * @param memberPvpEnabled True to allow members to harm each other.
+	 */
+	public void setMemberPvpEnabled(boolean memberPvpEnabled) {
+		this.memberPvpEnabled = memberPvpEnabled;
+	}
+
+	/**
+	 * Returns whether mob spawning is allowed in this dominion's chunks.
+	 * @return True if mob spawning is allowed.
+	 */
+	public boolean isMobSpawningEnabled() {
+		return mobSpawningEnabled;
+	}
+
+	/**
+	 * Sets whether mob spawning is allowed in this dominion's chunks.
+	 * @param mobSpawningEnabled True to allow mobs to spawn.
+	 */
+	public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
+		this.mobSpawningEnabled = mobSpawningEnabled;
+	}
+
+	/**
 	 * Provides the balance of the dominion.
 	 * @return The balance of the dominion.
 	 */
@@ -313,5 +418,102 @@ public class Dominion {
 	 */
 	public void setBiomeResourcesBeingClaimed(Biome biomeResourcesBeingClaimed) {
 		this.biomeResourcesBeingClaimed = biomeResourcesBeingClaimed;
+	}
+
+	/**
+	 * Provides the list of Dominion leaders that have been conquered by this Dominion.
+	 * @return The list of Dominion leaders that have been conquered by this Dominion.
+	 */
+	public List<UUID> getConquered() {
+		return conquered;
+	}
+
+	/**
+	 * Updates the list of Dominion leaders that have been conquered by this Dominion.
+	 * @param conquered The list of Dominion leaders that have been conquered by this Dominion.
+	 */
+	public void setConquered(List<UUID> conquered) {
+		this.conquered = conquered;
+	}
+
+	/**
+	 * Provides the UUID of the Dominion leader that sent a conquer request.
+	 * @return The UUID of the Dominion leader that sent a conquer request.
+	 */
+	public UUID getConqueredRequest() {
+		return conqueredRequest;
+	}
+
+	/**
+	 * Updates the UUID of the Dominion leader that sent a conquer request.
+	 * @param conqueredRequest The UUID of the Dominion leader that sent a conquer request.
+	 */
+	public void setConqueredRequest(UUID conqueredRequest) {
+		this.conqueredRequest = conqueredRequest;
+	}
+
+	/**
+	 * Provides the UUID of the Dominion leader of the conquered Dominion.
+	 * @return The UUID of the Dominion leader of the conquered Dominion.
+	 */
+	public UUID getRebelRequest() {
+		return rebelRequest;
+	}
+
+	/**
+	 * Updates the UUID of the Dominion leader of the conquered Dominion.
+	 * @param rebelRequest The UUID of the Dominion leader of the conquered Dominion.
+	 */
+	public void setRebelRequest(UUID rebelRequest) {
+		this.rebelRequest = rebelRequest;
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are mutual allies.
+	 * Both dominions must have each other in their allied lists.
+	 * @param other The other Dominion.
+	 * @return True if both dominions are allied with each other.
+	 */
+	public boolean isAllied(Dominion other) {
+		return this.allied.contains(other.leader) && other.allied.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion have a mutual truce.
+	 * Both dominions must have each other in their truced lists.
+	 * @param other The other Dominion.
+	 * @return True if both dominions are truced with each other.
+	 */
+	public boolean isTruced(Dominion other) {
+		return this.truced.contains(other.leader) && other.truced.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are enemies.
+	 * If either dominion has the other in their enemy list, both are considered enemies.
+	 * @param other The other Dominion.
+	 * @return True if either dominion has marked the other as an enemy.
+	 */
+	public boolean isEnemied(Dominion other) {
+		return this.enemied.contains(other.leader) || other.enemied.contains(this.leader);
+	}
+
+	/**
+	 * Determines if this Dominion and the other Dominion are neutral with each other.
+	 * Two dominions are neutral if they are not allied, truced, or enemied.
+	 * @param other The other Dominion.
+	 * @return True if the two dominions have no active relationship.
+	 */
+	public boolean isNeutral(Dominion other) {
+		return !isAllied(other) && !isTruced(other) && !isEnemied(other);
+	}
+
+	/**
+	 * Determines if this Dominion is the same as the other Dominion.
+	 * @param other The other Dominion.
+	 * @return True if both dominions share the same stable ID.
+	 */
+	public boolean isSameDominion(Dominion other) {
+		return this.id.equals(other.id);
 	}
 }

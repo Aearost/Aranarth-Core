@@ -266,7 +266,7 @@ public class GuiStore {
 		gui.setItem(44, blank);
 
 		// Specified Slots
-		ItemStack blacklist = new ItemStack(Material.BLACK_WOOL);
+		ItemStack blacklist = new ItemStack(Material.LAVA_BUCKET);
 		ItemMeta blacklistMeta = blacklist.getItemMeta();
 		blacklistMeta.setDisplayName(ChatUtils.translateToColor("&8&lBlacklist - $1.99"));
 		List<String> blacklistLore = new ArrayList<>();

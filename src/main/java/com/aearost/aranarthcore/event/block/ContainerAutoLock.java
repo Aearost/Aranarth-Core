@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -27,9 +28,14 @@ public class ContainerAutoLock {
         Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
         Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
         if (blockDominion != null) {
-            if (playerDominion == null || !playerDominion.getLeader().equals(blockDominion.getLeader())) {
+            if (playerDominion == null || !playerDominion.isSameDominion(blockDominion)) {
                 return;
             }
+        }
+
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (!aranarthPlayer.isAutoLockingChests()) {
+            return;
         }
 
         Block placed = e.getBlockPlaced();
@@ -73,7 +79,7 @@ public class ContainerAutoLock {
 
 
         // Logic to create a locked container for single chests or for shulkers or barrels
-        if (placed.getState() instanceof Chest || placed.getState() instanceof ShulkerBox || placed.getType() == Material.BARREL) {
+        if (AranarthUtils.isContainerBlock(placed)) {
             List<UUID> trusted = new ArrayList<>();
             trusted.add(e.getPlayer().getUniqueId());
             LockedContainer lockedContainer = new LockedContainer(e.getPlayer().getUniqueId(), trusted, new Location[] { placed.getLocation(), null });

@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -17,9 +17,7 @@ public class EnderChestOpenPrevent {
 					if (!e.getPlayer().isOp()) {
 						e.setCancelled(true);
 						e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot open an enderchest in creative!"));
-						for (int i = 0; i < 100; i++) {
-							Bukkit.getLogger().info(e.getPlayer().getName() + " tried to open an enderchest in creative!");
-						}
+						DiscordUtils.createNotification(e.getPlayer().getName() + " tried to open an enderchest in creative", e.getPlayer().getUniqueId());
 					}
 				}
 			}

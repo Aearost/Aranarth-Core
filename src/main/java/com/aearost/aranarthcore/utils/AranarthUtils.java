@@ -13,17 +13,24 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.TextDisplay;
+import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.permissions.PermissionAttachment;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.profile.PlayerProfile;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -36,8 +43,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARMOR_TYPE;
-import static com.aearost.aranarthcore.objects.CustomItemKeys.ARROW;
+import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
 
 /**
@@ -70,12 +76,16 @@ public class AranarthUtils {
 	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
-	private static final List<TextDisplay> textHolograms = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
+	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
+	private static final List<AranarthVote> votes = new ArrayList<>();
+	private static final int afkSecondsAmount = 300;
+	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
+	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
-	 * 
+	 *
 	 * @param player The player to determine.
 	 * @return Confirmation of whether they've played before.
 	 */
@@ -86,7 +96,7 @@ public class AranarthUtils {
 	/**
 	 * Sets the username of a player. This is used to update a player's username
 	 * value in the case that they changed it.
-	 * 
+	 *
 	 * @param player The player whose username will be changed.
 	 */
 	public static void setUsername(Player player) {
@@ -97,7 +107,7 @@ public class AranarthUtils {
 
 	/**
 	 * Gets the AranarthPlayer corresponding to an input UUID.
-	 * 
+	 *
 	 * @param uuid The UUID of the player to be found.
 	 * @return The AranarthPlayer tied to the UUID.
 	 */
@@ -116,7 +126,7 @@ public class AranarthUtils {
 
 	/**
 	 * Adds a player to the players HashMap.
-	 * 
+	 *
 	 * @param uuid The UUID of the player to be added.
 	 * @param aranarthPlayer The new AranarthPlayer to be added.
 	 */
@@ -125,7 +135,10 @@ public class AranarthUtils {
 		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
 				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
 				|| uuid.equals(getUUIDFromUsername("SachsiBua")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
-				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))) {
+				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))
+				|| uuid.equals(getUUIDFromUsername("Keos36")) || uuid.equals(getUUIDFromUsername("WitchEggDog"))
+				|| uuid.equals(getUUIDFromUsername("MasterlySnake")) || uuid.equals(getUUIDFromUsername("Cainaedriel"))
+				|| uuid.equals(getUUIDFromUsername("B3nnett_B"))) {
 			originalPlayers.add(uuid);
 		}
 	}
@@ -145,7 +158,7 @@ public class AranarthUtils {
 
 	/**
 	 * Gets the stored username of a player.
-	 * 
+	 *
 	 * @param player The player whose username is to be found.
 	 * @return The username of the player.
 	 */
@@ -278,10 +291,10 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Include any world that should share the inventory of Survival
-		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource")) {
+		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn")) {
 			currentWorld = "world";
 		}
-		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource")) {
+		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn")) {
 			destinationWorld = "world";
 		}
 
@@ -301,6 +314,14 @@ public class AranarthUtils {
 			for (PotionEffect effect : player.getActivePotionEffects()) {
 				player.removePotionEffect(effect.getType());
 			}
+		}
+
+		// World edit permissions
+		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		if (destinationWorld.equals("creative")) {
+			perms.setPermission("worldedit.*", true);
+		} else {
+			perms.setPermission("worldedit.*", false);
 		}
 
 		if (currentWorld.startsWith("world")) {
@@ -326,9 +347,11 @@ public class AranarthUtils {
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-					player.setGameMode(GameMode.CREATIVE);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.CREATIVE);
+				return;
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("arena")) {
@@ -336,20 +359,24 @@ public class AranarthUtils {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					PermissionUtils.toggleArenaBendingPermissions(player, false);
-					PermissionUtils.updateSubElements(player);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.SURVIVAL);
+				PermissionUtils.toggleArenaBendingPermissions(player, false);
+				PermissionUtils.updateSubElements(player);
+				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
-					player.setGameMode(GameMode.CREATIVE);
-					PermissionUtils.toggleArenaBendingPermissions(player, false);
-					PermissionUtils.updateSubElements(player);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.CREATIVE);
+				PermissionUtils.toggleArenaBendingPermissions(player, false);
+				PermissionUtils.updateSubElements(player);
+				return;
 			}
 			player.getInventory().clear();
 		} else if (currentWorld.startsWith("creative")) {
@@ -357,9 +384,11 @@ public class AranarthUtils {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
-					player.setGameMode(GameMode.SURVIVAL);
-					return;
+				} else {
+					player.getInventory().clear();
 				}
+				player.setGameMode(GameMode.SURVIVAL);
+				return;
 			} else if (destinationWorld.startsWith("arena")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
@@ -378,6 +407,8 @@ public class AranarthUtils {
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
+				return;
+			} else if (destinationWorld.equals("creative")) {
 				return;
 			}
 			player.getInventory().clear();
@@ -414,6 +445,11 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.DOLPHINS_GRACE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.CONDUIT_POWER, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			boolean isRaining = AranarthUtils.getWeather() == Weather.RAIN || AranarthUtils.getWeather() == Weather.THUNDER;
+			if (isRaining || player.isInWater()) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			}
 		} else if (isWearingArmorType(player, "ardent")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 1));
@@ -429,6 +465,10 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			if (player.getWorld().getName().endsWith("_nether")) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+			}
 		} else if (isWearingArmorType(player, "soulbound")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 		}
@@ -503,7 +543,7 @@ public class AranarthUtils {
 		} else {
 			return dragonHeads.get(location);
 		}
-		
+
 	}
 
 	/**
@@ -714,7 +754,63 @@ public class AranarthUtils {
 	public static boolean isBlockCrop(Material type) {
 		return type == Material.WHEAT || type == Material.CARROTS
 				|| type == Material.POTATOES || type == Material.BEETROOTS
-				|| type == Material.NETHER_WART;
+				|| type == Material.NETHER_WART || type == Material.COCOA
+				|| type == Material.CACTUS || type == Material.SUGAR_CANE
+				|| type == Material.MELON || type == Material.PUMPKIN;
+	}
+
+	/**
+	 * Confirms if the input item can be harvested by a pickaxe.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by a pickaxe.
+	 */
+	public static boolean isHarvestableWithPickaxe(Material type) {
+		return type == Material.STONE || type == Material.DEEPSLATE
+				|| type == Material.COBBLESTONE || type == Material.COBBLED_DEEPSLATE
+				|| type == Material.SANDSTONE || type == Material.RED_SANDSTONE
+				|| type == Material.GRANITE || type == Material.DIORITE
+				|| type == Material.ANDESITE || type == Material.CALCITE
+				|| type == Material.TUFF || type == Material.DRIPSTONE_BLOCK
+				|| type == Material.POINTED_DRIPSTONE || type == Material.MAGMA_BLOCK
+				|| type == Material.NETHERRACK || type == Material.CRIMSON_NYLIUM
+				|| type == Material.BASALT || type == Material.SMOOTH_BASALT
+				|| type == Material.END_STONE || type == Material.ANCIENT_DEBRIS
+				|| type == Material.AMETHYST_BLOCK || type == Material.BUDDING_AMETHYST
+				|| type == Material.ICE || type == Material.PACKED_ICE || type == Material.BLUE_ICE
+				|| type == Material.PRISMARINE_BRICKS || type == Material.PRISMARINE
+				|| type == Material.BONE_BLOCK || type == Material.OBSIDIAN
+				|| type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
+				|| type == Material.BLACKSTONE || type == Material.GLOWSTONE
+				|| type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
+	}
+
+	/**
+	 * Confirms if the input item can be harvested by an axe.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by an axe.
+	 */
+	public static boolean isHarvestableWithAxe(Material type) {
+		if ((type.name().endsWith("_LOG") && !type.name().endsWith("_STRIPPED_LOG")) || type.name().endsWith("_LEAVES")) {
+			return true;
+		} else if (type == Material.CRIMSON_STEM || type == Material.CRIMSON_HYPHAE
+				|| type == Material.WARPED_STEM || type == Material.WARPED_HYPHAE
+				|| type == Material.NETHER_WART_BLOCK || type == Material.WARPED_WART_BLOCK) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Confirms if the input item can be harvested by a shovel.
+	 * @param type The type of item it is.
+	 * @return Confirmation of whether the input item can be harvested by a shovel.
+	 */
+	public static boolean isHarvestableWithShovel(Material type) {
+		return type == Material.DIRT || type == Material.COARSE_DIRT || type == Material.PODZOL
+				|| type == Material.GRASS_BLOCK || type == Material.MYCELIUM || type == Material.ROOTED_DIRT
+				|| type == Material.MUD || type == Material.SAND || type == Material.RED_SAND
+				|| type == Material.GRAVEL || type == Material.CLAY || type == Material.SNOW_BLOCK
+				|| type == Material.SOUL_SAND || type == Material.SOUL_SOIL;
 	}
 
 	/**
@@ -997,6 +1093,14 @@ public class AranarthUtils {
 		return block.getType() == Material.CHEST
 				|| block.getType() == Material.TRAPPED_CHEST
 				|| block.getType() == Material.BARREL
+				|| block.getType() == Material.COPPER_CHEST
+				|| block.getType() == Material.EXPOSED_COPPER_CHEST
+				|| block.getType() == Material.WEATHERED_COPPER_CHEST
+				|| block.getType() == Material.OXIDIZED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_EXPOSED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_WEATHERED_COPPER_CHEST
+				|| block.getType() == Material.WAXED_OXIDIZED_COPPER_CHEST
 				|| block.getType().name().endsWith("SHULKER_BOX");
 	}
 
@@ -1007,9 +1111,9 @@ public class AranarthUtils {
 	 * @return Confirmation whether the input locations are the same.
 	 */
 	private static boolean isSameLocation(Location loc1, Location loc2) {
-		return loc1.getBlockX() == loc2.getX()
-				&& loc1.getBlockY() == loc2.getY()
-				&& loc1.getBlockZ() == loc2.getZ();
+		return loc1.getBlockX() == loc2.getBlockX()
+				&& loc1.getBlockY() == loc2.getBlockY()
+				&& loc1.getBlockZ() == loc2.getBlockZ();
 	}
 
 	/**
@@ -1148,6 +1252,13 @@ public class AranarthUtils {
 			case "amethyst" -> new ArrowAmethyst().getItem();
 			case "obsidian" -> new ArrowObsidian().getItem();
 			case "diamond" -> new ArrowDiamond().getItem();
+			case "explosive" -> new ArrowExplosive().getItem();
+			case "lightning" -> new ArrowLightning().getItem();
+			case "spectral" -> new ItemStack(Material.SPECTRAL_ARROW, 4);
+			case "rooting" -> new ArrowRooting().getItem();
+			case "gust" -> new ArrowGust().getItem();
+			case "dragon" -> new ArrowDragon().getItem();
+			case "bone" -> new ArrowBone().getItem();
 			default -> null;
 		};
 	}
@@ -1163,7 +1274,7 @@ public class AranarthUtils {
 				continue;
 			}
 
-			if (getPlayer(uuid).getUsername().equals(username)) {
+			if (getPlayer(uuid).getUsername().equalsIgnoreCase(username)) {
 				return uuid;
 			}
 		}
@@ -1195,15 +1306,22 @@ public class AranarthUtils {
 			rankHomeNum = 5;
 		}
 
-		if (aranarthPlayer.getSaintRank() == 1) {
+		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
 			saintHomeNum = 1;
-		} else if (aranarthPlayer.getSaintRank() == 2) {
+		}
+		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
 			saintHomeNum = 3;
-		} else if (aranarthPlayer.getSaintRank() == 3) {
+		}
+		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
 			saintHomeNum = 5;
 		}
 
-		int perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+		int perksHomeAmount = 0;
+		if (aranarthPlayer.getPerks() != null) {
+			if (aranarthPlayer.getPerks().containsKey(Perk.HOMES)) {
+				perksHomeAmount = aranarthPlayer.getPerks().get(Perk.HOMES);
+			}
+		}
 
 		return rankHomeNum + saintHomeNum + perksHomeAmount;
 	}
@@ -1383,6 +1501,7 @@ public class AranarthUtils {
 	 */
 	public static void addMutedPlayer(UUID uuid) {
 		mutedPlayers.add(uuid);
+		DiscordUtils.toggleMuteRole(uuid, true);
 	}
 
 	/**
@@ -1391,6 +1510,7 @@ public class AranarthUtils {
 	 */
 	public static void removeMutedPlayer(UUID uuid) {
 		mutedPlayers.remove(uuid);
+		DiscordUtils.toggleMuteRole(uuid, false);
 	}
 
 	/**
@@ -1402,28 +1522,28 @@ public class AranarthUtils {
 		int rank = aranarthPlayer.getRank();
 		if (aranarthPlayer.getPronouns() == Pronouns.MALE) {
 			switch (rank) {
-				case 1: return "&d[&aEsquire&d] &r";
-				case 2: return "&7[&fKnight&7] &r";
-				case 3: return "&5[&dBaron&5] &r";
-				case 4: return "&8[&7Count&8] &r";
-				case 5: return "&6[&eDuke&6] &r";
-				case 6: return "&6[&bPrince&6] &r";
-				case 7: return "&6[&9King&6] &r";
-				case 8: return "&6[&4Emperor&6] &r";
+				case 1: return "&d&l[&a&lEsquire&d&l] &r";
+				case 2: return "&7&l[&f&lKnight&7&l] &r";
+				case 3: return "&5&l[&d&lBaron&5&l] &r";
+				case 4: return "&8&l[&7&lCount&8&l] &r";
+				case 5: return "&6&l[&e&lDuke&6&l] &r";
+				case 6: return "&6&l[&b&lPrince&6&l] &r";
+				case 7: return "&6&l[&9&lKing&6&l] &r";
+				case 8: return "&6&l[&4&lEmperor&6&l] &r";
 			}
 		} else {
 			switch (rank) {
-				case 1: return "&d[&aEsquire&d] &r";
-				case 2: return "&7[&fKnight&7] &r";
-				case 3: return "&5[&dBaroness&5] &r";
-				case 4: return "&8[&7Countess&8] &r";
-				case 5: return "&6[&eDuchess&6] &r";
-				case 6: return "&6[&bPrincess&6] &r";
-				case 7: return "&6[&9Queen&6] &r";
-				case 8: return "&6[&4Empress&6] &r";
+				case 1: return "&d&l[&a&lEsquire&d&l] &r";
+				case 2: return "&7&l[&f&lKnight&7&l] &r";
+				case 3: return "&5&l[&d&lBaroness&5&l] &r";
+				case 4: return "&8&l[&7&lCountess&8&l] &r";
+				case 5: return "&6&l[&e&lDuchess&6&l] &r";
+				case 6: return "&6&l[&b&lPrincess&6&l] &r";
+				case 7: return "&6&l[&9&lQueen&6&l] &r";
+				case 8: return "&6&l[&4&lEmpress&6&l] &r";
 			}
 		}
-		return "&8[&aPeasant&8] &r";
+		return "&8&l[&a&lPeasant&8&l] &r";
 	}
 
 	/**
@@ -1470,35 +1590,84 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Confirms if the input coordinate is within the server Spawn.
-	 * @param loc The location of the block or entity.
-	 * @return Confirmation if the input coordinate is within the server Spawn.
+	 * Provides the String portion of the player's Architect rank.
+	 * @param aranarthPlayer The AranarthPlayer that is being analyzed.
+	 * @return The String portion of the player's Architect rank.
 	 */
-	public static boolean isSpawnLocation(Location loc) {
-		int topRightX = 335;
-		int topRightZ = -447;
-		int bottomLeftX = -351;
-		int bottomLeftZ = 255;
-
-		if (!loc.getWorld().getName().equals("world")) {
-			return false;
+	public static String getAvatarRank(AranarthPlayer aranarthPlayer) {
+		if (AvatarUtils.getCurrentAvatar() != null) {
+			UUID uuid = AvatarUtils.getCurrentAvatar().getUuid();
+			if (uuid != null && getUUIDFromUsername(aranarthPlayer.getUsername()) != null && uuid.equals(getUUIDFromUsername(aranarthPlayer.getUsername()))) {
+				return "&5✵";
+			}
 		}
 
-		int x = loc.getBlockX();
-		int z = loc.getBlockZ();
-
-		if ((bottomLeftX < x && x < topRightX) && (bottomLeftZ > z && z > topRightZ)) {
-			return true;
-		}
-		return false;
+		return "";
 	}
 
 	/**
-	 * Plays the teleport sound effect.
-	 * @param player The player to play the sound for.
-	 * @return Confirmation that the teleport was successful
+	 * Confirms if the input coordinate is within the server Spawn world.
+	 * @param loc The location of the block or entity.
+	 * @return Confirmation if the input coordinate is within the server Spawn world.
 	 */
-	public static boolean teleportPlayer(Player player, Location from, Location to) {
+	public static boolean isSpawnLocation(Location loc) {
+		return loc.getWorld().getName().equals("spawn");
+	}
+
+	/**
+	 * Handles creating the teleport task timer and initializing the callback method.
+	 * @param player The player that is being teleported.
+	 * @param from The location that the player is teleporting from.
+	 * @param to The location that the player is teleporting to.
+	 * @param isImmediateTeleport Whether the teleportation should be immediate or not.
+	 * @param resultCallback Confirmation whether the teleportation was successful or not.
+	 */
+	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, Consumer<Boolean> resultCallback) {
+		if (isImmediateTeleport) {
+			boolean result = handleTeleportLogic(player, from, to);
+			resultCallback.accept(result);
+		} else {
+			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
+			initiateTeleport(player, () -> {
+				boolean result = handleTeleportLogic(player, from, to);
+				resultCallback.accept(result);
+			});
+		}
+	}
+
+	/**
+	 * Prepares the player to be teleported by creating the teleport task.
+	 * @param player The player.
+	 * @param onSuccess The method to be called once the timer ends to handle the actual teleportation.
+	 */
+	public static void initiateTeleport(Player player, Runnable onSuccess) {
+		// Cancel and override the previous task if exists with the new one
+		BukkitTask existingTask = teleportingPlayers.remove(player.getUniqueId());
+		if (existingTask != null) {
+			existingTask.cancel();
+		}
+
+		// Initiate the teleportation after a 3 second delay, storing the task for the duration
+		BukkitTask task = new BukkitRunnable() {
+			@Override
+			public void run() {
+				teleportingPlayers.remove(player.getUniqueId());
+				onSuccess.run();
+			}
+		}.runTaskLater(AranarthCore.getInstance(), 60);
+
+		// This is run before the above task itself due to the delay
+		teleportingPlayers.put(player.getUniqueId(), task);
+	}
+
+	/**
+	 * Handles the actual teleportation of the player.
+	 * @param player The player that is being teleported.
+	 * @param from The location that the player is teleporting from.
+	 * @param to The location that the player is teleporting to.
+	 * @return Confirmation if the teleportation was successful.
+	 */
+	private static boolean handleTeleportLogic(Player player, Location from, Location to) {
 		// Teleporting seems to manually toggle on a player's bending when it was toggled off
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 		boolean isToggled = false;
@@ -1512,7 +1681,35 @@ public class AranarthUtils {
 			player.sendMessage(ChatUtils.chatMessage("&cThis teleport location is unsafe!"));
 			return false;
 		}
+
+		List<LivingEntity> leashedEntities = new ArrayList<>();
+		for (Entity nearby : from.getNearbyEntities(25, 25, 25)) {
+			if (nearby instanceof LivingEntity mob) {
+				if (mob.isLeashed()) {
+					if (mob.getLeashHolder() instanceof Player holder) {
+						if (holder.getUniqueId().equals(player.getUniqueId())) {
+							boolean isFromSurvivalWorld = from.getWorld().getName().startsWith("world")
+									|| from.getWorld().getName().startsWith("smp")
+									|| from.getWorld().getName().startsWith("resource");
+							boolean isToSurvivalWorld = to.getWorld().getName().startsWith("world")
+									|| to.getWorld().getName().startsWith("smp")
+									|| to.getWorld().getName().startsWith("resource");
+							if (isFromSurvivalWorld && isToSurvivalWorld) {
+								leashedEntities.add(mob);
+							} else {
+								mob.setLeashHolder(null);
+							}
+						}
+					}
+				}
+			}
+		}
+
 		player.teleport(locToTeleportTo);
+		for (Entity leashed : leashedEntities) {
+			leashed.teleport(locToTeleportTo);
+		}
+
 		player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 
 		// Saves the player's last location for /ac back
@@ -1523,14 +1720,36 @@ public class AranarthUtils {
 		try {
 			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
 			// Toggles off the bending if it should be toggled off
-			if (isToggled) {
+			if (isToggled && (!from.getWorld().getName().equals("spawn") && to.getWorld().getName().equals("spawn"))) {
 				bendingPlayer.toggleBending();
 			}
+
+			for (LivingEntity leashed : leashedEntities) {
+				leashed.setLeashHolder(player);
+			}
+
 			return true;
 		} catch (IOException e) {
 			player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with changing world."));
 			return false;
 		}
+	}
+
+	/**
+	 * Provides the BukkitTask associated to the player's teleportation.
+	 * @param uuid The player's UUID.
+	 * @return The BukkitTask associated to the player's teleportation.
+	 */
+	public static BukkitTask getTeleportTask(UUID uuid) {
+		return teleportingPlayers.get(uuid);
+	}
+
+	/**
+	 * Provides the BukkitTask associated to the player's teleportation.
+	 * @param uuid The player's UUID.
+	 */
+	public static void removeTeleportTask(UUID uuid) {
+		teleportingPlayers.remove(uuid);
 	}
 
 	/**
@@ -1658,8 +1877,10 @@ public class AranarthUtils {
 	public static void applySpawnBuffs() {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			if (isSpawnLocation(player.getLocation())) {
-				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
-				player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+				if (AranarthUtils.getPlayer(player.getUniqueId()).isUsingSpawnBoost()) {
+					player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 100, 4));
+					player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, 100, 2));
+				}
 			}
 		}
 	}
@@ -1900,7 +2121,7 @@ public class AranarthUtils {
 	 * @param item The item that is attempting to be picked up.
 	 * @return 0 if the item should be deleted, 1 if the item should be ignored, -1 if the item is not blacklisted.
 	 */
-	public static int isBlacklistingItem(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
+	public static int getBlacklistMethod(Player player, AranarthPlayer aranarthPlayer, ItemStack item) {
 		if (!player.hasPermission("aranarth.blacklist")) {
 			return -1;
 		}
@@ -1911,12 +2132,8 @@ public class AranarthUtils {
 		}
 
 		for (ItemStack is : blacklistedItems) {
-			if (is.isSimilar(item)) {
-				if (aranarthPlayer.isDeletingBlacklistedItems()) {
-					return 0;
-				} else {
-					return 1;
-				}
+			if (is.isSimilar(item) || (item.getType() == is.getType() && CropUtils.isCropSeed(item.getType()))) {
+				return aranarthPlayer.getBlacklistingMethod();
 			}
 		}
 		return -1;
@@ -2183,7 +2400,8 @@ public class AranarthUtils {
 				|| type == Material.AMETHYST_SHARD || type == Material.RESIN_CLUMP || type == Material.GLOWSTONE_DUST
 				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
 				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
-				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL;
+				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL
+				|| type == Material.QUARTZ;
 	}
 
 	/**
@@ -2218,6 +2436,7 @@ public class AranarthUtils {
 		addCompressibleItem(uuid, Material.BONE_MEAL);
 		addCompressibleItem(uuid, Material.SNOWBALL);
 		addCompressibleItem(uuid, Material.CLAY_BALL);
+		addCompressibleItem(uuid, Material.QUARTZ);
 	}
 
 	/**
@@ -2252,6 +2471,7 @@ public class AranarthUtils {
 		removeCompressibleItem(uuid, Material.BONE_MEAL);
 		removeCompressibleItem(uuid, Material.SNOWBALL);
 		removeCompressibleItem(uuid, Material.CLAY_BALL);
+		removeCompressibleItem(uuid, Material.QUARTZ);
 	}
 
 	/**
@@ -2291,8 +2511,6 @@ public class AranarthUtils {
 					&& warps.get(i).getLocation().getBlockY() == direction.getBlockY()
 					&& warps.get(i).getLocation().getBlockZ() == direction.getBlockZ()) {
 				if (!warps.get(i).getName().equals(warpName)) {
-					Bukkit.getLogger().info(warpName);
-					Bukkit.getLogger().info(warps.get(i).getName());
 					continue;
 				}
 
@@ -2384,4 +2602,906 @@ public class AranarthUtils {
 	public static void deleteShopLocation(UUID uuid) {
 		shopLocations.remove(uuid);
 	}
+
+	/**
+	 * Plays the jingle when a player sends or receives a teleport request.
+	 * @param player The player that sent or received the request.
+	 */
+	public static void playTeleportSound(Player player) {
+		Sound sound = Sound.BLOCK_NOTE_BLOCK_HARP;
+		new BukkitRunnable() {
+			int runs = 0;
+			@Override
+			public void run() {
+				float pitch = 1.5F;
+
+				switch (runs) {
+					case 0 -> pitch = 1.5F;
+					case 1 -> pitch = 1.25F;
+					case 2 -> pitch = 1.5F;
+					case 3 -> pitch = 2F;
+					default -> {
+						pitch = 0;
+					}
+				}
+
+				// No sound
+				if (pitch != 0) {
+					player.playSound(player, sound, 1F, pitch);
+				}
+
+				if (runs == 5) {
+					cancel();
+				}
+				runs++;
+			}
+		}.runTaskTimer(AranarthCore.getInstance(), 0, 3); // Runs every 3 ticks
+	}
+
+	/**
+	 * Handles logic to update how the tab list displays
+	 */
+	public static void updateTab() {
+		List<Player> onlinePlayers = new ArrayList<>(Bukkit.getOnlinePlayers());
+
+		int onlineNum = (int) onlinePlayers.stream()
+				.filter(player -> {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					return !aranarthPlayer.isVanished();
+				})
+				.count();
+
+		int day = AranarthUtils.getDay();
+		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
+		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
+		int year = AranarthUtils.getYear();
+		String dateLine = DateUtils.determineServerDate(day, weekday, month, year)[1];
+		String[] parts = ChatUtils.stripColorFormatting(dateLine).split(" ");
+		dateLine = "&e" + parts[0] + " &f" + parts[1] + " " + parts[2] + " " + parts[3] + " " + parts[4] + " &e" + parts[5];
+
+		String playerOrPlayers = onlineNum == 1 ? "player" : "players";
+		String tps = String.format("%.1f", Bukkit.getServer().getTPS()[0]);
+		String infoLine = "&e" + onlineNum + " " + playerOrPlayers + " online &7&l| &eTPS " + tps;
+
+		// Header / Footer
+		for (Player player : onlinePlayers) {
+			player.setPlayerListHeader(ChatUtils.translateToColor(
+					"&8&l---------------------\n&6&lThe Realm of Aranarth\n" + dateLine + "\n" + infoLine));
+			player.setPlayerListFooter(ChatUtils.translateToColor("&8&l---------------------"));
+		}
+
+		// Handle vanish visibility
+		for (Player player : onlinePlayers) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+			for (Player hiddenPlayer : onlinePlayers) {
+				AranarthPlayer hiddenAranarthPlayer = AranarthUtils.getPlayer(hiddenPlayer.getUniqueId());
+
+				if (hiddenAranarthPlayer.isVanished()) {
+					if (aranarthPlayer.getCouncilRank() == 3) {
+						player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+					} else {
+						player.hidePlayer(AranarthCore.getInstance(), hiddenPlayer);
+					}
+				} else {
+					// Always show non-vanished players
+					player.showPlayer(AranarthCore.getInstance(), hiddenPlayer);
+				}
+			}
+		}
+
+		// Remove vanished players from tab
+		onlinePlayers.removeIf(player -> {
+			AranarthPlayer data = AranarthUtils.getPlayer(player.getUniqueId());
+			return data.isVanished();
+		});
+
+		// Sort by rank priority (highest first)
+		onlinePlayers.sort((a, b) -> {
+			int first = getRankPriority(getPlayer(a.getUniqueId()));
+			int second = getRankPriority(getPlayer(b.getUniqueId()));
+			return Integer.compare(first, second);
+		});
+
+		// Apply display and order
+		int order = 0;
+		for (Player player : onlinePlayers) {
+			UUID uuid = player.getUniqueId();
+			String display = ChatUtils.providePrefixAndName(uuid);
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+			// If the player is AFK
+			if (aranarthPlayer.getAfkLocation() != null && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+				display += " &7[AFK]";
+			}
+
+			int ping = player.getPing();
+			if (ping <= 150) {
+				display += " &8[&a" + ping + "ms&8]";
+			} else if (ping <= 250) {
+				display += " &8[&e" + ping + "ms&8]";
+			} else {
+				display += " &8[&c" + ping + "ms&8]";
+			}
+
+			player.setPlayerListName(ChatUtils.translateToColor(display));
+			player.setPlayerListOrder(order);
+			order++;
+		}
+	}
+
+	/**
+	 * Returns the total priority of the player's rank.
+	 * The higher the value, the higher up top on the tab list.
+	 */
+	private static int getRankPriority(AranarthPlayer aranarthPlayer) {
+		if (aranarthPlayer.getCouncilRank() == 3) {
+			return 48;
+		} else if (aranarthPlayer.getCouncilRank() == 2) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 47;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 46;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 45;
+			} else {
+				return 44;
+			}
+		} else if (aranarthPlayer.getCouncilRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 43;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 42;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 41;
+			} else {
+				return 40;
+			}
+		} else if (aranarthPlayer.getArchitectRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 39;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 38;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 37;
+			} else {
+				return 36;
+			}
+		} else if (aranarthPlayer.getRank() == 8) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 35;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 34;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 33;
+			} else {
+				return 32;
+			}
+		} else if (aranarthPlayer.getRank() == 7) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 31;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 30;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 29;
+			} else {
+				return 28;
+			}
+		} else if (aranarthPlayer.getRank() == 6) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 27;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 26;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 25;
+			} else {
+				return 24;
+			}
+		} else if (aranarthPlayer.getRank() == 5) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 23;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 22;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 21;
+			} else {
+				return 20;
+			}
+		} else if (aranarthPlayer.getRank() == 4) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 19;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 18;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 17;
+			} else {
+				return 16;
+			}
+		} else if (aranarthPlayer.getRank() == 3) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 15;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 14;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 13;
+			} else {
+				return 12;
+			}
+		} else if (aranarthPlayer.getRank() == 2) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 11;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 10;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 9;
+			} else {
+				return 8;
+			}
+		} else if (aranarthPlayer.getRank() == 1) {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 7;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 6;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 5;
+			} else {
+				return 4;
+			}
+		} else {
+			if (aranarthPlayer.getSaintRank() == 3) {
+				return 3;
+			} else if (aranarthPlayer.getSaintRank() == 2) {
+				return 2;
+			} else if (aranarthPlayer.getSaintRank() == 1) {
+				return 1;
+			} else {
+				return 0;
+			}
+		}
+	}
+
+	/**
+	 * Provides the roman numeral equivalent of the input level.
+	 * @param level The level of the incantation.
+	 * @return The roman numeral equivalent of the input level.
+	 */
+	public static String getIncantationLevelInNumerals(int level) {
+		String levelLetter = "I";
+		if (level == 2) {
+			return "II";
+		} else if (level == 3) {
+			return "III";
+		} else if (level == 4) {
+			return "IV";
+		} else if (level == 5) {
+			return "V";
+		}
+		return levelLetter;
+	}
+
+	/**
+	 * Determines whether the input item contains an Aranarth incantation.
+	 * @param item The item.
+	 * @param incantation The incantation name.
+	 * @return Whether the input item contains an Aranarth incantation.
+	 */
+	public static boolean hasIncantation(ItemStack item, String incantation) {
+		if (item.hasItemMeta()) {
+			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE, PersistentDataType.STRING)) {
+				if (item.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING).equals(incantation)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Provides
+	 * @param item The item.
+	 * @return The level of the applied incantation. -1 if the level is not determined.
+	 */
+	public static int getIncantationLevel(ItemStack item) {
+		if (item.hasItemMeta()) {
+			if (item.getItemMeta().getPersistentDataContainer().has(INCANTATION_LEVEL, PersistentDataType.INTEGER)) {
+				return item.getItemMeta().getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * Attempts to use the given horn based on the previous use of the horn.
+	 * @param player The player.
+	 * @param horn The type of horn.
+	 */
+	public static boolean canUseHornSuccessfully(Player player, MusicInstrument horn) {
+		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+		HashMap<MusicInstrument, Long> horns = aranarthPlayer.getHorns();
+		long lastHornUse = 0;
+		long cooldown = getHornCooldown(horn);
+
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.PONDER_GOAT_HORN) != null ? horns.get(MusicInstrument.PONDER_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.SING_GOAT_HORN) != null ? horns.get(MusicInstrument.SING_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.SEEK_GOAT_HORN) != null ? horns.get(MusicInstrument.SEEK_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.FEEL_GOAT_HORN) != null ? horns.get(MusicInstrument.FEEL_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.ADMIRE_GOAT_HORN) != null ? horns.get(MusicInstrument.ADMIRE_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.CALL_GOAT_HORN) != null ? horns.get(MusicInstrument.CALL_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.YEARN_GOAT_HORN) != null ? horns.get(MusicInstrument.YEARN_GOAT_HORN) : -1;
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			lastHornUse = horns.get(MusicInstrument.DREAM_GOAT_HORN) != null ? horns.get(MusicInstrument.DREAM_GOAT_HORN) : -1;
+		}
+
+		MusicInstrument hornWithLongestCooldown = null;
+		// Ensures only one horn can be used at a time (limiting stacking)
+		for (MusicInstrument hornOnCooldown : horns.keySet()) {
+			long lastUse = horns.get(hornOnCooldown) != null ? horns.get(hornOnCooldown) : -1;
+
+			// If the horn is actively on cooldown
+			if (lastUse + getHornCooldown(hornOnCooldown) > System.currentTimeMillis()) {
+				if (hornWithLongestCooldown == null) {
+					hornWithLongestCooldown = hornOnCooldown;
+				}
+
+				if (horns.get(hornOnCooldown) >= horns.get(hornWithLongestCooldown)) {
+					hornWithLongestCooldown = hornOnCooldown;
+				}
+			}
+		}
+
+		// If there are no horns on cooldown
+		if (hornWithLongestCooldown == null) {
+			horns.put(horn, System.currentTimeMillis());
+			aranarthPlayer.setHorns(horns);
+			setPlayer(player.getUniqueId(), aranarthPlayer);
+			String hornName = getHornName(horn);
+
+			// Goat horns are heard up to 256 blocks away, inform nearby players
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+					if (onlinePlayer.getName().equals(player.getName())) {
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You have used the &eHorn of " + hornName));
+						continue;
+					}
+
+					if (player.getWorld().equals(onlinePlayer.getWorld())) {
+						if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has used the &eHorn of " + hornName));
+						}
+					}
+				}
+			}
+
+			return true;
+		}
+		// If there was a horn on cooldown
+		else {
+			// Goat horns are heard up to 256 blocks away, this is to prevent it from being heard again
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (player.getWorld().getName().equals(onlinePlayer.getWorld().getName())) {
+					if (player.getLocation().distance(onlinePlayer.getLocation()) <= 256) {
+						onlinePlayer.stopSound(SoundCategory.RECORDS);
+					}
+				}
+			}
+			long remainder = (horns.get(hornWithLongestCooldown) + getHornCooldown(hornWithLongestCooldown)) - System.currentTimeMillis();
+			remainder = remainder / 1000;
+			int seconds = (int) remainder;
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a horn again for another &e" + seconds + " &cseconds!"));
+			return false;
+		}
+	}
+
+	/**
+	 * Provides the cooldown of the input horn.
+	 * @param horn The horn.
+	 * @return The cooldown of the input horn.
+	 */
+	private static long getHornCooldown(MusicInstrument horn) {
+		long cooldown = 60000;
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			cooldown = 60000;
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			cooldown = 90000;
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			cooldown = 180000;
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			cooldown = 150000;
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			cooldown = 120000;
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			cooldown = 30000;
+		}
+		return cooldown;
+	}
+
+	/**
+	 * Provides the custom name for each horn.
+	 * @param horn The horn.
+	 * @return The name of the horn.
+	 */
+	private static String getHornName(MusicInstrument horn) {
+		String name = "Horns";
+		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
+			name = "the Traveller";
+		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
+			name = "the Forager";
+		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
+			name = "the Brute";
+		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {
+			name = "the Resilient";
+		} else if (horn.equals(MusicInstrument.ADMIRE_GOAT_HORN)) {
+			name = "the Armored";
+		} else if (horn.equals(MusicInstrument.CALL_GOAT_HORN)) {
+			name = "the Beasts";
+		} else if (horn.equals(MusicInstrument.YEARN_GOAT_HORN)) {
+			name = "the Stallion";
+		} else if (horn.equals(MusicInstrument.DREAM_GOAT_HORN)) {
+			name = "the Pure";
+		}
+		return name;
+	}
+
+	/**
+	 * Refreshes the Locations of all sentinels.
+	 */
+	public static void refreshSentinels() {
+		for (AranarthPlayer aranarthPlayer : players.values()) {
+			UUID uuid = AranarthUtils.getUuidOfAranarthPlayer(aranarthPlayer);
+			HashMap<EntityType, List<Sentinel>> sentinels = aranarthPlayer.getSentinels();
+			List<Integer> sentinelsToRemove = new ArrayList<>();
+			for (EntityType type : sentinels.keySet()) {
+				for (int i = 0; i < sentinels.get(type).size(); i++) {
+					Sentinel sentinel = sentinels.get(type).get(i);
+
+					// Must manually load the chunk to allow the entity to teleport
+					Chunk chunk = sentinel.getLocation().getChunk();
+					if (chunk.isLoaded()) {
+						Entity entity = Bukkit.getEntity(sentinel.getUuid());
+						// Cleans up any sentinels that have died
+						if (entity == null) {
+							sentinelsToRemove.add(i);
+						}
+						// Updates the location of the sentinel
+						else {
+							sentinel.setLocation(entity.getLocation());
+							sentinels.get(type).set(i, sentinel);
+						}
+					}
+				}
+
+				// Remove in reverse order to avoid shifting indexes
+				for (int i = sentinelsToRemove.size() - 1; i >= 0; i--) {
+					int index = sentinelsToRemove.get(i);
+					sentinels.get(type).remove(index);
+				}
+				sentinelsToRemove.clear();
+			}
+			aranarthPlayer.setSentinels(sentinels);
+			AranarthUtils.setPlayer(uuid, aranarthPlayer);
+		}
+	}
+
+	/**
+	 * Provides the UUID of the AranarthPlayer.
+	 * @param aranarthPlayer The AranarthPlayer.
+	 * @return The UUID of the AranarthPlayer.
+	 */
+	public static UUID getUuidOfAranarthPlayer(AranarthPlayer aranarthPlayer) {
+		for (UUID uuid : players.keySet()) {
+			if (players.get(uuid).equals(aranarthPlayer)) {
+				return uuid;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Toggles the player's AFK status.
+	 * @param uuid The UUID of the player.
+	 * @param isEnablingAfk Whether the player is enabling their AFK status.
+	 */
+	public static void toggleAfkStatus(UUID uuid, boolean isEnablingAfk) {
+		Player player = Bukkit.getPlayer(uuid);
+		AranarthPlayer aranarthPlayer = getPlayer(uuid);
+		if (isEnablingAfk) {
+			if (aranarthPlayer.getAfkLocation() == null) {
+				AfkLocation afkLocation = new AfkLocation(player.getLocation(),getAfkSecondsAmount());
+				aranarthPlayer.setAfkLocation(afkLocation);
+			}
+
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are now AFK"));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
+				}
+			}
+			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
+		} else {
+			aranarthPlayer.setAfkLocation(null);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You are no longer AFK"));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
+				}
+			}
+			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
+		}
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+	}
+
+	/**
+	 * Updates all players' current AFK Locations.
+	 */
+	public static void updateAfkLocations() {
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
+			AfkLocation afkLocation = aranarthPlayer.getAfkLocation();
+			if (afkLocation == null) {
+				afkLocation = new AfkLocation(player.getLocation(), 0);
+				aranarthPlayer.setAfkLocation(afkLocation);
+				setPlayer(player.getUniqueId(), aranarthPlayer);
+			} else {
+				// If the player hasn't moved and isn't afk yet
+				if (isSameLocation(player.getLocation(), afkLocation.getLocation())) {
+					if (afkLocation.getSeconds() < getAfkSecondsAmount()) {
+						afkLocation.setSeconds(afkLocation.getSeconds() + 5);
+						aranarthPlayer.setAfkLocation(afkLocation);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
+					}
+					// Auto-afk after 5 minutes
+					else if (afkLocation.getSeconds() == getAfkSecondsAmount()) {
+						toggleAfkStatus(player.getUniqueId(), true);
+						// Prevents further calls
+						afkLocation.setSeconds(AranarthUtils.getAfkSecondsAmount() + 5);
+						aranarthPlayer.setAfkLocation(afkLocation);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
+					}
+				}
+				// The player has moved
+				else {
+					if (afkLocation.getSeconds() >= getAfkSecondsAmount()) {
+						toggleAfkStatus(player.getUniqueId(), false);
+					} else {
+						aranarthPlayer.setAfkLocation(null);
+						setPlayer(player.getUniqueId(), aranarthPlayer);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Increases the amount of drops from a mob in an EntityDeathEvent.
+	 * @param e The event.
+	 */
+	public static void increaseMobDrops(EntityDeathEvent e) {
+		EntityEquipment equipment = e.getEntity().getEquipment();
+		List<ItemStack> equipmentList = new ArrayList<>();
+		equipmentList.addAll(Arrays.asList(equipment.getArmorContents()));
+		equipmentList.add(equipment.getItemInMainHand());
+		equipmentList.add(equipment.getItemInOffHand());
+
+		for (ItemStack drop : e.getDrops()) {
+			// Avoid duplication of held items or worn armor
+			if (equipmentList.contains(drop)) {
+				continue;
+			}
+
+			// Avoids duplication of saddles and armor on mounts
+			if (drop.getType() == Material.SADDLE || drop.getType().name().contains("_ARMOR") || drop.getType() == Material.ARMOR_STAND) {
+				continue;
+			}
+
+			int rand = new Random().nextInt(4);
+			// 50% chance to increase the drop by 1
+			if (rand <= 1) {
+				drop.setAmount(drop.getAmount() + 1);
+			}
+			// 25% chance to increase the drop by 2
+			else if (rand == 3) {
+				drop.setAmount(drop.getAmount() + 2);
+			}
+		}
+	}
+
+	/**
+	 * Adds a vote to the list of votes.
+	 * @param vote The vote being added.
+	 */
+	public static void addVote(AranarthVote vote) {
+		votes.add(vote);
+	}
+
+	/**
+	 * Provides the list of votes.
+	 * @return The list of votes.
+	 */
+	public static List<AranarthVote> getVotes() {
+		return votes;
+	}
+
+	/**
+	 * Provides the number of times a player has voted - not the vote points.
+	 * @param uuid The UUID of the player.
+	 * @return The number of times a player has voted - not the vote points.
+	 */
+	public static int getVoteNum(UUID uuid) {
+		int voteNum = 0;
+		for (AranarthVote vote : votes) {
+			if (vote.getUuid().equals(uuid)) {
+				voteNum++;
+			}
+		}
+		return voteNum;
+	}
+
+	/**
+	 * Provides the number of vote points a player has - not necessarily usable.
+	 * @param uuid The UUID of the player.
+	 * @return The number of vote points a player has - not necessarily usable.
+	 */
+	public static int getVotePoints(UUID uuid) {
+		int pointsNum = 0;
+		for (AranarthVote vote : votes) {
+			if (vote.getUuid().equals(uuid)) {
+				pointsNum += vote.getPointsRewarded();
+			}
+		}
+		return pointsNum;
+	}
+
+	/**
+	 * Provides the number of vote points a player has available.
+	 * @param uuid The UUID of the player.
+	 * @return The number of vote points a player has available.
+	 */
+	public static int getAvailableVotePoints(UUID uuid) {
+		int totalPoints = getVotePoints(uuid);
+		return totalPoints - AranarthUtils.getPlayer(uuid).getVotePointsSpent();
+	}
+
+	/**
+	 * Provides the number of seconds that a player is AFK to automatically be placed in the AFK status.
+	 * @return The number of seconds that a player is AFK to automatically be placed in the AFK status.
+	 */
+	public static int getAfkSecondsAmount() {
+		return afkSecondsAmount;
+	}
+
+	/**
+	 * Provides the HashMap of the kills and deaths of all players across all worlds.
+	 * @return The HashMap of the kills and deaths of all players across all worlds.
+	 */
+	public static HashMap<UUID, List<PlayerKillDeathScore>> getKillDeathScores() {
+		return killDeathScores;
+	}
+
+	/**
+	 * Adds the player's kills and deaths to the HashMap.
+	 * @param pkds The player's kills and deaths to be added to the HashMap.
+	 */
+	public static void addPlayerKillDeathScore(PlayerKillDeathScore pkds) {
+		List<PlayerKillDeathScore> list = killDeathScores.get(pkds.getUuid());
+		if (list == null) {
+			list = new ArrayList<>();
+		}
+
+		for (int i = 0; i < list.size(); i++) {
+			PlayerKillDeathScore inList = list.get(i);
+			if (inList.getWorldPrefix().equals(pkds.getWorldPrefix())) {
+				// Combines the two
+				inList.setKills(inList.getKills() + pkds.getKills());
+				inList.setDeaths(inList.getDeaths() + pkds.getDeaths());
+				list.set(i, inList);
+				killDeathScores.put(pkds.getUuid(), list);
+				return;
+			}
+		}
+
+		// Only adds if it isn't already in the list
+		list.add(pkds);
+		killDeathScores.put(pkds.getUuid(), list);
+	}
+
+	/**
+	 * Provides the number of kills/deaths the player has in the input world.
+	 * @param uuid The UUID of the player.
+	 * @param world The world to verify the number of kills/deaths in.
+	 * @param isGettingKills Whether the method is getting the player's kills/deaths. False if getting deaths.
+	 * @return The number of kills/deaths the player has in the input world.
+	 */
+	public static int getKillsOrDeathsInWorld(UUID uuid, World world, boolean isGettingKills) {
+		if (killDeathScores.get(uuid) == null) {
+			killDeathScores.put(uuid, new ArrayList<>());
+			return 0;
+		}
+
+		List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
+		for (PlayerKillDeathScore pkds : scores) {
+			if (pkds.getWorldPrefix().equals(world.getName().split("_")[0])) {
+				if (isGettingKills) {
+					return pkds.getKills();
+				} else {
+					return pkds.getDeaths();
+				}
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Updates the number of kills and deaths of the input players based on who was the killer and who was the victim.
+	 * @param killer The player who did the killing.
+	 * @param victim The player who died.
+	 * @param world The world that the player was killed in.
+	 */
+	public static void updateKillAndDeath(Player killer, Player victim, World world) {
+		String deathWorld = victim.getWorld().getName().split("_")[0];
+
+		boolean wasKillerScoreUpdated = false;
+		if (killer != null && killDeathScores.get(killer.getUniqueId()) == null) {
+			PlayerKillDeathScore pkds = new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0);
+			List<PlayerKillDeathScore> list = new ArrayList<>();
+			list.add(pkds);
+			killDeathScores.put(killer.getUniqueId(), list);
+			wasKillerScoreUpdated = true;
+		}
+
+		boolean wasVictimScoreUpdated = false;
+		if (killDeathScores.get(victim.getUniqueId()) == null) {
+			PlayerKillDeathScore pkds = new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1);
+			List<PlayerKillDeathScore> list = new ArrayList<>();
+			list.add(pkds);
+			killDeathScores.put(victim.getUniqueId(), list);
+			wasVictimScoreUpdated = true;
+		}
+
+		// Increases the killer's kill count by 1 in the world
+		if (killer != null && !wasKillerScoreUpdated) {
+			List<PlayerKillDeathScore> list = killDeathScores.get(killer.getUniqueId());
+			boolean foundKillerWorld = false;
+			for (int i = 0; i < list.size(); i++) {
+				PlayerKillDeathScore pkds = list.get(i);
+				if (deathWorld.equals(pkds.getWorldPrefix())) {
+					pkds.setKills(pkds.getKills() + 1);
+					list.set(i, pkds);
+					foundKillerWorld = true;
+					break;
+				}
+			}
+			if (!foundKillerWorld) {
+				list.add(new PlayerKillDeathScore(killer.getUniqueId(), deathWorld, 1, 0));
+			}
+			killDeathScores.put(killer.getUniqueId(), list);
+		}
+		// Increases the victim's death count by 1 in the world
+		if (!wasVictimScoreUpdated) {
+			List<PlayerKillDeathScore> list = killDeathScores.get(victim.getUniqueId());
+			boolean foundVictimWorld = false;
+			for (int i = 0; i < list.size(); i++) {
+				PlayerKillDeathScore pkds = list.get(i);
+				if (deathWorld.equals(pkds.getWorldPrefix())) {
+					pkds.setDeaths(pkds.getDeaths() + 1);
+					list.set(i, pkds);
+					foundVictimWorld = true;
+					break;
+				}
+			}
+			if (!foundVictimWorld) {
+				list.add(new PlayerKillDeathScore(victim.getUniqueId(), deathWorld, 0, 1));
+			}
+			killDeathScores.put(victim.getUniqueId(), list);
+		}
+
+	}
+
+	/**
+	 * Provides a list of the UUIDs of the players with the most kills, sorted by kills.
+	 * @param world The world to verify the kills in.
+	 * @return The list of the UUIDs of the players with the most kills, sorted by kills.
+	 */
+	public static List<UUID> getTopKills(World world) {
+		String worldName = world.getName().split("_")[0];
+		Map<UUID, Integer> totalKills = new HashMap<>();
+		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+			int sum = 0;
+
+			for (PlayerKillDeathScore score : entry.getValue()) {
+				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+					sum += score.getKills();
+				}
+			}
+
+			// Only include players who actually have kills
+			if (sum > 0) {
+				totalKills.put(entry.getKey(), sum);
+			}
+		}
+
+		// Sort by kills descending and return UUIDs
+		return totalKills.entrySet()
+				.stream()
+				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.map(Map.Entry::getKey)
+				.toList();
+	}
+
+	/**
+	 * Provides a list of the UUIDs of the players with the most deaths, sorted by deaths.
+	 * @param world The world to verify the deaths in.
+	 * @return The list of the UUIDs of the players with the most deaths, sorted by deaths.
+	 */
+	public static List<UUID> getTopDeaths(World world) {
+		String worldName = world.getName().split("_")[0];
+		Map<UUID, Integer> totalDeaths = new HashMap<>();
+		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
+			int sum = 0;
+
+			for (PlayerKillDeathScore score : entry.getValue()) {
+				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+					sum += score.getDeaths();
+				}
+			}
+
+			// Only include players who actually have deaths
+			if (sum > 0) {
+				totalDeaths.put(entry.getKey(), sum);
+			}
+		}
+
+		// Sort by deaths descending and return UUIDs
+		return totalDeaths.entrySet()
+				.stream()
+				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.map(Map.Entry::getKey)
+				.toList();
+	}
+
+	/**
+	 * Provides the map of pending vote keys awaiting claim.
+	 * @return The HashMap of UUID to pending key count.
+	 */
+	public static HashMap<UUID, Integer> getPendingVoteKeys() {
+		return pendingVoteKeys;
+	}
+
+	/**
+	 * Adds pending vote keys for a player.
+	 * @param uuid The UUID of the player.
+	 * @param amount The number of keys to add.
+	 */
+	public static void addPendingVoteKeys(UUID uuid, int amount) {
+		pendingVoteKeys.merge(uuid, amount, Integer::sum);
+	}
+
+	/**
+	 * Sets the pending vote key count for a player.
+	 * @param uuid The UUID of the player.
+	 * @param amount The number of pending keys.
+	 */
+	public static void setPendingVoteKeys(UUID uuid, int amount) {
+		pendingVoteKeys.put(uuid, amount);
+	}
+
+	/**
+	 * Removes a player's pending vote key entry entirely.
+	 * @param uuid The UUID of the player.
+	 */
+	public static void removePendingVoteKeys(UUID uuid) {
+		pendingVoteKeys.remove(uuid);
+	}
+
 }

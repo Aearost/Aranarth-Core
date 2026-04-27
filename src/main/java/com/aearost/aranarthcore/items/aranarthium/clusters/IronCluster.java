@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.CLUSTER;
+import static com.aearost.aranarthcore.objects.CustomKeys.CLUSTER;
 
 /**
  * Provides the necessary components of an Iron Cluster item.
@@ -29,6 +29,7 @@ public class IronCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "iron");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			ironFragment.setItemMeta(meta);
 		}
 	    return ironFragment;

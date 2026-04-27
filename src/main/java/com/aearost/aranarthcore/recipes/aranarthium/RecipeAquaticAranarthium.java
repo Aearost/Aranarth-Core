@@ -21,13 +21,13 @@ public class RecipeAquaticAranarthium {
 		NamespacedKey nk = new NamespacedKey(plugin, "AC_AQUATIC_ARANARTHIUM");
 		ShapedRecipe recipe = new ShapedRecipe(nk, new AranarthiumAquatic().getItem());
 
-		recipe.shape("CWC", "SES", "DHD");
+		recipe.shape("LWL", "PEP", "DHD");
 
-		recipe.setIngredient('C', Material.PRISMARINE_CRYSTALS);
+		recipe.setIngredient('L', Material.SEA_LANTERN);
 		recipe.setIngredient('W', Material.WATER_BUCKET);
+		recipe.setIngredient('P', Material.DARK_PRISMARINE);
 		recipe.setIngredient('E', Material.ECHO_SHARD);
-		recipe.setIngredient('S', Material.PRISMARINE_SHARD);
-		recipe.setIngredient('D', Material.DIAMOND);
+		recipe.setIngredient('D', Material.DIAMOND_BLOCK);
 		recipe.setIngredient('H', Material.HEART_OF_THE_SEA);
 
 		Bukkit.addRecipe(recipe);

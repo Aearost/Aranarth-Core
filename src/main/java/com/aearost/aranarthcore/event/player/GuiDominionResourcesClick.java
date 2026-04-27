@@ -34,7 +34,9 @@ public class GuiDominionResourcesClick {
 			DominionUtils.updateDominion(dominion);
 
 			player.sendMessage(ChatUtils.chatMessage("&7Enter the number of claims for the &e" + biomeNameUnformatted + " &7biome"));
-			player.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &e" + dominion.getClaimableResources() + "/16 &7available"));
+			player.sendMessage(ChatUtils.chatMessage("&7Your Dominion has &e"
+					+ dominion.getClaimableResources() + "/" + DominionUtils.getMaxClaimableResourcesAmount(dominion)
+					+ " &7available"));
 			player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 			player.closeInventory();
 		}

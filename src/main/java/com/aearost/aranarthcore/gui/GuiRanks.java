@@ -74,7 +74,7 @@ public class GuiRanks {
 		}
 		peasantLore.add(ChatUtils.translateToColor("&f&lBending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- Basic abilities"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- &3&oIcebending"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- #99f5ff&oIce Bending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 3 quiver slots"));
@@ -92,13 +92,15 @@ public class GuiRanks {
 		}
 		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oHealing"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oPlantbending"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &2&oSandbending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- #008048&oPlant Bending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- #ffdc82&oSand Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac seen"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- /ac dominion home"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /seen"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- /dominion home"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 5 quiver slots"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 100 potion slots"));
+		esquireLore.add("");
+		esquireLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 100 levels"));
 		esquireMeta.setLore(esquireLore);
 		esquire.setItemMeta(esquireMeta);
 
@@ -111,13 +113,15 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($1,250)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- &2&oMetalbending"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- /ac msg"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- /back"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- /trash"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 2 homes"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 9 quiver slots"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 200 potion slots"));
+		knightLore.add("");
+		knightLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 350 levels"));
 		knightMeta.setLore(knightLore);
 		knight.setItemMeta(knightMeta);
 
@@ -140,11 +144,15 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- &b&oWaterArms"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /ac dominion create"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- /ac tphere"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /dominion create"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- /tphere"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
+		baronLore.add("");
+		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 500 levels"));
+		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 150 levels"));
+
 		baronMeta.setLore(baronLore);
 		baron.setItemMeta(baronMeta);
 
@@ -167,11 +175,14 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &7&oSonicBlast"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		countLore.add(ChatUtils.translateToColor("&f&o- /ac back"));
+		countLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 500 potion slots"));
+		countLore.add("");
+		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 1000 levels"));
+		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 375 levels"));
 		countMeta.setLore(countLore);
 		count.setItemMeta(countMeta);
 
@@ -192,13 +203,16 @@ public class GuiRanks {
 			}
 		}
 		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &2MetalClips"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &7Suffocate"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetalClips"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- &7&oSuffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- /ac nick"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick (and a nickname in Discord)"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
+		dukeLore.add("");
+		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 2500 levels"));
+		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 750 levels"));
 		dukeMeta.setLore(dukeLore);
 		duke.setItemMeta(dukeMeta);
 
@@ -219,15 +233,18 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4&oLightning Bending"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- #820d0d&oLightning Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- #cab0ff&oSpiritual Bending"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle msg"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- /ac toggle tp"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle msg"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle tp"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 4 homes"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
+		princeLore.add("");
+		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 7500 levels"));
+		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 1250 levels"));
 		princeMeta.setLore(princeLore);
 		prince.setItemMeta(princeMeta);
 
@@ -248,14 +265,17 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &2&oLava Bending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &c&lFireComet"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- #c73800&oLava Bending"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &c&oFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /ac toggle chat"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- /ac nick (color)"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /toggle chat"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- /nick (color)"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 50 player shops"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 36 quiver slots"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 1500 potion slots"));
+		kingLore.add("");
+		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 12500 levels"));
+		kingLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 2500 levels"));
 		kingMeta.setLore(kingLore);
 		king.setItemMeta(kingMeta);
 
@@ -277,13 +297,16 @@ public class GuiRanks {
 		}
 
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- &4&oCombustion Bending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- #690213&oCombustion Bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 5 homes"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 45 quiver slots"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 2500 potion slots"));
+		emperorLore.add("");
+		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 25000 levels"));
+		emperorLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 5000 levels"));
 		emperorMeta.setLore(emperorLore);
 		emperor.setItemMeta(emperorMeta);
 

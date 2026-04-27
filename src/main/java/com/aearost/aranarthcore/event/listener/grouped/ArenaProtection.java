@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,13 +14,17 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFadeEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerItemDamageEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.potion.PotionType;
+
+import java.util.Random;
 
 /**
  * Handles preventing behaviour in the arena world.
@@ -44,15 +49,29 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
-	 * Prevents blocks from being destroyed in the arena world spawn
+	 * Prevents blocks from being destroyed in the arena world spawn.
 	 */
 	@EventHandler
 	public void onBlockBreak(final BlockBreakEvent e) {
 		if (isArenaSpawn(e.getBlock().getLocation())) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (aranarthPlayer.getCouncilRank() != 3) {
+			if (!aranarthPlayer.isInAdminMode()) {
 				e.setCancelled(true);
 				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break this!"));
+			}
+		}
+	}
+
+	/**
+	 * Prevents blocks from being placed in the arena world spawn if somehow obtained.
+	 */
+	@EventHandler
+	public void onBlockPlace(final BlockPlaceEvent e) {
+		if (isArenaSpawn(e.getBlock().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place this here!"));
 			}
 		}
 	}
@@ -120,7 +139,37 @@ public class ArenaProtection implements Listener {
 		int y = loc.getBlockY();
 		int z = loc.getBlockZ();
 
-		return (x >= -4 && x <= 4) && (y >= 100 && y <= 111) && (z >= -4 && z <=4);
+		return (x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10);
+	}
+
+	/**
+	 * Reduces bending ability damage in the arena world using a tiered scale.
+	 * Damage is expressed in health points (2 HP = 1 heart).
+	 */
+	@EventHandler
+	public void onBendingDamageInArena(AbilityDamageEntityEvent e) {
+		if (!e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+			return;
+		}
+
+		double hearts = e.getDamage() / 2.0;
+
+		double reducedHp;
+		if (hearts <= 0.5) {
+			return;                // 0.5 hearts or less — keep as is
+		} else if (hearts <= 1.5) {
+			reducedHp = 2.0;       // cap at 1 heart
+		} else if (hearts <= 3.0) {
+			reducedHp = 3.0;       // cap at 1.5 hearts
+		} else if (hearts <= 6.0) {
+			reducedHp = 4.0;       // cap at 2 hearts
+		} else if (hearts <= 10.0) {
+			reducedHp = 5.0;       // cap at 2.5 hearts
+		} else {
+			reducedHp = 6.0;       // cap at 3 hearts (hard max)
+		}
+
+		e.setDamage(reducedHp);
 	}
 
 	/**
@@ -141,8 +190,21 @@ public class ArenaProtection implements Listener {
 	 * Automatically toggles the player's bending based on their teleportation to and from spawn.
 	 */
 	@EventHandler
-	public void onTeleportFromSpawn(PlayerTeleportEvent e) {
-		toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+	public void onTeleport(PlayerTeleportEvent e) {
+		if (e.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || e.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND) {
+			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+		}
+	}
+
+	/**
+	 * Handles toggling the player's bending as they move at the arena spawn.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onMove(PlayerMoveEvent e) {
+		if (e.getPlayer().getLocation().getWorld().getName().equals("arena")) {
+			toggleBendingForLocation(e.getPlayer(), e.getFrom(), e.getTo());
+		}
 	}
 
 	/**
@@ -166,7 +228,7 @@ public class ArenaProtection implements Listener {
 		}
 
 		// Leaving the arena spawn
-		if (!isToArenaSpawn) {
+		if (isFromArenaSpawn && !isToArenaSpawn) {
 			BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
 			if (bPlayer != null) {
 				if (!bPlayer.isToggled()) {
@@ -190,6 +252,73 @@ public class ArenaProtection implements Listener {
 					if (parts[1].startsWith("t")) {
 						e.setCancelled(true);
 						player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending here!"));
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adds functionality to the signs at the Arena spawn
+	 */
+	@EventHandler
+	public void onSignClick(PlayerInteractEvent e) {
+		if (e.getClickedBlock() != null && e.getClickedBlock().getType().name().endsWith("_SIGN")) {
+			Player player = e.getPlayer();
+			Location loc = e.getClickedBlock().getLocation();
+			if (loc.getWorld().getName().equalsIgnoreCase("arena")) {
+				// Small arena
+				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
+					e.setCancelled(true);
+					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+						if (success) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eSmall Arena"));
+						}
+					});
+				}
+				// Large arena
+				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
+					e.setCancelled(true);
+					Location arenaLoc = null;
+					int locationNum = new Random().nextInt(5);
+					if (locationNum == 0) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1000, 101, -1000);
+					} else if (locationNum == 1) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -960, 104, -1050, 45, 0);
+					} else if (locationNum == 2) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1068, 105, -1026, -45, 0);
+					} else if (locationNum == 3) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -1042, 103, -937, -135, 0);
+					} else if (locationNum == 4) {
+						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
+					}
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+						if (success) {
+							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&cYou could not be teleported to the &eLarge Arena"));
+						}
+					});
+				}
+				// Arrows
+				else if (loc.getBlockX() == 1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+					e.setCancelled(true);
+					for (int i = 0; i < 9; i++) {
+						player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
+					}
+				}
+				// Water Bottles
+				else if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+					e.setCancelled(true);
+					ItemStack bottle = new ItemStack(Material.POTION);
+					PotionMeta meta = (PotionMeta) bottle.getItemMeta();
+					meta.setBasePotionType(PotionType.WATER);
+					bottle.setItemMeta(meta);
+					for (int i = 0; i < 9; i++) {
+						player.getInventory().addItem(bottle);
 					}
 				}
 			}

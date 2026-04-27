@@ -11,7 +11,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Objects;
 
-import static com.aearost.aranarthcore.objects.CustomItemKeys.CLUSTER;
+import static com.aearost.aranarthcore.objects.CustomKeys.CLUSTER;
 
 /**
  * Provides the necessary components of an Lapis Cluster item.
@@ -29,6 +29,7 @@ public class LapisCluster implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(CLUSTER, PersistentDataType.STRING, "lapis");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setFireResistant(true);
 			lapisCluster.setItemMeta(meta);
 		}
 	    return lapisCluster;

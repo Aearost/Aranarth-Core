@@ -35,13 +35,13 @@ public class InvisibleItemFrame implements AranarthItem {
 	 * @return The Invisible Item Frame.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.ITEM_FRAME, 1);
+		ItemStack item = new ItemStack(Material.GLOW_ITEM_FRAME, 1);
 		ItemMeta meta = item.getItemMeta();
 		ArrayList<String> lore = new ArrayList<>();
 
 		if (Objects.nonNull(meta)) {
-//			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "invisible_item_frame");
-//			meta.setItemModel(key);
+			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "invisible_item_frame");
+			meta.setItemModel(key);
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
@@ -57,7 +57,7 @@ public class InvisibleItemFrame implements AranarthItem {
 	 */
 	public static boolean isInvisibleItemFrame(Entity entity) {
 		if (entity != null) {
-			if (entity.getType() == EntityType.ITEM_FRAME) {
+			if (entity.getType() == EntityType.GLOW_ITEM_FRAME) {
 				return entity.getPersistentDataContainer().has(IS_INVISIBLE, PersistentDataType.BYTE);
 			}
 		}

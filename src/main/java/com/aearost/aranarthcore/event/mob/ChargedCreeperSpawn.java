@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.entity.Creeper;
 import org.bukkit.event.entity.EntitySpawnEvent;
@@ -12,8 +13,7 @@ import java.util.Random;
  */
 public class ChargedCreeperSpawn {
 	public void execute(EntitySpawnEvent e) {
-		if (e.getLocation().getWorld().isThundering()) {
-
+		if (AranarthUtils.getWeather() == Weather.THUNDER) {
 			if (AranarthUtils.getMonth() == Month.AESTIVOR) {
 				// 20% chance of it being charged
 				if (new Random().nextInt(5) == 0) {

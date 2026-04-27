@@ -1,10 +1,12 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
@@ -34,17 +36,35 @@ public class PitcherPlantBreak {
 		
 		// Breaking top half of plant
 		if (locationAbove.getBlock().getType() == Material.LIGHT) {
-			locationAbove.getBlock().setType(Material.AIR);
+			locationAbove.getBlock().setType(Material.BARRIER);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					locationAbove.getBlock().setType(Material.AIR);
+				}
+			}.runTaskLater(AranarthCore.getInstance(), 1);
 		}
 		// Breaking bottom half of plant
 		else if (locationTwoAbove.getBlock().getType() == Material.LIGHT) {
-				locationTwoAbove.getBlock().setType(Material.AIR);
+			locationTwoAbove.getBlock().setType(Material.BARRIER);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					locationTwoAbove.getBlock().setType(Material.AIR);
+				}
+			}.runTaskLater(AranarthCore.getInstance(), 1);
 		}
 		// Breaking the block under the plant
 		 else if (locationAbove.getBlock().getType() == Material.PITCHER_PLANT) {
 			 Location locationAbovePitcherPlant = new Location(location.getWorld(), location.getX(), location.getY() + 3, location.getZ());
 			 if (locationAbovePitcherPlant.getBlock().getType() == Material.LIGHT) {
-				 locationAbovePitcherPlant.getBlock().setType(Material.AIR);
+				 locationAbovePitcherPlant.getBlock().setType(Material.BARRIER);
+				 new BukkitRunnable() {
+					 @Override
+					 public void run() {
+						 locationAbovePitcherPlant.getBlock().setType(Material.AIR);
+					 }
+				 }.runTaskLater(AranarthCore.getInstance(), 1);
 			 }
 		}
 	}

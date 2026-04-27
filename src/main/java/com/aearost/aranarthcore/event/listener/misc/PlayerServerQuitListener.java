@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -10,6 +11,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.HashMap;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -24,6 +27,14 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		aranarthPlayer.setAfkLocation(null);
+		if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+			player.setHealth(0);
+		}
+
+		aranarthPlayer.setCombatLogTime(new HashMap<>());
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
 		// Called to save the Avatar's abilities to prevent loss of avatar abilities
 		if (AvatarUtils.getCurrentAvatar() != null) {
@@ -49,6 +60,7 @@ public class PlayerServerQuitListener implements Listener {
 		}
 
 		playQuitSound();
+		AranarthUtils.updateTab();
 	}
 
 	/**

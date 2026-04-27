@@ -1,52 +1,104 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.CropUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.block.BlockGrowEvent;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
- * Adds increased crop growth rates during the month of Florivor.
+ * Adjusts crop growth speed based on the current month's defined rates.
  */
 public class CropGrowBoost {
+
 	public void execute(BlockGrowEvent e) {
 		Block block = e.getBlock();
-		if (getIsBlockCrop(block)) {
-			Ageable cropWithUpdatedMaturity = getNewCropMaturity(block);
-			if (cropWithUpdatedMaturity != null) {
-				block.setBlockData(cropWithUpdatedMaturity);
-			} else {
-				Bukkit.getLogger().info("Something went wrong with a crop's growth boost...");
+		Material blockType = block.getType();
+		Material newType = e.getNewState().getType();
+
+		final Material seedKey;
+		final boolean isNewBlockGrowth;
+
+		if (blockType == Material.CACTUS || (blockType == Material.AIR && newType == Material.CACTUS)) {
+			seedKey = Material.CACTUS;
+			isNewBlockGrowth = true;
+		} else if (blockType == Material.SUGAR_CANE || (blockType == Material.AIR && newType == Material.SUGAR_CANE)) {
+			seedKey = Material.SUGAR_CANE;
+			isNewBlockGrowth = true;
+		} else if (newType == Material.MELON) {
+			seedKey = Material.MELON_SEEDS;
+			isNewBlockGrowth = true;
+		} else if (newType == Material.PUMPKIN) {
+			seedKey = Material.PUMPKIN_SEEDS;
+			isNewBlockGrowth = true;
+		} else {
+			seedKey = CropUtils.getSeedMaterial(blockType);
+			isNewBlockGrowth = false;
+		}
+
+		double speed = CropUtils.getCropGrowthSpeed(AranarthUtils.getMonth(), seedKey);
+
+		if (speed < 1.0) {
+			// Speed should not go below 1x in the nether
+			if (seedKey == Material.NETHER_WART && block.getWorld().getName().endsWith("_nether")) {
+				return;
+			}
+
+			// Dynamically cancel growth to simulate a slower growth rate
+			if (ThreadLocalRandom.current().nextDouble() < 1.0 - speed) {
+				e.setCancelled(true);
+			}
+		} else if (speed > 1.0) {
+			if (!isNewBlockGrowth && block.getBlockData() instanceof Ageable crop) {
+				// Cancel and manually advance extra age stages
+				e.setCancelled(true);
+				double extraGrowth = speed - 1.0;
+				int guaranteedExtra = (int) extraGrowth;
+				double fracChance = extraGrowth - guaranteedExtra;
+				int extraStages = guaranteedExtra + (ThreadLocalRandom.current().nextDouble() < fracChance ? 1 : 0);
+				int newAge = Math.min(crop.getAge() + 1 + extraStages, crop.getMaximumAge());
+				crop.setAge(newAge);
+				block.setBlockData(crop);
+			} else if (isNewBlockGrowth && (seedKey == Material.CACTUS || seedKey == Material.SUGAR_CANE)) {
+				// Allow natural growth then schedule extra blocks on top
+				double extraGrowth = speed - 1.0;
+				int guaranteedExtra = (int) extraGrowth;
+				double fracChance = extraGrowth - guaranteedExtra;
+				final int extraBlocks = guaranteedExtra + (ThreadLocalRandom.current().nextDouble() < fracChance ? 1 : 0);
+				if (extraBlocks > 0) {
+					// After the event the new block will exist - locate it one tick later
+					final Location newBlockLoc = (blockType == Material.AIR) ? block.getLocation() : block.getRelative(BlockFace.UP).getLocation();
+
+					Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+						Block newBlock = newBlockLoc.getBlock();
+						if (newBlock.getType() != seedKey) return;
+						Block above = newBlock.getRelative(BlockFace.UP);
+						for (int i = 0; i < extraBlocks; i++) {
+							if (above.getType() != Material.AIR) break;
+							if (seedKey == Material.CACTUS && !isCactusPlaceable(above)) break;
+							above.setType(seedKey);
+							above = above.getRelative(BlockFace.UP);
+						}
+					}, 1L);
+				}
 			}
 		}
 	}
 
 	/**
-	 * Confirms if the input block is indeed a crop.
-	 * @param block The block.
-	 * @return Confirmation of whether the block is a crop or not.
+	 * Determines if a cactus block can be placed at the given location.
 	 */
-	private boolean getIsBlockCrop(Block block) {
-        return block.getType() == Material.WHEAT || block.getType() == Material.CARROTS
-                || block.getType() == Material.POTATOES || block.getType() == Material.BEETROOTS
-                || block.getType() == Material.NETHER_WART;
-    }
-
-	/**
-	 * Provides the Ageable result based on the new crop maturity.
-	 * @param block The block.
-	 * @return Confirmation of whether the block is fully matured or not.
-	 */
-	private Ageable getNewCropMaturity(Block block) {
-		if (block.getBlockData() instanceof Ageable crop) {
-            if (crop.getMaximumAge() == crop.getAge() + 1) {
-				crop.setAge(crop.getMaximumAge());
-			} else {
-				crop.setAge(crop.getAge() + 2);
-			}
-			return crop;
-		}
-		return null;
+	private boolean isCactusPlaceable(Block block) {
+		return block.getRelative(BlockFace.NORTH).getType() == Material.AIR
+				&& block.getRelative(BlockFace.SOUTH).getType() == Material.AIR
+				&& block.getRelative(BlockFace.EAST).getType() == Material.AIR
+				&& block.getRelative(BlockFace.WEST).getType() == Material.AIR;
 	}
 }
