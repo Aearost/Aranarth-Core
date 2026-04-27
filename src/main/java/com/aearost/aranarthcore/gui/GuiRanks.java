@@ -149,6 +149,7 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
+		baronLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oNo Pose &f&opose"));
 		baronLore.add("");
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 500 levels"));
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 150 levels"));
@@ -180,6 +181,7 @@ public class GuiRanks {
 		countLore.add(ChatUtils.translateToColor("&f&o- 3 homes"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 18 quiver slots"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 500 potion slots"));
+		countLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oSolemn &f&opose"));
 		countLore.add("");
 		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 1000 levels"));
 		countLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 375 levels"));
@@ -210,6 +212,7 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 15 player shops"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
+		dukeLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oAttention &f&opose"));
 		dukeLore.add("");
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 2500 levels"));
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 750 levels"));
@@ -242,6 +245,7 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 player shops"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 30 quiver slots"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 1000 potion slots"));
+		princeLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oRiposte &f&opose"));
 		princeLore.add("");
 		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 7500 levels"));
 		princeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 1250 levels"));

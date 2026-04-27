@@ -1,7 +1,7 @@
 AranarthCore v. 1.10
 
 Major Features
-[+] TBD
+[+] Implemented permission-based custom armor stand poses
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

@@ -245,6 +245,22 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.enderchest", false);
 		perms.setPermission("aranarth.chat.gradient", false);
 		perms.setPermission("aranarth.chat.gradientbold", false);
+
+		// Armor stand poses
+		perms.setPermission("aranarthcore.armorstand.nopose", false);
+		perms.setPermission("aranarthcore.armorstand.solemn", false);
+		perms.setPermission("aranarthcore.armorstand.athena", false);
+		perms.setPermission("aranarthcore.armorstand.brandish", false);
+		perms.setPermission("aranarthcore.armorstand.honor", false);
+		perms.setPermission("aranarthcore.armorstand.entertainment", false);
+		perms.setPermission("aranarthcore.armorstand.salute", false);
+		perms.setPermission("aranarthcore.armorstand.heroic", false);
+		perms.setPermission("aranarthcore.armorstand.riposte", false);
+		perms.setPermission("aranarthcore.armorstand.zombie", false);
+		perms.setPermission("aranarthcore.armorstand.cancana", false);
+		perms.setPermission("aranarthcore.armorstand.cancanb", false);
+		perms.setPermission("aranarthcore.armorstand.engarde", false);
+		perms.setPermission("aranarthcore.armorstand.attention", false);
 	}
 
 	/**
@@ -504,6 +520,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.dominion.create", true);
 			perms.setPermission("aranarth.tphere", true);
 			perms.setPermission("bending.command.preset.create.8", true);
+			perms.setPermission("aranarthcore.armorstand.nopose", true);
 		} else {
 			return;
 		}
@@ -513,6 +530,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.sonicblast", true);
 			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("bending.command.preset.create.10", true);
+			perms.setPermission("aranarthcore.armorstand.solemn", true);
 		} else {
 			return;
 		}
@@ -523,6 +541,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.suffocate", true);
 			perms.setPermission("aranarth.nick", true);
 			perms.setPermission("bending.command.preset.create.12", true);
+			perms.setPermission("aranarthcore.armorstand.attention", true);
 		} else {
 			return;
 		}
@@ -534,7 +553,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.toggle.msg", true);
 			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("bending.command.preset.create.15", true);
-
+			perms.setPermission("aranarthcore.armorstand.riposte", true);
 		} else {
 			return;
 		}
@@ -598,6 +617,10 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.blacklist", true);
 			perms.setPermission("aranarth.tables", true);
 			perms.setPermission("aranarth.trash", true);
+			perms.setPermission("aranarthcore.armorstand.athena", true);
+			perms.setPermission("aranarthcore.armorstand.brandish", true);
+			perms.setPermission("aranarthcore.armorstand.honor", true);
+			perms.setPermission("aranarthcore.armorstand.entertainment", true);
 		} else {
 			return;
 		}
@@ -609,6 +632,8 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.nick.hex", true);
 			perms.setPermission("aranarth.shulker", true);
 			perms.setPermission("aranarth.chat.gradient", true);
+			perms.setPermission("aranarthcore.armorstand.salute", true);
+			perms.setPermission("aranarthcore.armorstand.zombie", true);
 		} else {
 			return;
 		}
@@ -620,6 +645,10 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.randomizer", true);
 			perms.setPermission("aranarth.inventory", true);
 			perms.setPermission("aranarth.chat.gradientbold", true);
+			perms.setPermission("aranarthcore.armorstand.heroic", true);
+			perms.setPermission("aranarthcore.armorstand.cancana", true);
+			perms.setPermission("aranarthcore.armorstand.cancanb", true);
+			perms.setPermission("aranarthcore.armorstand.engarde", true);
 		} else {
 			return;
 		}
