@@ -267,6 +267,7 @@ Minor Features
 [~] Fixed issue where /ac msg wouldn't reset the AFK timer
 [~] Prevented players from entering the nether or the end in the creative and arena worlds
 [~] Fixed issue where items were infinitely getting dropped due to off-hand defect
+[~] Allowed OG players to set homes in creative and SMP worlds, but not others
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
