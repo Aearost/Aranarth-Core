@@ -266,6 +266,7 @@ Minor Features
 [~] Fixed issue where aranarthium armour being crafted and taken with shift-click didn't actually yield the result
 [~] Fixed issue where /ac msg wouldn't reset the AFK timer
 [~] Prevented players from entering the nether or the end in the creative and arena worlds
+[~] Fixed issue where items were infinitely getting dropped due to off-hand defect
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items
