@@ -4,7 +4,7 @@ Major Features
 [+] TBD
 
 Minor Features
-[+] TBD
+[+] Added dynamic snow layering during the winter months
 
 Backend Code Changes
 - TBD

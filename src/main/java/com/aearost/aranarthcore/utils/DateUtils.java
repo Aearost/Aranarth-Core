@@ -970,6 +970,18 @@ public class DateUtils {
 	}
 
 	/**
+	 * Determines the maximum snow layers that can accumulate based on the current winter month.
+	 * @return The maximum number of snow layers allowed for the current month.
+	 */
+	private int getMaxSnowLayersForMonth() {
+		return switch (AranarthUtils.getMonth()) {
+			case FRIGORVOR -> 3;
+			case GLACIVOR, UMBRAVOR -> 2;
+			default -> 1;
+		};
+	}
+
+	/**
 	 * Determines and provides the radius of weather functionality proportional to the amount of online players.
 	 * @return The radius that weather should apply.
 	 */
@@ -1264,7 +1276,7 @@ public class DateUtils {
 					Block surfaceBlock = above.getRelative(BlockFace.DOWN);
 					// Places the snow or adds layer
 					if (above.getBlockData() instanceof Snow snow) {
-						if (snow.getLayers() < 4) {
+						if (snow.getLayers() < getMaxSnowLayersForMonth()) {
 							int snowLayers = snow.getLayers();
 							snow.setLayers(snowLayers + 1);
 							above.setBlockData(snow);
@@ -1310,7 +1322,7 @@ public class DateUtils {
 								if (!INVALID_SURFACE_BLOCKS.contains(blockUnderneath.getType())) {
 									// Places the snow or adds layer
 									if (block.getBlockData() instanceof Snow snow) {
-										if (snow.getLayers() < 4) {
+										if (snow.getLayers() < getMaxSnowLayersForMonth()) {
 											int snowLayers = snow.getLayers();
 											snow.setLayers(snowLayers + 1);
 											block.setBlockData(snow);
