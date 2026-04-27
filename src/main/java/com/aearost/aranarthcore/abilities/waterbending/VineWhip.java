@@ -71,7 +71,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
         selectRange = 6;
         range = 25;
         damage = 5.0;
-        fullExtendDuration = 1000;
+        fullExtendDuration = 750;
         holdDuration = 500;
 
         phase = Phase.SELECTING;
