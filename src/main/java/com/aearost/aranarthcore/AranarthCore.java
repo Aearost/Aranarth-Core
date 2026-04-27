@@ -574,6 +574,27 @@ public class AranarthCore extends JavaPlugin {
 			Block block = spawn.getBlockAt(0, 100, 0);
 			block.setType(Material.BEDROCK);
 		}
+
+		// Disable advancement announcements in every world
+		for (World w : Bukkit.getWorlds()) {
+			w.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+		}
+
+		// Apply world borders (always set so they survive world resets)
+		for (String worldName : new String[]{"world", "world_nether", "world_the_end"}) {
+			World w = Bukkit.getWorld(worldName);
+			if (w != null) {
+				w.getWorldBorder().setCenter(0, 0);
+				w.getWorldBorder().setSize(25250);
+			}
+		}
+		for (String worldName : new String[]{"resource", "resource_nether", "resource_the_end"}) {
+			World w = Bukkit.getWorld(worldName);
+			if (w != null) {
+				w.getWorldBorder().setCenter(0, 0);
+				w.getWorldBorder().setSize(5000);
+			}
+		}
 	}
 
 	/**

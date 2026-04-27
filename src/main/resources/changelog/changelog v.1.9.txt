@@ -280,3 +280,4 @@ Backend Code Changes
 - Updated all command completion to be more compact and clean
 - Tweaked aranarth player persistence logic to easily support new fields being added
 - Restructured a lot of dominion functionality to cater to permissions, ranks, and dominion relations
+- Added programmatic world border for world* and resource*, and achievements disabling for different worlds
