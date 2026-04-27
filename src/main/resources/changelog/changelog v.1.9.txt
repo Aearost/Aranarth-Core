@@ -265,6 +265,7 @@ Minor Features
 [~] Fixed issue where aranarthium armour being crafted and taken with shift-click didn't actually yield the result
 [~] Fixed issue where /ac msg wouldn't reset the AFK timer
 [+] Added daily login streaks
+[+] Implemented VineWhip
 
 Backend Code Changes
 - Renamed the CustomItemKeys file to CustomKeys as they will not necessarily pertain to items

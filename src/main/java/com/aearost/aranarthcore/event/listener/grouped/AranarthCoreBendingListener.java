@@ -17,6 +17,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -83,7 +84,10 @@ public class AranarthCoreBendingListener implements Listener {
 			else if (ability instanceof WaterAbility && bendingPlayer.isElementToggled(Element.WATER)) {
 				if (ability instanceof PlantAbility) {
 					if (abilityName.equalsIgnoreCase("vinewhip")) {
-						new VineWhip(e.getPlayer());
+						// Guard: only one active instance per player
+						if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
+							new VineWhip(e.getPlayer());
+						}
 					}
 				}
 			}
@@ -97,8 +101,7 @@ public class AranarthCoreBendingListener implements Listener {
 	}
 
 	/**
-	 * Handles left-click activation of AstralProjection sub-abilities via the multi-ability hotbar.
-	 * Slot 0 = Aura, Slot 1 = Scream, Slot 2 = Possess.
+	 * Handles left-click activation for AstralProjection sub-abilities and VineWhip firing.
 	 */
 	@EventHandler
 	public void onLeftClick(PlayerAnimationEvent e) {
@@ -106,15 +109,22 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		Player player = e.getPlayer();
-		if (!AstralProjection.isProjecting(player.getUniqueId())) {
+
+		// AstralProjection sub-ability activation (Slot 0 = Aura, 1 = Scream, 2 = Possess)
+		if (AstralProjection.isProjecting(player.getUniqueId())) {
+			AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
+			switch (player.getInventory().getHeldItemSlot()) {
+				case 0 -> projection.activateAura();
+				case 1 -> projection.activateScream();
+				case 2 -> projection.activatePossess();
+			}
 			return;
 		}
 
-		AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
-		switch (player.getInventory().getHeldItemSlot()) {
-			case 0 -> projection.activateAura();
-			case 1 -> projection.activateScream();
-			case 2 -> projection.activatePossess();
+		// VineWhip: left-click while selecting fires the vine
+		VineWhip vineWhip = VineWhip.getActiveInstance(player.getUniqueId());
+		if (vineWhip != null) {
+			vineWhip.onLeftClick();
 		}
 	}
 
@@ -156,6 +166,31 @@ public class AranarthCoreBendingListener implements Listener {
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		boolean areAllied = playerDominion != null && dominion.isAllied(playerDominion);
 		return !dominion.getMembers().contains(player.getUniqueId()) && !areAllied;
+	}
+
+	// Below for VineWhip overrides
+
+	/**
+	 * Cancels block breaking while VineWhip is active to prevent the left-click
+	 * that fires the vine from also damaging or breaking blocks.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onBlockBreakVineWhip(BlockBreakEvent e) {
+		if (VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Immediately cancels VineWhip (no retraction animation) when the player
+	 * switches to a different ability slot.
+	 */
+	@EventHandler
+	public void onSlotChange(PlayerItemHeldEvent e) {
+		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
+		if (vineWhip != null) {
+			vineWhip.cancelInstantly();
+		}
 	}
 
 	// Below for AstralProjection overrides
@@ -237,12 +272,16 @@ public class AranarthCoreBendingListener implements Listener {
 	}
 
 	/**
-	 * Cancels all block interactions while the player is astral projecting.
+	 * Cancels all block interactions while the player is astral projecting or has VineWhip active.
 	 * Sub-ability activation uses PlayerAnimationEvent and is unaffected.
 	 */
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
 		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}
