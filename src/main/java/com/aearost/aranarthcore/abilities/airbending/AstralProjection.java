@@ -345,7 +345,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     /** Slot 0: Emit a disorienting aura (Slowness II + Nausea) in a 5-block radius. */
     public void activateAura() {
         if (!isAuraReady()) {
-            long cooldown = (int) bPlayer.getCooldown("Aura") / 1000;
+            int cooldown = (int) (bPlayer.getCooldown("Aura") - System.currentTimeMillis()) / 1000 + 1;
             player.sendMessage(ChatUtils.chatMessage("&7Aura is on cooldown for another " + cooldown + " seconds"));
             return;
         }
@@ -413,7 +413,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     /** Slot 2: Possess a player in line of sight within 8 blocks, scrambling their movement. */
     public void activatePossess() {
         if (!isPossessReady()) {
-            long cooldown = (int) bPlayer.getCooldown("Possess") / 1000;
+            int cooldown = (int) (bPlayer.getCooldown("Possess") - System.currentTimeMillis()) / 1000 + 1;
             player.sendMessage(ChatUtils.chatMessage("&7Possess is on cooldown for another " + cooldown + " seconds"));
             return;
         }
