@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
+import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
 import com.aearost.aranarthcore.commands.council.CommandTrash;
@@ -16,6 +17,7 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
+import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
@@ -28,6 +30,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.Method;
 import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
@@ -55,6 +58,14 @@ public class AranarthCore extends JavaPlugin {
 		AranarthUtils.setWeather(Weather.CLEAR);
 		AranarthUtils.setStormDelay(new Random().nextInt(18000));
 
+		SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
+		try {
+			Method setColor = Element.class.getDeclaredMethod("setColor", net.md_5.bungee.api.ChatColor.class);
+			setColor.setAccessible(true);
+			setColor.invoke(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
+		} catch (Exception e) {
+			Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
+		}
 		CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
 		Bukkit.getLogger().info("AranarthCore Bending has been loaded");
 

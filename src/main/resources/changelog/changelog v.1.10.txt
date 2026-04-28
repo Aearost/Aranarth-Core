@@ -3,6 +3,7 @@ AranarthCore v. 1.10
 Major Features
 [+] Implemented permission-based custom armor stand poses
 [+] Implemented the CableSlash combo
+[+] Added the soundbending sub-element for airbenders, unlockable at Count
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

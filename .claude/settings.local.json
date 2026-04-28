@@ -28,7 +28,11 @@
       "Bash(unzip -l \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\")",
       "Read(//c/Users/liamh/IdeaProjects/**)",
       "Read(//c/Users/liamh/AppData/**)",
-      "Bash(unzip -p \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/BendingPlayer.java\")"
+      "Bash(unzip -p \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/BendingPlayer.java\")",
+      "Bash(python3 /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/list_classes.py)",
+      "Bash(unzip -p /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar com/projectkorra/projectkorra/ability/SpiritualAbility.java)",
+      "Bash(unzip -p /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar com/projectkorra/projectkorra/Element.java)",
+      "Bash(unzip:*)"
     ]
   }
 }

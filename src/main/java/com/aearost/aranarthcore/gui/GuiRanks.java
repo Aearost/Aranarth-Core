@@ -149,7 +149,7 @@ public class GuiRanks {
 		baronLore.add(ChatUtils.translateToColor("&f&o- 3 player shops"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 12 quiver slots"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 350 potion slots"));
-		baronLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oNo Pose &f&opose"));
+		baronLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&o\"No Pose\" &f&opose"));
 		baronLore.add("");
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 500 levels"));
 		baronLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 150 levels"));
@@ -174,7 +174,7 @@ public class GuiRanks {
 			}
 		}
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
-		countLore.add(ChatUtils.translateToColor("&f&o- &7&oSonicBlast"));
+		countLore.add(ChatUtils.translateToColor("&f&o- #6644cc&oSound Bending"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		countLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 7 player shops"));
