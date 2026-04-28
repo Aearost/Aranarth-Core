@@ -6,6 +6,7 @@ Major Features
 [+] Added the soundbending sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders
 [+] Added AstralShot ability for spiritual benders
+[+]
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
@@ -13,4 +14,4 @@ Minor Features
 [~] Corrected invalid cooldown messages for AstralProjection's Aura and Possess abilities
 
 Backend Code Changes
-- TBD
+- Created the AranarthBendingUtils class to help with multiple bending abilities

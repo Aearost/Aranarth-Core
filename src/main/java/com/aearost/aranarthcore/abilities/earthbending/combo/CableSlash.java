@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.earthbending.combo;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ComboAbility;
@@ -85,14 +86,7 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
 
         // MetalCable fires before the combo is recognised, so it's already active by the time
         // CableSlash starts. Remove it and wipe its cooldown so the player isn't penalised.
-        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(this.player))) {
-                if (ability.getName().equals("MetalCable")) {
-                    ability.remove();
-                    this.bPlayer.removeCooldown("MetalCable");
-                }
-            }
-        });
+        AranarthBendingUtils.suppressComboTrigger(this.bPlayer, this.player, "MetalCable");
     }
 
     @Override
