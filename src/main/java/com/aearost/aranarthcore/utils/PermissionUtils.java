@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
@@ -89,6 +90,20 @@ public class PermissionUtils {
 							}
 						}
 					}
+				}
+			}
+
+			// SoundAbility.SOUND is a custom addon sub-element not returned by Element.getSubElements,
+			// so it must be handled explicitly. The avatar always has access; other airbenders need rank >= Count.
+			if (bendingPlayer.getElements().contains(Element.AIR)) {
+				Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+				boolean isAvatar = currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId());
+				if (isAvatar || player.hasPermission("bending.air.sound")) {
+					if (!bendingPlayer.hasSubElement(SoundAbility.SOUND)) {
+						bendingPlayer.addSubElement(SoundAbility.SOUND);
+					}
+				} else {
+					bendingPlayer.getSubElements().remove(SoundAbility.SOUND);
 				}
 			}
 
@@ -185,14 +200,16 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.waterarms", false);
 		perms.setPermission("bending.ability.firecomet", false);
 		perms.setPermission("bending.ability.metalclips", false);
-		perms.setPermission("bending.ability.sonicblast", true);
 		perms.setPermission("bending.ability.suffocate", false);
 		perms.setPermission("bending.earth.lavaflux", false);
 		perms.setPermission("bending.earth.fissure", false);
 
 		// Enable all Aranarth abilities by default as sub-element permission takes precedence
 		perms.setPermission("bending.ability.astralprojection", true);
+		perms.setPermission("bending.ability.astralshot", true);
 		perms.setPermission("bending.ability.vinewhip", true);
+		perms.setPermission("bending.ability.sonicboom", true);
+		perms.setPermission("bending.ability.cableslash", true);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);
