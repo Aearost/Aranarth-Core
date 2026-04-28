@@ -2,6 +2,7 @@ AranarthCore v. 1.10
 
 Major Features
 [+] Implemented permission-based custom armor stand poses
+[+] Implemented the CableSlash combo
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

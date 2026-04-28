@@ -17,7 +17,18 @@
       "Bash(\"/c/Program Files/Java/jdk-23/bin/jar.exe\" xf \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/JedCore.jar\")",
       "Bash(\"/c/Program Files/Java/jdk-23/bin/javap.exe\" -c -p com/jedk1/jedcore/scoreboard/BendingBoard.class)",
       "Bash(\"/c/Program Files/Java/jdk-23/bin/javap.exe\" -c -p /tmp/jedcore_src/com/jedk1/jedcore/scoreboard/BendingBoard.class)",
-      "Bash(python3 -c \":*)"
+      "Bash(python3 -c \":*)",
+      "Bash(grep -r \"bindMultiAbility\\\\|registerAbility\\\\|CoreAbility\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/*.java)",
+      "Bash(find C:UsersliamhIdeaProjects -type d -name *ProjectKorra* -o -type d -name *Core*)",
+      "Bash(mkdir -p /tmp/pk_sources)",
+      "Bash(unzip -o \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/event/*\" -d .)",
+      "Bash(unzip -p \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/ability/CoreAbility.java\")",
+      "Bash(unzip -p \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/earthbending/metal/MetalCable.java\")",
+      "Bash(unzip -p /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar com/projectkorra/projectkorra/earthbending/metal/MetalCable.java)",
+      "Bash(unzip -l \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\")",
+      "Read(//c/Users/liamh/IdeaProjects/**)",
+      "Read(//c/Users/liamh/AppData/**)",
+      "Bash(unzip -p \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\" \"com/projectkorra/projectkorra/BendingPlayer.java\")"
     ]
   }
 }
