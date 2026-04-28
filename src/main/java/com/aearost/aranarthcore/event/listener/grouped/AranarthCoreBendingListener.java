@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
+import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
+import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -80,6 +82,12 @@ public class AranarthCoreBendingListener implements Listener {
 						// Guard: do not start a new projection while already projecting
 						if (!AstralProjection.isProjecting(player.getUniqueId())) {
 							new AstralProjection(e.getPlayer());
+						}
+					}
+				} else if (ability instanceof SoundAbility) {
+					if (abilityName.equalsIgnoreCase("sonicboom")) {
+						if (CoreAbility.getAbility(player, SonicBoom.class) == null) {
+							new SonicBoom(player);
 						}
 					}
 				}
