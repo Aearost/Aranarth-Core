@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import org.bukkit.Bukkit;
@@ -12,12 +13,11 @@ import java.util.ArrayList;
 
 public class AranarthBendingUtils {
 
-    private AranarthBendingUtils() {}
-
     /**
-     * Returns true if the player's ability should be prevented because they are near
-     * a Dominion they are not a member of or allied with. Checks the 3x3 chunk grid
-     * centered on the player's current chunk.
+     * Returns true if the player's ability should be prevented near a Dominion where they
+     * do not have the Build permission. Checks the 3x3 chunk grid centered on the player's
+     * current chunk. The Build permission accounts for the player's effective rank in the
+     * dominion (member rank or inter-dominion relation rank).
      *
      * @param player The player using the ability.
      * @return Whether the ability should be cancelled.
@@ -32,9 +32,7 @@ public class AranarthBendingUtils {
                 if (dominion == null) {
                     continue;
                 }
-                Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-                boolean areAllied = playerDominion != null && dominion.isAllied(playerDominion);
-                if (!dominion.getMembers().contains(player.getUniqueId()) && !areAllied) {
+                if (!DominionUtils.hasPermission(player, dominion, DominionPermission.BUILD)) {
                     return true;
                 }
             }
@@ -43,12 +41,9 @@ public class AranarthBendingUtils {
     }
 
     /**
-     * Removes an ability instance that fires as part of a combo's input sequence and
-     * wipes its cooldown, so the player is not penalised for the trigger that activated
-     * the combo. The removal is deferred by one tick so PK has time to recognise the combo.
-     *
-     * @param bPlayer     The BendingPlayer whose cooldown should be cleared.
-     * @param player      The Player whose active ability instances are searched.
+     * Removes an ability instance that fires as part of a combo's input sequence.
+     * @param bPlayer The BendingPlayer whose cooldown should be cleared.
+     * @param player The Player whose active ability instances are searched.
      * @param abilityName The exact ability name to remove (case-sensitive).
      */
     public static void suppressComboTrigger(BendingPlayer bPlayer, Player player, String abilityName) {
