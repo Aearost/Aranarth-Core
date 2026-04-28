@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.abilities.airbending;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -163,7 +164,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 	private void applyEffects(LivingEntity entity) {
 		double t = Math.min(distanceTraveled / range, 1.0);
 		double damage = maxDamage - (maxDamage - minDamage) * t;
-		entity.damage(damage, player);
+		DamageHandler.damageEntity(entity, damage, this);
 		applySoundDebuff(entity);
 	}
 
