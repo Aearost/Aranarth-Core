@@ -6,7 +6,7 @@ Major Features
 [+] Added the soundbending sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders
 [+] Added AstralShot ability for spiritual benders
-[+]
+[+] Implemented the AstralShot spiritual combo
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
