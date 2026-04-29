@@ -7,6 +7,7 @@ Major Features
 [+] Added SonicBoom ability for soundbenders
 [+] Added AstralShot ability for spiritual benders
 [+] Implemented the AstralShot spiritual combo
+[+] Implemented the Sandstorm ability for sandbenders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
