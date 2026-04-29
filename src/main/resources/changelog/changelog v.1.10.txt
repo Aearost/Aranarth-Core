@@ -5,9 +5,9 @@ Major Features
 [+] Implemented the CableSlash combo
 [+] Added the soundbending sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders
-[+] Added AstralShot ability for spiritual benders
 [+] Implemented the AstralShot spiritual combo
 [+] Implemented the Sandstorm ability for sandbenders
+[+] Implemented the RazorLeaves ability for plantbenders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

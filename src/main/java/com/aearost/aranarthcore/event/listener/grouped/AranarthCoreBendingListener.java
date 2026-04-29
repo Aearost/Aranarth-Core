@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
+import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -106,6 +107,14 @@ public class AranarthCoreBendingListener implements Listener {
 						if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
 							new VineWhip(e.getPlayer());
 						}
+					} else if (abilityName.equalsIgnoreCase("razorleaves")) {
+						RazorLeaves existing = RazorLeaves.getActiveInstance(player.getUniqueId());
+						if (existing == null) {
+							new RazorLeaves(player);
+						} else {
+							// Re-source in SOURCED phase; ignored in CASTING phase
+							existing.onSneak();
+						}
 					}
 				}
 			}
@@ -150,6 +159,13 @@ public class AranarthCoreBendingListener implements Listener {
 		VineWhip vineWhip = VineWhip.getActiveInstance(player.getUniqueId());
 		if (vineWhip != null) {
 			vineWhip.onLeftClick();
+			return;
+		}
+
+		// RazorLeaves: left-click fires a leaf in the player's current look direction
+		RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(player.getUniqueId());
+		if (razorLeaves != null) {
+			razorLeaves.onLeftClick();
 		}
 	}
 
@@ -163,6 +179,10 @@ public class AranarthCoreBendingListener implements Listener {
 	public void onBlockBreakVineWhip(BlockBreakEvent e) {
 		Player player = e.getPlayer();
 		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
@@ -180,6 +200,10 @@ public class AranarthCoreBendingListener implements Listener {
 		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (vineWhip != null) {
 			vineWhip.cancelInstantly();
+		}
+		RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(e.getPlayer().getUniqueId());
+		if (razorLeaves != null) {
+			razorLeaves.endWithCooldown();
 		}
 		Sandstorm sandstorm = Sandstorm.getActiveInstance(e.getPlayer().getUniqueId());
 		if (sandstorm != null) {
@@ -302,6 +326,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
