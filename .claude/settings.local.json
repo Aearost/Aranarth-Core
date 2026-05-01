@@ -32,7 +32,26 @@
       "Bash(python3 /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/list_classes.py)",
       "Bash(unzip -p /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar com/projectkorra/projectkorra/ability/SpiritualAbility.java)",
       "Bash(unzip -p /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar com/projectkorra/projectkorra/Element.java)",
-      "Bash(unzip:*)"
+      "Bash(unzip:*)",
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/**)",
+      "Bash(where jar:*)",
+      "Read(//c/Program Files/**)",
+      "Bash(mvn compile:*)",
+      "Bash(\"/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn\" compile:*)",
+      "Bash(\"/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn\" clean:*)",
+      "Bash(xxd \"src/main/java/com/aearost/aranarthcore/event/listener/grouped/AranarthCoreBendingListener.java\")",
+      "Bash(cd:*)",
+      "Bash(cp src/main/java/com/aearost/aranarthcore/event/listener/grouped/AranarthCoreBendingListener.java /tmp/Listener_backup.java)",
+      "Bash(cp /tmp/TestListener.java src/main/java/com/aearost/aranarthcore/event/listener/grouped/AranarthCoreBendingListener.java)",
+      "Bash(awk 'NR>=45 && NR<=145' src/main/java/com/aearost/aranarthcore/event/listener/grouped/AranarthCoreBendingListener.java)",
+      "Bash(awk 'NR>=85 && NR<=141' src/main/java/com/aearost/aranarthcore/event/listener/grouped/AranarthCoreBendingListener.java)",
+      "Bash(ls *.jar)",
+      "Bash(\"/c/Users/liamh/.jdks/temurin-21.0.4/bin/jar\" tf:*)",
+      "Bash(\"/c/Users/liamh/.jdks/temurin-21.0.4/bin/jar\" xf:*)",
+      "Bash(grep -r \"Element\\\\.ICE\\\\|getElement.*ICE\\\\|ICE.*getColor\" C:/Users/liamh/IdeaProjects --include=*.java)",
+      "Bash(./mvnw compile:*)",
+      "Bash(cmd.exe /c \"mvn compile -q 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile -q 2>&1\")"
     ]
   }
 }

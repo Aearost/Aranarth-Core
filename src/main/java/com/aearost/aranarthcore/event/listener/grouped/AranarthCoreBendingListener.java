@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
@@ -166,14 +167,18 @@ public class AranarthCoreBendingListener implements Listener {
 		RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(player.getUniqueId());
 		if (razorLeaves != null) {
 			razorLeaves.onLeftClick();
+			return;
+		}
+
+		// IceShards: left-click fires the charged shards
+		IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
+		if (iceShards != null) {
+			iceShards.fire();
 		}
 	}
 
-	// Below for VineWhip overrides
-
 	/**
-	 * Cancels block breaking while VineWhip or Sandstorm is active to prevent
-	 * left-click interactions from also breaking blocks.
+	 * Cancels block breaking while an ability is active.
 	 */
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockBreakVineWhip(BlockBreakEvent e) {
@@ -188,12 +193,15 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		if (Sandstorm.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
+			return;
+		}
+		if (IceShards.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
 		}
 	}
 
 	/**
-	 * Immediately cancels VineWhip (no retraction animation) when the player
-	 * switches to a different ability slot. Also cleanly cancels Sandstorm.
+	 * Immediately cancels an ability when the player switches to a different ability slot.
 	 */
 	@EventHandler
 	public void onSlotChange(PlayerItemHeldEvent e) {
@@ -209,32 +217,43 @@ public class AranarthCoreBendingListener implements Listener {
 		if (sandstorm != null) {
 			sandstorm.cancelFromSlotChange();
 		}
-	}
-
-	/**
-	 * Locks the Sandstorm caster's XYZ position while casting.
-	 * Head rotation (yaw/pitch) is still freely allowed.
-	 */
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void onPlayerMoveSandstorm(PlayerMoveEvent e) {
-		Player player = e.getPlayer();
-		Sandstorm sandstorm = Sandstorm.getActiveInstance(player.getUniqueId());
-		if (sandstorm == null || !sandstorm.isCasting()) return;
-
-		Location from = e.getFrom();
-		Location to   = e.getTo();
-		if (to == null) return;
-
-		if (from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ()) {
-			// Preserve head rotation but snap XYZ back
-			Location locked = from.clone();
-			locked.setYaw(to.getYaw());
-			locked.setPitch(to.getPitch());
-			e.setTo(locked);
+		// IceShards slot-change cancel is handled inside progress(), but we also
+		// call remove() here for immediate cleanup without waiting a tick.
+		IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
+		if (iceShards != null) {
+			iceShards.remove();
 		}
 	}
 
-	// Below for AstralProjection overrides
+	/**
+	 * Locks XYZ for any ability that roots the player in place.
+	 */
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+	public void onPlayerMoveRooted(PlayerMoveEvent e) {
+		Player player = e.getPlayer();
+		UUID uuid = player.getUniqueId();
+
+		Sandstorm sandstorm = Sandstorm.getActiveInstance(uuid);
+		IceShards iceShards = IceShards.getActiveInstance(uuid);
+		boolean rooted = (sandstorm != null && sandstorm.isCasting())
+				|| (iceShards != null && iceShards.isCharging());
+
+		if (!rooted) return;
+		lockXYZ(e);
+	}
+
+	/** Snaps the player's XYZ back to the event's from-location while preserving head rotation. */
+	private static void lockXYZ(PlayerMoveEvent e) {
+		Location to = e.getTo();
+		if (to == null) return;
+		Location from = e.getFrom();
+		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) return;
+		Location locked = from.clone();
+		locked.setYaw(to.getYaw());
+		locked.setPitch(to.getPitch());
+		e.setTo(locked);
+	}
+
 
 	/**
 	 * Prevents the projecting player from dealing any melee or projectile damage.
