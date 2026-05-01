@@ -232,9 +232,9 @@ public class PlayerServerJoinListener implements Listener {
 		// Login streak notification
 		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
 		if (streakReset) {
-			player.sendMessage(ChatUtils.chatMessage("&7Your login streak has been reset to Day 1"));
+			player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));
 		} else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
-			player.sendMessage(ChatUtils.chatMessage("&7Don't forget to claim your daily login reward with &e/streak"));
+			player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
 		}
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));

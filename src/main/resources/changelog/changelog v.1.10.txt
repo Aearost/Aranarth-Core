@@ -16,6 +16,7 @@ Minor Features
 [~] Updated the description of VineWhip
 [~] Corrected invalid cooldown messages for AstralProjection's Aura and Possess abilities
 [~] Fixed issue where EarthTunnel and Collapse weren't usable near dominions based on relation, and not by the Build permission
+[~] Fixed issue where streak messages in MOTD were not displayed correctly
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
