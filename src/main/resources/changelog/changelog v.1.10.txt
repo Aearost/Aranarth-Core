@@ -9,6 +9,7 @@ Major Features
 [+] Implemented the Sandstorm ability for sandbenders
 [+] Implemented the RazorLeaves ability for plantbenders
 [+] Implemented the IceShards combo
+[+] Implemented the Barrage ability for combustion benders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
@@ -17,4 +18,4 @@ Minor Features
 [~] Fixed issue where EarthTunnel and Collapse weren't usable near dominions based on relation, and not by the Build permission
 
 Backend Code Changes
-- Created the AranarthBendingUtils class to help with multiple bendingvej abilities
+- Created the AranarthBendingUtils class to help with multiple bending abilities

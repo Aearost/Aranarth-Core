@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
+import com.aearost.aranarthcore.abilities.firebending.Barrage;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
@@ -16,6 +17,7 @@ import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
+import com.projectkorra.projectkorra.ability.FireAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.ability.SandAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
@@ -119,6 +121,14 @@ public class AranarthCoreBendingListener implements Listener {
 					}
 				}
 			}
+			// Firebending
+			else if (ability instanceof FireAbility && bendingPlayer.isElementToggled(Element.FIRE)) {
+				if (abilityName.equalsIgnoreCase("barrage")) {
+					if (!Barrage.hasActiveInstance(player.getUniqueId())) {
+						new Barrage(player);
+					}
+				}
+			}
 			// Earthbending
 			else if (ability instanceof EarthAbility && bendingPlayer.isElementToggled(Element.EARTH)) {
 				if (ability instanceof SandAbility) {
@@ -196,6 +206,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (IceShards.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (Barrage.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}

@@ -51,7 +51,13 @@
       "Bash(grep -r \"Element\\\\.ICE\\\\|getElement.*ICE\\\\|ICE.*getColor\" C:/Users/liamh/IdeaProjects --include=*.java)",
       "Bash(./mvnw compile:*)",
       "Bash(cmd.exe /c \"mvn compile -q 2>&1\")",
-      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile -q 2>&1\")"
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore && mvn compile -q 2>&1\")",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f \\\\\\(-name *.yml -o -name *.yaml -o -name *.config \\\\\\))",
+      "Bash(ls /c/Users/liamh/IdeaProjects/AranarthCore/*.xml)",
+      "Bash(/c/Users/liamh/AppData/Local/JetBrains/Toolbox/apps/intellij-idea-ultimate/jbr/bin/javac --version)",
+      "Read(//c/Users/liamh/**)",
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn.cmd compile:*)",
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn.cmd compiler:compile)"
     ]
   }
 }
