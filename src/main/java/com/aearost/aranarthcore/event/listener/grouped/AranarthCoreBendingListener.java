@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.firebending.Barrage;
+import com.aearost.aranarthcore.abilities.firebending.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
@@ -127,6 +128,10 @@ public class AranarthCoreBendingListener implements Listener {
 					if (!Barrage.hasActiveInstance(player.getUniqueId())) {
 						new Barrage(player);
 					}
+				} else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
+					if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
+						new NoxiousFumes(player);
+					}
 				}
 			}
 			// Earthbending
@@ -180,6 +185,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// NoxiousFumes: left-click begins channeling from the READY state
+		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(player.getUniqueId());
+		if (noxiousFumes != null) {
+			noxiousFumes.startChanneling();
+			return;
+		}
+
 		// IceShards: left-click fires the charged shards
 		IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
 		if (iceShards != null) {
@@ -211,6 +223,10 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		if (Barrage.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
+			return;
+		}
+		if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
 		}
 	}
 
@@ -236,6 +252,10 @@ public class AranarthCoreBendingListener implements Listener {
 		IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
 		if (iceShards != null) {
 			iceShards.remove();
+		}
+		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
+		if (noxiousFumes != null) {
+			noxiousFumes.endChanneling();
 		}
 	}
 

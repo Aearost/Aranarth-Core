@@ -10,6 +10,7 @@ Major Features
 [+] Implemented the RazorLeaves ability for plantbenders
 [+] Implemented the IceShards combo
 [+] Implemented the Barrage ability for combustion benders
+[+] Implemented the NoxiousFumes combustion ability
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
