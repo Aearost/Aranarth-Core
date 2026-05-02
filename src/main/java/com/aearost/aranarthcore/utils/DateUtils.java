@@ -15,6 +15,7 @@ import org.bukkit.block.data.type.Stairs;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.LocalDate;
@@ -1600,7 +1601,7 @@ public class DateUtils {
 
 										// Melt ice if the water is not close to a hot biome or crops
 										if (surfaceBlock.getType() == Material.ICE) {
-											if (!isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
+											if (!TempBlock.isTempBlock(surfaceBlock) && !isTouchingFarmland(surfaceBlock) && !isNearbyHotBiome(surfaceBlock)) {
 												surfaceBlock.setType(Material.WATER);
 											}
 											continue;

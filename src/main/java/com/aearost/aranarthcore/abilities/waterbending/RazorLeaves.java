@@ -354,7 +354,7 @@ public class RazorLeaves extends PlantAbility implements AddonAbility {
     @Override
     public void stop() {
         restoreSourceBlock();
-        activeInstances.remove(player.getUniqueId());
+        if (player != null) activeInstances.remove(player.getUniqueId());
     }
 
     @Override

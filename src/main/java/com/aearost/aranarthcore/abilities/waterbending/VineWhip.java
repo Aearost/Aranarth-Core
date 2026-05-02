@@ -450,7 +450,7 @@ public class VineWhip extends PlantAbility implements AddonAbility {
      */
     @Override
     public void stop() {
-        cleanupBlocks();
+        if (originalBlockData != null) cleanupBlocks();
     }
 
     @Override

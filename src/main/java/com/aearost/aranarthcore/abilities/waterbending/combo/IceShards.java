@@ -14,13 +14,13 @@ import com.projectkorra.projectkorra.command.Commands;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.util.ClickType;
 import com.projectkorra.projectkorra.util.DamageHandler;
+import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -49,7 +49,6 @@ import java.util.UUID;
 public class IceShards extends IceAbility implements AddonAbility, ComboAbility {
 
     private static final Map<UUID, IceShards> ACTIVE_INSTANCES = new HashMap<>();
-    private static final Set<String> DOME_BLOCK_KEYS = new HashSet<>();
     private static Listener listener;
 
     private enum Phase { CHARGING, FIRING }
@@ -71,14 +70,13 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     private int heldSlot = -1;
 
     private final List<Vector> domeTargets = new ArrayList<>();
-    private final List<Location> domeBlocks = new ArrayList<>();
+    private final List<TempBlock> domeBlocks = new ArrayList<>();
     private int domeTargetIndex = 0;
     private int freezeIndex = 0;
     private boolean chargeComplete = false;
     private long lastWaterSoundTime = -600L;
     private final List<Shard> shards = new ArrayList<>();
     private final Set<UUID> hitEntities = new HashSet<>();
-    private final Map<Location, BlockData> displacedWater = new HashMap<>();
 
     // -----------------------------------------------------------------------
     // Shard — wraps a BlockDisplay with a manually-tracked velocity.
@@ -139,7 +137,6 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "IceSpike");
 
         this.generateDomeTargets();
-        this.displaceNearbyWater();
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         this.start();
     }
@@ -149,57 +146,23 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     // -----------------------------------------------------------------------
 
     /**
-     * Converts all water blocks within domeRadius+1 of the player centre to AIR,
-     * storing them so they can be restored when the ability ends.
-     * This prevents any external water from interacting with the dome.
-     */
-    private void displaceNearbyWater() {
-        final Location centre = this.player.getLocation().clone().add(0, 1, 0);
-        final int r = this.domeRadius + 1;
-        for (int x = -r; x <= r; x++) {
-            for (int y = -r; y <= r; y++) {
-                for (int z = -r; z <= r; z++) {
-                    if (x * x + y * y + z * z > r * r) continue;
-                    final Block block = centre.clone().add(x, y, z).getBlock();
-                    if (block.getType() == Material.WATER) {
-                        this.displacedWater.put(block.getLocation(), block.getBlockData());
-                        block.setType(Material.AIR, false);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Scans the full interior of the dome sphere every other tick and removes any
-     * water block that is not a registered dome block. This is the definitive fix
-     * for dome water flowing inward along the floor and for external water that
-     * re-enters the area via delayed fluid ticks that bypass event cancellation.
+     * Scans the interior of the dome sphere every tick and removes any water block
+     * that is not a registered dome block, preventing external water from entering
+     * via delayed fluid ticks that bypass event cancellation.
      */
     private void cleanupInteriorWater(final Location centre) {
-        final int r = this.domeRadius + 1;
+        final int r = this.domeRadius;
         for (int x = -r; x <= r; x++) {
             for (int y = -r; y <= r; y++) {
                 for (int z = -r; z <= r; z++) {
                     if (x * x + y * y + z * z > r * r) continue;
                     final Block block = centre.clone().add(x, y, z).getBlock();
                     if (block.getType() != Material.WATER) continue;
-                    if (DOME_BLOCK_KEYS.contains(blockKey(block.getLocation()))) continue;
+                    if (TempBlock.isTempBlock(block)) continue;
                     block.setType(Material.AIR, false);
                 }
             }
         }
-    }
-
-    private void restoreDisplacedWater() {
-        for (final Map.Entry<Location, BlockData> entry : this.displacedWater.entrySet()) {
-            final Block block = entry.getKey().getBlock();
-            // Only restore if the block is still air — don't overwrite anything placed after.
-            if (block.getType() == Material.AIR) {
-                block.setBlockData(entry.getValue(), false);
-            }
-        }
-        this.displacedWater.clear();
     }
 
     // -----------------------------------------------------------------------
@@ -293,10 +256,9 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             final double freezeProgress = Math.min(1.0, (double) (elapsed - freezeStart) / 1000.0);
             final int freezeTarget = (int) (freezeProgress * this.domeBlocks.size());
             while (this.freezeIndex < freezeTarget && this.freezeIndex < this.domeBlocks.size()) {
-                final Location loc = this.domeBlocks.get(this.freezeIndex);
-                if (loc.getBlock().getType() == Material.WATER) {
-                    DOME_BLOCK_KEYS.remove(blockKey(loc));
-                    loc.getBlock().setType(Material.ICE, false);
+                final TempBlock tb = this.domeBlocks.get(this.freezeIndex);
+                if (tb.getBlock().getType() == Material.WATER) {
+                    tb.setType(Material.ICE);
                 }
                 this.freezeIndex++;
             }
@@ -321,32 +283,25 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     // Dome block helpers
     // -----------------------------------------------------------------------
 
-    private static String blockKey(final Location loc) {
-        return loc.getWorld().getName() + ":" + loc.getBlockX() + ":" + loc.getBlockY() + ":" + loc.getBlockZ();
-    }
-
     /**
-     * Places a water source block at the target position and registers it to suppress flow events.
+     * Places a water block at the target position as a TempBlock so PK tracks
+     * and reverts it automatically, and so isTempBlock() can guard event handlers.
      */
     private void placeWaterBlock(final Location playerCentre, final Vector targetOffset) {
         final Location targetLoc = playerCentre.clone().add(targetOffset);
         final Block block = targetLoc.getBlock();
         if (!block.isPassable()) return;
-        final String key = blockKey(targetLoc);
-        if (DOME_BLOCK_KEYS.contains(key)) return;
-        DOME_BLOCK_KEYS.add(key);
-        block.setType(Material.WATER, false);
-        this.domeBlocks.add(block.getLocation());
+        if (TempBlock.isTempBlock(block)) return;
+        this.domeBlocks.add(new TempBlock(block, Material.WATER.createBlockData()));
     }
 
     /**
      * Converts all remaining water dome blocks to ice.
      */
     private void freezeDome() {
-        for (final Location loc : this.domeBlocks) {
-            if (loc.getBlock().getType() == Material.WATER) {
-                DOME_BLOCK_KEYS.remove(blockKey(loc));
-                loc.getBlock().setType(Material.ICE, false);
+        for (final TempBlock tb : this.domeBlocks) {
+            if (tb.getBlock().getType() == Material.WATER) {
+                tb.setType(Material.ICE);
             }
         }
     }
@@ -355,13 +310,8 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
      * Removes all dome blocks (water or ice) and clears the tracking list.
      */
     private void removeDomeBlocks() {
-        for (final Location loc : this.domeBlocks) {
-            final Block block = loc.getBlock();
-            final Material type = block.getType();
-            if (type == Material.WATER || type == Material.ICE) {
-                block.setType(Material.AIR, false);
-            }
-            DOME_BLOCK_KEYS.remove(blockKey(loc));
+        for (final TempBlock tb : this.domeBlocks) {
+            tb.revertBlock();
         }
         this.domeBlocks.clear();
     }
@@ -539,7 +489,6 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             if (!shard.display.isDead()) shard.display.remove();
         }
         this.shards.clear();
-        this.restoreDisplacedWater();
     }
 
     // -----------------------------------------------------------------------
@@ -600,7 +549,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             public void onBlockFromTo(final BlockFromToEvent e) {
                 if (e.getBlock().getType() != Material.WATER) return;
                 // Source is a registered dome block
-                if (DOME_BLOCK_KEYS.contains(blockKey(e.getBlock().getLocation()))) {
+                if (TempBlock.isTempBlock(e.getBlock())) {
                     e.setCancelled(true);
                     return;
                 }
@@ -627,7 +576,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
             public void onBlockPhysics(final BlockPhysicsEvent e) {
                 if (e.getBlock().getType() != Material.WATER) return;
-                if (DOME_BLOCK_KEYS.contains(blockKey(e.getBlock().getLocation()))) {
+                if (TempBlock.isTempBlock(e.getBlock())) {
                     e.setCancelled(true);
                     return;
                 }
@@ -659,7 +608,6 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
             listener = null;
         }
         ACTIVE_INSTANCES.clear();
-        DOME_BLOCK_KEYS.clear();
     }
 
     @Override

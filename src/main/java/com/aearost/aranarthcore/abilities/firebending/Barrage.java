@@ -394,7 +394,7 @@ public class Barrage extends CombustionAbility implements AddonAbility {
 
     @Override
     public void stop() {
-        cleanup();
+        if (player != null) cleanup();
     }
 
     @Override

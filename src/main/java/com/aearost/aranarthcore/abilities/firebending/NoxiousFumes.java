@@ -535,8 +535,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
     @Override
     public void stop() {
-        travelers.clear();
-        puffs.clear();
+        if (travelers != null) travelers.clear();
+        if (puffs != null) puffs.clear();
     }
 
     @Override
