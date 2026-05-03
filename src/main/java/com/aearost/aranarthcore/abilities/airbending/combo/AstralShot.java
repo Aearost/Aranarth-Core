@@ -10,7 +10,6 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.util.ClickType;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import io.papermc.paper.datacomponent.item.ResolvableProfile;
@@ -22,10 +21,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mannequin;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -36,8 +31,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class AstralShot extends SpiritualAbility implements AddonAbility, ComboAbility {
-
-    private static Listener listener;
 
     private static final double HIT_RADIUS = 1.5;
     private static final double STEP_SIZE = 0.1;
@@ -224,23 +217,10 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
     }
 
     @Override
-    public void load() {
-        listener = new Listener() {
-            @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-            public void onPKReload(final BendingReloadEvent e) {
-                new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
-            }
-        };
-        Bukkit.getPluginManager().registerEvents(listener, AranarthCore.getInstance());
-    }
+    public void load() {}
 
     @Override
-    public void stop() {
-        if (listener != null) {
-            HandlerList.unregisterAll(listener);
-            listener = null;
-        }
-    }
+    public void stop() {}
 
     @Override
     public String getAuthor() {

@@ -60,7 +60,8 @@
       "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn.cmd compiler:compile)",
       "Bash(grep -r class.*extends /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/abilities/)",
       "Bash(find C:/Users/liamh/.gradle/caches -name *tempblock* -o -name *ProjectKorra*)",
-      "Bash(find C:/Users/liamh/.m2 -name *projectkorra*)"
+      "Bash(find C:/Users/liamh/.m2 -name *projectkorra*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.jar -o -type f -path */projectkorra/*)"
     ]
   }
 }

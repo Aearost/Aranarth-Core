@@ -214,6 +214,8 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.razorleaves", true);
 		perms.setPermission("bending.ability.iceshards", true);
 		perms.setPermission("bending.ability.barrage", true);
+		perms.setPermission("bending.ability.noxiousfumes", true);
+		perms.setPermission("bending.ability.angeredspirits", true);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);

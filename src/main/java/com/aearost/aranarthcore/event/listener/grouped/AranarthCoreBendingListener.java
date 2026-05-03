@@ -6,8 +6,10 @@ import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
+import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.NoxiousFumes;
+import com.aearost.aranarthcore.abilities.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
@@ -24,15 +26,19 @@ import com.projectkorra.projectkorra.ability.SandAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
 import com.projectkorra.projectkorra.ability.WaterAbility;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
+import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockFromToEvent;
+import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
@@ -40,6 +46,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -60,6 +67,9 @@ public class AranarthCoreBendingListener implements Listener {
 		// End all active projections before PK clears and re-registers abilities,
 		// so players are safely returned to their body location.
 		AstralProjection.endAllProjections();
+		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -68,6 +78,52 @@ public class AranarthCoreBendingListener implements Listener {
 				Bukkit.getLogger().info("AranarthCore Bending Reloaded");
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
+	}
+
+	/**
+	 * Cancels water flow from IceShards dome blocks, or into the dome radius,
+	 * preventing external water from entering and creating infinite sources.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onIceShardsBlockFromTo(final BlockFromToEvent e) {
+		if (e.getBlock().getType() != Material.WATER) return;
+		if (TempBlock.isTempBlock(e.getBlock())) {
+			e.setCancelled(true);
+			return;
+		}
+		final Location toLoc = e.getToBlock().getLocation();
+		for (final IceShards inst : IceShards.getActiveInstances()) {
+			if (!inst.getPlayer().getWorld().equals(toLoc.getWorld())) continue;
+			final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
+			final double r = 12; // domeRadius + 2
+			if (toLoc.distanceSquared(centre) <= r * r) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Suppresses fluid physics on IceShards dome water blocks and any water within
+	 * the dome radius, preventing flow ticks that bypass BlockFromToEvent.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onIceShardsBlockPhysics(final BlockPhysicsEvent e) {
+		if (e.getBlock().getType() != Material.WATER) return;
+		if (TempBlock.isTempBlock(e.getBlock())) {
+			e.setCancelled(true);
+			return;
+		}
+		final Location loc = e.getBlock().getLocation();
+		for (final IceShards inst : IceShards.getActiveInstances()) {
+			if (!inst.getPlayer().getWorld().equals(loc.getWorld())) continue;
+			final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
+			final double r = 12; // domeRadius + 2
+			if (loc.distanceSquared(centre) <= r * r) {
+				e.setCancelled(true);
+				return;
+			}
+		}
 	}
 
 	@EventHandler
@@ -96,6 +152,10 @@ public class AranarthCoreBendingListener implements Listener {
 						}
 					} else if (abilityName.equalsIgnoreCase("astralshot")) {
 						new AstralShot(player);
+					} else if (abilityName.equalsIgnoreCase("angeredspirits")) {
+						if (!AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
+							new AngeredSpirits(player);
+						}
 					}
 				} else if (ability instanceof SoundAbility) {
 					if (abilityName.equalsIgnoreCase("sonicboom")) {
@@ -196,6 +256,13 @@ public class AranarthCoreBendingListener implements Listener {
 		IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
 		if (iceShards != null) {
 			iceShards.fire();
+			return;
+		}
+
+		// AngeredSpirits: left-click fires the next spirit during the firing window
+		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
+		if (angeredSpirits != null) {
+			angeredSpirits.onLeftClick();
 		}
 	}
 
@@ -227,6 +294,10 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
+			return;
+		}
+		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
 		}
 	}
 
@@ -256,6 +327,10 @@ public class AranarthCoreBendingListener implements Listener {
 		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
 		if (noxiousFumes != null) {
 			noxiousFumes.endChanneling();
+		}
+		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
+		if (angeredSpirits != null) {
+			angeredSpirits.onSlotChange();
 		}
 	}
 

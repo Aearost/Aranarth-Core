@@ -11,6 +11,7 @@ Major Features
 [+] Implemented the IceShards combo
 [+] Implemented the Barrage ability for combustion benders
 [+] Implemented the NoxiousFumes combustion ability
+[+] Implemented AngeredSpirits ability for Spiritual benders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

@@ -1,32 +1,24 @@
 package com.aearost.aranarthcore.abilities.earthbending.combo;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ComboAbility;
-import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.MetalAbility;
 import com.projectkorra.projectkorra.ability.util.Collision;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.command.Commands;
-import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.firebending.combo.ComboStream;
 import com.projectkorra.projectkorra.object.HorizontalVelocityTracker;
 import com.projectkorra.projectkorra.util.ClickType;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.ParticleEffect;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -34,7 +26,6 @@ import java.util.List;
 
 public class CableSlash extends MetalAbility implements AddonAbility, ComboAbility {
 
-    private static Listener metalCableBlocker;
     private static final double RECALL_SPEED = 1.5;
 
     private int progressCounter;
@@ -313,28 +304,11 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
         return "CableSlash";
     }
 
-    /**
-     * Called when the ability is loaded by PK. This is where the developer
-     * registers Listeners and Permissions.
-     */
     @Override
-    public void load() {
-        metalCableBlocker = new Listener() {
-            @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-            public void onPKReload(final BendingReloadEvent e) {
-                new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
-            }
-        };
-        Bukkit.getPluginManager().registerEvents(metalCableBlocker, AranarthCore.getInstance());
-    }
+    public void load() {}
 
     @Override
-    public void stop() {
-        if (metalCableBlocker != null) {
-            HandlerList.unregisterAll(metalCableBlocker);
-            metalCableBlocker = null;
-        }
-    }
+    public void stop() {}
 
     @Override
     public String getAuthor() {

@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.abilities.waterbending.combo;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -11,11 +10,9 @@ import com.projectkorra.projectkorra.ability.*;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.command.Commands;
-import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.util.ClickType;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import com.projectkorra.projectkorra.util.TempBlock;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -25,12 +22,6 @@ import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
@@ -49,7 +40,6 @@ import java.util.UUID;
 public class IceShards extends IceAbility implements AddonAbility, ComboAbility {
 
     private static final Map<UUID, IceShards> ACTIVE_INSTANCES = new HashMap<>();
-    private static Listener listener;
 
     private enum Phase { CHARGING, FIRING }
 
@@ -507,6 +497,10 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         return ACTIVE_INSTANCES.get(uuid);
     }
 
+    public static Iterable<IceShards> getActiveInstances() {
+        return ACTIVE_INSTANCES.values();
+    }
+
     // -----------------------------------------------------------------------
     // CoreAbility / AddonAbility boilerplate
     // -----------------------------------------------------------------------
@@ -537,76 +531,10 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
     }
 
     @Override
-    public void load() {
-        listener = new Listener() {
-            /**
-             * Cancels any water flow that originates from a dome block OR whose
-             * destination falls within the dome radius of an active instance.
-             * The second check prevents external water from flowing into the dome
-             * area and triggering vanilla infinite-source creation.
-             */
-            @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-            public void onBlockFromTo(final BlockFromToEvent e) {
-                if (e.getBlock().getType() != Material.WATER) return;
-                // Source is a registered dome block
-                if (TempBlock.isTempBlock(e.getBlock())) {
-                    e.setCancelled(true);
-                    return;
-                }
-                // Destination is inside (or just outside) an active dome — cancel
-                // to stop external water from entering and creating new sources.
-                if (ACTIVE_INSTANCES.isEmpty()) return;
-                final Location toLoc = e.getToBlock().getLocation();
-                for (final IceShards inst : ACTIVE_INSTANCES.values()) {
-                    if (!inst.player.getWorld().equals(toLoc.getWorld())) continue;
-                    final Location centre = inst.player.getLocation().clone().add(0, 1, 0);
-                    final double r = inst.domeRadius + 2;
-                    if (toLoc.distanceSquared(centre) <= r * r) {
-                        e.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-
-            /**
-             * Suppresses fluid physics on dome water blocks and on any water
-             * block within the dome radius, preventing the scheduler from
-             * queueing new flow ticks that bypass BlockFromToEvent.
-             */
-            @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-            public void onBlockPhysics(final BlockPhysicsEvent e) {
-                if (e.getBlock().getType() != Material.WATER) return;
-                if (TempBlock.isTempBlock(e.getBlock())) {
-                    e.setCancelled(true);
-                    return;
-                }
-                if (ACTIVE_INSTANCES.isEmpty()) return;
-                final Location loc = e.getBlock().getLocation();
-                for (final IceShards inst : ACTIVE_INSTANCES.values()) {
-                    if (!inst.player.getWorld().equals(loc.getWorld())) continue;
-                    final Location centre = inst.player.getLocation().clone().add(0, 1, 0);
-                    final double r = inst.domeRadius + 2;
-                    if (loc.distanceSquared(centre) <= r * r) {
-                        e.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-
-            @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-            public void onPKReload(final BendingReloadEvent e) {
-                new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
-            }
-        };
-        Bukkit.getPluginManager().registerEvents(listener, AranarthCore.getInstance());
-    }
+    public void load() {}
 
     @Override
     public void stop() {
-        if (listener != null) {
-            HandlerList.unregisterAll(listener);
-            listener = null;
-        }
         ACTIVE_INSTANCES.clear();
     }
 
