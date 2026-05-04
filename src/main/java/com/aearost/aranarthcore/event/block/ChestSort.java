@@ -42,7 +42,7 @@ public class ChestSort {
         Player player = e.getPlayer();
         Block block = e.getClickedBlock();
 
-        if (!player.hasPermission("aranarth.chestsort")) {
+        if (!player.hasPermission("aranarth.inventory")) {
             player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to sort chests!"));
             return;
         }
