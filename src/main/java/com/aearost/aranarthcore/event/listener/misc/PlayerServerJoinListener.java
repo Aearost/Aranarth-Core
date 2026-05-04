@@ -2,6 +2,9 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.items.HoneyGlazedHam;
+import com.aearost.aranarthcore.items.Quiver;
+import com.aearost.aranarthcore.items.arrow.ArrowIron;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.*;
@@ -11,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.Recipe;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -121,6 +126,28 @@ public class PlayerServerJoinListener implements Listener {
 					Bukkit.broadcastMessage("");
 
 					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
+
+					// Give starter kit
+					PlayerInventory inv = player.getInventory();
+					inv.setItem(0, new ItemStack(Material.STONE_SWORD));
+					inv.setItem(1, new ItemStack(Material.STONE_PICKAXE));
+					inv.setItem(2, new ItemStack(Material.STONE_AXE));
+					inv.setItem(3, new ItemStack(Material.STONE_SHOVEL));
+					ItemStack honeyGlazedHam = new HoneyGlazedHam().getItem();
+					honeyGlazedHam.setAmount(16);
+					inv.setItem(4, honeyGlazedHam);
+					inv.setItem(5, new ItemStack(Material.BUNDLE));
+					ItemStack ironArrows = new ArrowIron().getItem();
+					ironArrows.setAmount(16);
+					inv.setItem(6, ironArrows);
+					inv.setItem(7, new Quiver().getItem());
+					inv.setItem(8, new ItemStack(Material.BOW));
+
+					// Equip leather armor
+					inv.setHelmet(new ItemStack(Material.LEATHER_HELMET));
+					inv.setChestplate(new ItemStack(Material.LEATHER_CHESTPLATE));
+					inv.setLeggings(new ItemStack(Material.LEATHER_LEGGINGS));
+					inv.setBoots(new ItemStack(Material.LEATHER_BOOTS));
 				}
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
