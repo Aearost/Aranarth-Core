@@ -11,8 +11,11 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.Set;
 
 public class AranarthBendingUtils {
 
@@ -113,5 +116,27 @@ public class AranarthBendingUtils {
                 }
             }
         });
+    }
+
+    private static final Set<Material> METAL_ARMOR_PIECES = EnumSet.of(
+            Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
+            Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
+            Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
+            Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS
+    );
+
+    /**
+     * Determines if the player is wearing at least 1 piece of metal armor.
+     * @param player The player.
+     * @return Whether the player is wearing at least 1 piece of metal armor.
+     */
+    public static boolean hasMetalArmor(final Player player) {
+        int count = 0;
+        for (final ItemStack piece : player.getInventory().getArmorContents()) {
+            if (piece != null && METAL_ARMOR_PIECES.contains(piece.getType())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

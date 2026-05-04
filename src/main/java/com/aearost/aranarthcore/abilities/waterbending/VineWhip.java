@@ -469,6 +469,6 @@ public class VineWhip extends PlantAbility implements AddonAbility {
                 "The vine will curve with your gaze as it extends, and snaps back" +
                 "to its source once it reaches its limit or strikes a foe." +
                 "You can also left-click before your vine hits a target, pulling the caught mob towards you.\n" +
-                ChatUtils.translateToColor("&fUsage: Sneak (hold) > Left-click");
+                ChatUtils.translateToColor("&fUsage: Hold Sneak (plant source) > Left-click");
     }
 }

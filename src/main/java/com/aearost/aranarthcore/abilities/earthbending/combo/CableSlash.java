@@ -64,6 +64,9 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
         if (this.bPlayer.isOnCooldown(this)) {
             return;
         }
+        if (!AranarthBendingUtils.hasMetalArmor(player)) {
+            return;
+        }
 
         this.damage = 5.0;
         this.range = 10.0;
