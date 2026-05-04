@@ -15,11 +15,13 @@ public class PetTargetPrevent {
 			if (pet.isTamed()) {
 				if (e.getTarget() instanceof Player target) {
 					Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
-					Dominion petOwnerDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
-					if (targetDominion != null && petOwnerDominion != null) {
-						if (targetDominion.isSameDominion(petOwnerDominion)
-							|| targetDominion.isAllied(petOwnerDominion) || targetDominion.isTruced(petOwnerDominion)) {
-							e.setCancelled(true);
+					if (pet.getOwner() != null) {
+						Dominion petOwnerDominion = DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId());
+						if (targetDominion != null && petOwnerDominion != null) {
+							if (targetDominion.isSameDominion(petOwnerDominion)
+									|| targetDominion.isAllied(petOwnerDominion) || targetDominion.isTruced(petOwnerDominion)) {
+								e.setCancelled(true);
+							}
 						}
 					}
 				}

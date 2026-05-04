@@ -15,6 +15,7 @@ Major Features
 [+] Implemented the SandWave ability for sandbenders
 [+] Added mirrored poses for several armor stand poses
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
+[~] Fixed null pointer due to pets not having any owner yet
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
