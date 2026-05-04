@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
@@ -63,7 +64,26 @@ public class CommandAdminTeleport {
 
 		boolean isSenderPlayer = player != null;
 
-		if (args[0].equalsIgnoreCase("tpf")) {
+		if (args[0].equalsIgnoreCase("tpw")) {
+			// /ac tpw <worldname> — teleport self to surface of 0,0 in the specified world
+			if (!isSenderPlayer) {
+				sender.sendMessage(ChatUtils.chatMessage("&cOnly players can execute this command!"));
+				return true;
+			}
+			if (args.length != 2) {
+				player.sendMessage(ChatUtils.chatMessage("&cUsage: /ac tpw <worldname>"));
+				return true;
+			}
+			World world = Bukkit.getWorld(args[1]);
+			if (world == null) {
+				player.sendMessage(ChatUtils.chatMessage("&cWorld &e" + args[1] + " &ccould not be found!"));
+				return true;
+			}
+			Location loc = AranarthUtils.getSafeTeleportLocation(new Location(world, 0, world.getHighestBlockYAt(0, 0), 0));
+			player.teleport(loc);
+			player.sendMessage(ChatUtils.chatMessage("&7You have teleported to world &e" + world.getName()));
+			return true;
+		} else if (args[0].equalsIgnoreCase("tpf")) {
 			// /ac tpf x y z [<yaw> <pitch>] — self teleport, player only
 			if (args.length == 4 || args.length == 6) {
 				if (!isSenderPlayer) {

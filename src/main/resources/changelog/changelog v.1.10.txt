@@ -23,6 +23,7 @@ Minor Features
 [~] Fixed issue where streak messages in MOTD were not displayed correctly
 [+] Added log message for when console sends a message to Council Chat
 [~] Changed streak rewards to be for crate keys instead of diamonds on Day 4
+[+] Added /ac tpw to force TP to different worlds
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

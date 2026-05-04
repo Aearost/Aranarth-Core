@@ -30,7 +30,7 @@ public class CommandACCompleter implements TabCompleter {
 	private static final List<String> COUNCIL_OPTIONS = List.of(
 		"admin", "ban", "broadcast", "clearchat", "dateset", "give",
 		"home", "invsee", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
-		"speed", "sudo", "time", "tp", "tpf", "unban", "unmute",
+		"speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
 		"vanish", "vpedit", "warn", "weather", "whereis"
 	);
 
@@ -158,6 +158,13 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 3 && (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY"))) {
 					yield args[2].isEmpty() ? List.of("100", "1200", "6000") : List.of();
 				}
+				yield List.of();
+			}
+			case "tpw" -> {
+				if (args.length == 2) yield Bukkit.getWorlds().stream()
+					.map(w -> w.getName())
+					.filter(name -> args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase()))
+					.collect(Collectors.toList());
 				yield List.of();
 			}
 			case "tp", "tpf" -> {
