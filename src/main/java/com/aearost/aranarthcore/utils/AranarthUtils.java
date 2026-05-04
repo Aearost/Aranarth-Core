@@ -1671,7 +1671,7 @@ public class AranarthUtils {
 		// Teleporting seems to manually toggle on a player's bending when it was toggled off
 		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 		boolean isToggled = false;
-		if (!bendingPlayer.isToggled()) {
+		if (bendingPlayer != null && !bendingPlayer.isToggled()) {
 			isToggled = true;
 		}
 

@@ -24,6 +24,7 @@ Minor Features
 [+] Added log message for when console sends a message to Council Chat
 [~] Changed streak rewards to be for crate keys instead of diamonds on Day 4
 [+] Added /ac tpw to force TP to different worlds
+[+] Added null check where the bending player was null when teleporting
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
