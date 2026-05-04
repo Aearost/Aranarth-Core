@@ -1,16 +1,27 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.ChestSortOrder;
+import com.aearost.aranarthcore.objects.LockedContainer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.DoubleChest;
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Handles the chest sort logic.
@@ -18,100 +29,101 @@ import java.util.List;
 public class ChestSort {
 
     public void execute(PlayerInteractEvent e) {
-        if (e.getHand() == EquipmentSlot.HAND) {
-            if (AranarthUtils.isContainerBlock(e.getClickedBlock())) {
-                if (e.getPlayer().getGameMode() == GameMode.SURVIVAL && e.getPlayer().isSneaking()) {
-                        e.getPlayer().sendMessage(ChatUtils.chatMessage("&cChest sort functionality is currently disabled"));
-//                    BlockState state = e.getClickedBlock().getState();
-//                    Container container = (Container) state;
-//
-//                    Inventory inventory = container.getInventory();
-//                    if (inventory.getHolder() instanceof DoubleChest doubleChest) {
-//                        inventory = doubleChest.getInventory(); // Get the full 54 slot inventory
-//                    }
-//
-//                    List<ItemStack> itemsStacked = stackItemsInContainer(inventory.getContents());
-//                    ItemStack[] stackedArray = new ItemStack[inventory.getContents().length];
-//                    stackedArray = itemsStacked.toArray(stackedArray);
-//                    ItemStack[] sortedItems = sortItems(stackedArray);
-//                    inventory.clear();
-//                    inventory.setContents(sortedItems);
-//
-//                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
-//                    e.getPlayer().playSound(e.getPlayer(), Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
-                }
+        if (e.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        if (!AranarthUtils.isContainerBlock(e.getClickedBlock())) {
+            return;
+        }
+        if (e.getPlayer().getGameMode() != GameMode.SURVIVAL || !e.getPlayer().isSneaking()) {
+            return;
+        }
+
+        Player player = e.getPlayer();
+        Block block = e.getClickedBlock();
+
+        if (!player.hasPermission("aranarth.chestsort")) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to sort chests!"));
+            return;
+        }
+
+        // Deny sort if the container is locked and the player is not trusted (mirrors attemptOpen logic)
+        LockedContainer lockedContainer = AranarthUtils.getLockedContainerAtBlock(block);
+        if (lockedContainer != null) {
+            UUID playerUuid = player.getUniqueId();
+            boolean isTrusted = lockedContainer.getTrusted().contains(playerUuid);
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(playerUuid);
+            if (!isTrusted && !aranarthPlayer.isInAdminMode()) {
+                e.setCancelled(true);
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to sort this container!"));
+                return;
             }
         }
+
+        BlockState state = block.getState();
+        Container container = (Container) state;
+        Inventory inventory = container.getInventory();
+        if (inventory.getHolder() instanceof DoubleChest doubleChest) {
+            inventory = doubleChest.getInventory();
+        }
+
+        // Collect clones of all real items (skip null/air slots)
+        List<ItemStack> items = new ArrayList<>();
+        for (ItemStack item : inventory.getContents()) {
+            if (item != null && item.getType() != Material.AIR) {
+                items.add(item.clone());
+            }
+        }
+
+        items = stackItems(items);
+        items.sort(Comparator.comparingInt(this::getSortOrder));
+
+        inventory.clear();
+        for (int i = 0; i < items.size(); i++) {
+            inventory.setItem(i, items.get(i));
+        }
+
+        player.sendMessage(ChatUtils.chatMessage("&7The chest has been sorted!"));
+        player.playSound(player, Sound.UI_STONECUTTER_TAKE_RESULT, 1F, 1F);
     }
 
-    private List<ItemStack> stackItemsInContainer(ItemStack[] chestInventory) {
-        List<ItemStack> stackedList = new ArrayList<>();
-        // Handles filling up all slots to the maximum amount
-        for (int i = 0; i < chestInventory.length; i++) {
-            ItemStack iterated = chestInventory[i];
-            if (iterated != null) {
-                // If it is not a full stack, check for other slots for the same item
-                if (iterated.getMaxStackSize() > iterated.getAmount()) {
-                    for (int j = i + 1; j < chestInventory.length; j++) {
-                        ItemStack nextIterated = chestInventory[j];
-                        if (nextIterated != null) {
-                            if (nextIterated.isSimilar(iterated)) {
-                                // Handle adjusting the inventory
-                                int newI = iterated.getAmount() + nextIterated.getAmount();
-                                int newJ = 0;
-                                if (newI > iterated.getMaxStackSize()) {
-                                    newJ = newI - iterated.getMaxStackSize();
-                                    newI = iterated.getMaxStackSize();
-                                }
-                                chestInventory[i].setAmount(newI);
-                                chestInventory[j].setAmount(newJ);
-                            }
-                        }
-                    }
+    /**
+     * Consolidates partial stacks of the same item type into full stacks.
+     * Works on cloned items, so the original inventory is not touched until we write back.
+     */
+    private List<ItemStack> stackItems(List<ItemStack> items) {
+        List<ItemStack> result = new ArrayList<>();
+        for (ItemStack incoming : items) {
+            int remaining = incoming.getAmount();
+            for (ItemStack existing : result) {
+                if (remaining <= 0) {
+                    break;
                 }
-                if (chestInventory[i].getType() == Material.AIR) {
+                if (!existing.isSimilar(incoming)) {
                     continue;
                 }
-                stackedList.add(chestInventory[i]);
+                int space = existing.getMaxStackSize() - existing.getAmount();
+                if (space <= 0) {
+                    continue;
+                }
+                int transfer = Math.min(space, remaining);
+                existing.setAmount(existing.getAmount() + transfer);
+                remaining -= transfer;
+            }
+            if (remaining > 0) {
+                ItemStack leftover = incoming.clone();
+                leftover.setAmount(remaining);
+                result.add(leftover);
             }
         }
-        return stackedList;
+        return result;
     }
 
-    private ItemStack[] sortItems(ItemStack[] stackedItems) {
-        List<ItemStack> sortedItems = new ArrayList<>();
-        List<ItemStack> unsortedItems = new ArrayList<>();
-        ChestSortOrder[] sortOrder = ChestSortOrder.values();
-
-        // Iterates through sort list
-        for (ChestSortOrder item : sortOrder) {
-            // Iterates through stacked chest contents
-            for (ItemStack is : stackedItems) {
-                if (is != null) {
-                    // If the iterated is the same sort list item
-                    if (item.name().equals(is.getType().name())) {
-                        sortedItems.add(is);
-                    }
-                    // If not, see if iterated is in list of predefined sort items
-                    else {
-                        try {
-                            ChestSortOrder.valueOf(is.getType().name());
-                        } catch (IllegalArgumentException e) {
-                            if (!unsortedItems.contains(is)) {
-                                unsortedItems.add(is);
-                            }
-                        }
-                    }
-                }
-            }
+    private int getSortOrder(ItemStack item) {
+        try {
+            return ChestSortOrder.valueOf(item.getType().name()).ordinal();
+        } catch (IllegalArgumentException e) {
+            return Integer.MAX_VALUE;
         }
-        // Adds all unsorted/non-defined items to the end of the list
-        sortedItems.addAll(unsortedItems);
-
-        ItemStack[] sortedItemsAsArray = new ItemStack[sortedItems.size()];
-        for (int i = 0; i < sortedItems.size(); i++) {
-            sortedItemsAsArray[i] = sortedItems.get(i);
-        }
-        return sortedItemsAsArray;
     }
 }

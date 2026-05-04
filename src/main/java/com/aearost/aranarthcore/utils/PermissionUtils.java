@@ -269,6 +269,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.enderchest", false);
 		perms.setPermission("aranarth.chat.gradient", false);
 		perms.setPermission("aranarth.chat.gradientbold", false);
+		perms.setPermission("aranarth.chestsort", false);
 
 		// Armor stand poses
 		perms.setPermission("aranarthcore.armorstand.nopose", false);
@@ -662,6 +663,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.chat.hex", true);
 			perms.setPermission("aranarth.nick.hex", true);
 			perms.setPermission("aranarth.shulker", true);
+			perms.setPermission("aranarth.chestsort", true);
 			perms.setPermission("aranarth.chat.gradient", true);
 			perms.setPermission("aranarthcore.armorstand.salute", true);
 			perms.setPermission("aranarthcore.armorstand.zombie", true);
