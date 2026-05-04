@@ -281,10 +281,14 @@ public class PermissionUtils {
 		perms.setPermission("aranarthcore.armorstand.heroic", false);
 		perms.setPermission("aranarthcore.armorstand.riposte", false);
 		perms.setPermission("aranarthcore.armorstand.zombie", false);
-		perms.setPermission("aranarthcore.armorstand.cancana", false);
-		perms.setPermission("aranarthcore.armorstand.cancanb", false);
+		perms.setPermission("aranarthcore.armorstand.cancan", false);
+		perms.setPermission("aranarthcore.armorstand.cancanmirrored", false);
 		perms.setPermission("aranarthcore.armorstand.engarde", false);
 		perms.setPermission("aranarthcore.armorstand.attention", false);
+		perms.setPermission("aranarthcore.armorstand.athenamirrored", false);
+		perms.setPermission("aranarthcore.armorstand.brandishmirrored", false);
+		perms.setPermission("aranarthcore.armorstand.engardemirrored", false);
+		perms.setPermission("aranarthcore.armorstand.ripostemirrored", false);
 	}
 
 	/**
@@ -578,6 +582,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("bending.command.preset.create.15", true);
 			perms.setPermission("aranarthcore.armorstand.riposte", true);
+			perms.setPermission("aranarthcore.armorstand.ripostemirrored", true);
 		} else {
 			return;
 		}
@@ -642,7 +647,9 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.tables", true);
 			perms.setPermission("aranarth.trash", true);
 			perms.setPermission("aranarthcore.armorstand.athena", true);
+			perms.setPermission("aranarthcore.armorstand.athenamirrored", true);
 			perms.setPermission("aranarthcore.armorstand.brandish", true);
+			perms.setPermission("aranarthcore.armorstand.brandishmirrored", true);
 			perms.setPermission("aranarthcore.armorstand.honor", true);
 			perms.setPermission("aranarthcore.armorstand.entertainment", true);
 		} else {
@@ -670,9 +677,10 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.inventory", true);
 			perms.setPermission("aranarth.chat.gradientbold", true);
 			perms.setPermission("aranarthcore.armorstand.heroic", true);
-			perms.setPermission("aranarthcore.armorstand.cancana", true);
-			perms.setPermission("aranarthcore.armorstand.cancanb", true);
+			perms.setPermission("aranarthcore.armorstand.cancan", true);
+			perms.setPermission("aranarthcore.armorstand.cancanmirrored", true);
 			perms.setPermission("aranarthcore.armorstand.engarde", true);
+			perms.setPermission("aranarthcore.armorstand.engardemirrored", true);
 		} else {
 			return;
 		}

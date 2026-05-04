@@ -13,6 +13,7 @@ Major Features
 [+] Implemented the NoxiousFumes combustion ability
 [+] Implemented AngeredSpirits ability for Spiritual benders
 [+] Implemented the SandWave ability for sandbenders
+[+] Added mirrored poses for several armor stand poses
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

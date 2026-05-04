@@ -30,35 +30,43 @@ public class ArmorStandItemAddListener implements Listener {
     //  1 = No Pose  (arms visible)
     //  2 = Solemn
     //  3 = Athena
-    //  4 = Brandish
-    //  5 = Honor
-    //  6 = Entertainment
-    //  7 = Salute
-    //  8 = Heroic
-    //  9 = Riposte
-    // 10 = Zombie
-    // 11 = Cancan A
-    // 12 = Cancan B
-    // 13 = En Garde
-    // 14 = Attention
+    //  4 = Athena Mirrored
+    //  5 = Brandish
+    //  6 = Brandish Mirrored
+    //  7 = Honor
+    //  8 = Entertainment
+    //  9 = Salute
+    // 10 = Heroic
+    // 11 = Riposte
+    // 12 = Riposte Mirrored
+    // 13 = Zombie
+    // 14 = Cancan
+    // 15 = Cancan Mirrored
+    // 16 = En Garde
+    // 17 = En Garde Mirrored
+    // 18 = Attention
     private static final String POSE_PERMISSION_PREFIX = "aranarthcore.armorstand.";
 
-    private static final int TOTAL_POSES = 15;
+    private static final int TOTAL_POSES = 19;
     private static final String[] POSE_NAMES = {
         "Arms Hidden",
         "No Pose",
         "Solemn",
         "Athena",
+        "Athena Mirrored",
         "Brandish",
+        "Brandish Mirrored",
         "Honor",
         "Entertainment",
         "Salute",
         "Heroic",
         "Riposte",
+        "Riposte Mirrored",
         "Zombie",
-        "Cancan A",
-        "Cancan B",
+        "Cancan",
+        "Cancan Mirrored",
         "En Garde",
+        "En Garde Mirrored",
         "Attention"
     };
 
@@ -226,31 +234,45 @@ public class ArmorStandItemAddListener implements Listener {
                 stand.setLeftLegPose(rad(5, 0, 0));
             }
             case 4 -> {
+                // Athena Mirrored
+                stand.setHeadPose(rad(-5, 0, 0));
+                stand.setRightArmPose(rad(10, 0, 20));
+                stand.setLeftArmPose(rad(-105, 0, 0));
+                stand.setRightLegPose(rad(5, 0, 0));
+            }
+            case 5 -> {
                 // Brandish
                 stand.setHeadPose(rad(-15, 0, 0));
                 stand.setRightArmPose(rad(-157.5, 0, 0));
                 stand.setLeftArmPose(rad(-15, 0, -10));
                 stand.setLeftLegPose(rad(5, 0, 0));
             }
-            case 5 -> {
+            case 6 -> {
+                // Brandish Mirrored
+                stand.setHeadPose(rad(-15, 0, 0));
+                stand.setRightArmPose(rad(-15, 0, 10));
+                stand.setLeftArmPose(rad(-157.5, 0, 0));
+                stand.setRightLegPose(rad(5, 0, 0));
+            }
+            case 7 -> {
                 // Honor
                 stand.setHeadPose(rad(-20, 0, 0));
                 stand.setRightArmPose(rad(-15, -70, 0));
                 stand.setLeftArmPose(rad(-15, 70, 0));
             }
-            case 6 -> {
+            case 8 -> {
                 // Entertainment
                 stand.setHeadPose(rad(-15, 0, 0));
                 stand.setRightArmPose(rad(-15, 0, -85));
                 stand.setLeftArmPose(rad(-15, 0, 85));
             }
-            case 7 -> {
+            case 9 -> {
                 // Salute
                 stand.setHeadPose(rad(-5, 0, 0));
                 stand.setRightArmPose(rad(-45, 0, -90));
                 stand.setLeftArmPose(rad(-10, 0, 10));
             }
-            case 8 -> {
+            case 10 -> {
                 // Heroic
                 stand.setHeadPose(rad(-20, 0, 0));
                 stand.setBodyPose(rad(-5, 0, 0));
@@ -259,7 +281,7 @@ public class ArmorStandItemAddListener implements Listener {
                 stand.setRightLegPose(rad(-10, 0, 0));
                 stand.setLeftLegPose(rad(10, 0, 0));
             }
-            case 9 -> {
+            case 11 -> {
                 // Riposte
                 stand.setHeadPose(rad(0, -15, 0));
                 stand.setBodyPose(rad(0, -10, 0));
@@ -268,29 +290,38 @@ public class ArmorStandItemAddListener implements Listener {
                 stand.setRightLegPose(rad(-15, 0, -5));
                 stand.setLeftLegPose(rad(5, 15, 0));
             }
-            case 10 -> {
+            case 12 -> {
+                // Riposte Mirrored
+                stand.setHeadPose(rad(0, 15, 0));
+                stand.setBodyPose(rad(0, 10, 0));
+                stand.setRightArmPose(rad(-60, 0, -10));
+                stand.setLeftArmPose(rad(-85, 0, 0));
+                stand.setRightLegPose(rad(5, -15, 0));
+                stand.setLeftLegPose(rad(-15, 0, 5));
+            }
+            case 13 -> {
                 // Zombie
                 stand.setHeadPose(rad(-10, 0, 0));
                 stand.setRightArmPose(rad(-90, 0, 0));
                 stand.setLeftArmPose(rad(-90, 0, 0));
             }
-            case 11 -> {
-                // Cancan A (right leg raised)
+            case 14 -> {
+                // Cancan (right leg raised)
                 stand.setHeadPose(rad(-10, 0, 0));
                 stand.setRightArmPose(rad(-10, 0, -130));
                 stand.setLeftArmPose(rad(-10, 0, 130));
                 stand.setRightLegPose(rad(-135, 0, 0));
                 stand.setLeftLegPose(rad(30, 0, 0));
             }
-            case 12 -> {
-                // Cancan B (left leg raised)
+            case 15 -> {
+                // Cancan Mirrored (left leg raised)
                 stand.setHeadPose(rad(-10, 0, 0));
                 stand.setRightArmPose(rad(-10, 0, -130));
                 stand.setLeftArmPose(rad(-10, 0, 130));
                 stand.setRightLegPose(rad(30, 0, 0));
                 stand.setLeftLegPose(rad(-135, 0, 0));
             }
-            case 13 -> {
+            case 16 -> {
                 // En Garde
                 stand.setHeadPose(rad(0, -15, 0));
                 stand.setBodyPose(rad(0, -15, 0));
@@ -299,7 +330,16 @@ public class ArmorStandItemAddListener implements Listener {
                 stand.setRightLegPose(rad(-15, 0, -5));
                 stand.setLeftLegPose(rad(5, 5, 0));
             }
-            case 14 -> {
+            case 17 -> {
+                // En Garde Mirrored
+                stand.setHeadPose(rad(0, 15, 0));
+                stand.setBodyPose(rad(0, 15, 0));
+                stand.setRightArmPose(rad(-15, 0, -15));
+                stand.setLeftArmPose(rad(-60, 0, 0));
+                stand.setRightLegPose(rad(5, -5, 0));
+                stand.setLeftLegPose(rad(-15, 0, 5));
+            }
+            case 18 -> {
                 // Attention
                 stand.setHeadPose(rad(5, 0, 0));
                 stand.setRightArmPose(rad(-5, 0, -5));
