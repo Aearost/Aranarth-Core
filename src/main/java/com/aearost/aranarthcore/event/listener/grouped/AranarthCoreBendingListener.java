@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
+import com.aearost.aranarthcore.abilities.earthbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.Barrage;
@@ -202,6 +203,13 @@ public class AranarthCoreBendingListener implements Listener {
 						if (sandstorm != null) {
 							sandstorm.startCasting();
 						}
+					} else if (abilityName.equalsIgnoreCase("sandwave")) {
+						if (!SandWave.hasActiveInstance(player.getUniqueId())) {
+							org.bukkit.block.Block target = player.getTargetBlock(null, 5);
+							if (target != null && EarthAbility.isSandbendable(player, target.getType())) {
+								SandWave.setPendingSource(player.getUniqueId(), target);
+							}
+						}
 					}
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
@@ -263,6 +271,18 @@ public class AranarthCoreBendingListener implements Listener {
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
 		if (angeredSpirits != null) {
 			angeredSpirits.onLeftClick();
+			return;
+		}
+
+		// SandWave: left-click launches the wave from a previously sneaked source
+		if (SandWave.hasPendingSource(player.getUniqueId())) {
+			BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
+			if (bp != null && bp.getBoundAbilityName().equalsIgnoreCase("sandwave")
+					&& !SandWave.hasActiveInstance(player.getUniqueId())) {
+				org.bukkit.block.Block sourceBlock = SandWave.getPendingSource(player.getUniqueId());
+				SandWave.clearPendingSource(player.getUniqueId());
+				new SandWave(player, sourceBlock);
+			}
 		}
 	}
 
@@ -299,6 +319,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (SandWave.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -332,6 +355,7 @@ public class AranarthCoreBendingListener implements Listener {
 		if (angeredSpirits != null) {
 			angeredSpirits.onSlotChange();
 		}
+		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
 
 	/**
@@ -462,7 +486,7 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
-		// Sandstorm: left-clicking a sandbendable block selects the source and creates the ability
+		// Sandstorm: left-clicking a sandbendable block selects the source
 		if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock() != null) {
 			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 			if (bendingPlayer != null
@@ -503,6 +527,7 @@ public class AranarthCoreBendingListener implements Listener {
 		if (AstralProjection.isProjecting(player.getUniqueId())) {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
+		SandWave.clearPendingSource(player.getUniqueId());
 	}
 
 	/**
@@ -514,6 +539,7 @@ public class AranarthCoreBendingListener implements Listener {
 		if (AstralProjection.isProjecting(player.getUniqueId())) {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
+		SandWave.clearPendingSource(player.getUniqueId());
 	}
 
 }

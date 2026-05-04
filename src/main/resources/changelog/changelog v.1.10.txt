@@ -12,6 +12,7 @@ Major Features
 [+] Implemented the Barrage ability for combustion benders
 [+] Implemented the NoxiousFumes combustion ability
 [+] Implemented AngeredSpirits ability for Spiritual benders
+[+] Implemented the SandWave ability for sandbenders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

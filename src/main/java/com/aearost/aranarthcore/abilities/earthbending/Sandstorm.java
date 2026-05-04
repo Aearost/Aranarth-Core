@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.SandAbility;
@@ -15,39 +16,6 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 public class Sandstorm extends SandAbility implements AddonAbility {
-
-    // -------------------------------------------------------------------------
-    // Dust palettes — colour varies by source block type
-    // -------------------------------------------------------------------------
-
-    private static final Particle.DustOptions[] YELLOW_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0xC2, 0xB2, 0x80), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0xD2, 0xB4, 0x8C), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0xE8, 0xD5, 0xA0), 0.8f),
-            new Particle.DustOptions(Color.fromRGB(0xC1, 0x9A, 0x6B), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0xA8, 0x96, 0x60), 0.9f),
-    };
-    private static final Particle.DustOptions[] RED_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0xC8, 0x5A, 0x32), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0xD4, 0x6A, 0x3E), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0xB8, 0x4A, 0x28), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0xDC, 0x7A, 0x50), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0xA0, 0x3C, 0x1E), 0.8f),
-    };
-    private static final Particle.DustOptions[] SOUL_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0x6B, 0x4A, 0x2E), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0x7A, 0x56, 0x38), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0x5C, 0x3E, 0x28), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0x8A, 0x64, 0x46), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0x4A, 0x32, 0x1E), 0.8f),
-    };
-    private static final Particle.DustOptions[] GRAVEL_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0x80, 0x80, 0x80), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0x6E, 0x6E, 0x6E), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0x96, 0x90, 0x8A), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0x5A, 0x56, 0x52), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0xAA, 0xA4, 0x9C), 0.8f),
-    };
 
     public enum Phase { SELECTED, CASTING, COLLAPSING }
 
@@ -96,7 +64,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
         super(player);
 
         this.sourceBlock = sourceBlock;
-        this.dustPalette = pickDustPalette(sourceBlock.getType());
+        this.dustPalette = AranarthBendingUtils.pickSandDustPalette(sourceBlock.getType());
 
         if (!bPlayer.canBend(this)) {
             return;
@@ -393,28 +361,6 @@ public class Sandstorm extends SandAbility implements AddonAbility {
             }
         }
         return false;
-    }
-
-    private static Particle.DustOptions[] pickDustPalette(Material material) {
-        return switch (material) {
-            // Red/orange tones
-            case RED_SAND,
-                 RED_SANDSTONE, RED_SANDSTONE_SLAB, RED_SANDSTONE_STAIRS, RED_SANDSTONE_WALL,
-                 CHISELED_RED_SANDSTONE, CUT_RED_SANDSTONE, CUT_RED_SANDSTONE_SLAB,
-                 SMOOTH_RED_SANDSTONE, SMOOTH_RED_SANDSTONE_STAIRS, SMOOTH_RED_SANDSTONE_SLAB -> RED_SAND_PALETTE;
-            // Dark brown tones
-            case SOUL_SAND, SOUL_SOIL -> SOUL_SAND_PALETTE;
-            // Gray tones (all concrete powders included)
-            case GRAVEL, SUSPICIOUS_GRAVEL,
-                 WHITE_CONCRETE_POWDER, ORANGE_CONCRETE_POWDER, MAGENTA_CONCRETE_POWDER,
-                 LIGHT_BLUE_CONCRETE_POWDER, YELLOW_CONCRETE_POWDER, LIME_CONCRETE_POWDER,
-                 PINK_CONCRETE_POWDER, GRAY_CONCRETE_POWDER, LIGHT_GRAY_CONCRETE_POWDER,
-                 CYAN_CONCRETE_POWDER, PURPLE_CONCRETE_POWDER, BLUE_CONCRETE_POWDER,
-                 BROWN_CONCRETE_POWDER, GREEN_CONCRETE_POWDER, RED_CONCRETE_POWDER,
-                 BLACK_CONCRETE_POWDER -> GRAVEL_PALETTE;
-            // Yellow/tan tones (SAND, SANDSTONE variants, SUSPICIOUS_SAND)
-            default -> YELLOW_SAND_PALETTE;
-        };
     }
 
     public static boolean hasActiveInstance(UUID uuid) {
