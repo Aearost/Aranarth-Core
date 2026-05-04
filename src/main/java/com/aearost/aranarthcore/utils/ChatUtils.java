@@ -797,5 +797,7 @@ public class ChatUtils {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
 			}
 		}
+		// Send message to logs
+		Bukkit.getLogger().info(ChatUtils.stripColorFormatting(prefixReceive + assembledMsg));
 	}
 }
