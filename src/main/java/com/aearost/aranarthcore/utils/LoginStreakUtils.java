@@ -2,8 +2,8 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyRare;
+import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -114,14 +114,15 @@ public class LoginStreakUtils {
      */
     private static void giveReward(Player player, AranarthPlayer aranarthPlayer, int day, int rank) {
         if (day == 4) {
-            int count = getDiamondCount(rank);
-            ItemStack diamonds = new ItemStack(Material.DIAMOND, count);
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(diamonds);
+            ItemStack key = rank <= 2 ? new KeyVote().getItem() : new KeyRare().getItem();
+            Map<Integer, ItemStack> leftover = player.getInventory().addItem(key);
             for (ItemStack overflow : leftover.values()) {
                 player.getWorld().dropItemNaturally(player.getLocation(), overflow);
             }
+            String keyColor = rank <= 2 ? "&a" : "&6";
+            String keyName = rank <= 2 ? "Vote Crate Key" : "Rare Crate Key";
             player.sendMessage(ChatUtils.chatMessage(
-                    "&7Day &e" + day + " &7streak reward: &e" + count + " Diamonds"));
+                    "&7Day &e" + day + " &7streak reward: " + keyColor + keyName));
 
         } else if (day == 7) {
             ItemStack key = rank <= 2 ? new KeyRare().getItem() : new KeyEpic().getItem();
@@ -182,19 +183,11 @@ public class LoginStreakUtils {
     }
 
     /**
-     * Returns the number of diamonds awarded on day 4 for the given rank.
-     * Scales from 4 (rank 0) to 64 (rank 8).
-     */
-    public static int getDiamondCount(int rank) {
-        return (int) Math.round(4 + (rank / 8.0) * 60);
-    }
-
-    /**
      * Returns a color-formatted display string for the day's reward (used in the GUI lore).
      */
     public static String getRewardDisplayName(int day, int rank) {
         if (day == 4) {
-            return "&b" + getDiamondCount(rank) + " Diamonds";
+            return rank <= 2 ? "&aVote Crate Key" : "&6Rare Crate Key";
         } else if (day == 7) {
             return rank <= 2 ? "&6Rare Crate Key" : "&5Epic Crate Key";
         } else {

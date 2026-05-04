@@ -21,6 +21,7 @@ Minor Features
 [~] Fixed issue where EarthTunnel and Collapse weren't usable near dominions based on relation, and not by the Build permission
 [~] Fixed issue where streak messages in MOTD were not displayed correctly
 [+] Added log message for when console sends a message to Council Chat
+[~] Changed streak rewards to be for crate keys instead of diamonds on Day 4
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
