@@ -301,15 +301,29 @@ public class VineWhip extends PlantAbility implements AddonAbility {
             retractionBlocksRemoved++;
         }
 
-        // Pull the entity toward the player via velocity each tick so the motion is smooth
+        // Pull the entity along the vine path as it retracts
         if (pulledEntity != null && pulledEntity.isValid()) {
-            Vector pull = player.getLocation().toVector()
-                    .subtract(pulledEntity.getLocation().toVector())
-                    .normalize()
-                    .multiply(0.8);
-            // Small upward bias to counteract gravity during the pull
-            pull.setY(Math.max(pull.getY(), 0.2));
-            pulledEntity.setVelocity(pull);
+            Location target;
+            int currentFrontIndex = vineBlocks.size() - 1 - retractionBlocksRemoved;
+            if (currentFrontIndex >= 0) {
+                // Chase the retracting vine front - this keeps them on the vine's path
+                Block frontBlock = vineBlocks.get(currentFrontIndex);
+                target = frontBlock.getLocation().add(0.5, 0.5, 0.5);
+            } else {
+                // All blocks removed - aim just in front of the player
+                target = player.getLocation().add(
+                        player.getLocation().getDirection().setY(0).normalize().multiply(1.5));
+            }
+
+            Vector toTarget = target.toVector().subtract(pulledEntity.getLocation().toVector());
+            double distance = toTarget.length();
+            if (distance > 0.3) {
+                double speed = Math.min(0.5 + distance * 0.1, 1.6);
+                Vector pull = toTarget.normalize().multiply(speed);
+                // Tiny constant to counteract gravity - no aggressive lift
+                pull.add(new Vector(0, 0.08, 0));
+                pulledEntity.setVelocity(pull);
+            }
         }
 
         if (retractionBlocksRemoved >= vineBlocks.size()) {
@@ -345,11 +359,6 @@ public class VineWhip extends PlantAbility implements AddonAbility {
      * Ends the ability with the retraction animation complete and applies the cooldown.
      */
     private void finishAbility() {
-        // Land the pulled entity at the player once the vine has fully retracted
-        if (pulledEntity != null && pulledEntity.isValid()) {
-            pulledEntity.teleport(player.getLocation());
-            pulledEntity = null;
-        }
         cleanupBlocks();
         bPlayer.addCooldown(this);
         remove();
