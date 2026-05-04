@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.QuestTaskType;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import com.gmail.nossr50.mcMMO;
 import org.bukkit.Bukkit;
@@ -126,7 +127,9 @@ public class QuestEventListener implements Listener {
     public void onBlockBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         Material type = e.getBlock().getType();
 
@@ -213,7 +216,9 @@ public class QuestEventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         Material placed = e.getBlockPlaced().getType();
         if (PLANTABLE_CROP_MATERIALS.contains(placed)) {
@@ -239,10 +244,14 @@ public class QuestEventListener implements Listener {
         }
 
         Player killer = getPlayerKiller(entity);
-        if (killer == null) return;
+        if (killer == null) {
+            return;
+        }
 
         String worldName = killer.getWorld().getName();
-        if (!QuestUtils.isAllowedKillWorld(worldName)) return;
+        if (!QuestUtils.isAllowedKillWorld(worldName)) {
+            return;
+        }
 
         // Hostile mob kills
         if (entity instanceof Enemy) {
@@ -292,10 +301,14 @@ public class QuestEventListener implements Listener {
 
     @EventHandler
     public void onPlayerFish(PlayerFishEvent e) {
-        if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) return;
+        if (e.getState() != PlayerFishEvent.State.CAUGHT_FISH) {
+            return;
+        }
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
         QuestUtils.updateProgress(player, QuestTaskType.FISH, 1);
     }
 
@@ -305,18 +318,30 @@ public class QuestEventListener implements Listener {
 
     @EventHandler
     public void onFurnaceResultTake(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
         InventoryType topType = e.getView().getTopInventory().getType();
-        if (topType != InventoryType.FURNACE && topType != InventoryType.SMOKER) return;
+        if (topType != InventoryType.FURNACE && topType != InventoryType.SMOKER) {
+            return;
+        }
         // Result slot is raw slot 2
-        if (e.getRawSlot() != 2) return;
+        if (e.getRawSlot() != 2) {
+            return;
+        }
 
         ItemStack result = e.getCurrentItem();
-        if (result == null || result.getType().isAir()) return;
-        if (!COOKED_FOOD_MATERIALS.contains(result.getType())) return;
+        if (result == null || result.getType().isAir()) {
+            return;
+        }
+        if (!COOKED_FOOD_MATERIALS.contains(result.getType())) {
+            return;
+        }
 
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         Material type = result.getType();
 
@@ -341,9 +366,13 @@ public class QuestEventListener implements Listener {
 
     @EventHandler
     public void onCraftItem(CraftItemEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isCraftingAllowedWorld(worldName)) return;
+        if (!QuestUtils.isCraftingAllowedWorld(worldName)) {
+            return;
+        }
 
         ItemStack result = e.getRecipe().getResult();
         Material type = result.getType();
@@ -363,7 +392,9 @@ public class QuestEventListener implements Listener {
             taskType = QuestTaskType.CRAFT_GOLDEN_APPLE;
         }
 
-        if (taskType == null) return;
+        if (taskType == null) {
+            return;
+        }
 
         // Snapshot inventory before craft completes, then compare after 1 tick
         // to accurately count how many items were crafted (handles shift-click)
@@ -385,7 +416,9 @@ public class QuestEventListener implements Listener {
     private Map<Material, Integer> countRelevantItems(Player player, Material target) {
         Map<Material, Integer> counts = new HashMap<>();
         for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) continue;
+            if (item == null) {
+                continue;
+            }
             if (item.getType() == target) {
                 counts.merge(target, item.getAmount(), Integer::sum);
             }
@@ -399,9 +432,13 @@ public class QuestEventListener implements Listener {
 
     @EventHandler
     public void onEntityBreed(EntityBreedEvent e) {
-        if (!(e.getBreeder() instanceof Player player)) return;
+        if (!(e.getBreeder() instanceof Player player)) {
+            return;
+        }
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
         QuestUtils.updateProgress(player, QuestTaskType.BREED_ANIMALS, 1);
     }
 
@@ -420,7 +457,9 @@ public class QuestEventListener implements Listener {
 
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
-        if (!QuestUtils.isSurvivalWorld(worldName)) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
+            return;
+        }
 
         QuestUtils.updateProgress(player, QuestTaskType.TRAVEL_BLOCKS, 1);
     }
@@ -435,15 +474,21 @@ public class QuestEventListener implements Listener {
      */
     private Player getPlayerKiller(LivingEntity entity) {
         Player directKiller = entity.getKiller();
-        if (directKiller != null) return directKiller;
+        if (directKiller != null) {
+            return directKiller;
+        }
 
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             Entity damager = dmgByEntity.getDamager();
-            if (damager instanceof Player p) return p;
+            if (damager instanceof Player p) {
+                return p;
+            }
             if (damager instanceof Projectile proj) {
                 ProjectileSource shooter = proj.getShooter();
-                if (shooter instanceof Player p) return p;
+                if (shooter instanceof Player p) {
+                    return p;
+                }
             }
         }
         return null;
@@ -468,7 +513,9 @@ public class QuestEventListener implements Listener {
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             // If the last damage was projectile, it's not a sword kill
-            if (dmgByEntity.getDamager() instanceof Projectile) return false;
+            if (dmgByEntity.getDamager() instanceof Projectile) {
+                return false;
+            }
         }
         ItemStack mainHand = killer.getInventory().getItemInMainHand();
         return mainHand.getType().name().endsWith(SWORD_SUFFIX);
@@ -480,7 +527,9 @@ public class QuestEventListener implements Listener {
     private boolean isMatureCrop(Block block) {
         Material type = block.getType();
         // Melon and pumpkin blocks don't have Ageable — they are always harvestable
-        if (type == Material.MELON || type == Material.PUMPKIN) return true;
+        if (type == Material.MELON || type == Material.PUMPKIN) {
+            return true;
+        }
 
         if (block.getBlockData() instanceof Ageable ageable) {
             return ageable.getAge() >= ageable.getMaximumAge();

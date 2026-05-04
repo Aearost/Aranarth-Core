@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiLoginStreak;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -18,9 +19,19 @@ public class GuiLoginStreakClick {
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
-        if (!(e.getWhoClicked() instanceof Player player)) return;
-        if (e.getClickedInventory() == null) return;
-        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) return;
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (e.getClickedInventory() == null) {
+            return;
+        }
+        if (!e.getClickedInventory().equals(e.getView().getTopInventory())) {
+            return;
+        }
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim login streaks in survival worlds!"));
+            return;
+        }
 
         int slot = e.getRawSlot();
         UUID uuid = player.getUniqueId();
@@ -33,14 +44,22 @@ public class GuiLoginStreakClick {
                 break;
             }
         }
-        if (clickedDay == -1) return;
+        if (clickedDay == -1) {
+            return;
+        }
 
         int currentDay = LoginStreakUtils.getStreakDay(uuid);
-        if (clickedDay != currentDay) return;
-        if (!LoginStreakUtils.canClaim(uuid)) return;
+        if (clickedDay != currentDay) {
+            return;
+        }
+        if (!LoginStreakUtils.canClaim(uuid)) {
+            return;
+        }
 
         boolean success = LoginStreakUtils.claimStreak(player);
-        if (!success) return;
+        if (!success) {
+            return;
+        }
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 

@@ -858,26 +858,16 @@ public class QuestUtils {
     // -------------------------------------------------------------------------
 
     /**
-     * Returns true if the world is a valid survival world for quest progress.
-     */
-    public static boolean isSurvivalWorld(String worldName) {
-        return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
-                || worldName.equals("smp") || worldName.equals("smp_nether") || worldName.equals("smp_the_end")
-                || worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
-                || worldName.equals("spawn");
-    }
-
-    /**
      * Returns true if the world allows crafting quest progress (survival worlds + spawn).
      */
     public static boolean isCraftingAllowedWorld(String worldName) {
-        return isSurvivalWorld(worldName) || worldName.equals("spawn");
+        return AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn");
     }
 
     /**
      * Returns true if the world allows player-kill quest progress (survival + arena).
      */
     public static boolean isAllowedKillWorld(String worldName) {
-        return isSurvivalWorld(worldName) || worldName.equals("arena");
+        return AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("arena");
     }
 }
