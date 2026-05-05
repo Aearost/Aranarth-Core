@@ -8,6 +8,7 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -131,6 +132,11 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 			// Spawn particles every ~0.5 blocks
 			if (i % 2 == 0) {
 				blastLocation.getWorld().spawnParticle(Particle.SONIC_BOOM, blastLocation, 1, 0, 0, 0, 0);
+			}
+
+			Block block = blastLocation.getBlock();
+			if (isGlass(block.getType())) {
+				shatterGlass(block);
 			}
 
 			checkEntityCollisions();

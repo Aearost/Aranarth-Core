@@ -3,6 +3,9 @@ package com.aearost.aranarthcore.abilities.airbending;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.SubAbility;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -24,6 +27,22 @@ public abstract class SoundAbility extends AirAbility implements SubAbility {
 	@Override
 	public Element getElement() {
 		return SOUND;
+	}
+
+	/**
+	 * Returns true if the given material is any glass variant (glass block or glass pane,
+	 * including all stained/colored variants).
+	 */
+	protected static boolean isGlass(Material material) {
+		return material.name().contains("GLASS");
+	}
+
+	/**
+	 * Breaks a glass block and plays the glass break sound at its location.
+	 */
+	protected static void shatterGlass(Block block) {
+		block.getWorld().playSound(block.getLocation(), Sound.BLOCK_GLASS_BREAK, 1.0f, 1.0f);
+		block.setType(Material.AIR);
 	}
 
 	/**

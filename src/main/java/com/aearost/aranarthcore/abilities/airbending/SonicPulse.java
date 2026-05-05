@@ -8,6 +8,7 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -146,8 +147,14 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
             pulse.location.add(pulse.direction.clone().multiply(PULSE_SPEED));
             pulse.distanceTraveled += PULSE_SPEED;
 
+            // Shatter glass blocks without stopping the pulse
+            Block block = pulse.location.getBlock();
+            if (isGlass(block.getType())) {
+                shatterGlass(block);
+            }
+
             // Block collision — pulse stops; close enough to the caster triggers recoil
-            if (pulse.location.getBlock().getType().isSolid()) {
+            if (block.getType().isSolid()) {
                 if (pulse.distanceTraveled <= MAX_RECOIL_DISTANCE) {
                     applyPlayerRecoil(pulse);
                 }

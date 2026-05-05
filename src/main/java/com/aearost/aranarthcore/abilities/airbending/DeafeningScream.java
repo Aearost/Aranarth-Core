@@ -8,6 +8,7 @@ import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
@@ -100,6 +101,24 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
             if (entity.getLocation().distance(origin) <= radius) {
                 DamageHandler.damageEntity(entity, damage, this);
                 applySoundDebuff(entity);
+            }
+        }
+
+        // Shatter glass blocks within the burst radius
+        int radiusInt = (int) Math.ceil(radius);
+        for (int dx = -radiusInt; dx <= radiusInt; dx++) {
+            for (int dy = -radiusInt; dy <= radiusInt; dy++) {
+                for (int dz = -radiusInt; dz <= radiusInt; dz++) {
+                    if (dx * dx + dy * dy + dz * dz <= radius * radius) {
+                        Block block = origin.getWorld().getBlockAt(
+                                origin.getBlockX() + dx,
+                                origin.getBlockY() + dy,
+                                origin.getBlockZ() + dz);
+                        if (isGlass(block.getType())) {
+                            shatterGlass(block);
+                        }
+                    }
+                }
             }
         }
 
