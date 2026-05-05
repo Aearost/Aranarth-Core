@@ -228,7 +228,7 @@ public class Regrowth extends PlantAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Channel your waterbending skill to speed up the growth of grass and flowers into bloom around you.\n" +
+        return "Channel your plantbending to speed up the growth of grass and flowers into bloom around you.\n" +
                 ChatUtils.translateToColor("&fUsage: Sneak (Hold)");
     }
 }

@@ -37,6 +37,7 @@ Minor Features
 [+] Added new player join sound effect
 [~] Adjusted UI Toast Challenge Complete pitches in various spots
 [~] Fixed error in command completion of /ac home due to non-existing player bug
+[+] Implemented /ac invswap to manually swap inventories of worlds
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

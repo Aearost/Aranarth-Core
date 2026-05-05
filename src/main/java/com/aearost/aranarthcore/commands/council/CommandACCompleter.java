@@ -28,7 +28,7 @@ public class CommandACCompleter implements TabCompleter {
 
 	private static final List<String> COUNCIL_OPTIONS = List.of(
 		"admin", "ban", "broadcast", "clearchat", "dateset", "give",
-		"home", "invsee", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
+		"home", "invsee", "invswap", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
 		"speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
 		"vanish", "vpedit", "warn", "weather", "whereis"
 	);
@@ -141,6 +141,11 @@ public class CommandACCompleter implements TabCompleter {
 						}
 					}
 				}
+				yield List.of();
+			}
+			case "invswap" -> {
+				if (args.length == 2) yield filter(List.of("ARENA", "CREATIVE", "SURVIVAL"), args[1]);
+				if (args.length == 3) yield filterPlayers(args[2]);
 				yield List.of();
 			}
 			case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();

@@ -101,6 +101,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandAdminHome.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("vpedit")) {
 			commandResult = CommandVpEdit.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("invswap")) {
+			commandResult = CommandInvSwap.onCommand(sender, args);
 		}
 		return commandResult;
 	}
