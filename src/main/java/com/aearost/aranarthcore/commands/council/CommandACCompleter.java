@@ -4,7 +4,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -131,10 +130,11 @@ public class CommandACCompleter implements TabCompleter {
 			case "home" -> {
 				if (args.length == 2) yield filterPlayers(args[1]);
 				if (args.length == 3) {
-					OfflinePlayer homeTarget = Bukkit.getOfflinePlayer(args[1]);
+					Player homeTarget = Bukkit.getPlayerExact(args[1]);
 					if (homeTarget != null) {
-						if (AranarthUtils.getPlayer(homeTarget.getUniqueId()) != null) {
-							List<String> homeNames = AranarthUtils.getPlayer(homeTarget.getUniqueId()).getHomes().stream()
+						AranarthPlayer homeTargetAranarthPlayer = AranarthUtils.getPlayer(homeTarget.getUniqueId());
+						if (homeTargetAranarthPlayer != null) {
+							List<String> homeNames = homeTargetAranarthPlayer.getHomes().stream()
 									.map(h -> ChatUtils.stripColorFormatting(h.getName()))
 									.collect(Collectors.toList());
 							yield filter(homeNames, args[2]);

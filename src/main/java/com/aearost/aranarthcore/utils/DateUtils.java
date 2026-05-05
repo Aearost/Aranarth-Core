@@ -244,7 +244,7 @@ public class DateUtils {
 
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				if (isNewMonth) {
-					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.5f);
+					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.25f);
 				} else {
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.5f);
 					player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 1f);

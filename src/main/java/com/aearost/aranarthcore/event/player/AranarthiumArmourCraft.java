@@ -91,7 +91,7 @@ public class AranarthiumArmourCraft {
 
 
 							ItemMeta meta = inventory.getItem(2).getItemMeta();
-							player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1F);
+							player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 0.5F, 1.5F);
 							String type = meta.getPersistentDataContainer().get(ARMOR_TYPE, PersistentDataType.STRING);
 							if (type.equals("aquatic") || type.equals("ardent") || type.equals("elven")) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + meta.getDisplayName()));

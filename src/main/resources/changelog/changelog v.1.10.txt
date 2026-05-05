@@ -28,6 +28,10 @@ Minor Features
 [~] Changed streak rewards to be for crate keys instead of diamonds on Day 4
 [+] Added /ac tpw to force TP to different worlds
 [+] Added null check where the bending player was null when teleporting
+[~] Fixed error in command completion of /ac home due to non-existing player bug
+[+] Added new player join sound effect
+[~] Adjusted UI Toast Challenge Complete pitches in various spots
+[~] Fixed error in command completion of /ac home due to non-existing player bug
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

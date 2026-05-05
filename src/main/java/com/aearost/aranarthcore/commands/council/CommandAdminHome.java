@@ -44,8 +44,11 @@ public class CommandAdminHome {
 			player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
 			return true;
 		}
-
 		AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+		if (targetAranarthPlayer == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
+			return true;
+		}
 		String homeName = args[2];
 
 		for (Home home : targetAranarthPlayer.getHomes()) {

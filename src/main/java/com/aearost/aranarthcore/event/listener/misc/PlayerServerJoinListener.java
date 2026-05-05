@@ -152,7 +152,13 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 1L);
 
-		playJoinSound();
+		if (finalIsNewPlayer) {
+			for (Player online : Bukkit.getOnlinePlayers()) {
+				online.playSound(online, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
+			}
+		} else {
+			playJoinSound();
+		}
 		AranarthUtils.updateTab();
 	}
 
