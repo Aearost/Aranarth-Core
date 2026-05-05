@@ -14,6 +14,7 @@ Major Features
 [+] Implemented AngeredSpirits ability for Spiritual benders
 [+] Implemented the SandWave ability for sandbenders
 [+] Implemented the Amplification ability for soundbenders
+[+] Implemented the DeafeningScream ability for soundbenders
 [+] Added mirrored poses for several armor stand poses
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [~] Fixed null pointer due to pets not having any owner yet
