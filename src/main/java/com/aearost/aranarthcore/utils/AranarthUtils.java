@@ -3514,4 +3514,20 @@ public class AranarthUtils {
 				|| worldName.equals("spawn");
 	}
 
+	/**
+	 * Determines if the destroyed block is a flower.
+	 * @param type The Material.
+	 * @return Whether the destroyed block is a flower.
+	 */
+	public static boolean isFlower(Material type) {
+		return type == Material.DANDELION || type == Material.POPPY || type == Material.BLUE_ORCHID || type == Material.ALLIUM
+				|| type == Material.AZURE_BLUET || type == Material.RED_TULIP || type == Material.ORANGE_TULIP
+				|| type == Material.WHITE_TULIP || type == Material.PINK_TULIP || type == Material.OXEYE_DAISY
+				|| type == Material.CORNFLOWER || type == Material.LILY_OF_THE_VALLEY || type == Material.TORCHFLOWER
+				|| type == Material.PITCHER_PLANT || type == Material.CACTUS_FLOWER || type == Material.OPEN_EYEBLOSSOM
+				|| type == Material.CLOSED_EYEBLOSSOM || type == Material.WITHER_ROSE || type == Material.PINK_PETALS
+				|| type == Material.WILDFLOWERS || type == Material.SPORE_BLOSSOM || type == Material.SUNFLOWER || type == Material.LILAC
+				|| type == Material.ROSE_BUSH || type == Material.PEONY || type == Material.CHORUS_FLOWER;
+	}
+
 }
