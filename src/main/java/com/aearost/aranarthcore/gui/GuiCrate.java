@@ -61,14 +61,14 @@ public class GuiCrate {
 	private Inventory initializeVoteCrate(Player player) {
 		Inventory gui = Bukkit.getServer().createInventory(player, 27, "Crate - Vote");
 
-		ItemStack money50 = new ItemStack(Material.GOLD_INGOT);
-		ItemMeta money50Meta = money50.getItemMeta();
-		money50Meta.setDisplayName(ChatUtils.translateToColor("&6&l$50 of In-Game Currency"));
-		List<String> money50Lore = new ArrayList<>();
-		money50Lore.add(ChatUtils.translateToColor("&a12% Chance"));
-		money50Meta.setLore(money50Lore);
-		money50.setItemMeta(money50Meta);
-		gui.setItem(2, money50);
+		ItemStack money100 = new ItemStack(Material.GOLD_INGOT);
+		ItemMeta money100Meta = money100.getItemMeta();
+		money100Meta.setDisplayName(ChatUtils.translateToColor("&6&l$100 of In-Game Currency"));
+		List<String> money100Lore = new ArrayList<>();
+		money100Lore.add(ChatUtils.translateToColor("&a12% Chance"));
+		money100Meta.setLore(money100Lore);
+		money100.setItemMeta(money100Meta);
+		gui.setItem(2, money100);
 
 		ItemStack bread = new ItemStack(Material.BREAD, 16);
 		ItemMeta breadMeta = bread.getItemMeta();

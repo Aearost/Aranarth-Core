@@ -387,11 +387,11 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 50);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 100);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$50 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$100 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.BREAD, 16);

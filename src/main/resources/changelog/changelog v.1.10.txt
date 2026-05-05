@@ -2,8 +2,8 @@ AranarthCore v. 1.10
 
 Major Features
 [+] Implemented permission-based custom armor stand poses
-[+] Implemented the CableSlash combo
-[+] Added the soundbending sub-element for airbenders, unlockable at Count
+[+] Implemented the CableSlash metal combo
+[+] Added the Sound sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders
 [+] Implemented the AstralShot spiritual combo
 [+] Implemented the Sandstorm ability for sandbenders
@@ -18,9 +18,7 @@ Major Features
 [+] Implemented the SonicPulse ability for soundbenders
 [+] Implemented the ToxicSpores ability for plantbenders
 [+] Implemented the Regrowth ability for plantbenders
-[+] Added mirrored poses for several armor stand poses
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
-[~] Fixed null pointer due to pets not having any owner yet
 [+] Added a basic starter kit to new players
 
 Minor Features
@@ -38,6 +36,8 @@ Minor Features
 [~] Adjusted UI Toast Challenge Complete pitches in various spots
 [~] Fixed error in command completion of /ac home due to non-existing player bug
 [+] Implemented /ac invswap to manually swap inventories of worlds
+[~] Fixed null pointer due to pets not having any owner yet
+[~] Increased vote crate money reward from $50 to $100
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
