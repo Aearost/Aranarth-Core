@@ -1,12 +1,12 @@
 package com.aearost.aranarthcore.abilities.airbending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,9 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class Amplification extends SoundAbility implements AddonAbility {
-
-    private static final Color TURQUOISE = Color.fromRGB(72, 209, 204);
-    private static final Particle.DustOptions RING_DUST = new Particle.DustOptions(TURQUOISE, 0.8f);
 
     // Tracks players with an active amplification buff so the static listener can apply it
     private static final Map<UUID, Amplification> activeAmplifications = new HashMap<>();
@@ -121,7 +118,29 @@ public class Amplification extends SoundAbility implements AddonAbility {
             return;
         }
 
+        // Consume immediately when the player starts any SoundAbility, even before it hits anything
+        CoreAbility active = findActiveSoundAbility();
+        if (active != null) {
+            consumed = true;
+            lockedMultiplier = getCurrentMultiplier();
+            triggeredAbility = active;
+            return;
+        }
+
         spawnBodyRings(elapsed);
+    }
+
+    /**
+     * Returns the first active SoundAbility for this player that is not Amplification itself,
+     * or null if none is currently running.
+     */
+    private CoreAbility findActiveSoundAbility() {
+        for (CoreAbility ability : CoreAbility.getAbilities(player)) {
+            if (ability instanceof SoundAbility && !(ability instanceof Amplification)) {
+                return ability;
+            }
+        }
+        return null;
     }
 
     private double getCurrentMultiplier() {
@@ -205,7 +224,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
             double angle = (2.0 * Math.PI / points) * i;
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, RING_DUST);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
         }
     }
 

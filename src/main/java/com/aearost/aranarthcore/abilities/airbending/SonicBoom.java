@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.abilities.airbending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,7 +18,7 @@ import java.util.UUID;
 
 public class SonicBoom extends SoundAbility implements AddonAbility {
 
-	private static final Particle.DustOptions CHARGE_DUST = new Particle.DustOptions(Color.fromRGB(0, 128, 128), 0.5f);
+	private static final Particle.DustOptions CHARGE_DUST = AranarthBendingUtils.SOUND_CHARGE_DUST;
 
 	@Attribute(Attribute.CHARGE_DURATION)
 	private long chargeDuration;

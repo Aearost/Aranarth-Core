@@ -20,6 +20,21 @@ import java.util.Set;
 public class AranarthBendingUtils {
 
     // -------------------------------------------------------------------------
+    // Sound-bending dust palette — shared across all sound abilities
+    // -------------------------------------------------------------------------
+
+    /** Turquoise ring colour used by DeafeningScream and Amplification. */
+    public static final Color SOUND_COLOR_TURQUOISE = Color.fromRGB(72, 209, 204);
+    /** Dark teal colour used by SonicBoom's charge particles. */
+    public static final Color SOUND_COLOR_TEAL      = Color.fromRGB(0, 128, 128);
+    /** Sky-blue colour used by SonicPulse's travelling rings. */
+    public static final Color SOUND_COLOR_PULSE     = Color.fromRGB(100, 210, 255);
+
+    public static final Particle.DustOptions SOUND_RING_DUST   = new Particle.DustOptions(SOUND_COLOR_TURQUOISE, 0.8f);
+    public static final Particle.DustOptions SOUND_CHARGE_DUST = new Particle.DustOptions(SOUND_COLOR_TEAL,      0.5f);
+    public static final Particle.DustOptions SOUND_PULSE_DUST  = new Particle.DustOptions(SOUND_COLOR_PULSE,     1.1f);
+
+    // -------------------------------------------------------------------------
     // Sandbending dust palettes — shared across sand abilities
     // -------------------------------------------------------------------------
 

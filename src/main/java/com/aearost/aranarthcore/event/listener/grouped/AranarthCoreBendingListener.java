@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.Amplification;
 import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.DeafeningScream;
+import com.aearost.aranarthcore.abilities.airbending.SonicPulse;
 import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.combo.AstralShot;
@@ -172,6 +173,10 @@ public class AranarthCoreBendingListener implements Listener {
 					} else if (abilityName.equalsIgnoreCase("deafeningscream")) {
 						if (!CoreAbility.hasAbility(player, DeafeningScream.class)) {
 							new DeafeningScream(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("sonicpulse")) {
+						if (!CoreAbility.hasAbility(player, SonicPulse.class)) {
+							new SonicPulse(player);
 						}
 					}
 				}

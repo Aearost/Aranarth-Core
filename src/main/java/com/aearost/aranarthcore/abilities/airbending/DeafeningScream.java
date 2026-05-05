@@ -1,10 +1,10 @@
 package com.aearost.aranarthcore.abilities.airbending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -18,8 +18,6 @@ import java.util.Random;
 
 public class DeafeningScream extends SoundAbility implements AddonAbility {
 
-    private static final Color TURQUOISE = Color.fromRGB(72, 209, 204);
-    private static final Particle.DustOptions RING_DUST = new Particle.DustOptions(TURQUOISE, 0.8f);
     private static final Random RANDOM = new Random();
 
     private static final int HALO_POINTS = 18;
@@ -105,7 +103,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
             }
         }
 
-        // Penalise the caster for the immense strain
+        // Penalise the caster
         player.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 2, false, true));
 
         spawnBurstWave();
@@ -133,15 +131,14 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
                     double angle = (2.0 * Math.PI / points) * i;
                     double x = Math.cos(angle) * ringRadius;
                     double z = Math.sin(angle) * ringRadius;
-                    center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, RING_DUST);
+                    center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
                 }
             }
         }
     }
 
     /**
-     * Spawns a turquoise halo ring in the plane perpendicular to the player's look direction,
-     * centred just in front of the player's face as a charge visual cue.
+     * Spawns a turquoise halo ring in the plane perpendicular to the player's look direction.
      */
     private void spawnFaceHalo() {
         Location eyeLocation = player.getEyeLocation();
@@ -162,7 +159,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
             Vector offset = right.clone().multiply(Math.cos(angle) * HALO_RADIUS)
                     .add(up.clone().multiply(Math.sin(angle) * HALO_RADIUS));
             Location point = center.clone().add(offset);
-            point.getWorld().spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, RING_DUST);
+            point.getWorld().spawnParticle(Particle.DUST, point, 1, 0, 0, 0, 0, AranarthBendingUtils.SOUND_RING_DUST);
         }
     }
 
