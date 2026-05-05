@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.abilities.firebending.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
+import com.aearost.aranarthcore.abilities.waterbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
@@ -197,6 +198,10 @@ public class AranarthCoreBendingListener implements Listener {
 							// Re-source in SOURCED phase; ignored in CASTING phase
 							existing.onSneak();
 						}
+					} else if (abilityName.equalsIgnoreCase("toxicspores")) {
+						if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+							new ToxicSpores(player);
+						}
 					}
 				}
 			}
@@ -277,6 +282,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// ToxicSpores: left-click begins channeling from the READY state
+		ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(player.getUniqueId());
+		if (toxicSpores != null) {
+			toxicSpores.startChanneling();
+			return;
+		}
+
 		// IceShards: left-click fires the charged shards
 		IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
 		if (iceShards != null) {
@@ -333,6 +345,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -367,6 +383,10 @@ public class AranarthCoreBendingListener implements Listener {
 		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
 		if (noxiousFumes != null) {
 			noxiousFumes.endChanneling();
+		}
+		ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
+		if (toxicSpores != null) {
+			toxicSpores.endChanneling();
 		}
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
 		if (angeredSpirits != null) {
@@ -499,6 +519,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
