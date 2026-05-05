@@ -133,10 +133,12 @@ public class CommandACCompleter implements TabCompleter {
 				if (args.length == 3) {
 					OfflinePlayer homeTarget = Bukkit.getOfflinePlayer(args[1]);
 					if (homeTarget != null) {
-						List<String> homeNames = AranarthUtils.getPlayer(homeTarget.getUniqueId()).getHomes().stream()
-							.map(h -> ChatUtils.stripColorFormatting(h.getName()))
-							.collect(Collectors.toList());
-						yield filter(homeNames, args[2]);
+						if (AranarthUtils.getPlayer(homeTarget.getUniqueId()) != null) {
+							List<String> homeNames = AranarthUtils.getPlayer(homeTarget.getUniqueId()).getHomes().stream()
+									.map(h -> ChatUtils.stripColorFormatting(h.getName()))
+									.collect(Collectors.toList());
+							yield filter(homeNames, args[2]);
+						}
 					}
 				}
 				yield List.of();
