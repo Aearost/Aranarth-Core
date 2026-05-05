@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.abilities.firebending.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
+import com.aearost.aranarthcore.abilities.waterbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
@@ -202,6 +203,10 @@ public class AranarthCoreBendingListener implements Listener {
 						if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
 							new ToxicSpores(player);
 						}
+					} else if (abilityName.equalsIgnoreCase("regrowth")) {
+						if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
+							new Regrowth(player);
+						}
 					}
 				}
 			}
@@ -349,6 +354,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (Regrowth.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -387,6 +396,10 @@ public class AranarthCoreBendingListener implements Listener {
 		ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
 		if (toxicSpores != null) {
 			toxicSpores.endChanneling();
+		}
+		Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
+		if (regrowth != null) {
+			regrowth.remove();
 		}
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
 		if (angeredSpirits != null) {
@@ -523,6 +536,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (Regrowth.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}

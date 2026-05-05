@@ -221,6 +221,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.deafeningscream", true);
 		perms.setPermission("bending.ability.sonicpulse", true);
 		perms.setPermission("bending.ability.toxicspores", true);
+		perms.setPermission("bending.ability.regrowth", true);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);

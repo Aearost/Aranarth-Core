@@ -17,6 +17,7 @@ Major Features
 [+] Implemented the DeafeningScream ability for soundbenders
 [+] Implemented the SonicPulse ability for soundbenders
 [+] Implemented the ToxicSpores ability for plantbenders
+[+] Implemented the Regrowth ability for plantbenders
 [+] Added mirrored poses for several armor stand poses
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [~] Fixed null pointer due to pets not having any owner yet

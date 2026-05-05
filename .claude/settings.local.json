@@ -64,7 +64,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.jar -o -type f -path */projectkorra/*)",
       "Bash(grep -rn extends.*Ability C:UsersliamhIdeaProjectsAranarthCoresrcmainjavacomaearostaranarthcoreabilitiesspiritual)",
       "Bash(grep \"\\\\.java$\")",
-      "Bash(grep -E \"\\\\.java$\")"
+      "Bash(grep -E \"\\\\.java$\")",
+      "Bash(find ~/.m2 -name *projectkorra* -type f)",
+      "Bash(grep \"\\\\.jar$\")"
     ]
   }
 }

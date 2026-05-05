@@ -16,7 +16,7 @@ import java.util.*;
 
 public class ToxicSpores extends PlantAbility implements AddonAbility {
 
-    public enum Phase { READY, CHANNELING, DISPERSING }
+    public enum Phase {READY, CHANNELING, DISPERSING}
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -34,22 +34,19 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     private double sourceCheckRadius;
 
     private Phase phase;
-    private Block sourceBlock; // The specific flower block that was locked in on activation
+    private Block sourceBlock;
     private long readyStartTime;
     private long channelingStartTime;
     private long lastTravelerLaunchTime;
 
     private static final long CHARGE_DURATION_MS = 500;
-    // Launch a new spore traveler every 100ms during channeling (denser cloud than NoxiousFumes)
     private static final long TRAVELER_LAUNCH_INTERVAL_MS = 100;
     private static final long EFFECT_INTERVAL_MS = 500;
     private static final int EFFECT_DURATION_TICKS = 80; // 4 seconds
     private static final int POISON_AMPLIFIER = 4; // Poison V
 
-    // Deep forest green — same as RazorLeaves
     private static final Particle.DustOptions SPORE_DUST =
             new Particle.DustOptions(Color.fromRGB(0, 90, 10), 0.6f);
-    // Rare pink accent particles
     private static final Particle.DustOptions SPORE_DUST_PINK =
             new Particle.DustOptions(Color.fromRGB(210, 80, 140), 0.5f);
 
@@ -152,8 +149,12 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
      * Transitions from READY to CHANNELING when the player left-clicks.
      */
     public void startChanneling() {
-        if (phase != Phase.READY) return;
-        if (System.currentTimeMillis() - readyStartTime < CHARGE_DURATION_MS) return;
+        if (phase != Phase.READY) {
+            return;
+        }
+        if (System.currentTimeMillis() - readyStartTime < CHARGE_DURATION_MS) {
+            return;
+        }
         phase = Phase.CHANNELING;
         channelingStartTime = System.currentTimeMillis();
         lastTravelerLaunchTime = 0;
@@ -170,7 +171,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             phase = Phase.DISPERSING;
             bPlayer.addCooldown(this);
         }
-        // If already DISPERSING, do nothing — let it finish naturally.
+        // If already DISPERSING, let it finish naturally
     }
 
     // -------------------------------------------------------------------------
@@ -204,7 +205,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             return;
         }
         double chargeFraction = Math.min(1.0,
-                (double)(System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
+                (double) (System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
         drawSourceLine(chargeFraction);
     }
 
@@ -244,7 +245,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     }
 
     // -------------------------------------------------------------------------
-    // Source line (source block → left hand, drawn every tick)
+    // Source line (source block to the left hand, drawn every tick)
     // -------------------------------------------------------------------------
 
     private void drawSourceLine(double fraction) {
@@ -253,7 +254,9 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         World world = player.getWorld();
         Vector toHand = leftHand.toVector().subtract(sourceTop.toVector());
         double totalLength = toHand.length();
-        if (totalLength < 0.1) return;
+        if (totalLength < 0.1) {
+            return;
+        }
         Vector dir = toHand.clone().normalize();
         double drawLength = totalLength * fraction;
 
@@ -278,7 +281,9 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     private void launchTraveler() {
         Location handLoc = getRightHandLocation();
         Location target = getTargetLocation();
-        if (handLoc.distanceSquared(target) < 0.25) return;
+        if (handLoc.distanceSquared(target) < 0.25) {
+            return;
+        }
         travelers.add(new SporeTraveler(handLoc, target));
     }
 
@@ -347,8 +352,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     // -------------------------------------------------------------------------
 
     /**
-     * Tracks every living entity inside any active puff and applies
-     * Nausea and Poison V every 0.5s they remain in the spores.
+     * Tracks targets inside any active puff and applies Nausea and Poison V every 0.5s they remain in the spores.
      */
     private void tickEffects() {
         if (puffs.isEmpty()) {
@@ -365,9 +369,16 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
             double radiusSq = radius * radius;
 
             for (Entity entity : puff.center.getWorld().getNearbyEntities(puff.center, radius, radius, radius)) {
-                if (!(entity instanceof LivingEntity living)) continue;
-                if (entity.getUniqueId().equals(player.getUniqueId())) continue; // caster is immune
-                if (entity.getLocation().distanceSquared(puff.center) > radiusSq) continue;
+                if (!(entity instanceof LivingEntity living)) {
+                    continue;
+                }
+                // Player using the ability is immune
+                if (entity.getUniqueId().equals(player.getUniqueId())) {
+                    continue;
+                }
+                if (entity.getLocation().distanceSquared(puff.center) > radiusSq) {
+                    continue;
+                }
 
                 UUID id = entity.getUniqueId();
                 inSpores.add(id);
@@ -429,8 +440,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     }
 
     /**
-     * Finds the nearest flower block within sourceCheckRadius and returns it,
-     * or null if none exists.
+     * Finds the nearest flower block within sourceCheckRadius and returns it, or null if none exists.
      */
     private Block findNearestFlower() {
         Location playerLoc = player.getLocation();
@@ -442,9 +452,13 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
         for (int x = -r; x <= r; x++) {
             for (int y = -r; y <= r; y++) {
                 for (int z = -r; z <= r; z++) {
-                    if (x * x + y * y + z * z > radiusSq) continue;
+                    if (x * x + y * y + z * z > radiusSq) {
+                        continue;
+                    }
                     Block candidate = playerLoc.getBlock().getRelative(x, y, z);
-                    if (!AranarthUtils.isFlower(candidate.getType())) continue;
+                    if (!AranarthUtils.isFlower(candidate.getType())) {
+                        continue;
+                    }
                     double distSq = playerLoc.distanceSquared(candidate.getLocation().add(0.5, 0.5, 0.5));
                     if (distSq < nearestDistSq) {
                         nearestDistSq = distSq;
@@ -500,17 +514,24 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
 
     @Override
     public Location getLocation() {
-        if (!puffs.isEmpty()) return puffs.get(0).center;
+        if (!puffs.isEmpty()) {
+            return puffs.get(0).center;
+        }
         return player.getLocation();
     }
 
     @Override
-    public void load() {}
+    public void load() {
+    }
 
     @Override
     public void stop() {
-        if (travelers != null) travelers.clear();
-        if (puffs != null) puffs.clear();
+        if (travelers != null) {
+            travelers.clear();
+        }
+        if (puffs != null) {
+            puffs.clear();
+        }
     }
 
     @Override
@@ -526,7 +547,7 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
     @Override
     public String getDescription() {
         return "Draw toxic spores from a nearby flower and release them toward your desired location, " +
-                "creating a lingering cloud that nauseates and poisons any entity caught within.\n" +
+                "creating a lingering cloud that nauseates and critically poisons any entity caught within.\n" +
                 ChatUtils.translateToColor("&fUsage: Hold Sneak (flower source) > Left-Click");
     }
 
