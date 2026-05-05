@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.Amplification;
 import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
@@ -18,6 +19,7 @@ import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
@@ -26,6 +28,7 @@ import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.ability.SandAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
 import com.projectkorra.projectkorra.ability.WaterAbility;
+import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
@@ -161,6 +164,10 @@ public class AranarthCoreBendingListener implements Listener {
 				} else if (ability instanceof SoundAbility) {
 					if (abilityName.equalsIgnoreCase("sonicboom")) {
 						new SonicBoom(player);
+					} else if (abilityName.equalsIgnoreCase("amplification")) {
+						if (!CoreAbility.hasAbility(player, Amplification.class)) {
+							new Amplification(player);
+						}
 					}
 				}
 			}
@@ -540,6 +547,25 @@ public class AranarthCoreBendingListener implements Listener {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
+	}
+
+	/**
+	 * Applies the Amplification damage multiplier to all hits from the SoundAbility that consumed the buff.
+	 * The multiplier is locked in on first contact and reused for every subsequent hit from the same cast.
+	 */
+	@EventHandler
+	public void onAmplificationDamage(AbilityDamageEntityEvent e) {
+		Ability ability = e.getAbility();
+		if (!(ability instanceof SoundAbility)) return;
+		if (ability instanceof Amplification) return;
+
+		Player p = ability.getPlayer();
+		if (p == null) return;
+
+		Amplification amp = Amplification.getActiveAmplification(p);
+		if (amp == null) return;
+
+		amp.applyMultiplier(e);
 	}
 
 }
