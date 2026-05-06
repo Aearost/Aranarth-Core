@@ -323,6 +323,7 @@ public class AranarthUtils {
 		} else {
 			perms.setPermission("worldedit.*", false);
 		}
+		player.updateCommands();
 
 		if (currentWorld.startsWith("world")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));

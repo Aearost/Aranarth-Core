@@ -53,6 +53,7 @@ public class PermissionUtils {
 		toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
 		updateSubElements(player);
 		AranarthUtils.updateTab();
+		player.updateCommands();
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
 

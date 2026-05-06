@@ -38,6 +38,7 @@ Minor Features
 [+] Implemented /ac invswap to manually swap inventories of worlds
 [~] Fixed null pointer due to pets not having any owner yet
 [~] Increased vote crate money reward from $50 to $100
+[~] Fixed issue where world edit command completion wasn't shown in the creative world
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
