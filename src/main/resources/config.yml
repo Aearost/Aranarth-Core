@@ -1,0 +1,4 @@
+# Set to true on the public server, false on test/local servers.
+# When false, Discord role changes are disabled to prevent the test server
+# from overwriting roles set by the public server.
+is-public-server: true

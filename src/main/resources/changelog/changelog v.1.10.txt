@@ -46,3 +46,4 @@ Minor Features
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
+- Added separation of the public vs the test server through a config file

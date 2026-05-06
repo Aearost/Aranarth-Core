@@ -67,7 +67,10 @@
       "Bash(grep -E \"\\\\.java$\")",
       "Bash(find ~/.m2 -name *projectkorra* -type f)",
       "Bash(grep \"\\\\.jar$\")",
-      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -path */abilities/*/combo/*.java -type f)"
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -path */abilities/*/combo/*.java -type f)",
+      "Bash(grep -r http /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore --include=*.java)",
+      "Bash(grep -r \"$5000\\\\|$250\\\\|$1250\\\\|5000\\\\|250\\\\|1250\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands/general/CommandDominion.java)",
+      "Bash(grep -v \"//\")"
     ]
   }
 }

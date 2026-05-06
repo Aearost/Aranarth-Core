@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.*;
 import github.scarsz.discordsrv.DiscordSRV;
@@ -146,6 +147,9 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
 	 */
 	public static void updateRank(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null) {
 			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
@@ -212,6 +216,9 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e. due to rankup or manual command change.
 	 */
 	public static void updateSaint(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
@@ -261,6 +268,9 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
 	 */
 	public static void updateArchitect(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
@@ -303,6 +313,9 @@ public class DiscordUtils {
 	 * @param isIntentionalChange Whether the change to the rank is intentional i.e due to rankup or manual command change.
 	 */
 	public static void updateCouncil(OfflinePlayer player, int newRankNum, boolean isIntentionalChange) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
@@ -373,6 +386,9 @@ public class DiscordUtils {
 	 * Update all Discord roles to stay aligned with in-game ranks in case of misalignment.
 	 */
 	public static void updateAllDiscordRoles() {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		for (UUID uuid : DiscordSRV.getPlugin().getAccountLinkManager().getLinkedAccounts().values()) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 			// Strange bug where a player links their account but they do not have an AranarthPlayer
@@ -394,6 +410,9 @@ public class DiscordUtils {
 	 * @param aranarthPlayer The AranarthPlayer object of the player.
 	 */
 	public static void updateDiscordRole(OfflinePlayer player, AranarthPlayer aranarthPlayer) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
@@ -561,6 +580,9 @@ public class DiscordUtils {
 	 * @param isNewAvatar Confirmation whether the message is for a new avatar, and if not, a deceased one.
 	 */
 	public static void addAvatarMessageToDiscord(Avatar avatar, boolean isNewAvatar) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(avatar.getUuid());
 		String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(avatar.getUuid()));
 		if (playerDiscordId == null) {
@@ -728,6 +750,9 @@ public class DiscordUtils {
 	 * @param isApplyingMute Whether the player is actively being muted.
 	 */
 	public static void toggleMuteRole(UUID uuid, boolean isApplyingMute) {
+		if (!AranarthCore.isPublicServer()) {
+			return;
+		}
 		Guild guild = getGuild();
 		Role mutedRole = guild.getRoleById("1467657570453033034"); // The Muted role
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);

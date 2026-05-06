@@ -47,6 +47,7 @@ public class AranarthCore extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		plugin = this;
+		saveDefaultConfig();
 		initializeWorlds();
 		initializeUtils();
 		initializeEvents();
@@ -185,6 +186,10 @@ public class AranarthCore extends JavaPlugin {
 
 	public static AranarthCore getInstance() {
 		return plugin;
+	}
+
+	public static boolean isPublicServer() {
+		return plugin.getConfig().getBoolean("is-public-server", true);
 	}
 
 	/**

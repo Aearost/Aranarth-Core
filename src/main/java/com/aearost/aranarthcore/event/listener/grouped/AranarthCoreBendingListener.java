@@ -154,7 +154,6 @@ public class AranarthCoreBendingListener implements Listener {
 			// Airbending
 			if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
 				if (ability instanceof SpiritualAbility) {
-					Bukkit.getLogger().info("A");
 					if (abilityName.equalsIgnoreCase("astralprojection")) {
 						// Guard: do not start a new projection while already projecting
 						if (!AstralProjection.isProjecting(player.getUniqueId())) {
@@ -167,9 +166,7 @@ public class AranarthCoreBendingListener implements Listener {
 							new AngeredSpirits(player);
 						}
 					} else if (abilityName.equalsIgnoreCase("energyburst")) {
-						Bukkit.getLogger().info("B");
 						if (!EnergyBurst.hasActiveInstance(player.getUniqueId())) {
-							Bukkit.getLogger().info("C");
 							new EnergyBurst(player);
 						}
 					}
