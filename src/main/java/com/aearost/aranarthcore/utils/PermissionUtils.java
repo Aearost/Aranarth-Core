@@ -49,6 +49,11 @@ public class PermissionUtils {
 			}
 		}
 
+		// Grant WorldEdit permissions if the player is in the creative world
+		if (player.getWorld().getName().equalsIgnoreCase("creative")) {
+			perms.setPermission("worldedit.*", true);
+		}
+
 		// Must update arena permissions after base permissions apply
 		toggleArenaBendingPermissions(player, player.getWorld().getName().equalsIgnoreCase("arena"));
 		updateSubElements(player);

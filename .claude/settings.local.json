@@ -70,7 +70,8 @@
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore -path */abilities/*/combo/*.java -type f)",
       "Bash(grep -r http /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore --include=*.java)",
       "Bash(grep -r \"$5000\\\\|$250\\\\|$1250\\\\|5000\\\\|250\\\\|1250\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands/general/CommandDominion.java)",
-      "Bash(grep -v \"//\")"
+      "Bash(grep -v \"//\")",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f \\\\\\(-name *.txt -o -name *.json \\\\\\))"
     ]
   }
 }
