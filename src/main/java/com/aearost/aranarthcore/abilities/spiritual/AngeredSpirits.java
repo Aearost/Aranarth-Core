@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.spiritual;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -32,10 +33,10 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     private record ShotType(Color color, PotionEffectType effectType, int amplifier) {}
 
     private static final ShotType[] SHOT_TYPES = {
-            new ShotType(Color.fromRGB(220, 30,  30),  PotionEffectType.WEAKNESS,  0),
-            new ShotType(Color.fromRGB(30,  100, 220), PotionEffectType.SLOWNESS,  0),
-            new ShotType(Color.fromRGB(140, 30,  200), PotionEffectType.BLINDNESS, 0),
-            new ShotType(Color.fromRGB(220, 200, 30),  PotionEffectType.NAUSEA,    0)
+            new ShotType(AranarthBendingUtils.SPIRIT_COLORS[0], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[0], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
+            new ShotType(AranarthBendingUtils.SPIRIT_COLORS[1], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[1], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
+            new ShotType(AranarthBendingUtils.SPIRIT_COLORS[2], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[2], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
+            new ShotType(AranarthBendingUtils.SPIRIT_COLORS[3], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[3], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
     };
 
     private static final double HIT_RADIUS  = 1.5;
@@ -324,11 +325,9 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Channel the wrath of restless spirits, summoning four ethereal vexes bound to your will. " +
-                "Hold sneak for 3 seconds to call upon the spirits. Once charged, release sneak and unleash them " +
-                "one at a time with left-click within 2.5 seconds. " +
-                "Each spirit carries a different curse: Weakness (red), Slowness (blue), Blindness (purple), and Nausea (yellow).\n" +
-                ChatUtils.translateToColor("&fUsage: Hold Sneak 3s → Release Sneak → Left-Click up to 4 times");
+        return "Channel the wrath of restless spirits, summoning four to your side. " +
+                "Once charged, release sneak and unleash the spirits one at a time, each applying a different negative potion effect.\n" +
+                ChatUtils.translateToColor("&fUsage: Sneak (Hold) > Sneak (Release) > Left-click (4 times)");
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -405,7 +404,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         }
 
         private void applyHitEffects(final LivingEntity entity) {
-            entity.addPotionEffect(new PotionEffect(shotType.effectType(), 100, shotType.amplifier(), false, true, true));
+            entity.addPotionEffect(new PotionEffect(shotType.effectType(), AranarthBendingUtils.SPIRIT_EFFECT_DURATION, shotType.amplifier(), false, true, true));
             DamageHandler.damageEntity(entity, damage, AngeredSpirits.this);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_VEX_HURT, 1.0f, 1.2f);
         }

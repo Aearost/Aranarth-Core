@@ -66,7 +66,8 @@
       "Bash(grep \"\\\\.java$\")",
       "Bash(grep -E \"\\\\.java$\")",
       "Bash(find ~/.m2 -name *projectkorra* -type f)",
-      "Bash(grep \"\\\\.jar$\")"
+      "Bash(grep \"\\\\.jar$\")",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -path */abilities/*/combo/*.java -type f)"
     ]
   }
 }

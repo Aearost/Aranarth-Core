@@ -10,14 +10,60 @@ import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Set;
 
 public class AranarthBendingUtils {
+
+    // -------------------------------------------------------------------------
+    // Spiritual energy palette — shared across spiritual abilities
+    // -------------------------------------------------------------------------
+
+    /**
+     * The four spirit colours used by AngeredSpirits and EnergyBurst, in index order:
+     * 0 = Red (Weakness), 1 = Blue (Slowness), 2 = Purple (Blindness), 3 = Yellow (Nausea).
+     */
+    public static final Color[] SPIRIT_COLORS = {
+            Color.fromRGB(220, 30,  30),   // Red    → Weakness
+            Color.fromRGB(30,  100, 220),  // Blue   → Slowness
+            Color.fromRGB(140, 30,  200),  // Purple → Blindness
+            Color.fromRGB(220, 200, 30),   // Yellow → Nausea
+    };
+
+    /** Matching potion effects for each entry in {@link #SPIRIT_COLORS}. */
+    public static final PotionEffectType[] SPIRIT_EFFECT_TYPES = {
+            PotionEffectType.WEAKNESS,
+            PotionEffectType.SLOWNESS,
+            PotionEffectType.BLINDNESS,
+            PotionEffectType.NAUSEA,
+    };
+
+    /** Duration (ticks) applied by all spiritual-ability curse effects. */
+    public static final int SPIRIT_EFFECT_DURATION  = 100;
+    /** Amplifier used for all spiritual-ability curse effects (0 = level I). */
+    public static final int SPIRIT_EFFECT_AMPLIFIER = 0;
+
+    /**
+     * Applies one randomly chosen spirit curse to the target entity using the
+     * standard duration and amplifier shared across spiritual abilities.
+     *
+     * @param entity The entity to curse.
+     */
+    public static void applyRandomSpiritEffect(final LivingEntity entity) {
+        final int idx = (int) (Math.random() * SPIRIT_EFFECT_TYPES.length);
+        entity.addPotionEffect(new PotionEffect(
+                SPIRIT_EFFECT_TYPES[idx],
+                SPIRIT_EFFECT_DURATION,
+                SPIRIT_EFFECT_AMPLIFIER,
+                false, true, true));
+    }
 
     // -------------------------------------------------------------------------
     // Sound-bending dust palette — shared across all sound abilities

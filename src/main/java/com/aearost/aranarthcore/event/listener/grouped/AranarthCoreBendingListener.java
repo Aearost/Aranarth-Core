@@ -14,6 +14,7 @@ import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.spiritual.AngeredSpirits;
+import com.aearost.aranarthcore.abilities.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.ToxicSpores;
@@ -153,6 +154,7 @@ public class AranarthCoreBendingListener implements Listener {
 			// Airbending
 			if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
 				if (ability instanceof SpiritualAbility) {
+					Bukkit.getLogger().info("A");
 					if (abilityName.equalsIgnoreCase("astralprojection")) {
 						// Guard: do not start a new projection while already projecting
 						if (!AstralProjection.isProjecting(player.getUniqueId())) {
@@ -163,6 +165,12 @@ public class AranarthCoreBendingListener implements Listener {
 					} else if (abilityName.equalsIgnoreCase("angeredspirits")) {
 						if (!AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
 							new AngeredSpirits(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("energyburst")) {
+						Bukkit.getLogger().info("B");
+						if (!EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+							Bukkit.getLogger().info("C");
+							new EnergyBurst(player);
 						}
 					}
 				} else if (ability instanceof SoundAbility) {
@@ -361,6 +369,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		if (SandWave.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -404,6 +415,10 @@ public class AranarthCoreBendingListener implements Listener {
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
 		if (angeredSpirits != null) {
 			angeredSpirits.onSlotChange();
+		}
+		EnergyBurst energyBurst = EnergyBurst.getActiveInstance(e.getPlayer().getUniqueId());
+		if (energyBurst != null) {
+			energyBurst.onSlotChange();
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}

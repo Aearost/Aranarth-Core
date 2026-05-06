@@ -18,6 +18,7 @@ Major Features
 [+] Implemented the SonicPulse ability for soundbenders
 [+] Implemented the ToxicSpores ability for plantbenders
 [+] Implemented the Regrowth ability for plantbenders
+[+] Implemented the EnergyBurst ability for spiritual benders
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week
