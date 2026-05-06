@@ -80,9 +80,10 @@ public class CropHarvest {
 		}
 
 		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
+		double elvenMultiplier = AranarthUtils.isWearingArmorType(player, "elven") ? 1.25 : 1.0;
 
 		for (ItemStack drop : drops) {
-			double scaled = drop.getAmount() * multiplier * boostMultiplier;
+			double scaled = drop.getAmount() * multiplier * boostMultiplier * elvenMultiplier;
 			int base = (int) scaled;
 			double frac = scaled - base;
 			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
@@ -152,9 +153,10 @@ public class CropHarvest {
 		Month month = AranarthUtils.getMonth();
 		double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
 		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
+		double elvenMultiplier = AranarthUtils.isWearingArmorType(player, "elven") ? 1.25 : 1.0;
 
 		for (ItemStack drop : drops) {
-			double scaled = drop.getAmount() * multiplier * boostMultiplier;
+			double scaled = drop.getAmount() * multiplier * boostMultiplier * elvenMultiplier;
 			int base = (int) scaled;
 			double frac = scaled - base;
 			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);

@@ -41,6 +41,7 @@ Minor Features
 [~] Increased vote crate money reward from $50 to $100
 [~] Fixed issue where world edit command completion wasn't shown in the creative world
 [~] Added alias for /streak being /daily
+[+] Added crop harvest boost to Elven Aranarthium wearers
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
