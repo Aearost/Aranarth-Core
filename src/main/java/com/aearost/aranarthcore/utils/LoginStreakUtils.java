@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Centralized utility class for the 7-day login streak system.
+ * Centralized utility class for the 28-day (4-week) login streak system.
  */
 public class LoginStreakUtils {
 
@@ -23,6 +23,10 @@ public class LoginStreakUtils {
     private static final HashMap<UUID, Long> lastClaimEpochDay = new HashMap<>();
     private static final ZoneId EST = ZoneId.of("America/New_York");
     private static final NumberFormat MONEY_FORMAT = NumberFormat.getInstance();
+
+    // Per-rank money anchors for the 24 money days (index 0 = day 1, index 23 = day 27)
+    private static final double[] START_AMOUNTS = {100, 175, 250, 375, 750, 1000, 1500, 2000, 2500};
+    private static final double[] END_AMOUNTS   = {1000, 1750, 2500, 5000, 7500, 12500, 20000, 35000, 50000};
 
     static {
         MONEY_FORMAT.setGroupingUsed(true);
@@ -37,7 +41,7 @@ public class LoginStreakUtils {
     }
 
     /**
-     * Returns the streak day the player is currently on (1-7).
+     * Returns the streak day the player is currently on (1-28).
      * Defaults to 1 if no data exists for the player.
      */
     public static int getStreakDay(UUID uuid) {
@@ -89,6 +93,7 @@ public class LoginStreakUtils {
     /**
      * Claims the current streak day reward for the player.
      * Validates the streak, distributes the reward, and advances the day counter.
+     * After day 28 the streak cycles back to day 1.
      */
     public static boolean claimStreak(Player player) {
         UUID uuid = player.getUniqueId();
@@ -104,37 +109,17 @@ public class LoginStreakUtils {
         giveReward(player, aranarthPlayer, day, rank);
 
         lastClaimEpochDay.put(uuid, getTodayEpochDay());
-        currentStreakDay.put(uuid, day == 7 ? 1 : day + 1);
+        currentStreakDay.put(uuid, day == 28 ? 1 : day + 1);
 
         return true;
     }
 
     /**
-     * Distributes the reward for the day to the player based on their rank.
+     * Distributes the reward for the given day to the player.
      */
     private static void giveReward(Player player, AranarthPlayer aranarthPlayer, int day, int rank) {
-        if (day == 4) {
-            ItemStack key = rank <= 2 ? new KeyVote().getItem() : new KeyRare().getItem();
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(key);
-            for (ItemStack overflow : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), overflow);
-            }
-            String keyColor = rank <= 2 ? "&a" : "&6";
-            String keyName = rank <= 2 ? "Vote Crate Key" : "Rare Crate Key";
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&7Day &e" + day + " &7streak reward: " + keyColor + keyName));
-
-        } else if (day == 7) {
-            ItemStack key = rank <= 2 ? new KeyRare().getItem() : new KeyEpic().getItem();
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(key);
-            for (ItemStack overflow : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), overflow);
-            }
-            String keyColor = rank <= 2 ? "&6" : "&3";
-            String keyName = rank <= 2 ? "Rare Crate Key" : "Epic Crate Key";
-            player.sendMessage(ChatUtils.chatMessage(
-                    "&7Day &e" + day + " &7streak reward: " + keyColor + keyName));
-
+        if (isKeyDay(day)) {
+            giveKeyReward(player, day, rank);
         } else {
             double money = getMoneyReward(day, rank);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + money);
@@ -144,41 +129,85 @@ public class LoginStreakUtils {
         }
     }
 
+    private static boolean isKeyDay(int day) {
+        return day == 7 || day == 14 || day == 21 || day == 28;
+    }
+
+    private static void giveKeyReward(Player player, int day, int rank) {
+        ItemStack key;
+        String keyColor;
+        String keyName;
+        int count;
+
+        if (rank <= 2) {
+            switch (day) {
+                case 7  -> { key = new KeyVote().getItem(); keyColor = "&a"; keyName = "Vote Crate Key"; count = 3; }
+                case 14 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 1; }
+                case 21 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 2; }
+                case 28 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 1; }
+                default -> { return; }
+            }
+        } else if (rank <= 5) {
+            switch (day) {
+                case 7  -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 1; }
+                case 14 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 2; }
+                case 21 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 3; }
+                case 28 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 1; }
+                default -> { return; }
+            }
+        } else {
+            switch (day) {
+                case 7  -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 1; }
+                case 14 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 3; }
+                case 21 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 1; }
+                case 28 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 3; }
+                default -> { return; }
+            }
+        }
+
+        key.setAmount(count);
+        Map<Integer, ItemStack> leftover = player.getInventory().addItem(key);
+        for (ItemStack overflow : leftover.values()) {
+            player.getWorld().dropItemNaturally(player.getLocation(), overflow);
+        }
+        String countStr = count == 1 ? "" : count + "x ";
+        player.sendMessage(ChatUtils.chatMessage(
+                "&7Day &e" + day + " &7streak reward: " + keyColor + countStr + keyName));
+    }
+
     // -------------------------------------------------------------------------
     // Reward calculations
     // -------------------------------------------------------------------------
 
     /**
-     * Returns the money reward for the given money day (1, 2, 3, 5, or 6) and rank.
-     * Scales linearly from rank 0 to rank 8 and is rounded to a clean interval.
+     * Returns the money reward for the given money day and rank.
+     * Scales linearly from rank start to rank end amounts across the 24 money days.
      */
     public static double getMoneyReward(int day, int rank) {
-        // 5 progression steps, one per money day
-        double[] rank0Values = {50, 100, 150, 200, 250};
-        double[] rank8Values = {2500, 4500, 6500, 8500, 10000};
-
-        int index = switch (day) {
-            case 1 -> 0;
-            case 2 -> 1;
-            case 3 -> 2;
-            case 5 -> 3;
-            case 6 -> 4;
-            default -> 0;
-        };
-
-        double raw = rank0Values[index] + (rank / 8.0) * (rank8Values[index] - rank0Values[index]);
+        int index = getMoneyIndex(day);
+        double raw = START_AMOUNTS[rank] + (index / 23.0) * (END_AMOUNTS[rank] - START_AMOUNTS[rank]);
         return roundMoney((int) Math.round(raw));
     }
 
     /**
-     * Rounds the calculated money reward based on the value of it.
-     * @param value The pre-rounded value.
-     * @return The rounded value.
+     * Maps a money day (non-key day) to a 0-based index across the 24 money days.
+     * Week 1 days 1-6 → 0-5, Week 2 days 8-13 → 6-11,
+     * Week 3 days 15-20 → 12-17, Week 4 days 22-27 → 18-23.
+     */
+    private static int getMoneyIndex(int day) {
+        if (day <= 6)  return day - 1;
+        if (day <= 13) return day - 2;
+        if (day <= 20) return day - 3;
+        return day - 4;
+    }
+
+    /**
+     * Rounds the calculated money reward to a clean interval based on magnitude.
      */
     private static double roundMoney(int value) {
-        if (value < 100) return Math.round(value / 5.0) * 5;
-        if (value < 500) return Math.round(value / 10.0) * 10;
-        if (value < 10000) return Math.round(value / 100.0) * 100;
+        if (value < 100)    return Math.round(value / 5.0) * 5;
+        if (value < 500)    return Math.round(value / 10.0) * 10;
+        if (value < 10000)  return Math.round(value / 100.0) * 100;
         return Math.round(value / 1000.0) * 1000;
     }
 
@@ -186,12 +215,37 @@ public class LoginStreakUtils {
      * Returns a color-formatted display string for the day's reward (used in the GUI lore).
      */
     public static String getRewardDisplayName(int day, int rank) {
-        if (day == 4) {
-            return rank <= 2 ? "&aVote Crate Key" : "&6Rare Crate Key";
-        } else if (day == 7) {
-            return rank <= 2 ? "&6Rare Crate Key" : "&5Epic Crate Key";
+        if (isKeyDay(day)) {
+            return getKeyDisplayName(day, rank);
+        }
+        return "&6$" + MONEY_FORMAT.format(getMoneyReward(day, rank));
+    }
+
+    private static String getKeyDisplayName(int day, int rank) {
+        if (rank <= 2) {
+            return switch (day) {
+                case 7  -> "&a3x Vote Crate Key";
+                case 14 -> "&61x Rare Crate Key";
+                case 21 -> "&62x Rare Crate Key";
+                case 28 -> "&31x Epic Crate Key";
+                default -> "";
+            };
+        } else if (rank <= 5) {
+            return switch (day) {
+                case 7  -> "&61x Rare Crate Key";
+                case 14 -> "&62x Rare Crate Key";
+                case 21 -> "&63x Rare Crate Key";
+                case 28 -> "&31x Epic Crate Key";
+                default -> "";
+            };
         } else {
-            return "&6$" + MONEY_FORMAT.format(getMoneyReward(day, rank));
+            return switch (day) {
+                case 7  -> "&61x Rare Crate Key";
+                case 14 -> "&63x Rare Crate Key";
+                case 21 -> "&31x Epic Crate Key";
+                case 28 -> "&33x Epic Crate Key";
+                default -> "";
+            };
         }
     }
 

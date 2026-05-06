@@ -16,11 +16,19 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * A GUI displaying the player's 7-day login streak progress and rewards.
+ * A GUI displaying the player's 28-day (4-week) login streak progress and rewards.
  */
 public class GuiLoginStreak {
 
-    public static final int[] DAY_SLOTS = {19, 20, 21, 22, 23, 24, 25};
+    // 28 slots, one per streak day, ordered days 1-28
+    public static final int[] DAY_SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,   // Week 1: days  1-7
+            19, 20, 21, 22, 23, 24, 25,   // Week 2: days  8-14
+            28, 29, 30, 31, 32, 33, 34,   // Week 3: days 15-21
+            37, 38, 39, 40, 41, 42, 43    // Week 4: days 22-28
+    };
+
+    private static final int INFO_SLOT = 49;
 
     private final Player player;
     private final Inventory gui;
@@ -38,81 +46,56 @@ public class GuiLoginStreak {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&6&lLogin Streak"));
+        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor("&6&lLogin Streak"));
 
         UUID uuid = player.getUniqueId();
 
         // Validate streak (resets if a day was missed) before rendering
         LoginStreakUtils.ensureStreakValid(uuid);
 
-        ItemStack yellowPane = makePane(Material.YELLOW_STAINED_GLASS_PANE);
         ItemStack blackPane  = makePane(Material.BLACK_STAINED_GLASS_PANE);
 
-        // Row 0
-        inv.setItem(0, yellowPane);
-        inv.setItem(1, yellowPane);
-        inv.setItem(2, blackPane);
-        inv.setItem(3, blackPane);
-        inv.setItem(4, blackPane);
-        inv.setItem(5, blackPane);
-        inv.setItem(6, blackPane);
-        inv.setItem(7, yellowPane);
-        inv.setItem(8, yellowPane);
+        inv.setItem(0,  blackPane);
+        inv.setItem(1,  blackPane);
+        inv.setItem(2,  blackPane);
+        inv.setItem(3,  blackPane);
+        inv.setItem(4,  blackPane);
+        inv.setItem(5,  blackPane);
+        inv.setItem(6,  blackPane);
+        inv.setItem(7,  blackPane);
+        inv.setItem(8,  blackPane);
 
-        // Row 1 — borders; day items filled below
-        inv.setItem(9, blackPane);
-        inv.setItem(10, yellowPane);
-        inv.setItem(11, blackPane);
-        inv.setItem(12, blackPane);
-        inv.setItem(13, blackPane);
-        inv.setItem(14, blackPane);
-        inv.setItem(15, blackPane);
-        inv.setItem(16, yellowPane);
+        inv.setItem(9,  blackPane);
         inv.setItem(17, blackPane);
 
-        // Row 2
         inv.setItem(18, blackPane);
-        inv.setItem(19, yellowPane);
-        inv.setItem(20, blackPane);
-        inv.setItem(21, blackPane);
-        inv.setItem(22, blackPane);
-        inv.setItem(23, blackPane);
-        inv.setItem(24, blackPane);
-        inv.setItem(25, yellowPane);
         inv.setItem(26, blackPane);
 
-        // Row 3
         inv.setItem(27, blackPane);
-        inv.setItem(28, yellowPane);
-        inv.setItem(29, blackPane);
-        inv.setItem(30, blackPane);
-        inv.setItem(31, blackPane);
-        inv.setItem(32, blackPane);
-        inv.setItem(33, blackPane);
-        inv.setItem(34, yellowPane);
         inv.setItem(35, blackPane);
 
-        // Row 4
-        inv.setItem(36, yellowPane);
-        inv.setItem(37, yellowPane);
-        inv.setItem(38, blackPane);
-        inv.setItem(39, blackPane);
-        inv.setItem(40, blackPane);
-        inv.setItem(41, blackPane);
-        inv.setItem(42, blackPane);
-        inv.setItem(43, yellowPane);
-        inv.setItem(44, yellowPane);
+        inv.setItem(36, blackPane);
+        inv.setItem(44, blackPane);
+
+        inv.setItem(45, blackPane);
+        inv.setItem(46, blackPane);
+        inv.setItem(47, blackPane);
+        inv.setItem(48, blackPane);
+        inv.setItem(50, blackPane);
+        inv.setItem(51, blackPane);
+        inv.setItem(52, blackPane);
+        inv.setItem(53, blackPane);
 
         int currentDay = LoginStreakUtils.getStreakDay(uuid);
         boolean canClaim = LoginStreakUtils.canClaim(uuid);
 
         // Day items
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < DAY_SLOTS.length; i++) {
             inv.setItem(DAY_SLOTS[i], makeDayItem(i + 1, currentDay, canClaim, rank));
         }
 
         // Info item
-        inv.setItem(31, makeInfoItem(currentDay, canClaim));
+        inv.setItem(INFO_SLOT, makeInfoItem(currentDay, canClaim));
 
         return inv;
     }
@@ -165,7 +148,7 @@ public class GuiLoginStreak {
         meta.setDisplayName(ChatUtils.translateToColor("&e&lStreak Info"));
 
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Current Streak Day: &f" + currentDay + "&7/&f7"));
+        lore.add(ChatUtils.translateToColor("&7Current Streak Day: &f" + currentDay + "&7/&f28"));
         lore.add("");
         if (canClaim) {
             lore.add(ChatUtils.translateToColor("&aYou can claim today's reward!"));
