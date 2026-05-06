@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.text.NumberFormat;
+import java.util.List;
 
 /**
  * Handles logic for clicking in the Rank-Up GUI
@@ -93,19 +95,9 @@ public class GuiRankupClick {
 		McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		int minimum = 0;
-
-		switch (aranarthPlayer.getRank()) {
-			case 0 -> minimum = 100;
-			case 1 -> minimum = 250;
-			case 2 -> minimum = 500;
-			case 3 -> minimum = 1000;
-			case 4 -> minimum = 2500;
-			case 5 -> minimum = 7500;
-			case 6 -> minimum = 12500;
-			case 7 -> minimum = 25000;
-			default -> minimum = 50000;
-		}
+		List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.total-level-requirements");
+		int rank = aranarthPlayer.getRank();
+		int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
 
 		return mcMMOPlayer.getPowerLevel() >= minimum;
 	}
@@ -120,18 +112,9 @@ public class GuiRankupClick {
 		McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		int minimum = 0;
-		switch (aranarthPlayer.getRank()) {
-			case 0 -> minimum = 0;
-			case 1 -> minimum = 0;
-			case 2 -> minimum = 150;
-			case 3 -> minimum = 375;
-			case 4 -> minimum = 750;
-			case 5 -> minimum = 1250;
-			case 6 -> minimum = 2500;
-			case 7 -> minimum = 5000;
-			default -> minimum = 5000;
-		}
+		List<Integer> requirements = AranarthCore.getInstance().getConfig().getIntegerList("mcmmo.per-category-requirements");
+		int rank = aranarthPlayer.getRank();
+		int minimum = rank < requirements.size() ? requirements.get(rank) : requirements.get(requirements.size() - 1);
 
 		if (minimum == 0) {
 			return true;

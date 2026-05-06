@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
@@ -304,6 +305,7 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player that executed the command.
 	 */
 	private static void createDominion(String[] args, Player player) {
+		double dominionCost = AranarthCore.getInstance().getConfig().getDouble("economy.dominion-creation-cost", 5000.0);
 		if (player.hasPermission("aranarth.dominion.create")) {
 			if (args.length >= 2) {
 				String dominionName = verifyDominionName(args, player);
@@ -317,7 +319,7 @@ public class CommandDominion implements CommandExecutor {
 					// Ensures the chunk is not already claimed
 					if (dominionOfChunk == null) {
 						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-						if (aranarthPlayer.getBalance() >= 5000) {
+						if (aranarthPlayer.getBalance() >= dominionCost) {
 							if (player.getWorld().getName().startsWith("world")) {
 								if (AranarthUtils.isSpawnLocation(player.getLocation())) {
 									player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion here!"));
@@ -337,7 +339,7 @@ public class CommandDominion implements CommandExecutor {
 								}
 								List<Chunk> chunks = new ArrayList<>();
 								chunks.add(player.getLocation().getChunk());
-								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - 5000);
+								aranarthPlayer.setBalance(aranarthPlayer.getBalance() - dominionCost);
 
 								List<UUID> conquered = new ArrayList<>();
 
@@ -349,7 +351,7 @@ public class CommandDominion implements CommandExecutor {
 										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54], 0,
 										conquered, null,
 										// Keep the balance at the end
-										5000);
+										dominionCost);
 								DominionUtils.createDominion(dominion);
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -360,7 +362,7 @@ public class CommandDominion implements CommandExecutor {
 								player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
 							}
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $5000 to afford this!"));
+							player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $" + NumberFormat.getNumberInstance().format((long) dominionCost) + " to afford this!"));
 						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&e" + dominionOfChunk.getName() + " &calready owns this chunk!"));

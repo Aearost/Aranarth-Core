@@ -79,7 +79,6 @@ public class AranarthUtils {
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
-	private static final int afkSecondsAmount = 300;
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 
@@ -3279,7 +3278,7 @@ public class AranarthUtils {
 	 * @return The number of seconds that a player is AFK to automatically be placed in the AFK status.
 	 */
 	public static int getAfkSecondsAmount() {
-		return afkSecondsAmount;
+		return AranarthCore.getInstance().getConfig().getInt("players.afk-timeout-seconds", 300);
 	}
 
 	/**

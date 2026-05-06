@@ -2,3 +2,73 @@
 # When false, Discord role changes are disabled to prevent the test server
 # from overwriting roles set by the public server.
 is-public-server: true
+
+discord:
+  guild-id: "664319732446396416"
+  # Discord user ID of the server owner (used for pinging in notifications).
+  owner-user-id: "201812118981443584"
+  roles:
+    # Progression ranks
+    peasant: "1436839882268872744"
+    esquire: "1436839935964352543"
+    knight: "1436840295768784928"
+    baron: "1436840332703563968"
+    count: "1436840423334084668"
+    duke: "1436840444771438752"
+    prince: "1436840565982498968"
+    king: "1436840642331410634"
+    emperor: "1436840682881945630"
+    # Special roles
+    saint: "1436839449626542161"
+    discord-linked: "1444160739769061528"
+    architect: "1436842029274632293"
+    avatar: "1440165603687137461"
+    muted: "1467657570453033034"
+    # Council roles
+    council: "1436877816796020836"
+    helper: "1436841788634697922"
+    moderator: "1436842179594031358"
+    admin: "1436842548412027011"
+
+economy:
+  # Cost in dollars to create a Dominion.
+  dominion-creation-cost: 5000.0
+  # Cost to rank up, indexed by current rank (index 0 = Peasant→Esquire, index 7 = King→Emperor).
+  rankup-costs:
+    - 250.0       # Rank 0 → 1 (Esquire)
+    - 1250.0      # Rank 1 → 2 (Knight)
+    - 5000.0      # Rank 2 → 3 (Baron/Baroness)
+    - 25000.0     # Rank 3 → 4 (Count/Countess)
+    - 100000.0    # Rank 4 → 5 (Duke/Duchess)
+    - 500000.0    # Rank 5 → 6 (Prince/Princess)
+    - 2500000.0   # Rank 6 → 7 (King/Queen)
+    - 10000000.0  # Rank 7 → 8 (Emperor/Empress)
+
+mcmmo:
+  # Minimum total mcMMO power level required to rank up, indexed by current rank.
+  total-level-requirements:
+    - 100    # Rank 0
+    - 250    # Rank 1
+    - 500    # Rank 2
+    - 1000   # Rank 3
+    - 2500   # Rank 4
+    - 7500   # Rank 5
+    - 12500  # Rank 6
+    - 25000  # Rank 7
+    - 50000  # Rank 8+ (default)
+  # Minimum mcMMO level required in each of the three skill categories (Gathering, Combat, Misc),
+  # indexed by current rank. 0 means no per-category requirement.
+  per-category-requirements:
+    - 0     # Rank 0
+    - 0     # Rank 1
+    - 150   # Rank 2
+    - 375   # Rank 3
+    - 750   # Rank 4
+    - 1250  # Rank 5
+    - 2500  # Rank 6
+    - 5000  # Rank 7
+    - 5000  # Rank 8+ (default)
+
+players:
+  # Number of seconds without movement before a player is marked AFK automatically.
+  afk-timeout-seconds: 300

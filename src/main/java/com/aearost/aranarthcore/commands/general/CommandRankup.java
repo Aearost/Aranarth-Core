@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.gui.GuiRankup;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -9,6 +10,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.text.NumberFormat;
+import java.util.List;
 
 /**
  * Displays the Rankup GUI pertaining to the player.
@@ -29,8 +33,14 @@ public class CommandRankup implements CommandExecutor {
 					"&6&lDuke", "&b&lPrince", "&9&lKing", "&4&lEmperor" };
 			String[] femaleRanks = new String[] { "&a&lPeasant", "&d&lEsquire", "&7&lKnight", "&5&lBaroness",
 					"&8&lCountess", "&6&lDuchess", "&b&lPrincess", "&9&lQueen", "&4&lEmpress" };
-			String[] rankupCosts = new String[] { "FREE", "$250", "$1,250", "$5,000", "$25,000", "$100,000", "$500,000",
-					"$2,500,000", "$10,000,000" };
+			List<Double> configCosts = AranarthCore.getInstance().getConfig().getDoubleList("economy.rankup-costs");
+			NumberFormat nf = NumberFormat.getNumberInstance();
+			// Index 0 is a placeholder so that rankupCosts[currentRank+1] lines up after the increment below
+			String[] rankupCosts = new String[configCosts.size() + 1];
+			rankupCosts[0] = "FREE";
+			for (int i = 0; i < configCosts.size(); i++) {
+				rankupCosts[i + 1] = "$" + nf.format(configCosts.get(i).longValue());
+			}
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			int currentRank = aranarthPlayer.getRank();
