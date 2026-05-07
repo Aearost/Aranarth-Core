@@ -588,6 +588,16 @@ public class PersistenceUtils {
 					aranarthPlayer.setGradientChatColors(fields[13]);
 				}
 
+				// Day Message (index 14)
+				if (fields.length > 14) {
+					aranarthPlayer.setDayMessageDisabled(!fields[14].equals("0"));
+				}
+
+				// Weather Message (index 15)
+				if (fields.length > 15) {
+					aranarthPlayer.setWeatherMessageDisabled(!fields[15].equals("0"));
+				}
+
 				AranarthUtils.setPlayer(uuid, aranarthPlayer);
 			}
 			Bukkit.getLogger().info("All toggled features have been initialized");
@@ -627,7 +637,7 @@ public class PersistenceUtils {
 				try {
 					FileWriter writer = new FileWriter(filePath);
 					// Template line
-					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors\n");
+					writer.write("#uuid|chat|messages|teleport|spawnboost|changeclaim|inventory|shulker|blacklist|compressing|chestlock|bluefire|gradientchatenabled|gradientchatcolors|daymessage|weathermessage\n");
 
 					for (Map.Entry<UUID, AranarthPlayer> entry : aranarthPlayers.entrySet()) {
 						AranarthPlayer aranarthPlayer = entry.getValue();
@@ -646,10 +656,12 @@ public class PersistenceUtils {
 						String bluefire = aranarthPlayer.hasBlueFireDisabled() ? "1" : "0";
 						String gradientEnabled = aranarthPlayer.isGradientChatEnabled() ? "1" : "0";
 						String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
+						String dayMessage = aranarthPlayer.isDayMessageDisabled() ? "1" : "0";
+						String weatherMessage = aranarthPlayer.isWeatherMessageDisabled() ? "1" : "0";
 
 						String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
 								+ "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
-								+ bluefire + "|" + gradientEnabled + "|" + gradientColors + "\n";
+								+ bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage + "\n";
 						writer.write(row);
 					}
 					writer.close();

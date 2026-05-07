@@ -235,6 +235,24 @@ public class CommandToggle implements CommandExecutor {
 						}
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("daymessage")) {
+					if (aranarthPlayer.isDayMessageDisabled()) {
+						aranarthPlayer.setDayMessageDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the new day message"));
+					} else {
+						aranarthPlayer.setDayMessageDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the new day message"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("weathermessage")) {
+					if (aranarthPlayer.isWeatherMessageDisabled()) {
+						aranarthPlayer.setWeatherMessageDisabled(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7weather change messages"));
+					} else {
+						aranarthPlayer.setWeatherMessageDisabled(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7weather change messages"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

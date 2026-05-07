@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.enums.Weather;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -206,9 +207,17 @@ public class DateUtils {
 
 			String dayNumAsString = getDayNumWithSuffix(dayNum);
 			for (Player player : Bukkit.getOnlinePlayers()) {
-				String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
-				String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
-				player.sendTitle(mainTitle, subTitle);
+				String worldName = player.getWorld().getName();
+				boolean skipDayMessage = worldName.equals("arena") || worldName.equals("creative");
+				if (!skipDayMessage) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					skipDayMessage = aranarthPlayer.isDayMessageDisabled();
+				}
+				if (!skipDayMessage) {
+					String mainTitle = ChatUtils.translateToColor("&e&l" + weekdayName);
+					String subTitle = ChatUtils.translateToColor("&f&lThe " + dayNumAsString + " of " + monthName + ", &e&l" + yearNum);
+					player.sendTitle(mainTitle, subTitle);
+				}
 				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 					if (onlinePlayer.isSleeping()) {
 						onlinePlayer.setHealth(onlinePlayer.getHealth() - 1);
@@ -243,6 +252,14 @@ public class DateUtils {
 			}
 
 			for (Player player : Bukkit.getOnlinePlayers()) {
+				String worldName = player.getWorld().getName();
+				if (worldName.equals("arena") || worldName.equals("creative")) {
+					continue;
+				}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (aranarthPlayer.isDayMessageDisabled()) {
+					continue;
+				}
 				if (isNewMonth) {
 					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 3f, 0.25f);
 				} else {
@@ -1952,6 +1969,9 @@ public class DateUtils {
 				resource.setWeatherDuration(duration);
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
+						String playerWorld = player.getWorld().getName();
+						if (playerWorld.equals("arena") || playerWorld.equals("creative")) continue;
+						if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) continue;
 						playRainStartSound(player);
 					}
 				}
@@ -1974,6 +1994,9 @@ public class DateUtils {
 				resource.setThunderDuration(duration);
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
+						String playerWorld = player.getWorld().getName();
+						if (playerWorld.equals("arena") || playerWorld.equals("creative")) continue;
+						if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) continue;
 						playThunderStartSound(player);
 					}
 				}
@@ -1996,6 +2019,9 @@ public class DateUtils {
 				resource.setClearWeatherDuration(duration);
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
+						String playerWorld = player.getWorld().getName();
+						if (playerWorld.equals("arena") || playerWorld.equals("creative")) continue;
+						if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) continue;
 						playSnowStartSound(player);
 					}
 				}
@@ -2024,12 +2050,20 @@ public class DateUtils {
 			AranarthUtils.setWeather(type);
 			if (!isNewDay) {
 				for (Player player : Bukkit.getOnlinePlayers()) {
+					String playerWorld = player.getWorld().getName();
+					if (playerWorld.equals("arena") || playerWorld.equals("creative")) continue;
+					if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) continue;
 					playClearSound(player);
 				}
 			}
 			message = ChatUtils.chatMessage("&7&oThe storm has subsided...");
 		}
-		Bukkit.broadcastMessage(message);
+		for (Player player : Bukkit.getOnlinePlayers()) {
+			String playerWorld = player.getWorld().getName();
+			if (playerWorld.equals("arena") || playerWorld.equals("creative")) continue;
+			if (AranarthUtils.getPlayer(player.getUniqueId()).isWeatherMessageDisabled()) continue;
+			player.sendMessage(message);
+		}
 	}
 
 	/**

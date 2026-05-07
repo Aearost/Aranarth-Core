@@ -15,8 +15,8 @@ public class CommandToggleCompleter implements TabCompleter {
 
 	private static final List<String> TOGGLE_OPTIONS = List.of(
 		"blacklist", "bluefire", "changeclaim", "chat", "chestlock",
-		"compressor", "gradientchat", "inventory", "messages", "pethurt",
-		"shulker", "spawnboost", "teleport"
+		"compressor", "daymessage", "gradientchat", "inventory", "messages", "pethurt",
+		"shulker", "spawnboost", "teleport", "weathermessage"
 	);
 
 	/**

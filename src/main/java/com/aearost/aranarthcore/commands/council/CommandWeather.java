@@ -68,7 +68,12 @@ public class CommandWeather {
 				// Must match the -100 offset used throughout DateUtils to stay in sync
 				AranarthUtils.setStormDelay(delay - 100);
 
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					String pWorld = p.getWorld().getName();
+					if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+					if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+					p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+				}
 
 			} else if (args[1].equalsIgnoreCase("RAIN") || args[1].equalsIgnoreCase("THUNDER")) {
 				boolean isThunder = args[1].equalsIgnoreCase("THUNDER");
@@ -120,7 +125,12 @@ public class CommandWeather {
 					AranarthUtils.setStormDuration(duration - 100);
 
 					String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
-					Bukkit.broadcastMessage(ChatUtils.chatMessage(broadcastMsg));
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						String pWorld = p.getWorld().getName();
+						if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+						if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+						p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
+					}
 				}
 			} else if (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY")) {
 				if (args.length >= 3) {
@@ -190,7 +200,12 @@ public class CommandWeather {
 		// WeatherChangeListener (matches DateUtils convention)
 		AranarthUtils.setStormDuration(duration - 100);
 
-		Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			String pWorld = p.getWorld().getName();
+			if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+			if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+			p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+		}
 	}
 
 	/**

@@ -89,6 +89,8 @@ public class AranarthPlayer {
 	private String gradientChatColors = "";
 	private boolean isGradientChatBold = false;
 	private UUID petTransferUuid = null;
+	private boolean isDayMessageDisabled = false;
+	private boolean isWeatherMessageDisabled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1391,5 +1393,21 @@ public class AranarthPlayer {
 	 */
 	public void setPetTransferUuid(UUID petTransferUuid) {
 		this.petTransferUuid = petTransferUuid;
+	}
+
+	public boolean isDayMessageDisabled() {
+		return isDayMessageDisabled;
+	}
+
+	public void setDayMessageDisabled(boolean isDayMessageDisabled) {
+		this.isDayMessageDisabled = isDayMessageDisabled;
+	}
+
+	public boolean isWeatherMessageDisabled() {
+		return isWeatherMessageDisabled;
+	}
+
+	public void setWeatherMessageDisabled(boolean isWeatherMessageDisabled) {
+		this.isWeatherMessageDisabled = isWeatherMessageDisabled;
 	}
 }

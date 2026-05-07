@@ -211,6 +211,12 @@ public class PlayerServerJoinListener implements Listener {
 		if (aranarthPlayer.hasBlueFireDisabled()) {
 			toggling.add("&e&oBlue Fire");
 		}
+		if (aranarthPlayer.isDayMessageDisabled()) {
+			toggling.add("&e&oDay Message");
+		}
+		if (aranarthPlayer.isWeatherMessageDisabled()) {
+			toggling.add("&e&oWeather Message");
+		}
 
 		if (!toggling.isEmpty()) {
 			String toggledFeatures = "  &7&oYou currently have ";

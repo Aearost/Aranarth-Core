@@ -3,11 +3,13 @@ package com.aearost.aranarthcore.event.listener.misc;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.weather.WeatherChangeEvent;
@@ -92,7 +94,17 @@ public class WeatherChangeListener implements Listener {
 					resource.setClearWeatherDuration(delay);
 					resource.setTime(world.getTime());
 
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+					for (Player player : Bukkit.getOnlinePlayers()) {
+							String worldName = player.getWorld().getName();
+							if (worldName.equals("arena") || worldName.equals("creative")) {
+								continue;
+							}
+							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+							if (aranarthPlayer.isWeatherMessageDisabled()) {
+								continue;
+							}
+							player.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+						}
 				}
 			}
 		}

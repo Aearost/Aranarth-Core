@@ -191,6 +191,12 @@ public class CommandInfo implements CommandExecutor {
 		if (aranarthPlayer.hasBlueFireDisabled()) {
 			toggling.add("&eBlue Fire");
 		}
+		if (aranarthPlayer.isDayMessageDisabled()) {
+			toggling.add("&eDay Message");
+		}
+		if (aranarthPlayer.isWeatherMessageDisabled()) {
+			toggling.add("&eWeather Message");
+		}
 		String toggledFeatures = "";
 		if (toggling.isEmpty()) {
 			toggledFeatures = "&eNone";
