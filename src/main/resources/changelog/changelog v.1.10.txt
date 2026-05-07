@@ -45,6 +45,7 @@ Minor Features
 [~] Added alias for /streak being /daily
 [+] Added crop harvest boost to Elven Aranarthium wearers
 [~] Fixed issue where players wouldn't have world edit in creative when they logged off
+[~] Added jingle sound when using /ac weather
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

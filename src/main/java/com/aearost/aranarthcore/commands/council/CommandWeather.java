@@ -73,6 +73,7 @@ public class CommandWeather {
 					if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
 					if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
 					p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+					DateUtils.playClearSound(p);
 				}
 
 			} else if (args[1].equalsIgnoreCase("RAIN") || args[1].equalsIgnoreCase("THUNDER")) {
@@ -130,6 +131,11 @@ public class CommandWeather {
 						if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
 						if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
 						p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
+						if (isThunder) {
+							DateUtils.playThunderStartSound(p);
+						} else {
+							DateUtils.playRainStartSound(p);
+						}
 					}
 				}
 			} else if (args[1].equalsIgnoreCase("DURATION") || args[1].equalsIgnoreCase("DELAY")) {
@@ -205,6 +211,7 @@ public class CommandWeather {
 			if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
 			if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
 			p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+			DateUtils.playSnowStartSound(p);
 		}
 	}
 

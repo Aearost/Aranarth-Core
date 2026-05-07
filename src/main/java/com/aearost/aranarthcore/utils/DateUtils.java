@@ -2119,7 +2119,7 @@ public class DateUtils {
 	 * Notes descend A4 → G4 → E4 → D4, evoking the melancholic patter of raindrops.
 	 * @param player The player to play the sound to.
 	 */
-	private void playRainStartSound(Player player) {
+	public static void playRainStartSound(Player player) {
 		// A4 (pitch 1.1892)
 		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.4f, 1.1892f);
 		// G4 (pitch 1.0595) — 0.3s later
@@ -2138,7 +2138,7 @@ public class DateUtils {
 	 * Bass notes B3 → A3 build ominous tension; chimes Bb4 → G4 → E4 evoke a lightning flash.
 	 * @param player The player to play the sound to.
 	 */
-	private void playThunderStartSound(Player player) {
+	public static void playThunderStartSound(Player player) {
 		// D5 (pitch 1.5874) — sharp crack (eighth note 1)
 		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.6f, 1.5874f);
 		// C#5 (pitch 1.4983) — dissonant semitone follow (eighth note 2, +6 ticks)
@@ -2160,7 +2160,7 @@ public class DateUtils {
 	 * Notes descend F#5 → D5 → B4 → G4, evoking the hush and magic of falling snow.
 	 * @param player The player to play the sound to.
 	 */
-	private void playSnowStartSound(Player player) {
+	public static void playSnowStartSound(Player player) {
 		// F#5 (pitch 2.0) — high and airy (quarter note 1)
 		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.35f, 2.0f);
 		// D5 (pitch 1.5874) — quarter note 2 (+12 ticks)
@@ -2179,7 +2179,7 @@ public class DateUtils {
 	 * Notes ascend C4 → E4 → G4 → C5 → E5 with accelerating gaps, evoking sunlight breaking through.
 	 * @param player The player to play the sound to.
 	 */
-	private void playClearSound(Player player) {
+	public static void playClearSound(Player player) {
 		// C4 (pitch 0.7071) — eighth note 1
 		player.playSound(player, Sound.BLOCK_NOTE_BLOCK_CHIME, 0.5f, 0.7071f);
 		// E4 (pitch 0.8909) — eighth note 2 (+6 ticks)
