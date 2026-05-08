@@ -147,7 +147,6 @@ public class PermissionUtils {
 			// Enable abilities
 			perms.setPermission("bending.ability.waterarms", true);
 			perms.setPermission("bending.ability.firecomet", true);
-			perms.setPermission("bending.ability.metalclips", true);
 			perms.setPermission("bending.ability.suffocate", true);
 			perms.setPermission("bending.earth.lavaflux", true);
 			perms.setPermission("bending.earth.fissure", true);
@@ -169,7 +168,6 @@ public class PermissionUtils {
 			// Disable abilities
 			perms.setPermission("bending.ability.waterarms", false);
 			perms.setPermission("bending.ability.firecomet", false);
-			perms.setPermission("bending.ability.metalclips", false);
 			perms.setPermission("bending.ability.suffocate", false);
 			perms.setPermission("bending.earth.lavaflux", false);
 			perms.setPermission("bending.earth.fissure", false);
@@ -205,7 +203,6 @@ public class PermissionUtils {
 		// Disable abilities
 		perms.setPermission("bending.ability.waterarms", false);
 		perms.setPermission("bending.ability.firecomet", false);
-		perms.setPermission("bending.ability.metalclips", false);
 		perms.setPermission("bending.ability.suffocate", false);
 		perms.setPermission("bending.earth.lavaflux", false);
 		perms.setPermission("bending.earth.fissure", false);
@@ -425,7 +422,6 @@ public class PermissionUtils {
 					// Enable all abilities
 					perms.setPermission("bending.ability.waterarms", true);
 					perms.setPermission("bending.ability.firecomet", true);
-					perms.setPermission("bending.ability.metalclips", true);
 					perms.setPermission("bending.ability.suffocate", true);
 
 					// Adding avatar-exclusive permissions
@@ -579,7 +575,6 @@ public class PermissionUtils {
 
 		// Duke
 		if (rank >= 5) {
-			perms.setPermission("bending.ability.metalclips", true);
 			perms.setPermission("bending.ability.suffocate", true);
 			perms.setPermission("aranarth.nick", true);
 			perms.setPermission("bending.command.preset.create.12", true);

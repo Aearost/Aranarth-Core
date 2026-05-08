@@ -49,6 +49,7 @@ Minor Features
 [~] Added jingle sound when using /ac weather
 [~] Fixed issue where Discord server join and quit were often showing up with "unknown-user" messages
 [+] Added /t alias for /toggle
+[-] Removed MetalClips permissions and descriptions
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

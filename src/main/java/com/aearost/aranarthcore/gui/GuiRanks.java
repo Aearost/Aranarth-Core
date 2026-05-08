@@ -205,7 +205,6 @@ public class GuiRanks {
 			}
 		}
 		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetalClips"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- &7&oSuffocate"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick (and a nickname in Discord)"));
