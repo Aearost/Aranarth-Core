@@ -21,7 +21,7 @@ import java.util.UUID;
 public class ContainerAutoLock {
 
     public void execute(BlockPlaceEvent e) {
-        if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+        if (!AranarthUtils.isSurvivalWorld(e.getBlock().getWorld().getName()) || AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
             return;
         }
 

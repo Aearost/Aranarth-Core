@@ -137,7 +137,9 @@ public class ContainerInteract {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
-        if (container != null) {
+        if (!AranarthUtils.isSurvivalWorld(block.getWorld().getName()) || AranarthUtils.isSpawnLocation(block.getLocation())) {
+            player.sendMessage(ChatUtils.chatMessage("&cContainers cannot be locked here!"));
+        } else if (container != null) {
             player.sendMessage(ChatUtils.chatMessage("&cThis container is already locked!"));
         } else {
             List<UUID> trusted = new ArrayList<>();
