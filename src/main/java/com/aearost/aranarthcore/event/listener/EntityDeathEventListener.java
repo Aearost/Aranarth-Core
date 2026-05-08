@@ -53,5 +53,9 @@ public class EntityDeathEventListener implements Listener {
             }
         }
 
+        if (e.getEntityType() != EntityType.PLAYER) {
+            new ArdentArmorMobDrops().execute(e);
+        }
+
     }
 }

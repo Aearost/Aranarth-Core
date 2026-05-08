@@ -88,7 +88,10 @@
       "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" tf \"/c/Users/liamh/IdeaProjects/AranarthCore/target/AranarthCore-1.10.jar\")",
       "WebSearch",
       "WebFetch(domain:github.com)",
-      "WebFetch(domain:wiki.mee6.xyz)"
+      "WebFetch(domain:wiki.mee6.xyz)",
+      "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/event/listener/*.java)",
+      "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/event/mob/*.java)",
+      "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/utils/*.java)"
     ]
   }
 }
