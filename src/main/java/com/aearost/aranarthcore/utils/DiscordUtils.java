@@ -22,7 +22,6 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -794,50 +793,56 @@ public class DiscordUtils {
 
 	/**
 	 * Provides custom server join messages in Discord with emojis.
-	 * @param user The user that joined the server.
+	 * @param name The display name of the user that joined the server.
+	 * @param discordId The Discord user ID of the user that joined the server.
 	 */
-	public static void discordServerJoin(String user) {
+	public static void discordServerJoin(String name, String discordId) {
+		String link = "[" + name + "](https://discord.com/users/" + discordId + ")";
 		List<String> welcomeMessages = new ArrayList<>();
-		welcomeMessages.add("**Welcome " + user + " to Aranarth's Discord!**");
-		welcomeMessages.add("**Is that " + user + " who has come to join us? \uD83D\uDC40**");
-		welcomeMessages.add("**Look - it's a wild " + user + "!**");
-		welcomeMessages.add("**" + user + " has entered the realm! ⚔️**");
-		welcomeMessages.add("**All hail " + user + ", our newest arrival! 👑**");
-		welcomeMessages.add("**" + user + " joined the party! 🎉**");
-		welcomeMessages.add("**The gates open for " + user + "! 🏰**");
-		welcomeMessages.add("**A new challenger appears: " + user + "! ⚡**");
+		welcomeMessages.add("**Welcome " + link + " to Aranarth's Discord!**");
+		welcomeMessages.add("**Is that " + link + " who has come to join us? \uD83D\uDC40**");
+		welcomeMessages.add("**Look - it's a wild " + link + "!**");
+		welcomeMessages.add("**" + link + " has entered the realm! ⚔️**");
+		welcomeMessages.add("**All hail " + link + ", our newest arrival! 👑**");
+		welcomeMessages.add("**" + link + " joined the party! 🎉**");
+		welcomeMessages.add("**The gates open for " + link + "! 🏰**");
+		welcomeMessages.add("**A new challenger appears: " + link + "! ⚡**");
 
 		int index = ThreadLocalRandom.current().nextInt(welcomeMessages.size());
-		welcome.sendMessage(welcomeMessages.get(index))
-				.allowedMentions(Collections.emptyList())
-				.queue(message -> {
-					message.addReaction("\uD83D\uDC4B").queue();
-					message.addReaction("🎉").queue();
-					message.addReaction("\uD83C\uDF88").queue();
-				});
+		EmbedBuilder embed = new EmbedBuilder()
+				.setDescription(welcomeMessages.get(index))
+				.setColor(Color.GREEN);
+		welcome.sendMessageEmbeds(embed.build()).queue(message -> {
+			message.addReaction("\uD83D\uDC4B").queue();
+			message.addReaction("🎉").queue();
+			message.addReaction("\uD83C\uDF88").queue();
+		});
 	}
 
 	/**
 	 * Provides custom server quit messages in Discord with emojis.
-	 * @param user The user that quit the server.
+	 * @param name The display name of the user that quit the server.
+	 * @param discordId The Discord user ID of the user that quit the server.
 	 */
-	public static void discordServerQuit(String user) {
+	public static void discordServerQuit(String name, String discordId) {
+		String link = "[" + name + "](https://discord.com/users/" + discordId + ")";
 		List<String> leaveMessages = new ArrayList<>();
-		leaveMessages.add("**" + user + " has left the realm 🏰**");
-		leaveMessages.add("**" + user + " has gone AFK... forever? 😶**");
-		leaveMessages.add("**" + user + " went poof ✨**");
-		leaveMessages.add("**" + user + " has left Aranarth... farewell! 🌙**");
-		leaveMessages.add("**" + user + " has vanished into the void 🌀**");
-		leaveMessages.add("**" + user + " has left us... for now ⏳**");
-		leaveMessages.add("**" + user + " left without saying goodbye 😢**");
-		leaveMessages.add("**" + user + " rage quit 😤**");
+		leaveMessages.add("**" + link + " has left the realm 🏰**");
+		leaveMessages.add("**" + link + " has gone AFK... forever? 😶**");
+		leaveMessages.add("**" + link + " went poof ✨**");
+		leaveMessages.add("**" + link + " has left Aranarth... farewell! 🌙**");
+		leaveMessages.add("**" + link + " has vanished into the void 🌀**");
+		leaveMessages.add("**" + link + " has left us... for now ⏳**");
+		leaveMessages.add("**" + link + " left without saying goodbye 😢**");
+		leaveMessages.add("**" + link + " rage quit 😤**");
 
 		int index = ThreadLocalRandom.current().nextInt(leaveMessages.size());
-		welcome.sendMessage(leaveMessages.get(index))
-				.allowedMentions(Collections.emptyList())
-				.queue(message -> {
-					message.addReaction("\uD83D\uDC94").queue();
-					message.addReaction("\uD83D\uDE2D").queue();
-				});
+		EmbedBuilder embed = new EmbedBuilder()
+				.setDescription(leaveMessages.get(index))
+				.setColor(Color.RED);
+		welcome.sendMessageEmbeds(embed.build()).queue(message -> {
+			message.addReaction("\uD83D\uDC94").queue();
+			message.addReaction("\uD83D\uDE2D").queue();
+		});
 	}
 }

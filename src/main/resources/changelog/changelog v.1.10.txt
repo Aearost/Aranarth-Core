@@ -46,6 +46,7 @@ Minor Features
 [+] Added crop harvest boost to Elven Aranarthium wearers
 [~] Fixed issue where players wouldn't have world edit in creative when they logged off
 [~] Added jingle sound when using /ac weather
+[~] Fixed issue where Discord server join and quit were often showing up with "unknown-user" messages
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
