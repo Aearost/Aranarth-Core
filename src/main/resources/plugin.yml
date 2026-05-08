@@ -141,6 +141,7 @@ commands:
     description: Provides the player with access to a GUI with all forms of crafting tables
   toggle:
     description: Allows the player to toggle different functionality
+    aliases: [t]
   teleport:
     description: Sends a teleport request to the input player
     aliases: [tp]
