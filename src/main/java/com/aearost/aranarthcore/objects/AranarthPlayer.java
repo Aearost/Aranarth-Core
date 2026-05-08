@@ -91,6 +91,7 @@ public class AranarthPlayer {
 	private UUID petTransferUuid = null;
 	private boolean isDayMessageDisabled = false;
 	private boolean isWeatherMessageDisabled = false;
+	private boolean isBulkSellShulkerEnabled = false;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1409,5 +1410,13 @@ public class AranarthPlayer {
 
 	public void setWeatherMessageDisabled(boolean isWeatherMessageDisabled) {
 		this.isWeatherMessageDisabled = isWeatherMessageDisabled;
+	}
+
+	public boolean isBulkSellShulkerEnabled() {
+		return isBulkSellShulkerEnabled;
+	}
+
+	public void setBulkSellShulkerEnabled(boolean isBulkSellShulkerEnabled) {
+		this.isBulkSellShulkerEnabled = isBulkSellShulkerEnabled;
 	}
 }

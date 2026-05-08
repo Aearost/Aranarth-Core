@@ -217,6 +217,9 @@ public class PlayerServerJoinListener implements Listener {
 		if (aranarthPlayer.isWeatherMessageDisabled()) {
 			toggling.add("&e&oWeather Message");
 		}
+		if (aranarthPlayer.isBulkSellShulkerEnabled()) {
+			toggling.add("&e&oBulk Sell Shulker");
+		}
 
 		if (!toggling.isEmpty()) {
 			String toggledFeatures = "  &7&oYou currently have ";

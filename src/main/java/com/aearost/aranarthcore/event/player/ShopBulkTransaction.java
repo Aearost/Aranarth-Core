@@ -67,6 +67,15 @@ public class ShopBulkTransaction {
 					return;
 				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
+				// Apply "leave one per shulker slot" adjustment to displayed quantity/price
+				if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
+					int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
+					if (adjustedQuantity > 0 && adjustedQuantity != bulkShop.getQuantity()) {
+						double pricePerUnit = bulkShop.getSellPrice() / bulkShop.getQuantity();
+						bulkShop.setQuantity(adjustedQuantity);
+						bulkShop.setSellPrice(pricePerUnit * adjustedQuantity);
+					}
+				}
 				if (bulkShop.getQuantity() == shop.getQuantity()) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
 					return;

@@ -316,6 +316,57 @@ public class ShopUtils {
     }
 
     /**
+     * Computes the "leave one per shulker slot" adjusted sell quantity for a bulk sale,
+     * aligned down to the nearest multiple of the original shop unit. Used for preview messages.
+     * @param bulkShop The bulk shop returned by getBulkShop.
+     * @param originalUnit The original shop's base quantity per transaction.
+     * @param player The player selling.
+     * @return The aligned quantity to display, or the bulk quantity if no adjustment applies.
+     */
+    public static int computeLeaveOneAdjustedQuantity(Shop bulkShop, int originalUnit, Player player) {
+        if (isShulkerBox(bulkShop.getItem())) return bulkShop.getQuantity();
+
+        int bulkQuantity = bulkShop.getQuantity();
+
+        // Calculate how much shulker slots can contribute (amount - 1 per slot for maxStackSize > 1)
+        int shulkerContribution = 0;
+        for (ItemStack invItem : player.getInventory().getStorageContents()) {
+            if (!isShulkerBox(invItem)) continue;
+            if (!(invItem.getItemMeta() instanceof BlockStateMeta bsm)) continue;
+            if (!(bsm.getBlockState() instanceof ShulkerBox shulker)) continue;
+            for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+                if (shulkerItem == null) continue;
+                boolean isSameCropSeed = shulkerItem.getType() == bulkShop.getItem().getType() && CropUtils.isCropSeed(bulkShop.getItem().getType());
+                if (shulkerItem.isSimilar(bulkShop.getItem()) || isSameCropSeed) {
+                    shulkerContribution += shulkerItem.getMaxStackSize() > 1
+                            ? shulkerItem.getAmount() - 1
+                            : 1;
+                }
+            }
+        }
+
+        int effectiveShulkerContribution = Math.min(shulkerContribution, bulkQuantity);
+        int regularTarget = Math.max(0, bulkQuantity - effectiveShulkerContribution);
+
+        // Count regular inventory contribution up to regularTarget
+        int regularContribution = 0;
+        for (ItemStack invItem : player.getInventory().getStorageContents()) {
+            if (invItem == null || isShulkerBox(invItem)) continue;
+            boolean isSameCropSeed = invItem.getType() == bulkShop.getItem().getType() && CropUtils.isCropSeed(bulkShop.getItem().getType());
+            if (invItem.isSimilar(bulkShop.getItem()) || isSameCropSeed) {
+                regularContribution += invItem.getAmount();
+                if (regularContribution >= regularTarget) {
+                    regularContribution = regularTarget;
+                    break;
+                }
+            }
+        }
+
+        int actualQuantity = regularContribution + effectiveShulkerContribution;
+        return (actualQuantity / originalUnit) * originalUnit;
+    }
+
+    /**
      * Provides the shop with its quantities and prices maxed out, tailored to the player making the transaction.
      * @param shop The original shop object.
      * @param player The player that is interacting with the shop.

@@ -197,6 +197,9 @@ public class CommandInfo implements CommandExecutor {
 		if (aranarthPlayer.isWeatherMessageDisabled()) {
 			toggling.add("&eWeather Message");
 		}
+		if (aranarthPlayer.isBulkSellShulkerEnabled()) {
+			toggling.add("&eBulk Sell Shulker");
+		}
 		String toggledFeatures = "";
 		if (toggling.isEmpty()) {
 			toggledFeatures = "&eNone";

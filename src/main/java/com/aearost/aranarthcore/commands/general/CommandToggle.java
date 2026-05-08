@@ -265,6 +265,19 @@ public class CommandToggle implements CommandExecutor {
 						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7weather change messages"));
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("bulksellshulker")) {
+					if (player.hasPermission("aranarth.shulker")) {
+						if (aranarthPlayer.isBulkSellShulkerEnabled()) {
+							aranarthPlayer.setBulkSellShulkerEnabled(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7bulk sell shulker"));
+						} else {
+							aranarthPlayer.setBulkSellShulkerEnabled(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7bulk sell shulker"));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}
