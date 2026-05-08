@@ -282,6 +282,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.enderchest", false);
 		perms.setPermission("aranarth.chat.gradient", false);
 		perms.setPermission("aranarth.chat.gradientbold", false);
+		perms.setPermission("aranarth.gate", false);
 
 		// Armor stand poses
 		perms.setPermission("aranarthcore.armorstand.nopose", false);
@@ -596,6 +597,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.command.preset.create.15", true);
 			perms.setPermission("aranarthcore.armorstand.riposte", true);
 			perms.setPermission("aranarthcore.armorstand.ripostemirrored", true);
+			perms.setPermission("aranarth.gate", true);
 		} else {
 			return;
 		}
@@ -678,6 +680,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.chat.gradient", true);
 			perms.setPermission("aranarthcore.armorstand.salute", true);
 			perms.setPermission("aranarthcore.armorstand.zombie", true);
+			perms.setPermission("aranarth.gate", true);
 		} else {
 			return;
 		}
@@ -767,6 +770,7 @@ public class PermissionUtils {
 		if (architectRank == 1) {
 			perms.setPermission("worldedit.*", true);
 			perms.setPermission("aranarth.skull", true);
+			perms.setPermission("aranarth.gate", true);
 		}
 	}
 

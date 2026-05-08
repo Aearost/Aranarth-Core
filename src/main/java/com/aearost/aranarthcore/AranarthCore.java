@@ -101,6 +101,7 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveQuestState();
 				PersistenceUtils.saveQuestProgress();
 				PersistenceUtils.saveLoginStreaks();
+				PersistenceUtils.saveGates();
 				DiscordUtils.updateAllDiscordRoles();
 				Bukkit.getLogger().info("Aranarth data has been saved");
 
@@ -219,6 +220,7 @@ public class AranarthCore extends JavaPlugin {
 		QuestUtils.initialize();
 		PersistenceUtils.loadQuestProgress();
 		PersistenceUtils.loadLoginStreaks();
+		PersistenceUtils.loadGates();
 	}
 
 	/**
@@ -278,6 +280,7 @@ public class AranarthCore extends JavaPlugin {
 		new PotionAlchemyExpListener(this);
 		new TamedPetStealPreventListener(this);
 		new RootingArrowMovePrevent(this);
+		new GateListener(this);
 
 		// Single-purpose and single-event event listeners
 		new PlayerServerJoinListener(this);
@@ -306,13 +309,13 @@ public class AranarthCore extends JavaPlugin {
 				discordMemberJoinListener = new ListenerAdapter() {
 					@Override
 					public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-						DiscordUtils.discordServerJoin(event.getUser().getAsMention());
+						DiscordUtils.discordServerJoin(event.getUser().getEffectiveName(), event.getUser().getId());
 					}
 				};
 				discordMemberLeaveListener = new ListenerAdapter() {
 					@Override
 					public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-						DiscordUtils.discordServerQuit(event.getUser().getAsMention());
+						DiscordUtils.discordServerQuit(event.getUser().getEffectiveName(), event.getUser().getId());
 					}
 				};
 				jda.addEventListener(discordMemberJoinListener);
@@ -651,6 +654,7 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveQuestState();
 		PersistenceUtils.saveQuestProgress();
 		PersistenceUtils.saveLoginStreaks();
+		PersistenceUtils.saveGates();
 
 		Bukkit.resetRecipes();
 		discordChatListener.unsubscribe();

@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.GateUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -235,6 +236,17 @@ public class CommandToggle implements CommandExecutor {
 						}
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				} else if (args[0].equalsIgnoreCase("gate")) {
+					if (player.hasPermission("aranarth.gate")) {
+						boolean enabled = GateUtils.toggleGatePlacementMode(player.getUniqueId());
+						if (enabled) {
+							player.sendMessage(ChatUtils.chatMessage("&7Gate placement mode &aenabled&7. Place a fence or bar block to start a new gate."));
+						} else {
+							player.sendMessage(ChatUtils.chatMessage("&7Gate placement mode &cdisabled&7."));
+						}
+					} else {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use gate placement mode!"));
+					}
 				} else if (args[0].equalsIgnoreCase("daymessage")) {
 					if (aranarthPlayer.isDayMessageDisabled()) {
 						aranarthPlayer.setDayMessageDisabled(false);

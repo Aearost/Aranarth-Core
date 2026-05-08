@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * Prevents crops from being trampled by both players and other mobs
+ * Centralizes all protections to the world to be done at Spawn.
  */
 public class SpawnProtectionListener implements Listener {
 

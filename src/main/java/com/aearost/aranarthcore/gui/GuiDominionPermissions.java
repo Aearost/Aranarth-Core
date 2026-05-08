@@ -381,6 +381,7 @@ public class GuiDominionPermissions {
      * Formats a DominionPermission enum name into a human-readable string.
      */
     public static String formatPermissionName(DominionPermission permission) {
+        if (permission == DominionPermission.FENCE_GATE) return "Gates";
         String raw = permission.name().replace("_", " ");
         StringBuilder formatted = new StringBuilder();
         for (String word : raw.split(" ")) {

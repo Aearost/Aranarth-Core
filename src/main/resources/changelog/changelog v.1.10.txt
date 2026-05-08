@@ -23,6 +23,7 @@ Major Features
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week
 [+] Added a toggle for the new day message, and for the weather messages
+[+] Implemented gate functionality
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

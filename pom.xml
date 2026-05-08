@@ -40,8 +40,9 @@
                         </goals>
                         <configuration>
                             <filters>
+                                <!-- Prevent mcMMO's plugin.yml from overwriting ours -->
                                 <filter>
-                                    <artifact>*:*</artifact>
+                                    <artifact>com.gmail.nossr50.mcMMO:mcMMO</artifact>
                                     <excludes>
                                         <exclude>plugin.yml</exclude>
                                     </excludes>
@@ -53,9 +54,21 @@
             </plugin>
         </plugins>
         <resources>
+            <!-- Filter YAML/text files (plugin.yml, config.yml, etc.) -->
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>pack/**</exclude>
+                </excludes>
+            </resource>
+            <!-- Copy binary resource pack assets without filtering -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>pack/**</include>
+                </includes>
             </resource>
         </resources>
     </build>

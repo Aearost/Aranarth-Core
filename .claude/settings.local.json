@@ -71,7 +71,24 @@
       "Bash(grep -r http /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore --include=*.java)",
       "Bash(grep -r \"$5000\\\\|$250\\\\|$1250\\\\|5000\\\\|250\\\\|1250\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/commands/general/CommandDominion.java)",
       "Bash(grep -v \"//\")",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f \\\\\\(-name *.txt -o -name *.json \\\\\\))"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f \\\\\\(-name *.txt -o -name *.json \\\\\\))",
+      "Bash(mvn clean:*)",
+      "Bash(./mvnw clean:*)",
+      "Bash(mvn.cmd clean:*)",
+      "Bash(where mvn:*)",
+      "Read(//c//**)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" clean package -q)",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" compile -Dmaven.resources.skip=true)",
+      "Bash(grep -r CHAIN /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api --include=*.java)",
+      "Bash(find /c/Users/liamh/.m2/repository/io/papermc/paper -name *.jar)",
+      "Bash(javap -classpath /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/1.21.11-R0.1-SNAPSHOT/paper-api-1.21.11-R0.1-20260129.111236-60.jar org.bukkit.Material)",
+      "Bash('/c/Program Files/Java/jdk-23/bin/javap' -classpath /c/Users/liamh/.m2/repository/io/papermc/paper/paper-api/1.21.11-R0.1-SNAPSHOT/paper-api-1.21.11-R0.1-20260129.111236-60.jar org.bukkit.Material)",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" tf \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/AranarthCore.jar\")",
+      "Bash(\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn\" clean package)",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" tf \"/c/Users/liamh/IdeaProjects/AranarthCore/target/AranarthCore-1.10.jar\")",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:wiki.mee6.xyz)"
     ]
   }
 }

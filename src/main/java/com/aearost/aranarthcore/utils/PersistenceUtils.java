@@ -2915,4 +2915,145 @@ public class PersistenceUtils {
 		}
 	}
 
+	/**
+	 * Initializes gates from gates.txt.
+	 * Format: id|ownerUuid|type|isOpen|axis|world|x1:y1:z1,x2:y2:z2,...
+	 * axis is X, Z, or NONE (single-block gate with no axis determined yet).
+	 */
+	public static void loadGates() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "gates.txt";
+		File file = new File(filePath);
+
+		if (!file.exists()) {
+			return;
+		}
+
+		GateUtils.clearGates();
+
+		Scanner reader;
+		try {
+			reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the gates file...");
+
+			while (reader.hasNextLine()) {
+				String line = reader.nextLine();
+				if (line.startsWith("#") || line.isBlank()) {
+					continue;
+				}
+
+				String[] fields = line.split("\\|");
+				if (fields.length < 7) continue;
+
+				UUID id = UUID.fromString(fields[0]);
+				UUID owner = UUID.fromString(fields[1]);
+				boolean metalGate = Boolean.parseBoolean(fields[2]);
+				boolean isOpen = Boolean.parseBoolean(fields[3]);
+				String axisField = fields[4];
+				String worldName = fields[5];
+				String blocksField = fields[6];
+
+				World world = Bukkit.getWorld(worldName);
+				if (world == null) continue;
+
+				Gate.Axis axis = null;
+				if ("X".equals(axisField)) axis = Gate.Axis.X;
+				else if ("Z".equals(axisField)) axis = Gate.Axis.Z;
+
+				Map<Location, Material> blockMaterials = new HashMap<>();
+				if (!blocksField.isEmpty()) {
+					for (String blockEntry : blocksField.split(",")) {
+						String[] parts = blockEntry.split(":");
+						if (parts.length < 3) continue;
+						int bx = Integer.parseInt(parts[0]);
+						int by = Integer.parseInt(parts[1]);
+						int bz = Integer.parseInt(parts[2]);
+						Location loc = new Location(world, bx, by, bz);
+						Material mat;
+						if (parts.length >= 4) {
+							mat = Material.matchMaterial(parts[3]);
+							if (mat == null) mat = metalGate ? Material.IRON_BARS : Material.OAK_FENCE;
+						} else {
+							// Legacy entry without material — use a sensible default.
+							mat = metalGate ? Material.IRON_BARS : Material.OAK_FENCE;
+						}
+						blockMaterials.put(loc, mat);
+					}
+				}
+
+				if (blockMaterials.isEmpty()) continue;
+				Location firstBlock = blockMaterials.keySet().iterator().next();
+				Gate gate = new Gate(id, owner, metalGate, firstBlock, blockMaterials.get(firstBlock));
+				gate.setBlockMaterials(blockMaterials);
+				gate.setAxis(axis);
+				gate.setOpen(isOpen);
+				GateUtils.addGate(gate);
+			}
+
+			Bukkit.getLogger().info("All gates have been initialized");
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the gates!");
+		}
+	}
+
+	/**
+	 * Saves all gates to gates.txt.
+	 */
+	public static void saveGates() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "gates.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = true;
+		if (!pluginDirectory.isDirectory()) {
+			isDirectoryCreated = pluginDirectory.mkdir();
+		}
+
+		if (isDirectoryCreated) {
+			try {
+				if (file.createNewFile()) {
+					Bukkit.getLogger().info("A new gates.txt file has been generated");
+				}
+			} catch (IOException e) {
+				Bukkit.getLogger().info("An error occurred in the creation of gates.txt");
+			}
+
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#id|ownerUuid|metalGate|isOpen|axis|world|x1:y1:z1:MAT1,x2:y2:z2:MAT2,...\n");
+
+				for (Gate gate : GateUtils.getGates()) {
+					if (gate.getBlocks().isEmpty()) continue;
+					Location anyBlock = gate.getBlocks().iterator().next();
+					if (anyBlock.getWorld() == null) continue;
+
+					String id = gate.getId().toString();
+					String owner = gate.getOwner().toString();
+					String metalGate = String.valueOf(gate.isMetalGate());
+					String isOpen = String.valueOf(gate.isOpen());
+					String axis = gate.getAxis() == null ? "NONE" : gate.getAxis().name();
+					String world = anyBlock.getWorld().getName();
+
+					StringBuilder blocksSB = new StringBuilder();
+					for (Location loc : gate.getBlocks()) {
+						if (!blocksSB.isEmpty()) blocksSB.append(",");
+						Material mat = gate.getMaterialAt(loc);
+						blocksSB.append(loc.getBlockX()).append(":").append(loc.getBlockY())
+								.append(":").append(loc.getBlockZ()).append(":").append(mat.name());
+					}
+
+					writer.write(id + "|" + owner + "|" + metalGate + "|" + isOpen + "|" + axis
+							+ "|" + world + "|" + blocksSB + "\n");
+				}
+				writer.close();
+			} catch (IOException e) {
+				Bukkit.getLogger().info("There was an error in saving the gates");
+			}
+		}
+	}
+
 }
