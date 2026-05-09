@@ -371,7 +371,7 @@ public class ShopInteract {
                     && !clickUser.isBulkSellShulkerEnabled();
             HashMap<Integer, ItemStack[]> leaveOneResult = null;
             if (useLeaveOneLogic) {
-                leaveOneResult = computeLeaveOneShulkerContents(player.getInventory().getStorageContents(), shop);
+                leaveOneResult = computeLeaveOneShulkerContents(player.getInventory().getContents(), shop);
                 int actualQuantity = leaveOneResult.keySet().iterator().next();
                 if (actualQuantity > 0) {
                     // Align to a multiple of the original shop's unit quantity
