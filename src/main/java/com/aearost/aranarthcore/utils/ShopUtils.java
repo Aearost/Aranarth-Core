@@ -345,23 +345,22 @@ public class ShopUtils {
             }
         }
 
-        int effectiveShulkerContribution = Math.min(shulkerContribution, bulkQuantity);
-        int regularTarget = Math.max(0, bulkQuantity - effectiveShulkerContribution);
-
-        // Count regular inventory contribution up to regularTarget
+        // Count regular inventory contribution: clear all when shulkers contribute so the
+        // preview matches the "clear inventory first" behaviour; otherwise cap at bulkQuantity.
         int regularContribution = 0;
         for (ItemStack invItem : player.getInventory().getStorageContents()) {
             if (invItem == null || isShulkerBox(invItem)) continue;
             boolean isSameCropSeed = invItem.getType() == bulkShop.getItem().getType() && CropUtils.isCropSeed(bulkShop.getItem().getType());
             if (invItem.isSimilar(bulkShop.getItem()) || isSameCropSeed) {
                 regularContribution += invItem.getAmount();
-                if (regularContribution >= regularTarget) {
-                    regularContribution = regularTarget;
+                if (shulkerContribution == 0 && regularContribution >= bulkQuantity) {
+                    regularContribution = bulkQuantity;
                     break;
                 }
             }
         }
 
+        int effectiveShulkerContribution = Math.min(shulkerContribution, Math.max(0, bulkQuantity - regularContribution));
         int actualQuantity = regularContribution + effectiveShulkerContribution;
         return (actualQuantity / originalUnit) * originalUnit;
     }

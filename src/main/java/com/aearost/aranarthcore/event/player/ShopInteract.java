@@ -584,18 +584,21 @@ public class ShopInteract {
             }
         }
 
-        int effectiveShulkerContribution = Math.min(shulkerContribution, bulkQuantity);
-        int regularTarget = Math.max(0, bulkQuantity - effectiveShulkerContribution);
-
-        // Step 2: Take from regular (non-shulker) inventory slots up to regularTarget
+        // Step 2: Take matching items from regular (non-shulker) inventory slots.
+        // When shulker items contribute, clear all regular items first so the inventory
+        // is fully emptied and any leftover after alignment is returned to the shulker.
+        // When no shulker items contribute, only take what is needed (cap at bulkQuantity).
         int collectedFromRegular = 0;
-        for (int i = contents.length - 1; i >= 0 && collectedFromRegular < regularTarget; i--) {
+        for (int i = contents.length - 1; i >= 0; i--) {
             if (contents[i] == null || isShulkerBox(contents[i])) {
                 continue;
             }
             boolean isSameCropSeed = contents[i].getType() == shop.getItem().getType() && CropUtils.isCropSeed(shop.getItem().getType());
             if (contents[i].isSimilar(shop.getItem()) || isSameCropSeed) {
-                int take = Math.min(regularTarget - collectedFromRegular, contents[i].getAmount());
+                int take = shulkerContribution > 0
+                        ? contents[i].getAmount()
+                        : Math.min(bulkQuantity - collectedFromRegular, contents[i].getAmount());
+                if (take <= 0) continue;
                 collectedFromRegular += take;
                 int remaining = contents[i].getAmount() - take;
                 if (remaining <= 0) {
@@ -603,8 +606,11 @@ public class ShopInteract {
                 } else {
                     contents[i].setAmount(remaining);
                 }
+                if (shulkerContribution == 0 && collectedFromRegular >= bulkQuantity) break;
             }
         }
+
+        int effectiveShulkerContribution = Math.min(shulkerContribution, Math.max(0, bulkQuantity - collectedFromRegular));
 
         // Step 3: Take (amount - 1) per shulker slot, capped at effectiveShulkerContribution
         int collectedFromShulker = 0;

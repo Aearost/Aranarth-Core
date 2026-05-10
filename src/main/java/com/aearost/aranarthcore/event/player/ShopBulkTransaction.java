@@ -67,6 +67,10 @@ public class ShopBulkTransaction {
 					return;
 				}
 				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
+				if (bulkShop.getQuantity() == shop.getQuantity()) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
+					return;
+				}
 				// Apply "leave one per shulker slot" adjustment to displayed quantity/price
 				if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
 					int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
@@ -75,10 +79,6 @@ public class ShopBulkTransaction {
 						bulkShop.setQuantity(adjustedQuantity);
 						bulkShop.setSellPrice(pricePerUnit * adjustedQuantity);
 					}
-				}
-				if (bulkShop.getQuantity() == shop.getQuantity()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
-					return;
 				}
 				saleOrPurchase = "sale";
 				player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getSellPrice()) + "?"));
