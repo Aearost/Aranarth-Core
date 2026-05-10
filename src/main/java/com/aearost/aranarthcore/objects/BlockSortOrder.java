@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
-public enum ChestSortOrder {
+public enum BlockSortOrder {
     // Dirts
     GRASS_BLOCK,
     MOSS_BLOCK,
@@ -536,7 +536,7 @@ public enum ChestSortOrder {
     PUMPKIN,
     CARVED_PUMPKIN,
     JACK_O_LANTERN,
-    HAY_BALE,
+    HAY_BLOCK,
     BEE_NEST,
     HONEYCOMB_BLOCK,
     HONEY_BLOCK,
@@ -795,6 +795,15 @@ public enum ChestSortOrder {
     PINK_SHULKER_BOX,
     PINK_BED,
     PINK_CANDLE,
-    PINK_BANNER
+    PINK_BANNER,
+
+    // Skulls and Heads (placeable blocks)
+    SKELETON_SKULL,
+    WITHER_SKELETON_SKULL,
+    ZOMBIE_HEAD,
+    CREEPER_HEAD,
+    PLAYER_HEAD,
+    PIGLIN_HEAD,
+    DRAGON_HEAD
 
 }

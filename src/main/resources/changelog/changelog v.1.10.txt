@@ -27,6 +27,7 @@ Major Features
 [~] Made it so shulkers filled with the same item will leave 1 of the stack when sold in bulk
 [+] Added /toggle bulksellshulker to handle full emptying of shulkers
 [+] Added extra mob drops and extra fishing rewards for Ardent Aranarthium wearers
+[+] Implemented item support for the chest sorting system
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

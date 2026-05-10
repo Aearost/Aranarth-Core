@@ -524,7 +524,6 @@ public class CommandDominion implements CommandExecutor {
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		// Trying to join a Dominion when already in one
 		if (playerDominion != null) {
-			Bukkit.getLogger().info("Dominion: " + playerDominion.getName());
 			player.sendMessage(ChatUtils.chatMessage("&cYou must leave your current Dominion first!"));
 			return;
 		}

@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiEnhancedAranarthium;
 import com.aearost.aranarthcore.items.aranarthium.armour.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -69,14 +68,12 @@ public class AranarthiumArmourCraft {
 				else if (e.getAction() == InventoryAction.PICKUP_ALL || e.getAction() == InventoryAction.PICKUP_HALF
 						|| e.getAction() == InventoryAction.PICKUP_ONE || e.getAction() == InventoryAction.PICKUP_SOME
 						|| e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
-					Bukkit.getLogger().info("Action: " + e.getAction().name());
 					if (slot == 0 || slot == 1) {
 						inventory.setItem(2, null);
 					} else if (slot == 2) {
 						boolean armorInFirst = hasNetheriteArmour(inventory.getItem(0)) && hasEnhancedAranarthium(inventory.getItem(1)) && inventory.getItem(2) != null;
 						boolean ingotInFirst = hasEnhancedAranarthium(inventory.getItem(0)) && hasNetheriteArmour(inventory.getItem(1)) && inventory.getItem(2) != null;
 						if (armorInFirst || ingotInFirst) {
-							Bukkit.getLogger().info("D");
 							if (e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
 								HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(inventory.getItem(2));
 								if (!remainder.isEmpty()) {
@@ -96,7 +93,6 @@ public class AranarthiumArmourCraft {
 							if (type.equals("aquatic") || type.equals("ardent") || type.equals("elven")) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have forged an " + meta.getDisplayName()));
 							} else {
-								Bukkit.getLogger().info("E");
 								player.sendMessage(ChatUtils.chatMessage("&7You have forged a " + meta.getDisplayName()));
 							}
 						}
