@@ -2948,7 +2948,13 @@ public class PersistenceUtils {
 
 				UUID id = UUID.fromString(fields[0]);
 				UUID owner = UUID.fromString(fields[1]);
-				boolean metalGate = Boolean.parseBoolean(fields[2]);
+				// Backward compat: "true" → METAL, "false" → WOODEN; new saves use GateType names.
+				Gate.GateType gateType = switch (fields[2]) {
+					case "true", "METAL" -> Gate.GateType.METAL;
+					case "NETHER_BRICK" -> Gate.GateType.NETHER_BRICK;
+					case "WALL" -> Gate.GateType.WALL;
+					default -> Gate.GateType.WOODEN;
+				};
 				boolean isOpen = Boolean.parseBoolean(fields[3]);
 				String axisField = fields[4];
 				String worldName = fields[5];
@@ -2973,10 +2979,10 @@ public class PersistenceUtils {
 						Material mat;
 						if (parts.length >= 4) {
 							mat = Material.matchMaterial(parts[3]);
-							if (mat == null) mat = metalGate ? Material.IRON_BARS : Material.OAK_FENCE;
+							if (mat == null) mat = fallbackMaterial(gateType);
 						} else {
 							// Legacy entry without material — use a sensible default.
-							mat = metalGate ? Material.IRON_BARS : Material.OAK_FENCE;
+							mat = fallbackMaterial(gateType);
 						}
 						blockMaterials.put(loc, mat);
 					}
@@ -2984,7 +2990,7 @@ public class PersistenceUtils {
 
 				if (blockMaterials.isEmpty()) continue;
 				Location firstBlock = blockMaterials.keySet().iterator().next();
-				Gate gate = new Gate(id, owner, metalGate, firstBlock, blockMaterials.get(firstBlock));
+				Gate gate = new Gate(id, owner, gateType, firstBlock, blockMaterials.get(firstBlock));
 				gate.setBlockMaterials(blockMaterials);
 				gate.setAxis(axis);
 				gate.setOpen(isOpen);
@@ -3024,7 +3030,7 @@ public class PersistenceUtils {
 
 			try {
 				FileWriter writer = new FileWriter(filePath);
-				writer.write("#id|ownerUuid|metalGate|isOpen|axis|world|x1:y1:z1:MAT1,x2:y2:z2:MAT2,...\n");
+				writer.write("#id|ownerUuid|gateType|isOpen|axis|world|x1:y1:z1:MAT1,x2:y2:z2:MAT2,...\n");
 
 				for (Gate gate : GateUtils.getGates()) {
 					if (gate.getBlocks().isEmpty()) continue;
@@ -3033,7 +3039,7 @@ public class PersistenceUtils {
 
 					String id = gate.getId().toString();
 					String owner = gate.getOwner().toString();
-					String metalGate = String.valueOf(gate.isMetalGate());
+					String gateType = gate.getGateType().name();
 					String isOpen = String.valueOf(gate.isOpen());
 					String axis = gate.getAxis() == null ? "NONE" : gate.getAxis().name();
 					String world = anyBlock.getWorld().getName();
@@ -3046,7 +3052,7 @@ public class PersistenceUtils {
 								.append(":").append(loc.getBlockZ()).append(":").append(mat.name());
 					}
 
-					writer.write(id + "|" + owner + "|" + metalGate + "|" + isOpen + "|" + axis
+					writer.write(id + "|" + owner + "|" + gateType + "|" + isOpen + "|" + axis
 							+ "|" + world + "|" + blocksSB + "\n");
 				}
 				writer.close();
@@ -3054,6 +3060,15 @@ public class PersistenceUtils {
 				Bukkit.getLogger().info("There was an error in saving the gates");
 			}
 		}
+	}
+
+	private static Material fallbackMaterial(Gate.GateType gateType) {
+		return switch (gateType) {
+			case METAL -> Material.IRON_BARS;
+			case NETHER_BRICK -> Material.NETHER_BRICK_FENCE;
+			case WALL -> Material.COBBLESTONE_WALL;
+			default -> Material.OAK_FENCE;
+		};
 	}
 
 }

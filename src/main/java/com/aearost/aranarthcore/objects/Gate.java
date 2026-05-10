@@ -15,15 +15,16 @@ public class Gate {
 
     public enum Axis {X, Z}
 
+    public enum GateType { WOODEN, METAL, NETHER_BRICK, WALL }
+
     private final UUID id;
     private final UUID owner;
 
     /**
-     * True if this gate plays metal (copper-chest) sounds; false for wooden
-     * (fence-gate) sounds. Determined from the first block placed and does not
-     * change when mixed materials are added later.
+     * Determines which sounds this gate plays. Set from the first block placed
+     * and does not change when mixed materials are added later.
      */
-    private final boolean metalGate;
+    private final GateType gateType;
 
     /**
      * Maps each block location (normalized) to its original material.
@@ -33,10 +34,10 @@ public class Gate {
     private Axis axis;
     private boolean open;
 
-    public Gate(UUID id, UUID owner, boolean metalGate, Location firstBlock, Material firstMaterial) {
+    public Gate(UUID id, UUID owner, GateType gateType, Location firstBlock, Material firstMaterial) {
         this.id = id;
         this.owner = owner;
-        this.metalGate = metalGate;
+        this.gateType = gateType;
         this.blockMaterials = new HashMap<>();
         this.blockMaterials.put(firstBlock, firstMaterial);
         this.axis = null;
@@ -51,8 +52,12 @@ public class Gate {
         return owner;
     }
 
+    public GateType getGateType() {
+        return gateType;
+    }
+
     public boolean isMetalGate() {
-        return metalGate;
+        return gateType == GateType.METAL;
     }
 
     /**
@@ -78,7 +83,12 @@ public class Gate {
         if (mat != null) {
             return mat;
         }
-        return metalGate ? Material.IRON_BARS : Material.OAK_FENCE;
+        return switch (gateType) {
+            case METAL -> Material.IRON_BARS;
+            case NETHER_BRICK -> Material.NETHER_BRICK_FENCE;
+            case WALL -> Material.COBBLESTONE_WALL;
+            default -> Material.OAK_FENCE;
+        };
     }
 
     public Axis getAxis() {

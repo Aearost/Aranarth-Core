@@ -5,11 +5,14 @@ import com.aearost.aranarthcore.objects.Gate;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Fence;
+import org.bukkit.block.data.type.Wall;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -47,6 +50,74 @@ public class GateUtils {
             Material.WAXED_OXIDIZED_COPPER_BARS
     );
 
+    public static final Set<Material> NETHER_BRICK_FENCE_MATERIALS = Set.of(
+            Material.NETHER_BRICK_FENCE
+    );
+
+    public static final Set<Material> WALL_MATERIALS = Set.of(
+            Material.COBBLESTONE_WALL,
+            Material.MOSSY_COBBLESTONE_WALL,
+            Material.STONE_BRICK_WALL,
+            Material.MOSSY_STONE_BRICK_WALL,
+            Material.BRICK_WALL,
+            Material.PRISMARINE_WALL,
+            Material.RED_SANDSTONE_WALL,
+            Material.SANDSTONE_WALL,
+            Material.END_STONE_BRICK_WALL,
+            Material.DIORITE_WALL,
+            Material.ANDESITE_WALL,
+            Material.GRANITE_WALL,
+            Material.NETHER_BRICK_WALL,
+            Material.RED_NETHER_BRICK_WALL,
+            Material.BLACKSTONE_WALL,
+            Material.POLISHED_BLACKSTONE_WALL,
+            Material.POLISHED_BLACKSTONE_BRICK_WALL,
+            Material.COBBLED_DEEPSLATE_WALL,
+            Material.POLISHED_DEEPSLATE_WALL,
+            Material.DEEPSLATE_BRICK_WALL,
+            Material.DEEPSLATE_TILE_WALL,
+            Material.TUFF_WALL,
+            Material.TUFF_BRICK_WALL,
+            Material.POLISHED_TUFF_WALL,
+            Material.MUD_BRICK_WALL,
+            Material.RESIN_BRICK_WALL
+    );
+
+    // Maps each special gate material to the place-block sound to play on open/close.
+    public static final Map<Material, String> MATERIAL_SOUNDS = Map.ofEntries(
+            Map.entry(Material.NETHER_BRICK_FENCE, "block.nether_brick.place"),
+            Map.entry(Material.COBBLESTONE_WALL, "block.stone.place"),
+            Map.entry(Material.MOSSY_COBBLESTONE_WALL, "block.stone.place"),
+            Map.entry(Material.STONE_BRICK_WALL, "block.stone.place"),
+            Map.entry(Material.MOSSY_STONE_BRICK_WALL, "block.stone.place"),
+            Map.entry(Material.BRICK_WALL, "block.stone.place"),
+            Map.entry(Material.PRISMARINE_WALL, "block.stone.place"),
+            Map.entry(Material.RED_SANDSTONE_WALL, "block.stone.place"),
+            Map.entry(Material.SANDSTONE_WALL, "block.stone.place"),
+            Map.entry(Material.END_STONE_BRICK_WALL, "block.stone.place"),
+            Map.entry(Material.DIORITE_WALL, "block.stone.place"),
+            Map.entry(Material.ANDESITE_WALL, "block.stone.place"),
+            Map.entry(Material.GRANITE_WALL, "block.stone.place"),
+            Map.entry(Material.NETHER_BRICK_WALL, "block.nether_brick.place"),
+            Map.entry(Material.RED_NETHER_BRICK_WALL, "block.nether_brick.place"),
+            Map.entry(Material.BLACKSTONE_WALL, "block.stone.place"),
+            Map.entry(Material.POLISHED_BLACKSTONE_WALL, "block.stone.place"),
+            Map.entry(Material.POLISHED_BLACKSTONE_BRICK_WALL, "block.stone.place"),
+            Map.entry(Material.COBBLED_DEEPSLATE_WALL, "block.deepslate.place"),
+            Map.entry(Material.POLISHED_DEEPSLATE_WALL, "block.deepslate.place"),
+            Map.entry(Material.DEEPSLATE_BRICK_WALL, "block.deepslate.place"),
+            Map.entry(Material.DEEPSLATE_TILE_WALL, "block.deepslate.place"),
+            Map.entry(Material.TUFF_WALL, "block.tuff.place"),
+            Map.entry(Material.TUFF_BRICK_WALL, "block.tuff_bricks.place"),
+            Map.entry(Material.POLISHED_TUFF_WALL, "block.polished_tuff.place"),
+            Map.entry(Material.MUD_BRICK_WALL, "block.mud_bricks.place"),
+            Map.entry(Material.RESIN_BRICK_WALL, "block.resin_bricks.place")
+    );
+
+    private static final List<BlockFace> WALL_FACES = List.of(
+            BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+    );
+
     private static final List<Gate> gates = new ArrayList<>();
 
     // String key "world:x:y:z" -> gate UUID
@@ -60,11 +131,27 @@ public class GateUtils {
     // -------------------------------------------------------------------------
 
     public static boolean isGateMaterial(Material type) {
-        return WOODEN_GATE_MATERIALS.contains(type) || METAL_GATE_MATERIALS.contains(type);
+        return WOODEN_GATE_MATERIALS.contains(type)
+                || METAL_GATE_MATERIALS.contains(type)
+                || NETHER_BRICK_FENCE_MATERIALS.contains(type)
+                || WALL_MATERIALS.contains(type);
     }
 
     public static boolean isMetalGate(Material type) {
         return METAL_GATE_MATERIALS.contains(type);
+    }
+
+    public static Gate.GateType determineGateType(Material type) {
+        if (METAL_GATE_MATERIALS.contains(type)) {
+            return Gate.GateType.METAL;
+        }
+        if (NETHER_BRICK_FENCE_MATERIALS.contains(type)) {
+            return Gate.GateType.NETHER_BRICK;
+        }
+        if (WALL_MATERIALS.contains(type)) {
+            return Gate.GateType.WALL;
+        }
+        return Gate.GateType.WOODEN;
     }
 
     public static List<Gate> getGates() {
@@ -149,7 +236,7 @@ public class GateUtils {
             }
         } else {
             if (inPlacementMode) {
-                Gate gate = new Gate(UUID.randomUUID(), playerId, isMetalGate(block.getType()), loc, block.getType());
+                Gate gate = new Gate(UUID.randomUUID(), playerId, determineGateType(block.getType()), loc, block.getType());
                 gates.add(gate);
                 blockToGateId.put(key(loc), gate.getId());
                 exitGatePlacementMode(playerId);
@@ -322,19 +409,20 @@ public class GateUtils {
         block.setType(type, false); // Place with default data first
 
         BlockData bd = block.getBlockData();
-        if (!(bd instanceof Fence fence)) {
-            // Non-Fence material will fall back to physics-based restore
+        if (bd instanceof Fence fence) {
+            for (BlockFace face : fence.getAllowedFaces()) {
+                fence.setFace(face, fenceConnectsTo(block.getRelative(face)));
+            }
+            block.setBlockData(fence, true);
+        } else if (bd instanceof Wall wall) {
+            for (BlockFace face : WALL_FACES) {
+                wall.setHeight(face, fenceConnectsTo(block.getRelative(face)) ? Wall.Height.LOW : Wall.Height.NONE);
+            }
+            block.setBlockData(wall, true);
+        } else {
+            // Non-Fence/Wall material will fall back to physics-based restore
             block.setType(type, true);
-            return;
         }
-
-        // Compute each allowed face based on what is actually adjacent right now
-        for (BlockFace face : fence.getAllowedFaces()) {
-            fence.setFace(face, fenceConnectsTo(block.getRelative(face)));
-        }
-
-        // Apply the corrected data and notify neighbors so they can recompute too
-        block.setBlockData(fence, true);
     }
 
     /**
@@ -356,30 +444,69 @@ public class GateUtils {
      * Plays staggered sounds sweeping along the gate axis.
      */
     private static void playGateSounds(Gate gate, List<Location> sortedBlocks, boolean opening) {
-        boolean isMetal = gate.isMetalGate();
-        String openSound = isMetal ? "block.copper_chest.open" : "block.fence_gate.open";
-        String closeSound = isMetal ? "block.copper_chest.close" : "block.fence_gate.close";
-        String sound = opening ? openSound : closeSound;
-        float baseVolume = isMetal ? 0.6f : 0.7f;
+        // Sounds that have a reliable Bukkit Sound enum entry use it directly to avoid
+        // Named Sound Effect packet issues with vanilla sound lookup in Paper 1.21+.
+        Sound enumSound = null;
+        String stringSound = null;
+        float baseVolume;
+        float basePitch;
+        float pitchIncrement;
+        float pitchRandom;
+
+        switch (gate.getGateType()) {
+            case METAL -> {
+                stringSound = opening ? "block.copper_chest.open" : "block.copper_chest.close";
+                baseVolume = 0.6f;
+                basePitch = 0.70f;
+                pitchIncrement = 0.025f;
+                pitchRandom = 0.05f;
+            }
+            case NETHER_BRICK -> {
+                enumSound = Sound.BLOCK_NETHER_BRICKS_PLACE;
+                baseVolume = 0.7f;
+                basePitch = 0.85f;
+                pitchIncrement = 0.020f;
+                pitchRandom = 0.10f;
+            }
+            case WALL -> {
+                Material anchorMat = gate.getBlockMaterials().values().iterator().next();
+                stringSound = MATERIAL_SOUNDS.getOrDefault(anchorMat, "block.stone.place");
+                baseVolume = 0.7f;
+                basePitch = 0.85f;
+                pitchIncrement = 0.020f;
+                pitchRandom = 0.10f;
+            }
+            default -> { // WOODEN
+                stringSound = opening ? "block.fence_gate.open" : "block.fence_gate.close";
+                baseVolume = 0.7f;
+                basePitch = 0.85f;
+                pitchIncrement = 0.020f;
+                pitchRandom = 0.10f;
+            }
+        }
+
         World world = sortedBlocks.get(0).getWorld();
         Random random = new Random();
+        final Sound finalEnumSound = enumSound;
+        final String finalStringSound = stringSound;
 
+        // 1 tick per block sound
         for (int i = 0; i < sortedBlocks.size(); i++) {
             final Location blockLoc = sortedBlocks.get(i);
-            final float pitch = isMetal
-                    ? 0.70f + (i * 0.025f) + random.nextFloat() * 0.05f
-                    : 0.85f + (i * 0.020f) + random.nextFloat() * 0.10f;
-            final int delay = i * 2;
+            final float pitch = basePitch + (i * pitchIncrement) + random.nextFloat() * pitchRandom;
+            final float finalVolume = baseVolume;
 
-            if (delay == 0) {
-                world.playSound(blockLoc, sound, baseVolume, pitch);
+            Runnable playSoundAction = finalEnumSound != null
+                    ? () -> world.playSound(blockLoc, finalEnumSound, SoundCategory.BLOCKS, finalVolume, pitch)
+                    : () -> world.playSound(blockLoc, finalStringSound, finalVolume, pitch);
+
+            if (i == 0) {
+                playSoundAction.run();
             } else {
-                final String finalSound = sound;
-                final float finalVolume = baseVolume;
                 Bukkit.getScheduler().scheduleSyncDelayedTask(
                         AranarthCore.getInstance(),
-                        () -> world.playSound(blockLoc, finalSound, finalVolume, pitch),
-                        delay
+                        playSoundAction,
+                        i
                 );
             }
         }
@@ -426,17 +553,21 @@ public class GateUtils {
     private static void setEndpointInwardFace(Location endpointLoc, Gate.Axis axis, boolean isMin, boolean connected) {
         Block block = endpointLoc.getBlock();
         BlockData bd = block.getBlockData();
-        if (!(bd instanceof Fence fence)) {
-            return;
-        }
-
         BlockFace inwardFace = getInwardFace(axis, isMin);
-        if (fence.getAllowedFaces().contains(inwardFace)) {
-            // When closing (connected=true), only connect if the inward neighbor actually qualifies
-            // Prevents phantom connections into empty space
-            // When opening (connected=false), always disconnect
-            fence.setFace(inwardFace, connected && fenceConnectsTo(block.getRelative(inwardFace)));
-            block.setBlockData(fence, false);
+
+        if (bd instanceof Fence fence) {
+            if (fence.getAllowedFaces().contains(inwardFace)) {
+                // When closing (connected=true), only connect if the inward neighbor actually qualifies
+                // Prevents phantom connections into empty space
+                // When opening (connected=false), always disconnect
+                fence.setFace(inwardFace, connected && fenceConnectsTo(block.getRelative(inwardFace)));
+                block.setBlockData(fence, false);
+            }
+        } else if (bd instanceof Wall wall) {
+            Wall.Height height = (connected && fenceConnectsTo(block.getRelative(inwardFace)))
+                    ? Wall.Height.LOW : Wall.Height.NONE;
+            wall.setHeight(inwardFace, height);
+            block.setBlockData(wall, false);
         }
     }
 
@@ -469,6 +600,7 @@ public class GateUtils {
 
     /**
      * Validates whether placing a block at the input location is compatible with the existing gate's axis constraint.
+     *
      * @return An error message if invalid, or null if valid.
      */
     private static String getAxisError(Location loc, Gate adjacentGate) {
@@ -619,7 +751,7 @@ public class GateUtils {
             Map<Location, Material> compMaterials = new HashMap<>();
             for (Location l : component) compMaterials.put(l, origMaterials.get(l));
             Location newAnchor = component.iterator().next();
-            Gate newGate = new Gate(UUID.randomUUID(), gate.getOwner(), gate.isMetalGate(), newAnchor, compMaterials.get(newAnchor));
+            Gate newGate = new Gate(UUID.randomUUID(), gate.getOwner(), gate.getGateType(), newAnchor, compMaterials.get(newAnchor));
             newGate.setBlockMaterials(compMaterials);
             newGate.setAxis(component.size() > 1 ? gate.getAxis() : null);
             gates.add(newGate);
