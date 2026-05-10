@@ -30,7 +30,8 @@ import java.util.UUID;
 
 public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
-    private record ShotType(Color color, PotionEffectType effectType, int amplifier) {}
+    private record ShotType(Color color, PotionEffectType effectType, int amplifier) {
+    }
 
     private static final ShotType[] SHOT_TYPES = {
             new ShotType(AranarthBendingUtils.SPIRIT_COLORS[0], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[0], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
@@ -39,12 +40,12 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
             new ShotType(AranarthBendingUtils.SPIRIT_COLORS[3], AranarthBendingUtils.SPIRIT_EFFECT_TYPES[3], AranarthBendingUtils.SPIRIT_EFFECT_AMPLIFIER),
     };
 
-    private static final double HIT_RADIUS  = 1.5;
-    private static final double STEP_SIZE   = 0.1;
-    private static final long   FIRE_WINDOW = 2500L;
-    private static final int    MAX_SHOTS   = 4;
-    private static final double MIN_RANGE   = 16.0;
-    private static final double MAX_RANGE   = 24.0;
+    private static final double HIT_RADIUS = 1.5;
+    private static final double STEP_SIZE = 0.1;
+    private static final long FIRE_WINDOW = 2500L;
+    private static final int MAX_SHOTS = 4;
+    private static final double MIN_RANGE = 16.0;
+    private static final double MAX_RANGE = 24.0;
 
     private static final Map<UUID, AngeredSpirits> activeInstances = new HashMap<>();
 
@@ -57,7 +58,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     @Attribute(Attribute.SPEED)
     private double speed;
 
-    private enum State { CHARGING, READY, FIRING }
+    private enum State {CHARGING, READY, FIRING}
 
     private State state;
     private int nextShotIndex;
@@ -109,8 +110,8 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
         switch (state) {
             case CHARGING -> handleCharging();
-            case READY    -> handleReady();
-            case FIRING   -> handleFiring();
+            case READY -> handleReady();
+            case FIRING -> handleFiring();
         }
     }
 
@@ -176,13 +177,15 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
      * Fires the next spirit projectile during the firing window.
      */
     public void onLeftClick() {
-        if (state != State.FIRING || nextShotIndex >= MAX_SHOTS) return;
+        if (state != State.FIRING || nextShotIndex >= MAX_SHOTS) {
+            return;
+        }
 
         final ShotType shotType = SHOT_TYPES[shotOrder[nextShotIndex]];
         nextShotIndex++;
 
-        final double range     = MIN_RANGE + Math.random() * (MAX_RANGE - MIN_RANGE);
-        final Location eyeLoc  = player.getEyeLocation();
+        final double range = MIN_RANGE + Math.random() * (MAX_RANGE - MIN_RANGE);
+        final Location eyeLoc = player.getEyeLocation();
         final Vector direction = eyeLoc.getDirection().normalize();
 
         activeProjectiles.add(new SpiritProjectile(eyeLoc.clone(), direction, shotType, range));
@@ -212,18 +215,20 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
     private void spawnChargeParticles(final long elapsed) {
         final double progress = (double) elapsed / chargeDuration;
-        final int colorCount  = Math.min((int) (progress * 4) + 1, 4);
+        final int colorCount = Math.min((int) (progress * 4) + 1, 4);
         for (int c = 0; c < colorCount; c++) {
             final Particle.DustOptions dust = new Particle.DustOptions(SHOT_TYPES[shotOrder[c]].color(), 0.7f);
-            final double angle  = Math.random() * 2 * Math.PI;
+            final double angle = Math.random() * 2 * Math.PI;
             final double radius = 0.6;
-            final Location loc  = player.getLocation().add(0, 1.0, 0)
+            final Location loc = player.getLocation().add(0, 1.0, 0)
                     .add(Math.cos(angle) * radius, (Math.random() - 0.5) * 0.5, Math.sin(angle) * radius);
             loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
         }
     }
 
-    /** One-time burst of colored particles to signal the charge is complete. */
+    /**
+     * One-time burst of colored particles to signal the charge is complete.
+     */
     private void spawnChargeCompleteBurst() {
         final Location center = player.getLocation().add(0, 1.0, 0);
         for (int i = 0; i < MAX_SHOTS; i++) {
@@ -237,11 +242,15 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         }
     }
 
-    /** Orbiting colored orbs showing remaining shots. */
+    /**
+     * Orbiting colored orbs showing remaining shots.
+     */
     private void spawnReadyParticles() {
         final double time = System.currentTimeMillis() / 500.0;
         for (int i = 0; i < MAX_SHOTS; i++) {
-            if (i < nextShotIndex) continue;
+            if (i < nextShotIndex) {
+                continue;
+            }
             final Particle.DustOptions dust = new Particle.DustOptions(SHOT_TYPES[shotOrder[i]].color(), 1.2f);
             final double angle = (i / (double) MAX_SHOTS) * 2 * Math.PI + time;
             final Location loc = player.getLocation().add(0, 1.2, 0)
@@ -302,11 +311,17 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
     }
 
     @Override
-    public void load() {}
+    public void load() {
+    }
 
     @Override
     public void stop() {
-        if (player != null) activeInstances.remove(player.getUniqueId());
+        if (player != null) {
+            activeInstances.remove(player.getUniqueId());
+        }
+        if (activeProjectiles == null) {
+            return;
+        }
         for (final SpiritProjectile proj : activeProjectiles) {
             proj.cleanup();
         }
@@ -343,12 +358,12 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         private final Set<UUID> hitEntities;
 
         SpiritProjectile(final Location startLocation, final Vector direction, final ShotType shotType, final double range) {
-            this.location         = startLocation.clone();
-            this.direction        = direction.clone().normalize();
-            this.shotType         = shotType;
-            this.range            = range;
+            this.location = startLocation.clone();
+            this.direction = direction.clone().normalize();
+            this.shotType = shotType;
+            this.range = range;
             this.distanceTraveled = 0;
-            this.hitEntities      = new HashSet<>();
+            this.hitEntities = new HashSet<>();
 
             this.vex = (Vex) startLocation.getWorld().spawnEntity(startLocation, EntityType.VEX);
             this.vex.setAI(false);
@@ -359,19 +374,27 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         }
 
         boolean advance() {
-            if (vex == null || vex.isDead()) return false;
+            if (vex == null || vex.isDead()) {
+                return false;
+            }
 
             final int steps = (int) (speed / STEP_SIZE);
             for (int i = 0; i < steps; i++) {
-                if (distanceTraveled >= range) return false;
+                if (distanceTraveled >= range) {
+                    return false;
+                }
 
                 location.add(direction.clone().multiply(STEP_SIZE));
                 distanceTraveled += STEP_SIZE;
 
-                if (GeneralMethods.isRegionProtectedFromBuild(AngeredSpirits.this, location)) return false;
+                if (GeneralMethods.isRegionProtectedFromBuild(AngeredSpirits.this, location)) {
+                    return false;
+                }
 
                 if (!isTransparent(location.getBlock())) {
-                    if (!isTransparent(location.clone().add(0, 0.2, 0).getBlock())) return false;
+                    if (!isTransparent(location.clone().add(0, 0.2, 0).getBlock())) {
+                        return false;
+                    }
                 }
 
                 final Particle.DustOptions dust = new Particle.DustOptions(shotType.color(), 0.8f);
@@ -391,9 +414,15 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
         private void checkCollisions() {
             for (final LivingEntity entity : location.getWorld().getLivingEntities()) {
-                if (entity.equals(player)) continue;
-                if (entity.equals(vex)) continue;
-                if (hitEntities.contains(entity.getUniqueId())) continue;
+                if (entity.equals(player)) {
+                    continue;
+                }
+                if (entity.equals(vex)) {
+                    continue;
+                }
+                if (hitEntities.contains(entity.getUniqueId())) {
+                    continue;
+                }
 
                 final Location entityCenter = entity.getLocation().add(0, entity.getHeight() / 2.0, 0);
                 if (entityCenter.distance(location) <= HIT_RADIUS) {
