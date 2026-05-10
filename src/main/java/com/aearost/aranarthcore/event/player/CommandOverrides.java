@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.PermissionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.Plugin;
 
 /**
  * Handles preventing or adding custom logic to commands being executed by players.
@@ -33,6 +34,19 @@ public class CommandOverrides {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 }
             }
+        }
+
+        if (parts[0].equals("/plugins") || parts[0].equals("/pl")) {
+            Plugin[] plugins = Bukkit.getPluginManager().getPlugins();
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < plugins.length; i++) {
+                if (i > 0) sb.append("&r, ");
+                sb.append(plugins[i].isEnabled() ? "&7" : "&c");
+                sb.append(plugins[i].getName());
+            }
+            player.sendMessage(ChatUtils.chatMessage("&e&lPlugins (" + plugins.length + ") &7&l- " + sb));
+            e.setCancelled(true);
+            return;
         }
 
         if (aranarthPlayer.getCouncilRank() != 3) {

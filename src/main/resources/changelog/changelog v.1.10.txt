@@ -55,6 +55,7 @@ Minor Features
 [+] Added /t alias for /toggle
 [-] Removed MetalClips permissions and descriptions
 [~] Limited container locking to survival worlds
+[+] Made /plugins usable by all players
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
