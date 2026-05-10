@@ -1189,24 +1189,22 @@ public class DateUtils {
 	 * @param smallFlakeDensity The density of the small snow flakes.
 	 */
 	private void applySnowParticles(Player player, Location loc, int bigFlakeDensity, int smallFlakeDensity) {
-		// Determines if the player is underground or not
-		boolean areAllBlocksAir = true;
-		Block highestBlock = loc.getWorld().getHighestBlockAt(loc.getBlockX(), loc.getBlockZ());
-		if (loc.getBlockY() + 2 < (highestBlock.getLocation().getBlockY())) {
-			areAllBlocksAir = false;
+		// Use sky light level to determine if the player is exposed to the sky.
+		// getHighestBlockAt() returns incorrect results in void/flat worlds (spawn),
+		// where it returns Y=-64 making every player appear "exposed" even indoors.
+		boolean isExposedToSky = loc.getBlock().getLightFromSky() == 15;
+		if (!isExposedToSky) {
+			return;
 		}
 		// If it is a warm biome, do not apply snow logic
-		if (highestBlock.getTemperature() < 0.85 && highestBlock.getBiome() != Biome.RIVER) {
-			// Only apply particles if the player is exposed to air
-			if (areAllBlocksAir) {
-				// If it is a temperate or cold biome
-				if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
-					int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
-					int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+		if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) < 0.85) {
+			// If it is a temperate or cold biome
+			if (loc.getWorld().getTemperature(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()) <= 1) {
+				int particleBigFlake = AranarthUtils.calculateParticlesForPlayer(bigFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
+				int particleSmallFlake = AranarthUtils.calculateParticlesForPlayer(smallFlakeDensity, AranarthUtils.getPlayer(player.getUniqueId()).getParticleNum());
 
-					loc.getWorld().spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
-					loc.getWorld().spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
-				}
+				player.spawnParticle(Particle.END_ROD, loc, particleBigFlake, 9, 12, 9, 0.05);
+				player.spawnParticle(Particle.WHITE_ASH, loc, particleSmallFlake, 9, 12, 9, 0.05);
 			}
 		}
 	}

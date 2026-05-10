@@ -91,7 +91,11 @@
       "WebFetch(domain:wiki.mee6.xyz)",
       "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/event/listener/*.java)",
       "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/event/mob/*.java)",
-      "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/utils/*.java)"
+      "Bash(ls -1 ./src/main/java/com/aearost/aranarthcore/utils/*.java)",
+      "Bash(while read:*)",
+      "Bash(do git:*)",
+      "Bash(echo \"$h\")",
+      "Bash(done)"
     ]
   }
 }

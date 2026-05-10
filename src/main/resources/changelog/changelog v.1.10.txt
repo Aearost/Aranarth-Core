@@ -57,6 +57,7 @@ Minor Features
 [~] Limited container locking to survival worlds
 [+] Made /plugins usable by all players
 [~] Fixed /ac home not working for offline players
+[~] Fixed lag sprees at spawn - due to winter snow particles spawning differently at spawn
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
