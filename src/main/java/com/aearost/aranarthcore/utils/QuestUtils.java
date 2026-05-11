@@ -650,6 +650,20 @@ public class QuestUtils {
             if (progress[i] >= quest.getRequired()) {
                 completed[i] = true;
                 player.sendMessage(ChatUtils.chatMessage("&7You've completed a quest! Use &e/quests &7to claim your reward"));
+
+                if (questType == QuestType.WEEKLY) {
+                    boolean allComplete = true;
+                    for (int j = 0; j < active.size(); j++) {
+                        if (!completed[j]) {
+                            allComplete = false;
+                            break;
+                        }
+                    }
+                    if (allComplete) {
+                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+                        Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has completed all of their &eweekly quests"));
+                    }
+                }
             }
         }
     }

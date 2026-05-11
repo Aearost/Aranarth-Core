@@ -61,6 +61,7 @@ Minor Features
 [~] Fixed lag sprees at spawn - due to winter snow particles spawning differently at spawn
 [~] Fixed /ac skull throwing errors with no parameter and added nickname support to player heads
 [+] Restricted Lecterns to only be protected at Spawn and in Dominions
+[+] Added chat message when a player completes all of their weekly quests
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
