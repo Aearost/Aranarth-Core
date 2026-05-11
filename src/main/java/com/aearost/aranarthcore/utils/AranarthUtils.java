@@ -2008,11 +2008,13 @@ public class AranarthUtils {
 			rankPotionNum = 50;
 		}
 
-		if (aranarthPlayer.getSaintRank() == 1) {
+		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
 			saintPotionNum = 500;
-		} else if (aranarthPlayer.getSaintRank() == 2) {
+		}
+		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
 			saintPotionNum = 1000;
-		} else if (aranarthPlayer.getSaintRank() == 3) {
+		}
+		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
 			saintPotionNum = 2500;
 		}
 
@@ -2068,11 +2070,13 @@ public class AranarthUtils {
 			rankQuiverSlotNum = 3;
 		}
 
-		if (aranarthPlayer.getSaintRank() == 1) {
+		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
 			saintQuiverSlotNum = 3;
-		} else if (aranarthPlayer.getSaintRank() == 2) {
+		}
+		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
 			saintQuiverSlotNum = 6;
-		} else if (aranarthPlayer.getSaintRank() == 3) {
+		}
+		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
 			saintQuiverSlotNum = 9;
 		}
 
@@ -2105,11 +2109,13 @@ public class AranarthUtils {
 			rankQuiverSlotNum = 0;
 		}
 
-		if (aranarthPlayer.getSaintRank() == 1) {
+		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
 			saintQuiverSlotNum = 3;
-		} else if (aranarthPlayer.getSaintRank() == 2) {
+		}
+		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
 			saintQuiverSlotNum = 6;
-		} else if (aranarthPlayer.getSaintRank() == 3) {
+		}
+		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
 			saintQuiverSlotNum = 9;
 		}
 

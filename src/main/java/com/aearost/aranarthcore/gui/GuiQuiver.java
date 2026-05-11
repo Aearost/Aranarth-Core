@@ -120,6 +120,10 @@ public class GuiQuiver {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		int rank = aranarthPlayer.getRank();
 		int saintRank = aranarthPlayer.getSaintRank();
+		// Give council the same perks as their Saint rank equivalent
+		if (aranarthPlayer.getCouncilRank() > saintRank) {
+			saintRank = aranarthPlayer.getCouncilRank();
+		}
         return switch (rank) {
             case 1 -> getEsquireQuiver(saintRank);
             case 2 -> getKnightQuiver(saintRank);
