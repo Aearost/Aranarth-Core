@@ -31,422 +31,440 @@ import org.slf4j.LoggerFactory;
  */
 public class DominionProtectionListener implements Listener {
 
-	private static final Logger log = LoggerFactory.getLogger(DominionProtectionListener.class);
+    private static final Logger log = LoggerFactory.getLogger(DominionProtectionListener.class);
 
-	public DominionProtectionListener(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public DominionProtectionListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	/**
-	 * Prevents players from placing blocks in another Dominion.
-	 */
-	@EventHandler
-	public void onPlace(BlockPlaceEvent e) {
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.isInAdminMode()) {
-			if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.BUILD)) {
-				e.setCancelled(true);
-			}
-		}
-	}
+    /**
+     * Prevents players from placing blocks in another Dominion.
+     */
+    @EventHandler
+    public void onPlace(BlockPlaceEvent e) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (!aranarthPlayer.isInAdminMode()) {
+            if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.BUILD)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	/**
-	 * Prevents players from breaking blocks in another Dominion.
-	 */
-	@EventHandler
-	public void onBreak(BlockBreakEvent e) {
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.isInAdminMode()) {
-			if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.BUILD)) {
-				e.setCancelled(true);
-			}
-		}
-	}
+    /**
+     * Prevents players from breaking blocks in another Dominion.
+     */
+    @EventHandler
+    public void onBreak(BlockBreakEvent e) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (!aranarthPlayer.isInAdminMode()) {
+            if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.BUILD)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	/**
-	 * Prevents players from interacting with armor stands in another Dominion.
-	 * Placing an armor stand is handled by onPlaceEntity (EntityPlaceEvent) as BUILD.
-	 */
-	@EventHandler
-	public void onInteractEntity(PlayerInteractEntityEvent e) {
-		if (e.getRightClicked() == null) {
-			return;
-		}
-		EntityType type = e.getRightClicked().getType();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (aranarthPlayer.isInAdminMode()) {
-			return;
-		}
+    /**
+     * Prevents players from interacting with armor stands in another Dominion.
+     * Placing an armor stand is handled by onPlaceEntity (EntityPlaceEvent) as BUILD.
+     */
+    @EventHandler
+    public void onInteractEntity(PlayerInteractEntityEvent e) {
+        if (e.getRightClicked() == null) {
+            return;
+        }
+        EntityType type = e.getRightClicked().getType();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return;
+        }
 
-		if (type == EntityType.ARMOR_STAND) {
-			if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.ARMOR_STAND)) {
-				e.setCancelled(true);
-			}
-		} else if (e.getRightClicked() instanceof Villager) {
-			if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.VILLAGER)) {
-				e.setCancelled(true);
-			}
-		} else if (!type.isAlive()) {
-			// Other non-alive entities (item frames handled separately in HangingPlaceEvent)
-			if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.ITEM_FRAME)) {
-				e.setCancelled(true);
-			}
-		}
-	}
+        if (type == EntityType.ARMOR_STAND) {
+            if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.ARMOR_STAND)) {
+                e.setCancelled(true);
+            }
+        } else if (e.getRightClicked() instanceof Villager) {
+            if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.VILLAGER)) {
+                e.setCancelled(true);
+            }
+        } else if (!type.isAlive()) {
+            // Other non-alive entities (item frames handled separately in HangingPlaceEvent)
+            if (applyLogic(e.getPlayer(), null, e.getRightClicked(), DominionPermission.ITEM_FRAME)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	/**
-	 * Prevents players from placing non-alive entities (including armor stands) in another Dominion.
-	 * Placing counts as BUILD.
-	 */
-	@EventHandler
-	public void onPlaceEntity(EntityPlaceEvent e) {
-		if (e.getEntity() == null) {
-			return;
-		}
-		EntityType type = e.getEntity().getType();
-		if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-			if (!aranarthPlayer.isInAdminMode()) {
-				if (applyLogic(e.getPlayer(), null, e.getEntity(), DominionPermission.BUILD)) {
-					e.setCancelled(true);
-				}
-			}
-		}
-	}
+    /**
+     * Prevents players from placing non-alive entities (including armor stands) in another Dominion.
+     * Placing counts as BUILD.
+     */
+    @EventHandler
+    public void onPlaceEntity(EntityPlaceEvent e) {
+        if (e.getEntity() == null) {
+            return;
+        }
+        EntityType type = e.getEntity().getType();
+        if (!type.isAlive() || type == EntityType.ARMOR_STAND) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+            if (!aranarthPlayer.isInAdminMode()) {
+                if (applyLogic(e.getPlayer(), null, e.getEntity(), DominionPermission.BUILD)) {
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
 
-	/**
-	 * Handles entity damage in Dominion land.
-	 * Armor stand attacks are treated as BUILD (destruction). PvP is controlled by the PVP permission.
-	 */
-	@EventHandler
-	public void onAttackEntity(EntityDamageEvent e) {
-		String name = e.getEntity().getLocation().getWorld().getName();
-		if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("resource")) {
-			return;
-		}
-		if (e.getEntity() == null) {
-			return;
-		}
+    /**
+     * Handles entity damage in Dominion land.
+     * Armor stand attacks are treated as BUILD (destruction). PvP is controlled by the PVP permission.
+     */
+    @EventHandler
+    public void onAttackEntity(EntityDamageEvent e) {
+        String name = e.getEntity().getLocation().getWorld().getName();
+        if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("resource")) {
+            return;
+        }
+        if (e.getEntity() == null) {
+            return;
+        }
 
-		EntityType type = e.getEntity().getType();
+        EntityType type = e.getEntity().getType();
 
-		// Armor stands: attacking counts as destroying (BUILD)
-		if (type == EntityType.ARMOR_STAND) {
-			if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (!aranarthPlayer.isInAdminMode()) {
-					if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
-						e.setCancelled(true);
-					}
-				}
-			}
-		}
-		// Other non-alive entities
-		else if (!type.isAlive()) {
-			if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (!aranarthPlayer.isInAdminMode()) {
-					if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
-						e.setCancelled(true);
-					}
-				}
-			}
-		}
-		// PvP against players
-		else if (e.getEntity() instanceof Player target) {
-			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				handlePvP(attacker, target, e);
-			}
-		}
-		// Tamed pets
-		else if (e.getEntity() instanceof Tameable pet && pet.isTamed()) {
-			if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
-				handlePetDamage(attacker, pet, e);
-			}
-		}
-	}
+        // Armor stands: attacking counts as destroying (BUILD)
+        if (type == EntityType.ARMOR_STAND) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player player) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (!aranarthPlayer.isInAdminMode()) {
+                    if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
+                        e.setCancelled(true);
+                    }
+                }
+            }
+        }
+        // Other non-alive entities
+        else if (!type.isAlive()) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player player) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (!aranarthPlayer.isInAdminMode()) {
+                    if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
+                        e.setCancelled(true);
+                    }
+                }
+            }
+        }
+        // PvP against players
+        else if (e.getEntity() instanceof Player target) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+                handlePvP(attacker, target, e);
+            }
+        }
+        // Tamed pets
+        else if (e.getEntity() instanceof Tameable pet && pet.isTamed()) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+                handlePetDamage(attacker, pet, e);
+            }
+        }
+    }
 
-	/**
-	 * Handles PvP between players with relation-based and chunk-based rules.
-	 *
-	 * <ul>
-	 *   <li>Same dominion — governed by the dominion-wide {@code memberPvpEnabled} flag,
-	 *       regardless of location.</li>
-	 *   <li>ALLIED / TRUCED — can never harm each other, regardless of location.</li>
-	 *   <li>ENEMIED — can always harm each other, regardless of location.</li>
-	 *   <li>Dominion member vs outsider in the member's land — the member may always
-	 *       attack; the outsider (WANDERER / NEUTRAL) may not attack the member.</li>
-	 *   <li>Outside all dominion land — no restrictions.</li>
-	 * </ul>
-	 */
-	private void handlePvP(Player attacker, Player target, EntityDamageEvent e) {
-		if (AranarthUtils.isSpawnLocation(target.getLocation())) {
-			return;
-		}
+    /**
+     * Handles PvP between players with relation-based and chunk-based rules.
+     *
+     * <ul>
+     *   <li>Same dominion — governed by the dominion-wide {@code memberPvpEnabled} flag,
+     *       regardless of location.</li>
+     *   <li>ALLIED / TRUCED — can never harm each other, regardless of location.</li>
+     *   <li>ENEMIED — can always harm each other, regardless of location.</li>
+     *   <li>Dominion member vs outsider in the member's land — the member may always
+     *       attack; the outsider (WANDERER / NEUTRAL) may not attack the member.</li>
+     *   <li>Outside all dominion land — no restrictions.</li>
+     * </ul>
+     */
+    private void handlePvP(Player attacker, Player target, EntityDamageEvent e) {
+        if (AranarthUtils.isSpawnLocation(target.getLocation())) {
+            return;
+        }
 
-		Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-		Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
-		AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
+        Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+        Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
+        AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
 
-		// --- Location-independent rules ---
+        // --- Location-independent rules ---
 
-		// Same dominion — check the single dominion-wide PvP flag
-		if (attackerDominion != null && targetDominion != null
-				&& attackerDominion.isSameDominion(targetDominion)) {
-			if (!attackerDominion.isMemberPvpEnabled()) {
-				e.setCancelled(true);
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-						+ " &7as PvP is disabled in &e" + attackerDominion.getName()));
-			}
-			return;
-		}
+        // Same dominion — check the single dominion-wide PvP flag
+        if (attackerDominion != null && targetDominion != null
+                && attackerDominion.isSameDominion(targetDominion)) {
+            if (!attackerDominion.isMemberPvpEnabled()) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                        + " &7as PvP is disabled in &e" + attackerDominion.getName()));
+            }
+            return;
+        }
 
-		// Different dominions: apply relation rules
-		if (attackerDominion != null && targetDominion != null) {
-			DominionRank relation = DominionUtils.getRelationKey(attackerDominion, targetDominion);
-			if (relation == DominionRank.ALLIED) {
-				e.setCancelled(true);
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-						+ " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.ALLIED)));
-				return;
-			}
-			if (relation == DominionRank.TRUCED) {
-				e.setCancelled(true);
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-						+ " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.TRUCED)));
-				return;
-			}
-			// Enemies can always harm each other
-			if (relation == DominionRank.ENEMIED) {
-				return;
-			}
-		}
+        // Different dominions: apply relation rules
+        if (attackerDominion != null && targetDominion != null) {
+            DominionRank relation = DominionUtils.getRelationKey(attackerDominion, targetDominion);
+            if (relation == DominionRank.ALLIED) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                        + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.ALLIED)));
+                return;
+            }
+            if (relation == DominionRank.TRUCED) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                        + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.TRUCED)));
+                return;
+            }
+            // Enemies can always harm each other
+            if (relation == DominionRank.ENEMIED) {
+                return;
+            }
+        }
 
-		// --- Chunk-based rules (WANDERER / NEUTRAL vs dominion members) ---
-		Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
-		if (chunkDominion == null) {
-			return; // Outside all dominion land — no restrictions
-		}
+        // --- Chunk-based rules (WANDERER / NEUTRAL vs dominion members) ---
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
+        if (chunkDominion == null) {
+            return; // Outside all dominion land — no restrictions
+        }
 
-		boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
-		boolean targetIsMember = targetDominion != null && targetDominion.isSameDominion(chunkDominion);
+        boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
+        boolean targetIsMember = targetDominion != null && targetDominion.isSameDominion(chunkDominion);
 
-		// Attacker is a member of the chunk dominion — may harm outsiders in their land
-		if (attackerIsMember) {
-			return;
-		}
+        // Attacker is a member of the chunk dominion — may harm outsiders in their land
+        if (attackerIsMember) {
+            return;
+        }
 
-		// Chunk-based protection only applies when the target is a member of the chunk dominion
-		if (!targetIsMember) {
-			return;
-		}
+        // Chunk-based protection only applies when the target is a member of the chunk dominion
+        if (!targetIsMember) {
+            return;
+        }
 
-		// Outsider attacking a dominion member in their land — cancel for WANDERER / NEUTRAL
-		DominionRank attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
-		if (attackerRelation == DominionRank.ENEMIED) {
-			return;
-		}
-		e.setCancelled(true);
-		attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-				+ " &7in their lands as you are " + DominionUtils.getFormattedRankName(attackerRelation)));
-	}
+        // Outsider attacking a dominion member in their land — cancel for WANDERER / NEUTRAL
+        DominionRank attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
+        if (attackerRelation == DominionRank.ENEMIED) {
+            return;
+        }
+        e.setCancelled(true);
+        attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                + " &7in their lands as you are " + DominionUtils.getFormattedRankName(attackerRelation)));
+    }
 
-	/**
-	 * Handles damage to tamed pets using PvP permission and relation-based defaults.
-	 */
-	private void handlePetDamage(Player attacker, Tameable pet, EntityDamageEvent e) {
-		Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
-		boolean petHasOwner = pet.getOwner() != null;
-		Dominion targetDominion = petHasOwner ? DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId()) : null;
+    /**
+     * Handles damage to tamed pets using PvP permission and relation-based defaults.
+     */
+    private void handlePetDamage(Player attacker, Tameable pet, EntityDamageEvent e) {
+        Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+        boolean petHasOwner = pet.getOwner() != null;
+        Dominion targetDominion = petHasOwner ? DominionUtils.getPlayerDominion(pet.getOwner().getUniqueId()) : null;
 
-		if (attackerDominion == null || targetDominion == null) {
-			return;
-		}
+        if (attackerDominion == null || targetDominion == null) {
+            return;
+        }
 
-		AranarthPlayer aranarthOwner = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
+        AranarthPlayer aranarthOwner = AranarthUtils.getPlayer(pet.getOwner().getUniqueId());
 
-		if (AranarthUtils.isSpawnLocation(pet.getLocation())) {
-			return;
-		}
-		if (pet.getOwner().getUniqueId().equals(attacker.getUniqueId())) {
-			return;
-		}
+        if (AranarthUtils.isSpawnLocation(pet.getLocation())) {
+            return;
+        }
+        if (pet.getOwner().getUniqueId().equals(attacker.getUniqueId())) {
+            return;
+        }
 
-		Dominion chunkDominion = DominionUtils.getDominionOfChunk(pet.getLocation().getChunk());
-		if (chunkDominion == null) {
-			return;
-		}
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(pet.getLocation().getChunk());
+        if (chunkDominion == null) {
+            return;
+        }
 
-		DominionRank attackerRelation;
-		if (attackerDominion.isSameDominion(chunkDominion)) {
-			attackerRelation = chunkDominion.getMemberRank(attacker.getUniqueId());
-			if (attackerRelation == null) attackerRelation = DominionRank.NEWCOMER;
-		} else {
-			attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
-		}
+        DominionRank attackerRelation;
+        if (attackerDominion.isSameDominion(chunkDominion)) {
+            attackerRelation = chunkDominion.getMemberRank(attacker.getUniqueId());
+            if (attackerRelation == null) {
+                attackerRelation = DominionRank.NEWCOMER;
+            }
+        } else {
+            attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
+        }
 
-		boolean pvpAllowed = chunkDominion.getDominionPermissions().hasPermission(attackerRelation, DominionPermission.PVP);
+        boolean pvpAllowed = chunkDominion.getDominionPermissions().hasPermission(attackerRelation, DominionPermission.PVP);
 
-		if (!pvpAllowed) {
-			e.setCancelled(true);
-			String petType = ChatUtils.getFormattedItemName(pet.getType().name());
-			String relationName = DominionUtils.getFormattedRankName(attackerRelation);
-			if (attackerDominion.isSameDominion(chunkDominion)) {
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7as you are both in &e" + chunkDominion.getName()));
-			} else {
-				attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7in their lands as you are " + relationName));
-			}
-		}
-	}
+        if (!pvpAllowed) {
+            e.setCancelled(true);
+            String petType = ChatUtils.getFormattedItemName(pet.getType().name());
+            String relationName = DominionUtils.getFormattedRankName(attackerRelation);
+            if (attackerDominion.isSameDominion(chunkDominion)) {
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7as you are both in &e" + chunkDominion.getName()));
+            } else {
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7in their lands as you are " + relationName));
+            }
+        }
+    }
 
-	/**
-	 * Handles block interaction events, routing to the appropriate specific permission.
-	 */
-	@EventHandler
-	public void onInteract(PlayerInteractEvent e) {
-		Block block = e.getClickedBlock();
-		Player player = e.getPlayer();
-		if (block == null) {
-			return;
-		}
+    /**
+     * Handles block interaction events, routing to the appropriate specific permission.
+     */
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        Block block = e.getClickedBlock();
+        Player player = e.getPlayer();
+        if (block == null) {
+            return;
+        }
 
-		DominionPermission perm = getInteractionPermission(block);
-		if (perm == null) {
-			return;
-		}
+        DominionPermission perm = getInteractionPermission(block);
+        if (perm == null) {
+            return;
+        }
 
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		if (aranarthPlayer.isInAdminMode()) {
-			return;
-		}
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return;
+        }
 
-		// Containers: only restrict unclaimed land access; claimed land still uses chest locking
-		if (perm == DominionPermission.CONTAINER) {
-			Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
-			if (chunkDominion == null) {
-				return; // unclaimed land — no restriction here
-			}
-			// Only show error if it is not a shop
-			if (ShopUtils.getShopFromLocation(block.getLocation()) != null) {
-				return;
-			}
-			if (applyLogic(player, block, null, DominionPermission.CONTAINER)) {
-				e.setCancelled(true);
-			}
-			return;
-		}
+        // Containers: only restrict unclaimed land access; claimed land still uses chest locking
+        if (perm == DominionPermission.CONTAINER) {
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+            if (chunkDominion == null) {
+                return; // unclaimed land — no restriction here
+            }
+            // Only show error if it is not a shop
+            if (ShopUtils.getShopFromLocation(block.getLocation()) != null) {
+                return;
+            }
+            if (applyLogic(player, block, null, DominionPermission.CONTAINER)) {
+                e.setCancelled(true);
+            }
+            return;
+        }
 
-		// For all other interaction types
-		if (ShopUtils.getShopFromLocation(block.getLocation()) != null) {
-			return;
-		}
-		if (applyLogic(player, block, null, perm)) {
-			e.setCancelled(true);
-		}
-	}
+        // For all other interaction types
+        if (ShopUtils.getShopFromLocation(block.getLocation()) != null) {
+            return;
+        }
+        if (applyLogic(player, block, null, perm)) {
+            e.setCancelled(true);
+        }
+    }
 
-	/**
-	 * Returns the DominionPermission that governs interaction with the given block,
-	 * or null if the block is not Dominion-protected.
-	 */
-	private DominionPermission getInteractionPermission(Block block) {
-		Material type = block.getType();
-		String name = type.name();
+    /**
+     * Returns the DominionPermission that governs interaction with the given block,
+     * or null if the block is not Dominion-protected.
+     */
+    private DominionPermission getInteractionPermission(Block block) {
+        Material type = block.getType();
+        String name = type.name();
 
-		if (name.endsWith("_DOOR")) return DominionPermission.DOOR;
-		if (name.endsWith("_BUTTON")) return DominionPermission.BUTTON;
-		if (name.endsWith("_GATE")) return DominionPermission.FENCE_GATE;
-		if (name.endsWith("_TRAPDOOR")) return DominionPermission.TRAPDOOR;
-		if (type == Material.LEVER) return DominionPermission.LEVER;
-		if (name.endsWith("_PRESSURE_PLATE")) return DominionPermission.PRESSURE_PLATE;
+        if (name.endsWith("_DOOR")) {
+            return DominionPermission.DOOR;
+        }
+        if (name.endsWith("_BUTTON")) {
+            return DominionPermission.BUTTON;
+        }
+        if (name.endsWith("_GATE")) {
+            return DominionPermission.FENCE_GATE;
+        }
+        if (name.endsWith("_TRAPDOOR")) {
+            return DominionPermission.TRAPDOOR;
+        }
+        if (type == Material.LEVER) {
+            return DominionPermission.LEVER;
+        }
+        if (name.endsWith("_PRESSURE_PLATE")) {
+            return DominionPermission.PRESSURE_PLATE;
+        }
 
-		// Containers (claimed-land only restriction)
-		if (isContainerBlock(block)) return DominionPermission.CONTAINER;
+        // Containers (claimed-land only restriction)
+        if (isContainerBlock(block)) {
+            return DominionPermission.CONTAINER;
+        }
 
-		// Miscellaneous interactables
-		if (name.endsWith("_SIGN")
-				|| type == Material.NOTE_BLOCK
-				|| name.endsWith("_SHELF")
-				|| type == Material.FLOWER_POT
-				|| type == Material.SWEET_BERRY_BUSH
-				|| type == Material.CAVE_VINES
-				|| type == Material.CAVE_VINES_PLANT
-				|| type == Material.DECORATED_POT) {
-			return DominionPermission.MISC_INTERACT;
-		}
+        // Miscellaneous interactables
+        if (name.endsWith("_SIGN")
+                || type == Material.NOTE_BLOCK
+                || name.endsWith("_SHELF")
+                || type == Material.FLOWER_POT
+                || type == Material.SWEET_BERRY_BUSH
+                || type == Material.CAVE_VINES
+                || type == Material.CAVE_VINES_PLANT
+                || type == Material.DECORATED_POT) {
+            return DominionPermission.MISC_INTERACT;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Returns true if the block is a container that should be protected.
-	 */
-	private boolean isContainerBlock(Block block) {
-		Material type = block.getType();
-		return AranarthUtils.isContainerBlock(block) // chests, trapped chests, barrels, shulker boxes
-				|| type == Material.FURNACE
-				|| type == Material.BLAST_FURNACE
-				|| type == Material.SMOKER
-				|| type == Material.CRAFTER
-				|| type == Material.HOPPER
-				|| type == Material.JUKEBOX
-				|| type == Material.CHISELED_BOOKSHELF;
-	}
+    /**
+     * Returns true if the block is a container that should be protected.
+     */
+    private boolean isContainerBlock(Block block) {
+        Material type = block.getType();
+        return AranarthUtils.isContainerBlock(block)
+                || type == Material.FURNACE
+                || type == Material.BLAST_FURNACE
+                || type == Material.SMOKER
+                || type == Material.CRAFTER
+                || type == Material.HOPPER
+                || type == Material.JUKEBOX
+                || type == Material.CHISELED_BOOKSHELF
+                || block.getType() == Material.LECTERN;
+    }
 
-	/**
-	 * Prevents players from placing item frames and paintings in another Dominion.
-	 */
-	@EventHandler
-	public void onHangingPlace(HangingPlaceEvent e) {
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
-		if (!aranarthPlayer.isInAdminMode()) {
-			if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.ITEM_FRAME)) {
-				e.setCancelled(true);
-			}
-		}
-	}
+    /**
+     * Prevents players from placing item frames and paintings in another Dominion.
+     */
+    @EventHandler
+    public void onHangingPlace(HangingPlaceEvent e) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (!aranarthPlayer.isInAdminMode()) {
+            if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.ITEM_FRAME)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	/**
-	 * Controls mob spawning in Dominions using the dominion-wide mob spawning toggle.
-	 */
-	@EventHandler
-	public void onMobSpawn(CreatureSpawnEvent e) {
-		if (e.getEntityType() == EntityType.ARMOR_STAND) {
-			return;
-		}
-		if (e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
-			return;
-		}
-		Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
-		if (chunkDominion != null) {
-			if (!chunkDominion.isMobSpawningEnabled()) {
-				e.setCancelled(true);
-			}
-		}
-	}
+    /**
+     * Controls mob spawning in Dominions using the dominion-wide mob spawning toggle.
+     */
+    @EventHandler
+    public void onMobSpawn(CreatureSpawnEvent e) {
+        if (e.getEntityType() == EntityType.ARMOR_STAND) {
+            return;
+        }
+        if (e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
+            return;
+        }
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
+        if (chunkDominion != null) {
+            if (!chunkDominion.isMobSpawningEnabled()) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
-	/**
-	 * All validation logic for interacting with another Dominion.
-	 * @param player The player performing the action.
-	 * @param block The block being interacted with (may be null).
-	 * @param entity The entity being interacted with (may be null).
-	 * @param permission The permission required for this action.
-	 * @return True if the action should be prevented.
-	 */
-	private boolean applyLogic(Player player, Block block, Entity entity, DominionPermission permission) {
-		Dominion dominion = null;
-		if (block != null) {
-			dominion = DominionUtils.getDominionOfChunk(block.getChunk());
-		} else if (entity != null) {
-			dominion = DominionUtils.getDominionOfChunk(entity.getLocation().getChunk());
-		}
+    /**
+     * All validation logic for interacting with another Dominion.
+     *
+     * @param player     The player performing the action.
+     * @param block      The block being interacted with (may be null).
+     * @param entity     The entity being interacted with (may be null).
+     * @param permission The permission required for this action.
+     * @return True if the action should be prevented.
+     */
+    private boolean applyLogic(Player player, Block block, Entity entity, DominionPermission permission) {
+        Dominion dominion = null;
+        if (block != null) {
+            dominion = DominionUtils.getDominionOfChunk(block.getChunk());
+        } else if (entity != null) {
+            dominion = DominionUtils.getDominionOfChunk(entity.getLocation().getChunk());
+        }
 
-		if (dominion != null) {
-			if (!DominionUtils.hasPermission(player, dominion, permission)) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
-				return true;
-			}
-		}
-		return false;
-	}
+        if (dominion != null) {
+            if (!DominionUtils.hasPermission(player, dominion, permission)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
+                return true;
+            }
+        }
+        return false;
+    }
 }
