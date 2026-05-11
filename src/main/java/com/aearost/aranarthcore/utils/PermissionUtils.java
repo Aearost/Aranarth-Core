@@ -254,7 +254,6 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.whereis", false);
 		perms.setPermission("aranarth.ban", false);
 		perms.setPermission("aranarth.invsee", false);
-		perms.setPermission("aranarth.spy", false);
 		perms.setPermission("aranarth.unmute", false);
 		perms.setPermission("aranarth.unban", false);
 		perms.setPermission("aranarth.dominion.create", false);
@@ -724,7 +723,6 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.ban", true);
 			perms.setPermission("aranarth.give", true);
 			perms.setPermission("aranarth.invsee", true);
-			perms.setPermission("aranarth.spy", true);
 			perms.setPermission("aranarth.unmute", true);
 			perms.setPermission("aranarth.whereis", true);
 			perms.setPermission("aranarth.broadcast", true);

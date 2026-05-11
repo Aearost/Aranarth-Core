@@ -741,6 +741,7 @@ public class AranarthUtils {
 		// If the player is done with editing the banner
 		if (bannerMeta == null) {
 			playerBanners.remove(uuid);
+			return;
 		}
 
 		playerBanners.put(uuid, bannerMeta);

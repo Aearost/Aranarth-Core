@@ -28,6 +28,7 @@ Major Features
 [+] Added /toggle bulksellshulker to handle full emptying of shulkers
 [+] Added extra mob drops and extra fishing rewards for Ardent Aranarthium wearers
 [+] Implemented item support for the chest sorting system
+[+] Added limit to 15 banner patterns
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
