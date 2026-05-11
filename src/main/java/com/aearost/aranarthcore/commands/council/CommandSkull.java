@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -25,11 +27,18 @@ public class CommandSkull {
 				return true;
 			}
 
+			if (args.length == 1) {
+				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/ac skull <username>"));
+				return true;
+			}
+
 			OfflinePlayer skullPlayer = Bukkit.getOfflinePlayer(args[1]);
 			if (skullPlayer != null) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullPlayer.getUniqueId());
 				ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
 				SkullMeta meta = (SkullMeta) skull.getItemMeta();
 				meta.setOwningPlayer(skullPlayer);
+				meta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname() + "&e's Skull"));
 				skull.setItemMeta(meta);
 				player.sendMessage(ChatUtils.chatMessage("&7You have given yourself &e" + skullPlayer.getName() + "'s &7skull"));
 				player.getInventory().addItem(skull);

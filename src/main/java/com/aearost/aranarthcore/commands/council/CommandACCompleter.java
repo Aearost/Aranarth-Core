@@ -31,7 +31,7 @@ public class CommandACCompleter implements TabCompleter {
             "admin", "ban", "broadcast", "clearchat", "dateset", "give",
             "home", "invsee", "invswap", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
             "speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
-            "vanish", "vpedit", "warn", "weather", "whereis"
+            "vanish", "vpedit", "warn", "weather", "whereis", "skull"
     );
 
     private static final List<String> ITEM_NAMES;
@@ -104,7 +104,7 @@ public class CommandACCompleter implements TabCompleter {
     private List<String> councilArgs(CommandSender sender, String[] args) {
         return switch (args[0].toLowerCase()) {
             case "whereis", "give", "mute", "unmute", "ban", "unban", "invsee", "warn", "punishments", "perks",
-                 "sudo" -> {
+                 "sudo", "skull" -> {
                 if (args.length == 2) {
                     yield filterPlayers(args[1]);
                 }
