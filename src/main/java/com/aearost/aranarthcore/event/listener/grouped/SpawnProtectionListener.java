@@ -556,8 +556,14 @@ public class SpawnProtectionListener implements Listener {
 				boolean isTooLow = e.getTo().getY() <= 50;
 
 				if (isTooLow || inBufferZone) {
-					Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
-					Location locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+					boolean inDockRegion = (x >= -90 && x <= -54) && (z >= -34 && z <= 0);
+					Location locToTeleportTo;
+					if (isTooLow && inDockRegion) {
+						locToTeleportTo = new Location(Bukkit.getWorld("spawn"), -63.5, 109, -10.5, 90, 0);
+					} else {
+						Location spawn = new Location(Bukkit.getWorld("spawn"), 0, 100, 0, 180, 0);
+						locToTeleportTo = AranarthUtils.getSafeTeleportLocation(spawn);
+					}
 					e.getPlayer().teleport(locToTeleportTo);
 					e.getPlayer().playSound(e.getPlayer(), Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 				}

@@ -67,6 +67,7 @@ Minor Features
 [~] Updated the descriptions of /aranarthium for the recent changes to Ardent, Elven, and Scorched
 [~] Added color codes to the different sets in /aranarthium
 [~] Updated the color of Dwarven Aranarthium's display name
+[~] Made it so that when you fall at the crates warp, you are teleported back to the crates warp location
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
