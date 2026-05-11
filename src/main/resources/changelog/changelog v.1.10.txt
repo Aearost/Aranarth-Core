@@ -66,6 +66,7 @@ Minor Features
 [+] Prevented paintings from being destroyed at spawn and in Dominions
 [~] Updated the descriptions of /aranarthium for the recent changes to Ardent, Elven, and Scorched
 [~] Added color codes to the different sets in /aranarthium
+[~] Updated the color of Dwarven Aranarthium's display name
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

@@ -77,7 +77,7 @@ public class CommandAranarthium implements CommandExecutor {
 
 	private static String dwarvenArmour() {
 		return ChatUtils.translateToColor(
-				"#708090&lDwarven Aranarthium\n\n&r" +
+				"#FFEE8C&lDwarven Aranarthium\n\n&r" +
 						"Provides the wearer with the status effects of &oNight Vision&r, and improved ore and cluster drop rates.\n\nAdditionally yields increased damage using &lAxes &rand &lMaces."
 		);
 	}
