@@ -620,7 +620,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
                 "Aura (Slowness + Nausea in radius), Scream (soul burst + damage), and Possess (disorient a nearby player's movement). " +
                 "Enemies who strike your body will snap you back and deal that damage to you. " +
                 "Travel too far away from your body, or double-tap sneak to return early.\n" +
-                ChatUtils.translateToColor("&fTo activate: Sneak (hold for " + (chargeDuration / 4) + " seconds) > Sneak (release)") + "\n" +
+                ChatUtils.translateToColor("&fTo activate: Hold sneak until you see particles") + "\n" +
                 ChatUtils.translateToColor("&fTo cancel: Double-tap Sneak") + "\n" +
                 ChatUtils.translateToColor("&fSub-abilities: Left-click while projecting with the correct hotbar slot selected");
     }
