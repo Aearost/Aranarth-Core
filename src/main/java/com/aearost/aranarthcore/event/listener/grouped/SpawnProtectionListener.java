@@ -20,6 +20,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.*;
 
@@ -116,6 +117,21 @@ public class SpawnProtectionListener implements Listener {
 					if (!aranarthPlayer.isInAdminMode()) {
 						e.setCancelled(true);
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from breaking paintings and item frames at spawn.
+	 */
+	@EventHandler
+	public void onHangingBreak(HangingBreakByEntityEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+			if (e.getRemover() instanceof Player player) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (!aranarthPlayer.isInAdminMode()) {
+					e.setCancelled(true);
 				}
 			}
 		}

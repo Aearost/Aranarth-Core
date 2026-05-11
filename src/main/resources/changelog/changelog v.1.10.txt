@@ -63,6 +63,7 @@ Minor Features
 [+] Restricted Lecterns to only be protected at Spawn and in Dominions
 [+] Added chat message when a player completes all of their weekly quests
 [+] Gave Council members the same number of quiver and potion slots as their Saint equivalent, as well as the number of shops
+[+] Prevented paintings from being destroyed at spawn and in Dominions
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

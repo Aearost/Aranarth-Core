@@ -20,6 +20,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -419,6 +420,22 @@ public class DominionProtectionListener implements Listener {
         if (!aranarthPlayer.isInAdminMode()) {
             if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.ITEM_FRAME)) {
                 e.setCancelled(true);
+            }
+        }
+    }
+
+    /**
+     * Prevents players from breaking paintings and item frames in another Dominion.
+     * Destroying counts as BUILD.
+     */
+    @EventHandler
+    public void onHangingBreak(HangingBreakByEntityEvent e) {
+        if (e.getRemover() instanceof Player player) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (!aranarthPlayer.isInAdminMode()) {
+                if (applyLogic(player, null, e.getEntity(), DominionPermission.BUILD)) {
+                    e.setCancelled(true);
+                }
             }
         }
     }
