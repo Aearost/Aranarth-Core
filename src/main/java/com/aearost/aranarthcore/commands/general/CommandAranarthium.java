@@ -63,42 +63,42 @@ public class CommandAranarthium implements CommandExecutor {
 
 	private static String aquaticArmour() {
 		return ChatUtils.translateToColor(
-				"&lAquatic Aranarthium\n\n&r" +
+				"#AEEEEE&lAquatic Aranarthium\n\n&r" +
 						"Provides the wearer with &oDolphin's Grace&r & &oConduit Power&r. If raining or in water, will also provide &oSpeed III &rand &oStrength II.\n\nIncreases &lTrident&r damage, and provides &oMining Fatigue &rimmunity from Elder Guardians."
 		);
 	}
 
 	private static String ardentArmour() {
 		return ChatUtils.translateToColor(
-				"&lArdent Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oStrength III &rand &oResistance II.\n\nAdditionally yields increased damage using &lSwords."
+				"#696969&lArdent Aranarthium\n\n&r" +
+						"Provides the wearer with the status effects of &oStrength III &rand &oResistance II, &rand increased mob and fishing drops.\n\nAdditionally yields increased damage using &lSwords."
 		);
 	}
 
 	private static String dwarvenArmour() {
 		return ChatUtils.translateToColor(
-				"&lDwarven Aranarthium\n\n&r" +
+				"#708090&lDwarven Aranarthium\n\n&r" +
 						"Provides the wearer with the status effects of &oNight Vision&r, and improved ore and cluster drop rates.\n\nAdditionally yields increased damage using &lAxes &rand &lMaces."
 		);
 	}
 
 	private static String elvenArmour() {
 		return ChatUtils.translateToColor(
-				"&lElven Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oSpeed III, Jump Boost II,&r and an extra row of hearts.\n\nAdditionally yields increased damage using &lBows &rand &lSpears."
+				"#3F704D&lElven Aranarthium\n\n&r" +
+						"Provides the wearer with the status effects of &oSpeed III, Jump Boost II,&r and an extra row of hearts. Also increases the harvests of crops.\n\nAdditionally yields increased damage using &lBows &rand &lSpears."
 		);
 	}
 
 	private static String scorchedArmour() {
 		return ChatUtils.translateToColor(
-				"&lScorched Aranarthium\n\n&r" +
-						"Provides the wearer with the status effects of &oFire Resistance&r and Resistance I&r.\n\nAdditionally causes all melee damage to ignite targets, and the wearer is not targeted by Piglins."
+				"#ff4500&lScorched Aranarthium\n&r" +
+						"Provides the wearer with &oFire Resistance&r and Resistance I&r, and if in the Nether, will also provide &oSpeed III &rand &oStrength II.\n\n&rAdditionally causes melee/bending damage to ignite targets, and the wearer is not targeted by Piglins."
 		);
 	}
 
 	private static String soulboundArmour() {
 		return ChatUtils.translateToColor(
-				"&lSoulbound Aranarthium\n\n&r" +
+				"#9400D3&lSoulbound Aranarthium\n\n&r" +
 						"Provides the wearer with no special status effects, but instead with the blessing of life-everlasting.\n\nThe wearer will have their full inventory persist across death."
 		);
 	}
