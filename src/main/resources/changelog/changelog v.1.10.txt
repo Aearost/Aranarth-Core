@@ -72,6 +72,7 @@ Minor Features
 [~] Fixed inaccurate usage steps for AstralProjection
 [+] Added permission to Council moderators/admins to change their gamemode
 [~] Prevented ice from forming during Umbravor
+[-] Removed shop creation permission from Moderators
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

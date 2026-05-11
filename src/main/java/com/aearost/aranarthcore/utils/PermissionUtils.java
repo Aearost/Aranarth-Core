@@ -730,7 +730,6 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.unmute", true);
 			perms.setPermission("aranarth.whereis", true);
 			perms.setPermission("aranarth.broadcast", true);
-			perms.setPermission("aranarth.shop.modify", true);
 			perms.setPermission("aranarth.time", true);
 			perms.setPermission("aranarth.skull", true);
 			perms.setPermission("minecraft.command.gamemode", true);
@@ -748,6 +747,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.boosts.modify", true);
 			perms.setPermission("aranarth.vote.test", true);
 			perms.setPermission("aranarth.sudo", true);
+			perms.setPermission("aranarth.shop.modify", true);
 			setSaintPermissions(perms, 3);
 			setArchitectPermissions(perms, 1);
 		} else {
