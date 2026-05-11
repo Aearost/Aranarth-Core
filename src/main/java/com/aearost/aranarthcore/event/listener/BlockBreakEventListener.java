@@ -59,6 +59,7 @@ public class BlockBreakEventListener implements Listener {
 
             new ContainerBreak().execute(e);
             new ShopDestroy().execute(e);
+            new ArmorStandFallOnBreak().execute(e);
 
             if (AranarthUtils.getMonth() == Month.FOLLIVOR) {
                 new LogExtraDrops().execute(e);

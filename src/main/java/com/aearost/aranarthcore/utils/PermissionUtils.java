@@ -280,6 +280,9 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.chat.gradientbold", false);
 		perms.setPermission("aranarth.gate", false);
 
+		// Armor stand
+		perms.setPermission("aranarth.armorstand.lock", false);
+
 		// Armor stand poses
 		perms.setPermission("aranarthcore.armorstand.nopose", false);
 		perms.setPermission("aranarthcore.armorstand.solemn", false);
@@ -646,6 +649,7 @@ public class PermissionUtils {
 		}
 
 		if (saintRank >= 1) {
+			perms.setPermission("aranarth.armorstand.lock", true);
 			perms.setPermission("aranarth.chat.color", true);
 			perms.setPermission("aranarth.hat", true);
 			perms.setPermission("aranarth.trash", true);

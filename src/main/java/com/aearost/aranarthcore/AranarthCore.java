@@ -299,7 +299,7 @@ public class AranarthCore extends JavaPlugin {
 		new ArmorStandSwitchListener(this);
 		new AnimalBreedingListener(this);
 		new VotifierListener(this);
-		new ArmorStandItemAddListener(this);
+		new ArmorStandInteractListener(this);
 		new PlayerFishEventListener(this);
 
 		// Discord server join and quit messages

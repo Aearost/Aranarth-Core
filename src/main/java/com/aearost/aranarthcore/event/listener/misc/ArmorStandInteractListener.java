@@ -1,6 +1,10 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -23,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class ArmorStandItemAddListener implements Listener {
+public class ArmorStandInteractListener implements Listener {
 
     // Pose cycle:
     //  0 = No Arms (default)
@@ -71,10 +75,12 @@ public class ArmorStandItemAddListener implements Listener {
     };
 
     private final NamespacedKey poseKey;
+    private final NamespacedKey lockedKey;
 
-    public ArmorStandItemAddListener(AranarthCore plugin) {
+    public ArmorStandInteractListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
         this.poseKey = new NamespacedKey(plugin, "armor_stand_pose");
+        this.lockedKey = new NamespacedKey(plugin, "armor_stand_locked");
     }
 
     /**
@@ -91,8 +97,42 @@ public class ArmorStandItemAddListener implements Listener {
         if (player.isSneaking()) {
             return;
         }
+
+        // Lock the armor stand if the player is holding an iron block
+        ItemStack hand = player.getInventory().getItemInMainHand();
+        if (hand.getType() == Material.IRON_BLOCK) {
+            if (!player.hasPermission("aranarth.armorstand.lock")) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to lock armor stands"));
+                e.setCancelled(true);
+                return;
+            }
+            Dominion dominion = DominionUtils.getDominionOfChunk(armorStand.getLocation().getChunk());
+            if (dominion != null && !DominionUtils.hasPermission(player, dominion, DominionPermission.ARMOR_STAND)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
+                e.setCancelled(true);
+                return;
+            }
+            PersistentDataContainer pdc = armorStand.getPersistentDataContainer();
+            if (pdc.has(lockedKey, PersistentDataType.BYTE)) {
+                player.sendMessage(ChatUtils.chatMessage("&cThis armor stand has already been locked"));
+                e.setCancelled(true);
+                return;
+            }
+            if (hand.getAmount() == 1) {
+                player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            } else {
+                hand.setAmount(hand.getAmount() - 1);
+            }
+            pdc.set(lockedKey, PersistentDataType.BYTE, (byte) 1);
+            armorStand.setCanMove(false);
+            player.playSound(armorStand.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
+            player.sendMessage(ChatUtils.chatMessage("&7This armor stand has been locked"));
+            e.setCancelled(true);
+            return;
+        }
+
         // If the player is holding something, allow it to be equipped via vanilla logic
-        if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
+        if (hand.getType() != Material.AIR) {
             return;
         }
         // The clicked slot on the stand has an item, allow it to be taken via vanilla logic

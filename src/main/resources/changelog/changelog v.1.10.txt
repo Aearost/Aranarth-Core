@@ -29,6 +29,7 @@ Major Features
 [+] Added extra mob drops and extra fishing rewards for Ardent Aranarthium wearers
 [+] Implemented item support for the chest sorting system
 [+] Added limit to 15 banner patterns
+[+] Added functionality to make immovable armor stands by right-clicking with an iron block
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
