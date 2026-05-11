@@ -71,6 +71,7 @@ Minor Features
 [~] Made it so that when you fall at the crates warp, you are teleported back to the crates warp location
 [~] Fixed inaccurate usage steps for AstralProjection
 [+] Added permission to Council moderators/admins to change their gamemode
+[~] Prevented ice from forming during Umbravor
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

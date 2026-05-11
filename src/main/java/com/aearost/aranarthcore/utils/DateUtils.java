@@ -1172,7 +1172,9 @@ public class DateUtils {
 								continue;
 							}
 
-							generateIce(loc, bigFlakeDensity);
+							if (AranarthUtils.getMonth() != Month.UMBRAVOR) {
+								generateIce(loc, bigFlakeDensity);
+							}
 						}
 					}
 				}
