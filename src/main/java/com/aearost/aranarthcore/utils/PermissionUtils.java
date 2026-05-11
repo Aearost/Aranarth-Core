@@ -729,6 +729,7 @@ public class PermissionUtils {
 			perms.setPermission("aranarth.shop.modify", true);
 			perms.setPermission("aranarth.time", true);
 			perms.setPermission("aranarth.skull", true);
+			perms.setPermission("minecraft.command.gamemode", true);
 			setSaintPermissions(perms, 2);
 		} else {
 			return;

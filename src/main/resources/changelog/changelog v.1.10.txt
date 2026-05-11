@@ -69,6 +69,7 @@ Minor Features
 [~] Updated the color of Dwarven Aranarthium's display name
 [~] Made it so that when you fall at the crates warp, you are teleported back to the crates warp location
 [~] Fixed inaccurate usage steps for AstralProjection
+[+] Added permission to Council moderators/admins to change their gamemode
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
