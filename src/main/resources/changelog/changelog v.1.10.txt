@@ -30,6 +30,8 @@ Major Features
 [+] Implemented item support for the chest sorting system
 [+] Added limit to 15 banner patterns
 [+] Added functionality to make immovable armor stands by right-clicking with an iron block
+[~] Adjusted market prices to better favor non-mining methods of income
+[~] Adjusted the rank prices to cost more in earlier ranks
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

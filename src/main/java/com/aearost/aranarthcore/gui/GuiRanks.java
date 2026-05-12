@@ -86,9 +86,9 @@ public class GuiRanks {
 		ItemMeta esquireMeta = esquire.getItemMeta();
 		ArrayList<String> esquireLore = new ArrayList<>();
 		if (rank == 1) {
-			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($250) - Current Rank"));
+			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($1,000) - Current Rank"));
 		} else {
-			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($250)"));
+			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($1,000)"));
 		}
 		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oHealing"));
@@ -108,9 +108,9 @@ public class GuiRanks {
 		ItemMeta knightMeta = knight.getItemMeta();
 		ArrayList<String> knightLore = new ArrayList<>();
 		if (rank == 2) {
-			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($1,250) - Current Rank"));
+			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000) - Current Rank"));
 		} else {
-			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($1,250)"));
+			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- #c7c5c5&oMetal Bending"));
@@ -130,15 +130,15 @@ public class GuiRanks {
 		ArrayList<String> baronLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 3) {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($5,000) - Current Rank"));
+				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($15,000) - Current Rank"));
 			} else {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($5,000)"));
+				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaron&r&f&l ($15,000)"));
 			}
 		} else {
 			if (rank == 3) {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($5,000) - Current Rank"));
+				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($15,000) - Current Rank"));
 			} else {
-				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($5,000)"));
+				baronMeta.setDisplayName(ChatUtils.translateToColor("&5&l&nBaroness&r&f&l ($15,000)"));
 			}
 		}
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
@@ -162,15 +162,15 @@ public class GuiRanks {
 		ArrayList<String> countLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 4) {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($25,000) - Current Rank"));
+				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($50,000) - Current Rank"));
 			} else {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($25,000)"));
+				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCount&r&f&l ($50,000)"));
 			}
 		} else {
 			if (rank == 4) {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($25,000) - Current Rank"));
+				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($50,000) - Current Rank"));
 			} else {
-				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($25,000)"));
+				countMeta.setDisplayName(ChatUtils.translateToColor("&8&l&nCountess&r&f&l ($50,000)"));
 			}
 		}
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
@@ -193,15 +193,15 @@ public class GuiRanks {
 		ArrayList<String> dukeLore = new ArrayList<>();
 		if (pronouns == Pronouns.MALE) {
 			if (rank == 5) {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($100,000) - Current Rank"));
+				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($125,000) - Current Rank"));
 			} else {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($100,000)"));
+				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuke&r&f&l ($125,000)"));
 			}
 		} else {
 			if (rank == 5) {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($100,000) - Current Rank"));
+				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($125,000) - Current Rank"));
 			} else {
-				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($100,000)"));
+				dukeMeta.setDisplayName(ChatUtils.translateToColor("&6&l&nDuchess&r&f&l ($125,000)"));
 			}
 		}
 		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));

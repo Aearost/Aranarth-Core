@@ -35,11 +35,11 @@ economy:
   dominion-creation-cost: 5000.0
   # Cost to rank up, indexed by current rank (index 0 = Peasant→Esquire, index 7 = King→Emperor).
   rankup-costs:
-    - 250.0       # Rank 0 → 1 (Esquire)
-    - 1250.0      # Rank 1 → 2 (Knight)
-    - 5000.0      # Rank 2 → 3 (Baron/Baroness)
-    - 25000.0     # Rank 3 → 4 (Count/Countess)
-    - 100000.0    # Rank 4 → 5 (Duke/Duchess)
+    - 1000.0      # Rank 0 → 1 (Esquire)
+    - 5000.0      # Rank 1 → 2 (Knight)
+    - 15000.0     # Rank 2 → 3 (Baron/Baroness)
+    - 50000.0     # Rank 3 → 4 (Count/Countess)
+    - 125000.0    # Rank 4 → 5 (Duke/Duchess)
     - 500000.0    # Rank 5 → 6 (Prince/Princess)
     - 2500000.0   # Rank 6 → 7 (King/Queen)
     - 10000000.0  # Rank 7 → 8 (Emperor/Empress)
