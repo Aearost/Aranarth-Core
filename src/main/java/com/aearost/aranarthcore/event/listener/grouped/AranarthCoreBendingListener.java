@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicPulse;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
+import com.aearost.aranarthcore.abilities.earthbending.lavabending.LavaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
@@ -30,6 +31,7 @@ import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.ability.FireAbility;
+import com.projectkorra.projectkorra.ability.LavaAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.ability.SandAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
@@ -244,6 +246,12 @@ public class AranarthCoreBendingListener implements Listener {
 							}
 						}
 					}
+				} else if (ability instanceof LavaAbility) {
+					if (abilityName.equalsIgnoreCase("lavaglaives")) {
+						if (!LavaGlaives.hasActiveInstance(player.getUniqueId())) {
+							new LavaGlaives(player);
+						}
+					}
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
 				}
@@ -314,6 +322,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// LavaGlaives: left-click fires the next glaive (right first, then left)
+		LavaGlaives lavaGlaives = LavaGlaives.getActiveInstance(player.getUniqueId());
+		if (lavaGlaives != null) {
+			lavaGlaives.onLeftClick();
+			return;
+		}
+
 		// SonicClap: instant left-click fire
 		BendingPlayer bpClap = BendingPlayer.getBendingPlayer(player);
 		if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
@@ -381,6 +396,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (SandWave.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (LavaGlaives.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -425,6 +443,15 @@ public class AranarthCoreBendingListener implements Listener {
 		EnergyBurst energyBurst = EnergyBurst.getActiveInstance(e.getPlayer().getUniqueId());
 		if (energyBurst != null) {
 			energyBurst.onSlotChange();
+		}
+		// Slot change while charging cancels without cooldown; slot change while READY or FLYING applies cooldown
+		LavaGlaives lavaGlaives = LavaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
+		if (lavaGlaives != null) {
+			if (lavaGlaives.getPhase() == LavaGlaives.Phase.CHARGING) {
+				lavaGlaives.cancelInstantly();
+			} else {
+				lavaGlaives.endWithCooldown();
+			}
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
@@ -561,6 +588,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (Regrowth.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (LavaGlaives.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
