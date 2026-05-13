@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities.waterbending;
+package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;

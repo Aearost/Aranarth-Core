@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities.airbending;
+package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AirAbility;

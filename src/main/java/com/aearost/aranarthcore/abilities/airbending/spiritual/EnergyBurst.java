@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities.spiritual;
+package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;

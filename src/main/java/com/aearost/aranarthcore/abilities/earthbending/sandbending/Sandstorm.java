@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities.earthbending;
+package com.aearost.aranarthcore.abilities.earthbending.sandbending;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;

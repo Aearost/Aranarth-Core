@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore;
 
-import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
-import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
+import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
 import com.aearost.aranarthcore.commands.council.CommandTrash;

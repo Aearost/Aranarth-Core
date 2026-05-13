@@ -1,4 +1,4 @@
-package com.aearost.aranarthcore.abilities.firebending;
+package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;

@@ -1,7 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
+import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Perk;
