@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.abilities.airbending.Amplification;
 import com.aearost.aranarthcore.abilities.airbending.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.DeafeningScream;
+import com.aearost.aranarthcore.abilities.airbending.SonicClap;
 import com.aearost.aranarthcore.abilities.airbending.SonicPulse;
 import com.aearost.aranarthcore.abilities.airbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.SoundAbility;
@@ -310,6 +311,14 @@ public class AranarthCoreBendingListener implements Listener {
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
 		if (angeredSpirits != null) {
 			angeredSpirits.onLeftClick();
+			return;
+		}
+
+		// SonicClap: instant left-click fire
+		BendingPlayer bpClap = BendingPlayer.getBendingPlayer(player);
+		if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
+				&& bpClap.isElementToggled(Element.AIR)) {
+			new SonicClap(player);
 			return;
 		}
 
