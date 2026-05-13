@@ -12,10 +12,12 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
+import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -84,6 +86,23 @@ public class ArmorStandInteractListener implements Listener {
     }
 
     /**
+     * Re-applies the locked state (canMove=false, gravity=false) for any armor stand
+     * that has the locked PDC key when its chunk is loaded after a server restart.
+     */
+    @EventHandler
+    public void onEntitiesLoad(final EntitiesLoadEvent e) {
+        for (Entity entity : e.getEntities()) {
+            if (!(entity instanceof ArmorStand armorStand)) {
+                continue;
+            }
+            if (armorStand.getPersistentDataContainer().has(lockedKey, PersistentDataType.BYTE)) {
+                armorStand.setCanMove(false);
+                armorStand.setGravity(false);
+            }
+        }
+    }
+
+    /**
      * Cycles the armor stand through all armor stand poses on each right-click.
      * Arms will only be hidden (pose 0) if the armor stand's hands are also empty.
      */
@@ -125,6 +144,7 @@ public class ArmorStandInteractListener implements Listener {
             }
             pdc.set(lockedKey, PersistentDataType.BYTE, (byte) 1);
             armorStand.setCanMove(false);
+            armorStand.setGravity(false);
             player.playSound(armorStand.getLocation(), Sound.BLOCK_ANVIL_PLACE, 1.0F, 1.0F);
             player.sendMessage(ChatUtils.chatMessage("&7This armor stand has been locked"));
             e.setCancelled(true);
