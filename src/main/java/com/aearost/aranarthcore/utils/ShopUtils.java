@@ -238,6 +238,15 @@ public class ShopUtils {
                 loc.add(0.5, 1.15, 0.5);
             }
 
+            // Remove any pre-existing holograms at this location
+            // Major lag without this check, as it piles up over time
+            BoundingBox box = BoundingBox.of(loc, 0.5, 3, 0.5);
+            for (Entity entity : loc.getWorld().getNearbyEntities(box)) {
+                if (entity instanceof ItemDisplay) {
+                    entity.remove();
+                }
+            }
+
             ItemDisplay hologram = loc.getWorld().spawn(loc, ItemDisplay.class);
             hologram.setItemStack(item);
             hologram.setBillboard(Display.Billboard.CENTER);

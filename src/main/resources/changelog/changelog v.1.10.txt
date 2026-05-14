@@ -35,6 +35,7 @@ Major Features
 [+] Added functionality to make immovable armor stands by right-clicking with an iron block
 [~] Adjusted market prices to better favor non-mining methods of income
 [~] Adjusted the rank prices to cost more in earlier ranks
+[~] Fixed major lag at spawn due to shop holograms duplicating but being invisible
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
