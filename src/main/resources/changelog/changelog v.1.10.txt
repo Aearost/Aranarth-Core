@@ -21,6 +21,7 @@ Major Features
 [+] Implemented the EnergyBurst ability for spiritual benders
 [+] Implemented the SonicClap ability for soundbenders
 [+] Implemented the LavaGlaives ability for lavabenders
+[+] Implemented the MetalShots ability for metalbenders
 [+] Implemented the CombustionStrike ability for combustion benders
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players

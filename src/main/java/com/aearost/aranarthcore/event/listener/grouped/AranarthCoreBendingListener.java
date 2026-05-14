@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.LavaGlaives;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
@@ -54,7 +55,10 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -257,6 +261,8 @@ public class AranarthCoreBendingListener implements Listener {
 							new LavaGlaives(player);
 						}
 					}
+				} else if (abilityName.equalsIgnoreCase("metalshots")) {
+					MetalShots.startRecall(player);
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
 				}
@@ -331,6 +337,14 @@ public class AranarthCoreBendingListener implements Listener {
 		LavaGlaives lavaGlaives = LavaGlaives.getActiveInstance(player.getUniqueId());
 		if (lavaGlaives != null) {
 			lavaGlaives.onLeftClick();
+			return;
+		}
+
+		// MetalShots: instant left-click fire — one iron ingot per shot
+		BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
+		if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalshots")
+				&& bpMetal.isElementToggled(Element.EARTH)) {
+			new MetalShots(player);
 			return;
 		}
 
@@ -664,6 +678,30 @@ public class AranarthCoreBendingListener implements Listener {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
+	}
+
+	/**
+	 * Enforces owner-only pickup for iron ingots fired by MetalShots. Any player other than the
+	 * caster who tagged the item is prevented from collecting it. When the owner steps on their
+	 * own ingot, it is removed from the MetalShots tracking map so it is no longer subject to recall.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onPickupMetalShot(final EntityPickupItemEvent e) {
+		if (!(e.getEntity() instanceof Player player)) return;
+
+		final String ownerUuid = e.getItem().getPersistentDataContainer().get(
+				MetalShots.getShotOwnerKey(), PersistentDataType.STRING);
+		if (ownerUuid == null) return;
+
+		if (!player.getUniqueId().toString().equals(ownerUuid)) {
+			e.setCancelled(true);
+			return;
+		}
+
+		// Owner is collecting their ingot — swap the tagged stack for a clean iron ingot before
+		// the pickup completes so the player never receives the internal instance-ID metadata.
+		e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
+		MetalShots.removeTrackedItem(e.getItem(), player.getUniqueId());
 	}
 
 	/**
