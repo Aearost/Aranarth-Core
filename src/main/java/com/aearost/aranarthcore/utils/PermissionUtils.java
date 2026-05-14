@@ -228,6 +228,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.energyburst", true);
 		perms.setPermission("bending.ability.sonicclap", true);
 		perms.setPermission("bending.ability.lavaglaives", true);
+		perms.setPermission("bending.ability.combustionstrike", true);
 
 		// Disable aranarth functionality
 		perms.setPermission("aranarth.exp", false);

@@ -14,6 +14,7 @@ import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
+import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
@@ -224,6 +225,10 @@ public class AranarthCoreBendingListener implements Listener {
 					if (!Barrage.hasActiveInstance(player.getUniqueId())) {
 						new Barrage(player);
 					}
+				} else if (abilityName.equalsIgnoreCase("combustionstrike")) {
+					if (!CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+						new CombustionStrike(player);
+					}
 				} else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
 					if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
 						new NoxiousFumes(player);
@@ -375,6 +380,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -443,6 +452,11 @@ public class AranarthCoreBendingListener implements Listener {
 		EnergyBurst energyBurst = EnergyBurst.getActiveInstance(e.getPlayer().getUniqueId());
 		if (energyBurst != null) {
 			energyBurst.onSlotChange();
+		}
+		// Slot change before the strike is fired cancels without cooldown; once TRAVELING it continues on its own
+		CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
+		if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
+			combustionStrike.cancelInstantly();
 		}
 		// Slot change while charging cancels without cooldown; slot change while READY or FLYING applies cooldown
 		LavaGlaives lavaGlaives = LavaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
