@@ -94,14 +94,18 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("inventory")) {
-					if (aranarthPlayer.isTogglingInventoryAssist()) {
-						aranarthPlayer.setTogglingInventoryAssist(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the inventory assist perk"));
+					if (player.hasPermission("aranarth.inventory")) {
+						if (aranarthPlayer.isTogglingInventoryAssist()) {
+							aranarthPlayer.setTogglingInventoryAssist(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the inventory assist perk"));
+						} else {
+							aranarthPlayer.setTogglingInventoryAssist(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the inventory assist perk"));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						aranarthPlayer.setTogglingInventoryAssist(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the inventory assist perk"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Inventory Assist perk!"));
 					}
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("shulker")) {
 					if (player.hasPermission("aranarth.shulker")) {
 						if (aranarthPlayer.isAddingToShulker()) {
@@ -113,7 +117,7 @@ public class CommandToggle implements CommandExecutor {
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Shulker Assist perk!"));
 					}
 				} else if (args[0].equalsIgnoreCase("blacklist")) {
 					if (player.hasPermission("aranarth.blacklist")) {
@@ -136,17 +140,21 @@ public class CommandToggle implements CommandExecutor {
 							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Blacklist perk!"));
 					}
 				} else if (args[0].equalsIgnoreCase("compressor")) {
-					if (aranarthPlayer.isCompressingItems()) {
-						aranarthPlayer.setCompressingItems(false);
-						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the compressor"));
+					if (player.hasPermission("aranarth.compressor")) {
+						if (aranarthPlayer.isCompressingItems()) {
+							aranarthPlayer.setCompressingItems(false);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7the compressor"));
+						} else {
+							aranarthPlayer.setCompressingItems(true);
+							player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the compressor"));
+						}
+						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						aranarthPlayer.setCompressingItems(true);
-						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7the compressor"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Compressor perk!"));
 					}
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("chestlock")) {
 					if (aranarthPlayer.isAutoLockingChests()) {
 						aranarthPlayer.setAutoLockingChests(false);
@@ -169,7 +177,7 @@ public class CommandToggle implements CommandExecutor {
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 						PermissionUtils.evaluatePlayerPermissions(player);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have access to the blue fire perk"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Blue Fire perk"));
 					}
 				} else if (args[0].equalsIgnoreCase("pethurt")) {
 					if (aranarthPlayer.isHurtingOwnPets()) {
@@ -181,6 +189,10 @@ public class CommandToggle implements CommandExecutor {
 					}
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else if (args[0].equalsIgnoreCase("gradientchat")) {
+					if (!aranarthPlayer.getPerks().containsKey(Perk.CHAT) && aranarthPlayer.getSaintRank() < 2) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Colored Chat perk!"));
+						return true;
+					}
 					if (args.length >= 2) {
 						if (args[1].equalsIgnoreCase("get")) {
 							if (aranarthPlayer.getGradientChatColors().isEmpty()) {
@@ -245,7 +257,7 @@ public class CommandToggle implements CommandExecutor {
 							player.sendMessage(ChatUtils.chatMessage("&7Gate placement mode &cdisabled&7."));
 						}
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use gate placement mode!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create gates!"));
 					}
 				} else if (args[0].equalsIgnoreCase("daymessage")) {
 					if (aranarthPlayer.isDayMessageDisabled()) {
@@ -276,7 +288,7 @@ public class CommandToggle implements CommandExecutor {
 						}
 						AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command!"));
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Shulker Assist perk!"));
 					}
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
