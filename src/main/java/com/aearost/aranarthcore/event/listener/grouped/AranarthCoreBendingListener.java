@@ -23,6 +23,7 @@ import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
+import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -86,6 +87,7 @@ public class AranarthCoreBendingListener implements Listener {
 		AstralProjection.endAllProjections();
 		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
@@ -153,6 +155,24 @@ public class AranarthCoreBendingListener implements Listener {
 
 		CoreAbility ability = bendingPlayer.getBoundAbility();
 		String abilityName = bendingPlayer.getBoundAbilityName();
+
+		// Sneak press during FIRING — cancel so PK cannot activate IceSpike via SHIFT_DOWN
+		if (e.isSneaking()) {
+			IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+			if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.FIRING) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+
+		// Sneak release — cancel IceDiscs immediately rather than waiting for the next progress() tick
+		if (!e.isSneaking()) {
+			IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+			if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.CHARGING) {
+				iceDiscs.cancelWithCooldown();
+				return;
+			}
+		}
 
 		if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
 			if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
@@ -326,6 +346,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// IceDiscs: left-click fires the next disc from the pillar
+		IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+		if (iceDiscs != null) {
+			iceDiscs.fireDisc();
+			return;
+		}
+
 		// AngeredSpirits: left-click fires the next spirit during the firing window
 		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
 		if (angeredSpirits != null) {
@@ -390,6 +417,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (Barrage.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -446,6 +477,10 @@ public class AranarthCoreBendingListener implements Listener {
 		IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
 		if (iceShards != null) {
 			iceShards.remove();
+		}
+		IceDiscs iceDiscs = IceDiscs.getActiveInstance(e.getPlayer().getUniqueId());
+		if (iceDiscs != null) {
+			iceDiscs.cancelWithCooldown();
 		}
 		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
 		if (noxiousFumes != null) {
@@ -620,6 +655,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (LavaGlaives.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}

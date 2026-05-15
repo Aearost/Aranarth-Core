@@ -215,6 +215,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.cableslash", true);
 		perms.setPermission("bending.ability.sandstorm", true);
 		perms.setPermission("bending.ability.razorleaves", true);
+		perms.setPermission("bending.ability.icediscs", true);
 		perms.setPermission("bending.ability.iceshards", true);
 		perms.setPermission("bending.ability.barrage", true);
 		perms.setPermission("bending.ability.noxiousfumes", true);

@@ -95,7 +95,8 @@
       "Bash(while read:*)",
       "Bash(do git:*)",
       "Bash(echo \"$h\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(ls *.xml)"
     ]
   }
 }
