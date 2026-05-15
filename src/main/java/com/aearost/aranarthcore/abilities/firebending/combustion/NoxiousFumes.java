@@ -46,8 +46,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private final Map<UUID, Long> entityLastEffectTime = new HashMap<>();
     private final Map<UUID, Integer> entityHitCounts = new HashMap<>();
 
-    // Launch a new smoke traveler every 250ms during channeling
-    private static final long TRAVELER_LAUNCH_INTERVAL_MS = 250;
+    // Launch a new smoke traveler every ~83ms during channeling (3x the original 250ms rate)
+    private static final long TRAVELER_LAUNCH_INTERVAL_MS = 83;
     // Apply escalating effects every 500ms while an entity is in the fumes
     private static final long EFFECT_INTERVAL_MS = 500;
     private static final int BASE_EFFECT_DURATION_TICKS = 60; // +20 ticks per 0.5s interval in fumes
@@ -123,7 +123,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         smokeSpeed = 12.0;
         maxChannelingDuration = 4000;
         puffLifespan = 7000;
-        puffRadius = 1.5;
+        puffRadius = 3.0;
         sourceCheckRadius = 6.0;
 
         sourceLocation = findNearestFireOrLava();
