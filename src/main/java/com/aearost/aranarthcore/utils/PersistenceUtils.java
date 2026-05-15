@@ -2543,6 +2543,129 @@ public class PersistenceUtils {
 		}
 	}
 
+	public static void loadRareKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "rare_keys.txt";
+		File file = new File(filePath);
+		if (!file.exists()) return;
+		try {
+			Scanner reader = new Scanner(file);
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) continue;
+				String[] parts = row.split("\\|");
+				AranarthUtils.setPendingRareKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the rare keys!");
+		}
+	}
+
+	public static void saveRareKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "rare_keys.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+		boolean isDirectoryCreated = pluginDirectory.isDirectory() || pluginDirectory.mkdir();
+		if (isDirectoryCreated) {
+			try { if (file.createNewFile()) Bukkit.getLogger().info("A new rare_keys.txt file has been generated"); }
+			catch (IOException e) { Bukkit.getLogger().info("An error occurred in the creation of rare_keys.txt"); }
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|amount\n");
+				for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingRareKeys().entrySet()) {
+					writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
+				}
+				writer.close();
+			} catch (IOException e) { Bukkit.getLogger().info("There was an error in saving the rare keys"); }
+		}
+	}
+
+	public static void loadEpicKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "epic_keys.txt";
+		File file = new File(filePath);
+		if (!file.exists()) return;
+		try {
+			Scanner reader = new Scanner(file);
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) continue;
+				String[] parts = row.split("\\|");
+				AranarthUtils.setPendingEpicKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the epic keys!");
+		}
+	}
+
+	public static void saveEpicKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "epic_keys.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+		boolean isDirectoryCreated = pluginDirectory.isDirectory() || pluginDirectory.mkdir();
+		if (isDirectoryCreated) {
+			try { if (file.createNewFile()) Bukkit.getLogger().info("A new epic_keys.txt file has been generated"); }
+			catch (IOException e) { Bukkit.getLogger().info("An error occurred in the creation of epic_keys.txt"); }
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|amount\n");
+				for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingEpicKeys().entrySet()) {
+					writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
+				}
+				writer.close();
+			} catch (IOException e) { Bukkit.getLogger().info("There was an error in saving the epic keys"); }
+		}
+	}
+
+	public static void loadGodlyKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "godly_keys.txt";
+		File file = new File(filePath);
+		if (!file.exists()) return;
+		try {
+			Scanner reader = new Scanner(file);
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine();
+				if (row.startsWith("#")) continue;
+				String[] parts = row.split("\\|");
+				AranarthUtils.setPendingGodlyKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
+			}
+			reader.close();
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading the godly keys!");
+		}
+	}
+
+	public static void saveGodlyKeys() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "godly_keys.txt";
+		File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+		boolean isDirectoryCreated = pluginDirectory.isDirectory() || pluginDirectory.mkdir();
+		if (isDirectoryCreated) {
+			try { if (file.createNewFile()) Bukkit.getLogger().info("A new godly_keys.txt file has been generated"); }
+			catch (IOException e) { Bukkit.getLogger().info("An error occurred in the creation of godly_keys.txt"); }
+			try {
+				FileWriter writer = new FileWriter(filePath);
+				writer.write("#uuid|amount\n");
+				for (Map.Entry<UUID, Integer> entry : AranarthUtils.getPendingGodlyKeys().entrySet()) {
+					writer.write(entry.getKey().toString() + "|" + entry.getValue() + "\n");
+				}
+				writer.close();
+			} catch (IOException e) { Bukkit.getLogger().info("There was an error in saving the godly keys"); }
+		}
+	}
+
 	// -------------------------------------------------------------------------
 	// Quest State Persistence
 	// -------------------------------------------------------------------------

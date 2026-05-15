@@ -90,16 +90,15 @@ public class VotifierListener implements Listener {
 					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
 					if (!remainder.isEmpty()) {
 						AranarthUtils.addPendingVoteKeys(uuid, 1);
-						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! Use &e/keyclaim &7to claim your vote key"));
+						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
 					}
 				} else {
 					AranarthUtils.addPendingVoteKeys(uuid, 1);
 					if (player != null) {
-						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! Use &e/keyclaim &7in Survival!"));
+						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
 					}
 				}
 			}
-
 		} else {
 			Bukkit.getLogger().info("Player " + username + " voted but has never joined the server before");
 		}

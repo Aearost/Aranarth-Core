@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
 
+import static com.aearost.aranarthcore.objects.CustomKeys.CRATE_KEY;
 import static com.aearost.aranarthcore.objects.CustomKeys.QUEST_NPC;
 
 /**
@@ -358,7 +359,9 @@ public class QuestUtils {
 
     private static void assignDailyQuests(UUID uuid, int rank) {
         List<Quest> pool = dailyQuestPool.get(rank);
-        if (pool == null || pool.isEmpty()) return;
+        if (pool == null || pool.isEmpty()) {
+            return;
+        }
         List<Quest> shuffled = new ArrayList<>(pool);
         Collections.shuffle(shuffled, RANDOM);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
@@ -371,7 +374,9 @@ public class QuestUtils {
 
     private static void assignWeeklyQuests(UUID uuid, int rank) {
         List<Quest> pool = weeklyQuestPool.get(rank);
-        if (pool == null || pool.isEmpty()) return;
+        if (pool == null || pool.isEmpty()) {
+            return;
+        }
         List<Quest> shuffled = new ArrayList<>(pool);
         Collections.shuffle(shuffled, RANDOM);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
@@ -457,7 +462,9 @@ public class QuestUtils {
             String[] words = item.getType().name().split("_");
             StringBuilder sb = new StringBuilder();
             for (String word : words) {
-                if (!sb.isEmpty()) sb.append(" ");
+                if (!sb.isEmpty()) {
+                    sb.append(" ");
+                }
                 sb.append(Character.toUpperCase(word.charAt(0)));
                 sb.append(word.substring(1).toLowerCase());
             }
@@ -519,9 +526,15 @@ public class QuestUtils {
     }
 
     private static int roundReward(int value) {
-        if (value < 100) return Math.round(value / 5.0f) * 5;
-        if (value < 500) return Math.round(value / 10.0f) * 10;
-        if (value < 10000) return Math.round(value / 100.0f) * 100;
+        if (value < 100) {
+            return Math.round(value / 5.0f) * 5;
+        }
+        if (value < 500) {
+            return Math.round(value / 10.0f) * 10;
+        }
+        if (value < 10000) {
+            return Math.round(value / 100.0f) * 100;
+        }
         return Math.round(value / 1000.0f) * 1000;
     }
 
@@ -536,9 +549,15 @@ public class QuestUtils {
     }
 
     private static int stepFor(int value) {
-        if (value < 100) return 5;
-        if (value < 500) return 10;
-        if (value < 10000) return 100;
+        if (value < 100) {
+            return 5;
+        }
+        if (value < 500) {
+            return 10;
+        }
+        if (value < 10000) {
+            return 100;
+        }
         return 1000;
     }
 
@@ -605,7 +624,9 @@ public class QuestUtils {
     public static void updateProgress(Player player, QuestTaskType taskType, int amount) {
         UUID uuid = player.getUniqueId();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-        if (aranarthPlayer == null) return;
+        if (aranarthPlayer == null) {
+            return;
+        }
 
         int rank = aranarthPlayer.getRank();
 
@@ -629,21 +650,27 @@ public class QuestUtils {
     }
 
     private static void updateProgressForType(Player player, UUID uuid,
-                                               QuestTaskType taskType, int amount, QuestType questType) {
+                                              QuestTaskType taskType, int amount, QuestType questType) {
         HashMap<UUID, int[]> progressMap = questType == QuestType.DAILY ? playerDailyProgress : playerWeeklyProgress;
         HashMap<UUID, boolean[]> completedMap = questType == QuestType.DAILY ? playerDailyCompleted : playerWeeklyCompleted;
         HashMap<UUID, List<Quest>> activeMap = questType == QuestType.DAILY ? playerActiveDailyQuests : playerActiveWeeklyQuests;
 
         List<Quest> active = activeMap.get(uuid);
-        if (active == null || active.isEmpty()) return;
+        if (active == null || active.isEmpty()) {
+            return;
+        }
 
         int[] progress = progressMap.computeIfAbsent(uuid, k -> new int[3]);
         boolean[] completed = completedMap.computeIfAbsent(uuid, k -> new boolean[3]);
 
         for (int i = 0; i < active.size(); i++) {
             Quest quest = active.get(i);
-            if (quest.getTaskType() != taskType) continue;
-            if (completed[i]) continue;
+            if (quest.getTaskType() != taskType) {
+                continue;
+            }
+            if (completed[i]) {
+                continue;
+            }
 
             progress[i] = Math.min(progress[i] + amount, quest.getRequired());
 
@@ -679,13 +706,19 @@ public class QuestUtils {
         HashMap<UUID, List<Quest>> activeMap = type == QuestType.DAILY ? playerActiveDailyQuests : playerActiveWeeklyQuests;
 
         boolean[] completed = completedMap.get(uuid);
-        if (completed == null || index >= completed.length || !completed[index]) return false;
+        if (completed == null || index >= completed.length || !completed[index]) {
+            return false;
+        }
 
         boolean[] claimed = claimedMap.computeIfAbsent(uuid, k -> new boolean[3]);
-        if (claimed[index]) return false;
+        if (claimed[index]) {
+            return false;
+        }
 
         List<Quest> active = activeMap.get(uuid);
-        if (active == null || index >= active.size()) return false;
+        if (active == null || index >= active.size()) {
+            return false;
+        }
 
         claimed[index] = true;
 
@@ -693,13 +726,26 @@ public class QuestUtils {
 
         if (quest.hasItemReward()) {
             ItemStack rewardItem = quest.getItemReward().clone();
-            Map<Integer, ItemStack> leftover = player.getInventory().addItem(rewardItem);
-            for (ItemStack overflow : leftover.values()) {
-                player.getWorld().dropItemNaturally(player.getLocation(), overflow);
-            }
+            String crateKeyType = rewardItem.hasItemMeta()
+                    ? rewardItem.getItemMeta().getPersistentDataContainer().get(CRATE_KEY, PersistentDataType.STRING)
+                    : null;
+            boolean isCrateKey = crateKeyType != null;
+            String worldName = player.getWorld().getName();
+            boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp")
+                    || worldName.startsWith("resource") || worldName.startsWith("spawn");
             String itemName = getItemRewardDisplayName(rewardItem);
-            player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
-                    + " &7for completing the quest"));
+            if (isCrateKey && !validWorld) {
+                AranarthUtils.addPendingKey(player.getUniqueId(), rewardItem, rewardItem.getAmount());
+                player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
+                        + " &7for completing the quest (use &e/keyclaim &7in Survival to claim)"));
+            } else {
+                Map<Integer, ItemStack> leftover = player.getInventory().addItem(rewardItem);
+                for (ItemStack overflow : leftover.values()) {
+                    player.getWorld().dropItemNaturally(player.getLocation(), overflow);
+                }
+                player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
+                        + " &7for completing the quest"));
+            }
         } else {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
             aranarthPlayer.setBalance(aranarthPlayer.getBalance() + quest.getReward());
@@ -728,37 +774,49 @@ public class QuestUtils {
 
     public static int getDailyProgress(UUID uuid, int index) {
         int[] progress = playerDailyProgress.get(uuid);
-        if (progress == null || index >= progress.length) return 0;
+        if (progress == null || index >= progress.length) {
+            return 0;
+        }
         return progress[index];
     }
 
     public static boolean isDailyCompleted(UUID uuid, int index) {
         boolean[] completed = playerDailyCompleted.get(uuid);
-        if (completed == null || index >= completed.length) return false;
+        if (completed == null || index >= completed.length) {
+            return false;
+        }
         return completed[index];
     }
 
     public static boolean isDailyClaimed(UUID uuid, int index) {
         boolean[] claimed = playerDailyClaimed.get(uuid);
-        if (claimed == null || index >= claimed.length) return false;
+        if (claimed == null || index >= claimed.length) {
+            return false;
+        }
         return claimed[index];
     }
 
     public static int getWeeklyProgress(UUID uuid, int index) {
         int[] progress = playerWeeklyProgress.get(uuid);
-        if (progress == null || index >= progress.length) return 0;
+        if (progress == null || index >= progress.length) {
+            return 0;
+        }
         return progress[index];
     }
 
     public static boolean isWeeklyCompleted(UUID uuid, int index) {
         boolean[] completed = playerWeeklyCompleted.get(uuid);
-        if (completed == null || index >= completed.length) return false;
+        if (completed == null || index >= completed.length) {
+            return false;
+        }
         return completed[index];
     }
 
     public static boolean isWeeklyClaimed(UUID uuid, int index) {
         boolean[] claimed = playerWeeklyClaimed.get(uuid);
-        if (claimed == null || index >= claimed.length) return false;
+        if (claimed == null || index >= claimed.length) {
+            return false;
+        }
         return claimed[index];
     }
 
@@ -767,7 +825,9 @@ public class QuestUtils {
     // -------------------------------------------------------------------------
 
     public static boolean isQuestNpc(Entity entity) {
-        if (!(entity instanceof Villager)) return false;
+        if (!(entity instanceof Villager)) {
+            return false;
+        }
         return entity.getPersistentDataContainer().has(QUEST_NPC, PersistentDataType.STRING);
     }
 

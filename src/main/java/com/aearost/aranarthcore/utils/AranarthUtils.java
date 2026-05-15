@@ -81,6 +81,9 @@ public class AranarthUtils {
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
+	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
+	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
+	private static final HashMap<UUID, Integer> pendingGodlyKeys = new HashMap<>();
 
 	/**
 	 * Determines if the player has played on the server before.
@@ -3509,6 +3512,38 @@ public class AranarthUtils {
 	 */
 	public static void removePendingVoteKeys(UUID uuid) {
 		pendingVoteKeys.remove(uuid);
+	}
+
+	public static HashMap<UUID, Integer> getPendingRareKeys() { return pendingRareKeys; }
+	public static void addPendingRareKeys(UUID uuid, int amount) { pendingRareKeys.merge(uuid, amount, Integer::sum); }
+	public static void setPendingRareKeys(UUID uuid, int amount) { pendingRareKeys.put(uuid, amount); }
+	public static void removePendingRareKeys(UUID uuid) { pendingRareKeys.remove(uuid); }
+
+	public static HashMap<UUID, Integer> getPendingEpicKeys() { return pendingEpicKeys; }
+	public static void addPendingEpicKeys(UUID uuid, int amount) { pendingEpicKeys.merge(uuid, amount, Integer::sum); }
+	public static void setPendingEpicKeys(UUID uuid, int amount) { pendingEpicKeys.put(uuid, amount); }
+	public static void removePendingEpicKeys(UUID uuid) { pendingEpicKeys.remove(uuid); }
+
+	public static HashMap<UUID, Integer> getPendingGodlyKeys() { return pendingGodlyKeys; }
+	public static void addPendingGodlyKeys(UUID uuid, int amount) { pendingGodlyKeys.merge(uuid, amount, Integer::sum); }
+	public static void setPendingGodlyKeys(UUID uuid, int amount) { pendingGodlyKeys.put(uuid, amount); }
+	public static void removePendingGodlyKeys(UUID uuid) { pendingGodlyKeys.remove(uuid); }
+
+	/**
+	 * Stores a crate key ItemStack as pending for the given player, routing to the
+	 * correct map based on the key's PDC type tag.
+	 */
+	public static void addPendingKey(UUID uuid, ItemStack keyItem, int amount) {
+		if (keyItem == null || !keyItem.hasItemMeta()) return;
+		String keyType = keyItem.getItemMeta().getPersistentDataContainer()
+				.get(CustomKeys.CRATE_KEY, PersistentDataType.STRING);
+		if (keyType == null) return;
+		switch (keyType) {
+			case "key_vote"  -> addPendingVoteKeys(uuid, amount);
+			case "key_rare"  -> addPendingRareKeys(uuid, amount);
+			case "key_epic"  -> addPendingEpicKeys(uuid, amount);
+			case "key_godly" -> addPendingGodlyKeys(uuid, amount);
+		}
 	}
 
 	/**

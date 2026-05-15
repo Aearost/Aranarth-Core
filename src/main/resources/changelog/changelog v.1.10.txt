@@ -38,6 +38,7 @@ Major Features
 [~] Adjusted market prices to better favor non-mining methods of income
 [~] Adjusted the rank prices to cost more in earlier ranks
 [~] Fixed major lag at spawn due to shop holograms duplicating but being invisible
+[~] Fixed issue where keys obtained from donations would be provided in non-survival worlds
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

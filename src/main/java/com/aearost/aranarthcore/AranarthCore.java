@@ -83,6 +83,9 @@ public class AranarthCore extends JavaPlugin {
 				PersistenceUtils.saveAranarthPlayers();
 				PersistenceUtils.saveVotes();
 				PersistenceUtils.saveVoteKeys();
+				PersistenceUtils.saveRareKeys();
+				PersistenceUtils.saveEpicKeys();
+				PersistenceUtils.saveGodlyKeys();
 				PersistenceUtils.saveToggledFeatures();
 				PersistenceUtils.saveLockedContainers();
 				PersistenceUtils.saveServerDate();
@@ -214,6 +217,9 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.loadSentinels();
 		PersistenceUtils.loadVotes();
 		PersistenceUtils.loadVoteKeys();
+		PersistenceUtils.loadRareKeys();
+		PersistenceUtils.loadEpicKeys();
+		PersistenceUtils.loadGodlyKeys();
 		PersistenceUtils.loadToggledFeatures();
 		PersistenceUtils.loadKillDeathCount();
 		PersistenceUtils.loadQuestState();
@@ -640,6 +646,9 @@ public class AranarthCore extends JavaPlugin {
 		PersistenceUtils.saveSentinels();
 		PersistenceUtils.saveVotes();
 		PersistenceUtils.saveVoteKeys();
+		PersistenceUtils.saveRareKeys();
+		PersistenceUtils.saveEpicKeys();
+		PersistenceUtils.saveGodlyKeys();
 		PersistenceUtils.saveToggledFeatures();
 		PersistenceUtils.saveKillDeathCount();
 		PersistenceUtils.saveAranarthPlayers();
