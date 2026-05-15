@@ -72,7 +72,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
         this.activeProjectiles = new ArrayList<>();
         this.cooldown = 12000L;
-        this.chargeDuration = 3000L;
+        this.chargeDuration = 1500L;
         this.damage = 3.0;
         this.speed = 2.0;
 

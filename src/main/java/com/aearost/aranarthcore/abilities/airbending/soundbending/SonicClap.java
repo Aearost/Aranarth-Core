@@ -27,7 +27,8 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             AranarthBendingUtils.SOUND_COLOR_PULSE, 0.6f);
 
     private static final double HALO_RADIUS = 0.55;
-    private static final double HIT_RADIUS = 1.1;
+    private static final double HIT_RADIUS_H = 1.2; // horizontal (left/right)
+    private static final double HIT_RADIUS_V = 1.55; // vertical (up/down)
     private static final double HALO_SPACING = 1.2;
     private static final double CLAP_SPEED = 1.5; // blocks per tick
     private static final double BASE_PLAYER_DAMAGE = 5.0;
@@ -186,7 +187,10 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             t = Math.max(0, Math.min(1, t));
 
             Vector closest = p1.clone().add(step.clone().multiply(t));
-            if (entityCenter.distanceSquared(closest) > HIT_RADIUS * HIT_RADIUS) {
+            Vector diff = entityCenter.clone().subtract(closest);
+            double normalizedDistSq = (diff.getX() * diff.getX() + diff.getZ() * diff.getZ()) / (HIT_RADIUS_H * HIT_RADIUS_H)
+                    + (diff.getY() * diff.getY()) / (HIT_RADIUS_V * HIT_RADIUS_V);
+            if (normalizedDistSq > 1.0) {
                 continue;
             }
 
