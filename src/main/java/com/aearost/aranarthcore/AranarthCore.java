@@ -293,6 +293,7 @@ public class AranarthCore extends JavaPlugin {
 		new VillagerCamelDismountListener(this);
 		new PottionEffectListener(this);
 		new ShopCreateListener(this);
+		new ShopHologramChunkListener(this);
 		new WeatherChangeListener(this);
 		new LeavesPreventBurnListener(this);
 		new SnowballHitListener(this);

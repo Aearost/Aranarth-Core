@@ -253,7 +253,7 @@ public class ShopUtils {
             hologram.setGravity(false);
             hologram.setVelocity(new Vector(0, 0, 0));
             hologram.setInvulnerable(true);
-            hologram.setPersistent(true);
+            hologram.setPersistent(false);
 
             // Decreases the size of the display
             Vector3f scale = new Vector3f(0.35F, 0.35F, 0.35F);
@@ -308,7 +308,11 @@ public class ShopUtils {
     public static void initializeAllHolograms() {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
-                initializeShopHologram(shop);
+                Location loc = shop.getLocation();
+                // Only initialize holograms for loaded chunks — ChunkLoadEvent handles the rest
+                if (loc.getWorld().isChunkLoaded(loc.getBlockX() >> 4, loc.getBlockZ() >> 4)) {
+                    initializeShopHologram(shop);
+                }
             }
         }
     }
