@@ -257,7 +257,7 @@ public class SonicClap extends SoundAbility implements AddonAbility {
     @Override
     public String getDescription() {
         return "Unleash a sharp sonic clap that sends three waves of concussive force tearing through the air, " +
-                "striking ny target caught in their path.\n" +
+                "striking all targets caught in their path.\n" +
                 ChatUtils.translateToColor("&fUsage: Left-Click");
     }
 

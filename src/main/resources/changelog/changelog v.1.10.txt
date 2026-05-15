@@ -20,7 +20,7 @@ Major Features
 [+] Implemented the Regrowth ability for plantbenders
 [+] Implemented the EnergyBurst ability for spiritual benders
 [+] Implemented the SonicClap ability for soundbenders
-[+] Implemented the LavaGlaives ability for lavabenders
+[+] Implemented the MagmaGlaives ability for lavabenders
 [+] Implemented the MetalShots ability for metalbenders
 [+] Implemented the CombustionStrike ability for combustion benders
 [+] Implemented the IceDiscs combo for waterbenders
