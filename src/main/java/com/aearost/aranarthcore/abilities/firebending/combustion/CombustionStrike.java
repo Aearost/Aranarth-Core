@@ -18,6 +18,7 @@ import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -171,8 +172,8 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
 
             // Trail particles every other step
             if (((int) (distanceTraveled / STEP)) % 2 == 0) {
-                strikePosition.getWorld().spawnParticle(Particle.LARGE_SMOKE, strikePosition.clone(), 1, 0, 0, 0, 0.04);
-                strikePosition.getWorld().spawnParticle(Particle.FIREWORK, strikePosition.clone(), 1, 0, 0, 0, 0.04);
+                strikePosition.getWorld().spawnParticle(Particle.LARGE_SMOKE, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
+                strikePosition.getWorld().spawnParticle(Particle.FIREWORK, strikePosition.clone(), 1, 0, 0, 0, 0.04, null, true);
             }
 
             // Firework burst ring + sound every 20 blocks
@@ -204,15 +205,15 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
         double z = RING_RADIUS * Math.sin(chargeRingAngle);
         Location head = center.clone().add(x, 0, z);
 
-        center.getWorld().spawnParticle(Particle.FLAME, head, 3, 0.04, 0.04, 0.04, 0.01);
-        center.getWorld().spawnParticle(Particle.FIREWORK, head, 1, 0, 0, 0, 0.02);
+        center.getWorld().spawnParticle(Particle.FLAME, head, 3, 0.04, 0.04, 0.04, 0.01, null, true);
+        center.getWorld().spawnParticle(Particle.FIREWORK, head, 1, 0, 0, 0, 0.02, null, true);
     }
 
     private void spawnReadyVisionSmoke() {
         Location eye = player.getEyeLocation();
         Vector forward = eye.getDirection().normalize();
         Location loc = eye.clone().add(forward.multiply(0.6));
-        eye.getWorld().spawnParticle(Particle.SMOKE, loc, 3, 0.15, 0.10, 0.15, 0.01);
+        eye.getWorld().spawnParticle(Particle.SMOKE, loc, 3, 0.15, 0.10, 0.15, 0.01, null, true);
     }
 
     private void spawnBurstRing(Location center, Vector direction) {
@@ -235,15 +236,15 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
             Vector vel = perp1.clone().multiply(cos * radius * 0.12).add(perp2.clone().multiply(sin * radius * 0.12));
 
             Location spawnLoc = center.clone().add(offset);
-            center.getWorld().spawnParticle(Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12);
+            center.getWorld().spawnParticle(Particle.FIREWORK, spawnLoc, 0, vel.getX(), vel.getY(), vel.getZ(), 0.12, null, true);
         }
     }
 
     private void createExplosion(Location center) {
-        center.getWorld().spawnParticle(Particle.FLAME, center, 16, 1.0, 1.0, 1.0, 0.4);
-        center.getWorld().spawnParticle(Particle.LARGE_SMOKE, center, 12, 1.0, 1.0, 1.0, 0.3);
-        center.getWorld().spawnParticle(Particle.FIREWORK, center, 16, 1.0, 1.0, 1.0, 0.4);
-        center.getWorld().spawnParticle(Particle.EXPLOSION, center, 4, 0.5, 0.5, 0.5, 0.0);
+        center.getWorld().spawnParticle(Particle.FLAME, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
+        center.getWorld().spawnParticle(Particle.LARGE_SMOKE, center, 12, 1.0, 1.0, 1.0, 0.3, null, true);
+        center.getWorld().spawnParticle(Particle.FIREWORK, center, 16, 1.0, 1.0, 1.0, 0.4, null, true);
+        center.getWorld().spawnParticle(Particle.EXPLOSION, center, 4, 0.5, 0.5, 0.5, 0.0, null, true);
 
         center.getWorld().playSound(center, Sound.ENTITY_GENERIC_EXPLODE, 2.0f, 0.9f);
         scatterBlockDamage(center);
@@ -279,6 +280,26 @@ public class CombustionStrike extends CombustionAbility implements AddonAbility 
                         continue;
                     }
                     new TempBlock(block, Material.AIR.createBlockData(), revertMs + ThreadLocalRandom.current().nextInt(500));
+                }
+            }
+        }
+
+        // Place fire on the bottom surface of the cleared sphere
+        for (int x = -r; x <= r; x++) {
+            for (int z = -r; z <= r; z++) {
+                for (int y = -r; y <= r; y++) {
+                    if (x * x + y * y + z * z > explosionRadius * explosionRadius) {
+                        continue;
+                    }
+                    // This is the lowest y inside the sphere for this (x, z) column
+                    Block below = center.getBlock().getRelative(x, y - 1, z);
+                    if (below.getType().isSolid()) {
+                        if (new Random().nextInt(3) == 0) {
+                            Block firePos = center.getBlock().getRelative(x, y, z);
+                            new TempBlock(firePos, Material.FIRE.createBlockData(), revertMs);
+                        }
+                    }
+                    break;
                 }
             }
         }
