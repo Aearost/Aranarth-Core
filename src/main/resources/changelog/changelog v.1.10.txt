@@ -84,6 +84,7 @@ Minor Features
 [-] Removed shop creation permission from Moderators
 [+] Added missing permission check for /t gradientchat, /t inventory, and /t compressor
 [~] Corrected the error messages in /toggle when the player did not have permission to the feature
+[~] Made it so that Aquatic Aranarthium provides the fishing boost instead of Ardent
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

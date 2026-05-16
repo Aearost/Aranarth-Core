@@ -96,7 +96,8 @@
       "Bash(do git:*)",
       "Bash(echo \"$h\")",
       "Bash(done)",
-      "Bash(ls *.xml)"
+      "Bash(ls *.xml)",
+      "Bash(grep -E \"\\\\.\\(java|kt\\)$\")"
     ]
   }
 }

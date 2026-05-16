@@ -9,6 +9,8 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+
 /**
  * Allows council members to teleport to another player's home.
  */
@@ -34,7 +36,7 @@ public class CommandAdminHome {
 			return true;
 		}
 
-		if (args.length != 3) {
+		if (args.length < 3) {
 			player.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/ac home <player> <home>"));
 			return true;
 		}
@@ -49,7 +51,7 @@ public class CommandAdminHome {
 			player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found!"));
 			return true;
 		}
-		String homeName = args[2];
+		String homeName = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
 
 		for (Home home : targetAranarthPlayer.getHomes()) {
 			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {

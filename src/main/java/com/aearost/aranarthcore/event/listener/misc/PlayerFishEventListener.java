@@ -18,8 +18,7 @@ public class PlayerFishEventListener implements Listener {
 	}
 
 	/**
-	 * Gives players wearing full ardent aranarthium 1 extra fish when catching
-	 * cod, salmon, pufferfish, or tropical fish.
+	 * Gives players wearing full Aquatic Aranarthium 1 extra fish.
 	 * @param e The event.
 	 */
 	@EventHandler
@@ -28,7 +27,7 @@ public class PlayerFishEventListener implements Listener {
 			return;
 		}
 		Player player = e.getPlayer();
-		if (!AranarthUtils.isWearingArmorType(player, "ardent")) {
+		if (!AranarthUtils.isWearingArmorType(player, "aquatic")) {
 			return;
 		}
 		if (!(e.getCaught() instanceof Item caughtItem)) {
