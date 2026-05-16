@@ -207,7 +207,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 
 	@Override
 	public String getDescription() {
-		return "Channel the deepest point of your Throat Chakra, and release a sonic boom towards your target. " +
+		return "Channel your sacral chakra, and release a sonic boom towards your target, dealing higher damage at closer range. " +
 				"Hit entities will be dazed by the attack, temporarily applying Slowness I and Blindness I.\n" +
 				ChatUtils.translateToColor("&fUsage: Hold Sneak until you see particles and then release sneak to fire the attack.");
 	}
