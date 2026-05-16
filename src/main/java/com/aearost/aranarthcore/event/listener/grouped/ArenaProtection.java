@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
+import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -321,6 +322,19 @@ public class ArenaProtection implements Listener {
 						player.getInventory().addItem(bottle);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from modifying signs in the arena.
+	 */
+	@EventHandler
+	public void onSignOpen(PlayerOpenSignEvent e) {
+		if (e.getSign().getLocation().getWorld().getName().equalsIgnoreCase("arena")) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
 			}
 		}
 	}

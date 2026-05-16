@@ -87,6 +87,7 @@ Minor Features
 [~] Made it so that Aquatic Aranarthium provides the fishing boost instead of Ardent
 [~] Made it so /ac home works for multiple-word names
 [+] Added support for admin mode to teleport to any dominion home
+[-] Prevented signs from being modified by players in the Arena world
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
