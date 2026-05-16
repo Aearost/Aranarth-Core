@@ -88,6 +88,7 @@ Minor Features
 [~] Made it so /ac home works for multiple-word names
 [+] Added support for admin mode to teleport to any dominion home
 [-] Prevented signs from being modified by players in the Arena world
+[~] Fixed issue where abilities are unbound incorrectly
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

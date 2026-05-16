@@ -97,7 +97,8 @@
       "Bash(echo \"$h\")",
       "Bash(done)",
       "Bash(ls *.xml)",
-      "Bash(grep -E \"\\\\.\\(java|kt\\)$\")"
+      "Bash(grep -E \"\\\\.\\(java|kt\\)$\")",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name \"*.java\" -exec grep -l \"getAbilities\\\\|clearAbilities\\\\|getSubElement\\\\|SubElement\" {})"
     ]
   }
 }

@@ -120,7 +120,7 @@ public class PermissionUtils {
 					bendingPlayer.saveSubElements();
 					bendingPlayer.saveElements();
 				}
-			}, 5);
+			}, 100L); // Long delay but to ensure unused abilities aren't unbound too soon
 		}
 	}
 
