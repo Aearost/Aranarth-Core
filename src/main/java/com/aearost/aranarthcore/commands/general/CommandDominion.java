@@ -265,8 +265,11 @@ public class CommandDominion implements CommandExecutor {
 	 * @param targetDominionName The name of the allied dominion.
 	 */
 	private static void teleportToAllyDominionHome(Player player, String targetDominionName) {
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		boolean isAdmin = aranarthPlayer.isInAdminMode();
+
 		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-		if (playerDominion == null) {
+		if (playerDominion == null && !isAdmin) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
 			return;
 		}
@@ -278,18 +281,19 @@ public class CommandDominion implements CommandExecutor {
 			return;
 		}
 
-		if (!playerDominion.isAllied(target)) {
-			player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
-			return;
+		if (!isAdmin) {
+			if (!playerDominion.isAllied(target)) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
+				return;
+			}
+
+			if (!target.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME)) {
+				player.sendMessage(ChatUtils.chatMessage("&e" + target.getName() + " &chas not enabled home access for allies!"));
+				return;
+			}
 		}
 
-		if (!target.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME)) {
-			player.sendMessage(ChatUtils.chatMessage("&e" + target.getName() + " &chas not enabled home access for allies!"));
-			return;
-		}
-
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), aranarthPlayer.isInAdminMode(), success -> {
+		AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), isAdmin, success -> {
 			if (success) {
 				player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + target.getName()));
 			} else {

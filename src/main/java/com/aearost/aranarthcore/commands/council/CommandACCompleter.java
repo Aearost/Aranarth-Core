@@ -152,15 +152,16 @@ public class CommandACCompleter implements TabCompleter {
                 if (args.length == 2) {
                     yield filterPlayers(args[1]);
                 }
-                if (args.length == 3) {
+                if (args.length >= 3) {
                     OfflinePlayer homeTarget = Bukkit.getOfflinePlayer(AranarthUtils.getUUIDFromUsername(args[1]));
                     if (homeTarget != null) {
                         AranarthPlayer homeTargetAranarthPlayer = AranarthUtils.getPlayer(homeTarget.getUniqueId());
                         if (homeTargetAranarthPlayer != null) {
-                            List<String> homeNames = homeTargetAranarthPlayer.getHomes().stream()
+                            String query = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                            yield homeTargetAranarthPlayer.getHomes().stream()
                                     .map(h -> ChatUtils.stripColorFormatting(h.getName()))
+                                    .filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
                                     .collect(Collectors.toList());
-                            yield filter(homeNames, args[2]);
                         }
                     }
                 }

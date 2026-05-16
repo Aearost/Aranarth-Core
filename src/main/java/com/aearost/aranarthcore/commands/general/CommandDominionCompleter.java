@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
@@ -45,9 +47,16 @@ public class CommandDominionCompleter implements TabCompleter {
 			case "invite", "who" -> filterPlayers(args[1]);
 			case "home" -> {
 				if (sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+					if (aranarthPlayer != null && aranarthPlayer.isInAdminMode()) {
+						yield DominionUtils.getDominions().stream()
+							.map(d -> ChatUtils.stripColorFormatting(d.getName()))
+							.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
+							.collect(Collectors.toList());
+					}
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 					if (dominion != null) {
-						String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 						yield dominion.getAllied().stream()
 							.map(DominionUtils::getDominionById)
 							.filter(d -> d != null)
