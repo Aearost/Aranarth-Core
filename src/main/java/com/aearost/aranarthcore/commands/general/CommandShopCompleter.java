@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Registry;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -14,32 +17,39 @@ import java.util.stream.Collectors;
  */
 public class CommandShopCompleter implements TabCompleter {
 
-	private static final List<String> MODIFY_OPTIONS = List.of("create", "delete");
+	private static final List<String> SUBCOMMANDS = List.of("create", "home", "sethome", "delete", "tp", "biome");
 
-	/**
-	 * @param sender The user that entered the command.
-	 * @param command The command itself.
-	 * @param alias The alias of the command.
-	 * @param args The arguments of the command.
-	 * @return Confirmation of whether the command was a success or not.
-	 */
+	private static final List<String> BIOME_NAMES = Registry.BIOME.stream()
+			.map(b -> b.getKey().getKey())
+			.collect(Collectors.toList());
+
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
 		if (!(sender instanceof Player player)) {
 			return List.of();
 		}
+
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
 		if (args.length == 1) {
-			List<String> options = filterPlayers(args[0]);
-			if (player.hasPermission("aranarth.shop.modify")) {
-                options.addAll(filter(MODIFY_OPTIONS, args[0]));
-			}
-			return options;
+			return filter(SUBCOMMANDS, args[0]);
 		}
-		if (args.length == 2 && player.hasPermission("aranarth.warp.modify")) {
-			if (args[0].equalsIgnoreCase("create") || args[0].equalsIgnoreCase("delete")) {
-				return args[1].isEmpty() ? List.of("username") : List.of();
+
+		if (args.length == 2) {
+			// /shop tp <username> — any player
+			if (args[0].equalsIgnoreCase("tp")) {
+				return filterPlayers(args[1]);
+			}
+			// /shop delete <username> — admin mode only
+			if (args[0].equalsIgnoreCase("delete") && aranarthPlayer.isInAdminMode()) {
+				return filterPlayers(args[1]);
+			}
+			// /shop biome <biome> — saint rank 1+
+			if (args[0].equalsIgnoreCase("biome") && (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.isInAdminMode())) {
+				return filter(BIOME_NAMES, args[1]);
 			}
 		}
+
 		return List.of();
 	}
 

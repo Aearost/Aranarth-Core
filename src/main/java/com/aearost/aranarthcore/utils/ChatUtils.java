@@ -456,7 +456,7 @@ public class ChatUtils {
 			tips.add("&7&oView the available &d&oin-game ranks &7&oat &e&o/ranks");
 			tips.add("&7&oBe sure to follow the rules seen in &e&o/rules");
 			tips.add("&7&oSpend your &a&ovote points &7&oin the &e&o/voteshop");
-			tips.add("&7&oWant to create your &e&o/shop&7? Reach out to &6&oThe Council");
+			tips.add("&7&oCreate your own shop island with &e&o/shop create");
 			tips.add("&7&oHave you completed your quests today? Check out &e&o/quests");
 			tips.add("&7&oMake sure you claim your &e&o/streak &7&oreward every day!");
 

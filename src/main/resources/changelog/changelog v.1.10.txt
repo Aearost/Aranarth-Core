@@ -39,6 +39,7 @@ Major Features
 [~] Adjusted the rank prices to cost more in earlier ranks
 [~] Fixed major lag at spawn due to shop holograms duplicating but being invisible
 [~] Fixed issue where keys obtained from donations would be provided in non-survival worlds
+[+] Implemented the shops world for individual player shop locations, accessible with /shop
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

@@ -77,6 +77,8 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
+	private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
+	private static int shopIslandCounter = 0;
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
@@ -293,10 +295,10 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Include any world that should share the inventory of Survival
-		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn")) {
+		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
 			currentWorld = "world";
 		}
-		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn")) {
+		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn") || destinationWorld.equals("shops")) {
 			destinationWorld = "world";
 		}
 
@@ -2611,6 +2613,56 @@ public class AranarthUtils {
 	 */
 	public static void deleteShopLocation(UUID uuid) {
 		shopLocations.remove(uuid);
+	}
+
+	/**
+	 * Provides the HashMap of shop island centers (UUID → {centerX, centerZ}).
+	 * @return The HashMap of shop island centers.
+	 */
+	public static HashMap<UUID, int[]> getShopIslandCenters() {
+		return shopIslandCenters;
+	}
+
+	/**
+	 * Registers the island center coordinates for the given player.
+	 * @param uuid The shop owner's UUID.
+	 * @param centerX The X coordinate of the island center in the shops world.
+	 * @param centerZ The Z coordinate of the island center in the shops world.
+	 */
+	public static void addShopIslandCenter(UUID uuid, int centerX, int centerZ) {
+		shopIslandCenters.put(uuid, new int[]{centerX, centerZ});
+	}
+
+	/**
+	 * Removes the island center registration for the given player.
+	 * @param uuid The shop owner's UUID.
+	 */
+	public static void removeShopIslandCenter(UUID uuid) {
+		shopIslandCenters.remove(uuid);
+	}
+
+	/**
+	 * Provides the current island counter (total islands ever created, never decremented on deletion).
+	 * @return The island counter.
+	 */
+	public static int getShopIslandCounter() {
+		return shopIslandCounter;
+	}
+
+	/**
+	 * Sets the island counter (used during persistence load).
+	 * @param counter The counter value to restore.
+	 */
+	public static void setShopIslandCounter(int counter) {
+		shopIslandCounter = counter;
+	}
+
+	/**
+	 * Increments and returns the next island index, then advances the counter.
+	 * @return The island index to use for the new island.
+	 */
+	public static int claimNextShopIslandIndex() {
+		return shopIslandCounter++;
 	}
 
 	/**

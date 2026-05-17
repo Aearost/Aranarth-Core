@@ -1,0 +1,307 @@
+package com.aearost.aranarthcore.event.listener.grouped;
+
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
+import com.projectkorra.projectkorra.BendingPlayer;
+import io.papermc.paper.event.player.PlayerOpenSignEvent;
+import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.*;
+import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityPlaceEvent;
+import org.bukkit.event.hanging.HangingBreakByEntityEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.player.*;
+
+import java.util.UUID;
+
+/**
+ * Centralizes all protections for the shops world.
+ */
+public class ShopProtectionListener implements Listener {
+
+    public ShopProtectionListener(AranarthCore plugin) {
+        org.bukkit.Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    private boolean isShopsWorld(Location location) {
+        return location.getWorld() != null && location.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD);
+    }
+
+    /**
+     * Returns true if the player is allowed to modify blocks at the given location.
+     */
+    private boolean canModify(Player player, Location location) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return true;
+        }
+        UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
+        return player.getUniqueId().equals(owner);
+    }
+
+    /**
+     * Teleports a player to the home of whichever island's grid cell contains.
+     * @param player    The player to teleport.
+     * @param reference A location whose X/Z is used to look up the island owner (Y is ignored).
+     */
+    private void teleportToIslandHome(Player player, Location reference) {
+        UUID islandOwner = (reference != null) ? ShopIslandUtils.getIslandOwnerAtLocation(reference) : null;
+        Location dest = (islandOwner != null) ? AranarthUtils.getShopLocations().get(islandOwner) : null;
+        if (dest == null) {
+            dest = AranarthUtils.getSafeTeleportLocation(
+                    new Location(org.bukkit.Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
+        }
+        player.teleport(dest);
+        player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
+    }
+
+    /**
+     * Returns true if the player is a non-owner visitor at the given shops-world location.
+     */
+    private boolean isNonOwnerInShopsWorld(Player player, Location location) {
+        if (location.getWorld() == null || !location.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
+            return false;
+        }
+        UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
+        return !player.getUniqueId().equals(owner);
+    }
+
+    /**
+     * Toggles bending on/off based on whether the player is a non-owner visitor.
+     */
+    private void toggleBendingForShopLocation(Player player, Location from, Location to) {
+        boolean wasNonOwner = isNonOwnerInShopsWorld(player, from.getBlock().getLocation());
+        boolean isNonOwner  = isNonOwnerInShopsWorld(player, to.getBlock().getLocation());
+
+        // Leaving a non-owner zone should re-enable bending
+        if (wasNonOwner && !isNonOwner) {
+            BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+            if (bPlayer != null) {
+                if (!bPlayer.isToggled()) {
+                    org.bukkit.Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> bPlayer.toggleBending(), 1L);
+                    return;
+                }
+            }
+        }
+
+        // Consistently keep bending disabled for visitors
+        if (isNonOwner) {
+            BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+            if (bPlayer != null) {
+                if (bPlayer.isToggled()) {
+                    bPlayer.toggleBending();
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles bending toggle when a player teleports to or from the shops world.
+     */
+    @EventHandler
+    public void onTeleportToShops(PlayerTeleportEvent e) {
+        toggleBendingForShopLocation(e.getPlayer(), e.getFrom(), e.getTo());
+    }
+
+    @EventHandler
+    public void onPlace(BlockPlaceEvent e) {
+        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place blocks on another player's shop island!"));
+        } else {
+            // Owner may only build within the 50x50 boundary
+            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(e.getBlock().getLocation());
+            if (owner != null) {
+                int[] center = AranarthUtils.getShopIslandCenters().get(owner);
+                if (center != null && !ShopIslandUtils.isWithinBuildBoundary(e.getBlock().getLocation(), center[0], center[1])) {
+                    e.setCancelled(true);
+                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&cThis block is outside of your shop island's space!"));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBreak(BlockBreakEvent e) {
+        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks on another player's shop island!"));
+        } else {
+            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(e.getBlock().getLocation());
+            if (owner != null) {
+                int[] center = AranarthUtils.getShopIslandCenters().get(owner);
+                if (center != null && !ShopIslandUtils.isWithinBuildBoundary(e.getBlock().getLocation(), center[0], center[1])) {
+                    e.setCancelled(true);
+                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks outside your shop's 50x50 build area!"));
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        Block block = e.getClickedBlock();
+        if (block == null) return;
+        if (!isShopsWorld(block.getLocation())) return;
+        // Only restrict interactive blocks
+        if (!isInteractableBlock(block)) return;
+        if (!canModify(e.getPlayer(), block.getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onInteractEntity(PlayerInteractEntityEvent e) {
+        if (!isShopsWorld(e.getRightClicked().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
+        if (!isShopsWorld(e.getRightClicked().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onPlaceEntity(EntityPlaceEvent e) {
+        if (e.getEntity() == null || e.getPlayer() == null) return;
+        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getEntity().getLocation())) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place entities on another player's shop island!"));
+        }
+    }
+
+    @EventHandler
+    public void onHangingBreak(HangingBreakByEntityEvent e) {
+        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (e.getRemover() instanceof Player player) {
+            if (!canModify(player, e.getEntity().getLocation())) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onHangingPlace(HangingPlaceEvent e) {
+        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getEntity().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onSignOpen(PlayerOpenSignEvent e) {
+        if (!isShopsWorld(e.getSign().getLocation())) return;
+        if (!canModify(e.getPlayer(), e.getSign().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onDamage(EntityDamageEvent e) {
+        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (e.getEntity() instanceof Player) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMobSpawn(CreatureSpawnEvent e) {
+        if (!isShopsWorld(e.getLocation())) return;
+        e.setCancelled(true);
+    }
+
+    // -----------------------------------------------------------------------
+    // No fire spreading
+    // -----------------------------------------------------------------------
+
+    @EventHandler
+    public void onFireCreate(BlockIgniteEvent e) {
+        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        e.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onFireSpread(BlockSpreadEvent e) {
+        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        org.bukkit.Material material = e.getSource().getType();
+        if (material == org.bukkit.Material.FIRE || material == org.bukkit.Material.SOUL_FIRE) {
+            e.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMove(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        if (!isShopsWorld(player.getLocation())) return;
+        if (e.getTo() == null) return;
+
+        // Toggle bending whenever the player moves
+        toggleBendingForShopLocation(player, e.getFrom(), e.getTo());
+
+        double y = e.getTo().getY();
+        if (y <= 50) {
+            teleportToIslandHome(player, e.getTo());
+            return;
+        }
+
+        // Out-of-bounds
+        int x = e.getTo().getBlockX();
+        int z = e.getTo().getBlockZ();
+        if (x < 0 || z < 0) {
+            teleportToIslandHome(player, e.getFrom());
+            return;
+        }
+
+        UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(e.getTo());
+        if (owner == null) {
+            // Crossed into a grid cell that has no island
+            teleportToIslandHome(player, e.getFrom());
+            return;
+        }
+
+        int[] center = AranarthUtils.getShopIslandCenters().get(owner);
+        if (center != null && !ShopIslandUtils.isWithinPlotBoundary(e.getTo(), center[0], center[1])) {
+            teleportToIslandHome(player, e.getTo());
+        }
+    }
+
+    private boolean isInteractableBlock(Block block) {
+        String name = block.getType().name();
+        return AranarthUtils.isContainerBlock(block)
+                || name.endsWith("_SIGN")
+                || name.endsWith("_DOOR")
+                || name.endsWith("_TRAPDOOR")
+                || name.endsWith("_GATE")
+                || name.endsWith("_BUTTON")
+                || block.getType() == org.bukkit.Material.NOTE_BLOCK
+                || block.getType() == org.bukkit.Material.LEVER
+                || block.getType() == org.bukkit.Material.JUKEBOX
+                || block.getType() == org.bukkit.Material.LECTERN
+                || block.getType() == org.bukkit.Material.HOPPER
+                || block.getType() == org.bukkit.Material.CRAFTER
+                || block.getType() == org.bukkit.Material.FLOWER_POT
+                || block.getType() == org.bukkit.Material.CHISELED_BOOKSHELF
+                || block.getType() == org.bukkit.Material.DECORATED_POT
+                || block.getType() == org.bukkit.Material.SMOKER
+                || block.getType() == org.bukkit.Material.BLAST_FURNACE
+                || block.getType() == org.bukkit.Material.FURNACE;
+    }
+}

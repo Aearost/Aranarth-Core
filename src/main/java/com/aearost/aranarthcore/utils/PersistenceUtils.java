@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.QuestTaskType;
@@ -2052,6 +2053,9 @@ public class PersistenceUtils {
 
 			while (reader.hasNextLine()) {
 				String row = reader.nextLine();
+				if (row.startsWith("#")) {
+					continue;
+				}
 				String[] parts = row.split("_");
 				UUID uuid = UUID.fromString(parts[0]);
 				String world = parts[1];
@@ -2062,6 +2066,13 @@ public class PersistenceUtils {
 				float pitch = Float.parseFloat(parts[6]);
 				Location location = new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
 				AranarthUtils.createShopLocation(uuid, location);
+
+				// Extended format: includes island center coordinates (parts[7] and parts[8])
+				if (parts.length >= 9) {
+					int centerX = Integer.parseInt(parts[7]);
+					int centerZ = Integer.parseInt(parts[8]);
+					AranarthUtils.addShopIslandCenter(uuid, centerX, centerZ);
+				}
 			}
 			Bukkit.getLogger().info("The shop locations have been initialized");
 			reader.close();
@@ -2098,6 +2109,7 @@ public class PersistenceUtils {
 			try {
 				FileWriter writer = new FileWriter(filePath);
 				HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
+				java.util.HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
 				for (UUID uuid : shopLocations.keySet()) {
 					Location location = shopLocations.get(uuid);
 					String shopLocation = uuid + "_";
@@ -2106,8 +2118,13 @@ public class PersistenceUtils {
 					shopLocation += location.getY() + "_";
 					shopLocation += location.getZ() + "_";
 					shopLocation += location.getYaw() + "_";
-					shopLocation += location.getPitch() + "\n";
-					writer.write(shopLocation);
+					shopLocation += location.getPitch();
+					// Append island center if available
+					int[] center = shopIslandCenters.get(uuid);
+					if (center != null) {
+						shopLocation += "_" + center[0] + "_" + center[1];
+					}
+					writer.write(shopLocation + "\n");
 				}
 
 				writer.close();
@@ -2115,6 +2132,23 @@ public class PersistenceUtils {
 				Bukkit.getLogger().info("There was an error in saving the shop locations");
 			}
 		}
+	}
+
+	/**
+	 * Loads the shop island counter from config.yml (key: shop.island-counter).
+	 */
+	public static void loadShopIslandCounter() {
+		int counter = AranarthCore.getInstance().getConfig().getInt("shop.island-counter", 0);
+		AranarthUtils.setShopIslandCounter(counter);
+		Bukkit.getLogger().info("Shop island counter loaded: " + counter);
+	}
+
+	/**
+	 * Saves the shop island counter to config.yml (key: shop.island-counter).
+	 */
+	public static void saveShopIslandCounter() {
+		AranarthCore.getInstance().getConfig().set("shop.island-counter", AranarthUtils.getShopIslandCounter());
+		AranarthCore.getInstance().saveConfig();
 	}
 
 	/**

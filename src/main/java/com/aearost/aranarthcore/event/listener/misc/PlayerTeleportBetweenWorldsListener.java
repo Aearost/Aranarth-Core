@@ -35,6 +35,10 @@ public class PlayerTeleportBetweenWorldsListener implements Listener {
 				if (destinationWorld.equalsIgnoreCase("creative")) {
 					newMode = GameMode.CREATIVE;
 				}
+				// Shops world uses the survival game mode
+				if (destinationWorld.equalsIgnoreCase("shops")) {
+					newMode = GameMode.SURVIVAL;
+				}
 
 				try {
 					AranarthUtils.switchInventory(player, currentWorld, destinationWorld);
