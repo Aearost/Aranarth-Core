@@ -176,7 +176,7 @@ public class ShopCreateListener implements Listener {
 		}
 
 		String name = e.getBlock().getLocation().getWorld().getName();
-		if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("spawn")) {
+		if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("spawn") && !name.startsWith("shops")) {
 			return false;
 		}
 
