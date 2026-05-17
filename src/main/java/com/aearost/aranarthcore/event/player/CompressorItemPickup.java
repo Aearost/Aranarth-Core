@@ -57,7 +57,10 @@ public class CompressorItemPickup {
 					if (inventoryItem.getItemMeta() instanceof BlockStateMeta im) {
 						if (im.getBlockState() instanceof ShulkerBox shulker) {
 							if (isIncludingShulkers) {
-								for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
+								boolean shulkerModified = false;
+								ItemStack[] shulkerContents = shulker.getInventory().getContents();
+								for (int si = 0; si < shulkerContents.length; si++) {
+									ItemStack shulkerItem = shulkerContents[si];
 									// Ignore if it is empty
 									if (shulkerItem == null || shulkerItem.getType() == Material.AIR) {
 										continue;
@@ -77,18 +80,24 @@ public class CompressorItemPickup {
 										if (compressibleItems.containsKey(type)) {
 											List<ItemStack> stacksOfItems = compressibleItems.get(type);
 											stacksOfItems.add(shulkerItem.clone());
-											shulkerItem.setAmount(0);
 											compressibleItems.put(type, stacksOfItems);
 										} else {
 											List<ItemStack> stacksOfItems = new ArrayList<>();
 											stacksOfItems.add(shulkerItem.clone());
-											shulkerItem.setAmount(0);
 											compressibleItems.put(type, stacksOfItems);
 										}
+										// Clear the slot properly rather than setting amount to 0,
+										// which can corrupt the shulker's NBT when serialised back.
+										shulker.getInventory().setItem(si, null);
+										shulkerModified = true;
 									}
 								}
-								im.setBlockState(shulker);
-								inventoryItem.setItemMeta(im);
+								// Only write back if something actually changed, to avoid
+								// unnecessary meta updates that can desync the client.
+								if (shulkerModified) {
+									im.setBlockState(shulker);
+									inventoryItem.setItemMeta(im);
+								}
 							}
 						}
 					}
@@ -238,10 +247,6 @@ public class CompressorItemPickup {
 								for (ItemStack shulkerItem : shulker.getInventory().getContents()) {
 									// Ignore if it is empty
 									if (shulkerItem == null || shulkerItem.getType() == Material.AIR) {
-										continue;
-									}
-
-									if (!AranarthUtils.isCompressible(shulkerItem, true)) {
 										continue;
 									}
 
