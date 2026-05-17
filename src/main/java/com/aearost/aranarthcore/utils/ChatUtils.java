@@ -793,7 +793,7 @@ public class ChatUtils {
 
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-			if (onlineAranarthPlayer.getCouncilRank() > 0) {
+			if (onlineAranarthPlayer.getCouncilRank() > 0 || onlineAranarthPlayer.getArchitectRank() >= 1) {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
 			}
 		}

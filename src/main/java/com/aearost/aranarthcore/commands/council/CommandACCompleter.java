@@ -79,9 +79,13 @@ public class CommandACCompleter implements TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         boolean isAuthorized = false;
+        boolean isArchitectOnly = false;
         if (sender instanceof Player player) {
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-            isAuthorized = aranarthPlayer.getCouncilRank() > 0;
+            boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
+            boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
+            isAuthorized = isCouncil || isArchitect;
+            isArchitectOnly = !isCouncil && isArchitect;
         } else if (sender instanceof ConsoleCommandSender) {
             isAuthorized = true;
         }
@@ -89,7 +93,7 @@ public class CommandACCompleter implements TabCompleter {
             return List.of();
         }
         if (args.length == 1) {
-            return filter(COUNCIL_OPTIONS, args[0]);
+            return filter(isArchitectOnly ? List.of("msg") : COUNCIL_OPTIONS, args[0]);
         }
         return councilArgs(sender, args);
     }

@@ -774,6 +774,7 @@ public class PermissionUtils {
 			perms.setPermission("worldedit.*", true);
 			perms.setPermission("aranarth.skull", true);
 			perms.setPermission("aranarth.gate", true);
+			perms.setPermission("aranarth.nick", true);
 		}
 	}
 

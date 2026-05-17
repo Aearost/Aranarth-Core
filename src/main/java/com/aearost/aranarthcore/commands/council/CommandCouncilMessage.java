@@ -18,7 +18,7 @@ public class CommandCouncilMessage {
 	public static boolean onCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 0) {
+			if (aranarthPlayer.getCouncilRank() == 0 && aranarthPlayer.getArchitectRank() == 0) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return false;
 			}

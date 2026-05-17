@@ -91,6 +91,8 @@ Minor Features
 [+] Added support for admin mode to teleport to any dominion home
 [-] Prevented signs from being modified by players in the Arena world
 [~] Fixed issue where abilities are unbound incorrectly
+[+] Added basic nickname permission to Architects
+[+] Added /ac msg permission to Architects
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

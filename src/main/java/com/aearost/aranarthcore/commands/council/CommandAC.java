@@ -25,9 +25,17 @@ public class CommandAC implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			if (aranarthPlayer.getCouncilRank() == 0) {
+			boolean isCouncil = aranarthPlayer.getCouncilRank() > 0;
+			boolean isArchitect = aranarthPlayer.getArchitectRank() >= 1;
+			if (!isCouncil && !isArchitect) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
 				return false;
+			}
+			if (!isCouncil && isArchitect) {
+				if (args.length == 0 || !args[0].equalsIgnoreCase("msg")) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+					return false;
+				}
 			}
 		}
 
