@@ -61,10 +61,19 @@ public class IncantationMagnetismBlockBreak {
         activeBreakLocations.put(locationKey, toolId);
 
         // All block drops (including cluster/extra drops) should have spawned by then.
+        // Also tag any items that were dropped via dropItemNaturally (e.g. from CropHarvest)
+        // and missed by ItemSpawnEvent due to the cancelled BlockBreakEvent.
         new BukkitRunnable() {
             @Override
             public void run() {
                 activeBreakLocations.remove(locationKey);
+                Location center = loc.clone().add(0.5, 0.5, 0.5);
+                for (Entity entity : loc.getWorld().getNearbyEntities(center, 1, 1, 1)) {
+                    if (!(entity instanceof Item item)) continue;
+                    if (!item.getPersistentDataContainer().has(MAGNETISM_TAG)) {
+                        item.getPersistentDataContainer().set(MAGNETISM_TAG, PersistentDataType.STRING, toolId);
+                    }
+                }
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
     }
