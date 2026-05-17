@@ -33,6 +33,7 @@ public class BlockBreakEventListener implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent e) {
         handlePlentifulBreak(e);
+        handleMagnetismBreak(e);
 
         // Blocks that are not necessarily destroyed
         if (AranarthUtils.isBlockCrop(e.getBlock().getType())) {
@@ -94,6 +95,23 @@ public class BlockBreakEventListener implements Listener {
                 }
             }
             AranarthUtils.setPlayer(uuid, aranarthPlayer);
+        }
+    }
+
+    /**
+     * Handles the logic for an Incantation of Magnetism block break.
+     * @param e The event.
+     */
+    private void handleMagnetismBreak(BlockBreakEvent e) {
+        String worldName = e.getBlock().getWorld().getName();
+        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+            ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
+            if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
+                String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+                if (type.equals("incantation_magnetism")) {
+                    new IncantationMagnetismBlockBreak().execute(e);
+                }
+            }
         }
     }
 

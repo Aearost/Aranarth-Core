@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -37,8 +38,8 @@ public class GuiCrate {
 			updateRareCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
-			// Updating the spawn eggs and clusters here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1));
+			// Updating the spawn eggs, clusters, and incantation here to allow for dynamic updates
+			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
@@ -374,14 +375,6 @@ public class GuiCrate {
 		discount10.setItemMeta(discount10Meta);
 		gui.setItem(21, discount10);
 
-		ItemStack plentiful = new IncantationPlentiful().getItem();
-		ItemMeta plentifulMeta = plentiful.getItemMeta();
-		List<String> plentifulLore = new ArrayList<>();
-		plentifulLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		plentifulMeta.setLore(plentifulLore);
-		plentiful.setItemMeta(plentifulMeta);
-		gui.setItem(23, plentiful);
-
 		ItemStack godlyKey = new KeyGodly().getItem();
 		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
 		godlyKeyMeta.setDisplayName(ChatUtils.translateToColor("&5&lGodly Crate Key"));
@@ -581,11 +574,12 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the spawn egg and cluster that are associated to the input indexes for an Epic Crate.
+	 * Provides the spawn egg, cluster, and incantation that are associated to the input indexes for an Epic Crate.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
+	 * @param incantationIndex The index of the incantation.
 	 */
-	public void updateEpicCrateItems(int eggIndex, int clusterIndex) {
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex) {
 		// Cycle through the spawn eggs
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -631,6 +625,15 @@ public class GuiCrate {
 		cycledClusterMeta.setLore(cycledClusterLore);
 		cluster.setItemMeta(cycledClusterMeta);
 		initializedGui.setItem(15, cluster);
+
+		// Cycle through the incantations
+		ItemStack incantation = incantationIndex == 1 ? new IncantationMagnetism().getItem() : new IncantationPlentiful().getItem();
+		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
+		List<String> cycledIncantationLore = new ArrayList<>();
+		cycledIncantationLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		cycledIncantationMeta.setLore(cycledIncantationLore);
+		incantation.setItemMeta(cycledIncantationMeta);
+		initializedGui.setItem(23, incantation);
 	}
 
 	/**

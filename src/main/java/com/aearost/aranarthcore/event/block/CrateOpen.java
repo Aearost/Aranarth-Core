@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
@@ -172,17 +173,19 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next spawn egg iteration
                                             if (indexes.get(0) < 3) {
@@ -196,6 +199,13 @@ public class CrateOpen {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
+                                            }
+
+                                            // Cycle through the next incantation iteration
+                                            if (indexes.get(2) < 1) {
+                                                indexes.set(2, indexes.get(2) + 1);
+                                            } else {
+                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -675,7 +685,12 @@ public class CrateOpen {
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
-                    reward = new IncantationPlentiful().getItem();
+                    // 50/50 between Plentiful and Magnetism
+                    if (new Random().nextInt(2) == 0) {
+                        reward = new IncantationPlentiful().getItem();
+                    } else {
+                        reward = new IncantationMagnetism().getItem();
+                    }
                     name = reward.getItemMeta().getDisplayName();
                 } else {
                     reward = new KeyGodly().getItem();

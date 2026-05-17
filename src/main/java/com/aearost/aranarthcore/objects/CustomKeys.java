@@ -23,4 +23,6 @@ public class CustomKeys {
     public static final NamespacedKey MOUNT_SPEED = new NamespacedKey(AranarthCore.getInstance(), "mount_speed");
     public static final NamespacedKey LINGERING_POTION_ID = new NamespacedKey(AranarthCore.getInstance(), "lingering_potion_id");
     public static final NamespacedKey QUEST_NPC = new NamespacedKey(AranarthCore.getInstance(), "quest_npc");
+    public static final NamespacedKey MAGNETISM_TOOL_ID = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tool_id");
+    public static final NamespacedKey MAGNETISM_TAG = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tag");
 }

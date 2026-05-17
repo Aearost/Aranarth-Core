@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
+import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
 import com.aearost.aranarthcore.commands.council.CommandACCompleter;
@@ -180,6 +181,14 @@ public class AranarthCore extends JavaPlugin {
                 }
             }
         }, 0, 100);
+
+        // Pull drops harvested with Magnetism
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                IncantationMagnetismBlockBreak.tickMagnetismPull();
+            }
+        }, 2L, 2L);
 
 //		Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
 //			@Override

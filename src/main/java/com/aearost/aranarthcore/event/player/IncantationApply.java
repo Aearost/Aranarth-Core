@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.items.incantation.Incantation;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -23,9 +24,11 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
+import static com.aearost.aranarthcore.objects.CustomKeys.MAGNETISM_TOOL_ID;
 
 /**
  * Handles the logic behind applying an incantation.
@@ -175,6 +178,12 @@ public class IncantationApply {
 						return;
 					}
 
+					// Do not allow any incantation to be applied to an item that already has one
+					if (toolItem.getItemStack().getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
+						player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+						return;
+					}
+
 					if (incantationType.equals("incantation_plentiful")) {
 						Incantation incantation = new IncantationPlentiful();
 						String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
@@ -190,6 +199,30 @@ public class IncantationApply {
 						ItemMeta toolMeta = tool.getItemMeta();
 						toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_plentiful");
 						toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+						toolMeta.setLore(lore);
+						tool.setItemMeta(toolMeta);
+						toolItem.setItemStack(tool);
+						aranarthiumItem.remove();
+						incantationFloorItem.remove();
+						player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+					} else if (incantationType.equals("incantation_magnetism")) {
+						Incantation incantation = new IncantationMagnetism();
+						String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+						List<String> lore = incantationMeta.getLore();
+						if (lore == null) {
+							lore = new ArrayList<>();
+							lore.add(fullIncantationName);
+						}
+
+						ItemStack tool = toolItem.getItemStack();
+						ItemMeta toolMeta = tool.getItemMeta();
+						toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_magnetism");
+						toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+						
+						// Assign a unique ID to this tool instance so its drops can be identified later
+						toolMeta.getPersistentDataContainer().set(MAGNETISM_TOOL_ID, PersistentDataType.STRING, UUID.randomUUID().toString());
 						toolMeta.setLore(lore);
 						tool.setItemMeta(toolMeta);
 						toolItem.setItemStack(tool);
