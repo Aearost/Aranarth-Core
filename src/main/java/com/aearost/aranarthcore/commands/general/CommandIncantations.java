@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
+import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
 import com.aearost.aranarthcore.items.incantation.IncantationPlentiful;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
@@ -39,6 +40,7 @@ public class CommandIncantations implements CommandExecutor {
 			meta.addPage(beheading());
 			meta.addPage(lifesteal());
 			meta.addPage(plentiful());
+			meta.addPage(magnetism());
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
@@ -108,9 +110,14 @@ public class CommandIncantations implements CommandExecutor {
 		);
 	}
 
-
-
-
-
+	private static String magnetism() {
+		return ChatUtils.translateToColor(
+				new IncantationMagnetism().getColor() + "&lThe Incantation\nof Magnetism&r\n" +
+						"&oPulls harvested items to you\n\n" +
+						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
+						"You must drop an " + new AranarthiumIngot().getName() +
+						" &ringot onto the tool, followed by the incantation. There is only one level of Magnetism."
+		);
+	}
 
 }
