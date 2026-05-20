@@ -30,7 +30,7 @@ public class CommandMessage implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/msg <player> <message>"));
 				return true;
 			} else {
-				UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[0]);
+				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 				// If the player has played before
 				if (targetUuid != null) {
 					Player target = Bukkit.getPlayer(targetUuid);

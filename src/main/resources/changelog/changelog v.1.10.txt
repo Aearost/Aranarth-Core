@@ -108,6 +108,7 @@ Minor Features
 [~] Made /msg also add the player as /r despite not receiving a message from them
 [+] Added /motd
 [+] Added /ac discordreload to reload all discord roles
+[+] Added support for nicknames in /msg, /pay, /seen, /teleport, /tphere, and several /dominion sub-commands
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

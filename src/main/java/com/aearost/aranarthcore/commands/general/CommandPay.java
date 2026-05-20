@@ -32,7 +32,7 @@ public class CommandPay implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax! &e/pay <player> <amount>"));
 				return true;
 			} else {
-				UUID uuid = AranarthUtils.getUUIDFromUsername(args[0]);
+				UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 				OfflinePlayer target = null;
 				if (uuid != null) {
 					target = Bukkit.getOfflinePlayer(uuid);

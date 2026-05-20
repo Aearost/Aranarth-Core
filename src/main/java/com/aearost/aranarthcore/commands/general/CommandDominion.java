@@ -417,7 +417,7 @@ public class CommandDominion implements CommandExecutor {
 		}
 
 		if (!args[1].isEmpty()) {
-			UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+			UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
 			if (uuid == null) {
 				player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found!"));
 				return;
@@ -487,7 +487,7 @@ public class CommandDominion implements CommandExecutor {
 			}
 
 			if (DominionUtils.hasPermission(player, dominion, DominionPermission.INVITE)) {
-				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+				UUID inputUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
 				if (inputUuid == null) {
 					player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found!"));
 					return;
@@ -598,7 +598,7 @@ public class CommandDominion implements CommandExecutor {
 					return;
 				}
 
-				UUID inputUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+				UUID inputUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
 				if (inputUuid != null) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(inputUuid);
 					if (!dominion.getMembers().contains(inputUuid)) {
@@ -1004,7 +1004,7 @@ public class CommandDominion implements CommandExecutor {
 		if (args.length >= 2) {
 			if (dominion != null) {
 				if (dominion.getLeader().equals(player.getUniqueId())) {
-					UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
+					UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
 					if (uuid != null) {
 						OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 						Dominion offlinePlayerDominion = DominionUtils.getPlayerDominion(uuid);
@@ -1772,7 +1772,7 @@ public class CommandDominion implements CommandExecutor {
 			return;
 		}
 
-		UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
+		UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
 		if (targetUuid == null) {
 			player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found!"));
 			return;

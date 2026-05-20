@@ -28,8 +28,8 @@ public class CommandTeleport implements CommandExecutor {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
 				return true;
 			} else {
-				if (AranarthUtils.getUUIDFromUsername(args[0]) != null) {
-					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsername(args[0]));
+				if (AranarthUtils.getUUIDFromUsernameOrNickname(args[0]) != null) {
+					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsernameOrNickname(args[0]));
 					if (target != null) {
 						if (player.getUniqueId().equals(target.getUniqueId())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));

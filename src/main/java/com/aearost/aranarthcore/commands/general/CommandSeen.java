@@ -43,7 +43,7 @@ public class CommandSeen implements CommandExecutor {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player's username!"));
 			return true;
 		} else {
-			UUID uuid = AranarthUtils.getUUIDFromUsername(args[0]);
+			UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 			if (uuid != null) {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);

@@ -1288,6 +1288,32 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Provides the UUID associated to the given username or nickname.
+	 * Searches usernames first, then nicknames if no username match is found.
+	 * @param input The username or nickname being searched.
+	 * @return The UUID of the associated player, or null if not found.
+	 */
+	public static UUID getUUIDFromUsernameOrNickname(String input) {
+		UUID uuid = getUUIDFromUsername(input);
+		if (uuid != null) {
+			return uuid;
+		}
+
+		// Cycles through nicknames second
+		for (Map.Entry<UUID, AranarthPlayer> entry : players.entrySet()) {
+			AranarthPlayer aranarthPlayer = entry.getValue();
+			if (aranarthPlayer.getNickname() == null || aranarthPlayer.getNickname().isEmpty()) {
+				continue;
+			}
+			if (ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(input)) {
+				return entry.getKey();
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Provides the combined total number of homes that a given player can set.
 	 * Includes homes from both the in-game rank, and Saint ranks.
 	 * @param player The player.
