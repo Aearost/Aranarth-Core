@@ -104,6 +104,7 @@ Minor Features
 [+] Added server tips messages for /calendar, /aranarthium, and /incantations
 [~] Fixed issue where Plentiful was not breaking the destroyed block if it wasn't harvestable with that tool
 [~] Fixed issue with double drops from boost of harvest causing i.e grass blocks to drop instead of dirt when harvested without silk touch
+[+] Added /toggle gradientchat get to the command completion
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

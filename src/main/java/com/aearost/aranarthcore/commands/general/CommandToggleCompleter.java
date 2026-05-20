@@ -33,7 +33,7 @@ public class CommandToggleCompleter implements TabCompleter {
         }
         if (args.length == 2) {
             if (args[0].equalsIgnoreCase("gradientchat")) {
-                return filter(List.of("bold", "#hex1,#hex2,..."), args[1]);
+                return filter(List.of("bold", "get", "#hex1,#hex2,..."), args[1]);
             }
             if (args[0].equalsIgnoreCase("blacklist")) {
                 return filter(List.of("off", "ignore", "trash"), args[1]);
