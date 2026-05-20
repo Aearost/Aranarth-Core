@@ -55,7 +55,7 @@ public class CommandInvSwap {
             // Determine the current inventory type from the target's world
             String worldName = target.getWorld().getName();
             String currentType;
-            if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource") || worldName.startsWith("spawn")) {
+            if (AranarthUtils.isSurvivalWorld(worldName)) {
                 currentType = "SURVIVAL";
             } else if (worldName.startsWith("arena")) {
                 currentType = "ARENA";
