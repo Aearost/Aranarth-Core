@@ -166,7 +166,7 @@ public class PlayerServerJoinListener implements Listener {
 	 * Displays the MOTD to the player when they join.
 	 * @param player The player.
 	 */
-	private void displayMotd(Player player) {
+	public static void displayMotd(Player player) {
 		// Displays the MOTD when the player joins
 		int day = AranarthUtils.getDay();
 		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());

@@ -84,6 +84,8 @@ commands:
   message:
     description: Messages the input player the provided message
     aliases: [msg]
+  motd:
+    description: Displays the server MOTD
   nickname:
     description: Updates the player's nickname
     aliases: [nick]

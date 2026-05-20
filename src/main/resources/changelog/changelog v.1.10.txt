@@ -106,6 +106,7 @@ Minor Features
 [~] Fixed issue with double drops from boost of harvest causing i.e grass blocks to drop instead of dirt when harvested without silk touch
 [+] Added /toggle gradientchat get to the command completion
 [~] Made /msg also add the player as /r despite not receiving a message from them
+[+] Added /motd
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
