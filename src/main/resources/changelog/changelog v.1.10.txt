@@ -59,7 +59,7 @@ Minor Features
 [~] Fixed error in command completion of /ac home due to non-existing player bug
 [+] Implemented /ac invswap to manually swap inventories of worlds
 [~] Fixed null pointer due to pets not having any owner yet
-[~] Increased vote crate money reward from $50 to $100
+[~] Increased vote crate money reward from $50 to $250
 [~] Fixed issue where world edit command completion wasn't shown in the creative world
 [~] Added alias for /streak being /daily
 [+] Added crop harvest boost to Elven Aranarthium wearers
