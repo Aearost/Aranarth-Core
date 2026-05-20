@@ -9,175 +9,250 @@ loadbefore: [mcMMO]
 commands:
   ac:
     description: All underlying commands regarding the plugin
+    permission: aranarth.ac
   afk:
     description: Manually places the player in AFK mode
+    permission: aranarth.afk
   anvil:
     description: Opens an anvil GUI
+    permission: aranarth.tables
   aranarthium:
     description: Provides a written book containing information about Aranarthium
+    permission: aranarth.aranarthium
   arena:
     description: Teleports the player to the arena world
+    permission: aranarth.arena
   avatar:
     description: Provides the player with information pertaining to the current Avatar
+    permission: aranarth.avatar
   back:
     description: Sets the player back to their previous location
+    permission: aranarth.back
   balance:
     description: Provides the balance of the player or the input player
     aliases: [bal]
+    permission: aranarth.balance
   balancetop:
     description: Provides a list of the players with the highest to lowest balances
     aliases: [baltop]
+    permission: aranarth.balancetop
   blacklist:
     description: Provides the player's blacklist
     aliases: [bl]
+    permission: aranarth.blacklist
   boosts:
     description: Lists the active boosts on the server
+    permission: aranarth.boosts
   calendar:
     description: Provides a written book containing information about the calendar system
     aliases: [cal]
+    permission: aranarth.calendar
   cartography:
     description: Opens a cartography table GUI
+    permission: aranarth.tables
   compressor:
     description: Opens the compressor GUI to toggle compressible items
     aliases: [comp, compress]
+    permission: aranarth.compressor
   craft:
     description: Opens a crafting table GUI
     aliases: [workbench, wb, ct]
+    permission: aranarth.tables
   creative:
     description: Teleports the player to the Creative world
+    permission: aranarth.creative
   date:
     description: Lists the current Aranarth calendar date
+    permission: aranarth.date
   deaths:
     description: Shows the number of deaths the input player has
+    permission: aranarth.deaths
   delhome:
     description: Deletes the player's specified home
+    permission: aranarth.delhome
   dominion:
     description: The master command for Aranarth dominions
     aliases: [d]
+    permission: aranarth.dominion
   enderchest:
     description: Opens the player's ender chest remotely
     aliases: [ec]
+    permission: aranarth.enderchest
   fletching:
     description: Opens a fletching table GUI
+    permission: aranarth.tables
   grindstone:
     description: Opens a grindstone GUI
+    permission: aranarth.tables
   hat:
     description: Places the held item on the player's head as a hat
+    permission: aranarth.hat
   home:
     description: Opens the GUI or teleports the player to their specified home
+    permission: aranarth.home
   homepad:
     description: Defines a homepad
+    permission: aranarth.homepad
   incantations:
     description: Provides a written book containing information about the incantations system
+    permission: aranarth.incantations
   info:
     description: Provides information about the input player
+    permission: aranarth.info
   itemname:
     description: Updates the held item to the input name
+    permission: aranarth.itemname
   keyclaim:
     description: Claims any pending vote crate keys that could not be delivered at the time of voting
+    permission: aranarth.keyclaim
   kills:
     description: Shows the number of kills the input player has
+    permission: aranarth.kills
   lock:
     description: Locks the next-clicked chest block
+    permission: aranarth.lock
   loom:
     description: Opens a loom GUI
+    permission: aranarth.tables
   message:
     description: Messages the input player the provided message
     aliases: [msg]
+    permission: aranarth.message
   motd:
     description: Displays the server MOTD
+    permission: aranarth.motd
   nickname:
     description: Updates the player's nickname
     aliases: [nick]
+    permission: aranarth.nick
   particles:
     description: Controls the number of Aranarth particles that will be displayed
+    permission: aranarth.particles
   pay:
     description: Pays the input player the specified amount
+    permission: aranarth.pay
   pettransfer:
     description: Allows the player to specify a player to transfer their pet's ownership to
+    permission: aranarth.pettransfer
   ping:
     description: Shows the input player's ping
+    permission: aranarth.ping
   potions:
     description: Opens the GUI of the player's potions
+    permission: aranarth.potions
   pronouns:
     description: Allows the player to update their pronouns
+    permission: aranarth.pronouns
   quests:
     description: Opens the Aranarth Quests GUI
+    permission: aranarth.quests
   randomizer:
     description: Randomizes placed blocks
     aliases: [rand]
+    permission: aranarth.randomizer
   ranks:
     description: Lists the in-game upgradable ranks
+    permission: aranarth.ranks
   rankup:
     description: Directly lists the next rank that the player can rank up to
+    permission: aranarth.rankup
   reply:
     description: Replies to the last received message
     aliases: [r]
+    permission: aranarth.reply
   resource:
     description: Teleports the player to the Resource world
+    permission: aranarth.resource
   rules:
     description: Displays the server's rules
+    permission: aranarth.rules
   seen:
     description: Displays the last time the player was seen online
+    permission: aranarth.seen
   sethome:
     description: Creates a new home
+    permission: aranarth.sethome
   shop:
     description: Opens the GUI to players' shops
+    permission: aranarth.shop
   smithing:
     description: Opens a smithing table GUI
+    permission: aranarth.tables
   smp:
     description: Teleports the player to the SMP world
+    permission: aranarth.smp
   spawn:
     description: Teleports the player to the Spawn world
+    permission: aranarth.spawn
   stonecutter:
     description: Opens a stonecutter GUI
+    permission: aranarth.tables
   store:
     description: Provides the player with a GUI of the server's store
+    permission: aranarth.store
   streak:
     description: Opens the Login Streak GUI to view and claim daily streak rewards
     aliases: [daily]
+    permission: aranarth.streak
   survival:
     description: Survival
     aliases: [rtp]
+    permission: aranarth.survival
   tables:
     description: Provides the player with access to a GUI with all forms of crafting tables
+    permission: aranarth.tables
   toggle:
     description: Allows the player to toggle different functionality
     aliases: [t]
+    permission: aranarth.toggle
   teleport:
     description: Sends a teleport request to the input player
     aliases: [tp]
+    permission: aranarth.teleport
   topkills:
     description: Shows the players with the most kills
     aliases: [tk]
+    permission: aranarth.topkills
   topdeaths:
     description: Shows the players with the most deaths
     aliases: [td]
+    permission: aranarth.topdeaths
   tpaccept:
     description: Allows the player to accept a teleport request
     aliases: [tpa]
+    permission: aranarth.tpaccept
   tpdeny:
     description: Allows the player to deny a teleport request
     aliases: [tpd]
+    permission: aranarth.tpdeny
   tphere:
     description: Allows the player to request another player teleports to them
     aliases: [tph]
+    permission: aranarth.tphere
   trash:
     description: Allows players to dispense of items
+    permission: aranarth.trash
   trust:
     description: Trusts the input player to the next clicked chest
+    permission: aranarth.trust
   unlock:
     description: Unlocks the next clicked chest
+    permission: aranarth.unlock
   untrust:
     description: Removes the input player from the next clicked chest's protection
+    permission: aranarth.untrust
   vote:
     description: Provides the player with a list of vote links
     aliases: [v]
+    permission: aranarth.vote
   votetop:
     description: Lists the top 10 players by vote count
     aliases: [vtop]
+    permission: aranarth.votetop
   voteshop:
     description: Opens the vote shop GUI to spend vote points
     aliases: [vshop, vs]
+    permission: aranarth.voteshop
   warp:
     description: Warps the player to the input warp
+    permission: aranarth.warp

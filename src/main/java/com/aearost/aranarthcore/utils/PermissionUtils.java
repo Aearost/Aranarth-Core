@@ -49,6 +49,11 @@ public class PermissionUtils {
 			}
 		}
 
+		// Grant creative world access to original players
+		if (AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+			perms.setPermission("aranarth.creative", true);
+		}
+
 		// Grant WorldEdit permissions if the player is in the creative world
 		if (player.getWorld().getName().equalsIgnoreCase("creative")) {
 			perms.setPermission("worldedit.*", true);
@@ -233,7 +238,64 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.jetfumes", true);
 		perms.setPermission("bending.ability.metalshots", true);
 
+		// Enable commands available to all players
+		perms.setPermission("aranarth.afk", true);
+		perms.setPermission("aranarth.aranarthium", true);
+		perms.setPermission("aranarth.arena", true);
+		perms.setPermission("aranarth.avatar", true);
+		perms.setPermission("aranarth.balance", true);
+		perms.setPermission("aranarth.balancetop", true);
+		perms.setPermission("aranarth.boosts", true);
+		perms.setPermission("aranarth.calendar", true);
+		perms.setPermission("aranarth.date", true);
+		perms.setPermission("aranarth.deaths", true);
+		perms.setPermission("aranarth.delhome", true);
+		perms.setPermission("aranarth.dominion", true);
+		perms.setPermission("aranarth.home", true);
+		perms.setPermission("aranarth.homepad", true);
+		perms.setPermission("aranarth.incantations", true);
+		perms.setPermission("aranarth.info", true);
+		perms.setPermission("aranarth.keyclaim", true);
+		perms.setPermission("aranarth.kills", true);
+		perms.setPermission("aranarth.lock", true);
+		perms.setPermission("aranarth.message", true);
+		perms.setPermission("aranarth.motd", true);
+		perms.setPermission("aranarth.particles", true);
+		perms.setPermission("aranarth.pay", true);
+		perms.setPermission("aranarth.pettransfer", true);
+		perms.setPermission("aranarth.ping", true);
+		perms.setPermission("aranarth.potions", true);
+		perms.setPermission("aranarth.pronouns", true);
+		perms.setPermission("aranarth.quests", true);
+		perms.setPermission("aranarth.ranks", true);
+		perms.setPermission("aranarth.rankup", true);
+		perms.setPermission("aranarth.reply", true);
+		perms.setPermission("aranarth.resource", true);
+		perms.setPermission("aranarth.rules", true);
+		perms.setPermission("aranarth.sethome", true);
+		perms.setPermission("aranarth.shop", true);
+		perms.setPermission("aranarth.smp", true);
+		perms.setPermission("aranarth.spawn", true);
+		perms.setPermission("aranarth.store", true);
+		perms.setPermission("aranarth.streak", true);
+		perms.setPermission("aranarth.survival", true);
+		perms.setPermission("aranarth.toggle", true);
+		perms.setPermission("aranarth.teleport", true);
+		perms.setPermission("aranarth.topkills", true);
+		perms.setPermission("aranarth.topdeaths", true);
+		perms.setPermission("aranarth.tpaccept", true);
+		perms.setPermission("aranarth.tpdeny", true);
+		perms.setPermission("aranarth.trust", true);
+		perms.setPermission("aranarth.unlock", true);
+		perms.setPermission("aranarth.untrust", true);
+		perms.setPermission("aranarth.vote", true);
+		perms.setPermission("aranarth.votetop", true);
+		perms.setPermission("aranarth.voteshop", true);
+		perms.setPermission("aranarth.warp", true);
+
 		// Disable aranarth functionality
+		perms.setPermission("aranarth.ac", false);
+		perms.setPermission("aranarth.creative", false);
 		perms.setPermission("aranarth.exp", false);
 		perms.setPermission("aranarth.seen", false);
 		perms.setPermission("aranarth.back", false);
@@ -717,6 +779,8 @@ public class PermissionUtils {
 		}
 
 		if (councilRank >= 1) {
+			perms.setPermission("aranarth.ac", true);
+			perms.setPermission("aranarth.creative", true);
 			perms.setPermission("aranarth.mute", true);
 			perms.setPermission("aranarth.warn", true);
 			perms.setPermission("aranarth.punishments", true);
@@ -772,6 +836,8 @@ public class PermissionUtils {
 		}
 
 		if (architectRank == 1) {
+			perms.setPermission("aranarth.ac", true);
+			perms.setPermission("aranarth.creative", true);
 			perms.setPermission("worldedit.*", true);
 			perms.setPermission("aranarth.skull", true);
 			perms.setPermission("aranarth.gate", true);

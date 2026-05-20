@@ -301,6 +301,7 @@ public class AranarthCore extends JavaPlugin {
         new GateListener(this);
 
         // Single-purpose and single-event event listeners
+        new PlayerCommandSendEventListener(this);
         new PlayerServerJoinListener(this);
         new PlayerServerQuitListener(this);
         new PlayerChatListener(this);
