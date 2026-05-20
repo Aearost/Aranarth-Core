@@ -16,6 +16,7 @@ import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
 import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
+import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
@@ -41,6 +42,7 @@ import com.projectkorra.projectkorra.ability.SpiritualAbility;
 import com.projectkorra.projectkorra.ability.WaterAbility;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
+import com.projectkorra.projectkorra.event.PlayerCooldownChangeEvent;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -89,6 +91,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -325,6 +328,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// JetFumes: left-click cancels active flight
+		JetFumes jetFumes = JetFumes.getActiveInstance(player.getUniqueId());
+		if (jetFumes != null) {
+			jetFumes.onLeftClick();
+			return;
+		}
+
 		// NoxiousFumes: left-click begins channeling from the READY state
 		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(player.getUniqueId());
 		if (noxiousFumes != null) {
@@ -430,6 +440,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (JetFumes.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
@@ -566,6 +580,44 @@ public class AranarthCoreBendingListener implements Listener {
 
 		if (attacker != null && AstralProjection.isProjecting(attacker.getUniqueId())
 				&& !AstralProjection.isSubAbilityDamaging(attacker.getUniqueId())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Blocks FireJet from receiving a cooldown while the player is in JetFumes FLYING phase.
+	 * Every PK addCooldown() call fires this cancellable event, so this intercepts all sources
+	 * (combo manager, CoreAbility.remove(), etc.) without any timing fragility.
+	 * endFlight() switches phase to DISPERSING before applying the real cooldown, so that
+	 * call is unaffected. remove() clears ACTIVE_INSTANCES before applying cooldowns, so
+	 * death/disconnect edge cases are also unaffected.
+	 */
+	@EventHandler
+	public void onFireJetCooldownDuringJetFumes(PlayerCooldownChangeEvent e) {
+		if (!e.getAbility().equalsIgnoreCase("FireJet")) return;
+		if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) return;
+		if (!e.isOnline()) return;
+		Player player = (Player) e.getPlayer();
+		JetFumes jf = JetFumes.getActiveInstance(player.getUniqueId());
+		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) return;
+		e.setCancelled(true);
+	}
+
+	/**
+	 * Cancels fire and lava damage to the JetFumes caster while they are in flight.
+	 * The ability starts near a fire/lava source, so without this the player would
+	 * immediately take environmental fire damage the moment the ability activates.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onJetFumesFireDamage(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player p)) return;
+		JetFumes jf = JetFumes.getActiveInstance(p.getUniqueId());
+		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) return;
+		EntityDamageEvent.DamageCause cause = e.getCause();
+		if (cause == EntityDamageEvent.DamageCause.FIRE
+				|| cause == EntityDamageEvent.DamageCause.FIRE_TICK
+				|| cause == EntityDamageEvent.DamageCause.LAVA
+				|| cause == EntityDamageEvent.DamageCause.HOT_FLOOR) {
 			e.setCancelled(true);
 		}
 	}

@@ -52,8 +52,27 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private static final long EFFECT_INTERVAL_MS = 500;
     private static final int BASE_EFFECT_DURATION_TICKS = 60; // +20 ticks per 0.5s interval in fumes
 
-    private static final Map<UUID, NoxiousFumes> activeInstances = new HashMap<>();
+    private static final Map<UUID, NoxiousFumes> activeInstances  = new HashMap<>();
+    // Tracks when a player's NoxiousFumes reached full charge — consumed by JetFumes activation.
+    private static final Map<UUID, Long>         chargeTimestamps = new HashMap<>();
+    private static final long                    CHARGE_VALID_MS  = 15000L;
     private final Random random = new Random();
+
+    public static void recordChargeComplete(UUID uuid) {
+        chargeTimestamps.putIfAbsent(uuid, System.currentTimeMillis());
+    }
+
+    public static boolean wasRecentlyCharged(UUID uuid) {
+        Long ts = chargeTimestamps.get(uuid);
+        if (ts == null) return false;
+        if (System.currentTimeMillis() - ts <= CHARGE_VALID_MS) return true;
+        chargeTimestamps.remove(uuid);
+        return false;
+    }
+
+    public static void clearChargeTimestamp(UUID uuid) {
+        chargeTimestamps.remove(uuid);
+    }
 
     // -------------------------------------------------------------------------
     // Inner class: SmokeTraveler
@@ -163,6 +182,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             travelers.clear();
             phase = Phase.DISPERSING;
             bPlayer.addCooldown(this);
+            clearChargeTimestamp(player.getUniqueId());
         }
         // If already DISPERSING, do nothing — let it finish naturally.
     }
@@ -202,6 +222,9 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         double chargeFraction = Math.min(1.0,
                 (double)(System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
         drawSourceLine(chargeFraction);
+        if (isCharged()) {
+            recordChargeComplete(player.getUniqueId());
+        }
     }
 
     private void progressChanneling() {
@@ -537,6 +560,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     public void stop() {
         if (travelers != null) travelers.clear();
         if (puffs != null) puffs.clear();
+        chargeTimestamps.clear();
     }
 
     @Override
@@ -558,5 +582,13 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
     public Phase getPhase() {
         return phase;
+    }
+
+    /**
+     * Returns true once the ability has been in the READY phase for at least the
+     * full charge duration — i.e., the smoke path has fully reached the player's hand.
+     */
+    public boolean isCharged() {
+        return phase == Phase.READY && System.currentTimeMillis() - readyStartTime >= CHARGE_DURATION_MS;
     }
 }

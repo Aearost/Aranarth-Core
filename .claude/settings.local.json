@@ -98,7 +98,20 @@
       "Bash(done)",
       "Bash(ls *.xml)",
       "Bash(grep -E \"\\\\.\\(java|kt\\)$\")",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name \"*.java\" -exec grep -l \"getAbilities\\\\|clearAbilities\\\\|getSubElement\\\\|SubElement\" {})"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name \"*.java\" -exec grep -l \"getAbilities\\\\|clearAbilities\\\\|getSubElement\\\\|SubElement\" {})",
+      "Bash(find /c/Users/liamh/.m2/repository/com/projectkorra -name *.jar)",
+      "Bash(find /c/Users/liamh -name *.yml -path */ProjectKorra/*)",
+      "Bash(find '/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test' -name *.yml)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -type f -name *.java)",
+      "Bash(jar xf:*)",
+      "Bash(find C:Usersliamh.m2 -name *jedcore* -o -name *JedCore*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.jar)",
+      "Bash(xargs -0 grep -l PlayerCooldownChangeEvent)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/target -name *.jar)",
+      "Bash(find /c/Users/liamh -iname *jedcore* -type f)",
+      "Bash(grep -rn \"PlayerCooldownChangeEvent\\\\|CooldownChangeEvent\" /c/Users/liamh/IdeaProjects --include=*.java)",
+      "Bash(jar -xf \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\")",
+      "Bash(find C:/Users/liamh/.gradle -name *projectkorra* -type f)"
     ]
   }
 }
