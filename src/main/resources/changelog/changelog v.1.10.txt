@@ -101,6 +101,7 @@ Minor Features
 [~] Mitigated issue caused by a boost ending automatically when another boost is active
 [~] Made Alchemy XP from consumed/thrown potions only provide XP if the effect duration is 80% breached or more
 [~] Tweaked Discord join/quit messages to properly support pinging
+[+] Added server tips messages for /calendar, /aranarthium, and /incantations
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
