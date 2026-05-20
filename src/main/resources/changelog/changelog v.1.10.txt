@@ -98,7 +98,6 @@ Minor Features
 [~] Decreased quartz cluster drop rates
 [~] Increased gold cluster drop rates (from nether gold ore)
 [~] Auto-closed the streaks GUI once the streak is claimed
-[+] Added shops to the list of survival worlds
 [~] Mitigated issue caused by a boost ending automatically when another boost is active
 
 Backend Code Changes

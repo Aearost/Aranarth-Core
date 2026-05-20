@@ -62,10 +62,10 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
             return;
         }
 
-        this.cooldown = 10000L;
+        this.cooldown = 8000L;
         this.damage = 2.0;
-        this.range = 16.0;
-        this.speed = 1.0; // blocks per tick
+        this.range = 24.0;
+        this.speed = 2.0; // blocks per tick
 
         // AirBlast fires before the combo is recognised; remove it and wipe its cooldown so the player isn't penalised.
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "AirBlast");
