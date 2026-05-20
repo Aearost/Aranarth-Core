@@ -534,6 +534,9 @@ public class ChatUtils {
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
 			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
 
+			aranarthPlayer.setLastReceivedMessage(target.getUniqueId());
+			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
 			String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
