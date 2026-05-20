@@ -107,6 +107,7 @@ Minor Features
 [+] Added /toggle gradientchat get to the command completion
 [~] Made /msg also add the player as /r despite not receiving a message from them
 [+] Added /motd
+[+] Added /ac discordreload to reload all discord roles
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

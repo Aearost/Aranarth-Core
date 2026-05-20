@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
-            "admin", "ban", "broadcast", "clearchat", "dateset", "give",
+            "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
             "speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "vanish", "vpedit", "warn", "weather", "whereis", "skull"

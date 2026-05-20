@@ -111,6 +111,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandVpEdit.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("invswap")) {
 			commandResult = CommandInvSwap.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("discordreload")) {
+			commandResult = CommandDiscordReload.onCommand(sender, args);
 		}
 		return commandResult;
 	}
