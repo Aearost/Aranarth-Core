@@ -143,15 +143,6 @@ public class ShopProtectionListener implements Listener {
         if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks on another player's shop island!"));
-        } else {
-            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(e.getBlock().getLocation());
-            if (owner != null) {
-                int[] center = AranarthUtils.getShopIslandCenters().get(owner);
-                if (center != null && !ShopIslandUtils.isWithinBuildBoundary(e.getBlock().getLocation(), center[0], center[1])) {
-                    e.setCancelled(true);
-                    e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks outside your shop's 50x50 build area!"));
-                }
-            }
         }
     }
 
