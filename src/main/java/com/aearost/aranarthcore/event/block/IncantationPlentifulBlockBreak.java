@@ -87,6 +87,12 @@ public class IncantationPlentifulBlockBreak {
 				// (plentifulBlocksToDestroy > 0) prevents re-executing this logic for the inner event.
 				player.breakBlock(block);
 				player.playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
+				// Vanilla does not consume hoe durability on crops (instant-break blocks), so we
+				// apply it explicitly here to match the behaviour of other tools with Plentiful.
+				if (name.endsWith("_HOE")) {
+					ItemStack currentItem = player.getInventory().getItemInMainHand();
+					player.getInventory().setItemInMainHand(currentItem.damage(1, player));
+				}
 			} else {
 				// If it is not harvestable, the counter must be manually reduced regardless
 				aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
