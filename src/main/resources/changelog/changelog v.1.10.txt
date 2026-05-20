@@ -100,6 +100,7 @@ Minor Features
 [~] Auto-closed the streaks GUI once the streak is claimed
 [~] Mitigated issue caused by a boost ending automatically when another boost is active
 [~] Made Alchemy XP from consumed/thrown potions only provide XP if the effect duration is 80% breached or more
+[~] Tweaked Discord join/quit messages to properly support pinging
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

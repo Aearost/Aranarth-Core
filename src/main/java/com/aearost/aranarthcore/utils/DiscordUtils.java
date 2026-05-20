@@ -797,7 +797,7 @@ public class DiscordUtils {
 	 * @param discordId The Discord user ID of the user that joined the server.
 	 */
 	public static void discordServerJoin(String name, String discordId) {
-		String link = "[" + name + "](https://discord.com/users/" + discordId + ")";
+		String link = "<@" + discordId + ">";
 		List<String> welcomeMessages = new ArrayList<>();
 		welcomeMessages.add("**Welcome " + link + " to Aranarth's Discord!**");
 		welcomeMessages.add("**Is that " + link + " who has come to join us? \uD83D\uDC40**");
@@ -809,10 +809,7 @@ public class DiscordUtils {
 		welcomeMessages.add("**A new challenger appears: " + link + "! ⚡**");
 
 		int index = ThreadLocalRandom.current().nextInt(welcomeMessages.size());
-		EmbedBuilder embed = new EmbedBuilder()
-				.setDescription(welcomeMessages.get(index))
-				.setColor(Color.GREEN);
-		welcome.sendMessageEmbeds(embed.build()).queue(message -> {
+		welcome.sendMessage(welcomeMessages.get(index)).allowedMentions(new ArrayList<>()).queue(message -> {
 			message.addReaction("\uD83D\uDC4B").queue();
 			message.addReaction("🎉").queue();
 			message.addReaction("\uD83C\uDF88").queue();
@@ -825,7 +822,7 @@ public class DiscordUtils {
 	 * @param discordId The Discord user ID of the user that quit the server.
 	 */
 	public static void discordServerQuit(String name, String discordId) {
-		String link = "[" + name + "](https://discord.com/users/" + discordId + ")";
+		String link = "<@" + discordId + ">";
 		List<String> leaveMessages = new ArrayList<>();
 		leaveMessages.add("**" + link + " has left the realm 🏰**");
 		leaveMessages.add("**" + link + " has gone AFK... forever? 😶**");
@@ -837,10 +834,7 @@ public class DiscordUtils {
 		leaveMessages.add("**" + link + " rage quit 😤**");
 
 		int index = ThreadLocalRandom.current().nextInt(leaveMessages.size());
-		EmbedBuilder embed = new EmbedBuilder()
-				.setDescription(leaveMessages.get(index))
-				.setColor(Color.RED);
-		welcome.sendMessageEmbeds(embed.build()).queue(message -> {
+		welcome.sendMessage(leaveMessages.get(index)).allowedMentions(new ArrayList<>()).queue(message -> {
 			message.addReaction("\uD83D\uDC94").queue();
 			message.addReaction("\uD83D\uDE2D").queue();
 		});
