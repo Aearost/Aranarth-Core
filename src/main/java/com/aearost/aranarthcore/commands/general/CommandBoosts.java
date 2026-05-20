@@ -54,14 +54,10 @@ public class CommandBoosts implements CommandExecutor {
 					if (applied != null) {
 						// Adding a boost
 						if (args[0].equals("add")) {
-							// If a user was entered, verify that the user exists
+							// If a user was entered, attempt to resolve their UUID
 							UUID uuid = null;
 							if (args.length >= 3) {
 								uuid = AranarthUtils.getUUIDFromUsername(args[2]);
-								if (uuid == null) {
-									sender.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
-									return true;
-								}
 							}
 							AranarthUtils.addServerBoost(applied, null, uuid);
 							return true;

@@ -2306,6 +2306,11 @@ public class AranarthUtils {
 	public static void refreshServerBoosts() {
 		List<Boost> toRemove = new ArrayList<>();
 		for (Boost boost : serverBoosts.keySet()) {
+			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
+				toRemove.add(boost);
+			}
+		}
+		for (Boost boost : toRemove) {
 			String name = "";
 			if (boost == Boost.MINER) {
 				name = "&8&lBoost of the Miner";
@@ -2318,12 +2323,9 @@ public class AranarthUtils {
 			} else {
 				name = "&7&lUnspecified Boost";
 			}
-
-			if (serverBoosts.get(boost).isBefore(LocalDateTime.now())) {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-				DiscordUtils.updateBoostInDiscord(null, boost, false);
-				serverBoosts.remove(boost);
-			}
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+			DiscordUtils.updateBoostInDiscord(null, boost, false);
+			serverBoosts.remove(boost);
 		}
 
 		if (serverBoosts.containsKey(Boost.MINER)) {

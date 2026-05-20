@@ -99,6 +99,7 @@ Minor Features
 [~] Increased gold cluster drop rates (from nether gold ore)
 [~] Auto-closed the streaks GUI once the streak is claimed
 [+] Added shops to the list of survival worlds
+[~] Mitigated issue caused by a boost ending automatically when another boost is active
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
