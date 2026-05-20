@@ -41,15 +41,19 @@ public class IncantationPlentifulBlockBreak {
 			blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch, false);
 		}
 
-		// Set the counter to the total number of blocks being processed so it is never
-		// exhausted before the loop finishes (e.g. hoe processes 27 blocks but the
-		// counter was only initialised to 9, causing it to go negative and re-trigger
+		// Remove the directly broken block — it is always broken by the original event,
+		// which we do not cancel. The loop below handles only the surrounding blocks.
+		Block brokenBlock = e.getBlock();
+		blocks.removeIf(b -> b.getX() == brokenBlock.getX()
+				&& b.getY() == brokenBlock.getY()
+				&& b.getZ() == brokenBlock.getZ());
+
+		// Set the counter to the total number of surrounding blocks being processed so it
+		// is never exhausted before the loop finishes (e.g. hoe processes 26 blocks but
+		// the counter was only initialised to 9, causing it to go negative and re-trigger
 		// execute on subsequent inner BlockBreakEvents).
 		aranarthPlayer.setPlentifulBlocksToDestroy(blocks.size());
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-
-		// Cancels the original event
-		e.setCancelled(true);
 
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 		for (Block block : blocks) {

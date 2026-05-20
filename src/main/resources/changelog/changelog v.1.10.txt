@@ -102,6 +102,8 @@ Minor Features
 [~] Made Alchemy XP from consumed/thrown potions only provide XP if the effect duration is 80% breached or more
 [~] Tweaked Discord join/quit messages to properly support pinging
 [+] Added server tips messages for /calendar, /aranarthium, and /incantations
+[~] Fixed issue where Plentiful was not breaking the destroyed block if it wasn't harvestable with that tool
+[~] Fixed issue with double drops from boost of harvest causing i.e grass blocks to drop instead of dirt when harvested without silk touch
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
