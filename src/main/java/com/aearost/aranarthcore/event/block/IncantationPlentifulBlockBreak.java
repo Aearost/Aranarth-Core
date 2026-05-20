@@ -41,6 +41,12 @@ public class IncantationPlentifulBlockBreak {
 			blocks = getBlocksToDestroy(e.getBlock().getLocation(), yaw, pitch, false);
 		}
 
+		// Apply hoe durability for the directly broken block
+		if (name.endsWith("_HOE") && AranarthUtils.isBlockCrop(e.getBlock().getType())) {
+			player.getInventory().setItemInMainHand(heldItem.damage(1, player));
+			heldItem = player.getInventory().getItemInMainHand();
+		}
+
 		// Remove the directly broken block — it is always broken by the original event,
 		// which we do not cancel. The loop below handles only the surrounding blocks.
 		Block brokenBlock = e.getBlock();
@@ -67,7 +73,7 @@ public class IncantationPlentifulBlockBreak {
 				}
 			}
 
-			boolean harvestable;
+			boolean harvestable = false;
 			if (name.endsWith("_PICKAXE")) {
 				harvestable = AranarthUtils.isHarvestableWithPickaxe(block.getType());
 			} else if (name.endsWith("_AXE")) {
@@ -76,8 +82,6 @@ public class IncantationPlentifulBlockBreak {
 				harvestable = AranarthUtils.isHarvestableWithShovel(block.getType());
 			} else if (name.endsWith("_HOE")) {
 				harvestable = AranarthUtils.isBlockCrop(block.getType());
-			} else {
-				harvestable = false;
 			}
 
 			if (harvestable) {
@@ -87,6 +91,7 @@ public class IncantationPlentifulBlockBreak {
 				// (plentifulBlocksToDestroy > 0) prevents re-executing this logic for the inner event.
 				player.breakBlock(block);
 				player.playSound(block.getLocation(), block.getBlockData().getSoundGroup().getBreakSound(), 1F, 0.1F);
+
 				// Vanilla does not consume hoe durability on crops (instant-break blocks), so we
 				// apply it explicitly here to match the behaviour of other tools with Plentiful.
 				if (name.endsWith("_HOE")) {
