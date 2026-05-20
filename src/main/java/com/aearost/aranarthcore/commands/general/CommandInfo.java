@@ -99,6 +99,9 @@ public class CommandInfo implements CommandExecutor {
 			case "creative" -> {
 				return "in &eCreative";
 			}
+			case "shops" -> {
+				return "in the &eShops World";
+			}
 			default -> {
 				return "at &eSpawn";
 			}

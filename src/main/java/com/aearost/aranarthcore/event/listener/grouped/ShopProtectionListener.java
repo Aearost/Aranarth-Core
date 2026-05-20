@@ -51,6 +51,7 @@ public class ShopProtectionListener implements Listener {
 
     /**
      * Teleports a player to the home of whichever island's grid cell contains.
+     *
      * @param player    The player to teleport.
      * @param reference A location whose X/Z is used to look up the island owner (Y is ignored).
      */
@@ -81,7 +82,7 @@ public class ShopProtectionListener implements Listener {
      */
     private void toggleBendingForShopLocation(Player player, Location from, Location to) {
         boolean wasNonOwner = isNonOwnerInShopsWorld(player, from.getBlock().getLocation());
-        boolean isNonOwner  = isNonOwnerInShopsWorld(player, to.getBlock().getLocation());
+        boolean isNonOwner = isNonOwnerInShopsWorld(player, to.getBlock().getLocation());
 
         // Leaving a non-owner zone should re-enable bending
         if (wasNonOwner && !isNonOwner) {
@@ -115,7 +116,9 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onPlace(BlockPlaceEvent e) {
-        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!isShopsWorld(e.getBlock().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place blocks on another player's shop island!"));
@@ -134,7 +137,9 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onBreak(BlockBreakEvent e) {
-        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!isShopsWorld(e.getBlock().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getBlock().getLocation())) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot break blocks on another player's shop island!"));
@@ -153,10 +158,16 @@ public class ShopProtectionListener implements Listener {
     @EventHandler
     public void onInteract(PlayerInteractEvent e) {
         Block block = e.getClickedBlock();
-        if (block == null) return;
-        if (!isShopsWorld(block.getLocation())) return;
+        if (block == null) {
+            return;
+        }
+        if (!isShopsWorld(block.getLocation())) {
+            return;
+        }
         // Only restrict interactive blocks
-        if (!isInteractableBlock(block)) return;
+        if (!isInteractableBlock(block)) {
+            return;
+        }
         if (!canModify(e.getPlayer(), block.getLocation())) {
             e.setCancelled(true);
         }
@@ -164,7 +175,9 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onInteractEntity(PlayerInteractEntityEvent e) {
-        if (!isShopsWorld(e.getRightClicked().getLocation())) return;
+        if (!isShopsWorld(e.getRightClicked().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
             e.setCancelled(true);
         }
@@ -172,7 +185,9 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onArmorStandManipulate(PlayerArmorStandManipulateEvent e) {
-        if (!isShopsWorld(e.getRightClicked().getLocation())) return;
+        if (!isShopsWorld(e.getRightClicked().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getRightClicked().getLocation())) {
             e.setCancelled(true);
         }
@@ -180,8 +195,12 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onPlaceEntity(EntityPlaceEvent e) {
-        if (e.getEntity() == null || e.getPlayer() == null) return;
-        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (e.getEntity() == null || e.getPlayer() == null) {
+            return;
+        }
+        if (!isShopsWorld(e.getEntity().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getEntity().getLocation())) {
             e.setCancelled(true);
             e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot place entities on another player's shop island!"));
@@ -190,7 +209,9 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onHangingBreak(HangingBreakByEntityEvent e) {
-        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (!isShopsWorld(e.getEntity().getLocation())) {
+            return;
+        }
         if (e.getRemover() instanceof Player player) {
             if (!canModify(player, e.getEntity().getLocation())) {
                 e.setCancelled(true);
@@ -198,9 +219,39 @@ public class ShopProtectionListener implements Listener {
         }
     }
 
+    /**
+     * Prevents non-owners from removing items from item frames by left-clicking.
+     */
+    @EventHandler
+    public void onItemFrameAttack(EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof org.bukkit.entity.ItemFrame)) {
+            return;
+        }
+        if (!isShopsWorld(e.getEntity().getLocation())) {
+            return;
+        }
+        if (e.getDamageSource().getCausingEntity() instanceof Player player) {
+            if (!canModify(player, e.getEntity().getLocation())) {
+                e.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onDamage(EntityDamageEvent e) {
+        if (!isShopsWorld(e.getEntity().getLocation())) {
+            return;
+        }
+        if (e.getEntity() instanceof Player) {
+            e.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onHangingPlace(HangingPlaceEvent e) {
-        if (!isShopsWorld(e.getEntity().getLocation())) return;
+        if (!isShopsWorld(e.getEntity().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getEntity().getLocation())) {
             e.setCancelled(true);
         }
@@ -208,23 +259,20 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onSignOpen(PlayerOpenSignEvent e) {
-        if (!isShopsWorld(e.getSign().getLocation())) return;
+        if (!isShopsWorld(e.getSign().getLocation())) {
+            return;
+        }
         if (!canModify(e.getPlayer(), e.getSign().getLocation())) {
             e.setCancelled(true);
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onDamage(EntityDamageEvent e) {
-        if (!isShopsWorld(e.getEntity().getLocation())) return;
-        if (e.getEntity() instanceof Player) {
-            e.setCancelled(true);
-        }
-    }
 
     @EventHandler
     public void onMobSpawn(CreatureSpawnEvent e) {
-        if (!isShopsWorld(e.getLocation())) return;
+        if (!isShopsWorld(e.getLocation())) {
+            return;
+        }
         e.setCancelled(true);
     }
 
@@ -234,13 +282,17 @@ public class ShopProtectionListener implements Listener {
 
     @EventHandler
     public void onFireCreate(BlockIgniteEvent e) {
-        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!isShopsWorld(e.getBlock().getLocation())) {
+            return;
+        }
         e.setCancelled(true);
     }
 
     @EventHandler
     public void onFireSpread(BlockSpreadEvent e) {
-        if (!isShopsWorld(e.getBlock().getLocation())) return;
+        if (!isShopsWorld(e.getBlock().getLocation())) {
+            return;
+        }
         org.bukkit.Material material = e.getSource().getType();
         if (material == org.bukkit.Material.FIRE || material == org.bukkit.Material.SOUL_FIRE) {
             e.setCancelled(true);
@@ -250,8 +302,12 @@ public class ShopProtectionListener implements Listener {
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         Player player = e.getPlayer();
-        if (!isShopsWorld(player.getLocation())) return;
-        if (e.getTo() == null) return;
+        if (!isShopsWorld(player.getLocation())) {
+            return;
+        }
+        if (e.getTo() == null) {
+            return;
+        }
 
         // Toggle bending whenever the player moves
         toggleBendingForShopLocation(player, e.getFrom(), e.getTo());
