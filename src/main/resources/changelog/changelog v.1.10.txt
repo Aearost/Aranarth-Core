@@ -97,6 +97,8 @@ Minor Features
 [~] Fixed issue that may cause shulker boxes to be lost due to the compressor perk
 [~] Decreased quartz cluster drop rates
 [~] Increased gold cluster drop rates (from nether gold ore)
+[~] Auto-closed the streaks GUI once the streak is claimed
+[+] Added shops to the list of survival worlds
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

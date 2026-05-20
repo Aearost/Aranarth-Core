@@ -3605,7 +3605,7 @@ public class AranarthUtils {
 		return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
 				|| worldName.equals("smp") || worldName.equals("smp_nether") || worldName.equals("smp_the_end")
 				|| worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
-				|| worldName.equals("spawn");
+				|| worldName.equals("spawn") || worldName.equals("shops");
 	}
 
 	/**

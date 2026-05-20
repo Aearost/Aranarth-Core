@@ -62,6 +62,7 @@ public class GuiLoginStreakClick {
         }
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+        player.closeInventory();
 
         // Refresh day items and info item to reflect the new state
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
