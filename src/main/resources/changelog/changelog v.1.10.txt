@@ -95,6 +95,8 @@ Minor Features
 [+] Added basic nickname permission to Architects
 [+] Added /ac msg permission to Architects
 [~] Fixed issue that may cause shulker boxes to be lost due to the compressor perk
+[~] Decreased quartz cluster drop rates
+[~] Increased gold cluster drop rates (from nether gold ore)
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities

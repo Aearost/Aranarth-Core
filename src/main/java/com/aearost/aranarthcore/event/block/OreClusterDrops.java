@@ -90,7 +90,7 @@ public class OreClusterDrops {
 					}
 				} else if (material.name().endsWith("GOLD_ORE")) {
 					if (material == Material.NETHER_GOLD_ORE) {
-						double calculation = 120 * evaluatedReduction;
+						double calculation = 80 * evaluatedReduction;
 						if (calculation <= 0) {
 							return;
 						}
@@ -139,7 +139,7 @@ public class OreClusterDrops {
 						world.dropItemNaturally(loc, new LapisCluster().getItem());
 					}
 				} else if (material == Material.NETHER_QUARTZ_ORE) {
-					double calculation = 125 * evaluatedReduction;
+					double calculation = 175 * evaluatedReduction;
 					if (calculation <= 0) {
 						return;
 					}
