@@ -149,7 +149,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
                     final Block block = centre.clone().add(x, y, z).getBlock();
                     if (block.getType() != Material.WATER) continue;
                     if (TempBlock.isTempBlock(block)) continue;
-                    block.setType(Material.AIR, false);
+                    this.domeBlocks.add(new TempBlock(block, Material.AIR.createBlockData()));
                 }
             }
         }

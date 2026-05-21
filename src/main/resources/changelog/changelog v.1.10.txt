@@ -111,6 +111,7 @@ Minor Features
 [+] Added support for nicknames in /msg, /pay, /seen, /teleport, /tphere, and several /dominion sub-commands
 [~] Mitigated the number of commands shown in command completion where the player does not have permission to them
 [~] Made is so Plentiful hoes will take durability damage as it is used to nerf it
+[~] Fixed issues where IceShards was making water blocks not revert
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
