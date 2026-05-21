@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
+import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
 import com.aearost.aranarthcore.event.mob.PiglinTargetPrevent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -23,5 +24,6 @@ public class EntityTargetEventListener implements Listener {
         new GuardianTargetPrevent().execute(e);
         new PiglinTargetPrevent().execute(e);
         new PetTargetPrevent().execute(e);
+        new PhantomSpawnNotify().execute(e);
     }
 }

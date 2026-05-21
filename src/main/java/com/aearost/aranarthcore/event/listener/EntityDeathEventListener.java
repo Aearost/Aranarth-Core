@@ -32,6 +32,8 @@ public class EntityDeathEventListener implements Listener {
             new WanderingTraderDeath().execute(e);
         } else if (e.getEntityType() == EntityType.GOAT) {
             new GoatDeath().execute(e);
+        } else if (e.getEntityType() == EntityType.PHANTOM) {
+            new PhantomSpawnNotify().execute(e);
         } else if (e.getEntityType() == EntityType.PLAYER) {
             new PlayerHeadDrop().execute(e);
             new DominionDeath().execute(e);

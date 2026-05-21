@@ -2,9 +2,11 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.ParrotJumpCancelDismount;
+import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
 import com.aearost.aranarthcore.event.mob.PillagerOutpostSpawnCancel;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Parrot;
+import org.bukkit.entity.Phantom;
 import org.bukkit.entity.Pillager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,6 +27,8 @@ public class CreatureSpawnEventListener implements Listener {
             new PillagerOutpostSpawnCancel().execute(e);
         } else if (e.getEntity() instanceof Parrot) {
             new ParrotJumpCancelDismount().execute(e);
+        } else if (e.getEntity() instanceof Phantom && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL) {
+            new PhantomSpawnNotify().execute(e);
         }
     }
 }

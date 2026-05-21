@@ -112,6 +112,7 @@ Minor Features
 [~] Mitigated the number of commands shown in command completion where the player does not have permission to them
 [~] Made is so Plentiful hoes will take durability damage as it is used to nerf it
 [~] Fixed issues where IceShards was making water blocks not revert
+[+] Added message in chat when phantoms start targetting the player
 
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
