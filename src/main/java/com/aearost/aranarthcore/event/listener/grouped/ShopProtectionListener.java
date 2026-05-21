@@ -7,9 +7,12 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -60,7 +63,7 @@ public class ShopProtectionListener implements Listener {
         Location dest = (islandOwner != null) ? AranarthUtils.getShopLocations().get(islandOwner) : null;
         if (dest == null) {
             dest = AranarthUtils.getSafeTeleportLocation(
-                    new Location(org.bukkit.Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
+                    new Location(Bukkit.getWorld("spawn"), 0.5, 100, 0.5, 180, 0));
         }
         player.teleport(dest);
         player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
@@ -89,7 +92,7 @@ public class ShopProtectionListener implements Listener {
             BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
             if (bPlayer != null) {
                 if (!bPlayer.isToggled()) {
-                    org.bukkit.Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> bPlayer.toggleBending(), 1L);
+                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> bPlayer.toggleBending(), 1L);
                     return;
                 }
             }
@@ -215,7 +218,7 @@ public class ShopProtectionListener implements Listener {
      */
     @EventHandler
     public void onItemFrameAttack(EntityDamageEvent e) {
-        if (!(e.getEntity() instanceof org.bukkit.entity.ItemFrame)) {
+        if (!(e.getEntity() instanceof ItemFrame)) {
             return;
         }
         if (!isShopsWorld(e.getEntity().getLocation())) {
@@ -276,6 +279,10 @@ public class ShopProtectionListener implements Listener {
         if (!isShopsWorld(e.getBlock().getLocation())) {
             return;
         }
+        // Allow the island owner to ignite blocks (e.g. lighting candles)
+        if (e.getPlayer() != null && canModify(e.getPlayer(), e.getBlock().getLocation())) {
+            return;
+        }
         e.setCancelled(true);
     }
 
@@ -284,8 +291,8 @@ public class ShopProtectionListener implements Listener {
         if (!isShopsWorld(e.getBlock().getLocation())) {
             return;
         }
-        org.bukkit.Material material = e.getSource().getType();
-        if (material == org.bukkit.Material.FIRE || material == org.bukkit.Material.SOUL_FIRE) {
+        Material material = e.getSource().getType();
+        if (material == Material.FIRE || material == Material.SOUL_FIRE) {
             e.setCancelled(true);
         }
     }
@@ -338,17 +345,17 @@ public class ShopProtectionListener implements Listener {
                 || name.endsWith("_TRAPDOOR")
                 || name.endsWith("_GATE")
                 || name.endsWith("_BUTTON")
-                || block.getType() == org.bukkit.Material.NOTE_BLOCK
-                || block.getType() == org.bukkit.Material.LEVER
-                || block.getType() == org.bukkit.Material.JUKEBOX
-                || block.getType() == org.bukkit.Material.LECTERN
-                || block.getType() == org.bukkit.Material.HOPPER
-                || block.getType() == org.bukkit.Material.CRAFTER
-                || block.getType() == org.bukkit.Material.FLOWER_POT
-                || block.getType() == org.bukkit.Material.CHISELED_BOOKSHELF
-                || block.getType() == org.bukkit.Material.DECORATED_POT
-                || block.getType() == org.bukkit.Material.SMOKER
-                || block.getType() == org.bukkit.Material.BLAST_FURNACE
-                || block.getType() == org.bukkit.Material.FURNACE;
+                || block.getType() == Material.NOTE_BLOCK
+                || block.getType() == Material.LEVER
+                || block.getType() == Material.JUKEBOX
+                || block.getType() == Material.LECTERN
+                || block.getType() == Material.HOPPER
+                || block.getType() == Material.CRAFTER
+                || block.getType() == Material.FLOWER_POT
+                || block.getType() == Material.CHISELED_BOOKSHELF
+                || block.getType() == Material.DECORATED_POT
+                || block.getType() == Material.SMOKER
+                || block.getType() == Material.BLAST_FURNACE
+                || block.getType() == Material.FURNACE;
     }
 }
