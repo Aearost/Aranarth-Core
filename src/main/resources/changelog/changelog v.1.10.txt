@@ -114,6 +114,7 @@ Minor Features
 [~] Fixed issues where IceShards was making water blocks not revert
 [+] Added message in chat when phantoms start targetting the player
 [+] Fixed currency formatting in bulk transaction confirmation messages
+[~] Implemented crop destruction by enemied dominion members
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

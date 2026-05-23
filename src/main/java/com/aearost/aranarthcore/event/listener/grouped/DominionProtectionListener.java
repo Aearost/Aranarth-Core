@@ -58,10 +58,31 @@ public class DominionProtectionListener implements Listener {
     public void onBreak(BlockBreakEvent e) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
         if (!aranarthPlayer.isInAdminMode()) {
+            // Crops can be destroyed by enemies
+            if (isEnemyHarvestableCrop(e.getBlock().getType())) {
+                Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
+                if (blockDominion != null) {
+                    Dominion playerDominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
+                    if (playerDominion != null && playerDominion.isEnemied(blockDominion)) {
+                        return;
+                    }
+                }
+            }
             if (applyLogic(e.getPlayer(), e.getBlock(), null, DominionPermission.BUILD)) {
                 e.setCancelled(true);
             }
         }
+    }
+
+    /**
+     * Returns true if the material is a crop or stem that enemied dominion members are permitted to harvest.
+     */
+    private boolean isEnemyHarvestableCrop(Material type) {
+        return AranarthUtils.isBlockCrop(type)
+                || type == Material.MELON_STEM
+                || type == Material.ATTACHED_MELON_STEM
+                || type == Material.PUMPKIN_STEM
+                || type == Material.ATTACHED_PUMPKIN_STEM;
     }
 
     /**
