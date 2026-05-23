@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiToggle;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -252,9 +253,9 @@ public class CommandToggle implements CommandExecutor {
 					if (player.hasPermission("aranarth.gate")) {
 						boolean enabled = GateUtils.toggleGatePlacementMode(player.getUniqueId());
 						if (enabled) {
-							player.sendMessage(ChatUtils.chatMessage("&7Gate placement mode &aenabled&7. Place a fence or bar block to start a new gate."));
+							player.sendMessage(ChatUtils.chatMessage("&7Gate creation mode &aenabled&7. Place a fence or bar block to start a new gate."));
 						} else {
-							player.sendMessage(ChatUtils.chatMessage("&7Gate placement mode &cdisabled&7."));
+							player.sendMessage(ChatUtils.chatMessage("&7Gate creation mode &cdisabled&7."));
 						}
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to create gates!"));
@@ -295,7 +296,7 @@ public class CommandToggle implements CommandExecutor {
 				}
 				return true;
 			} else {
-				player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
+				new GuiToggle(player).openGui();
 				return true;
 			}
 		} else {

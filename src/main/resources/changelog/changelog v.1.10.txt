@@ -42,6 +42,7 @@ Major Features
 [~] Fixed issue where keys obtained from donations would be provided in non-survival worlds
 [+] Implemented the shops world for individual player shop locations, accessible with /shop
 [+] Implemented the Incantation of Magnetism
+[+] Implemented a GUI for /toggle
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
