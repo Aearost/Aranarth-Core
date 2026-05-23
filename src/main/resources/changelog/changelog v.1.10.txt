@@ -115,6 +115,7 @@ Minor Features
 [+] Added message in chat when phantoms start targetting the player
 [+] Fixed currency formatting in bulk transaction confirmation messages
 [~] Implemented crop destruction by enemied dominion members
+[~] Fixed issue where inactive dominions couldn't be disbanded unless the owner was online
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
