@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Phantom;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -19,6 +21,8 @@ public class PhantomSpawnNotify {
     private static final Map<UUID, UUID> phantomWave = new HashMap<>();
     private static final Map<UUID, Integer> waveSize = new HashMap<>();
     private static final Map<UUID, Set<UUID>> notifiedWaves = new HashMap<>();
+    // Tracks a pending delayed notification per player (player UUID -> wave UUID)
+    private static final Map<UUID, UUID> pendingNotification = new HashMap<>();
 
     private static UUID currentWaveId = null;
     private static long currentWaveStartTime = 0L;
@@ -50,14 +54,30 @@ public class PhantomSpawnNotify {
             return;
         }
 
+        // Already notified for this wave
         Set<UUID> playerNotified = notifiedWaves.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>());
-        if (!playerNotified.add(waveId)) {
+        if (playerNotified.contains(waveId)) {
             return;
         }
 
-        int count = waveSize.getOrDefault(waveId, 1);
-        String message = count > 1 ? "&7Phantoms have started attacking you." : "&7A phantom has started attacking you.";
-        player.sendMessage(ChatUtils.chatMessage(message));
+        // Already have a pending notification scheduled for this wave
+        if (waveId.equals(pendingNotification.get(player.getUniqueId()))) {
+            return;
+        }
+
+        // Schedule a 2-tick delayed notification so all phantoms in the batch
+        // have time to spawn and join the wave before the message is sent
+        pendingNotification.put(player.getUniqueId(), waveId);
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            pendingNotification.remove(player.getUniqueId(), waveId);
+            Set<UUID> notified = notifiedWaves.computeIfAbsent(player.getUniqueId(), k -> new HashSet<>());
+            if (!notified.add(waveId) || !waveSize.containsKey(waveId)) {
+                return;
+            }
+            int count = waveSize.getOrDefault(waveId, 1);
+            String message = count > 1 ? "&7Phantoms have started attacking you." : "&7A phantom has started attacking you.";
+            player.sendMessage(ChatUtils.chatMessage(message));
+        }, 5L);
     }
 
     public void execute(EntityDeathEvent e) {
