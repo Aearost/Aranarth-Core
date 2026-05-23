@@ -116,6 +116,7 @@ Minor Features
 [+] Fixed currency formatting in bulk transaction confirmation messages
 
 Backend Code Changes
+- Updated AranarthCore to version 26.1.2 of Minecraft
 - Created the AranarthBendingUtils class to help with multiple bending abilities
 - Added a config file for various Aranarth configurations
 - Made Maven properly integrated with AranarthCore to build the jar

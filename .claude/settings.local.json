@@ -113,7 +113,10 @@
       "Bash(jar -xf \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\")",
       "Bash(find C:/Users/liamh/.gradle -name *projectkorra* -type f)",
       "Bash(mvn --version)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(java -version)",
+      "WebFetch(domain:repo.maven.apache.org)",
+      "WebFetch(domain:central.sonatype.com)"
     ]
   }
 }
