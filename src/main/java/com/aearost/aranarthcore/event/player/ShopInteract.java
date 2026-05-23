@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 
-import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -206,7 +206,7 @@ public class ShopInteract {
                 if (isPlayerShop) {
                     // Verifies that there is enough quantity in the chest's inventory
                     // Cycles through the chest's inventory starting from end to beginning
-                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop);
+                    HashMap<Boolean, ItemStack[]> result = checkIfContentsHasShopItems(chestInventory.getContents(), shop, true);
                     if (result.containsKey(true)) {
                         chestInventory.clear();
                         chestInventory.setContents(result.get(true));
@@ -256,7 +256,7 @@ public class ShopInteract {
                     return;
                 }
 
-                DecimalFormat df = new DecimalFormat("0.00");
+                NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() - shop.getBuyPrice());
@@ -323,7 +323,7 @@ public class ShopInteract {
 
                 player.sendMessage(ChatUtils.chatMessage(
                         "&7You have purchased &e" + shop.getQuantity() + " " + itemname
-                                + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getBuyPrice()))));
+                                + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getBuyPrice()))));
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
@@ -338,7 +338,7 @@ public class ShopInteract {
                         Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased &e" + shop.getQuantity() + " "
-                                        + itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getBuyPrice()))));
+                                        + itemname + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getBuyPrice()))));
                     }
                 }
             } else {
@@ -444,12 +444,24 @@ public class ShopInteract {
             if (leaveOneResult != null) {
                 result = new HashMap<>();
                 result.put(true, leaveOneResult.values().iterator().next());
+            } else if (useLeaveOneLogic) {
+                // Leave-one logic was active but nothing could be sold (only 1 item per shulker slot).
+                // Do NOT fall back to checkIfContentsHasShopItems — that would consume the kept items.
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+                clickUser.setBulkTransactionNum(-1);
+                AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+                return;
             } else {
-                result = checkIfContentsHasShopItems(playerInventory.getContents(), shop);
+                // When the player is in leave-one mode (aranarth.shulker perm, bulkSellShulker off,
+                // not selling a shulker), don't let a regular sell drain protected shulker slots.
+                boolean leaveOneMode = player.hasPermission("aranarth.shulker")
+                        && !isShulkerBox(shop.getItem())
+                        && !clickUser.isBulkSellShulkerEnabled();
+                result = checkIfContentsHasShopItems(playerInventory.getContents(), shop, !leaveOneMode);
             }
 
             if (result.containsKey(true)) {
-                DecimalFormat df = new DecimalFormat("0.00");
+                NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
                 // Logic to update balances and chest inventory
                 clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
@@ -473,7 +485,7 @@ public class ShopInteract {
 
                 player.sendMessage(ChatUtils.chatMessage(
                         "&7You have sold &e" + shop.getQuantity() + " " + itemname
-                                + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getSellPrice()))));
+                                + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getSellPrice()))));
                 clickUser.setBulkTransactionNum(-1);
                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
 
@@ -483,7 +495,7 @@ public class ShopInteract {
                         Player shopPlayer = Bukkit.getPlayer(shop.getUuid());
                         shopPlayer.sendMessage(
                                 ChatUtils.chatMessage("&e" + player.getName() + " &7has sold you &e" + shop.getQuantity() + " "
-                                        + itemname + ChatUtils.translateToColor(" &7for &6$" + df.format(shop.getSellPrice()))));
+                                        + itemname + ChatUtils.translateToColor(" &7for &6" + formatter.format(shop.getSellPrice()))));
                     }
                 }
             } else {
@@ -672,7 +684,7 @@ public class ShopInteract {
      * @param playerShop The player shop being interacted with.
      * @return Confirmation if the contents contain the full amount from the shop.
      */
-    private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] inventory, Shop playerShop) {
+    private HashMap<Boolean, ItemStack[]> checkIfContentsHasShopItems(ItemStack[] inventory, Shop playerShop, boolean scanShulkers) {
         // Avoids reference errors
         List<ItemStack> items = new ArrayList<>();
         for (ItemStack is : inventory) {
@@ -706,8 +718,9 @@ public class ShopInteract {
             }
         }
 
-        // Phase 2: Scan inside shulker boxes if still not enough (only when shop item is not itself a shulker)
-        if (!shopItemIsShulker) {
+        // Phase 2: Scan inside shulker boxes if still not enough (only when shop item is not itself a shulker
+        // and the caller permits shulker scanning)
+        if (!shopItemIsShulker && scanShulkers) {
             for (int i = contents.length - 1; i >= 0 && collected < needed; i--) {
                 if (contents[i] == null || !isShulkerBox(contents[i])) {
                     continue;

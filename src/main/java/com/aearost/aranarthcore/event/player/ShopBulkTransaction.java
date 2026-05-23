@@ -74,7 +74,11 @@ public class ShopBulkTransaction {
 				// Apply "leave one per shulker slot" adjustment to displayed quantity/price
 				if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
 					int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
-					if (adjustedQuantity > 0 && adjustedQuantity != bulkShop.getQuantity()) {
+					if (adjustedQuantity <= 0) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+						return;
+					}
+					if (adjustedQuantity != bulkShop.getQuantity()) {
 						double pricePerUnit = bulkShop.getSellPrice() / bulkShop.getQuantity();
 						bulkShop.setQuantity(adjustedQuantity);
 						bulkShop.setSellPrice(pricePerUnit * adjustedQuantity);
