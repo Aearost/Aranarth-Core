@@ -118,3 +118,4 @@ Minor Features
 Backend Code Changes
 - Created the AranarthBendingUtils class to help with multiple bending abilities
 - Added a config file for various Aranarth configurations
+- Made Maven properly integrated with AranarthCore to build the jar

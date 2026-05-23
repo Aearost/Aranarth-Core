@@ -111,7 +111,9 @@
       "Bash(find /c/Users/liamh -iname *jedcore* -type f)",
       "Bash(grep -rn \"PlayerCooldownChangeEvent\\\\|CooldownChangeEvent\" /c/Users/liamh/IdeaProjects --include=*.java)",
       "Bash(jar -xf \"/c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1-sources.jar\")",
-      "Bash(find C:/Users/liamh/.gradle -name *projectkorra* -type f)"
+      "Bash(find C:/Users/liamh/.gradle -name *projectkorra* -type f)",
+      "Bash(mvn --version)",
+      "Bash(python3:*)"
     ]
   }
 }
