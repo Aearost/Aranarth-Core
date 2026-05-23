@@ -116,7 +116,12 @@
       "Bash(python3:*)",
       "Bash(java -version)",
       "WebFetch(domain:repo.maven.apache.org)",
-      "WebFetch(domain:central.sonatype.com)"
+      "WebFetch(domain:central.sonatype.com)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *World* -o -name *Element* -o -name *Change*)",
+      "Bash(grep -rn \"getElements\\\\|removeElement\\\\|clear.*Element\\\\|bendingPlayer.*clear\\\\|Element.*remove\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
+      "Bash(grep -rn \"rank.*2\\\\|Knight\\\\|resource.*rank\\\\|rank.*resource\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
+      "Bash(grep -rn \"resource.*element\\\\|element.*clear\\\\|bend.*remove\\\\|removeUnusableAbilities\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name PKListener.java -o -name GeneralEvents.java -o -name *Listener*.java)"
     ]
   }
 }

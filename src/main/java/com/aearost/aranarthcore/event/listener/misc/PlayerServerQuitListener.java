@@ -27,6 +27,7 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		aranarthPlayer.setAfkLocation(null);
 		if (!aranarthPlayer.getCombatLogTime().isEmpty()) {

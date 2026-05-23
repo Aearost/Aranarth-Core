@@ -13,7 +13,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachment;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -21,13 +24,33 @@ import java.util.UUID;
  */
 public class PermissionUtils {
 
+	private static final Map<UUID, List<PermissionAttachment>> playerAttachments = new HashMap<>();
+
+	private static PermissionAttachment addTrackedAttachment(Player player) {
+		PermissionAttachment attachment = player.addAttachment(AranarthCore.getInstance());
+		playerAttachments.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(attachment);
+		return attachment;
+	}
+
+	public static void clearPlayerAttachments(UUID uuid) {
+		List<PermissionAttachment> attachments = playerAttachments.remove(uuid);
+		if (attachments != null) {
+			for (PermissionAttachment attachment : attachments) {
+				try {
+					attachment.remove();
+				} catch (Exception ignored) {}
+			}
+		}
+	}
+
 	/**
 	 * Centralizes all permissions logic being set.
 	 * @param player The player.
 	 */
 	public static void evaluatePlayerPermissions(Player player) {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		clearPlayerAttachments(player.getUniqueId());
+		PermissionAttachment perms = addTrackedAttachment(player);
 
 		setDefaultPermissions(player, perms);
 		setRankPermissions(perms, aranarthPlayer.getRank());
@@ -41,11 +64,17 @@ public class PermissionUtils {
 		if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
 			updateAvatarPermissions(player.getUniqueId(), false);
 		}
-		// If elements were removed while the old avatar was offline
-		else if (currentAvatar == null || !currentAvatar.getUuid().equals(player.getUniqueId())) {
-			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-			if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
-				updateAvatarPermissions(player.getUniqueId(), true);
+		// If elements were removed while the old avatar was offline — only applies to the actual previous avatar
+		else {
+			List<Avatar> avatarHistory = AvatarUtils.getAvatars();
+			if (avatarHistory.size() >= 2) {
+				Avatar previousAvatar = avatarHistory.get(avatarHistory.size() - 2);
+				if (previousAvatar.getUuid().equals(player.getUniqueId())) {
+					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+					if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
+						updateAvatarPermissions(player.getUniqueId(), true);
+					}
+				}
 			}
 		}
 
@@ -135,7 +164,7 @@ public class PermissionUtils {
 	 * @param isInArenaWorld Whether the player is actively in the arena world.
 	 */
 	public static void toggleArenaBendingPermissions(Player player, boolean isInArenaWorld) {
-		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		PermissionAttachment perms = addTrackedAttachment(player);
 		if (isInArenaWorld) {
 			// Enable sub-elements
 			perms.setPermission("bending.water.healing", true);
