@@ -116,6 +116,7 @@ Minor Features
 [+] Fixed currency formatting in bulk transaction confirmation messages
 [~] Implemented crop destruction by enemied dominion members
 [~] Fixed issue where inactive dominions couldn't be disbanded unless the owner was online
+[~] Fixed issue where spawn eggs couldn't be used in claimed dominion lands
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -469,9 +469,13 @@ public class DominionProtectionListener implements Listener {
         if (e.getEntityType() == EntityType.ARMOR_STAND) {
             return;
         }
-        if (e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
+        // Only prevents natural mob spawning
+        boolean isPermittedSpawnReason = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL
+                                    || e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.JOCKEY;
+        if (e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER && isPermittedSpawnReason) {
             return;
         }
+        // Only hostile mobs will make it this far
         Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getLocation().getChunk());
         if (chunkDominion != null) {
             if (!chunkDominion.isMobSpawningEnabled()) {
