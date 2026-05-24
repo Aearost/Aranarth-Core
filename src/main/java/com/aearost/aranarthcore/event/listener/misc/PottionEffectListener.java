@@ -41,6 +41,17 @@ public class PottionEffectListener implements Listener {
 		// Potions will stack but other forms of applied effects i.e bending passives or beacons will not
 		// Potentially could add manual checks i.e if it's a beacon, stack logic and ignore below, preventing infinite recursive calls
 		if (e.getAction() == Action.ADDED && e.getCause() == Cause.PLUGIN) {
+			if (e.getEntity() instanceof Player player) {
+				// Prevent heat stroke effect during Ardorvor
+				if (AranarthUtils.isWearingArmorType(player, "scorched") && AranarthUtils.getMonth() == Month.ARDORVOR) {
+					boolean isHeatStroke = newEffect.getType() == PotionEffectType.WEAKNESS || newEffect.getType() == PotionEffectType.MINING_FATIGUE;
+					if (e.getCause() == Cause.PLUGIN && isHeatStroke) {
+						e.setCancelled(true);
+						player.removePotionEffect(PotionEffectType.WEAKNESS);
+						player.removePotionEffect(PotionEffectType.MINING_FATIGUE);
+					}
+				}
+			}
 			return;
 		}
 
