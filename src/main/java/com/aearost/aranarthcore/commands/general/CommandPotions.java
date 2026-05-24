@@ -29,8 +29,7 @@ public class CommandPotions implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			if (!player.getLocation().getWorld().getName().startsWith("world") && !player.getLocation().getWorld().getName().startsWith("smp")
-					&& !player.getLocation().getWorld().getName().startsWith("resource")) {
+			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou must be in Survival to use this command!"));
 				return true;
 			}
