@@ -45,7 +45,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 	public SonicBoom(Player player) {
 		super(player);
 
-		this.chargeDuration = 750;
+		this.chargeDuration = 1000;
 		this.range = 10.0;
 		this.cooldown = 8000;
 		this.maxDamage = 12.0;
