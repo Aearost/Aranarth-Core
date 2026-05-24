@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
-import com.aearost.aranarthcore.utils.DiscordUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -33,7 +33,9 @@ public class CommandBroadcast {
 					}
 				}
 				Bukkit.broadcastMessage(ChatUtils.chatMessage(messageBuilder.toString()));
-				DiscordUtils.createNotification(ChatUtils.stripColorFormatting(messageBuilder.toString()), null);
+				for (Player online : Bukkit.getOnlinePlayers()) {
+					online.playSound(online, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, 1F);
+				}
 				return true;
 			} else {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a message to broadcast!"));
