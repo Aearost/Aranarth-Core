@@ -321,7 +321,7 @@ public class AranarthUtils {
 		}
 
 		// World edit permissions
-		PermissionAttachment perms = player.addAttachment(AranarthCore.getInstance());
+		PermissionAttachment perms = PermissionUtils.addTrackedAttachment(player);
 		if (destinationWorld.equals("creative")) {
 			perms.setPermission("worldedit.*", true);
 		} else {

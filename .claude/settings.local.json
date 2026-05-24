@@ -121,7 +121,12 @@
       "Bash(grep -rn \"getElements\\\\|removeElement\\\\|clear.*Element\\\\|bendingPlayer.*clear\\\\|Element.*remove\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
       "Bash(grep -rn \"rank.*2\\\\|Knight\\\\|resource.*rank\\\\|rank.*resource\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
       "Bash(grep -rn \"resource.*element\\\\|element.*clear\\\\|bend.*remove\\\\|removeUnusableAbilities\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java --include=*.java)",
-      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name PKListener.java -o -name GeneralEvents.java -o -name *Listener*.java)"
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name PKListener.java -o -name GeneralEvents.java -o -name *Listener*.java)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name *.jar -path */projectkorra*)",
+      "Bash(find /c/Users/liamh -name projectkorra*.jar)",
+      "Bash(find /c/Users/liamh/.m2 -name projectkorra*.jar)",
+      "Bash(javap -classpath /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1.jar com.projectkorra.projectkorra.Element)",
+      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *AirSpout* -o -name *WaterSpout*)"
     ]
   }
 }

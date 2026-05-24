@@ -26,7 +26,7 @@ public class PermissionUtils {
 
 	private static final Map<UUID, List<PermissionAttachment>> playerAttachments = new HashMap<>();
 
-	private static PermissionAttachment addTrackedAttachment(Player player) {
+	public static PermissionAttachment addTrackedAttachment(Player player) {
 		PermissionAttachment attachment = player.addAttachment(AranarthCore.getInstance());
 		playerAttachments.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(attachment);
 		return attachment;
@@ -64,11 +64,11 @@ public class PermissionUtils {
 		if (currentAvatar != null && currentAvatar.getUuid().equals(player.getUniqueId())) {
 			updateAvatarPermissions(player.getUniqueId(), false);
 		}
-		// If elements were removed while the old avatar was offline — only applies to the actual previous avatar
+		// If elements were removed while the old avatar was offline, only applies to the actual previous avatar
 		else {
-			List<Avatar> avatarHistory = AvatarUtils.getAvatars();
-			if (avatarHistory.size() >= 2) {
-				Avatar previousAvatar = avatarHistory.get(avatarHistory.size() - 2);
+			List<Avatar> avatars = AvatarUtils.getAvatars();
+			if (avatars.size() >= 2) {
+				Avatar previousAvatar = avatars.get(avatars.size() - 2);
 				if (previousAvatar.getUuid().equals(player.getUniqueId())) {
 					BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
 					if (bendingPlayer != null && bendingPlayer.getElements().size() > 1) {
@@ -95,6 +95,7 @@ public class PermissionUtils {
 		player.updateCommands();
 		Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
 	}
+
 
 	/**
 	 * Updates the player's sub-elements based on their current permissions.
@@ -150,6 +151,12 @@ public class PermissionUtils {
 			Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
 				@Override
 				public void run() {
+					// Guard against stale BendingPlayer references from fast reconnects or lag disconnects
+					// If the player is offline, or a new session has replaced this BendingPlayer, skip it
+					// Without this, canBind returns false for !player.isOnline() and clears all abilities.
+					if (!player.isOnline() || BendingPlayer.getBendingPlayer(player) != bendingPlayer) {
+						return;
+					}
 					bendingPlayer.removeUnusableAbilities();
 					bendingPlayer.saveSubElements();
 					bendingPlayer.saveElements();
@@ -215,6 +222,12 @@ public class PermissionUtils {
 	 * @param perms The permissions the player will have access to.
 	 */
 	private static void setDefaultPermissions(Player player, PermissionAttachment perms) {
+
+		// Explicitly grant bending.player so that all basic bending ability permissions
+		// (bending.ability.FireBlast, etc.) are set via Bukkit's child resolution even on
+		// servers using LuckPerms or other managers that don't apply plugin.yml defaults.
+		// The subsequent sub-element denials below override the relevant children correctly.
+		perms.setPermission("bending.player", true);
 
 		perms.setPermission("bending.command.rechoose", true);
 

@@ -9,9 +9,11 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
 import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
@@ -36,7 +38,7 @@ public class PlayerServerJoinListener implements Listener {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
@@ -160,6 +162,26 @@ public class PlayerServerJoinListener implements Listener {
 			playJoinSound();
 		}
 		AranarthUtils.updateTab();
+	}
+
+	/**
+	 * Re-evaluates bending sub-elements once ProjectKorra has finished loading
+	 * the player's BendingPlayer object. This handles the race condition where
+	 * evaluatePlayerPermissions runs before the BendingPlayer is available in
+	 * ONLINE_PLAYERS (either because AranarthCore's listener fires before
+	 * PKListener's, or because the data was loaded asynchronously from the DB).
+	 */
+	@EventHandler
+	public void onBendingPlayerLoad(BendingPlayerLoadEvent e) {
+		if (!e.isOnline()) {
+			return;
+		}
+		BendingPlayer bendingPlayer = (BendingPlayer) e.getBendingPlayer();
+		Player player = bendingPlayer.getPlayer();
+		if (player == null || !player.isOnline()) {
+			return;
+		}
+		PermissionUtils.updateSubElements(player);
 	}
 
 	/**

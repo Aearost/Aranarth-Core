@@ -31,7 +31,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
@@ -62,9 +62,9 @@ public class AranarthCore extends JavaPlugin {
 
         SoundAbility.SOUND = new Element.SubElement("Sound", Element.AIR, Element.ElementType.NO_SUFFIX, this);
         try {
-            Method setColor = Element.class.getDeclaredMethod("setColor", net.md_5.bungee.api.ChatColor.class);
-            setColor.setAccessible(true);
-            setColor.invoke(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
+            Field colorField = Element.class.getDeclaredField("color");
+            colorField.setAccessible(true);
+            colorField.set(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
         } catch (Exception e) {
             Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
         }
