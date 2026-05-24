@@ -23,9 +23,9 @@ import org.bukkit.potion.PotionEffectTypeCategory;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class PottionEffectListener implements Listener {
+public class PotionEffectListener implements Listener {
 
-	public PottionEffectListener(AranarthCore plugin) {
+	public PotionEffectListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
