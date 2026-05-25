@@ -25,4 +25,9 @@ public class CustomKeys {
     public static final NamespacedKey QUEST_NPC = new NamespacedKey(AranarthCore.getInstance(), "quest_npc");
     public static final NamespacedKey MAGNETISM_TOOL_ID = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tool_id");
     public static final NamespacedKey MAGNETISM_TAG = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tag");
+    public static final NamespacedKey SNIFFER_SADDLE = new NamespacedKey(AranarthCore.getInstance(), "sniffer_saddle");
+    public static final NamespacedKey SNIFFER_SPEED = new NamespacedKey(AranarthCore.getInstance(), "sniffer_speed");
+    public static final NamespacedKey PLAYER_SNIFFER_MAX_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "player_sniffer_max_health");
+    public static final NamespacedKey PLAYER_SNIFFER_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "player_sniffer_health");
+    public static final NamespacedKey PLAYER_SNIFFER_SPEED = new NamespacedKey(AranarthCore.getInstance(), "player_sniffer_speed");
 }

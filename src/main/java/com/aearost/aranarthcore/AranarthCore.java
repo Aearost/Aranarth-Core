@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.event.listener.*;
 import com.aearost.aranarthcore.event.listener.grouped.*;
 import com.aearost.aranarthcore.event.listener.misc.*;
+import com.aearost.aranarthcore.event.mob.SnifferMountListener;
 import com.aearost.aranarthcore.items.InvisibleItemFrame;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
@@ -295,6 +296,7 @@ public class AranarthCore extends JavaPlugin {
         new LeafDropsListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);
+        new SnifferMountListener(this);
         new PotionAlchemyExpListener(this);
         new TamedPetStealPreventListener(this);
         new RootingArrowMovePrevent(this);

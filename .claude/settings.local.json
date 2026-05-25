@@ -126,7 +126,32 @@
       "Bash(find /c/Users/liamh -name projectkorra*.jar)",
       "Bash(find /c/Users/liamh/.m2 -name projectkorra*.jar)",
       "Bash(javap -classpath /c/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/projectkorra-1.12.1-PRE-RELEASE-1.jar com.projectkorra.projectkorra.Element)",
-      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *AirSpout* -o -name *WaterSpout*)"
+      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *AirSpout* -o -name *WaterSpout*)",
+      "Bash(grep -l \"Entity\\\\|entity\" /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/event/listener/*.java)",
+      "Bash(find C:/Users/liamh/.m2 -name spigot-api-*.jar)",
+      "Bash(find C:/Users/liamh/IdeaProjects -name *.jar -path *spigot*)",
+      "Bash(find C:/Users/liamh/.m2 -name *.jar -path *1.21*)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -name *.jar)",
+      "Bash(\"C:/Program Files/Java/jdk-25/bin/jar\" tf \"paper-api-1.21.11-R0.1-20260511.115010-91.jar\")",
+      "Bash(JARFILE=\"C:/Users/liamh/.m2/repository/io/papermc/paper/paper-api/1.21.11-R0.1-SNAPSHOT/paper-api-1.21.11-R0.1-20260511.115010-91-sources.jar\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" tf \"$JARFILE\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" xf \"$JARFILE\" \"org/bukkit/event/player/PlayerInputEvent.java\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" xf \"$JARFILE\" \"org/bukkit/Input.java\")",
+      "Bash(JARFILE=\"C:/Users/liamh/.m2/repository/io/papermc/paper/paper-api/1.21.11-R0.1-SNAPSHOT/paper-api-1.21.11-R0.1-20260511.115010-91.jar\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/jar\" xf \"$JARFILE\" \"org/bukkit/event/player/PlayerInputEvent.class\" \"org/bukkit/Input.class\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/javap\" -p \"org/bukkit/event/player/PlayerInputEvent.class\")",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/javap\" -p \"org/bukkit/Input.class\")",
+      "Bash(rm -rf org/)",
+      "Bash(JARFILE=\"C:/Users/liamh/.m2/repository/io/papermc/paper/paper-api/26.1.2.build.65-stable/paper-api-26.1.2.build.65-stable.jar\")",
+      "Bash('/c/Program Files/Java/jdk-23/bin/jar' xf $JARFILE org/bukkit/event/player/PlayerInputEvent.class)",
+      "Bash('/c/Program Files/Java/jdk-23/bin/javap' -p org/bukkit/event/player/PlayerInputEvent.class)",
+      "Bash(\"/c/Program Files/Java/jdk-23/bin/javap\" -p org/bukkit/Input.class)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/jar\" xf:*)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/event/player/PlayerInputEvent.class)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/Input.class)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/entity/Entity.class)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/entity/LivingEntity.class)",
+      "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/block/Block.class)"
     ]
   }
 }

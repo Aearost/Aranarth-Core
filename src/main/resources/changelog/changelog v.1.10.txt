@@ -43,6 +43,7 @@ Major Features
 [+] Implemented the shops world for individual player shop locations, accessible with /shop
 [+] Implemented the Incantation of Magnetism
 [+] Implemented a GUI for /toggle
+[+] Implemented custom sniffer mounts to mimic badger moles, capable of creating large earth tunnels
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
