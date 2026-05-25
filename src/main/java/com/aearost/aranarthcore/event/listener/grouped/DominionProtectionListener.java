@@ -469,10 +469,10 @@ public class DominionProtectionListener implements Listener {
         if (e.getEntityType() == EntityType.ARMOR_STAND) {
             return;
         }
-        // Only prevents natural mob spawning
-        boolean isPermittedSpawnReason = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL
-                                    || e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.JOCKEY;
-        if (e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER && isPermittedSpawnReason) {
+        // Only prevent natural spawning of hostile mobs
+        boolean isNaturalSpawn = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL
+                              || e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.JOCKEY;
+        if (!isNaturalSpawn || e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
             return;
         }
         // Only hostile mobs will make it this far

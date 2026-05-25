@@ -126,6 +126,7 @@ Minor Features
 [-] Removed the discord ping to /ac broadcast
 [+] Added sound effect to broadcast messages
 [+] Added command completion for /d home <dominion>
+[~] Fixed issue where mob spawning was not working as expected in Dominions
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
