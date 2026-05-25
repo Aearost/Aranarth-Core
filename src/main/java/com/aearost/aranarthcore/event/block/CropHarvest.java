@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
+import com.gmail.nossr50.mcMMO;
 import com.gmail.nossr50.skills.herbalism.HerbalismManager;
 import com.gmail.nossr50.util.EventUtils;
 import org.bukkit.Material;
@@ -162,6 +163,15 @@ public class CropHarvest {
 			double frac = scaled - base;
 			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
 			drop.setAmount(Math.max(1, amount));
+		}
+
+		// Cap melon slice drops at 9 for player-placed melon blocks to prevent compressor duplication exploits
+		if (block.getType() == Material.MELON && !mcMMO.getChunkManager().isEligible(block)) {
+			for (ItemStack drop : drops) {
+				if (drop.getType() == Material.MELON_SLICE && drop.getAmount() > 9) {
+					drop.setAmount(9);
+				}
+			}
 		}
 
 		for (ItemStack drop : drops) {
