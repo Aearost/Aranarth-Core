@@ -20,12 +20,16 @@ import java.util.UUID;
  */
 public class SnifferTunnel extends BukkitRunnable {
 
-    private static final double MAX_RADIUS       = 3.5;
+    private static final double MAX_RADIUS = 3.5;
     private static final double RADIUS_INCREMENT = 0.25;
-    private static final double RANGE            = 25.0;
-    /** Blocks removed per tick. High value keeps the tunnel ahead of even the fastest mount. */
+    private static final double RANGE = 25.0;
+    /**
+     * Blocks removed per tick. High value keeps the tunnel ahead of even the fastest mount.
+     */
     private static final int BLOCKS_PER_TICK = 600;
-    /** How long (ms) before TempBlock reverts the tunnel back to original terrain. */
+    /**
+     * How long (ms) before TempBlock reverts the tunnel back to original terrain.
+     */
     private static final long REVERT_TIME_MS = 200_000L; // ~3 minutes 20 seconds
 
     private static final Set<Material> NON_DIGGABLE = Set.of(
@@ -74,13 +78,13 @@ public class SnifferTunnel extends BukkitRunnable {
 
     public SnifferTunnel(org.bukkit.entity.Player rider, Sniffer sniffer,
                          Map<UUID, SnifferTunnel> activeTunnels) {
-        this.activeTunnels  = activeTunnels;
-        this.snifferUUID    = sniffer.getUniqueId();
-        this.startLocation  = sniffer.getLocation().clone().add(0, 1.0, 0);
-        this.direction      = rider.getEyeLocation().getDirection().clone().normalize();
-        this.depth  = 0;
+        this.activeTunnels = activeTunnels;
+        this.snifferUUID = sniffer.getUniqueId();
+        this.startLocation = sniffer.getLocation().clone().add(0, 1.0, 0);
+        this.direction = rider.getEyeLocation().getDirection().clone().normalize();
+        this.depth = 0;
         this.radius = RADIUS_INCREMENT;
-        this.angle  = 0;
+        this.angle = 0;
     }
 
     @Override
@@ -127,8 +131,12 @@ public class SnifferTunnel extends BukkitRunnable {
 
     private boolean isDiggable(Block block) {
         Material type = block.getType();
-        if (NON_DIGGABLE.contains(type)) return false;
-        if (block.isLiquid()) return false;
+        if (NON_DIGGABLE.contains(type)) {
+            return false;
+        }
+        if (block.isLiquid()) {
+            return false;
+        }
         return type.getHardness() >= 0;
     }
 
@@ -148,13 +156,15 @@ public class SnifferTunnel extends BukkitRunnable {
         return rotateVectorAroundVector(axis, ortho, degrees);
     }
 
-    /** Rodrigues' rotation formula. */
+    /**
+     * Rodrigues' rotation formula.
+     */
     private static Vector rotateVectorAroundVector(Vector axis, Vector v, double degrees) {
         double angle = Math.toRadians(degrees);
         double cos = Math.cos(angle);
         double sin = Math.sin(angle);
         double ax = axis.getX(), ay = axis.getY(), az = axis.getZ();
-        double vx = v.getX(),    vy = v.getY(),    vz = v.getZ();
+        double vx = v.getX(), vy = v.getY(), vz = v.getZ();
 
         double rx = vx * (cos + ax * ax * (1 - cos))
                 + vy * (ax * ay * (1 - cos) - az * sin)

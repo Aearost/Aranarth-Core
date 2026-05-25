@@ -25,39 +25,26 @@ import org.bukkit.util.Vector;
 import java.util.*;
 
 /**
- * Makes Sniffers rideable mounts with saddle-based access, randomised speed/health,
- * two-passenger support, auto step-up, and a space-hold tunnel-digging ability.
+ * Makes Sniffers rideable mounts.
  */
 public class SnifferMountListener implements Listener {
 
-    /** Upward impulse for stepping up a 1-block obstacle. */
+    /**
+     * Upward impulse for stepping up a 1-block obstacle.
+     */
     private static final double STEP_UP_VELOCITY = 0.42;
-
-    // Speed range: 8–20 blocks/second  →  0.40–1.00 blocks/tick (at 20 tps)
     private static final double MIN_SPEED = 0.40;
     private static final double MAX_SPEED = 1.00;
-
-    /** Sniffer UUIDs that currently have at least one rider. */
     private static final Set<UUID> mountedSniffers = new HashSet<>();
-    /** Per-sniffer mounted speed cached on first mount, loaded from PDC. */
     private static final Map<UUID, Double> snifferSpeeds = new HashMap<>();
-    /**
-     * Stored WASD input per rider UUID: {forward, strafe}.
-     * Updated each PlayerInputEvent; consumed every tick by the movement scheduler.
-     */
     private static final Map<UUID, double[]> playerInputs = new HashMap<>();
-    /** Active tunnel tasks keyed by sniffer UUID. */
     static final Map<UUID, SnifferTunnel> activeTunnels = new HashMap<>();
 
     private final Random random = new Random();
-    private final AranarthCore plugin;
 
     public SnifferMountListener(AranarthCore plugin) {
-        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
 
-        // Server-side movement + rotation — runs every tick for all mounted sniffers.
-        // Velocity is ALWAYS set (even 0 horizontal) to override the sniffer's own AI movement.
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -72,7 +59,9 @@ public class SnifferMountListener implements Listener {
                         cleanupSniffer(id);
                         continue;
                     }
-                    if (!(passengers.get(0) instanceof Player rider)) continue;
+                    if (!(passengers.get(0) instanceof Player rider)) {
+                        continue;
+                    }
 
                     float riderYaw = rider.getLocation().getYaw();
                     sniffer.setRotation(riderYaw, 0);
@@ -80,13 +69,13 @@ public class SnifferMountListener implements Listener {
 
                     double[] in = playerInputs.getOrDefault(rider.getUniqueId(), new double[]{0, 0});
                     double forward = in[0];
-                    double strafe  = in[1];
+                    double strafe = in[1];
 
                     double speed = snifferSpeeds.computeIfAbsent(id, uid -> readSpeed(sniffer));
 
                     double yaw = Math.toRadians(riderYaw);
                     double vx = -Math.sin(yaw) * forward + Math.cos(yaw) * strafe;
-                    double vz =  Math.cos(yaw) * forward + Math.sin(yaw) * strafe;
+                    double vz = Math.cos(yaw) * forward + Math.sin(yaw) * strafe;
                     double len = Math.sqrt(vx * vx + vz * vz);
                     if (len > 0.001) {
                         vx = (vx / len) * speed;
@@ -133,10 +122,14 @@ public class SnifferMountListener implements Listener {
 
     @EventHandler
     public void onSnifferSpawn(CreatureSpawnEvent event) {
-        if (!(event.getEntity() instanceof Sniffer sniffer)) return;
+        if (!(event.getEntity() instanceof Sniffer sniffer)) {
+            return;
+        }
 
         // Skip randomisation for sniffers restored from player login data
-        if (sniffer.getPersistentDataContainer().has(CustomKeys.SNIFFER_SPEED, PersistentDataType.DOUBLE)) return;
+        if (sniffer.getPersistentDataContainer().has(CustomKeys.SNIFFER_SPEED, PersistentDataType.DOUBLE)) {
+            return;
+        }
 
         // Health: 32–100 half-hearts (16–50 full hearts)
         double health = 32 + random.nextInt(69);
@@ -158,11 +151,22 @@ public class SnifferMountListener implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEntityEvent event) {
-        if (!(event.getRightClicked() instanceof Sniffer sniffer)) return;
-        event.setCancelled(true);
+        if (!(event.getRightClicked() instanceof Sniffer sniffer)) {
+            return;
+        }
+        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) {
+            return;
+        }
 
         Player player = event.getPlayer();
         ItemStack mainHand = player.getInventory().getItemInMainHand();
+
+        // Holding a lead → let vanilla attach it without interference
+        if (mainHand.getType() == Material.LEAD) {
+            return;
+        }
+
+        event.setCancelled(true);
 
         // Holding saddle → equip it
         if (mainHand.getType() == Material.SADDLE) {
@@ -184,17 +188,21 @@ public class SnifferMountListener implements Listener {
             return;
         }
 
-        // No saddle → tell the player
+        // No saddle → only tell the player if they have nothing in hand (i.e. trying to mount)
         if (!hasSaddle(sniffer)) {
-            player.sendMessage(ChatUtils.translateToColor("&cYou need a saddle to ride this sniffer!"));
+            if (mainHand.getType().isAir()) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou need a saddle to ride this sniffer!"));
+            }
             return;
         }
 
         // Mount (up to 2 riders)
         List<Entity> passengers = sniffer.getPassengers();
-        if (passengers.contains(player)) return;
+        if (passengers.contains(player)) {
+            return;
+        }
         if (passengers.size() >= 2) {
-            player.sendMessage(ChatUtils.translateToColor("&cThis sniffer already has two riders!"));
+            player.sendMessage(ChatUtils.chatMessage("&cThis sniffer already has two riders!"));
             return;
         }
 
@@ -208,20 +216,34 @@ public class SnifferMountListener implements Listener {
     @EventHandler
     public void onPlayerInput(PlayerInputEvent event) {
         Player player = event.getPlayer();
-        if (!(player.getVehicle() instanceof Sniffer sniffer)) return;
-        if (!mountedSniffers.contains(sniffer.getUniqueId())) return;
+        if (!(player.getVehicle() instanceof Sniffer sniffer)) {
+            return;
+        }
+        if (!mountedSniffers.contains(sniffer.getUniqueId())) {
+            return;
+        }
 
         List<Entity> passengers = sniffer.getPassengers();
-        if (passengers.isEmpty() || !passengers.get(0).equals(player)) return;
+        if (passengers.isEmpty() || !passengers.get(0).equals(player)) {
+            return;
+        }
 
         var input = event.getInput();
 
         double forward = 0;
-        if (input.isForward())  forward += 1;
-        if (input.isBackward()) forward -= 1;
+        if (input.isForward()) {
+            forward += 1;
+        }
+        if (input.isBackward()) {
+            forward -= 1;
+        }
         double strafe = 0;
-        if (input.isLeft())  strafe += 1;
-        if (input.isRight()) strafe -= 1;
+        if (input.isLeft()) {
+            strafe += 1;
+        }
+        if (input.isRight()) {
+            strafe -= 1;
+        }
 
         playerInputs.put(player.getUniqueId(), new double[]{forward, strafe});
 
@@ -238,7 +260,9 @@ public class SnifferMountListener implements Listener {
         } else {
             // Space released — stop digging
             SnifferTunnel tunnel = activeTunnels.remove(snifferUUID);
-            if (tunnel != null) tunnel.cancel();
+            if (tunnel != null) {
+                tunnel.cancel();
+            }
         }
     }
 
@@ -248,8 +272,12 @@ public class SnifferMountListener implements Listener {
 
     @EventHandler
     public void onDismount(EntityDismountEvent event) {
-        if (!(event.getDismounted() instanceof Sniffer sniffer)) return;
-        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getDismounted() instanceof Sniffer sniffer)) {
+            return;
+        }
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
 
         playerInputs.remove(player.getUniqueId());
 
@@ -268,7 +296,9 @@ public class SnifferMountListener implements Listener {
 
     @EventHandler
     public void onEntityDeath(EntityDeathEvent event) {
-        if (!(event.getEntity() instanceof Sniffer sniffer)) return;
+        if (!(event.getEntity() instanceof Sniffer sniffer)) {
+            return;
+        }
 
         UUID id = sniffer.getUniqueId();
         cleanupSniffer(id);
@@ -285,20 +315,22 @@ public class SnifferMountListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        if (!(player.getVehicle() instanceof Sniffer sniffer)) return;
+        if (!(player.getVehicle() instanceof Sniffer sniffer)) {
+            return;
+        }
 
         // Save stats to player PDC so we can restore them on next login
         PersistentDataContainer playerPdc = player.getPersistentDataContainer();
 
         var maxHpAttr = sniffer.getAttribute(Attribute.MAX_HEALTH);
         double maxHealth = maxHpAttr != null ? maxHpAttr.getBaseValue() : 60;
-        double health    = sniffer.getHealth();
-        double speed     = readSpeed(sniffer);
+        double health = sniffer.getHealth();
+        double speed = readSpeed(sniffer);
         boolean hasSaddle = hasSaddle(sniffer);
 
         playerPdc.set(CustomKeys.PLAYER_SNIFFER_MAX_HEALTH, PersistentDataType.DOUBLE, maxHealth);
-        playerPdc.set(CustomKeys.PLAYER_SNIFFER_HEALTH,     PersistentDataType.DOUBLE, health);
-        playerPdc.set(CustomKeys.PLAYER_SNIFFER_SPEED,      PersistentDataType.DOUBLE, speed);
+        playerPdc.set(CustomKeys.PLAYER_SNIFFER_HEALTH, PersistentDataType.DOUBLE, health);
+        playerPdc.set(CustomKeys.PLAYER_SNIFFER_SPEED, PersistentDataType.DOUBLE, speed);
         // Re-use SNIFFER_SADDLE key but stored on the player PDC
         playerPdc.set(CustomKeys.SNIFFER_SADDLE, PersistentDataType.BYTE, hasSaddle ? (byte) 1 : (byte) 0);
 
@@ -315,12 +347,14 @@ public class SnifferMountListener implements Listener {
         Player player = event.getPlayer();
         PersistentDataContainer playerPdc = player.getPersistentDataContainer();
 
-        if (!playerPdc.has(CustomKeys.PLAYER_SNIFFER_MAX_HEALTH, PersistentDataType.DOUBLE)) return;
+        if (!playerPdc.has(CustomKeys.PLAYER_SNIFFER_MAX_HEALTH, PersistentDataType.DOUBLE)) {
+            return;
+        }
 
         double maxHealth = playerPdc.get(CustomKeys.PLAYER_SNIFFER_MAX_HEALTH, PersistentDataType.DOUBLE);
-        double health    = playerPdc.get(CustomKeys.PLAYER_SNIFFER_HEALTH,     PersistentDataType.DOUBLE);
-        double speed     = playerPdc.get(CustomKeys.PLAYER_SNIFFER_SPEED,      PersistentDataType.DOUBLE);
-        byte   saddleByte = playerPdc.getOrDefault(CustomKeys.SNIFFER_SADDLE, PersistentDataType.BYTE, (byte) 1);
+        double health = playerPdc.get(CustomKeys.PLAYER_SNIFFER_HEALTH, PersistentDataType.DOUBLE);
+        double speed = playerPdc.get(CustomKeys.PLAYER_SNIFFER_SPEED, PersistentDataType.DOUBLE);
+        byte saddleByte = playerPdc.getOrDefault(CustomKeys.SNIFFER_SADDLE, PersistentDataType.BYTE, (byte) 1);
 
         // Clear the saved data
         playerPdc.remove(CustomKeys.PLAYER_SNIFFER_MAX_HEALTH);
@@ -329,8 +363,10 @@ public class SnifferMountListener implements Listener {
         playerPdc.remove(CustomKeys.SNIFFER_SADDLE);
 
         // Delay slightly to ensure the player is fully loaded into the world
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (!player.isOnline()) return;
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (!player.isOnline()) {
+                return;
+            }
 
             World world = player.getWorld();
             Location spawnLoc = player.getLocation();
@@ -354,7 +390,9 @@ public class SnifferMountListener implements Listener {
     // Helpers
     // -------------------------------------------------------------------------
 
-    /** Adds the player as a passenger and registers the sniffer as mounted. */
+    /**
+     * Adds the player as a passenger and registers the sniffer as mounted.
+     */
     private void mountSniffer(Sniffer sniffer, Player player) {
         sniffer.addPassenger(player);
         mountedSniffers.add(sniffer.getUniqueId());
@@ -362,19 +400,25 @@ public class SnifferMountListener implements Listener {
         // Zero out the AI movement speed so the sniffer's goal selector cannot
         // move it on its own. Our velocity-based control bypasses this attribute.
         var speedAttr = sniffer.getAttribute(Attribute.MOVEMENT_SPEED);
-        if (speedAttr != null) speedAttr.setBaseValue(0.0);
+        if (speedAttr != null) {
+            speedAttr.setBaseValue(0.0);
+        }
     }
 
     private void cleanupSniffer(UUID id) {
         mountedSniffers.remove(id);
         snifferSpeeds.remove(id);
         SnifferTunnel tunnel = activeTunnels.remove(id);
-        if (tunnel != null) tunnel.cancel();
+        if (tunnel != null) {
+            tunnel.cancel();
+        }
         // Restore the sniffer's natural movement speed so it can wander again
         Entity e = Bukkit.getEntity(id);
         if (e instanceof Sniffer s && !s.isDead()) {
             var speedAttr = s.getAttribute(Attribute.MOVEMENT_SPEED);
-            if (speedAttr != null) speedAttr.setBaseValue(speedAttr.getDefaultValue());
+            if (speedAttr != null) {
+                speedAttr.setBaseValue(speedAttr.getDefaultValue());
+            }
         }
     }
 
@@ -383,7 +427,9 @@ public class SnifferMountListener implements Listener {
      * its collision height must be ≤ 1.0 (excludes fences/walls at 1.5 blocks).
      */
     private boolean isSteppableObstacle(Block block) {
-        if (block.isPassable()) return false;
+        if (block.isPassable()) {
+            return false;
+        }
         double h = block.getBoundingBox().getHeight();
         return h > 0 && h <= 1.0;
     }
@@ -393,7 +439,9 @@ public class SnifferMountListener implements Listener {
      * above a step (air, plants, thin snow layers, etc.).
      */
     private boolean isClearForPassage(Block block) {
-        if (block.isPassable()) return true;
+        if (block.isPassable()) {
+            return true;
+        }
         // Thin snow layers (< 8 layers) are passable in practice
         return block.getType() == Material.SNOW && block.getBoundingBox().getHeight() < 0.5;
     }
