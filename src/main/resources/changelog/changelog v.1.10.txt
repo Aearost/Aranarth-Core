@@ -44,6 +44,7 @@ Major Features
 [+] Implemented the Incantation of Magnetism
 [+] Implemented a GUI for /toggle
 [+] Implemented custom sniffer mounts to mimic badger moles, capable of creating large earth tunnels
+[~] Added alternate arrow recipes using a base arrow and the custom arrowhead
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

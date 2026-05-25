@@ -19,6 +19,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 
+import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
 
 /**
@@ -202,6 +203,9 @@ public class FletchingTableCraft {
 
 		ItemStack result = computeArrowResult(contents);
 		if (result == null) {
+			result = computeArrowFromShortRecipe(contents);
+		}
+		if (result == null) {
 			result = computeArrowheadResult(contents);
 		}
 
@@ -237,6 +241,51 @@ public class FletchingTableCraft {
 		}
 
 		return AranarthUtils.getArrowFromType(special);
+	}
+
+	/**
+	 * Determines the result of the alternative short recipe: custom arrowhead + vanilla arrow = special arrow.
+	 * Valid configurations (arrowhead must be above the arrow, no gaps):
+	 *   - Slot 2 (arrowhead) + Slot 5 (vanilla arrow), Slot 8 empty
+	 *   - Slot 2 empty, Slot 5 (arrowhead) + Slot 8 (vanilla arrow)
+	 * The default "arrowhead" type is excluded.
+	 * @param inventory The inventory of the Fletching Table.
+	 * @return The special arrow result, or null if the input does not match the recipe.
+	 */
+	private ItemStack computeArrowFromShortRecipe(ItemStack[] inventory) {
+		ItemStack slot2 = safe(inventory, 2);
+		ItemStack slot5 = safe(inventory, 5);
+		ItemStack slot8 = safe(inventory, 8);
+
+		ItemStack head;
+		ItemStack arrow;
+
+		if (slot2 != null && slot5 != null && slot8 == null) {
+			head = slot2;
+			arrow = slot5;
+		} else if (slot2 == null && slot5 != null && slot8 != null) {
+			head = slot5;
+			arrow = slot8;
+		} else {
+			return null;
+		}
+
+		// Head must be a custom arrowhead, excluding the default "arrowhead" type
+		if (!head.hasItemMeta()) return null;
+		PersistentDataContainer headPdc = head.getItemMeta().getPersistentDataContainer();
+		if (!headPdc.has(ARROW_HEAD, PersistentDataType.STRING)) return null;
+		String headType = headPdc.get(ARROW_HEAD, PersistentDataType.STRING);
+		if (headType == null || headType.equals("arrowhead")) return null;
+
+		// Arrow must be a vanilla arrow (no custom ARROW PDC)
+		if (arrow.getType() != Material.ARROW) return null;
+		if (arrow.hasItemMeta() && arrow.getItemMeta().getPersistentDataContainer().has(ARROW, PersistentDataType.STRING)) return null;
+
+		ItemStack result = AranarthUtils.getArrowFromType(headType);
+		if (result != null) {
+			result.setAmount(1);
+		}
+		return result;
 	}
 
 	/**
