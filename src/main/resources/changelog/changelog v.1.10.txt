@@ -125,6 +125,7 @@ Minor Features
 [~] Added immunity to the heat stroke effect of Ardorvor if wearing Scorched Aranarthium
 [-] Removed the discord ping to /ac broadcast
 [+] Added sound effect to broadcast messages
+[+] Added command completion for /d home <dominion>
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -2,6 +2,8 @@ package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
+import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -58,8 +60,8 @@ public class CommandDominionCompleter implements TabCompleter {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 					if (dominion != null) {
 						yield dominion.getAllied().stream()
-							.map(DominionUtils::getDominionById)
-							.filter(d -> d != null)
+							.map(DominionUtils::getPlayerDominion)
+							.filter(d -> d != null && dominion.isAllied(d) && d.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME))
 							.map(d -> ChatUtils.stripColorFormatting(d.getName()))
 							.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
 							.collect(Collectors.toList());
