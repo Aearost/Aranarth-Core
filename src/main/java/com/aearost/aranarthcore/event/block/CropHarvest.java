@@ -81,15 +81,23 @@ public class CropHarvest {
 			}
 		}
 
-		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
-		double elvenMultiplier = AranarthUtils.isWearingArmorType(player, "elven") ? 1.25 : 1.0;
+		boolean hasHarvestBoost = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST);
+		boolean hasElvenArmor = AranarthUtils.isWearingArmorType(player, "elven");
 
 		for (ItemStack drop : drops) {
-			double scaled = drop.getAmount() * multiplier * boostMultiplier * elvenMultiplier;
+			int amount = drop.getAmount();
+			if (isMainCropDrop(drop.getType())) {
+				if (hasHarvestBoost && ThreadLocalRandom.current().nextBoolean()) {
+					amount += 1;
+				}
+				if (hasElvenArmor && ThreadLocalRandom.current().nextBoolean()) {
+					amount += 1;
+				}
+			}
+			double scaled = amount * multiplier;
 			int base = (int) scaled;
 			double frac = scaled - base;
-			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
-			drop.setAmount(Math.max(1, amount));
+			drop.setAmount(Math.max(1, base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0)));
 		}
 
         // Auto-replant functionality
@@ -154,15 +162,23 @@ public class CropHarvest {
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
 		Month month = AranarthUtils.getMonth();
 		double multiplier = CropUtils.getCropYieldMultiplier(month, CropUtils.getSeedMaterial(block.getType()));
-		int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
-		double elvenMultiplier = AranarthUtils.isWearingArmorType(player, "elven") ? 1.25 : 1.0;
+		boolean hasHarvestBoost = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST);
+		boolean hasElvenArmor = AranarthUtils.isWearingArmorType(player, "elven");
 
 		for (ItemStack drop : drops) {
-			double scaled = drop.getAmount() * multiplier * boostMultiplier * elvenMultiplier;
+			int amount = drop.getAmount();
+			if (isMainCropDrop(drop.getType())) {
+				if (hasHarvestBoost && ThreadLocalRandom.current().nextBoolean()) {
+					amount += 1;
+				}
+				if (hasElvenArmor && ThreadLocalRandom.current().nextBoolean()) {
+					amount += 1;
+				}
+			}
+			double scaled = amount * multiplier;
 			int base = (int) scaled;
 			double frac = scaled - base;
-			int amount = base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0);
-			drop.setAmount(Math.max(1, amount));
+			drop.setAmount(Math.max(1, base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0)));
 		}
 
 		// Cap melon slice drops at 9 for player-placed melon blocks to prevent compressor duplication exploits
@@ -190,5 +206,12 @@ public class CropHarvest {
 		block.setType(Material.AIR);
 	}
 
+	/**
+	 * Returns true if the drop is the main crop yield, not a seed-only item.
+	 * Harvest boost and Elven armor bonuses apply only to main crop drops.
+	 */
+	private boolean isMainCropDrop(Material type) {
+		return type != Material.WHEAT_SEEDS && type != Material.BEETROOT_SEEDS;
+	}
 
 }

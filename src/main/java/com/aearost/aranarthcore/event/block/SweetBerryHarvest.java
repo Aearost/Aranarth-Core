@@ -68,9 +68,18 @@ public class SweetBerryHarvest {
 			Month month = AranarthUtils.getMonth();
 			double multiplier = CropUtils.getCropYieldMultiplier(month, Material.SWEET_BERRIES);
 			boolean isWinterMonth = DateUtils.isWinterMonth(month) || month == Month.IGNIVOR;
-			int boostMultiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 2 : 1;
+			boolean hasHarvestBoost = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST);
+			boolean hasElvenArmor = AranarthUtils.isWearingArmorType(player, "elven");
 
-			double scaled = vanillaAmount * multiplier * boostMultiplier;
+			int amount = vanillaAmount;
+			if (hasHarvestBoost && ThreadLocalRandom.current().nextDouble() < 0.5) {
+				amount += 1;
+			}
+			if (hasElvenArmor && ThreadLocalRandom.current().nextDouble() < 0.5) {
+				amount += 1;
+			}
+
+			double scaled = amount * multiplier;
 			int finalAmount = Math.max(1, isWinterMonth ? (int) scaled : (int) Math.ceil(scaled));
 
 			ItemStack berries = new ItemStack(Material.SWEET_BERRIES, finalAmount);
