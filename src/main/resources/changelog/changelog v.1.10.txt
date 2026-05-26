@@ -139,6 +139,7 @@ Minor Features
 [~] Made it so /d msg toggled would not use gradientchat
 [~] Fixed issue where /d resources was not being decremented correctly due to a full inventory
 [~] Renamed Saint I to Acolyte, Saint II to Disciple, and Saint III to Seraph
+[+] Added /tell as an alias for /msg
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
