@@ -32,9 +32,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.4.2</version>
-                <configuration>
-                    <outputDirectory>${deploy.dir}</outputDirectory>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -46,6 +43,9 @@
                         <goals>
                             <goal>shade</goal>
                         </goals>
+                        <configuration>
+                            <outputFile>${deploy.dir}/AranarthCore-${project.version}.jar</outputFile>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
