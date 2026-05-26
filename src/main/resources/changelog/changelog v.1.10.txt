@@ -128,6 +128,7 @@ Minor Features
 [+] Added command completion for /d home <dominion>
 [~] Fixed issue where mob spawning was not working as expected in Dominions
 [~] Fixed issue where melons were able to essentially be duplicated with fortune and harvest boosts with the compressor
+[~] Made it so /potions remove GUI will display the potion names with their current quantities
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

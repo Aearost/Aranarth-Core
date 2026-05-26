@@ -57,11 +57,25 @@ public class GuiPotions {
 		if (size % 9 != 0) {
 			size = ((int) (double) (size / 9) + 1) * 9;
 		}
+		String potionStats = AranarthUtils.getPlayerStoredPotionNum(player) + "/" + AranarthUtils.getMaxPotionNum(player);
 
-		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions");
-		for (ItemStack storedPotion : potions.keySet()) {
-			inventory.addItem(storedPotion);
+		Inventory inventory = Bukkit.getServer().createInventory(player, size, "Remove Potions (" + potionStats + ")");
+
+		HashMap<String, HashMap<ItemStack, Integer>> formattedPotions = AranarthUtils.getPlayerPotionNames(player);
+		for (String formattedName : formattedPotions.keySet()) {
+			HashMap<ItemStack, Integer> storedPotion = formattedPotions.get(formattedName);
+			// Should only have 1 record in it
+			for (ItemStack potion : storedPotion.keySet()) {
+				ItemStack potionCopy = potion.clone();
+				if (potionCopy.hasItemMeta()) {
+					ItemMeta meta = potionCopy.getItemMeta();
+					meta.setDisplayName(ChatUtils.translateToColor("&e" + formattedName + " &6x" + storedPotion.get(potion)));
+					potionCopy.setItemMeta(meta);
+					inventory.addItem(potionCopy);
+				}
+			}
 		}
+
 		return inventory;
 	}
 
