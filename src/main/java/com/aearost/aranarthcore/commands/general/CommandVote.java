@@ -64,13 +64,13 @@ public class CommandVote implements CommandExecutor {
 	 */
 	private void displayVoteLinks(Player player) {
 		player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lVote Links &8- - -"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l1&8&l] &e&l&oPlanet Minecraft", "https://tinyurl.com/5n7wezr9"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l2&8&l] &7&l&oMC Server List", "https://tinyurl.com/ynsp6zm2"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l3&8&l] &e&l&oMC Servers", "https://tinyurl.com/4r97nrsa"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l4&8&l] &7&l&oMineList", "https://tinyurl.com/f8wfzbj6"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l5&8&l] &e&l&oMinecraft MP", "https://tinyurl.com/3c8hfadt"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l6&8&l] &7&l&oTopG", "https://tinyurl.com/5c2yxkzj"));
-		player.sendMessage(buildVoteLink(" &8&l[&6&l7&8&l] &e&l&oMinecraft Buzz", "https://tinyurl.com/4ve6h5zn"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l1&8&l] &e&l&oPlanet Minecraft", "https://www.planetminecraft.com/server/aranarth-6795356/vote/"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l2&8&l] &7&l&oMC Server List", "https://minecraft-mp.com/server/356466/vote/"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l3&8&l] &e&l&oMinecraft MP", "https://minecraftservers.org/vote/685940"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l4&8&l] &7&l&oMC Servers", "https://minecraft-server-list.com/server/519140/vote/"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l5&8&l] &e&l&oTopG", "https://topg.org/minecraft-servers/server-681145"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l6&8&l] &7&l&oMineList", "https://minelist.net/vote/5200"));
+		player.sendMessage(buildVoteLink(" &8&l[&6&l7&8&l] &e&l&oMinecraft Buzz", "https://minecraft.buzz/vote/20178"));
 	}
 
 	/**

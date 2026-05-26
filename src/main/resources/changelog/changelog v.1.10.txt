@@ -129,6 +129,8 @@ Minor Features
 [~] Fixed issue where mob spawning was not working as expected in Dominions
 [~] Fixed issue where melons were able to essentially be duplicated with fortune and harvest boosts with the compressor
 [~] Made it so /potions remove GUI will display the potion names with their current quantities
+[~] Re-ordered the list of links in /vote
+[~] Added the true URL rather than the tinyurl in the vote list
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
