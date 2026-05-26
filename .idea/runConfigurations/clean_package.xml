@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="clean package" type="MavenRunConfiguration" factoryName="Maven">
+    <MavenSettings>
+      <option name="myGoals" value="clean package" />
+      <option name="myResolveToWorkspace" value="false" />
+      <option name="myRunMavenInBackground" value="false" />
+    </MavenSettings>
+    <method v="2" />
+  </configuration>
+</component>
