@@ -140,10 +140,13 @@ public class CommandPerks {
 								PermissionUtils.evaluatePlayerPermissions(player);
 							}
 
+							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 							if (!args[3].equals("0")) {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the " + perk + " &7perk!";
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								if (!isSilent) {
+									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								}
 							} else {
 								sender.sendMessage(ChatUtils.chatMessage("&7The " + perk + " &7perk has been removed from &e" + aranarthPlayer.getNickname()));
 								// If the sender is either console or if the sender player is not the one the perk is being applied to
@@ -168,10 +171,13 @@ public class CommandPerks {
 								PermissionUtils.evaluatePlayerPermissions(player);
 							}
 
+							boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 							if (!args[3].equals("0")) {
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								if (!isSilent) {
+									DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+								}
 							}
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThat is not an appropriate value!"));
@@ -184,10 +190,13 @@ public class CommandPerks {
 
 						DiscordUtils.updateDiscordRole(Bukkit.getOfflinePlayer(uuid), aranarthPlayer);
 
+						boolean isSilent = args.length >= 5 && args[4].equalsIgnoreCase("silent");
 						if (!args[3].equals("0")) {
 							String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &5&lDiscord Chat &7perk!";
 							Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-							DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							if (!isSilent) {
+								DiscordUtils.donationNotification(ChatUtils.stripColorFormatting(message), uuid, Color.CYAN);
+							}
 						}
 
 						return true;

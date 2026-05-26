@@ -132,6 +132,7 @@ Minor Features
 [~] Re-ordered the list of links in /vote
 [~] Added the true URL rather than the tinyurl in the vote list
 [~] Modified the increased crop yield logic to apply a flat +1 rather than a multiplier for Elven Aranarthium and a Harvest boost
+[~] Prevented vote shop perk purchases from sending a discord notification
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
