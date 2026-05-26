@@ -136,6 +136,7 @@ Minor Features
 [~] Prevented locked containers from being blown up by explosions
 [+] Added /ac dominion disband to manually disband dominions
 [~] Fixed issue where stale dominion invites were re-creating disbanded dominions in the background
+[~] Made it so /d msg toggled would not use gradientchat
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

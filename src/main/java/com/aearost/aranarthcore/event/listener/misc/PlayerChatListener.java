@@ -135,7 +135,7 @@ public class PlayerChatListener implements Listener {
             ChatUtils.evaluateCouncilMessage(player, message.split(" "), false);
         } else if (aranarthPlayer.isInDominionChat()) {
             // Dominion chat toggle is on — route to dominion chat
-            ChatUtils.evaluateDominionMessage(player, chatMessage.split(" "), false);
+            ChatUtils.evaluateDominionMessage(player, message.split(" "), false);
         } else {
             for (Player recipient : e.getRecipients()) {
                 recipient.sendMessage(fullMessage);
