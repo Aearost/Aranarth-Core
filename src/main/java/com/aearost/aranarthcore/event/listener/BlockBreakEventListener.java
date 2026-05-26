@@ -56,6 +56,10 @@ public class BlockBreakEventListener implements Listener {
                     new OreClusterDrops().execute(e);
                     new OreExtraDrops().execute(e);
                 }
+
+                if (type == Material.GILDED_BLACKSTONE) {
+                    new GildedBlackstoneBreak().execute(e);
+                }
             }
 
             new ContainerBreak().execute(e);
