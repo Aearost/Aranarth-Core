@@ -534,8 +534,16 @@ public class CommandDominion implements CommandExecutor {
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		Dominion dominion = aranarthPlayer.getPendingDominion();
+		// Always clear the pending invite so stale accepts can't resurrect disbanded dominions
+		aranarthPlayer.setPendingDominion(null);
+		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 		// If the player has a pending Dominion invitation
 		if (dominion != null) {
+			// Guard against stale invites where the dominion was disbanded before acceptance
+			if (DominionUtils.getDominionById(dominion.getId()) == null) {
+				player.sendMessage(ChatUtils.chatMessage("&cThis Dominion no longer exists!"));
+				return;
+			}
 			dominion.getMembers().add(player.getUniqueId());
 			dominion.setMemberRank(player.getUniqueId(), DominionRank.NEWCOMER);
 			DominionUtils.updateDominion(dominion);

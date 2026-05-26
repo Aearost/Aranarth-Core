@@ -1,8 +1,10 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -113,6 +115,26 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandInvSwap.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("discordreload")) {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("disband")) {
+			if (args.length < 2) {
+				sender.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac disband <dominion name>"));
+			} else {
+				StringBuilder nameBuilder = new StringBuilder();
+				for (int i = 1; i < args.length; i++) {
+					if (i > 1) nameBuilder.append(" ");
+					nameBuilder.append(args[i]);
+				}
+				String targetName = nameBuilder.toString();
+				Dominion target = DominionUtils.getDominions().stream()
+						.filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
+						.findFirst().orElse(null);
+				if (target == null) {
+					sender.sendMessage(ChatUtils.chatMessage("&cDominion &e" + targetName + " &ccould not be found!"));
+				} else {
+					DominionUtils.disbandDominion(target);
+					commandResult = true;
+				}
+			}
 		}
 		return commandResult;
 	}

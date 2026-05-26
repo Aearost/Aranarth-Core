@@ -134,6 +134,8 @@ Minor Features
 [~] Modified the increased crop yield logic to apply a flat +1 rather than a multiplier for Elven Aranarthium and a Harvest boost
 [~] Prevented vote shop perk purchases from sending a discord notification
 [~] Prevented locked containers from being blown up by explosions
+[+] Added /ac dominion disband to manually disband dominions
+[~] Fixed issue where stale dominion invites were re-creating disbanded dominions in the background
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
