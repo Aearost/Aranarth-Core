@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
 import com.aearost.aranarthcore.event.mob.PiglinTargetPrevent;
+import com.aearost.aranarthcore.event.mob.RavagerTargetPrevent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,6 +25,7 @@ public class EntityTargetEventListener implements Listener {
         new GuardianTargetPrevent().execute(e);
         new PiglinTargetPrevent().execute(e);
         new PetTargetPrevent().execute(e);
+        new RavagerTargetPrevent().execute(e);
         new PhantomSpawnNotify().execute(e);
     }
 }

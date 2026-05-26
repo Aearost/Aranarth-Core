@@ -49,6 +49,10 @@ public class MountListener implements Listener {
          * Called on any cleanup path (dismount, death, logout).
          */
         void cleanup(UUID mountId);
+
+        default boolean isPassive() {
+            return false;
+        }
     }
 
     static final class SnifferTunnelAction implements SpecialAction {
@@ -84,9 +88,45 @@ public class MountListener implements Listener {
         }
     }
 
+    static final class RavagerRamAction implements SpecialAction {
+
+        final Map<UUID, RavagerRam> activeRams = new HashMap<>();
+
+        @Override
+        public void start(LivingEntity mount, Player rider, AranarthMount mountData) {
+            UUID id = mount.getUniqueId();
+            if (activeRams.containsKey(id)) {
+                return;
+            }
+            double maxDamage = mountData.getThirdAttribute() != null
+                    ? mountData.getThirdAttribute()
+                    : 14.0;
+            RavagerRam ram = new RavagerRam((Ravager) mount, rider, activeRams, maxDamage);
+            activeRams.put(id, ram);
+            ram.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
+        }
+
+        @Override
+        public void stop(UUID mountId) {
+            // Passive ability — always active while mounted; space-bar release is ignored.
+        }
+
+        @Override
+        public void cleanup(UUID mountId) {
+            RavagerRam ram = activeRams.remove(mountId);
+            if (ram != null) {
+                ram.cancel();
+            }
+        }
+
+        @Override
+        public boolean isPassive() {
+            return true;
+        }
+    }
+
     /**
      * Immutable configuration for a single mount entity type.
-     *
      * @param entityClass          Bukkit entity class (used for spawning).
      * @param minHealth            Minimum randomised max-health (half-hearts).
      * @param maxHealth            Maximum randomised max-health (half-hearts).
@@ -116,6 +156,7 @@ public class MountListener implements Listener {
     }
 
     private static final SnifferTunnelAction SNIFFER_TUNNEL = new SnifferTunnelAction();
+    private static final RavagerRamAction RAVAGER_RAM = new RavagerRamAction();
 
     static final Map<Class<? extends LivingEntity>, MountTypeConfig> MOUNT_CONFIGS = new LinkedHashMap<>();
 
@@ -130,6 +171,17 @@ public class MountListener implements Listener {
                 true,
                 SNIFFER_TUNNEL
         ));
+        MOUNT_CONFIGS.put(Ravager.class, new MountTypeConfig(
+                Ravager.class,
+                40, 100, // Health (half-hearts)
+                0.75, 1.50, // Speed (blocks/tick – 15–30 m/s)
+                4.0, 14.0, // Ram Damage (half-hearts max – 2–7 hearts)
+                "Ram Damage",
+                true,
+                true,
+                RAVAGER_RAM
+        ));
+
 //         Template for future mounts
 //
 //         MOUNT_CONFIGS.put(NewMob.class, new MountTypeConfig(
@@ -541,6 +593,14 @@ public class MountListener implements Listener {
 
         if (config.specialAction() != null) {
             activeSpecialActions.put(mount.getUniqueId(), config.specialAction());
+            if (config.specialAction().isPassive()) {
+                config.specialAction().start(mount, player, aMount);
+            }
+        }
+
+        // Clear any existing target so the mount doesn't continue aggro on mount
+        if (mount instanceof Mob mob) {
+            mob.setTarget(null);
         }
 
         // Zero the AI speed so the mob's goal selector cannot override our velocity control

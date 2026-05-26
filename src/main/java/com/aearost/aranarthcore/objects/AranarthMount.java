@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.entity.Ravager;
 import org.bukkit.entity.Sniffer;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -83,6 +84,36 @@ public class AranarthMount {
                 + 3.689713992 * Math.pow(s, 2)
                 + 2.128599134 * s
                 - 0.343930367;
+    }
+
+    /**
+     * Constructs an {@code AranarthMount} from a Ravager's persistent data.
+     * Returns {@code null} if the entity has no tracked mount speed.
+     */
+    @Nullable
+    public static AranarthMount fromRavager(Ravager ravager) {
+        PersistentDataContainer pdc = ravager.getPersistentDataContainer();
+
+        if (!pdc.has(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE)) {
+            return null;
+        }
+
+        UUID ownerUUID = null;
+        if (pdc.has(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING)) {
+            try {
+                ownerUUID = UUID.fromString(pdc.get(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        double speed = pdc.get(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE);
+        boolean hasSaddle = pdc.has(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE)
+                && pdc.get(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE) == 1;
+
+        Double thirdAttr = pdc.has(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE)
+                ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
+
+        return new AranarthMount(ownerUUID, speed, hasSaddle, thirdAttr, thirdAttr != null ? "Ram Damage" : null);
     }
 
     /**
