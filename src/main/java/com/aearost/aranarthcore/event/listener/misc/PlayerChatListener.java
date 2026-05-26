@@ -12,6 +12,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.block.Biome;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -29,7 +30,10 @@ import java.util.List;
  */
 public class PlayerChatListener implements Listener {
 
+	private final AranarthCore plugin;
+
 	public PlayerChatListener(AranarthCore plugin) {
+		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -54,16 +58,22 @@ public class PlayerChatListener implements Listener {
                             enteredNumber = dominion.getClaimableResources();
                         }
 
-                        while (enteredNumber > 0) {
-                            claimDominionResources(dominion, player);
-                            enteredNumber--;
-                        }
-                        player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
+                        final int count = enteredNumber;
+                        final Biome capturedBiome = dominion.getBiomeResourcesBeingClaimed();
+                        // Deduct and clear state immediately on this thread to prevent a second claim
+                        // being started while the main-thread task is still queued.
+                        dominion.setClaimableResources(dominion.getClaimableResources() - count);
+                        dominion.setBiomeResourcesBeingClaimed(null);
+                        DominionUtils.updateDominion(dominion);
+                        Bukkit.getScheduler().runTask(plugin, () -> {
+                            for (int i = 0; i < count; i++) {
+                                claimDominionResources(dominion, player, capturedBiome);
+                            }
+                            player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
+                        });
                     } catch (NumberFormatException ex) {
                         player.sendMessage(ChatUtils.chatMessage("&cThat number is invalid!"));
                     }
-                    dominion.setBiomeResourcesBeingClaimed(null);
-                    DominionUtils.updateDominion(dominion);
                     return;
                 }
             }
@@ -151,12 +161,13 @@ public class PlayerChatListener implements Listener {
     }
 
     /**
-     * Claims the resources of the Dominion based on the stored Biome variable.
+     * Claims the resources of the Dominion for the given biome.
      * @param dominion The Dominion.
      * @param player The player claiming the resources.
+     * @param biome The biome whose resources should be distributed.
      */
-    private void claimDominionResources(Dominion dominion, Player player) {
-        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, dominion.getBiomeResourcesBeingClaimed());
+    private void claimDominionResources(Dominion dominion, Player player, Biome biome) {
+        List<ItemStack> resourcesToClaim = DominionUtils.getResourcesByDominionAndBiome(dominion, biome);
         Location loc = player.getLocation();
         for (ItemStack resource : resourcesToClaim) {
             HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(resource);
@@ -164,7 +175,6 @@ public class PlayerChatListener implements Listener {
                 loc.getWorld().dropItemNaturally(loc, remainder.get(0));
             }
         }
-        dominion.setClaimableResources(dominion.getClaimableResources() - 1);
         player.sendMessage(ChatUtils.chatMessage("&7The resources have been added to your inventory"));
     }
 }

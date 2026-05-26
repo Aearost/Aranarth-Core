@@ -137,6 +137,7 @@ Minor Features
 [+] Added /ac dominion disband to manually disband dominions
 [~] Fixed issue where stale dominion invites were re-creating disbanded dominions in the background
 [~] Made it so /d msg toggled would not use gradientchat
+[~] Fixed issue where /d resources was not being decremented correctly due to a full inventory
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
