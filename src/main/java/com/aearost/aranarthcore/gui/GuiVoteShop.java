@@ -244,7 +244,7 @@ public class GuiVoteShop {
 
 		ItemStack saint1monthly = new ItemStack(Material.PINK_CONCRETE_POWDER);
 		ItemMeta saint1monthlyMeta = saint1monthly.getItemMeta();
-		saint1monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint I (1 Month)"));
+		saint1monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lAcolyte (1 Month)"));
 		List<String> saint1monthlyLore = new ArrayList<>();
 		saint1monthlyLore.add(ChatUtils.translateToColor("&e250 vote points"));
 		saint1monthlyMeta.setLore(saint1monthlyLore);
@@ -253,7 +253,7 @@ public class GuiVoteShop {
 
 		ItemStack saint2monthly = new ItemStack(Material.MAGENTA_CONCRETE_POWDER);
 		ItemMeta saint2monthlyMeta = saint2monthly.getItemMeta();
-		saint2monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint II (1 Month)"));
+		saint2monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lDisciple (1 Month)"));
 		List<String> saint2monthlyLore = new ArrayList<>();
 		saint2monthlyLore.add(ChatUtils.translateToColor("&e350 vote points"));
 		saint2monthlyMeta.setLore(saint2monthlyLore);
@@ -262,7 +262,7 @@ public class GuiVoteShop {
 
 		ItemStack saint3monthly = new ItemStack(Material.PURPLE_CONCRETE_POWDER);
 		ItemMeta saint3monthlyMeta = saint3monthly.getItemMeta();
-		saint3monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint III (1 Month)"));
+		saint3monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSeraph (1 Month)"));
 		List<String> saint3monthlyLore = new ArrayList<>();
 		saint3monthlyLore.add(ChatUtils.translateToColor("&e500 vote points"));
 		saint3monthlyMeta.setLore(saint3monthlyLore);

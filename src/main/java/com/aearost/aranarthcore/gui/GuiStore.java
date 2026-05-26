@@ -167,54 +167,54 @@ public class GuiStore {
 		// Specified Slots
 		ItemStack saint1monthly = new ItemStack(Material.PINK_CONCRETE_POWDER);
 		ItemMeta saint1monthlyMeta = saint1monthly.getItemMeta();
-		saint1monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint I (1 Month) - $3.99"));
+		saint1monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lAcolyte (1 Month) - $3.99"));
 		List<String> saint1monthlyLore = new ArrayList<>();
-		saint1monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Saint I perks for 1 month"));
+		saint1monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Acolyte perks for 1 month"));
 		saint1monthlyMeta.setLore(saint1monthlyLore);
 		saint1monthly.setItemMeta(saint1monthlyMeta);
 		gui.setItem(11, saint1monthly);
 
 		ItemStack saint2monthly = new ItemStack(Material.MAGENTA_CONCRETE_POWDER);
 		ItemMeta saint2monthlyMeta = saint2monthly.getItemMeta();
-		saint2monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint II (1 Month) - $5.99"));
+		saint2monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lDisciple (1 Month) - $5.99"));
 		List<String> saint2monthlyLore = new ArrayList<>();
-		saint2monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Saint II perks for 1 month"));
+		saint2monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Disciple perks for 1 month"));
 		saint2monthlyMeta.setLore(saint2monthlyLore);
 		saint2monthly.setItemMeta(saint2monthlyMeta);
 		gui.setItem(13, saint2monthly);
 
 		ItemStack saint3monthly = new ItemStack(Material.PURPLE_CONCRETE_POWDER);
 		ItemMeta saint3monthlyMeta = saint3monthly.getItemMeta();
-		saint3monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSaint III (1 Month) - $7.99"));
+		saint3monthlyMeta.setDisplayName(ChatUtils.translateToColor("&5&lSeraph (1 Month) - $7.99"));
 		List<String> saint3monthlyLore = new ArrayList<>();
-		saint3monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Saint III perks for 1 month"));
+		saint3monthlyLore.add(ChatUtils.translateToColor("&dAccess to the Seraph perks for 1 month"));
 		saint3monthlyMeta.setLore(saint3monthlyLore);
 		saint3monthly.setItemMeta(saint3monthlyMeta);
 		gui.setItem(15, saint3monthly);
 
 		ItemStack saint1 = new ItemStack(Material.PINK_CONCRETE);
 		ItemMeta saint1Meta = saint1.getItemMeta();
-		saint1Meta.setDisplayName(ChatUtils.translateToColor("&5&lSaint I (Lifetime) - $9.99"));
+		saint1Meta.setDisplayName(ChatUtils.translateToColor("&5&lAcolyte (Lifetime) - $9.99"));
 		List<String> saint1Lore = new ArrayList<>();
-		saint1Lore.add(ChatUtils.translateToColor("&dPermanent access to the Saint I perks"));
+		saint1Lore.add(ChatUtils.translateToColor("&dPermanent access to the Acolyte perks"));
 		saint1Meta.setLore(saint1Lore);
 		saint1.setItemMeta(saint1Meta);
 		gui.setItem(20, saint1);
 
 		ItemStack saint2 = new ItemStack(Material.MAGENTA_CONCRETE);
 		ItemMeta saint2Meta = saint2.getItemMeta();
-		saint2Meta.setDisplayName(ChatUtils.translateToColor("&5&lSaint II (Lifetime) - $19.99"));
+		saint2Meta.setDisplayName(ChatUtils.translateToColor("&5&lDisciple (Lifetime) - $19.99"));
 		List<String> saint2Lore = new ArrayList<>();
-		saint2Lore.add(ChatUtils.translateToColor("&dPermanent access to the Saint II perks"));
+		saint2Lore.add(ChatUtils.translateToColor("&dPermanent access to the Disciple perks"));
 		saint2Meta.setLore(saint2Lore);
 		saint2.setItemMeta(saint2Meta);
 		gui.setItem(22, saint2);
 
 		ItemStack saint3 = new ItemStack(Material.PURPLE_CONCRETE);
 		ItemMeta saint3Meta = saint3.getItemMeta();
-		saint3Meta.setDisplayName(ChatUtils.translateToColor("&5&lSaint III (Lifetime) - $34.99"));
+		saint3Meta.setDisplayName(ChatUtils.translateToColor("&5&lSeraph (Lifetime) - $34.99"));
 		List<String> saint3Lore = new ArrayList<>();
-		saint3Lore.add(ChatUtils.translateToColor("&dPermanent access to the Saint III perks"));
+		saint3Lore.add(ChatUtils.translateToColor("&dPermanent access to the Seraph perks"));
 		saint3Meta.setLore(saint3Lore);
 		saint3.setItemMeta(saint3Meta);
 		gui.setItem(24, saint3);

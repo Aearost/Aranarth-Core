@@ -72,22 +72,22 @@ public class GuiStoreClick {
 
 		// Clicking one of the ranks
 		if (slot == 11) {
-			player.sendMessage(ChatUtils.chatMessage("&3&lSaint I (1 Month): &bhttps://aranarth.craftingstore.net/package/1474413"));
+			player.sendMessage(ChatUtils.chatMessage("&3&lAcolyte (1 Month): &bhttps://aranarth.craftingstore.net/package/1474413"));
 			player.closeInventory();
 		} else if (slot == 13) {
-			player.sendMessage(ChatUtils.chatMessage("&6&lSaint II (1 Month): &ehttps://aranarth.craftingstore.net/package/1474415"));
+			player.sendMessage(ChatUtils.chatMessage("&6&lDisciple (1 Month): &ehttps://aranarth.craftingstore.net/package/1474415"));
 			player.closeInventory();
 		} else if (slot == 15) {
-			player.sendMessage(ChatUtils.chatMessage("&4&lSaint III (1 Month): &chttps://aranarth.craftingstore.net/package/1474421"));
+			player.sendMessage(ChatUtils.chatMessage("&4&lSeraph (1 Month): &chttps://aranarth.craftingstore.net/package/1474421"));
 			player.closeInventory();
 		} else if (slot == 20) {
-			player.sendMessage(ChatUtils.chatMessage("&3&lSaint I (Lifetime): &bhttps://aranarth.craftingstore.net/package/493265"));
+			player.sendMessage(ChatUtils.chatMessage("&3&lAcolyte (Lifetime): &bhttps://aranarth.craftingstore.net/package/493265"));
 			player.closeInventory();
 		} else if (slot == 22) {
-			player.sendMessage(ChatUtils.chatMessage("&6&lSaint II (Lifetime): &ehttps://aranarth.craftingstore.net/package/1474409"));
+			player.sendMessage(ChatUtils.chatMessage("&6&lDisciple (Lifetime): &ehttps://aranarth.craftingstore.net/package/1474409"));
 			player.closeInventory();
 		} else if (slot == 24) {
-			player.sendMessage(ChatUtils.chatMessage("&4&lSaint III (Lifetime): &chttps://aranarth.craftingstore.net/package/1474412"));
+			player.sendMessage(ChatUtils.chatMessage("&4&lSeraph (Lifetime): &chttps://aranarth.craftingstore.net/package/1474412"));
 			player.closeInventory();
 		}
 

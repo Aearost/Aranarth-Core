@@ -218,15 +218,15 @@ public class GuiVoteShopPurchaseClick {
                         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1000);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     }
-                    // Saint I
+                    // Acolyte
                     else if (clicked.getType() == Material.PINK_CONCRETE_POWDER) {
                         Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 1");
                     }
-                    // Saint II
+                    // Disciple
                     else if (clicked.getType() == Material.MAGENTA_CONCRETE_POWDER) {
                         Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 2");
                     }
-                    // Saint III
+                    // Seraph
                     else if (clicked.getType() == Material.PURPLE_CONCRETE_POWDER) {
                         Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3");
                     }
