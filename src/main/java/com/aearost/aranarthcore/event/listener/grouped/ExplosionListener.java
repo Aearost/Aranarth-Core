@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
@@ -36,6 +37,8 @@ public class ExplosionListener implements Listener {
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
 			if (chunkDominion != null) {
 				e.setCancelled(true);
+			} else {
+				e.blockList().removeIf(block -> AranarthUtils.getLockedContainerAtBlock(block) != null);
 			}
 		}
 	}
