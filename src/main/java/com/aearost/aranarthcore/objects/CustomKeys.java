@@ -25,6 +25,16 @@ public class CustomKeys {
     public static final NamespacedKey QUEST_NPC = new NamespacedKey(AranarthCore.getInstance(), "quest_npc");
     public static final NamespacedKey MAGNETISM_TOOL_ID = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tool_id");
     public static final NamespacedKey MAGNETISM_TAG = new NamespacedKey(AranarthCore.getInstance(), "magnetism_tag");
+    public static final NamespacedKey MOUNT_OWNER = new NamespacedKey(AranarthCore.getInstance(), "mount_owner");
+    public static final NamespacedKey MOUNT_SADDLE = new NamespacedKey(AranarthCore.getInstance(), "mount_saddle");
+    public static final NamespacedKey MOUNT_THIRD_ATTR = new NamespacedKey(AranarthCore.getInstance(), "mount_third_attr");
+    public static final NamespacedKey PLAYER_MOUNT_MAX_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "player_mount_max_health");
+    public static final NamespacedKey PLAYER_MOUNT_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "player_mount_health");
+    public static final NamespacedKey PLAYER_MOUNT_SPEED = new NamespacedKey(AranarthCore.getInstance(), "player_mount_speed");
+    public static final NamespacedKey PLAYER_MOUNT_THIRD_ATTR = new NamespacedKey(AranarthCore.getInstance(), "player_mount_third_attr");
+    public static final NamespacedKey PLAYER_MOUNT_OWNER = new NamespacedKey(AranarthCore.getInstance(), "player_mount_owner");
+    public static final NamespacedKey PLAYER_MOUNT_TYPE = new NamespacedKey(AranarthCore.getInstance(), "player_mount_type");
+    // Legacy keys kept for one-version migration (read-only; do not write new data with these)
     public static final NamespacedKey SNIFFER_SADDLE = new NamespacedKey(AranarthCore.getInstance(), "sniffer_saddle");
     public static final NamespacedKey SNIFFER_SPEED = new NamespacedKey(AranarthCore.getInstance(), "sniffer_speed");
     public static final NamespacedKey PLAYER_SNIFFER_MAX_HEALTH = new NamespacedKey(AranarthCore.getInstance(), "player_sniffer_max_health");

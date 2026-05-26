@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Sniffer;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -15,25 +16,16 @@ import java.util.UUID;
 
 /**
  * Digs a circular tunnel in the direction the sniffer rider is looking.
- * Diameter: 7 blocks (radius 3.5). Max depth: 15 blocks.
- * Active only while the rider holds space; cancelled externally when released.
  */
 public class SnifferTunnel extends BukkitRunnable {
 
-    private static final double MAX_RADIUS = 3.5;
+    private static final double MAX_RADIUS = 3.0;
     private static final double RADIUS_INCREMENT = 0.25;
     private static final double RANGE = 25.0;
-    /**
-     * Blocks removed per tick. High value keeps the tunnel ahead of even the fastest mount.
-     */
-    private static final int BLOCKS_PER_TICK = 600;
-    /**
-     * How long (ms) before TempBlock reverts the tunnel back to original terrain.
-     */
-    private static final long REVERT_TIME_MS = 200_000L; // ~3 minutes 20 seconds
+    private static final long REVERT_TIME_MS = 200_000L; // 3m 20s
 
     private static final Set<Material> NON_DIGGABLE = Set.of(
-            // Admin / structural blocks
+            // Admin / Structural blocks
             Material.BEDROCK,
             Material.END_PORTAL_FRAME,
             Material.END_PORTAL,
@@ -45,7 +37,7 @@ public class SnifferTunnel extends BukkitRunnable {
             Material.STRUCTURE_BLOCK,
             Material.BARRIER,
             Material.LIGHT,
-            // Ores — preserved so players don't lose resources
+            // Ores
             Material.COAL_ORE,
             Material.DEEPSLATE_COAL_ORE,
             Material.IRON_ORE,
@@ -66,22 +58,22 @@ public class SnifferTunnel extends BukkitRunnable {
             Material.NETHER_QUARTZ_ORE,
             Material.ANCIENT_DEBRIS
     );
-
     private final Map<UUID, SnifferTunnel> activeTunnels;
     private final UUID snifferUUID;
     private final org.bukkit.Location startLocation;
     private final Vector direction;
-
+    private final int blocksPerTick;
     private double depth;
     private double radius;
     private double angle;
 
-    public SnifferTunnel(org.bukkit.entity.Player rider, Sniffer sniffer,
-                         Map<UUID, SnifferTunnel> activeTunnels) {
+    public SnifferTunnel(Player rider, Sniffer sniffer,
+                         Map<UUID, SnifferTunnel> activeTunnels, int blocksPerTick) {
         this.activeTunnels = activeTunnels;
         this.snifferUUID = sniffer.getUniqueId();
         this.startLocation = sniffer.getLocation().clone().add(0, 1.0, 0);
         this.direction = rider.getEyeLocation().getDirection().clone().normalize();
+        this.blocksPerTick = blocksPerTick;
         this.depth = 0;
         this.radius = RADIUS_INCREMENT;
         this.angle = 0;
@@ -95,7 +87,7 @@ public class SnifferTunnel extends BukkitRunnable {
             return;
         }
 
-        for (int i = 0; i < BLOCKS_PER_TICK; i++) {
+        for (int i = 0; i < blocksPerTick; i++) {
             if (depth > RANGE) {
                 finish();
                 return;
@@ -109,14 +101,13 @@ public class SnifferTunnel extends BukkitRunnable {
 
             if (!block.getType().isAir() && isDiggable(block)) {
                 if (TempBlock.isTempBlock(block)) {
-                    // Already managed by ProjectKorra — just clear it directly
                     block.setType(Material.AIR, false);
                 } else {
                     new TempBlock(block, Material.AIR).setRevertTime(REVERT_TIME_MS);
                 }
             }
 
-            // Advance spiral: angle fastest, then radius, then depth
+            // Advance spiral - angle fastest, then radius, then depth
             angle += 20;
             if (angle >= 360) {
                 angle = 0;
