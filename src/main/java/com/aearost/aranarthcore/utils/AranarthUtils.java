@@ -2121,36 +2121,25 @@ public class AranarthUtils {
 	 */
 	public static int getMaxShopNum(Player player) {
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
-		int rankQuiverSlotNum = 0;
-		int saintQuiverSlotNum = 0;
+		int rankShopNum = 0;
 
 		if (aranarthPlayer.getRank() == 3) {
-			rankQuiverSlotNum = 3;
+			rankShopNum = 3;
 		} else if (aranarthPlayer.getRank() == 4) {
-			rankQuiverSlotNum = 7;
+			rankShopNum = 7;
 		} else if (aranarthPlayer.getRank() == 5) {
-			rankQuiverSlotNum = 15;
+			rankShopNum = 15;
 		} else if (aranarthPlayer.getRank() == 6) {
-			rankQuiverSlotNum = 30;
+			rankShopNum = 30;
 		} else if (aranarthPlayer.getRank() == 7) {
-			rankQuiverSlotNum = 50;
+			rankShopNum = 50;
 		} else if (aranarthPlayer.getRank() == 8) {
-			rankQuiverSlotNum = -1;
+			return -1;
 		} else {
-			rankQuiverSlotNum = 0;
+			rankShopNum = 0;
 		}
 
-		if (aranarthPlayer.getSaintRank() == 1 || aranarthPlayer.getCouncilRank() == 1) {
-			saintQuiverSlotNum = 3;
-		}
-		if (aranarthPlayer.getSaintRank() == 2 || aranarthPlayer.getCouncilRank() == 2) {
-			saintQuiverSlotNum = 6;
-		}
-		if (aranarthPlayer.getSaintRank() == 3 || aranarthPlayer.getCouncilRank() == 3) {
-			saintQuiverSlotNum = 9;
-		}
-
-		return rankQuiverSlotNum + saintQuiverSlotNum;
+		return rankShopNum;
 	}
 
 	/**
