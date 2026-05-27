@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Handles the auto complete functionality while using the /dominion command.
@@ -59,11 +60,17 @@ public class CommandDominionCompleter implements TabCompleter {
 					}
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 					if (dominion != null) {
-						yield dominion.getAllied().stream()
+						Stream<String> alliedStream = dominion.getAllied().stream()
 							.map(DominionUtils::getPlayerDominion)
 							.filter(d -> d != null && dominion.isAllied(d) && d.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME))
-							.map(d -> ChatUtils.stripColorFormatting(d.getName()))
+							.map(d -> ChatUtils.stripColorFormatting(d.getName()));
+						Stream<String> conqueredStream = dominion.getConquered().stream()
+							.map(DominionUtils::getPlayerDominion)
+							.filter(d -> d != null)
+							.map(d -> ChatUtils.stripColorFormatting(d.getName()));
+						yield Stream.concat(alliedStream, conqueredStream)
 							.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
+							.distinct()
 							.collect(Collectors.toList());
 					}
 				}

@@ -282,14 +282,17 @@ public class CommandDominion implements CommandExecutor {
 		}
 
 		if (!isAdmin) {
-			if (!playerDominion.isAllied(target)) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
-				return;
-			}
+			boolean isConquered = playerDominion.getConquered().contains(target.getLeader());
+			if (!isConquered) {
+				if (!playerDominion.isAllied(target)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
+					return;
+				}
 
-			if (!target.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME)) {
-				player.sendMessage(ChatUtils.chatMessage("&e" + target.getName() + " &chas not enabled home access for allies!"));
-				return;
+				if (!target.getDominionPermissions().hasPermission(DominionRank.ALLIED, DominionPermission.HOME)) {
+					player.sendMessage(ChatUtils.chatMessage("&e" + target.getName() + " &chas not enabled home access for allies!"));
+					return;
+				}
 			}
 		}
 
