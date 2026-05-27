@@ -32,6 +32,11 @@ public enum DominionPermission {
     INVITE,
     REMOVE_MEMBER,
 
+    // War commands (lieutenant-accessible by default, configurable)
+    SURRENDER,
+    REBEL,
+    RETREAT,
+
     // Leader-restricted commands (enforced in commands, not configurable per rank)
     WITHDRAW
 }

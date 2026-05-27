@@ -18,10 +18,15 @@ public class DominionUtils {
 
 	private static final List<Dominion> dominions = new ArrayList<>();
 
-	// O(1) lookup maps
 	private static final Map<UUID, Dominion> dominionById = new HashMap<>();
 	private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
 	private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
+	public static final long CONQUEST_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
+	public static final long CONQUER_COOLDOWN_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+	public static final long REBEL_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
+	public static final long REBEL_COOLDOWN_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+	public static final long REBEL_INACTIVITY_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
+	public static final long CONQUEST_INACTIVITY_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
 
 	/**
 	 * Provides the list of Dominions.
@@ -1974,5 +1979,182 @@ public class DominionUtils {
 	 */
 	public static String getFormattedRankName(DominionRank rank) {
 		return getRankColor(rank) + (rank.name().toUpperCase()).charAt(0) + (rank.name().toLowerCase()).substring(1);
+	}
+
+	/**
+	 * Verifies active conquest/rebellion requests and resolves any that have reached a deadline or activity threshold.
+	 */
+	public static void checkAndProcessConquestDeadlines() {
+		long now = System.currentTimeMillis();
+
+		List<Dominion> conquestInactive = new ArrayList<>();
+		List<Dominion> conquestExpired = new ArrayList<>();
+		List<Dominion> rebellionInactive = new ArrayList<>();
+		List<Dominion> rebellionExpired = new ArrayList<>();
+
+		for (Dominion dominion : getDominions()) {
+			// Conquest checks (inactivity takes priority over expiry)
+			if (dominion.getConqueredRequest() != null && dominion.getConqueredRequestTimestamp() > 0) {
+				long defenderLastSeen = dominion.getConqueredRequestDefenderLastSeen();
+				// If no defender has logged on for 3 consecutive days, auto-conquer
+				if (defenderLastSeen > 0 && now - defenderLastSeen >= CONQUEST_INACTIVITY_MS) {
+					conquestInactive.add(dominion);
+				}
+				// If the 7-day conquest window expires with defenders having been active
+				else if (now - dominion.getConqueredRequestTimestamp() >= CONQUEST_DEADLINE_MS) {
+					conquestExpired.add(dominion);
+				}
+			}
+			// Rebellion checks (inactivity takes priority over expiry)
+			if (dominion.getRebelRequest() != null && dominion.getRebelRequestTimestamp() > 0) {
+				long lastSeen = dominion.getRebelRequestConquerorLastSeen();
+				// If the conquerors are inactive for 3 consecutive days, rebellion auto-succeeds
+				if (lastSeen > 0 && now - lastSeen >= REBEL_INACTIVITY_MS) {
+					rebellionInactive.add(dominion);
+				}
+				// If the 7-day rebellion window expires with no resolution
+				else if (now - dominion.getRebelRequestTimestamp() >= REBEL_DEADLINE_MS) {
+					rebellionExpired.add(dominion);
+				}
+			}
+		}
+
+		// Conquest auto-success, no defender logged on for 3 consecutive days
+		for (Dominion defender : conquestInactive) {
+			Dominion conqueror = getPlayerDominion(defender.getConqueredRequest());
+			defender.setConqueredRequest(null);
+			defender.setConqueredRequestTimestamp(0L);
+			defender.setConqueredRequestDefenderLastSeen(0L);
+
+			if (conqueror == null) {
+				updateDominion(defender);
+				continue;
+			}
+
+			List<UUID> conquered = conqueror.getConquered();
+			conquered.add(defender.getLeader());
+			conquered.addAll(defender.getConquered());
+			defender.setConquered(new ArrayList<>());
+			conqueror.setConquered(conquered);
+			conqueror.setLastConquerAttemptTimestamp(now);
+			updateDominion(defender);
+			updateDominion(conqueror);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
+				onlinePlayer.sendMessage(ChatUtils.chatMessage(defender.getName() + " &4has been conquered by &e" + conqueror.getName()));
+			}
+			DiscordUtils.dominionMessage(defender, defender.getName() + " has been conquered by " + conqueror.getName(), new Color(101, 0, 0));
+		}
+
+		// Conquest expired, 7-day window ended with defenders having been active, no outcome
+		for (Dominion defender : conquestExpired) {
+			Dominion conqueror = getPlayerDominion(defender.getConqueredRequest());
+			defender.setConqueredRequest(null);
+			defender.setConqueredRequestTimestamp(0L);
+			defender.setConqueredRequestDefenderLastSeen(0L);
+
+			if (conqueror == null) {
+				updateDominion(defender);
+				continue;
+			}
+
+			conqueror.setLastConquerAttemptTimestamp(now);
+			updateDominion(defender);
+			updateDominion(conqueror);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+				onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + conqueror.getName() + " &7's conquest of &e" + defender.getName() + " &7has failed"));
+			}
+			DiscordUtils.dominionMessage(defender, conqueror.getName() + "'s conquest of " + defender.getName() + " has failed", new Color(135, 245, 220));
+		}
+
+		// Rebellion auto-success, conqueror was inactive for 3 consecutive days
+		for (Dominion conqueror : rebellionInactive) {
+			Dominion rebel = getPlayerDominion(conqueror.getRebelRequest());
+			conqueror.setRebelRequest(null);
+			conqueror.setRebelRequestTimestamp(0L);
+			conqueror.setRebelRequestConquerorLastSeen(0L);
+
+			if (rebel == null) {
+				updateDominion(conqueror);
+				continue;
+			}
+
+			List<UUID> conquered = conqueror.getConquered();
+			conquered.remove(rebel.getLeader());
+			conqueror.setConquered(conquered);
+			rebel.setLastRebelAttemptTimestamp(now);
+			updateDominion(conqueror);
+			updateDominion(rebel);
+			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+				onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+				onlinePlayer.sendMessage(ChatUtils.chatMessage(rebel.getName() + " &dhas successfully rebelled against &e" + conqueror.getName()));
+			}
+			DiscordUtils.dominionMessage(conqueror, rebel.getName() + " has successfully rebelled against " + conqueror.getName(), new Color(135, 245, 220));
+		}
+
+		// Rebellion expired, 7 days passed with no resolution so the dominion stays conquered
+		for (Dominion conqueror : rebellionExpired) {
+			Dominion rebel = getPlayerDominion(conqueror.getRebelRequest());
+			conqueror.setRebelRequest(null);
+			conqueror.setRebelRequestTimestamp(0L);
+			conqueror.setRebelRequestConquerorLastSeen(0L);
+
+			if (rebel != null) {
+				rebel.setLastRebelAttemptTimestamp(now);
+				updateDominion(rebel);
+			}
+			updateDominion(conqueror);
+
+			if (rebel != null) {
+				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+					onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 1F, 1F);
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + rebel.getName() + "&7's rebellion against &e" + conqueror.getName() + " &7has failed"));
+				}
+				DiscordUtils.dominionMessage(conqueror, rebel.getName() + "'s rebellion against " + conqueror.getName() + " has failed", new Color(101, 0, 0));
+			}
+		}
+	}
+
+	/**
+	 * Provides the death penalty multiplier that applies to the victim based on the
+	 * current war state between the victim's and killer's dominions.
+	 * @param victimUuid The UUID of the player who died.
+	 * @param killerUuid The UUID of the player who killed them.
+	 * @return The multiplier to apply to the victim's death penalties (1 or 3).
+	 */
+	public static int getDeathPenaltyMultiplier(UUID victimUuid, UUID killerUuid) {
+		Dominion victimDom = getPlayerDominion(victimUuid);
+		Dominion killerDom = getPlayerDominion(killerUuid);
+		// One of the two is null
+		if (victimDom == null || killerDom == null || victimDom.isSameDominion(killerDom)) {
+			return 1;
+		}
+
+		// Active conquest: killerDom is conquering victimDom (victim is defender)
+		if (victimDom.getConqueredRequest() != null
+				&& victimDom.getConqueredRequest().equals(killerDom.getLeader())) {
+			return 3;
+		}
+		// Active conquest: victimDom is conquering killerDom (victim is attacker)
+		if (killerDom.getConqueredRequest() != null
+				&& killerDom.getConqueredRequest().equals(victimDom.getLeader())) {
+			return 3;
+		}
+
+		// Active rebellion: victimDom is the conqueror being rebelled against by killerDom
+		if (victimDom.getRebelRequest() != null
+				&& victimDom.getRebelRequest().equals(killerDom.getLeader())
+				&& victimDom.getConquered().contains(killerDom.getLeader())) {
+			return 3;
+		}
+		// Active rebellion: killerDom is the conqueror, victimDom is the rebelling dominion → 1x for rebel
+		if (killerDom.getRebelRequest() != null
+				&& killerDom.getRebelRequest().equals(victimDom.getLeader())
+				&& killerDom.getConquered().contains(victimDom.getLeader())) {
+			return 1;
+		}
+
+		return 1;
 	}
 }

@@ -116,7 +116,7 @@ commands:
     permission: aranarth.tables
   message:
     description: Messages the input player the provided message
-    aliases: [msg]
+    aliases: [msg, tell]
     permission: aranarth.message
   motd:
     description: Displays the server MOTD

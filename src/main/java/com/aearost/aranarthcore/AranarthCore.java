@@ -28,6 +28,7 @@ import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMe
 import github.scarsz.discordsrv.dependencies.jda.api.hooks.ListenerAdapter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -56,6 +57,13 @@ public class AranarthCore extends JavaPlugin {
         initializeRecipes();
         initializeCommands();
         initializeItems();
+
+        // Force /ac to be handled by AranarthCore after all plugins (including mcMMO) have enabled
+        Bukkit.getScheduler().runTask(this, () -> {
+            SimpleCommandMap commandMap = (SimpleCommandMap) Bukkit.getServer().getCommandMap();
+            commandMap.getKnownCommands().put("ac", getCommand("ac"));
+            commandMap.getKnownCommands().put("aranarthcore:ac", getCommand("ac"));
+        });
 
         // Sets default storm values
         AranarthUtils.setWeather(Weather.CLEAR);
@@ -96,6 +104,7 @@ public class AranarthCore extends JavaPlugin {
                 ShopUtils.initializeAllHolograms();
                 PersistenceUtils.saveDominions();
                 PersistenceUtils.saveDominionPermissions();
+                DominionUtils.checkAndProcessConquestDeadlines();
                 PersistenceUtils.saveWarps();
                 PersistenceUtils.savePunishments();
                 PersistenceUtils.saveAvatars();

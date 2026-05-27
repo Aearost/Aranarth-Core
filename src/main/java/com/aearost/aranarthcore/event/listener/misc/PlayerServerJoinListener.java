@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.items.Quiver;
 import com.aearost.aranarthcore.items.arrow.ArrowIron;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
@@ -73,6 +74,21 @@ public class PlayerServerJoinListener implements Listener {
 						}
 					}
 				}.runTaskLater(AranarthCore.getInstance(), 30);
+			}
+		}
+
+		// Update conquest/rebellion activity tracking for this player's dominion
+		Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+		if (playerDominion != null) {
+			// Defender logging on during an active conquest, reset their inactivity clock
+			if (playerDominion.getConqueredRequest() != null) {
+				playerDominion.setConqueredRequestDefenderLastSeen(System.currentTimeMillis());
+				DominionUtils.updateDominion(playerDominion);
+			}
+			// Conqueror logging on during an active rebellion, reset their inactivity clock
+			if (playerDominion.getRebelRequest() != null) {
+				playerDominion.setRebelRequestConquerorLastSeen(System.currentTimeMillis());
+				DominionUtils.updateDominion(playerDominion);
 			}
 		}
 

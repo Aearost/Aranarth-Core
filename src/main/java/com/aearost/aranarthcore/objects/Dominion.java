@@ -34,7 +34,13 @@ public class Dominion {
 	private Biome biomeResourcesBeingClaimed;
 	private List<UUID> conquered;
 	private UUID conqueredRequest;
+	private long conqueredRequestTimestamp;
+	private long conqueredRequestDefenderLastSeen;
 	private UUID rebelRequest;
+	private long rebelRequestTimestamp;
+	private long rebelRequestConquerorLastSeen;
+	private long lastConquerAttemptTimestamp;
+	private long lastRebelAttemptTimestamp;
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
@@ -453,6 +459,55 @@ public class Dominion {
 	}
 
 	/**
+	 * Provides the timestamp of when the active conquer request was issued on this Dominion.
+	 * @return The timestamp.
+	 */
+	public long getConqueredRequestTimestamp() {
+		return conqueredRequestTimestamp;
+	}
+
+	/**
+	 * Updates the timestamp of when the active conquer request was issued on this Dominion.
+	 * @param conqueredRequestTimestamp The timestamp.
+	 */
+	public void setConqueredRequestTimestamp(long conqueredRequestTimestamp) {
+		this.conqueredRequestTimestamp = conqueredRequestTimestamp;
+	}
+
+	/**
+	 * Provides the timestamp of the last time any defending member logged on during an active conquest window.
+	 * Used for rolling 3-day inactivity detection (auto-conquest if no defender seen for 3 consecutive days).
+	 * @return The timestamp in milliseconds, or 0 if not set.
+	 */
+	public long getConqueredRequestDefenderLastSeen() {
+		return conqueredRequestDefenderLastSeen;
+	}
+
+	/**
+	 * Updates the last-seen timestamp for defending members during an active conquest window.
+	 * @param timestamp The timestamp in milliseconds.
+	 */
+	public void setConqueredRequestDefenderLastSeen(long timestamp) {
+		this.conqueredRequestDefenderLastSeen = timestamp;
+	}
+
+	/**
+	 * Provides the timestamp of the last time this Dominion issued a conquer attempt.
+	 * @return The timestamp.
+	 */
+	public long getLastConquerAttemptTimestamp() {
+		return lastConquerAttemptTimestamp;
+	}
+
+	/**
+	 * Updates the timestamp of the last time this Dominion issued a conquer attempt.
+	 * @param lastConquerAttemptTimestamp The timestamp.
+	 */
+	public void setLastConquerAttemptTimestamp(long lastConquerAttemptTimestamp) {
+		this.lastConquerAttemptTimestamp = lastConquerAttemptTimestamp;
+	}
+
+	/**
 	 * Provides the UUID of the Dominion leader of the conquered Dominion.
 	 * @return The UUID of the Dominion leader of the conquered Dominion.
 	 */
@@ -466,6 +521,56 @@ public class Dominion {
 	 */
 	public void setRebelRequest(UUID rebelRequest) {
 		this.rebelRequest = rebelRequest;
+	}
+
+	/**
+	 * Provides the timestamp of when the active rebel request was issued on this Dominion.
+	 * @return The timestamp, or 0 if none.
+	 */
+	public long getRebelRequestTimestamp() {
+		return rebelRequestTimestamp;
+	}
+
+	/**
+	 * Updates the timestamp of when the rebel request was issued on this Dominion.
+	 * @param rebelRequestTimestamp The timestamp, or 0 to clear.
+	 */
+	public void setRebelRequestTimestamp(long rebelRequestTimestamp) {
+		this.rebelRequestTimestamp = rebelRequestTimestamp;
+	}
+
+	/**
+	 * Provides the last time any member of this (conquering) Dominion logged on since a rebellion started.
+	 * Used for the rolling 3-day inactivity check. 0 means never updated.
+	 * @return The timestamp, or 0 if no rebellion is active.
+	 */
+	public long getRebelRequestConquerorLastSeen() {
+		return rebelRequestConquerorLastSeen;
+	}
+
+	/**
+	 * Updates the last-seen timestamp for the conquering Dominion during an active rebellion.
+	 * @param rebelRequestConquerorLastSeen The timestamp.
+	 */
+	public void setRebelRequestConquerorLastSeen(long rebelRequestConquerorLastSeen) {
+		this.rebelRequestConquerorLastSeen = rebelRequestConquerorLastSeen;
+	}
+
+	/**
+	 * Provides the timestamp of when the last rebellion attempt by this Dominion ended.
+	 * Used to enforce the 3-day rebellion cooldown.
+	 * @return The timestamp, or 0 if they have never rebelled.
+	 */
+	public long getLastRebelAttemptTimestamp() {
+		return lastRebelAttemptTimestamp;
+	}
+
+	/**
+	 * Updates the timestamp of when the last rebellion attempt ended.
+	 * @param lastRebelAttemptTimestamp The timestamp, or 0 to clear.
+	 */
+	public void setLastRebelAttemptTimestamp(long lastRebelAttemptTimestamp) {
+		this.lastRebelAttemptTimestamp = lastRebelAttemptTimestamp;
 	}
 
 	/**

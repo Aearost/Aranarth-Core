@@ -51,7 +51,7 @@ public class GuiDominionPermissions {
      * Row 0 — Buffer:              slots 0-8  (gray panes)
      * Row 1 — Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
      * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slots 28-32 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER)
+     * Row 3 — Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
      * Row 4 — Buffer:             slots 36-44 (gray panes)
      * </pre>
      */
@@ -74,6 +74,9 @@ public class GuiDominionPermissions {
         map.put(30, DominionPermission.RESOURCES);
         map.put(31, DominionPermission.INVITE);
         map.put(32, DominionPermission.REMOVE_MEMBER);
+        map.put(33, DominionPermission.SURRENDER);
+        map.put(34, DominionPermission.REBEL);
+        map.put(35, DominionPermission.RETREAT);
         return map;
     }
 
@@ -335,6 +338,9 @@ public class GuiDominionPermissions {
             case RESOURCES -> Material.DIAMOND_PICKAXE;
             case INVITE -> Material.PAPER;
             case REMOVE_MEMBER -> Material.IRON_AXE;
+            case SURRENDER -> Material.WHITE_BANNER;
+            case REBEL -> Material.CROSSBOW;
+            case RETREAT -> Material.FEATHER;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }

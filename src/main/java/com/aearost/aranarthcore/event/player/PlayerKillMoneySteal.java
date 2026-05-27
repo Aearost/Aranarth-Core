@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -35,16 +36,18 @@ public class PlayerKillMoneySteal {
 
         double percentage = 2.5 + new Random().nextDouble() * 2.5;
         DecimalFormat df = new DecimalFormat("0.00");
-        double stolenAmount = Double.parseDouble(df.format(victimBalance * percentage / 100.0));
+        int warMultiplier = DominionUtils.getDeathPenaltyMultiplier(victim.getUniqueId(), killer.getUniqueId());
+        double stolenAmount = Double.parseDouble(df.format(victimBalance * percentage / 100.0 * warMultiplier));
 
         victimAranarthPlayer.setBalance(victimBalance - stolenAmount);
         killerAranarthPlayer.setBalance(killerAranarthPlayer.getBalance() + stolenAmount);
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         String formattedAmount = formatter.format(stolenAmount);
+        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
 
-        killer.sendMessage(ChatUtils.chatMessage("&7You have stolen &6" + formattedAmount + " &7from &e" + victimAranarthPlayer.getNickname()));
+        killer.sendMessage(ChatUtils.chatMessage("&7You have stolen &6" + formattedAmount + " &7from &e" + victimAranarthPlayer.getNickname() + warSuffix));
         killer.playSound(killer, Sound.ENTITY_PLAYER_LEVELUP, 1F, 1F);
-        victim.sendMessage(ChatUtils.chatMessage("&e" + killerAranarthPlayer.getNickname() + " &chas stolen &6" + formattedAmount + " &cfrom you!"));
+        victim.sendMessage(ChatUtils.chatMessage("&e" + killerAranarthPlayer.getNickname() + " &chas stolen &6" + formattedAmount + " &cfrom you!" + warSuffix));
     }
 }

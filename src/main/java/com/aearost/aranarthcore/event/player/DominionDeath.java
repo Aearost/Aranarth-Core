@@ -29,13 +29,20 @@ public class DominionDeath {
                     moneyToConsume = 500;
                 }
 
+                int warMultiplier = 1;
+                if (wasKilledByPlayer) {
+                    Player killer = (Player) e.getDamageSource().getCausingEntity();
+                    warMultiplier = DominionUtils.getDeathPenaltyMultiplier(player.getUniqueId(), killer.getUniqueId());
+                    moneyToConsume *= warMultiplier;
+                }
+
                 // Prioritize food decrease
                 if (new Random().nextBoolean()) {
-                    boolean wasFoodDecreased = attemptFoodDecrease(dominion, wasKilledByPlayer);
+                    boolean wasFoodDecreased = attemptFoodDecrease(dominion, wasKilledByPlayer, warMultiplier);
                     if (!wasFoodDecreased) {
                         int result = DominionUtils.consumeMoneyOrLand(dominion, moneyToConsume);
                         if (result == 1) {
-                            displayMoneyLoss(dominion, wasKilledByPlayer);
+                            displayMoneyLoss(dominion, wasKilledByPlayer, warMultiplier);
                         } else {
                             // Selling a chunk
                             if (result == 0) {
@@ -53,11 +60,11 @@ public class DominionDeath {
                     // Do not apply chunk selling logic if there is not enough money
                     if (dominion.getBalance() >= moneyToConsume) {
                         DominionUtils.consumeMoneyOrLand(dominion, moneyToConsume);
-                        displayMoneyLoss(dominion, wasKilledByPlayer);
+                        displayMoneyLoss(dominion, wasKilledByPlayer, warMultiplier);
                     }
                     // Prioritizing food decrease before chunk selling
                     else {
-                        boolean wasFoodDecreased = attemptFoodDecrease(dominion, wasKilledByPlayer);
+                        boolean wasFoodDecreased = attemptFoodDecrease(dominion, wasKilledByPlayer, warMultiplier);
                         if (!wasFoodDecreased) {
                             // Will only do a chunk decrease due to balance being exceeded
                             int result = DominionUtils.consumeMoneyOrLand(dominion, moneyToConsume);
@@ -77,9 +84,10 @@ public class DominionDeath {
      * Handles logic when attempting to decrease a Dominion's food reserves.
      * @param dominion The Dominion.
      * @param wasKilledByPlayer Whether the death was caused by another player.
+     * @param warMultiplier The war penalty multiplier (1 = normal, 3 = at war).
      * @return Whether the food reserves were depleted or not.
      */
-    private boolean attemptFoodDecrease(Dominion dominion, boolean wasKilledByPlayer) {
+    private boolean attemptFoodDecrease(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
         int totalFoodPower = DominionUtils.getTotalFoodPower(dominion);
         int powerBeingConsumed = 0;
         // Consume 100 power per day for <=25 chunks
@@ -96,9 +104,11 @@ public class DominionDeath {
             powerBeingConsumed *= 4;
         }
 
+        powerBeingConsumed *= warMultiplier;
+
         if (totalFoodPower >= powerBeingConsumed) {
             DominionUtils.consumeFood(dominion, powerBeingConsumed);
-            displayFoodLoss(dominion, wasKilledByPlayer);
+            displayFoodLoss(dominion, wasKilledByPlayer, warMultiplier);
             return true;
         } else {
             return false;
@@ -106,16 +116,18 @@ public class DominionDeath {
     }
 
     /**
-     * Informs members of the input Dominion that money was lost by a player's death.
+     * Informs members of the input Dominion that food was lost by a player's death.
      * @param dominion The Dominion.
      * @param wasKilledByPlayer Whether the death was caused by another player.
+     * @param warMultiplier The war penalty multiplier (1 = normal, 3 = at war).
      */
-    private void displayFoodLoss(Dominion dominion, boolean wasKilledByPlayer) {
+    private void displayFoodLoss(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
         String severelyKeyword = wasKilledByPlayer ? "severely " : "";
+        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(
-                        "&cYour Dominion's food reserves have been " + severelyKeyword + "depleted"));
+                        "&cYour Dominion's food reserves have been " + severelyKeyword + "depleted" + warSuffix));
             }
         }
     }
@@ -124,13 +136,15 @@ public class DominionDeath {
      * Informs members of the input Dominion that money was lost by a player's death.
      * @param dominion The Dominion.
      * @param wasKilledByPlayer Whether the death was caused by another player.
+     * @param warMultiplier The war penalty multiplier (1 = normal, 3 = at war).
      */
-    private void displayMoneyLoss(Dominion dominion, boolean wasKilledByPlayer) {
+    private void displayMoneyLoss(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
         String severelyKeyword = wasKilledByPlayer ? "severely " : "";
+        String warSuffix = warMultiplier > 1 ? " &4(" + warMultiplier + "x war penalty)" : "";
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
                 onlinePlayer.sendMessage(ChatUtils.chatMessage(
-                        "&cYour Dominion's balance has been " + severelyKeyword + "depleted"));
+                        "&cYour Dominion's balance has been " + severelyKeyword + "depleted" + warSuffix));
             }
         }
     }

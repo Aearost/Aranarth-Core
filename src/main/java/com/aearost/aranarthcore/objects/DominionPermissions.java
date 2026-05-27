@@ -43,7 +43,8 @@ public class DominionPermissions {
         lieutenantPerms.addAll(Arrays.asList(
                 DominionPermission.BUILD,
                 DominionPermission.HOME, DominionPermission.FOOD,
-                DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER
+                DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER,
+                DominionPermission.SURRENDER, DominionPermission.REBEL, DominionPermission.RETREAT
         ));
         perms.put(DominionRank.LIEUTENANT, lieutenantPerms);
 

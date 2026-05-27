@@ -1492,76 +1492,99 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player.
 	 */
 	private static void conquer(String[] args, Dominion dominion, Player player) {
-		if (dominion != null) {
-			StringBuilder dominionNameBuilder = new StringBuilder();
-			for (int i = 1; i < args.length; i++) {
-				dominionNameBuilder.append(args[i]);
-				if (i < args.length - 1) {
-					dominionNameBuilder.append(" ");
-				}
-			}
-
-			List<Dominion> dominions = DominionUtils.getDominions();
-			boolean wasDominionFound = false;
-			for (Dominion dominionFromList : dominions) {
-				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					wasDominionFound = true;
-					if (dominion.isSameDominion(dominionFromList)) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Conquer &cyour own Dominion!"));
-						return;
-					}
-
-					if (!dominion.isEnemied(dominionFromList)) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou can only &4Conquer &ca Dominion that you are &4Enemied &cwith!"));
-						return;
-					}
-
-					if (DominionUtils.getConquerorOfDominion(dominion) != null) {
-						player.sendMessage(ChatUtils.chatMessage("&cA conquered Dominion cannot conquer another!"));
-						return;
-					}
-
-					if (dominion.getConquered().contains(dominionFromList.getLeader())) {
-						player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already conquered &e" + dominionFromList.getName()));
-						return;
-					}
-
-					UUID conquerorUuid = DominionUtils.getConquerorOfDominion(dominionFromList);
-					if (conquerorUuid != null) {
-						player.sendMessage(ChatUtils.chatMessage("&cThis Dominion is already conquered by &e" + DominionUtils.getPlayerDominion(conquerorUuid).getName()));
-						return;
-					}
-
-					// Send Dominion conquer request
-					if (dominionFromList.getConqueredRequest() != null
-							&& dominionFromList.getConqueredRequest().equals(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou have already attempted to &4Conquer &e" + dominionFromList.getName()));
-						return;
-					} else {
-						dominionFromList.setConqueredRequest(player.getUniqueId());
-						DominionUtils.updateDominion(dominionFromList);
-						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-								onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_2, 2F, 1F);
-								onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + dominionFromList.getName()));
-							} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-								onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 2F, 1F);
-								onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &4is attempting to conquer your Dominion"));
-								if (onlinePlayer.getUniqueId().equals(dominionFromList.getLeader())) {
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&4To surrender your Dominion, use &e/dominion surrender " + ChatUtils.stripColorFormatting(dominion.getName())));
-								}
-							}
-						}
-					}
-					break;
-				}
-			}
-
-			if (!wasDominionFound) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
-			}
-		} else {
+		if (dominion == null) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		// Only the leader can initiate a conquest
+		if (!dominion.getLeader().equals(player.getUniqueId())) {
+			player.sendMessage(ChatUtils.chatMessage("&cOnly the Dominion Leader can initiate a conquest!"));
+			return;
+		}
+
+		if (DominionUtils.getConquerorOfDominion(dominion) != null) {
+			player.sendMessage(ChatUtils.chatMessage("&cA conquered Dominion cannot conquer another!"));
+			return;
+		}
+
+		// Block if there is already an active conquest attempt from this dominion
+		boolean alreadyConquering = DominionUtils.getDominions().stream()
+				.anyMatch(d -> d.getConqueredRequest() != null && d.getConqueredRequest().equals(dominion.getLeader()));
+		if (alreadyConquering) {
+			player.sendMessage(ChatUtils.chatMessage("&cYour Dominion already has an active conquest underway!"));
+			return;
+		}
+
+		// If on cooldown for conquering again
+		long lastAttempt = dominion.getLastConquerAttemptTimestamp();
+		if (lastAttempt > 0 && System.currentTimeMillis() - lastAttempt < DominionUtils.CONQUER_COOLDOWN_MS) {
+			long remainingMs = DominionUtils.CONQUER_COOLDOWN_MS - (System.currentTimeMillis() - lastAttempt);
+			long remainingHours = remainingMs / (1000 * 60 * 60);
+			long remainingDays = remainingHours / 24;
+			long leftoverHours = remainingHours % 24;
+			String timeLeft = remainingDays > 0 ? remainingDays + "d " + leftoverHours + "h" : leftoverHours + "h";
+			player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot conquer again for &4" + timeLeft));
+			return;
+		}
+
+		StringBuilder dominionNameBuilder = new StringBuilder();
+		for (int i = 1; i < args.length; i++) {
+			dominionNameBuilder.append(args[i]);
+			if (i < args.length - 1) {
+				dominionNameBuilder.append(" ");
+			}
+		}
+
+		List<Dominion> dominions = DominionUtils.getDominions();
+		boolean wasDominionFound = false;
+		for (Dominion dominionFromList : dominions) {
+			if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+				wasDominionFound = true;
+				if (dominion.isSameDominion(dominionFromList)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Conquer &cyour own Dominion!"));
+					return;
+				}
+				if (!dominion.isEnemied(dominionFromList)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou can only &4Conquer &ca Dominion that you are &4Enemied &cwith!"));
+					return;
+				}
+				if (dominion.getConquered().contains(dominionFromList.getLeader())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already conquered &e" + dominionFromList.getName()));
+					return;
+				}
+				UUID conquerorUuid = DominionUtils.getConquerorOfDominion(dominionFromList);
+				if (conquerorUuid != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis Dominion is already conquered by &e" + DominionUtils.getPlayerDominion(conquerorUuid).getName()));
+					return;
+				}
+				if (dominionFromList.getConqueredRequest() != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cThis Dominion already has an active conquest request against it!"));
+					return;
+				}
+
+				long now = System.currentTimeMillis();
+				dominionFromList.setConqueredRequest(player.getUniqueId());
+				dominionFromList.setConqueredRequestTimestamp(now);
+				dominionFromList.setConqueredRequestDefenderLastSeen(now);
+				DominionUtils.updateDominion(dominionFromList);
+
+				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+					if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_2, 2F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion is attempting to conquer &e" + dominionFromList.getName()));
+					} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_4, 2F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &4is attempting to conquer your Dominion"));
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&4Your Dominion will automatically be conquered if nobody logs on for 3 days during the conquest!"));
+					}
+				}
+				break;
+			}
+		}
+
+		if (!wasDominionFound) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
 		}
 	}
 
@@ -1572,55 +1595,64 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player.
 	 */
 	private static void surrender(String[] args, Dominion dominion, Player player) {
-		if (dominion != null) {
-			StringBuilder dominionNameBuilder = new StringBuilder();
-			for (int i = 1; i < args.length; i++) {
-				dominionNameBuilder.append(args[i]);
-				if (i < args.length - 1) {
-					dominionNameBuilder.append(" ");
-				}
-			}
-
-			List<Dominion> dominions = DominionUtils.getDominions();
-			boolean wasDominionFound = false;
-			for (Dominion dominionFromList : dominions) {
-				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					wasDominionFound = true;
-					if (dominion.isSameDominion(dominionFromList)) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Surrender &cto your own Dominion!"));
-						return;
-					}
-
-					// Surrendering if the Dominion indeed sent the conquer request
-					if (dominion.getConqueredRequest() != null && dominion.getConqueredRequest().equals(dominionFromList.getLeader())) {
-						dominion.setConqueredRequest(null);
-						List<UUID> conquered = dominionFromList.getConquered();
-						conquered.add(dominion.getLeader());
-						// Transfers the conquered dominions over to the new conqueror
-                        conquered.addAll(dominion.getConquered());
-						dominion.setConquered(new ArrayList<>());
-						dominionFromList.setConquered(conquered);
-
-						DominionUtils.updateDominion(dominion);
-						DominionUtils.updateDominion(dominionFromList);
-
-						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
-							onlinePlayer.sendMessage(ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName()));
-						}
-						DiscordUtils.dominionMessage(dominion, dominion.getName() + " has been conquered by " + dominionFromList.getName(), new Color(101, 0, 0));
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to conquer yours!"));
-					}
-					break;
-				}
-			}
-
-			if (!wasDominionFound) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
-			}
-		} else {
+		if (dominion == null) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+		if (!dominion.getDominionPermissions().hasPermission(rank, DominionPermission.SURRENDER)) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to surrender your Dominion!"));
+			return;
+		}
+
+		StringBuilder dominionNameBuilder = new StringBuilder();
+		for (int i = 1; i < args.length; i++) {
+			dominionNameBuilder.append(args[i]);
+			if (i < args.length - 1) {
+				dominionNameBuilder.append(" ");
+			}
+		}
+
+		List<Dominion> dominions = DominionUtils.getDominions();
+		boolean wasDominionFound = false;
+		for (Dominion dominionFromList : dominions) {
+			if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+				wasDominionFound = true;
+				if (dominion.isSameDominion(dominionFromList)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot &4Surrender &cto your own Dominion!"));
+					return;
+				}
+
+				if (dominion.getConqueredRequest() != null && dominion.getConqueredRequest().equals(dominionFromList.getLeader())) {
+					dominion.setConqueredRequest(null);
+					dominion.setConqueredRequestTimestamp(0L);
+					dominion.setConqueredRequestDefenderLastSeen(0L);
+
+					List<UUID> conquered = dominionFromList.getConquered();
+					conquered.add(dominion.getLeader());
+					conquered.addAll(dominion.getConquered());
+					dominion.setConquered(new ArrayList<>());
+					dominionFromList.setConquered(conquered);
+					dominionFromList.setLastConquerAttemptTimestamp(System.currentTimeMillis());
+
+					DominionUtils.updateDominion(dominion);
+					DominionUtils.updateDominion(dominionFromList);
+
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_7, 1F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage(dominion.getName() + " &4has been conquered by &e" + dominionFromList.getName()));
+					}
+					DiscordUtils.dominionMessage(dominion, dominion.getName() + " has been conquered by " + dominionFromList.getName(), new Color(101, 0, 0));
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to conquer yours!"));
+				}
+				break;
+			}
+		}
+
+		if (!wasDominionFound) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
 		}
 	}
 
@@ -1631,59 +1663,79 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player.
 	 */
 	private static void rebel(String[] args, Dominion dominion, Player player) {
-		if (dominion != null) {
-			StringBuilder dominionNameBuilder = new StringBuilder();
-			for (int i = 1; i < args.length; i++) {
-				dominionNameBuilder.append(args[i]);
-				if (i < args.length - 1) {
-					dominionNameBuilder.append(" ");
-				}
-			}
-
-			List<Dominion> dominions = DominionUtils.getDominions();
-			boolean wasDominionFound = false;
-			for (Dominion dominionFromList : dominions) {
-				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					wasDominionFound = true;
-					if (dominion.isSameDominion(dominionFromList)) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &5Rebel &cagainst your own Dominion!"));
-						return;
-					}
-
-					// Send Dominion rebel request
-					if (dominionFromList.getRebelRequest() != null
-							&& dominionFromList.getRebelRequest().equals(player.getUniqueId())) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou have already attempted to &4Rebel &cagainst &e" + dominionFromList.getName()));
-						return;
-					} else {
-						if (dominionFromList.getConquered().contains(dominion.getLeader())) {
-							dominionFromList.setRebelRequest(player.getUniqueId());
-							DominionUtils.updateDominion(dominionFromList);
-							for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-								if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&5Your Dominion is attempting to rebel against &e" + dominionFromList.getName()));
-								} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
-									onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
-									onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &5is attempting to rebel against your Dominion"));
-									if (onlinePlayer.getUniqueId().equals(dominionFromList.getLeader())) {
-										onlinePlayer.sendMessage(ChatUtils.chatMessage("&5To retreat, use &e/dominion retreat " + ChatUtils.stripColorFormatting(dominion.getName())));
-									}
-								}
-							}
-						} else {
-							player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is not conquered by &e" + dominionFromList.getName()));
-						}
-					}
-					break;
-				}
-			}
-
-			if (!wasDominionFound) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
-			}
-		} else {
+		if (dominion == null) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+		if (!dominion.getDominionPermissions().hasPermission(rank, DominionPermission.REBEL)) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to start a rebellion!"));
+			return;
+		}
+
+		long lastRebel = dominion.getLastRebelAttemptTimestamp();
+		if (lastRebel > 0 && System.currentTimeMillis() - lastRebel < DominionUtils.REBEL_COOLDOWN_MS) {
+			long remainingMs = DominionUtils.REBEL_COOLDOWN_MS - (System.currentTimeMillis() - lastRebel);
+			long remainingHours = remainingMs / (1000 * 60 * 60);
+			long remainingDays = remainingHours / 24;
+			long leftoverHours = remainingHours % 24;
+			String timeLeft = remainingDays > 0 ? remainingDays + "d " + leftoverHours + "h" : leftoverHours + "h";
+			player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot rebel again for &5" + timeLeft));
+			return;
+		}
+
+		StringBuilder dominionNameBuilder = new StringBuilder();
+		for (int i = 1; i < args.length; i++) {
+			dominionNameBuilder.append(args[i]);
+			if (i < args.length - 1) {
+				dominionNameBuilder.append(" ");
+			}
+		}
+
+		List<Dominion> dominions = DominionUtils.getDominions();
+		boolean wasDominionFound = false;
+		for (Dominion dominionFromList : dominions) {
+			if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+				wasDominionFound = true;
+				if (dominion.isSameDominion(dominionFromList)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot &5Rebel &cagainst your own Dominion!"));
+					return;
+				}
+
+				if (!dominionFromList.getConquered().contains(dominion.getLeader())) {
+					player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is not conquered by &e" + dominionFromList.getName()));
+					return;
+				}
+
+				if (dominionFromList.getRebelRequest() != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYour Dominion already has an active rebellion against &e" + dominionFromList.getName()));
+					return;
+				}
+
+				long now = System.currentTimeMillis();
+				dominionFromList.setRebelRequest(player.getUniqueId());
+				dominionFromList.setRebelRequestTimestamp(now);
+				dominionFromList.setRebelRequestConquerorLastSeen(now);
+				DominionUtils.updateDominion(dominionFromList);
+
+				for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+					if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&5Your Dominion has started a rebellion against &e" + dominionFromList.getName()));
+					} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_1, 2F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &5has started a rebellion against your Dominion!"));
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&5Use &e/dominion retreat " + ChatUtils.stripColorFormatting(dominion.getName()) + " &5to release them of your conquest"));
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("They will be freed if your Dominion goes 3 days without logging on"));
+					}
+				}
+				break;
+			}
+		}
+
+		if (!wasDominionFound) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
 		}
 	}
 
@@ -1694,50 +1746,86 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player.
 	 */
 	private static void retreat(String[] args, Dominion dominion, Player player) {
-		if (dominion != null) {
-			StringBuilder dominionNameBuilder = new StringBuilder();
-			for (int i = 1; i < args.length; i++) {
-				dominionNameBuilder.append(args[i]);
-				if (i < args.length - 1) {
-					dominionNameBuilder.append(" ");
-				}
+		if (dominion == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+
+		DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+		if (!dominion.getDominionPermissions().hasPermission(rank, DominionPermission.RETREAT)) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to retreat from a conquest!"));
+			return;
+		}
+
+		StringBuilder dominionNameBuilder = new StringBuilder();
+		for (int i = 1; i < args.length; i++) {
+			dominionNameBuilder.append(args[i]);
+			if (i < args.length - 1) {
+				dominionNameBuilder.append(" ");
 			}
+		}
 
-			List<Dominion> dominions = DominionUtils.getDominions();
-			boolean wasDominionFound = false;
-			for (Dominion dominionFromList : dominions) {
-				if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
-					wasDominionFound = true;
-					if (dominion.isSameDominion(dominionFromList)) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou cannot &dRetreat &cfrom your own Dominion!"));
-						return;
+		List<Dominion> dominions = DominionUtils.getDominions();
+		boolean wasDominionFound = false;
+		for (Dominion dominionFromList : dominions) {
+			if (ChatUtils.stripColorFormatting(dominionFromList.getName()).equalsIgnoreCase(dominionNameBuilder.toString())) {
+				wasDominionFound = true;
+				if (dominion.isSameDominion(dominionFromList)) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot &dRetreat &cfrom your own Dominion!"));
+					return;
+				}
+
+				long now = System.currentTimeMillis();
+
+				// Case 1: Retreating from an active conquest attempt (before surrender)
+				if (dominionFromList.getConqueredRequest() != null
+						&& dominionFromList.getConqueredRequest().equals(dominion.getLeader())) {
+					dominionFromList.setConqueredRequest(null);
+					dominionFromList.setConqueredRequestTimestamp(0L);
+					dominionFromList.setConqueredRequestDefenderLastSeen(0L);
+					dominion.setLastConquerAttemptTimestamp(now);
+					DominionUtils.updateDominion(dominion);
+					DominionUtils.updateDominion(dominionFromList);
+
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from conquering &e" + dominionFromList.getName()));
 					}
+					DiscordUtils.dominionMessage(dominionFromList, dominion.getName() + " has retreated from conquering " + dominionFromList.getName(), new Color(135, 245, 220));
+					return;
+				}
 
-					// Retreating if the Dominion indeed sent the rebel request
+				// Case 2: Voluntarily releasing an already-conquered dominion
+				if (dominion.getConquered().contains(dominionFromList.getLeader())) {
+					// Clear any active rebellion too
 					if (dominion.getRebelRequest() != null && dominion.getRebelRequest().equals(dominionFromList.getLeader())) {
 						dominion.setRebelRequest(null);
-						List<UUID> conquered = dominion.getConquered();
-						conquered.remove(dominionFromList.getLeader());
-						dominion.setConquered(conquered);
-						DominionUtils.updateDominion(dominion);
-
-						for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-							onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
-							onlinePlayer.sendMessage(ChatUtils.chatMessage(dominionFromList.getName() + " &dhas retreated from &e" + dominion.getName()));
-						}
-						DiscordUtils.dominionMessage(dominion, dominionFromList.getName() + " has retreated from " + dominion.getName(), new Color(135, 245, 220));
-					} else {
-						player.sendMessage(ChatUtils.chatMessage("&cThere is no Dominion attempting to rebel against yours!"));
+						dominion.setRebelRequestTimestamp(0L);
+						dominion.setRebelRequestConquerorLastSeen(0L);
+						dominionFromList.setLastRebelAttemptTimestamp(now);
 					}
-					break;
-				}
-			}
+					List<UUID> conquered = dominion.getConquered();
+					conquered.remove(dominionFromList.getLeader());
+					dominion.setConquered(conquered);
+					dominion.setLastConquerAttemptTimestamp(now);
+					DominionUtils.updateDominion(dominion);
+					DominionUtils.updateDominion(dominionFromList);
 
-			if (!wasDominionFound) {
-				player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
+					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+						onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 1F);
+						onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &dhas retreated from &e" + dominionFromList.getName()));
+					}
+					DiscordUtils.dominionMessage(dominion, dominion.getName() + " has retreated from " + dominionFromList.getName(), new Color(135, 245, 220));
+					return;
+				}
+
+				player.sendMessage(ChatUtils.chatMessage("&cYour Dominion is not conquering or occupying &e" + dominionFromList.getName()));
+				break;
 			}
-		} else {
-			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+		}
+
+		if (!wasDominionFound) {
+			player.sendMessage(ChatUtils.chatMessage("&cThat Dominion could not be found!"));
 		}
 	}
 

@@ -45,6 +45,7 @@ Major Features
 [+] Implemented a GUI for /toggle
 [+] Implemented custom sniffer mounts to mimic badger moles, capable of creating large earth tunnels
 [~] Added alternate arrow recipes using a base arrow and the custom arrowhead
+[~] Added a 7-day conquer period and a 7-day rebel period, automatically succeeding or ending based on inactivity, and increasing lost money and food reserves per death
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

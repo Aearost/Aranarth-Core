@@ -45,11 +45,19 @@ public class CombatLog {
 										|| !aranarthPlayer.getCombatLogTime().containsKey(attacker.getUniqueId());
 								if (isNotTaggedByAttacker) {
 									player.sendMessage(ChatUtils.chatMessage("&4You have been combat tagged by &e" + attackerAranarthPlayer.getNickname()));
+									int playerWarMultiplier = DominionUtils.getDeathPenaltyMultiplier(player.getUniqueId(), attacker.getUniqueId());
+									if (playerWarMultiplier > 1) {
+										player.sendMessage(ChatUtils.chatMessage("&4\u2694 War penalty: &c" + playerWarMultiplier + "x &4money and food losses apply to you!"));
+									}
 								}
 								boolean isAlreadyTaggingPlayer = attackerAranarthPlayer.getCombatLogTime().isEmpty()
 										|| !attackerAranarthPlayer.getCombatLogTime().containsKey(player.getUniqueId());
 								if (isAlreadyTaggingPlayer) {
 									attacker.sendMessage(ChatUtils.chatMessage("&4You have combat tagged &e" + aranarthPlayer.getNickname()));
+									int attackerWarMultiplier = DominionUtils.getDeathPenaltyMultiplier(attacker.getUniqueId(), player.getUniqueId());
+									if (attackerWarMultiplier > 1) {
+										attacker.sendMessage(ChatUtils.chatMessage("&4\u2694 War penalty: &c" + attackerWarMultiplier + "x &4money and food losses apply to you!"));
+									}
 								}
 
 								// Capture the exact timestamp this hit was registered

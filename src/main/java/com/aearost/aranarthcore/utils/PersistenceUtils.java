@@ -1153,6 +1153,19 @@ public class PersistenceUtils {
 
 				boolean memberPvpEnabled = fields.length > 19 && fields[19].equals("1");
 				boolean mobSpawningEnabled = fields.length > 20 && fields[20].equals("1");
+				long conqueredRequestTimestamp = fields.length > 21 ? Long.parseLong(fields[21]) : 0L;
+				long lastConquerAttemptTimestamp = fields.length > 22 ? Long.parseLong(fields[22]) : 0L;
+				long rebelRequestTimestamp = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
+				// Backward-compatible: old saves stored a boolean "0"/"1" for field 24; treat both as 0L (no timestamp)
+				long conqueredRequestDefenderLastSeen = 0L;
+				if (fields.length > 24) {
+					String f24 = fields[24];
+					if (!f24.equals("0") && !f24.equals("1")) {
+						conqueredRequestDefenderLastSeen = Long.parseLong(f24);
+					}
+				}
+				long rebelRequestConquerorLastSeen = fields.length > 25 ? Long.parseLong(fields[25]) : 0L;
+				long lastRebelAttemptTimestamp = fields.length > 26 ? Long.parseLong(fields[26]) : 0L;
 
 				Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
 						x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1160,6 +1173,12 @@ public class PersistenceUtils {
 						balance);
 				dominion.setMemberPvpEnabled(memberPvpEnabled);
 				dominion.setMobSpawningEnabled(mobSpawningEnabled);
+				dominion.setConqueredRequestTimestamp(conqueredRequestTimestamp);
+				dominion.setLastConquerAttemptTimestamp(lastConquerAttemptTimestamp);
+				dominion.setRebelRequestTimestamp(rebelRequestTimestamp);
+				dominion.setConqueredRequestDefenderLastSeen(conqueredRequestDefenderLastSeen);
+				dominion.setRebelRequestConquerorLastSeen(rebelRequestConquerorLastSeen);
+				dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
 				DominionUtils.createDominion(dominion);
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");
@@ -1201,7 +1220,7 @@ public class PersistenceUtils {
 				List<Dominion> dominions = DominionUtils.getDominions();
 				try {
 					FileWriter writer = new FileWriter(filePath);
-					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled\n");
+					writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp\n");
 
 					if (dominions != null && !dominions.isEmpty()) {
 						for (Dominion dominion : dominions) {
@@ -1296,7 +1315,12 @@ public class PersistenceUtils {
 									+ x + "|" + y + "|" + z + "|" + yaw + "|" + pitch + "|" + foodString + "|" + claimableResources + "|"
 									+ conquered + "|"
 									// Keep balance before memberRanks
-									+ balance + "|" + memberRanksString + "|" + (dominion.isMemberPvpEnabled() ? "1" : "0") + "|" + (dominion.isMobSpawningEnabled() ? "1" : "0") + "\n";
+									+ balance + "|" + memberRanksString + "|" + (dominion.isMemberPvpEnabled() ? "1" : "0") + "|" + (dominion.isMobSpawningEnabled() ? "1" : "0")
+									+ "|" + dominion.getConqueredRequestTimestamp() + "|" + dominion.getLastConquerAttemptTimestamp()
+								+ "|" + dominion.getRebelRequestTimestamp()
+								+ "|" + dominion.getConqueredRequestDefenderLastSeen()
+								+ "|" + dominion.getRebelRequestConquerorLastSeen()
+								+ "|" + dominion.getLastRebelAttemptTimestamp() + "\n";
 							writer.write(row);
 						}
 					}
@@ -1367,6 +1391,9 @@ public class PersistenceUtils {
 					}
 				}
 
+				// LEADER always has all permissions regardless of what was persisted,
+				// since new permissions added to the enum would otherwise be missing.
+				allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
 				dominion.setDominionPermissions(new DominionPermissions(allPerms));
 			}
 			Bukkit.getLogger().info("All dominion permissions have been initialized");
