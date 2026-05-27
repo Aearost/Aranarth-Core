@@ -1567,7 +1567,7 @@ public class CommandDominion implements CommandExecutor {
 				}
 
 				long now = System.currentTimeMillis();
-				dominionFromList.setConqueredRequest(player.getUniqueId());
+				dominionFromList.setConqueredRequest(dominion.getLeader());
 				dominionFromList.setConqueredRequestTimestamp(now);
 				dominionFromList.setConqueredRequestDefenderLastSeen(now);
 				DominionUtils.updateDominion(dominionFromList);
@@ -1718,7 +1718,7 @@ public class CommandDominion implements CommandExecutor {
 				}
 
 				long now = System.currentTimeMillis();
-				dominionFromList.setRebelRequest(player.getUniqueId());
+				dominionFromList.setRebelRequest(dominion.getLeader());
 				dominionFromList.setRebelRequestTimestamp(now);
 				dominionFromList.setRebelRequestConquerorLastSeen(now);
 				DominionUtils.updateDominion(dominionFromList);
