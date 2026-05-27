@@ -25,6 +25,9 @@ public class GuiDominionResourcesClick {
 
 			// Obtains the Biome object from the name of the item
 			ItemStack clickedItem = e.getClickedInventory().getItem(e.getSlot());
+			if (clickedItem == null || !clickedItem.hasItemMeta()) {
+				return;
+			}
 			String biomeNameUnformatted = clickedItem.getItemMeta().getDisplayName();
 			String biomeNameFormatted = biomeNameUnformatted.replaceAll(" ", "_");
 			biomeNameFormatted = "minecraft:" + biomeNameFormatted.toLowerCase();
