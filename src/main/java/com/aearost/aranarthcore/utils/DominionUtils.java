@@ -2037,6 +2037,7 @@ public class DominionUtils {
 			defender.setConquered(new ArrayList<>());
 			conqueror.setConquered(conquered);
 			conqueror.setLastConquerAttemptTimestamp(now);
+			defender.setLastRebelAttemptTimestamp(now);
 			updateDominion(defender);
 			updateDominion(conqueror);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

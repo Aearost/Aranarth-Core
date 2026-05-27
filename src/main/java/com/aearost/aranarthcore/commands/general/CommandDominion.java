@@ -1635,6 +1635,7 @@ public class CommandDominion implements CommandExecutor {
 					dominion.setConquered(new ArrayList<>());
 					dominionFromList.setConquered(conquered);
 					dominionFromList.setLastConquerAttemptTimestamp(System.currentTimeMillis());
+					dominion.setLastRebelAttemptTimestamp(System.currentTimeMillis());
 
 					DominionUtils.updateDominion(dominion);
 					DominionUtils.updateDominion(dominionFromList);
