@@ -285,7 +285,7 @@ public class CommandDominion implements CommandExecutor {
 			boolean isConquered = playerDominion.getConquered().contains(target.getLeader());
 			if (!isConquered) {
 				if (!playerDominion.isAllied(target)) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou are not allied with &e" + target.getName()));
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot access this home as you do not have permission."));
 					return;
 				}
 
