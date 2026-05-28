@@ -148,6 +148,7 @@ Minor Features
 [~] Fixed bug where Incantation of Lifesteal was not stacking with health boost
 [~] Updated the key rewards for login streaks for Emperors
 [~] Added messages to other council members and players when punishments are issued
+[~] Made it so conqueror dominions forcefully have build permission in their conquered dominions
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

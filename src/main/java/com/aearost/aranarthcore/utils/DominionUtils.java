@@ -80,6 +80,15 @@ public class DominionUtils {
 			}
 			return dominion.getDominionPermissions().hasPermission(rank, permission);
 		}
+		// Conqueror bypass build permission for the leader and lieutenants
+		if (permission == DominionPermission.BUILD
+				&& playerDominion != null
+				&& playerDominion.getConquered().contains(dominion.getLeader())) {
+			DominionRank playerRank = playerDominion.getMemberRank(player.getUniqueId());
+			if (playerRank == DominionRank.LEADER || playerRank == DominionRank.LIEUTENANT) {
+				return true;
+			}
+		}
 		DominionRank relation = getRelationKey(playerDominion, dominion);
 		return dominion.getDominionPermissions().hasPermission(relation, permission);
 	}
