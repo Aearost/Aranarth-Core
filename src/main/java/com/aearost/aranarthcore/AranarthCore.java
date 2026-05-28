@@ -33,6 +33,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Random;
 
@@ -644,9 +645,10 @@ public class AranarthCore extends JavaPlugin {
             shops.setGameRule(GameRules.FIRE_DAMAGE, false);
         }
 
-        // Disable advancement announcements in every world
+        // Disable advancement announcements and locator bar in every world
         for (World w : Bukkit.getWorlds()) {
             w.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+            w.setGameRule(GameRules.LOCATOR_BAR, false);
         }
 
         // Apply world borders (always set so they survive world resets)
@@ -664,6 +666,83 @@ public class AranarthCore extends JavaPlugin {
                 w.getWorldBorder().setSize(5000);
             }
         }
+    }
+
+    /**
+     * Resets the resource world automatically.
+     * Called automatically on the 1st of Ignivór (new year).
+     */
+    public static void resetResourceWorlds() {
+        String[] worldNames = {"resource", "resource_nether", "resource_the_end"};
+        World.Environment[] environments = {
+            World.Environment.NORMAL,
+            World.Environment.NETHER,
+            World.Environment.THE_END
+        };
+
+        Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
+
+        Bukkit.broadcastMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
+            "&5A new year has dawned! The resource world is being reset..."));
+
+        // Teleport any players in a resource world to Spawn immediately
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getWorld().getName();
+            for (String rWorld : worldNames) {
+                if (worldName.equals(rWorld)) {
+                    player.teleport(spawnLocation);
+                    player.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
+                        "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
+                    break;
+                }
+            }
+        }
+
+        // Unload, delete, and recreate each resource world
+        for (int i = 0; i < worldNames.length; i++) {
+            String worldName = worldNames[i];
+            World world = Bukkit.getWorld(worldName);
+
+            File worldFolder = null;
+            if (world != null) {
+                worldFolder = world.getWorldFolder();
+                Bukkit.unloadWorld(world, false);
+            } else {
+                worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            }
+
+            if (worldFolder.exists()) {
+                deleteDirectory(worldFolder);
+            }
+
+            WorldCreator wc = new WorldCreator(worldName);
+            wc.environment(environments[i]);
+            wc.type(WorldType.NORMAL);
+            World newWorld = wc.createWorld();
+
+            if (newWorld != null) {
+                newWorld.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+                newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
+                newWorld.getWorldBorder().setCenter(0, 0);
+                newWorld.getWorldBorder().setSize(5000);
+            }
+        }
+
+        Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
+    }
+
+    private static void deleteDirectory(File directory) {
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    deleteDirectory(file);
+                } else {
+                    boolean isFileDeleted = file.delete();
+                }
+            }
+        }
+        boolean isDirectoryDeleted = directory.delete();
     }
 
     /**

@@ -153,7 +153,9 @@
       "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/entity/LivingEntity.class)",
       "Bash(\"/c/Users/liamh/.jdks/loom-ea-25-loom+1-11/bin/javap\" -p org/bukkit/block/Block.class)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java -name *Parrot* -o -name *Camel* -o -name *Horse*)",
-      "Bash(awk 'NR>100 && NR<300')"
+      "Bash(awk 'NR>100 && NR<300')",
+      "Bash(grep:*)",
+      "Bash(find C:/Users/liamh -name paper-*.jar -o -name paper-api-*.jar)"
     ]
   }
 }

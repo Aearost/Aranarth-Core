@@ -289,6 +289,9 @@ public class DateUtils {
 			// Will display once and only once regardless of online players
 			if (isNewMonth) {
 				DiscordUtils.monthMessage(month, description);
+				if (month == Month.IGNIVOR) {
+					AranarthCore.resetResourceWorlds();
+				}
 			}
 
 			DominionUtils.reEvaluateFoodInventory();
