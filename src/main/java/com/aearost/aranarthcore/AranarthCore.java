@@ -738,6 +738,8 @@ public class AranarthCore extends JavaPlugin {
 
     /**
      * Launches themed fireworks for each online player at the start of a new in-game month.
+     * Fireworks use the month's signature color plus one lighter and one darker shade.
+     * Runs for approximately 1 second (3 waves, 10 ticks apart).
      */
     public static void launchMonthFireworks(Month month) {
         Color[] colors = getMonthFireworkColors(month);
@@ -787,35 +789,35 @@ public class AranarthCore extends JavaPlugin {
 
     private static Color[] getMonthFireworkColors(Month month) {
         return switch (month) {
-            // #ffe082 - warm gold; lighter pastel gold + deeper amber
+            // #ffe082 — warm gold; lighter pastel gold + deeper amber
             case IGNIVOR   -> new Color[]{ Color.fromRGB(255,224,130), Color.fromRGB(255,242,185), Color.fromRGB(200,162,75) };
-            // &3 (#00AAAA) - dark aqua; brighter teal + deep teal
+            // &3 (#00AAAA) — dark aqua; brighter teal + deep teal
             case AQUINVOR  -> new Color[]{ Color.fromRGB(0,170,170),   Color.fromRGB(50,215,215),  Color.fromRGB(0,105,105) };
-            // #d1e5f4 - very light sky blue; only darken
+            // #d1e5f4 — very light sky blue; only darken
             case VENTIVOR  -> new Color[]{ Color.fromRGB(209,229,244), Color.fromRGB(155,188,222), Color.fromRGB(95,140,185) };
-            // #FDA4BA - soft pink; lighter blush + deeper rose
+            // #FDA4BA — soft pink; lighter blush + deeper rose
             case FLORIVOR  -> new Color[]{ Color.fromRGB(253,164,186), Color.fromRGB(255,205,218), Color.fromRGB(200,95,128) };
-            // &e (#FFFF55) - bright yellow; lighter cream + deeper golden yellow
+            // &e (#FFFF55) — bright yellow; lighter cream + deeper golden yellow
             case AESTIVOR  -> new Color[]{ Color.fromRGB(255,255,85),  Color.fromRGB(255,255,165), Color.fromRGB(195,195,0) };
-            // &6 (#FFAA00) - gold; lighter golden + deep amber
+            // &6 (#FFAA00) — gold; lighter golden + deep amber
             case CALORVOR  -> new Color[]{ Color.fromRGB(255,170,0),   Color.fromRGB(255,208,75),  Color.fromRGB(185,115,0) };
-            // #ff4500 - orange-red; lighter orange + deep scarlet
+            // #ff4500 — orange-red; lighter orange + deep scarlet
             case ARDORVOR  -> new Color[]{ Color.fromRGB(255,69,0),    Color.fromRGB(255,125,55),  Color.fromRGB(175,25,0) };
-            // #BD5745 - muted terracotta; lighter salmon + deep rust
+            // #BD5745 — muted terracotta; lighter salmon + deep rust
             case SOLARVOR  -> new Color[]{ Color.fromRGB(189,87,69),   Color.fromRGB(230,135,112), Color.fromRGB(125,42,32) };
-            // #a17100 - dark amber; lighter ochre + deep brown-gold
+            // #a17100 — dark amber; lighter ochre + deep brown-gold
             case FOLLIVOR  -> new Color[]{ Color.fromRGB(161,113,0),   Color.fromRGB(210,158,45),  Color.fromRGB(95,60,0) };
-            // #8a00c2 - vibrant purple; lighter violet + deep indigo-purple
+            // #8a00c2 — vibrant purple; lighter violet + deep indigo-purple
             case STRIGAVOR -> new Color[]{ Color.fromRGB(138,0,194),   Color.fromRGB(182,55,242),  Color.fromRGB(78,0,125) };
-            // #5b0001 - very dark crimson; only lighten
+            // #5b0001 — very dark crimson; only lighten
             case FAUNIVOR  -> new Color[]{ Color.fromRGB(91,0,1),      Color.fromRGB(145,28,28),   Color.fromRGB(205,72,72) };
-            // #2B3856 - dark navy-grey; only lighten
+            // #2B3856 — dark navy-grey; only lighten
             case UMBRAVOR  -> new Color[]{ Color.fromRGB(43,56,86),    Color.fromRGB(78,100,142),  Color.fromRGB(118,148,202) };
-            // #DBE9FA - very pale ice blue; only darken
+            // #DBE9FA — very pale ice blue; only darken
             case GLACIVOR  -> new Color[]{ Color.fromRGB(219,233,250), Color.fromRGB(155,188,228), Color.fromRGB(92,138,195) };
-            // #79BAEC - medium cornflower blue; lighter sky + deeper cerulean
+            // #79BAEC — medium cornflower blue; lighter sky + deeper cerulean
             case FRIGORVOR -> new Color[]{ Color.fromRGB(121,186,236), Color.fromRGB(178,220,255), Color.fromRGB(55,128,190) };
-            // #2C041C - very dark maroon-purple; only lighten
+            // #2C041C — very dark maroon-purple; only lighten
             case OBSCURVOR -> new Color[]{ Color.fromRGB(44,4,28),     Color.fromRGB(102,18,68),   Color.fromRGB(162,58,118) };
         };
     }
