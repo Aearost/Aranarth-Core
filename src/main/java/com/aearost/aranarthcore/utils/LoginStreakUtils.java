@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.items.key.KeyEpic;
+import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -157,10 +158,10 @@ public class LoginStreakUtils {
             }
         } else {
             switch (day) {
-                case 7  -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 1; }
-                case 14 -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 3; }
-                case 21 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 1; }
-                case 28 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 3; }
+                case 7  -> { key = new KeyRare().getItem(); keyColor = "&6"; keyName = "Rare Crate Key"; count = 3; }
+                case 14 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 1; }
+                case 21 -> { key = new KeyEpic().getItem(); keyColor = "&3"; keyName = "Epic Crate Key"; count = 3; }
+                case 28 -> { key = new KeyGodly().getItem(); keyColor = "&5"; keyName = "Godly Crate Key"; count = 1; }
                 default -> { return; }
             }
         }
@@ -240,10 +241,10 @@ public class LoginStreakUtils {
             };
         } else {
             return switch (day) {
-                case 7  -> "&61x Rare Crate Key";
-                case 14 -> "&63x Rare Crate Key";
-                case 21 -> "&31x Epic Crate Key";
-                case 28 -> "&33x Epic Crate Key";
+                case 7  -> "&63x Rare Crate Key";
+                case 14 -> "&31x Epic Crate Key";
+                case 21 -> "&33x Epic Crate Key";
+                case 28 -> "&51x Godly Crate Key";
                 default -> "";
             };
         }

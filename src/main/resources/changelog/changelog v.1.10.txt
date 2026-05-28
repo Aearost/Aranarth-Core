@@ -146,6 +146,7 @@ Minor Features
 [~] Fixed issue where emperors were not able to create shops correctly
 [~] Made it so that /trust and /untrust are toggles
 [~] Fixed bug where Incantation of Lifesteal was not stacking with health boost
+[~] Updated the key rewards for login streaks for Emperors
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
