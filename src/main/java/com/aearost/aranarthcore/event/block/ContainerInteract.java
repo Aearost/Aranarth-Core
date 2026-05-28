@@ -79,13 +79,13 @@ public class ContainerInteract {
                 } else {
                     AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
-                    player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7has been trusted to this container!"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have trusted &e" + username + " &7to this container"));
+                    player.sendMessage(ChatUtils.chatMessage("&7Use &e/trust &7again to stop trusting this player"));
                 }
             } else {
                 player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
             }
         }
-        aranarthPlayer.setTrustedPlayerUUID(null);
         AranarthUtils.setPlayer(uuid, aranarthPlayer);
         e.setCancelled(true);
     }
@@ -112,7 +112,8 @@ public class ContainerInteract {
                     boolean wasRemoved = AranarthUtils.removePlayerFromContainer(aranarthPlayer.getUntrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getUntrustedPlayerUUID()).getName();
                     if (wasRemoved) {
-                        player.sendMessage(ChatUtils.chatMessage("&e" + username + " &7is no longer trusted to this container!"));
+                        player.sendMessage(ChatUtils.chatMessage("&7You have untrusted &e" + username + " &7from this container"));
+                        player.sendMessage(ChatUtils.chatMessage("&7To exit untrust mode, type &e/untrust &7again"));
                     } else {
                         player.sendMessage(ChatUtils.chatMessage("&e" + username + " &ccould not be removed from this container!"));
                     }
@@ -121,7 +122,6 @@ public class ContainerInteract {
                 player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
             }
         }
-        aranarthPlayer.setUntrustedPlayerUUID(null);
         AranarthUtils.setPlayer(uuid, aranarthPlayer);
         e.setCancelled(true);
     }

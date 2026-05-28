@@ -35,12 +35,19 @@ public class CommandTrust implements CommandExecutor {
 					if (AranarthUtils.getPlayer(offlinePlayer.getUniqueId()) != null) {
 						if (offlinePlayer.getName().equalsIgnoreCase(args[0])) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							aranarthPlayer.setTrustedPlayerUUID(offlinePlayer.getUniqueId());
-							aranarthPlayer.setUntrustedPlayerUUID(null);
-							aranarthPlayer.setUnlockingContainer(false);
-							aranarthPlayer.setLockingContainer(false);
-							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-							player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to trust &e" + offlinePlayer.getName()));
+							// Toggle off if already in trust mode for this player
+							if (offlinePlayer.getUniqueId().equals(aranarthPlayer.getTrustedPlayerUUID())) {
+								aranarthPlayer.setTrustedPlayerUUID(null);
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+								player.sendMessage(ChatUtils.chatMessage("&7Trust mode disabled"));
+							} else {
+								aranarthPlayer.setTrustedPlayerUUID(offlinePlayer.getUniqueId());
+								aranarthPlayer.setUntrustedPlayerUUID(null);
+								aranarthPlayer.setUnlockingContainer(false);
+								aranarthPlayer.setLockingContainer(false);
+								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+								player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to trust &e" + offlinePlayer.getName()));
+							}
 							isPlayerFound = true;
 							return true;
 						}
