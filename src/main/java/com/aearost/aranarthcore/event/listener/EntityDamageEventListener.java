@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,6 +25,12 @@ public class EntityDamageEventListener implements Listener {
      */
     @EventHandler
     public void onEntityDamage(EntityDamageEvent e) {
+        if (e.getDamageSource().getDirectEntity() instanceof Firework firework
+                && firework.hasMetadata("newYearFirework")) {
+            e.setCancelled(true);
+            return;
+        }
+
         if (e.getDamageSource().getDirectEntity() instanceof Arrow arrow) {
             new TippedArrowDamagePrevent().execute(e);
             new SpecialArrowDamageEffects().execute(e);
