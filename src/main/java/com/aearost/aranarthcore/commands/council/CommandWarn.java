@@ -65,7 +65,6 @@ public class CommandWarn {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 				if (args.length >= 3) {
-					sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned"));
 					StringBuilder reason = new StringBuilder();
 					for (int i = 2; i < args.length; i++) {
 						reason.append(args[i]);
@@ -74,14 +73,23 @@ public class CommandWarn {
 						}
 					}
 
+					sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned for: &e" + reason));
+
 					Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
 							ZoneId.systemDefault()), "WARN", reason.toString(), senderUuid);
 					AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
 
+					UUID targetUuid = Bukkit.getOfflinePlayer(playerName).getUniqueId();
 					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(playerName).getUniqueId())) {
+						if (onlinePlayer.getUniqueId().equals(targetUuid)) {
 							onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been warned for: &e" + reason));
 							onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
+						} else if (senderUuid != null && onlinePlayer.getUniqueId().equals(senderUuid)) {
+							// sender already notified above
+						} else if (onlinePlayer.hasPermission("aranarth.warn")) {
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned for: &e" + reason));
+						} else {
+							onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been warned"));
 						}
 					}
 				} else {

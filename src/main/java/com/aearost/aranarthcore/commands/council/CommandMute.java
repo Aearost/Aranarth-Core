@@ -142,12 +142,19 @@ public class CommandMute {
 			Punishment punishment = new Punishment(AranarthUtils.getUUIDFromUsername(args[1]), LocalDateTime.ofInstant(Instant.now(),
 					ZoneId.systemDefault()), "MUTE", reason.toString(), senderUuid);
 			AranarthUtils.addPunishment(AranarthUtils.getUUIDFromUsername(args[1]), punishment, false);
-			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
+			sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted for: &e" + reason));
 
+			UUID targetUuid = AranarthUtils.getUUIDFromUsername(args[1]);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-				if (onlinePlayer.getUniqueId().equals(Bukkit.getOfflinePlayer(args[1]).getUniqueId())) {
+				if (onlinePlayer.getUniqueId().equals(targetUuid)) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&cYou have been muted for: &e" + reason));
 					onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_GHAST_HURT, 1F, 1.1F);
+				} else if (senderUuid != null && onlinePlayer.getUniqueId().equals(senderUuid)) {
+					// sender already notified above
+				} else if (onlinePlayer.hasPermission("aranarth.warn")) {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted for: &e" + reason));
+				} else {
+					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been muted"));
 				}
 			}
 		}

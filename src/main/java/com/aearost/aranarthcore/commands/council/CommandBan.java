@@ -98,7 +98,19 @@ public class CommandBan {
 			return;
 		}
 
-		sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned"));
+		sender.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned for: &e" + reason));
+
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			if (onlinePlayer.getUniqueId().equals(uuid)) {
+				// target is being banned/kicked, no need to notify
+			} else if (senderUuid != null && onlinePlayer.getUniqueId().equals(senderUuid)) {
+				// sender already notified above
+			} else if (onlinePlayer.hasPermission("aranarth.warn")) {
+				onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned for: &e" + reason));
+			} else {
+				onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + nickname + " &7has been banned"));
+			}
+		}
 	}
 
 	/**
