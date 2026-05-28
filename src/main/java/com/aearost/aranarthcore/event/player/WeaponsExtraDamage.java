@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.damage.DamageType;
@@ -129,10 +130,11 @@ public class WeaponsExtraDamage {
 										healAmount = e.getDamage() * 0.5;
 									}
 									Player player = (Player) e.getDamageSource().getCausingEntity();
-									if ((player.getHealth() + healAmount) <= 20) {
+									double maxHealth = player.getAttribute(Attribute.MAX_HEALTH).getValue();
+									if ((player.getHealth() + healAmount) <= maxHealth) {
 										player.setHealth(player.getHealth() + healAmount);
 									} else {
-										player.setHealth(20);
+										player.setHealth(maxHealth);
 									}
 								}
 							}
