@@ -59,7 +59,7 @@ public class CommandMounts implements CommandExecutor {
                 status = "§cRecovering §8(&c"
                         + MountUtils.formatRechargeTime(mount.getRechargeRemainingSeconds()) + "§8)";
             } else if (MountUtils.getEntityClassForElement(element) != null) {
-                status = "§aReady";
+                status = "§eReady";
             } else {
                 status = "§7Coming Soon";
             }

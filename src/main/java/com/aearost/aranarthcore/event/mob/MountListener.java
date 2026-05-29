@@ -294,7 +294,7 @@ public class MountListener implements Listener {
                 Ravager.class,
                 15, 45, // Health MEDIUM
                 0.45, 1.10, // Speed MEDIUM (9–22 m/s)
-                4.0, 14.0, // Ram Damage MEDIUM
+                6.0, 18.0, // Ram Damage MEDIUM
                 "Ram Damage",
                 true,
                 RAVAGER_RAM
@@ -621,6 +621,9 @@ public class MountListener implements Listener {
         double forward = in[0];
         double strafe = in[1];
         double speed = activeMounts.get(mount.getUniqueId()).getSpeed();
+        if (MountUtils.isMountInWater(mount.getUniqueId())) {
+            speed *= 0.3;
+        }
         // Track speed XP for mounts
         boolean isMoving = Math.abs(forward) > 0.001 || Math.abs(strafe) > 0.001;
 
