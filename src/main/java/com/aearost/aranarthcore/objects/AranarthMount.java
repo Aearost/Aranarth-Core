@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import org.bukkit.entity.HappyGhast;
 import org.bukkit.entity.Ravager;
 import org.bukkit.entity.Sniffer;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -81,8 +82,7 @@ public class AranarthMount {
     }
 
     /**
-     * Constructs an {@code AranarthMount} from a Ravager's persistent data.
-     * Returns {@code null} if the entity has no tracked mount speed.
+     * Constructs a Komodo Rhino from a Ravager's persistent data.
      */
     @Nullable
     public static AranarthMount fromRavager(Ravager ravager) {
@@ -108,8 +108,33 @@ public class AranarthMount {
     }
 
     /**
-     * Constructs an {@code AranarthMount} from a Sniffer's persistent data.
-     * Returns {@code null} if the entity has no tracked mount speed.
+     * Constructs a Flying Bison from a Happy Ghast's persistent data.
+     */
+    @Nullable
+    public static AranarthMount fromHappyGhast(HappyGhast ghast) {
+        PersistentDataContainer pdc = ghast.getPersistentDataContainer();
+
+        if (!pdc.has(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE)) {
+            return null;
+        }
+
+        UUID ownerUUID = null;
+        if (pdc.has(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING)) {
+            try {
+                ownerUUID = UUID.fromString(pdc.get(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        double speed = pdc.get(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE);
+        Double thirdAttr = pdc.has(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE)
+                ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
+
+        return new AranarthMount(ownerUUID, speed, thirdAttr, thirdAttr != null ? "Bellow Power" : null);
+    }
+
+    /**
+     * Constructs a Badger Mole from a Sniffer's persistent data.
      */
     @Nullable
     public static AranarthMount fromSniffer(Sniffer sniffer) {

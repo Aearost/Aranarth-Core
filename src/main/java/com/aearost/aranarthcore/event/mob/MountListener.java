@@ -152,8 +152,43 @@ public class MountListener implements Listener {
         }
     }
 
+    static final class FlyingBisonBellowAction implements SpecialAction {
+
+        private final Map<UUID, Long> cooldownEnds = new HashMap<>();
+        private static final long COOLDOWN_MS = 5_000L;
+
+        @Override
+        public void start(LivingEntity mount, Player rider, AranarthMount mountData) {
+            UUID id = mount.getUniqueId();
+            long now = System.currentTimeMillis();
+            long end = cooldownEnds.getOrDefault(id, 0L);
+            if (now < end) {
+                // Still on cooldown — give the player a quiet hint via action bar
+                long remaining = (end - now + 999) / 1000;
+                rider.sendActionBar(net.kyori.adventure.text.Component.text(
+                        "§7Bellow is ready in §e" + remaining + "s"));
+                return;
+            }
+            double maxDamage = mountData.getThirdAttribute() != null
+                    ? mountData.getThirdAttribute() : 4.0;
+            FlyingBisonBellow.trigger((HappyGhast) mount, rider, maxDamage, id);
+            cooldownEnds.put(id, now + COOLDOWN_MS);
+        }
+
+        @Override
+        public void stop(UUID mountId) {
+            // This ability uses a cooldown, so this is ignored
+        }
+
+        @Override
+        public void cleanup(UUID mountId) {
+            cooldownEnds.remove(mountId);
+        }
+    }
+
     private static final SnifferTunnelAction SNIFFER_TUNNEL = new SnifferTunnelAction();
     private static final RavagerRamAction RAVAGER_RAM = new RavagerRamAction();
+    private static final FlyingBisonBellowAction FLYING_BISON_BELLOW = new FlyingBisonBellowAction();
 
     /**
      * Foods accepted by all mounts (mirrors vanilla horse diet).
@@ -198,24 +233,37 @@ public class MountListener implements Listener {
     static final Map<Class<? extends LivingEntity>, MountTypeConfig> MOUNT_CONFIGS = new LinkedHashMap<>();
 
     static {
+        // Badger Mole - high health, low speed, tunneling utility (no combat damage)
         MOUNT_CONFIGS.put(Sniffer.class, new MountTypeConfig(
                 Sniffer.class,
-                20, 60, // Health (high: 20–60 half-hearts)
-                0.35, 0.90, // Speed (low: 7–18 m/s)
-                50.0, 200.0, // Tunnel speed range (blocks/tick at Lv1/Lv10)
+                25, 65, // Health HIGH
+                0.25, 0.65, // Speed LOW (5–13 m/s)
+                50.0, 200.0, // Dig Speed (blocks/tick at Lv1/Lv10)
                 "Dig Speed",
                 true,
                 SNIFFER_TUNNEL
         ));
 
+        // Komodo Rhino - medium health, medium speed, medium damage
         MOUNT_CONFIGS.put(Ravager.class, new MountTypeConfig(
                 Ravager.class,
-                15, 45, // Health (medium: 15–45 half-hearts)
-                0.50, 1.25, // Speed (medium: 10–25 m/s)
-                4.0, 17.0, // Ram Damage (medium: 4–17 half-hearts)
+                15, 45, // Health MEDIUM
+                0.45, 1.10, // Speed MEDIUM (9–22 m/s)
+                4.0, 14.0, // Ram Damage MEDIUM
                 "Ram Damage",
                 true,
                 RAVAGER_RAM
+        ));
+
+        // Flying Bison - high health, high speed, low damage bellow
+        MOUNT_CONFIGS.put(HappyGhast.class, new MountTypeConfig(
+                HappyGhast.class,
+                35, 90, // Health HIGH
+                0.75, 1.50, // Speed HIGH (15–30 m/s)
+                4.0, 15.0, // Bellow Power
+                "Bellow Power",
+                true,
+                FLYING_BISON_BELLOW
         ));
 
 //         Template for future mounts
@@ -233,6 +281,7 @@ public class MountListener implements Listener {
     private static final Map<UUID, double[]> playerInputs = new HashMap<>();
     private static final Map<UUID, SpecialAction> activeSpecialActions = new HashMap<>();
     private static final Map<UUID, Double> originalSpeeds = new HashMap<>();
+    private static final Map<UUID, Double> originalFlyingSpeeds = new HashMap<>();
     private final Random random = new Random();
     private static MountListener instance;
 
@@ -532,24 +581,44 @@ public class MountListener implements Listener {
             vz = (vz / len) * speed;
         }
 
-        double vertY = mount.getVelocity().getY();
+        double vertY;
 
-        // Auto step-up over 1-block solid obstacles (not fences/walls)
-        if (mount.isOnGround() && len > 0.001) {
-            double nx = vx / speed;
-            double nz = vz / speed;
-            Location loc = mount.getLocation();
-            int iy = (int) Math.floor(loc.getY());
+        if (mount instanceof HappyGhast) {
+            // Full 3D directional flight following the rider's look direction
+            Vector lookDir = rider.getEyeLocation().getDirection();
+            // Horizontal-only strafe vector (90° clockwise from yaw in XZ)
+            Vector strafeDir = new Vector(Math.cos(yaw), 0, Math.sin(yaw));
 
-            for (double ld : new double[]{1.3, 1.6, 1.9}) {
-                int cx = (int) Math.floor(loc.getX() + nx * ld);
-                int cz = (int) Math.floor(loc.getZ() + nz * ld);
-                Block foot = mount.getWorld().getBlockAt(cx, iy, cz);
-                Block clear1 = mount.getWorld().getBlockAt(cx, iy + 1, cz);
-                Block clear2 = mount.getWorld().getBlockAt(cx, iy + 2, cz);
-                if (isSteppableObstacle(foot) && isClearForPassage(clear1) && isClearForPassage(clear2)) {
-                    vertY = STEP_UP_VELOCITY;
-                    break;
+            Vector moveVec = lookDir.clone().multiply(forward)
+                    .add(strafeDir.clone().multiply(strafe));
+            double moveLen = moveVec.length();
+            if (moveLen > 0.001) {
+                moveVec.multiply(speed / moveLen);
+            }
+            // Override the XZ values computed above with the full 3D result
+            vx = moveVec.getX();
+            vz = moveVec.getZ();
+            vertY = moveVec.getY(); // 0 when idle as the ghast hovers naturally
+        } else {
+            vertY = mount.getVelocity().getY();
+
+            // Auto step-up over 1-block solid obstacles (not fences/walls)
+            if (mount.isOnGround() && len > 0.001) {
+                double nx = vx / speed;
+                double nz = vz / speed;
+                Location loc = mount.getLocation();
+                int iy = (int) Math.floor(loc.getY());
+
+                for (double ld : new double[]{1.3, 1.6, 1.9}) {
+                    int cx = (int) Math.floor(loc.getX() + nx * ld);
+                    int cz = (int) Math.floor(loc.getZ() + nz * ld);
+                    Block foot = mount.getWorld().getBlockAt(cx, iy, cz);
+                    Block clear1 = mount.getWorld().getBlockAt(cx, iy + 1, cz);
+                    Block clear2 = mount.getWorld().getBlockAt(cx, iy + 2, cz);
+                    if (isSteppableObstacle(foot) && isClearForPassage(clear1) && isClearForPassage(clear2)) {
+                        vertY = STEP_UP_VELOCITY;
+                        break;
+                    }
                 }
             }
         }
@@ -618,6 +687,15 @@ public class MountListener implements Listener {
             originalSpeeds.put(mount.getUniqueId(), speedAttr.getBaseValue());
             speedAttr.setBaseValue(0.0);
         }
+
+        // Flying mounts also have a FLYING_SPEED attribute that must be suppressed.
+        if (mount instanceof HappyGhast) {
+            var flyAttr = mount.getAttribute(Attribute.FLYING_SPEED);
+            if (flyAttr != null) {
+                originalFlyingSpeeds.put(mount.getUniqueId(), flyAttr.getBaseValue());
+                flyAttr.setBaseValue(0.0);
+            }
+        }
     }
 
     /**
@@ -632,17 +710,28 @@ public class MountListener implements Listener {
 
         Entity e = Bukkit.getEntity(id);
         if (e instanceof LivingEntity living && !living.isDead()) {
-            var speedAttr = living.getAttribute(Attribute.MOVEMENT_SPEED);
-            if (speedAttr != null) {
-                double restore = originalSpeeds.getOrDefault(id, speedAttr.getDefaultValue());
-                speedAttr.setBaseValue(restore);
+            // Only restore if we actually saved a value
+            if (originalSpeeds.containsKey(id)) {
+                var speedAttr = living.getAttribute(Attribute.MOVEMENT_SPEED);
+                if (speedAttr != null) {
+                    speedAttr.setBaseValue(originalSpeeds.remove(id));
+                } else {
+                    originalSpeeds.remove(id);
+                }
             }
-            originalSpeeds.remove(id);
 
-            // Zero residual horizontal velocity left over from the movement loop so the
-            // mount doesn't launch away in a straight line when the rider dismounts
-            Vector vel = living.getVelocity();
-            living.setVelocity(new Vector(0, vel.getY(), 0));
+            // Restore flying speed for the Happy Ghast
+            if (living instanceof HappyGhast && originalFlyingSpeeds.containsKey(id)) {
+                var flyAttr = living.getAttribute(Attribute.FLYING_SPEED);
+                if (flyAttr != null) {
+                    flyAttr.setBaseValue(originalFlyingSpeeds.remove(id));
+                } else {
+                    originalFlyingSpeeds.remove(id);
+                }
+            }
+
+            // Zero ALL residual velocity from the movement loop
+            living.setVelocity(new Vector(0, 0, 0));
 
             String mountElement = living.getPersistentDataContainer()
                     .get(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING);
@@ -755,7 +844,7 @@ public class MountListener implements Listener {
 
         LivingEntity mount = player.getWorld().spawn(
                 player.getLocation(), entityClass, entity -> {
-                   // If the server restarts while the pet is out, the entity simply disappears
+                    // If the server restarts while the pet is out, the entity simply disappears
                     entity.setPersistent(false);
 
                     var maxHpAttr = entity.getAttribute(Attribute.MAX_HEALTH);

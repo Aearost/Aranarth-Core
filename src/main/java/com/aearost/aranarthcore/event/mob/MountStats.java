@@ -40,6 +40,9 @@ public class MountStats {
         } else if (clicked instanceof Ravager ravager) {
             e.setCancelled(true);
             showRavagerStats(player, ravager);
+        } else if (clicked instanceof HappyGhast ghast) {
+            e.setCancelled(true);
+            showHappyGhastStats(player, ghast);
         }
     }
 
@@ -127,6 +130,32 @@ public class MountStats {
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
             player.sendMessage(ChatUtils.translateToColor("&7Ram Damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts"));
+        }
+    }
+
+    private void showHappyGhastStats(Player player, HappyGhast ghast) {
+        AranarthMount mount = AranarthMount.fromHappyGhast(ghast);
+        if (mount == null) {
+            return;
+        }
+
+        double health = ghast.getAttribute(Attribute.MAX_HEALTH).getValue();
+        int halfHearts = (int) Math.round(health);
+        double speed = mount.getSnifferSpeedMetersPerSecond(); // blocks/tick * 20
+
+        String ownerName = "None";
+        if (mount.getOwnerUUID() != null) {
+            ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
+        }
+
+        player.sendMessage(ChatUtils.translateToColor("&8      - - - &7" + ghast.getName() + "&7's Stats &8- - -"));
+        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
+        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
+        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+
+        if (mount.getThirdAttribute() != null) {
+            double maxHearts = mount.getThirdAttribute() / 2.0;
+            player.sendMessage(ChatUtils.translateToColor("&7Bellow damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts per hit"));
         }
     }
 
