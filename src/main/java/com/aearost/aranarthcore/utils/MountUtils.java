@@ -454,9 +454,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_SPEED);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §eSpeed" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getSpeedLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eSpeed" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getSpeedLevel()));
             }
         }
     }
@@ -489,9 +489,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_HEALTH);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §cHealth" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getHealthLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eHealth" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getHealthLevel()));
             }
         }
     }
@@ -520,9 +520,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §6Ramming" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eRamming" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getThirdLevel()));
             }
         }
     }
@@ -554,9 +554,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §eDig Speed" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eDig Speed" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getThirdLevel()));
             }
         }
     }
@@ -588,9 +588,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §fBellow Power" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eBellow Power" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getThirdLevel()));
             }
         }
     }
@@ -622,9 +622,9 @@ public class MountUtils {
             refreshSkillBar(owner, info[1], BAR_THIRD);
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
-                        getElementColor(info[1]) + "Your " + formatElement(info[1])
-                                + " mount's §bBite Strength" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
+                        getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
+                                + "'s §eBite Strength" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getThirdLevel()));
             }
         }
     }

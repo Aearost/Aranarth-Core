@@ -13,6 +13,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDismountEvent;
@@ -519,6 +520,18 @@ public class MountListener implements Listener {
         }
         if (!MountUtils.isActiveMount(mount.getUniqueId())) {
             return;
+        }
+        // Prevent the owner from damaging their own mount
+        if (event instanceof EntityDamageByEntityEvent edbe) {
+            Entity damager = edbe.getDamager();
+            if (damager instanceof Projectile proj && proj.getShooter() instanceof Entity shooter) {
+                damager = shooter;
+            }
+            String[] info = MountUtils.getActiveMountInfo(mount.getUniqueId());
+            if (info != null && damager.getUniqueId().toString().equals(info[0])) {
+                event.setCancelled(true);
+                return;
+            }
         }
         // Award health XP for damage absorbed by the mount
         MountUtils.addHealthXp(mount.getUniqueId(), event.getFinalDamage());
