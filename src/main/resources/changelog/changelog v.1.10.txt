@@ -150,6 +150,7 @@ Minor Features
 [~] Updated the key rewards for login streaks for Emperors
 [~] Added messages to other council members and players when punishments are issued
 [~] Made it so conqueror dominions forcefully have build permission in their conquered dominions
+[~] Fixed issue where Dominion inventories were not being resized correctly
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

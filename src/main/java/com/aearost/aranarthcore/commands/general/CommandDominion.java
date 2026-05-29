@@ -355,7 +355,7 @@ public class CommandDominion implements CommandExecutor {
 
 								Dominion dominion = new Dominion(
 										null, dominionName, player.getUniqueId(), members, memberRanks, allies, truced, enemies, loc.getWorld().getName(), chunks,
-										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[54], 0,
+										loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[18], 0,
 										conquered, null,
 										// Keep the balance at the end
 										dominionCost);

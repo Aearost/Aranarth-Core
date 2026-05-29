@@ -1179,6 +1179,7 @@ public class PersistenceUtils {
 				dominion.setConqueredRequestDefenderLastSeen(conqueredRequestDefenderLastSeen);
 				dominion.setRebelRequestConquerorLastSeen(rebelRequestConquerorLastSeen);
 				dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
+				DominionUtils.resizeFoodArray(dominion);
 				DominionUtils.createDominion(dominion);
 			}
 			Bukkit.getLogger().info("All dominions have been initialized");

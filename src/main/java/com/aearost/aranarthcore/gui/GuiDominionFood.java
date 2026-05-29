@@ -25,17 +25,10 @@ public class GuiDominionFood {
 	private Inventory initializeGui(Player player) {
 		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 
-		int size = 0;
-		if (dominion.getChunks().size() <= 25) {
-			size = 18;
-		} else if (dominion.getChunks().size() <= 100) {
-			size = 36;
-		} else {
-			size = 54;
-		}
+		int size = DominionUtils.getFoodArraySize(dominion);
 
 		Inventory gui = Bukkit.getServer().createInventory(player, size, ChatUtils.translateToColor("&e" + dominion.getName() +"'s &rFood"));
-		for (int i = 0; i < size; i++) {
+		for (int i = 0; i < dominion.getFood().length; i++) {
 			gui.setItem(i, dominion.getFood()[i]);
 		}
 		return gui;

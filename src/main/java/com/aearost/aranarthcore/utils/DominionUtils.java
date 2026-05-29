@@ -201,6 +201,7 @@ public class DominionUtils {
 								List<Chunk> chunks = playerDominion.getChunks();
 								chunks.add(chunkToClaim);
 								chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
+								resizeFoodArray(playerDominion);
 								updateDominion(playerDominion);
 								return "&e" + playerDominion.getName() + " &7has claimed &e" +
 										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
@@ -260,6 +261,7 @@ public class DominionUtils {
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								playerDominion.getChunks().remove(chunk);
 								chunkKeyToDominion.remove(getChunkKey(chunk));
+								resizeFoodArray(playerDominion);
 								updateDominion(playerDominion);
 								return "&7This chunk has been unclaimed successfully";
 							} else {
@@ -668,6 +670,36 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Returns the correct food array size for a dominion based on its chunk count.
+	 * ≤25 chunks = 18 slots, ≤100 chunks = 36 slots, >100 chunks = 54 slots.
+	 */
+	public static int getFoodArraySize(Dominion dominion) {
+		int chunkCount = dominion.getChunks().size();
+		if (chunkCount <= 25) {
+			return 18;
+		} else if (chunkCount <= 100) {
+			return 36;
+		} else {
+			return 54;
+		}
+	}
+
+	/**
+	 * Resizes the dominion's food array to match the correct size for its current chunk count.
+	 * Items in slots that fall outside the new size are lost when shrinking.
+	 */
+	public static void resizeFoodArray(Dominion dominion) {
+		int targetSize = getFoodArraySize(dominion);
+		ItemStack[] current = dominion.getFood();
+		if (current.length == targetSize) {
+			return;
+		}
+		ItemStack[] resized = new ItemStack[targetSize];
+        System.arraycopy(current, 0, resized, 0, Math.min(current.length, targetSize));
+		dominion.setFood(resized);
+	}
+
+	/**
 	 * Determines whether the input Material is a food item.
 	 * @param type The type of item being verified.
 	 * @return Confirmation whether the input Material is a food item.
@@ -754,6 +786,7 @@ public class DominionUtils {
 				return -1;
 			} else {
 				dominion.getChunks().remove(chunkToRemove);
+				resizeFoodArray(dominion);
 				updateDominion(dominion);
 				return 0;
 			}
