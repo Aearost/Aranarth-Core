@@ -43,6 +43,9 @@ public class MountStats {
         } else if (clicked instanceof HappyGhast ghast) {
             e.setCancelled(true);
             showHappyGhastStats(player, ghast);
+        } else if (clicked instanceof PolarBear bear) {
+            e.setCancelled(true);
+            showPolarBearStats(player, bear);
         }
     }
 
@@ -156,6 +159,32 @@ public class MountStats {
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
             player.sendMessage(ChatUtils.translateToColor("&7Bellow damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts per hit"));
+        }
+    }
+
+    private void showPolarBearStats(Player player, PolarBear bear) {
+        AranarthMount mount = AranarthMount.fromPolarBear(bear);
+        if (mount == null) {
+            return;
+        }
+
+        double health = bear.getAttribute(Attribute.MAX_HEALTH).getValue();
+        int halfHearts = (int) Math.round(health);
+        double speed = mount.getSnifferSpeedMetersPerSecond(); // blocks/tick * 20
+
+        String ownerName = "None";
+        if (mount.getOwnerUUID() != null) {
+            ownerName = AranarthUtils.getPlayer(mount.getOwnerUUID()).getNickname();
+        }
+
+        player.sendMessage(ChatUtils.translateToColor("&8      - - - &b" + bear.getName() + "&b's Stats &8- - -"));
+        player.sendMessage(ChatUtils.translateToColor("&7Owner: &e" + ownerName));
+        player.sendMessage(ChatUtils.translateToColor("&7Health: &e" + halfHearts));
+        player.sendMessage(ChatUtils.translateToColor("&7Speed: &e" + String.format("%.2f m/s", speed)));
+
+        if (mount.getThirdAttribute() != null) {
+            double maxHearts = mount.getThirdAttribute() / 2.0;
+            player.sendMessage(ChatUtils.translateToColor("&7Bite Damage: &e2.5 - " + String.format("%.1f", maxHearts) + " hearts per hit"));
         }
     }
 

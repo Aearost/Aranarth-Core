@@ -186,9 +186,54 @@ public class MountListener implements Listener {
         }
     }
 
+    static final class PolarBearBiteAction implements SpecialAction {
+
+        private final Map<UUID, Long> cooldownEnds = new HashMap<>();
+        private final Map<UUID, PolarBearBite> activeLunges = new HashMap<>();
+        private static final long COOLDOWN_MS = 1_000L;
+
+        @Override
+        public void start(LivingEntity mount, Player rider, AranarthMount mountData) {
+            UUID id = mount.getUniqueId();
+            long now = System.currentTimeMillis();
+            long end = cooldownEnds.getOrDefault(id, 0L);
+            if (now < end) {
+                long remaining = (end - now + 999) / 1000;
+                rider.sendActionBar(net.kyori.adventure.text.Component.text(
+                        "§7Bite is ready in §e" + remaining + "s"));
+                return;
+            }
+            if (activeLunges.containsKey(id)) {
+                return; // Already mid-lunge
+            }
+            double maxDamage = mountData.getThirdAttribute() != null
+                    ? mountData.getThirdAttribute() : 10.0;
+            PolarBearBite lunge = new PolarBearBite((PolarBear) mount, rider, activeLunges, maxDamage);
+            activeLunges.put(id, lunge);
+            lunge.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
+            cooldownEnds.put(id, now + COOLDOWN_MS);
+        }
+
+        @Override
+        public void stop(UUID mountId) {
+            // Cooldown-based ability so the space-bar release is ignored
+        }
+
+        @Override
+        public void cleanup(UUID mountId) {
+            PolarBearBite lunge = activeLunges.remove(mountId);
+            if (lunge != null) {
+                lunge.cancel();
+            }
+            PolarBearBite.LUNGING_MOUNTS.remove(mountId);
+            cooldownEnds.remove(mountId);
+        }
+    }
+
     private static final SnifferTunnelAction SNIFFER_TUNNEL = new SnifferTunnelAction();
     private static final RavagerRamAction RAVAGER_RAM = new RavagerRamAction();
     private static final FlyingBisonBellowAction FLYING_BISON_BELLOW = new FlyingBisonBellowAction();
+    private static final PolarBearBiteAction POLAR_BEAR_BITE = new PolarBearBiteAction();
 
     /**
      * Foods accepted by all mounts (mirrors vanilla horse diet).
@@ -266,14 +311,16 @@ public class MountListener implements Listener {
                 FLYING_BISON_BELLOW
         ));
 
-//         Template for future mounts
-//
-//         MOUNT_CONFIGS.put(NewMob.class, new MountTypeConfig(
-//                 NewMob.class,
-//                 20, 20, 0.5, 1.0,
-//                 null, null, null,   // no third attribute
-//                 false, null         // persists, no special action
-//         ));
+        // Polar Bear Dog - low health, high speed, high damage bite lunge
+        MOUNT_CONFIGS.put(PolarBear.class, new MountTypeConfig(
+                PolarBear.class,
+                16, 25,   // Health LOW
+                0.70, 1.40, // Speed HIGH (14–28 m/s)
+                10.0, 22.0, // Bite Damage HIGH
+                "Bite Strength",
+                true,
+                POLAR_BEAR_BITE
+        ));
     }
 
     private static final double STEP_UP_VELOCITY = 0.42;
@@ -563,6 +610,11 @@ public class MountListener implements Listener {
         mount.setRotation(riderYaw, 0);
         if (mount instanceof Mob mob) {
             mob.setBodyYaw(riderYaw);
+        }
+
+        // While the Polar Bear Dog is lunging, the PolarBearBite runnable controls velocity
+        if (PolarBearBite.LUNGING_MOUNTS.contains(mount.getUniqueId())) {
+            return;
         }
 
         double[] in = playerInputs.getOrDefault(rider.getUniqueId(), new double[]{0, 0});

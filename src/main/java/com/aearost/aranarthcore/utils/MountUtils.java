@@ -13,6 +13,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.HappyGhast;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.PolarBear;
 import org.bukkit.entity.Ravager;
 import org.bukkit.entity.Sniffer;
 import org.bukkit.scheduler.BukkitTask;
@@ -309,7 +310,8 @@ public class MountUtils {
             case "EARTH" -> Sniffer.class;
             case "FIRE" -> Ravager.class;
             case "AIR" -> HappyGhast.class;
-            default -> null; // WATER mount not yet added
+            case "WATER" -> PolarBear.class;
+            default -> null;
         };
     }
 
@@ -396,6 +398,14 @@ public class MountUtils {
 
     public static boolean isActiveMount(UUID mountEntityUUID) {
         return activeMounts.containsKey(mountEntityUUID);
+    }
+
+    /**
+     * Returns true if the mount entity with the given UUID is currently in water.
+     */
+    public static boolean isMountInWater(UUID mountEntityUUID) {
+        Entity e = Bukkit.getEntity(mountEntityUUID);
+        return e instanceof LivingEntity le && le.isInWater();
     }
 
     @Nullable
@@ -580,6 +590,40 @@ public class MountUtils {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + "Your " + formatElement(info[1])
                                 + " mount's §fBellow Power" + getElementColor(info[1])
+                                + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
+            }
+        }
+    }
+
+    /**
+     * Awards Bite XP when the Polar Bear Dog's lunge connects with an entity.
+     *
+     * @param mountEntityUUID UUID of the mount entity.
+     * @param xp              Total XP to award (base + per-hit bonus, pre-computed by caller).
+     */
+    public static void addBiteXp(UUID mountEntityUUID, int xp) {
+        String[] info = activeMounts.get(mountEntityUUID);
+        if (info == null) {
+            return;
+        }
+
+        UUID ownerUUID = parseUUID(info[0]);
+        if (ownerUUID == null) {
+            return;
+        }
+        Mount pet = get(ownerUUID, info[1]);
+        if (pet == null) {
+            return;
+        }
+
+        boolean leveled = pet.addThirdXp(xp);
+        Player owner = Bukkit.getPlayer(ownerUUID);
+        if (owner != null) {
+            refreshSkillBar(owner, info[1], BAR_THIRD);
+            if (leveled) {
+                owner.sendMessage(ChatUtils.chatMessage(
+                        getElementColor(info[1]) + "Your " + formatElement(info[1])
+                                + " mount's §bBite Strength" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getThirdLevel() + "§r§a!"));
             }
         }

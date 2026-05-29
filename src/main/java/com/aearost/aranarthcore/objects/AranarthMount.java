@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.objects;
 
 import org.bukkit.entity.HappyGhast;
+import org.bukkit.entity.PolarBear;
 import org.bukkit.entity.Ravager;
 import org.bukkit.entity.Sniffer;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -131,6 +132,32 @@ public class AranarthMount {
                 ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
 
         return new AranarthMount(ownerUUID, speed, thirdAttr, thirdAttr != null ? "Bellow Power" : null);
+    }
+
+    /**
+     * Constructs a Polar Bear Dog from a Polar Bear's persistent data.
+     */
+    @Nullable
+    public static AranarthMount fromPolarBear(PolarBear bear) {
+        PersistentDataContainer pdc = bear.getPersistentDataContainer();
+
+        if (!pdc.has(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE)) {
+            return null;
+        }
+
+        UUID ownerUUID = null;
+        if (pdc.has(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING)) {
+            try {
+                ownerUUID = UUID.fromString(pdc.get(CustomKeys.MOUNT_OWNER, PersistentDataType.STRING));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        double speed = pdc.get(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE);
+        Double thirdAttr = pdc.has(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE)
+                ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
+
+        return new AranarthMount(ownerUUID, speed, thirdAttr, thirdAttr != null ? "Bite Strength" : null);
     }
 
     /**
