@@ -157,7 +157,8 @@
       "Bash(grep:*)",
       "Bash(find C:/Users/liamh -name paper-*.jar -o -name paper-api-*.jar)",
       "Bash(for f:*)",
-      "Bash(do echo:*)"
+      "Bash(do echo:*)",
+      "Bash(find ~/.m2/repository/com/projectkorra -name *.jar)"
     ]
   }
 }

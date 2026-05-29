@@ -131,6 +131,12 @@ commands:
   pay:
     description: Pays the input player the specified amount
     permission: aranarth.pay
+  mount:
+    description: Calls or dismisses the player's current mount
+    permission: aranarth.mount
+  mounts:
+    description: Shows a summary of all four of the player's mounts
+    permission: aranarth.mount
   pettransfer:
     description: Allows the player to specify a player to transfer their pet's ownership to
     permission: aranarth.pettransfer

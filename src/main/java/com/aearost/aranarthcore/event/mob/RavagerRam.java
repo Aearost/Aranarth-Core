@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.MountUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
@@ -88,6 +89,9 @@ public class RavagerRam extends BukkitRunnable {
         target.setVelocity(knockback);
 
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_RAVAGER_ATTACK, 1.5f, 0.8f);
+
+        // Award ram-strength XP if this Ravager is a mount
+        MountUtils.addRamXp(ravagerUUID);
     }
 
     private void finish() {

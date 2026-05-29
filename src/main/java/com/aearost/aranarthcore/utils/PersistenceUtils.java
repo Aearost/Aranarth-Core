@@ -3255,4 +3255,105 @@ public class PersistenceUtils {
 		};
 	}
 
+	/**
+	 * Loads per-player per-element mount progress from petprogress.txt.
+	 *
+	 * <p>Format (one entry per line):
+	 * {@code playerUUID|element|healthLevel|healthXp|speedLevel|speedXp|thirdLevel|thirdXp|rechargeEndMs|currentHealth|nickname}
+	 * The {@code nickname} field is optional and may be empty.
+	 */
+	public static void loadMounts() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "petprogress.txt";
+		File file = new File(filePath);
+		if (!file.exists()) return;
+
+		try {
+			Scanner reader = new Scanner(file);
+			Bukkit.getLogger().info("Attempting to read the petprogress file...");
+			while (reader.hasNextLine()) {
+				String row = reader.nextLine().trim();
+				if (row.startsWith("#") || row.isEmpty()) continue;
+				String[] f = row.split("\\|");
+				if (f.length < 10) continue;
+				try {
+					UUID uuid         = UUID.fromString(f[0]);
+					String element    = f[1];
+					int healthLevel   = Integer.parseInt(f[2]);
+					long healthXp     = Long.parseLong(f[3]);
+					int speedLevel    = Integer.parseInt(f[4]);
+					long speedXp      = Long.parseLong(f[5]);
+					int thirdLevel    = Integer.parseInt(f[6]);
+					long thirdXp      = Long.parseLong(f[7]);
+					long rechargeEnd  = Long.parseLong(f[8]);
+					double curHealth  = Double.parseDouble(f[9]);
+
+					com.aearost.aranarthcore.objects.Mount pm =
+							new com.aearost.aranarthcore.objects.Mount(
+									healthLevel, healthXp,
+									speedLevel,  speedXp,
+									thirdLevel,  thirdXp,
+									rechargeEnd, curHealth);
+					if (f.length >= 11 && !f[10].isEmpty()) pm.setNickname(f[10]);
+					com.aearost.aranarthcore.utils.MountUtils.put(uuid, element, pm);
+				} catch (Exception ignored) {}
+			}
+			reader.close();
+			Bukkit.getLogger().info("Mount progress has been initialised");
+		} catch (FileNotFoundException e) {
+			Bukkit.getLogger().info("Something went wrong with loading petprogress.txt!");
+		}
+	}
+
+	/**
+	 * Saves all mount progress to petprogress.txt.
+	 *
+	 * <p>Format: {@code playerUUID|element|healthLevel|healthXp|speedLevel|speedXp|thirdLevel|thirdXp|rechargeEndMs|currentHealth|nickname}
+	 */
+	public static void saveMounts() {
+		String currentPath = System.getProperty("user.dir");
+		String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+				+ File.separator + "petprogress.txt";
+		File pluginDirectory = new File(
+				currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+		File file = new File(filePath);
+
+		boolean isDirectoryCreated = pluginDirectory.isDirectory() || pluginDirectory.mkdir();
+		if (!isDirectoryCreated) return;
+
+		try {
+			if (file.createNewFile()) Bukkit.getLogger().info("A new petprogress.txt file has been generated");
+		} catch (IOException e) {
+			Bukkit.getLogger().info("An error occurred in the creation of petprogress.txt");
+		}
+
+		try {
+			FileWriter writer = new FileWriter(filePath);
+			writer.write("#playerUUID|element|healthLevel|healthXp|speedLevel|speedXp|thirdLevel|thirdXp|rechargeEndMs|currentHealth|nickname\n");
+			for (Map.Entry<UUID, Map<String, com.aearost.aranarthcore.objects.Mount>> playerEntry
+					: com.aearost.aranarthcore.utils.MountUtils.getAllMounts().entrySet()) {
+				for (Map.Entry<String, com.aearost.aranarthcore.objects.Mount> elementEntry
+						: playerEntry.getValue().entrySet()) {
+					com.aearost.aranarthcore.objects.Mount pm = elementEntry.getValue();
+					writer.write(
+							playerEntry.getKey() + "|"
+							+ elementEntry.getKey() + "|"
+							+ pm.getHealthLevel() + "|"
+							+ pm.getHealthXp() + "|"
+							+ pm.getSpeedLevel() + "|"
+							+ pm.getSpeedXp() + "|"
+							+ pm.getThirdLevel() + "|"
+							+ pm.getThirdXp() + "|"
+							+ pm.getRechargeEndMs() + "|"
+							+ pm.getCurrentHealth() + "|"
+							+ (pm.hasNickname() ? pm.getNickname() : "") + "\n");
+				}
+			}
+			writer.close();
+		} catch (IOException e) {
+			Bukkit.getLogger().info("There was an error in saving mount progress");
+		}
+	}
+
 }

@@ -7,6 +7,7 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 /**
  * Displays a mount's stats when shift + right-clicked.
@@ -16,6 +17,9 @@ public class MountStats {
         Player player = e.getPlayer();
 
         if (!player.isSneaking()) {
+            return;
+        }
+        if (e.getHand() != EquipmentSlot.HAND) {
             return;
         }
         if (player.getInventory().getItemInMainHand().getType() == Material.GOAT_HORN) {
@@ -96,7 +100,7 @@ public class MountStats {
 
         if (mount.getThirdAttribute() != null) {
             double digSpeed = mount.getDigSpeedBlocksPerSecond();
-            player.sendMessage(ChatUtils.translateToColor("&7Dig Speed: &e" + String.format("%.1f blk/s", digSpeed)));
+            player.sendMessage(ChatUtils.translateToColor("&7Dig Speed: &e" + String.format("%.1f ", digSpeed) + " blocks/s"));
         }
     }
 
@@ -122,7 +126,7 @@ public class MountStats {
 
         if (mount.getThirdAttribute() != null) {
             double maxHearts = mount.getThirdAttribute() / 2.0;
-            player.sendMessage(ChatUtils.translateToColor("&7Ram Damage: &e1 - " + String.format("%.1f \u2665", maxHearts)));
+            player.sendMessage(ChatUtils.translateToColor("&7Ram Damage: &e1 - " + String.format("%.1f", maxHearts) + " hearts"));
         }
     }
 

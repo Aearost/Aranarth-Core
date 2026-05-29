@@ -15,15 +15,13 @@ public class AranarthMount {
 
     private UUID ownerUUID;
     private final double speed;
-    private final boolean hasSaddle;
     private final Double thirdAttribute;
     private final String thirdAttributeLabel;
 
-    public AranarthMount(@Nullable UUID ownerUUID, double speed, boolean hasSaddle,
+    public AranarthMount(@Nullable UUID ownerUUID, double speed,
                          @Nullable Double thirdAttribute, @Nullable String thirdAttributeLabel) {
         this.ownerUUID = ownerUUID;
         this.speed = speed;
-        this.hasSaddle = hasSaddle;
         this.thirdAttribute = thirdAttribute;
         this.thirdAttributeLabel = thirdAttributeLabel;
     }
@@ -39,10 +37,6 @@ public class AranarthMount {
 
     public double getSpeed() {
         return speed;
-    }
-
-    public boolean hasSaddle() {
-        return hasSaddle;
     }
 
     /**
@@ -107,13 +101,10 @@ public class AranarthMount {
         }
 
         double speed = pdc.get(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE);
-        boolean hasSaddle = pdc.has(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE)
-                && pdc.get(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE) == 1;
-
         Double thirdAttr = pdc.has(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE)
                 ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
 
-        return new AranarthMount(ownerUUID, speed, hasSaddle, thirdAttr, thirdAttr != null ? "Ram Damage" : null);
+        return new AranarthMount(ownerUUID, speed, thirdAttr, thirdAttr != null ? "Ram Damage" : null);
     }
 
     /**
@@ -137,12 +128,9 @@ public class AranarthMount {
         }
 
         double speed = pdc.get(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE);
-        boolean hasSaddle = pdc.has(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE)
-                && pdc.get(CustomKeys.MOUNT_SADDLE, PersistentDataType.BYTE) == 1;
-
         Double thirdAttr = pdc.has(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE)
                 ? pdc.get(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE) : null;
 
-        return new AranarthMount(ownerUUID, speed, hasSaddle, thirdAttr, thirdAttr != null ? "Dig Speed" : null);
+        return new AranarthMount(ownerUUID, speed, thirdAttr, thirdAttr != null ? "Dig Speed" : null);
     }
 }

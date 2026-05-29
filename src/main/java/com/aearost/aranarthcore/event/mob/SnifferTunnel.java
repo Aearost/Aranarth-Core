@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.MountUtils;
+import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -24,8 +26,8 @@ public class SnifferTunnel extends BukkitRunnable {
     private static final double RANGE = 25.0;
     private static final long REVERT_TIME_MS = 200_000L; // 3m 20s
 
+    /** Blocks that must never be dug regardless of earthbendability. */
     private static final Set<Material> NON_DIGGABLE = Set.of(
-            // Admin / Structural blocks
             Material.BEDROCK,
             Material.END_PORTAL_FRAME,
             Material.END_PORTAL,
@@ -36,28 +38,10 @@ public class SnifferTunnel extends BukkitRunnable {
             Material.REPEATING_COMMAND_BLOCK,
             Material.STRUCTURE_BLOCK,
             Material.BARRIER,
-            Material.LIGHT,
-            // Ores
-            Material.COAL_ORE,
-            Material.DEEPSLATE_COAL_ORE,
-            Material.IRON_ORE,
-            Material.DEEPSLATE_IRON_ORE,
-            Material.COPPER_ORE,
-            Material.DEEPSLATE_COPPER_ORE,
-            Material.GOLD_ORE,
-            Material.DEEPSLATE_GOLD_ORE,
-            Material.NETHER_GOLD_ORE,
-            Material.REDSTONE_ORE,
-            Material.DEEPSLATE_REDSTONE_ORE,
-            Material.EMERALD_ORE,
-            Material.DEEPSLATE_EMERALD_ORE,
-            Material.LAPIS_ORE,
-            Material.DEEPSLATE_LAPIS_ORE,
-            Material.DIAMOND_ORE,
-            Material.DEEPSLATE_DIAMOND_ORE,
-            Material.NETHER_QUARTZ_ORE,
-            Material.ANCIENT_DEBRIS
+            Material.LIGHT
     );
+
+    private static final int DIG_XP_BLOCKS_PER_LEVEL = 100;
     private final Map<UUID, SnifferTunnel> activeTunnels;
     private final UUID snifferUUID;
     private final org.bukkit.Location startLocation;
@@ -66,6 +50,7 @@ public class SnifferTunnel extends BukkitRunnable {
     private double depth;
     private double radius;
     private double angle;
+    private int blocksDiggedThisTunnel;
 
     public SnifferTunnel(Player rider, Sniffer sniffer,
                          Map<UUID, SnifferTunnel> activeTunnels, int blocksPerTick) {
@@ -77,6 +62,7 @@ public class SnifferTunnel extends BukkitRunnable {
         this.depth = 0;
         this.radius = RADIUS_INCREMENT;
         this.angle = 0;
+        this.blocksDiggedThisTunnel = 0;
     }
 
     @Override
@@ -105,6 +91,11 @@ public class SnifferTunnel extends BukkitRunnable {
                 } else {
                     new TempBlock(block, Material.AIR).setRevertTime(REVERT_TIME_MS);
                 }
+                blocksDiggedThisTunnel++;
+                if (blocksDiggedThisTunnel >= DIG_XP_BLOCKS_PER_LEVEL) {
+                    MountUtils.addDigXp(snifferUUID, 1);
+                    blocksDiggedThisTunnel -= DIG_XP_BLOCKS_PER_LEVEL;
+                }
             }
 
             // Advance spiral - angle fastest, then radius, then depth
@@ -122,13 +113,11 @@ public class SnifferTunnel extends BukkitRunnable {
 
     private boolean isDiggable(Block block) {
         Material type = block.getType();
-        if (NON_DIGGABLE.contains(type)) {
+        if (NON_DIGGABLE.contains(type) || block.isLiquid()) {
             return false;
         }
-        if (block.isLiquid()) {
-            return false;
-        }
-        return type.getHardness() >= 0;
+        // Only allow blocks that ProjectKorra considers earthbendable (earth, metal, sand, mud — not lava or ores)
+        return EarthAbility.isEarthbendable(type, true, true, false);
     }
 
     private void finish() {

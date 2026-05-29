@@ -1,14 +1,21 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PermissionUtils;
+import com.aearost.aranarthcore.utils.MountUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.Plugin;
+
+import java.util.UUID;
 
 /**
  * Handles preventing or adding custom logic to commands being executed by players.
@@ -79,11 +86,39 @@ public class CommandOverrides {
                         if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
                             PermissionUtils.evaluatePlayerPermissions(player);
                         }
+                        // Dismiss any active mount — the new element may have a different mount
+                        dismissActiveMountIfPresent(player);
                     }
                 }
             }
         }
     }
 
+    private void dismissActiveMountIfPresent(Player player) {
+        UUID mountId = MountUtils.getActiveMountEntityUUID(player.getUniqueId());
+        if (mountId == null) return;
+
+        String[] info = MountUtils.getActiveMountInfo(mountId);
+        Entity entity = Bukkit.getEntity(mountId);
+
+        if (entity instanceof LivingEntity mount) {
+            if (info != null) {
+                Mount mountData = MountUtils.get(player.getUniqueId(), info[1]);
+                if (mountData != null) mountData.setCurrentHealth(mount.getHealth());
+            }
+            MountListener ml = MountListener.getInstance();
+            if (ml != null) ml.cleanupMountPublic(mountId);
+            mount.eject();
+            mount.remove();
+        } else {
+            MountUtils.unregisterActive(mountId);
+        }
+
+        if (info != null) {
+            String displayName = MountUtils.getDisplayName(player.getUniqueId(), info[1]);
+            player.sendMessage(ChatUtils.chatMessage(
+                    MountUtils.getElementColor(info[1]) + displayName + " &7has returned."));
+        }
+    }
 
 }

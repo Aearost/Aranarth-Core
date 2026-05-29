@@ -122,6 +122,8 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveQuestProgress();
                 PersistenceUtils.saveLoginStreaks();
                 PersistenceUtils.saveGates();
+                MountUtils.syncAllActiveHealthToData();
+                PersistenceUtils.saveMounts();
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info("Aranarth data has been saved");
 
@@ -253,6 +255,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadQuestProgress();
         PersistenceUtils.loadLoginStreaks();
         PersistenceUtils.loadGates();
+        PersistenceUtils.loadMounts();
     }
 
     /**
@@ -535,6 +538,9 @@ public class AranarthCore extends JavaPlugin {
         getCommand("warp").setTabCompleter(new CommandWarpCompleter());
         getCommand("quests").setExecutor(new CommandQuests());
         getCommand("streak").setExecutor(new CommandStreak());
+        getCommand("mount").setExecutor(new CommandMount());
+        getCommand("mount").setTabCompleter(new CommandMountCompleter());
+        getCommand("mounts").setExecutor(new CommandMounts());
     }
 
     /**
@@ -924,6 +930,8 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveQuestProgress();
         PersistenceUtils.saveLoginStreaks();
         PersistenceUtils.saveGates();
+        MountUtils.syncAllActiveHealthToData();
+        PersistenceUtils.saveMounts();
 
         Bukkit.resetRecipes();
         discordChatListener.unsubscribe();
