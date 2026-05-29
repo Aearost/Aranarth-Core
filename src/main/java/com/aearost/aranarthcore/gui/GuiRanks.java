@@ -95,6 +95,7 @@ public class GuiRanks {
 		esquireLore.add(ChatUtils.translateToColor("&f&o- #008048&oPlant Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- #ffdc82&oSand Bending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- Summon your &e/mount"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /seen"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- /dominion home"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 5 quiver slots"));

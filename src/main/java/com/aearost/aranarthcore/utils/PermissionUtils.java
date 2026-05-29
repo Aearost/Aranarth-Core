@@ -651,6 +651,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.earth.sandbending", true);
 			perms.setPermission("aranarth.seen", true);
 			perms.setPermission("aranarth.dominion.home", true);
+			perms.setPermission("aranarth.mount", true);
 		} else {
 			return;
 		}
