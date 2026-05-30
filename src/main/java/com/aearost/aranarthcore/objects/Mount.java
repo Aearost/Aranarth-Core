@@ -17,6 +17,7 @@ public class Mount {
     private long rechargeEndMs;
     private double currentHealth;
     private String nickname;
+    private String harnessColor;
 
     public Mount() {
         healthLevel = 1;
@@ -27,6 +28,7 @@ public class Mount {
         thirdXp = 0;
         rechargeEndMs = 0;
         currentHealth = -1;
+        harnessColor = "BROWN";
     }
 
     public Mount(int healthLevel, long healthXp,
@@ -191,5 +193,13 @@ public class Mount {
 
     public void setNickname(String name) {
         this.nickname = (name == null || name.isEmpty()) ? null : name;
+    }
+
+    public String getHarnessColor() {
+        return harnessColor != null ? harnessColor : "BROWN";
+    }
+
+    public void setHarnessColor(String harnessColor) {
+        this.harnessColor = (harnessColor == null || harnessColor.isEmpty()) ? "BROWN" : harnessColor;
     }
 }

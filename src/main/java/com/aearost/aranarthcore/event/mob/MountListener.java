@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.mob;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthMount;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -20,6 +21,7 @@ import org.bukkit.event.entity.EntityDismountEvent;
 import org.bukkit.event.player.PlayerInputEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -427,6 +429,26 @@ public class MountListener implements Listener {
             Double healAmount = getFoodHealAmount(mountElement, mainHand.getType());
             if (healAmount != null) {
                 feedMount(clickedEntity, player, mainHand, healAmount);
+                return;
+            }
+        }
+
+        // Change harness color with dye
+        if (clickedEntity instanceof HappyGhast happyGhast
+                && ownerUUID != null && ownerUUID.equals(player.getUniqueId())) {
+            Material harnessMaterial = getHarnessMaterialFromDye(mainHand.getType());
+            if (harnessMaterial != null) {
+                AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                if (aranarthPlayer.getSaintRank() >= 1) {
+                    happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
+                    String colorName = mainHand.getType().name().replace("_DYE", "");
+                    Mount mountData = MountUtils.get(ownerUUID, "AIR");
+                    if (mountData != null) {
+                        mountData.setHarnessColor(colorName);
+                    }
+                    mainHand.setAmount(mainHand.getAmount() - 1);
+                    player.sendMessage(ChatUtils.chatMessage("&7Your Flying Bison's harness color has been updated!"));
+                }
                 return;
             }
         }
@@ -930,6 +952,12 @@ public class MountListener implements Listener {
                     }
                 });
 
+        // Apply saved harness color to Flying Bison (defaults to brown)
+        if (mount instanceof HappyGhast happyGhast) {
+            Material harnessMaterial = getHarnessMaterialFromColorName(mountData.getHarnessColor());
+            happyGhast.getEquipment().setItem(EquipmentSlot.BODY, new ItemStack(harnessMaterial));
+        }
+
         mountEntity(mount, player, config);
 
         // Apply the player's display name (nickname or species name) as the entity nametag
@@ -984,6 +1012,33 @@ public class MountListener implements Listener {
         }
         // Fallback to midpoint of the configured range
         return (config.minThirdAttr() + config.maxThirdAttr()) / 2.0;
+    }
+
+    /**
+     * Returns the harness {@link Material} corresponding to the given dye material,
+     * or {@code null} if the material is not a dye or has no matching harness.
+     */
+    private Material getHarnessMaterialFromDye(Material dye) {
+        String name = dye.name();
+        if (!name.endsWith("_DYE")) {
+            return null;
+        }
+        try {
+            return Material.valueOf(name.substring(0, name.length() - 4) + "_HARNESS");
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the harness Material for a stored color.
+     */
+    private Material getHarnessMaterialFromColorName(String colorName) {
+        try {
+            return Material.valueOf(colorName + "_HARNESS");
+        } catch (IllegalArgumentException e) {
+            return Material.BROWN_HARNESS;
+        }
     }
 
     private UUID readOwner(LivingEntity mount) {
