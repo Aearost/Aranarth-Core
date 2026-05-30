@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.DominionDeath;
+import com.aearost.aranarthcore.event.player.MountKillDeathMessage;
 import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.event.player.PlayerKillDeathStats;
 import com.aearost.aranarthcore.event.player.PlayerKillMoneySteal;
@@ -14,6 +15,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 public class EntityDeathEventListener implements Listener {
 
@@ -39,6 +41,7 @@ public class EntityDeathEventListener implements Listener {
             new DominionDeath().execute(e);
             new PlayerKillDeathStats().execute(e);
             new PlayerKillMoneySteal().execute(e);
+            new MountKillDeathMessage().execute((PlayerDeathEvent) e);
         }
 
         // If the mob was a sentinel
