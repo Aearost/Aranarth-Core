@@ -16,8 +16,8 @@ import java.util.UUID;
 public class AranarthMount {
 
     private UUID ownerUUID;
-    private final double speed;
-    private final Double thirdAttribute;
+    private double speed;
+    private Double thirdAttribute;
     private final String thirdAttributeLabel;
 
     public AranarthMount(@Nullable UUID ownerUUID, double speed,
@@ -41,12 +41,20 @@ public class AranarthMount {
         return speed;
     }
 
+    public void setSpeed(double speed) {
+        this.speed = speed;
+    }
+
     /**
      * Mob-specific third attribute.
      */
     @Nullable
     public Double getThirdAttribute() {
         return thirdAttribute;
+    }
+
+    public void setThirdAttribute(@Nullable Double thirdAttribute) {
+        this.thirdAttribute = thirdAttribute;
     }
 
     /**

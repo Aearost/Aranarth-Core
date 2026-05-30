@@ -457,6 +457,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eSpeed" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getSpeedLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }
@@ -495,6 +499,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eHealth" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getHealthLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }
@@ -526,6 +534,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eRamming" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getThirdLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }
@@ -560,6 +572,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eDig Speed" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getThirdLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }
@@ -594,6 +610,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eBellow Power" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getThirdLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }
@@ -628,6 +648,10 @@ public class MountUtils {
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
                                 + "'s §eBite Strength" + getElementColor(info[1])
                                 + " has reached level §e" + pet.getThirdLevel()));
+                MountListener ml = MountListener.getInstance();
+                if (ml != null) {
+                    ml.updateMountStats(mountEntityUUID);
+                }
             }
         }
     }

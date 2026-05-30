@@ -992,6 +992,76 @@ public class MountListener implements Listener {
                 MountUtils.getElementColor(element) + displayName + " &7has been summoned!"));
     }
 
+    /**
+     * Updates a mount's stats when they are already out in the world.
+     *
+     * @param mountEntityUUID UUID of the active mount entity.
+     */
+    public void updateMountStats(UUID mountEntityUUID) {
+        AranarthMount aMount = activeMounts.get(mountEntityUUID);
+        if (aMount == null) {
+            return;
+        }
+
+        Entity entity = Bukkit.getEntity(mountEntityUUID);
+        if (!(entity instanceof LivingEntity mount)) {
+            return;
+        }
+
+        String[] info = MountUtils.getActiveMountInfo(mountEntityUUID);
+        if (info == null) {
+            return;
+        }
+
+        UUID ownerUUID;
+        try {
+            ownerUUID = UUID.fromString(info[0]);
+        } catch (IllegalArgumentException e) {
+            return;
+        }
+
+        Mount mountData = MountUtils.get(ownerUUID, info[1]);
+        if (mountData == null) {
+            return;
+        }
+
+        MountTypeConfig config = getConfig(mount.getClass());
+        if (config == null) {
+            return;
+        }
+
+        double newMaxHealth = Mount.statForLevel(config.minHealth(), config.maxHealth(),
+                mountData.getHealthLevel());
+        double newSpeed = Mount.statForLevel(config.minSpeed(), config.maxSpeed(),
+                mountData.getSpeedLevel());
+        double newThirdAttr = config.hasThirdAttr()
+                ? Mount.statForLevel(config.minThirdAttr(), config.maxThirdAttr(),
+                mountData.getThirdLevel())
+                : 0;
+
+        // Health ability
+        var maxHpAttr = mount.getAttribute(Attribute.MAX_HEALTH);
+        if (maxHpAttr != null) {
+            maxHpAttr.setBaseValue(newMaxHealth);
+            if (mount.getHealth() > newMaxHealth) {
+                mount.setHealth(newMaxHealth);
+            }
+        }
+
+        // Speed ability
+        PersistentDataContainer pdc = mount.getPersistentDataContainer();
+        pdc.set(CustomKeys.MOUNT_SPEED, PersistentDataType.DOUBLE, newSpeed);
+        if (config.hasThirdAttr()) {
+            pdc.set(CustomKeys.MOUNT_THIRD_ATTR, PersistentDataType.DOUBLE, newThirdAttr);
+        }
+
+        // Extra ability
+        aMount.setSpeed(newSpeed);
+        if (config.hasThirdAttr()) {
+            aMount.setThirdAttribute(newThirdAttr);
+        }
+    }
+
     private MountTypeConfig getConfig(Class<? extends LivingEntity> entityClass) {
         for (Map.Entry<Class<? extends LivingEntity>, MountTypeConfig> entry : MOUNT_CONFIGS.entrySet()) {
             if (entry.getKey().isAssignableFrom(entityClass)) {
