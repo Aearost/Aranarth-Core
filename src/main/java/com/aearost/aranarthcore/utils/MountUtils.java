@@ -482,7 +482,10 @@ public class MountUtils {
             return;
         }
 
-        long xp = Math.max(1, (long) damage) * HEALTH_XP_PER_HALF_HEART;
+        if (!Double.isFinite(damage) || damage <= 0) {
+            return;
+        }
+        long xp = Math.max(1, Math.min((long) damage, 200L)) * HEALTH_XP_PER_HALF_HEART;
         boolean leveled = pet.addHealthXp(xp);
         Player owner = Bukkit.getPlayer(ownerUUID);
         if (owner != null) {

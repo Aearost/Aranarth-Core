@@ -67,8 +67,12 @@ public class FlyingBisonBellow {
 
             // Low damage scaled by skill level and falloff
             double damage = MIN_DAMAGE + random.nextDouble() * (maxDamage - MIN_DAMAGE);
+            double healthBefore = target.getHealth();
+            double absorptionBefore = target.getAbsorptionAmount();
             target.damage(damage * falloff, ghast);
-            hits++;
+            if (target.isDead() || target.getHealth() < healthBefore || target.getAbsorptionAmount() < absorptionBefore) {
+                hits++;
+            }
         }
 
         if (hits > 0) {

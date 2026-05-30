@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.MountUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -174,9 +175,22 @@ public class DominionProtectionListener implements Listener {
                 }
             }
         }
-        // PvP against players
+        // PvP against players (including damage dealt by mounts on behalf of their rider)
         else if (e.getEntity() instanceof Player target) {
-            if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+            Player attacker = null;
+            Entity causingEntity = e.getDamageSource().getCausingEntity();
+            if (causingEntity instanceof Player p) {
+                attacker = p;
+            } else if (causingEntity != null && MountUtils.isActiveMount(causingEntity.getUniqueId())) {
+                String[] info = MountUtils.getActiveMountInfo(causingEntity.getUniqueId());
+                if (info != null) {
+                    Entity rider = Bukkit.getEntity(java.util.UUID.fromString(info[0]));
+                    if (rider instanceof Player p) {
+                        attacker = p;
+                    }
+                }
+            }
+            if (attacker != null) {
                 handlePvP(attacker, target, e);
             }
         }
@@ -184,6 +198,18 @@ public class DominionProtectionListener implements Listener {
         else if (e.getEntity() instanceof Tameable pet && pet.isTamed()) {
             if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
                 handlePetDamage(attacker, pet, e);
+            }
+        }
+        // Active mounts (treated as their rider/owner for relation purposes)
+        else if (MountUtils.isActiveMount(e.getEntity().getUniqueId())) {
+            if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
+                String[] info = MountUtils.getActiveMountInfo(e.getEntity().getUniqueId());
+                if (info != null) {
+                    Entity rider = Bukkit.getEntity(java.util.UUID.fromString(info[0]));
+                    if (rider instanceof Player owner) {
+                        handleMountDamage(attacker, owner, e);
+                    }
+                }
             }
         }
     }
@@ -321,6 +347,82 @@ public class DominionProtectionListener implements Listener {
                 attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname() + "'s &e" + petType + " &7in their lands as you are " + relationName));
             }
         }
+    }
+
+    /**
+     * Handles damage to active mounts using the same relation-based rules as PvP.
+     * The mount's rider is treated as the owner for all relation checks.
+     */
+    private void handleMountDamage(Player attacker, Player mountOwner, EntityDamageEvent e) {
+        if (attacker.getUniqueId().equals(mountOwner.getUniqueId())) {
+            return;
+        }
+        if (AranarthUtils.isSpawnLocation(e.getEntity().getLocation())) {
+            return;
+        }
+
+        Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
+        Dominion ownerDominion = DominionUtils.getPlayerDominion(mountOwner.getUniqueId());
+        AranarthPlayer aranarthOwner = AranarthUtils.getPlayer(mountOwner.getUniqueId());
+        String[] mountInfo = MountUtils.getActiveMountInfo(e.getEntity().getUniqueId());
+        String mountTypeName = mountInfo != null
+                ? MountUtils.getDisplayName(mountOwner.getUniqueId(), mountInfo[1])
+                : ChatUtils.getFormattedItemName(e.getEntity().getType().name());
+
+        // Same dominion — check the dominion-wide PvP flag
+        if (attackerDominion != null && ownerDominion != null
+                && attackerDominion.isSameDominion(ownerDominion)) {
+            if (!attackerDominion.isMemberPvpEnabled()) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                        + "'s &e" + mountTypeName + " &7as PvP is disabled in &e" + attackerDominion.getName()));
+            }
+            return;
+        }
+
+        // Different dominions: apply relation rules
+        if (attackerDominion != null && ownerDominion != null) {
+            DominionRank relation = DominionUtils.getRelationKey(attackerDominion, ownerDominion);
+            if (relation == DominionRank.ALLIED) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                        + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.ALLIED)));
+                return;
+            }
+            if (relation == DominionRank.TRUCED) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                        + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.TRUCED)));
+                return;
+            }
+            if (relation == DominionRank.ENEMIED) {
+                return;
+            }
+        }
+
+        // Chunk-based rules (outsider attacking a mount in the owner's dominion land)
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+        if (chunkDominion == null) {
+            return;
+        }
+
+        boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
+        boolean ownerIsMember = ownerDominion != null && ownerDominion.isSameDominion(chunkDominion);
+
+        if (attackerIsMember) {
+            return;
+        }
+        if (!ownerIsMember) {
+            return;
+        }
+
+        DominionRank attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
+        if (attackerRelation == DominionRank.ENEMIED) {
+            return;
+        }
+        e.setCancelled(true);
+        attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                + "'s &e" + mountTypeName + " &7in their lands as you are " + DominionUtils.getFormattedRankName(attackerRelation)));
     }
 
     /**

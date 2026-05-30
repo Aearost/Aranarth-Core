@@ -155,9 +155,15 @@ public class PolarBearBite extends BukkitRunnable {
         }
 
         // Deal damage — full to primary, reduced to AOE targets
+        int actualHits = 0;
         for (LivingEntity target : targets) {
             double d = target.equals(primaryTarget) ? damage : damage * AOE_DAMAGE_FRACTION;
+            double healthBefore = target.getHealth();
+            double absorptionBefore = target.getAbsorptionAmount();
             target.damage(d, bear);
+            if (target.isDead() || target.getHealth() < healthBefore || target.getAbsorptionAmount() < absorptionBefore) {
+                actualHits++;
+            }
         }
 
         if (!inWater) {
@@ -171,8 +177,10 @@ public class PolarBearBite extends BukkitRunnable {
         bear.getWorld().spawnParticle(Particle.CRIT,
                 primaryTarget.getLocation().add(0, 1.0, 0), 8, 0.3, 0.2, 0.3, 0.05);
 
-        // Award bite XP
-        MountUtils.addBiteXp(bearUUID, BASE_XP + targets.size() * XP_PER_HIT);
+        // Award bite XP only for targets where damage was actually dealt
+        if (actualHits > 0) {
+            MountUtils.addBiteXp(bearUUID, BASE_XP + actualHits * XP_PER_HIT);
+        }
     }
 
     private void finish() {

@@ -575,8 +575,10 @@ public class MountListener implements Listener {
                 return;
             }
         }
-        // Award health XP for damage absorbed by the mount
-        MountUtils.addHealthXp(mount.getUniqueId(), event.getFinalDamage());
+        // Award health XP for damage absorbed by the mount (skip cancelled events)
+        if (!event.isCancelled()) {
+            MountUtils.addHealthXp(mount.getUniqueId(), event.getFinalDamage());
+        }
     }
 
     @EventHandler

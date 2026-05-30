@@ -74,6 +74,8 @@ public class RavagerRam extends BukkitRunnable {
 
     private void ram(Ravager ravager, LivingEntity target) {
         double damage = MIN_DAMAGE + random.nextDouble() * (maxDamage - MIN_DAMAGE);
+        double healthBefore = target.getHealth();
+        double absorptionBefore = target.getAbsorptionAmount();
         target.damage(damage, ravager);
 
         // Knock target away from the ravager and upward
@@ -90,8 +92,10 @@ public class RavagerRam extends BukkitRunnable {
 
         target.getWorld().playSound(target.getLocation(), Sound.ENTITY_RAVAGER_ATTACK, 1.5f, 0.8f);
 
-        // Award ram-strength XP if this Ravager is a mount
-        MountUtils.addRamXp(ravagerUUID);
+        // Award ram-strength XP only if damage was actually dealt
+        if (target.isDead() || target.getHealth() < healthBefore || target.getAbsorptionAmount() < absorptionBefore) {
+            MountUtils.addRamXp(ravagerUUID);
+        }
     }
 
     private void finish() {
