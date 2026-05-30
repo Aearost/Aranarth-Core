@@ -322,10 +322,16 @@ public class CommandDominion implements CommandExecutor {
 
 				// Ensures the player is not in a dominion
 				if (DominionUtils.getPlayerDominion(player.getUniqueId()) == null) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					long cooldownEnd = aranarthPlayer.getConquestDisbandCooldownEnd();
+					if (cooldownEnd > System.currentTimeMillis()) {
+						long daysLeft = (cooldownEnd - System.currentTimeMillis()) / (1000 * 60 * 60 * 24) + 1;
+						player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion for another &e" + daysLeft + " day(s) &cbecause you disbanded while conquered!"));
+						return;
+					}
 					Dominion dominionOfChunk = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
 					// Ensures the chunk is not already claimed
 					if (dominionOfChunk == null) {
-						AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 						if (aranarthPlayer.getBalance() >= dominionCost) {
 							if (player.getWorld().getName().startsWith("world")) {
 								if (AranarthUtils.isSpawnLocation(player.getLocation())) {
@@ -393,6 +399,23 @@ public class CommandDominion implements CommandExecutor {
 	private static void disbandDominion(Dominion dominion, Player player) {
 		if (dominion != null) {
 			if (dominion.getLeader().equals(player.getUniqueId())) {
+				if (dominion.getConqueredRequest() != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou cannot disband your Dominion while it is under active conquest!"));
+					return;
+				}
+				long oneWeekMs = 7L * 24 * 60 * 60 * 1000;
+				if (DominionUtils.getConquerorOfDominion(dominion) != null) {
+					long timeElapsed = System.currentTimeMillis() - dominion.getConqueredTimestamp();
+					if (timeElapsed < oneWeekMs) {
+						long daysLeft = (oneWeekMs - timeElapsed) / (1000 * 60 * 60 * 24) + 1;
+						player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot disband for another &e" + daysLeft + " day(s) &cafter being conquered!"));
+						return;
+					}
+					// Past the 7-day lock — allow disband but apply a 1-week creation/join cooldown
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					aranarthPlayer.setConquestDisbandCooldownEnd(System.currentTimeMillis() + oneWeekMs);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				}
 				// Must update the relations between Dominions, and then will disband
 				DominionUtils.updateDominionLeader(dominion, null, true);
 			} else {
@@ -536,6 +559,12 @@ public class CommandDominion implements CommandExecutor {
 		}
 
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		long cooldownEnd = aranarthPlayer.getConquestDisbandCooldownEnd();
+		if (cooldownEnd > System.currentTimeMillis()) {
+			long daysLeft = (cooldownEnd - System.currentTimeMillis()) / (1000 * 60 * 60 * 24) + 1;
+			player.sendMessage(ChatUtils.chatMessage("&cYou cannot join a Dominion for another &e" + daysLeft + " day(s) &cbecause you disbanded while conquered!"));
+			return;
+		}
 		Dominion dominion = aranarthPlayer.getPendingDominion();
 		// Always clear the pending invite so stale accepts can't resurrect disbanded dominions
 		aranarthPlayer.setPendingDominion(null);
@@ -1639,6 +1668,7 @@ public class CommandDominion implements CommandExecutor {
 					dominionFromList.setConquered(conquered);
 					dominionFromList.setLastConquerAttemptTimestamp(System.currentTimeMillis());
 					dominion.setLastRebelAttemptTimestamp(System.currentTimeMillis());
+					dominion.setConqueredTimestamp(System.currentTimeMillis());
 
 					DominionUtils.updateDominion(dominion);
 					DominionUtils.updateDominion(dominionFromList);

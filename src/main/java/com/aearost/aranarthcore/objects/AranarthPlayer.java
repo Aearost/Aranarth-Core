@@ -57,6 +57,7 @@ public class AranarthPlayer {
 	private HashMap<Perk, Integer> perks = new HashMap<>();
 	private boolean isInAdminMode = false;
 	private long saintExpireDate;
+	private long conquestDisbandCooldownEnd = 0;
 	private boolean isCompressingItems = true;
 	private int bulkTransactionNum = 0;
 	private boolean isOpeningCrateWithCyclingItem = false;
@@ -880,6 +881,23 @@ public class AranarthPlayer {
 	 */
 	public void setSaintExpireDate(long saintExpireDate) {
 		this.saintExpireDate = saintExpireDate;
+	}
+
+	/**
+	 * Provides the timestamp at which the player's conquest-disband cooldown expires.
+	 * While active, the player cannot create a new Dominion.
+	 * @return The epoch millisecond when the cooldown expires, or 0 if there is none.
+	 */
+	public long getConquestDisbandCooldownEnd() {
+		return conquestDisbandCooldownEnd;
+	}
+
+	/**
+	 * Updates the conquest-disband cooldown expiry timestamp for the player.
+	 * @param conquestDisbandCooldownEnd The epoch millisecond when the cooldown expires.
+	 */
+	public void setConquestDisbandCooldownEnd(long conquestDisbandCooldownEnd) {
+		this.conquestDisbandCooldownEnd = conquestDisbandCooldownEnd;
 	}
 
 	/**

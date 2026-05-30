@@ -293,6 +293,8 @@ public class PersistenceUtils {
                         muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
                         firstJoinDate,
                         pronouns)); // Keep pronouns at the end
+                long conquestDisbandCooldownEnd = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
+                AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
             }
             Bukkit.getLogger().info("All aranarth players have been initialized");
             reader.close();
@@ -448,12 +450,13 @@ public class PersistenceUtils {
                             pronouns = "N";
                         }
 
+                        long conquestDisbandCooldownEnd = aranarthPlayer.getConquestDisbandCooldownEnd();
                         String row = uuid + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
                                 + allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
                                 + "|" + isCompressingItems + "|" + votePointsSpent + "|" + spawnBoostValue + "|"
-                                + firstJoinDate + "|"
+                                + firstJoinDate + "|" + conquestDisbandCooldownEnd + "|"
                                 // Keep pronouns at the end and add before this
                                 + pronouns + "\n";
                         writer.write(row);
@@ -1168,6 +1171,7 @@ public class PersistenceUtils {
                 }
                 long rebelRequestConquerorLastSeen = fields.length > 25 ? Long.parseLong(fields[25]) : 0L;
                 long lastRebelAttemptTimestamp = fields.length > 26 ? Long.parseLong(fields[26]) : 0L;
+                long conqueredTimestamp = fields.length > 27 ? Long.parseLong(fields[27]) : 0L;
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1181,6 +1185,7 @@ public class PersistenceUtils {
                 dominion.setConqueredRequestDefenderLastSeen(conqueredRequestDefenderLastSeen);
                 dominion.setRebelRequestConquerorLastSeen(rebelRequestConquerorLastSeen);
                 dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
+                dominion.setConqueredTimestamp(conqueredTimestamp);
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
@@ -1323,7 +1328,8 @@ public class PersistenceUtils {
                                     + "|" + dominion.getRebelRequestTimestamp()
                                     + "|" + dominion.getConqueredRequestDefenderLastSeen()
                                     + "|" + dominion.getRebelRequestConquerorLastSeen()
-                                    + "|" + dominion.getLastRebelAttemptTimestamp() + "\n";
+                                    + "|" + dominion.getLastRebelAttemptTimestamp()
+                                    + "|" + dominion.getConqueredTimestamp() + "\n";
                             writer.write(row);
                         }
                     }

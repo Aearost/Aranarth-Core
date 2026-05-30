@@ -41,6 +41,7 @@ public class Dominion {
 	private long rebelRequestConquerorLastSeen;
 	private long lastConquerAttemptTimestamp;
 	private long lastRebelAttemptTimestamp;
+	private long conqueredTimestamp;
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
@@ -571,6 +572,22 @@ public class Dominion {
 	 */
 	public void setLastRebelAttemptTimestamp(long lastRebelAttemptTimestamp) {
 		this.lastRebelAttemptTimestamp = lastRebelAttemptTimestamp;
+	}
+
+	/**
+	 * Provides the timestamp of when this Dominion was conquered.
+	 * @return The epoch millisecond when conquest completed, or 0 if never conquered.
+	 */
+	public long getConqueredTimestamp() {
+		return conqueredTimestamp;
+	}
+
+	/**
+	 * Updates the timestamp of when this Dominion was conquered.
+	 * @param conqueredTimestamp The epoch millisecond when conquest completed, or 0 to clear.
+	 */
+	public void setConqueredTimestamp(long conqueredTimestamp) {
+		this.conqueredTimestamp = conqueredTimestamp;
 	}
 
 	/**

@@ -191,6 +191,9 @@ public class DominionUtils {
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null) {
 			if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
+				if (playerDominion.getConqueredRequest() != null) {
+					return "&cYou cannot claim chunks while your Dominion is under active conquest!";
+				}
 				if (dominionOfChunk == null) {
 					int claimPrice = 250;
 					if (playerDominion.getBalance() >= claimPrice) {
@@ -251,6 +254,9 @@ public class DominionUtils {
 			if (playerDominion != null) {
 				if (playerDominion.isSameDominion(dominionOfChunk)) {
 					if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
+						if (playerDominion.getConqueredRequest() != null) {
+							return "&cYou cannot unclaim chunks while your Dominion is under active conquest!";
+						}
 						Chunk homeChunk = playerDominion.getDominionHome().getChunk();
 						if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()) {
 							return "&cYou cannot unclaim the chunk that the home is in!";
@@ -488,16 +494,6 @@ public class DominionUtils {
 					break;
 				}
 			}
-			for (int i = 0; i < dominion.getConquered().size(); i++) {
-				if (dominion.getConquered().get(i).equals(oldLeader)) {
-					if (!isDeleting) {
-						dominion.getConquered().set(i, newLeader);
-					} else {
-						dominion.getConquered().remove(oldLeader);
-					}
-					break;
-				}
-			}
 			if (dominion.getConqueredRequest() != null) {
 				if (dominion.getConqueredRequest().equals(oldLeader)) {
 					if (!isDeleting) {
@@ -542,6 +538,11 @@ public class DominionUtils {
 		}
 
 		for (Dominion dominion : new ArrayList<>(getDominions())) {
+			// Conquered dominions are exempt from daily food/money/land taxes
+			if (getConquerorOfDominion(dominion) != null) {
+				continue;
+			}
+
 			int totalFoodPower = getTotalFoodPower(dominion);
 
 			int powerBeingConsumed = 0;
@@ -1918,16 +1919,13 @@ public class DominionUtils {
 				}
 			}
 
-			boolean isTaxed = false;
 			if (!dominion.getConquered().isEmpty()) {
 				// $500 per week per conquered Dominion, limit of 5 conquered rewards per week
 				int money = dominion.getConquered().size() >= 5 ? 2500 : dominion.getConquered().size() * 500;
 				dominion.setBalance(dominion.getBalance() + money);
-			} else {
-				if (getConquerorOfDominion(dominion) != null) {
-					dominion.setBalance(dominion.getBalance() - 100);
-					isTaxed = true;
-				}
+				// Deduct $75/week per vassal as upkeep cost (conqueror funds the conquered dominion's taxes)
+				int upkeepCost = dominion.getConquered().size() >= 5 ? 375 : dominion.getConquered().size() * 75;
+				dominion.setBalance(dominion.getBalance() - upkeepCost);
 			}
 			updateDominion(dominion);
 
@@ -1942,9 +1940,6 @@ public class DominionUtils {
 					}
 				}
 
-				if (isTaxed) {
-					player.getPlayer().sendMessage(ChatUtils.chatMessage("&7Your Dominion was taxed $100 this week by your Conqueror"));
-				}
 			}
 		}
 	}
@@ -2080,6 +2075,7 @@ public class DominionUtils {
 			conqueror.setConquered(conquered);
 			conqueror.setLastConquerAttemptTimestamp(now);
 			defender.setLastRebelAttemptTimestamp(now);
+			defender.setConqueredTimestamp(now);
 			updateDominion(defender);
 			updateDominion(conqueror);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
