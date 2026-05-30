@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.crafting;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +14,19 @@ import static com.aearost.aranarthcore.objects.CustomKeys.HOMEPAD;
  * Handles the overrides when crafting involving Homepads.
  */
 public class CraftingOverridesHomepad {
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
+        if (!e.getBlock().getWorld().getName().startsWith("smp")) {
+            e.setCancelled(true);
+            return;
+        }
+        ItemMeta meta = is.getItemMeta();
+        if (is.getType() == Material.HEAVY_WEIGHTED_PRESSURE_PLATE) {
+            if (meta != null && meta.getPersistentDataContainer().has(HOMEPAD)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         if (!player.getLocation().getWorld().getName().startsWith("smp")) {

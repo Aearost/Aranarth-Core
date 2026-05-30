@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.inventory.ItemStack;
@@ -34,6 +35,20 @@ public class CraftingOverridesSugarcaneBlock {
 
         if (nullCounter == e.getInventory().getMatrix().length - 1 && sugarcaneBlockCounter == 1) {
             e.getInventory().setResult(new ItemStack(Material.SUGAR_CANE, 9));
+        }
+    }
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
+        if (is.getType() == Material.SUGAR_CANE) {
+            return;
+        }
+        if (is.hasItemMeta()) {
+            ItemMeta meta = is.getItemMeta();
+            if (meta.getPersistentDataContainer().has(SUGARCANE_BLOCK)) {
+                if (e.getResult().getType() != Material.BAMBOO) {
+                    e.setCancelled(true);
+                }
+            }
         }
     }
 

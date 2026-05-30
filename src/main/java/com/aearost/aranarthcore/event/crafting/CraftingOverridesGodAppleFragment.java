@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.crafting;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -13,6 +14,22 @@ import static com.aearost.aranarthcore.objects.CustomKeys.GOD_APPLE_FRAGMENT;
  * Handles the overrides when crafting involving God Apple Fragments.
  */
 public class CraftingOverridesGodAppleFragment {
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
+        ItemMeta meta = is.getItemMeta();
+        ItemStack result = e.getResult();
+        if (is.getType() == Material.GOLD_NUGGET) {
+            if (result.getType() == Material.ENCHANTED_GOLDEN_APPLE) {
+                if (meta == null || !meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
+                    e.setCancelled(true);
+                }
+            } else {
+                if (meta != null && meta.getPersistentDataContainer().has(GOD_APPLE_FRAGMENT)) {
+                    e.setCancelled(true);
+                }
+            }
+        }
+    }
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         ItemMeta meta = is.getItemMeta();

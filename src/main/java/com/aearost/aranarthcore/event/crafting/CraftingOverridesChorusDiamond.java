@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.crafting;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,6 +15,28 @@ import static com.aearost.aranarthcore.objects.CustomKeys.HOMEPAD;
  * Handles the overrides when crafting involving a Chorus Diamond.
  */
 public class CraftingOverridesChorusDiamond {
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
+        ItemMeta meta = is.getItemMeta();
+        if (e.getResult().hasItemMeta()) {
+            ItemMeta resultMeta = e.getResult().getItemMeta();
+            if (is.getType() == Material.DIAMOND) {
+                if (resultMeta.getPersistentDataContainer().has(HOMEPAD)) {
+                    if (meta == null || !meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                        e.setCancelled(true);
+                    }
+                } else {
+                    if (meta != null && meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                        e.setCancelled(true);
+                    }
+                }
+            }
+        } else {
+            if (meta != null && meta.getPersistentDataContainer().has(CHORUS_DIAMOND)) {
+                e.setCancelled(true);
+            }
+        }
+    }
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         ItemMeta meta = is.getItemMeta();

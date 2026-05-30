@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -19,6 +20,50 @@ import static com.aearost.aranarthcore.objects.CustomKeys.CLUSTER;
  * Handles the overrides when crafting involving an Aranarthium Ingot.
  */
 public class CraftingOverridesAranarthium {
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack ingredient) {
+        ItemStack result = e.getResult();
+        ItemMeta resultMeta = result.getItemMeta();
+
+        if (ingredient.getType() == Material.NETHERITE_INGOT) {
+            return;
+        }
+
+        if (ingredient.hasItemMeta()) {
+            ItemMeta ingredientMeta = ingredient.getItemMeta();
+
+            if (ingredientMeta.getPersistentDataContainer().has(CLUSTER)) {
+                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+                    String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+                    if (ingotType.equals("aranarthium")) {
+                        return;
+                    }
+                }
+            }
+
+            if (ingredientMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+                if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+                    String ingotType = ingredientMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+                    if (ingotType.equals("aranarthium")) {
+                        return;
+                    }
+                }
+            }
+
+            if (ingredientMeta instanceof MusicInstrumentMeta) {
+                return;
+            }
+        } else {
+            if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
+                String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
+                if (!ingotType.equals("aranarthium")) {
+                    return;
+                }
+            }
+        }
+
+        e.setCancelled(true);
+    }
 
     public void onCraft(CraftItemEvent e, ItemStack ingredient, HumanEntity player) {
         ItemStack result = e.getRecipe().getResult();

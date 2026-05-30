@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.crafting;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -14,6 +15,16 @@ import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
  * Handles the overrides when crafting involving God Apple Fragments.
  */
 public class CraftingOverridesArrows {
+
+    public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
+        ItemMeta meta = is.getItemMeta();
+        if (meta == null || (!meta.getPersistentDataContainer().has(ARROW) || !meta.getPersistentDataContainer().has(ARROW_HEAD))) {
+            if (is.getType() == Material.FEATHER || is.getType() == Material.STICK) {
+                return;
+            }
+            e.setCancelled(true);
+        }
+    }
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
         ItemMeta meta = is.getItemMeta();
