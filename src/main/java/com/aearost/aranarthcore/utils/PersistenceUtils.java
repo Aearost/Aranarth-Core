@@ -293,7 +293,7 @@ public class PersistenceUtils {
                         muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
                         firstJoinDate,
                         pronouns)); // Keep pronouns at the end
-                long conquestDisbandCooldownEnd = fields.length > 23 ? Long.parseLong(fields[23]) : 0L;
+                long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
                 AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
             }
             Bukkit.getLogger().info("All aranarth players have been initialized");
