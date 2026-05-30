@@ -116,7 +116,11 @@ public class SnifferTunnel extends BukkitRunnable {
         if (NON_DIGGABLE.contains(type) || block.isLiquid()) {
             return false;
         }
-        // Only allow blocks that ProjectKorra considers earthbendable (earth, metal, sand, mud — not lava or ores)
+        // Leave ore blocks intact so players can mine them manually
+        if (type.name().endsWith("_ORE") || type == Material.ANCIENT_DEBRIS) {
+            return false;
+        }
+        // Only allow blocks that ProjectKorra considers earthbendable (earth, metal, sand, mud)
         return EarthAbility.isEarthbendable(type, true, true, false);
     }
 
