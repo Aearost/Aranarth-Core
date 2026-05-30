@@ -415,17 +415,35 @@ public class MountListener implements Listener {
             return;
         }
 
-        // Check ownership before any other interaction
+        String mountElement = clickedEntity.getPersistentDataContainer()
+                .get(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING);
         UUID ownerUUID = readOwner(clickedEntity);
-        if (ownerUUID != null && !ownerUUID.equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cThis is not your mount!"));
+        boolean isOwner = ownerUUID == null || ownerUUID.equals(player.getUniqueId());
+
+        if (!isOwner) {
+            if (!"AIR".equals(mountElement)) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou cannot ride someone else's mount!"));
+                return;
+            }
+            // Flying Bison: non-owners may join when the owner is already riding
+            List<Entity> passengers = clickedEntity.getPassengers();
+            boolean ownerIsRiding = !passengers.isEmpty()
+                    && passengers.get(0) instanceof Player firstRider
+                    && firstRider.getUniqueId().equals(ownerUUID);
+            if (!ownerIsRiding) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou can only ride the Flying Bison when the owner is already riding it!"));
+                return;
+            }
+            if (!passengers.contains(player)) {
+                clickedEntity.addPassenger(player);
+            }
             return;
         }
 
+        // Owner-only interactions: feeding, dyeing, mounting
+
         // You can only feed your own mount
-        String mountElement = clickedEntity.getPersistentDataContainer()
-                .get(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING);
-        if (ownerUUID != null && ownerUUID.equals(player.getUniqueId())) {
+        if (ownerUUID != null) {
             Double healAmount = getFoodHealAmount(mountElement, mainHand.getType());
             if (healAmount != null) {
                 feedMount(clickedEntity, player, mainHand, healAmount);
@@ -434,8 +452,7 @@ public class MountListener implements Listener {
         }
 
         // Change harness color with dye
-        if (clickedEntity instanceof HappyGhast happyGhast
-                && ownerUUID != null && ownerUUID.equals(player.getUniqueId())) {
+        if (clickedEntity instanceof HappyGhast happyGhast && ownerUUID != null) {
             Material harnessMaterial = getHarnessMaterialFromDye(mainHand.getType());
             if (harnessMaterial != null) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -453,20 +470,10 @@ public class MountListener implements Listener {
             }
         }
 
-        // Mount (up to 2 riders)
         List<Entity> passengers = clickedEntity.getPassengers();
-        if (passengers.contains(player)) {
-            return;
+        if (!passengers.contains(player)) {
+            mountEntity(clickedEntity, player, config);
         }
-        if (passengers.size() >= 2) {
-            // Flying Bison should allow the same as normal Happy Ghasts
-            if (!mountElement.equals("AIR")) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis mount already has two riders!"));
-                return;
-            }
-        }
-
-        mountEntity(clickedEntity, player, config);
     }
 
     @EventHandler
@@ -478,7 +485,6 @@ public class MountListener implements Listener {
         if (!activeMounts.containsKey(mount.getUniqueId())) {
             return;
         }
-
         List<Entity> passengers = mount.getPassengers();
         if (passengers.isEmpty() || !passengers.get(0).equals(player)) {
             return;
@@ -502,6 +508,9 @@ public class MountListener implements Listener {
 
     @EventHandler
     public void onDismount(EntityDismountEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
         if (!(event.getDismounted() instanceof LivingEntity mount)) {
             return;
         }
@@ -511,13 +520,24 @@ public class MountListener implements Listener {
         if (!activeMounts.containsKey(mount.getUniqueId())) {
             return;
         }
-        if (!(event.getEntity() instanceof Player player)) {
-            return;
-        }
 
         playerInputs.remove(player.getUniqueId());
 
         UUID mountId = mount.getUniqueId();
+
+        // Owner dismounting from AIR mount — eject any remaining passengers
+        AranarthMount aMount = activeMounts.get(mountId);
+        if (aMount != null && player.getUniqueId().equals(aMount.getOwnerUUID())) {
+            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+                Entity e = Bukkit.getEntity(mountId);
+                if (e != null) {
+                    for (Entity passenger : new ArrayList<>(e.getPassengers())) {
+                        passenger.leaveVehicle();
+                    }
+                }
+            }, 1L);
+        }
+
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             Entity e = Bukkit.getEntity(mountId);
             if (!(e instanceof LivingEntity m) || !m.getPassengers().isEmpty()) {
@@ -603,6 +623,7 @@ public class MountListener implements Listener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         MountUtils.cleanupPlayerBars(player.getUniqueId());
+
 
         // If the mount is dismounted but alive in the world, save its HP and remove it
         UUID wanderingId = MountUtils.getActiveMountEntityUUID(player.getUniqueId());
