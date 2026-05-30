@@ -37,7 +37,8 @@ public class PlayerInteractEntityEventListener implements Listener {
                 new SentinelMark().execute(e);
                 new MountStats().execute(e);
             } else if (e.getRightClicked() instanceof Camel || e.getRightClicked() instanceof Sniffer
-                        || e.getRightClicked() instanceof Ravager) {
+                        || e.getRightClicked() instanceof Ravager || e.getRightClicked() instanceof HappyGhast
+                        || e.getRightClicked() instanceof PolarBear) {
                 new MountStats().execute(e);
             }
 
