@@ -680,7 +680,12 @@ public class MountListener implements Listener {
         double strafe = in[1];
         double speed = activeMounts.get(mount.getUniqueId()).getSpeed();
         if (MountUtils.isMountInWater(mount.getUniqueId())) {
-            speed *= 0.3;
+            // Komodo Rhinos should be extremely slow swimmers
+            if (mount instanceof PolarBear) {
+                speed *= 0.4;
+            } else {
+                speed *= 0.1;
+            }
         }
         // Track speed XP for mounts
         boolean isMoving = Math.abs(forward) > 0.001 || Math.abs(strafe) > 0.001;
