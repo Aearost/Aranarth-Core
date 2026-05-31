@@ -66,6 +66,11 @@ public class ShopInteract {
                             return;
                         }
 
+                        // Just completed a bulk transaction - skip while sneaking to avoid re-triggering
+                        if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                            return;
+                        }
+
                         // Enables bulk mode for the sale
                         if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
                             shop = ShopUtils.getBulkShop(shop, player, false);
@@ -113,6 +118,11 @@ public class ShopInteract {
 
                             handleBuyLogic(player, clickUser, null, shop, null);
                         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+                            // Just completed a bulk transaction - skip while sneaking to avoid re-triggering
+                            if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                                return;
+                            }
+
                             // Enables bulk mode for the sale
                             if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
                                 shop = ShopUtils.getBulkShop(shop, player, false);

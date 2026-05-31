@@ -28,10 +28,12 @@ public class ShopBulkTransaction {
 			return;
 		}
 
-		// If they click elsewhere after enabling the bulk transaction
-		if (aranarthPlayer.getBulkTransactionNum() == 1 && (shop == null || !player.isSneaking())) {
+		// If they click elsewhere or stop sneaking after enabling/completing a bulk transaction
+		if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !player.isSneaking())) {
+			if (aranarthPlayer.getBulkTransactionNum() == 1) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have disabled the bulk transaction mode"));
+			}
 			aranarthPlayer.setBulkTransactionNum(0);
-			player.sendMessage(ChatUtils.chatMessage("&7You have disabled the bulk transaction mode"));
 		}
 		// If they are enabling the bulk transaction mode
 		else if (aranarthPlayer.getBulkTransactionNum() == 0 && shop != null && player.isSneaking()) {
@@ -90,8 +92,9 @@ public class ShopBulkTransaction {
 			player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
 			aranarthPlayer.setBulkTransactionNum(1);
 		}
-		// If they just made a purchase, do not display the message
-		else {
+		// If they just made a purchase/sale (-1), keep the state until sneaking ends to prevent
+		// spurious "cannot" messages on rapid re-fires of the same click
+		else if (aranarthPlayer.getBulkTransactionNum() != -1) {
 			aranarthPlayer.setBulkTransactionNum(0);
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
