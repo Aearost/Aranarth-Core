@@ -63,9 +63,10 @@ public class CommandTpAccept implements CommandExecutor {
 			// Player is accepting somebody's /tp request
 			else if (aranarthPlayer.getTeleportFromUuid() != null) {
 				Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportFromUuid());
-				AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+				String targetNickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(aranarthPlayer.getTeleportFromUuid()));
 				// If both players are still online
 				if (target != null) {
+					AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 					String destinationWorld = player.getLocation().getWorld().getName();
 					if (destinationWorld.startsWith("smp") || destinationWorld.equals("creative")) {
 						if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
@@ -90,8 +91,8 @@ public class CommandTpAccept implements CommandExecutor {
 						clearTeleportRequests(player, target);
 					});
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis no longer online"));
-					clearTeleportRequests(player, target);
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
+					aranarthPlayer.setTeleportFromUuid(null);
 				}
 				return true;
 			} else {
