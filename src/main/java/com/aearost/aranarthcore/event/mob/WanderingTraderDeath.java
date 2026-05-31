@@ -12,7 +12,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 public class WanderingTraderDeath {
 	public void execute(final EntityDeathEvent e) {
 		if (e.getDamageSource().getCausingEntity() instanceof Player player) {
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader was slain by " + AranarthUtils.getNickname(player)));
+			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader was slain by &e" + AranarthUtils.getNickname(player)));
 		} else {
 			if (e.getDamageSource().getCausingEntity() != null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7A wandering trader has been slain by &e" + e.getDamageSource().getCausingEntity().getName()));
