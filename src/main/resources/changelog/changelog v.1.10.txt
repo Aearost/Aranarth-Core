@@ -157,6 +157,7 @@ Minor Features
 [~] Fixed issue where twins during Calorvor were spawning as different variants at times
 [~] Rephrased messages for /lock, /unlock, /trust, and /untrust
 [+] Added hoverable /msg auto-fill response
+[~] Mitigated issue where commands in the arena world were appearing in red as if they did not exist
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

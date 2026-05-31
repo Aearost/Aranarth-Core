@@ -337,6 +337,7 @@ public class AranarthUtils {
 					player.setGameMode(GameMode.SURVIVAL);
 					PermissionUtils.toggleArenaBendingPermissions(player, true);
 					PermissionUtils.updateSubElements(player);
+					player.updateCommands();
 					return;
 				}
 				player.getInventory().clear();
@@ -348,6 +349,7 @@ public class AranarthUtils {
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
+				player.updateCommands();
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
@@ -370,6 +372,7 @@ public class AranarthUtils {
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, false);
 				PermissionUtils.updateSubElements(player);
+				player.updateCommands();
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
@@ -381,6 +384,7 @@ public class AranarthUtils {
 				player.setGameMode(GameMode.CREATIVE);
 				PermissionUtils.toggleArenaBendingPermissions(player, false);
 				PermissionUtils.updateSubElements(player);
+				player.updateCommands();
 				return;
 			}
 			player.getInventory().clear();
@@ -401,6 +405,7 @@ public class AranarthUtils {
 					player.setGameMode(GameMode.SURVIVAL);
 					PermissionUtils.toggleArenaBendingPermissions(player, true);
 					PermissionUtils.updateSubElements(player);
+					player.updateCommands();
 					return;
 				}
 				player.getInventory().clear();
@@ -412,6 +417,7 @@ public class AranarthUtils {
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
+				player.updateCommands();
 				return;
 			} else if (destinationWorld.equals("creative")) {
 				return;
