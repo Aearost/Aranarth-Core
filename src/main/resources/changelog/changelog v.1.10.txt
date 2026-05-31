@@ -156,6 +156,7 @@ Minor Features
 [+] Fixed issue where the Crafter was bypassing recipes with custom meta ingredients, using them as if they were normal items
 [~] Fixed issue where twins during Calorvor were spawning as different variants at times
 [~] Rephrased messages for /lock, /unlock, /trust, and /untrust
+[+] Added hoverable /msg auto-fill response
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

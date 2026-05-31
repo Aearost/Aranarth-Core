@@ -516,8 +516,8 @@ public class ChatUtils {
 			AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 			String prefixStart = "&7⊰&r";
 			String prefixEnd = "&7⊱&r";
-			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ");
-			String targetPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o");
+			String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ";
+			String targetPrefixRaw = prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o";
 
 			// Formats to color if the player sending has the permissions (no gradient for private messages)
 			String formattedMsg;
@@ -529,8 +529,13 @@ public class ChatUtils {
 				formattedMsg = assembledMsg;
 			}
 
-			player.sendMessage(ChatUtils.translateToColor(senderPrefix + formattedMsg));
-			target.sendMessage(ChatUtils.translateToColor(targetPrefix + formattedMsg));
+			Component senderComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(senderPrefixRaw)
+					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
+			player.sendMessage(ChatUtils.clickableCommand(senderComponent, "§7Message §e" + targetAranarthPlayer.getNickname(), "/msg " + target.getName() + " ", true));
+
+			Component targetComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(targetPrefixRaw)
+					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
+			target.sendMessage(ChatUtils.clickableCommand(targetComponent, "§7Reply to §e" + aranarthPlayer.getNickname(), "/msg " + player.getName() + " ", true));
 
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
 			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
