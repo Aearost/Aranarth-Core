@@ -54,6 +54,9 @@ public class FlyingBisonBellow {
             if (target.getUniqueId().equals(rider.getUniqueId())) {
                 continue;
             }
+            if (PetHurtPrevent.wouldBeBlocked(rider, target)) {
+                continue;
+            }
 
             double dist = nearby.getLocation().distance(center);
             if (dist > AOE_RADIUS) {

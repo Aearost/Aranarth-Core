@@ -66,6 +66,10 @@ public class RavagerRam extends BukkitRunnable {
             if (cooldowns.containsKey(target.getUniqueId())) {
                 continue;
             }
+            if (Bukkit.getEntity(riderUUID) instanceof Player rider
+                    && PetHurtPrevent.wouldBeBlocked(rider, target)) {
+                continue;
+            }
 
             ram(ravager, target);
             cooldowns.put(target.getUniqueId(), tick + RAM_COOLDOWN_TICKS);

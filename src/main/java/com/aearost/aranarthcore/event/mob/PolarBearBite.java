@@ -44,11 +44,8 @@ public class PolarBearBite extends BukkitRunnable {
     private final UUID riderUUID;
     private final Map<UUID, PolarBearBite> activeLunges;
     private final double maxDamage;
-    /** Full 3D lunge velocity vector (direction * LUNGE_SPEED). Null when in water. */
     private final Vector lungeDir;
-    /** Maximum 3D distance this lunge may travel, derived from look angle. */
     private final double maxDistance;
-    /** True when activated while the bear is in water — skips all dash logic. */
     private final boolean inWater;
     private final Random random = new Random();
     private int tick = 0;
@@ -99,9 +96,19 @@ public class PolarBearBite extends BukkitRunnable {
         // ── Water path: immediate melee bite, no movement ────────────────────
         if (inWater) {
             for (Entity nearby : bear.getNearbyEntities(HIT_RANGE, HIT_RANGE, HIT_RANGE)) {
-                if (!(nearby instanceof LivingEntity target)) continue;
-                if (target.getUniqueId().equals(bearUUID)) continue;
-                if (target.getUniqueId().equals(riderUUID)) continue;
+                if (!(nearby instanceof LivingEntity target)) {
+                    continue;
+                }
+                if (target.getUniqueId().equals(bearUUID)) {
+                    continue;
+                }
+                if (target.getUniqueId().equals(riderUUID)) {
+                    continue;
+                }
+                if (Bukkit.getEntity(riderUUID) instanceof Player rider
+                        && PetHurtPrevent.wouldBeBlocked(rider, target)) {
+                    continue;
+                }
                 bite(bear, target);
                 break;
             }
@@ -127,9 +134,19 @@ public class PolarBearBite extends BukkitRunnable {
 
         // Check for a contact hit at the bear's current position
         for (Entity nearby : bear.getNearbyEntities(HIT_RANGE, HIT_RANGE, HIT_RANGE)) {
-            if (!(nearby instanceof LivingEntity target)) continue;
-            if (target.getUniqueId().equals(bearUUID)) continue;
-            if (target.getUniqueId().equals(riderUUID)) continue;
+            if (!(nearby instanceof LivingEntity target)) {
+                continue;
+            }
+            if (target.getUniqueId().equals(bearUUID)) {
+                continue;
+            }
+            if (target.getUniqueId().equals(riderUUID)) {
+                continue;
+            }
+            if (Bukkit.getEntity(riderUUID) instanceof Player rider
+                    && PetHurtPrevent.wouldBeBlocked(rider, target)) {
+                continue;
+            }
             bite(bear, target);
             finish();
             return;
@@ -146,11 +163,23 @@ public class PolarBearBite extends BukkitRunnable {
         List<LivingEntity> targets = new ArrayList<>();
         targets.add(primaryTarget);
 
+        Player rider = Bukkit.getEntity(riderUUID) instanceof Player p ? p : null;
         for (Entity nearby : primaryTarget.getNearbyEntities(AOE_RADIUS, AOE_RADIUS, AOE_RADIUS)) {
-            if (targets.size() >= MAX_AOE_TARGETS) break;
-            if (!(nearby instanceof LivingEntity le)) continue;
-            if (le.getUniqueId().equals(bearUUID)) continue;
-            if (le.getUniqueId().equals(riderUUID)) continue;
+            if (targets.size() >= MAX_AOE_TARGETS) {
+                break;
+            }
+            if (!(nearby instanceof LivingEntity le)) {
+                continue;
+            }
+            if (le.getUniqueId().equals(bearUUID)) {
+                continue;
+            }
+            if (le.getUniqueId().equals(riderUUID)) {
+                continue;
+            }
+            if (rider != null && PetHurtPrevent.wouldBeBlocked(rider, le)) {
+                continue;
+            }
             targets.add(le);
         }
 
