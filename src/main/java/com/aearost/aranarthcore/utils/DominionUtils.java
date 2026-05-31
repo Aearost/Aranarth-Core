@@ -197,7 +197,7 @@ public class DominionUtils {
 				if (dominionOfChunk == null) {
 					int claimPrice = 250;
 					if (playerDominion.getBalance() >= claimPrice) {
-						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25)) {
+						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks())) {
 							if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
 								double newBalance = playerDominion.getBalance() - claimPrice;
 								playerDominion.setBalance(newBalance);
@@ -207,12 +207,12 @@ public class DominionUtils {
 								resizeFoodArray(playerDominion);
 								updateDominion(playerDominion);
 								return "&e" + playerDominion.getName() + " &7has claimed &e" +
-										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25) + " chunks";
+										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks()) + " chunks";
 							} else {
 								return "&cThis chunk is not connected to the rest of your Dominion!";
 							}
 						} else {
-							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25) + " chunks!";
+							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks()) + " chunks!";
 						}
 					} else {
 						return "&cYour dominion cannot afford this!";

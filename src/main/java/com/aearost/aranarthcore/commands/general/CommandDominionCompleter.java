@@ -25,7 +25,7 @@ import java.util.stream.Stream;
 public class CommandDominionCompleter implements TabCompleter {
 
 	private static final List<String> DOMINION_OPTIONS = List.of(
-		"accept", "ally", "autoclaim", "balance", "claim", "conquer", "create",
+		"accept", "ally", "autoclaim", "balance", "buychunks", "claim", "conquer", "create",
 		"deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
 		"leave", "list", "map", "msg", "neutral", "permissions", "perms", "rank",
 		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
@@ -114,6 +114,7 @@ public class CommandDominionCompleter implements TabCompleter {
 					.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
 					.collect(Collectors.toList());
 			}
+			case "buychunks" -> args[1].isEmpty() ? List.of("<amount>") : List.of();
 			case "create" -> args[1].isEmpty() ? List.of("name") : List.of();
 			default -> List.of();
 		};

@@ -1172,6 +1172,7 @@ public class PersistenceUtils {
                 long rebelRequestConquerorLastSeen = fields.length > 25 ? Long.parseLong(fields[25]) : 0L;
                 long lastRebelAttemptTimestamp = fields.length > 26 ? Long.parseLong(fields[26]) : 0L;
                 long conqueredTimestamp = fields.length > 27 ? Long.parseLong(fields[27]) : 0L;
+                int boughtChunks = fields.length > 28 ? Integer.parseInt(fields[28]) : 0;
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1186,6 +1187,7 @@ public class PersistenceUtils {
                 dominion.setRebelRequestConquerorLastSeen(rebelRequestConquerorLastSeen);
                 dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
                 dominion.setConqueredTimestamp(conqueredTimestamp);
+                dominion.setBoughtChunks(boughtChunks);
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
@@ -1228,7 +1230,7 @@ public class PersistenceUtils {
                 List<Dominion> dominions = DominionUtils.getDominions();
                 try {
                     FileWriter writer = new FileWriter(filePath);
-                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp\n");
+                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
@@ -1329,7 +1331,8 @@ public class PersistenceUtils {
                                     + "|" + dominion.getConqueredRequestDefenderLastSeen()
                                     + "|" + dominion.getRebelRequestConquerorLastSeen()
                                     + "|" + dominion.getLastRebelAttemptTimestamp()
-                                    + "|" + dominion.getConqueredTimestamp() + "\n";
+                                    + "|" + dominion.getConqueredTimestamp()
+                                    + "|" + dominion.getBoughtChunks() + "\n";
                             writer.write(row);
                         }
                     }

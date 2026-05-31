@@ -30,6 +30,8 @@ import java.util.*;
  */
 public class CommandDominion implements CommandExecutor {
 
+	private static final Map<UUID, Integer> pendingChunkPurchases = new HashMap<>();
+
 	/**
 	 * @param sender The user that entered the command.
 	 * @param command The command itself.
@@ -222,6 +224,8 @@ public class CommandDominion implements CommandExecutor {
 					openPermissionsGui(dominion, player);
 				} else if (args[0].equalsIgnoreCase("rank")) {
 					setMemberRank(args, dominion, player);
+				} else if (args[0].equalsIgnoreCase("buychunks")) {
+					buyChunks(args, dominion, player);
 				}
 				else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
@@ -1076,6 +1080,80 @@ public class CommandDominion implements CommandExecutor {
 	}
 
 	/**
+	 * Calculates the total cost to buy a given number of extra chunks.
+	 * @param currentBought The number of extra chunks already purchased.
+	 * @param amount The number of new extra chunks to buy.
+	 * @return The total cost.
+	 */
+	private static double calculateBuyChunksCost(int currentBought, int amount) {
+		double total = 0;
+		for (int i = 0; i < amount; i++) {
+			total += 10000 * Math.pow(1.02, currentBought + i);
+		}
+		return total;
+	}
+
+	/**
+	 * Allows the Dominion leader to purchase extra chunks beyond the member-based limit.
+	 * @param args The command arguments.
+	 * @param dominion The player's Dominion.
+	 * @param player The player executing the command.
+	 */
+	private static void buyChunks(String[] args, Dominion dominion, Player player) {
+		if (dominion == null) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+			return;
+		}
+		if (!dominion.getLeader().equals(player.getUniqueId())) {
+			player.sendMessage(ChatUtils.chatMessage("&cOnly the Leader can purchase additional chunks!"));
+			return;
+		}
+		if (args.length < 2) {
+			player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/dominion buychunks <amount>"));
+			return;
+		}
+
+		int amount;
+		try {
+			amount = Integer.parseInt(args[1]);
+		} catch (NumberFormatException e) {
+			player.sendMessage(ChatUtils.chatMessage("&cInvalid amount!"));
+			return;
+		}
+		if (amount <= 0) {
+			player.sendMessage(ChatUtils.chatMessage("&cAmount must be greater than 0!"));
+			return;
+		}
+
+		int currentBought = dominion.getBoughtChunks();
+		double totalCost = calculateBuyChunksCost(currentBought, amount);
+
+		Integer pending = pendingChunkPurchases.get(player.getUniqueId());
+		if (pending != null && pending == amount) {
+			// Confirmed entry, complete the purchase of the extra chunks
+			pendingChunkPurchases.remove(player.getUniqueId());
+			if (dominion.getBalance() < totalCost) {
+				NumberFormat formatter = NumberFormat.getCurrencyInstance();
+				player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot afford this! You need &6" + formatter.format(totalCost)));
+				return;
+			}
+			dominion.setBalance(dominion.getBalance() - totalCost);
+			dominion.setBoughtChunks(currentBought + amount);
+			DominionUtils.updateDominion(dominion);
+			int newLimit = dominion.getMembers().size() * 25 + dominion.getBoughtChunks();
+			NumberFormat formatter = NumberFormat.getCurrencyInstance();
+			player.sendMessage(ChatUtils.chatMessage("&7Purchased &e" + amount + " additional chunk" + (amount > 1 ? "s" : "")
+					+ " &7for &6" + formatter.format(totalCost) + "&7! Your Dominion can now claim up to &e" + newLimit + " chunks&7."));
+		} else {
+			// First entry, show confirmation prompt
+			pendingChunkPurchases.put(player.getUniqueId(), amount);
+			String formattedCost = String.format("%,d", Math.round(totalCost));
+			player.sendMessage(ChatUtils.chatMessage("&7Re-enter &e/dominion buychunks " + amount
+					+ " &7to purchase " + amount + " chunk" + (amount > 1 ? "s" : "") + " for &6$" + formattedCost));
+		}
+	}
+
+	/**
 	 * Displays the info for the input dominion.
 	 * @param player The player who executed the command.
 	 * @param dominion The dominion to display the info for.
@@ -1211,7 +1289,7 @@ public class CommandDominion implements CommandExecutor {
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		String valueWithTwoDecimals = formatter.format(dominion.getBalance());
 		player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
-		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + (dominion.getMembers().size() * 25) + " chunks"));
+		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + (dominion.getMembers().size() * 25 + dominion.getBoughtChunks()) + " chunks"));
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
 	}
 

@@ -45,6 +45,7 @@ public class Dominion {
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
+	private int boughtChunks;
 
 	// Keep balance at the end
 	private double balance;
@@ -345,6 +346,22 @@ public class Dominion {
 	 */
 	public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
 		this.mobSpawningEnabled = mobSpawningEnabled;
+	}
+
+	/**
+	 * Provides the number of extra chunks purchased beyond the member-based limit.
+	 * @return The number of bought extra chunks.
+	 */
+	public int getBoughtChunks() {
+		return boughtChunks;
+	}
+
+	/**
+	 * Updates the number of extra chunks purchased beyond the member-based limit.
+	 * @param boughtChunks The new count of bought extra chunks.
+	 */
+	public void setBoughtChunks(int boughtChunks) {
+		this.boughtChunks = boughtChunks;
 	}
 
 	/**

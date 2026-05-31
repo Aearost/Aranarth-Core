@@ -48,6 +48,7 @@ Major Features
 [~] Added automatically resetting resource world at the start of every in-game year (once a month~)
 [+] Added fireworks during each start of a new month
 [+] Added /mount(s) functionality to summon and train element-based pets
+[+] Added /d buychunks to allow dominions to buy additional chunks
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
