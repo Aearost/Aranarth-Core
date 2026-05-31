@@ -153,6 +153,7 @@ Minor Features
 [+] Added feature to prevent a leader from disbanding their dominion within the first week of being conquered
 [+] Added cooldown to creating or joining a new dominion after disbanding your dominion
 [+] Fixed issue where the Crafter was bypassing recipes with custom meta ingredients, using them as if they were normal items
+[~] Fixed issue where twins during Calorvor were spawning as different variants at times
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
