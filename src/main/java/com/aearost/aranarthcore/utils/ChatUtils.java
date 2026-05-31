@@ -529,13 +529,13 @@ public class ChatUtils {
 				formattedMsg = assembledMsg;
 			}
 
-			Component senderComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(senderPrefixRaw)
+			Component senderComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(senderPrefixRaw))
 					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
-			player.sendMessage(ChatUtils.clickableCommand(senderComponent, "§7Message §e" + targetAranarthPlayer.getNickname(), "/msg " + target.getName() + " ", true));
+			player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor("&7Message &e" + targetAranarthPlayer.getNickname()), "/msg " + target.getName() + " ", true));
 
-			Component targetComponent = LegacyComponentSerializer.legacyAmpersand().deserialize(targetPrefixRaw)
+			Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
 					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
-			target.sendMessage(ChatUtils.clickableCommand(targetComponent, "§7Reply to §e" + aranarthPlayer.getNickname(), "/msg " + player.getName() + " ", true));
+			target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + aranarthPlayer.getNickname()), "/msg " + player.getName() + " ", true));
 
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
 			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
