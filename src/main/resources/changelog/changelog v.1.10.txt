@@ -162,6 +162,7 @@ Minor Features
 [~] Fixed issue causing stale UUID references in TP requests
 [~] Added automatic unclaiming of chunks once per in-game week when exceeding chunk limit
 [~] Added automatic unclaiming of chunks once per in-game week when exceeding chunk limit
+[~] Allowed interactions with lecterns but prevented the book from being taken at spawn, dominions, and shop islands
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -25,6 +25,7 @@ import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -530,8 +531,7 @@ public class DominionProtectionListener implements Listener {
                 || type == Material.CRAFTER
                 || type == Material.HOPPER
                 || type == Material.JUKEBOX
-                || type == Material.CHISELED_BOOKSHELF
-                || block.getType() == Material.LECTERN;
+                || type == Material.CHISELED_BOOKSHELF;
     }
 
     /**
@@ -583,6 +583,20 @@ public class DominionProtectionListener implements Listener {
             if (!chunkDominion.isMobSpawningEnabled()) {
                 e.setCancelled(true);
             }
+        }
+    }
+
+    /**
+     * Prevents players from taking books from lecterns in another Dominion while still allowing them to view the contents.
+     */
+    @EventHandler
+    public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return;
+        }
+        if (applyLogic(e.getPlayer(), e.getLectern().getBlock(), null, DominionPermission.CONTAINER)) {
+            e.setCancelled(true);
         }
     }
 

@@ -262,6 +262,19 @@ public class ShopProtectionListener implements Listener {
     }
 
 
+    /**
+     * Prevents non-owners from taking books from lecterns on another player's shop island while still allowing them to view the contents.
+     */
+    @EventHandler
+    public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
+        if (!isShopsWorld(e.getLectern().getLocation())) {
+            return;
+        }
+        if (!canModify(e.getPlayer(), e.getLectern().getLocation())) {
+            e.setCancelled(true);
+        }
+    }
+
     @EventHandler
     public void onMobSpawn(CreatureSpawnEvent e) {
         if (!isShopsWorld(e.getLocation())) {
@@ -348,7 +361,6 @@ public class ShopProtectionListener implements Listener {
                 || block.getType() == Material.NOTE_BLOCK
                 || block.getType() == Material.LEVER
                 || block.getType() == Material.JUKEBOX
-                || block.getType() == Material.LECTERN
                 || block.getType() == Material.HOPPER
                 || block.getType() == Material.CRAFTER
                 || block.getType() == Material.FLOWER_POT

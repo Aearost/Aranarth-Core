@@ -217,8 +217,7 @@ public class SpawnProtectionListener implements Listener {
 						|| block.getType().name().endsWith("_DOOR") || block.getType().name().endsWith("_GATE")
 						|| block.getType() == Material.CRAFTER || block.getType() == Material.HOPPER || block.getType().name().endsWith("_SHELF")
 						|| block.getType() == Material.DECORATED_POT || block.getType() == Material.FLOWER_POT || block.getType() == Material.CHISELED_BOOKSHELF
-						|| block.getType() == Material.SWEET_BERRY_BUSH || block.getType() == Material.CAVE_VINES || block.getType() == Material.CAVE_VINES_PLANT
-						|| block.getType() == Material.LECTERN) {
+						|| block.getType() == Material.SWEET_BERRY_BUSH || block.getType() == Material.CAVE_VINES || block.getType() == Material.CAVE_VINES_PLANT) {
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
 					if (!aranarthPlayer.isInAdminMode()) {
 						// Allow server shops to be used at spawn
@@ -229,6 +228,19 @@ public class SpawnProtectionListener implements Listener {
 						e.setCancelled(true);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from taking books from lecterns at spawn while still allowing them to view the contents.
+	 */
+	@EventHandler
+	public void onTakeLecternBook(PlayerTakeLecternBookEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getLectern().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
 			}
 		}
 	}
