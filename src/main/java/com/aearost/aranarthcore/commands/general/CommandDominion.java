@@ -1140,7 +1140,7 @@ public class CommandDominion implements CommandExecutor {
 			dominion.setBalance(dominion.getBalance() - totalCost);
 			dominion.setBoughtChunks(currentBought + amount);
 			DominionUtils.updateDominion(dominion);
-			int newLimit = dominion.getMembers().size() * 25 + dominion.getBoughtChunks();
+			int newLimit = dominion.getMaxChunks();
 			NumberFormat formatter = NumberFormat.getCurrencyInstance();
 			player.sendMessage(ChatUtils.chatMessage("&7Purchased &e" + amount + " additional chunk" + (amount > 1 ? "s" : "")
 					+ " &7for &6" + formatter.format(totalCost) + "&7! Your Dominion can now claim up to &e" + newLimit + " chunks&7."));
@@ -1289,7 +1289,7 @@ public class CommandDominion implements CommandExecutor {
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		String valueWithTwoDecimals = formatter.format(dominion.getBalance());
 		player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
-		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + (dominion.getMembers().size() * 25 + dominion.getBoughtChunks()) + " chunks"));
+		player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + dominion.getMaxChunks() + " chunks"));
 		player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
 	}
 

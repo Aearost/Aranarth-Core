@@ -197,7 +197,7 @@ public class DominionUtils {
 				if (dominionOfChunk == null) {
 					int claimPrice = 250;
 					if (playerDominion.getBalance() >= claimPrice) {
-						if (playerDominion.getChunks().size() < (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks())) {
+						if (playerDominion.getChunks().size() < playerDominion.getMaxChunks()) {
 							if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
 								double newBalance = playerDominion.getBalance() - claimPrice;
 								playerDominion.setBalance(newBalance);
@@ -207,12 +207,12 @@ public class DominionUtils {
 								resizeFoodArray(playerDominion);
 								updateDominion(playerDominion);
 								return "&e" + playerDominion.getName() + " &7has claimed &e" +
-										playerDominion.getChunks().size() + "/" + (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks()) + " chunks";
+										playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
 							} else {
 								return "&cThis chunk is not connected to the rest of your Dominion!";
 							}
 						} else {
-							return "&cYou cannot claim more than &e" + (playerDominion.getMembers().size() * 25 + playerDominion.getBoughtChunks()) + " chunks!";
+							return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
 						}
 					} else {
 						return "&cYour dominion cannot afford this!";
@@ -1927,6 +1927,34 @@ public class DominionUtils {
 				int upkeepCost = dominion.getConquered().size() >= 5 ? 375 : dominion.getConquered().size() * 75;
 				dominion.setBalance(dominion.getBalance() - upkeepCost);
 			}
+
+			// If the dominion is over its chunk limit, unclaim one chunk per week
+			int maxChunks = dominion.getMaxChunks();
+			if (dominion.getChunks().size() > maxChunks) {
+				Chunk homeChunk = dominion.getDominionHome().getChunk();
+				Chunk chunkToRemove = null;
+				for (Chunk chunk : dominion.getChunks()) {
+					if (chunk.getX() == homeChunk.getX() && chunk.getZ() == homeChunk.getZ()
+							&& chunk.getWorld().equals(homeChunk.getWorld())) {
+						continue;
+					}
+					if (isAllClaimsConnectedAfterUnclaiming(dominion, chunk)) {
+						chunkToRemove = chunk;
+						break;
+					}
+				}
+				if (chunkToRemove != null) {
+					dominion.getChunks().remove(chunkToRemove);
+					chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
+					resizeFoodArray(dominion);
+					if (player.isOnline()) {
+						player.getPlayer().sendMessage(ChatUtils.chatMessage(
+								"&cYour Dominion is over its chunk limit and has lost a chunk! "
+										+ "&7(" + dominion.getChunks().size() + "/" + maxChunks + " chunks)"));
+					}
+				}
+			}
+
 			updateDominion(dominion);
 
 			if (player.isOnline()) {
