@@ -43,14 +43,17 @@ public class CommandUntrust implements CommandExecutor {
 								if (offlinePlayer.getUniqueId().equals(aranarthPlayer.getUntrustedPlayerUUID())) {
 									aranarthPlayer.setUntrustedPlayerUUID(null);
 									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-									player.sendMessage(ChatUtils.chatMessage("&7Untrust mode disabled"));
+									sender.sendMessage(ChatUtils.chatMessage("&7You are no longer in untrust mode"));
 								} else {
 									aranarthPlayer.setTrustedPlayerUUID(null);
 									aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
 									aranarthPlayer.setUnlockingContainer(false);
 									aranarthPlayer.setLockingContainer(false);
 									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-									player.sendMessage(ChatUtils.chatMessage("&7Right-click the container to untrust &e" + offlinePlayer.getName()));
+									String nickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
+									sender.sendMessage(ChatUtils.chatMessage("&7You are now untrusting &e" + nickname
+											+ " &7from your containers - right-click to untrust them"));
+									sender.sendMessage(ChatUtils.chatMessage("&7Run &e/untrust &7again to exit the untrust mode"));
 								}
 								isPlayerFound = true;
 								return true;

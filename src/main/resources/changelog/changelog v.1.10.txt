@@ -145,6 +145,7 @@ Minor Features
 [+] Added /tell as an alias for /msg
 [~] Fixed issue where emperors were not able to create shops correctly
 [~] Made it so that /trust and /untrust are toggles
+[~] Made it so that /lock and /unlock are toggles
 [~] Fixed bug where Incantation of Lifesteal was not stacking with health boost
 [~] Updated the key rewards for login streaks for Emperors
 [~] Added messages to other council members and players when punishments are issued
@@ -154,6 +155,7 @@ Minor Features
 [+] Added cooldown to creating or joining a new dominion after disbanding your dominion
 [+] Fixed issue where the Crafter was bypassing recipes with custom meta ingredients, using them as if they were normal items
 [~] Fixed issue where twins during Calorvor were spawning as different variants at times
+[~] Rephrased messages for /lock, /unlock, /trust, and /untrust
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

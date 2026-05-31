@@ -80,7 +80,6 @@ public class ContainerInteract {
                     AranarthUtils.addPlayerToContainer(aranarthPlayer.getTrustedPlayerUUID(), block.getLocation());
                     String username = Bukkit.getOfflinePlayer(aranarthPlayer.getTrustedPlayerUUID()).getName();
                     player.sendMessage(ChatUtils.chatMessage("&7You have trusted &e" + username + " &7to this container"));
-                    player.sendMessage(ChatUtils.chatMessage("&7Use &e/trust &7again to stop trusting this player"));
                 }
             } else {
                 player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
@@ -149,7 +148,6 @@ public class ContainerInteract {
             AranarthUtils.addLockedContainer(lockedContainer);
             player.sendMessage(ChatUtils.chatMessage("&7This container has been locked!"));
         }
-        aranarthPlayer.setLockingContainer(false);
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         e.setCancelled(true);
     }
@@ -180,7 +178,6 @@ public class ContainerInteract {
                 player.sendMessage(ChatUtils.chatMessage("&cYou are not the owner of this container!"));
             }
         }
-        aranarthPlayer.setUnlockingContainer(false);
         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         e.setCancelled(true);
     }

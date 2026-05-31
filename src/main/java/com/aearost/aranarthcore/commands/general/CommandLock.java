@@ -23,13 +23,20 @@ public class CommandLock implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			sender.sendMessage(ChatUtils.chatMessage("&7Right-click the container to be locked"));
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			aranarthPlayer.setTrustedPlayerUUID(null);
-			aranarthPlayer.setUntrustedPlayerUUID(null);
-			aranarthPlayer.setUnlockingContainer(false);
-			aranarthPlayer.setLockingContainer(true);
-			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			if (aranarthPlayer.isLockingContainer()) {
+				aranarthPlayer.setLockingContainer(false);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				sender.sendMessage(ChatUtils.chatMessage("&7You are no longer locking containers"));
+			} else {
+				aranarthPlayer.setTrustedPlayerUUID(null);
+				aranarthPlayer.setUntrustedPlayerUUID(null);
+				aranarthPlayer.setUnlockingContainer(false);
+				aranarthPlayer.setLockingContainer(true);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				sender.sendMessage(ChatUtils.chatMessage("&7You are now locking containers - right-click to lock them"));
+				sender.sendMessage(ChatUtils.chatMessage("&7Run &e/lock &7again to exit locking mode"));
+			}
         } else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));
         }

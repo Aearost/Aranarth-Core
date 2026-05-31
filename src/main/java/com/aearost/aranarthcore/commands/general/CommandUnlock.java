@@ -23,13 +23,20 @@ public class CommandUnlock implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
-			sender.sendMessage(ChatUtils.chatMessage("&7Right-click the container to be unlocked"));
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-			aranarthPlayer.setTrustedPlayerUUID(null);
-			aranarthPlayer.setUntrustedPlayerUUID(null);
-			aranarthPlayer.setUnlockingContainer(true);
-			aranarthPlayer.setLockingContainer(false);
-			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+			if (aranarthPlayer.isUnlockingContainer()) {
+				aranarthPlayer.setUnlockingContainer(false);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				sender.sendMessage(ChatUtils.chatMessage("&7You are no longer unlocking containers"));
+			} else {
+				aranarthPlayer.setTrustedPlayerUUID(null);
+				aranarthPlayer.setUntrustedPlayerUUID(null);
+				aranarthPlayer.setUnlockingContainer(true);
+				aranarthPlayer.setLockingContainer(false);
+				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				sender.sendMessage(ChatUtils.chatMessage("&7You are now unlocking containers - right-click to unlock them"));
+				sender.sendMessage(ChatUtils.chatMessage("&7Run &e/unlock &7again to exit unlocking mode"));
+			}
         } else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));
         }
