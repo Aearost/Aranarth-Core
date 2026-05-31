@@ -365,6 +365,15 @@ public class Dominion {
 	}
 
 	/**
+	 * Provides the maximum number of chunks this Dominion is allowed to claim,
+	 * based on member count and bought chunks.
+	 * @return The maximum claimable chunk count.
+	 */
+	public int getMaxChunks() {
+		return this.members.size() * 25 + this.boughtChunks;
+	}
+
+	/**
 	 * Provides the balance of the dominion.
 	 * @return The balance of the dominion.
 	 */
