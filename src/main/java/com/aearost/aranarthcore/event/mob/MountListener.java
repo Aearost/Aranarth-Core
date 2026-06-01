@@ -332,6 +332,7 @@ public class MountListener implements Listener {
     private static final Map<UUID, SpecialAction> activeSpecialActions = new HashMap<>();
     private static final Map<UUID, Double> originalSpeeds = new HashMap<>();
     private static final Map<UUID, Double> originalFlyingSpeeds = new HashMap<>();
+    private static final Map<UUID, Location> mountPrevLocations = new HashMap<>();
     private final Random random = new Random();
     private static MountListener instance;
 
@@ -687,8 +688,15 @@ public class MountListener implements Listener {
                 speed *= 0.1;
             }
         }
-        // Track speed XP for mounts
-        boolean isMoving = Math.abs(forward) > 0.001 || Math.abs(strafe) > 0.001;
+        // Compute actual distance moved since last tick for speed XP
+        UUID mountId = mount.getUniqueId();
+        Location currentLocation = mount.getLocation();
+        Location prevLocation = mountPrevLocations.get(mountId);
+        double distanceMoved = 0;
+        if (prevLocation != null && prevLocation.getWorld() == currentLocation.getWorld()) {
+            distanceMoved = prevLocation.distance(currentLocation);
+        }
+        mountPrevLocations.put(mountId, currentLocation);
 
         double yaw = Math.toRadians(riderYaw);
         double vx = -Math.sin(yaw) * forward + Math.cos(yaw) * strafe;
@@ -746,9 +754,9 @@ public class MountListener implements Listener {
         // Zeroing horizontal velocity when idle suppresses AI wandering
         mount.setVelocity(new Vector(vx, vertY, vz));
 
-        // Award speed XP when the mount is actually moving
-        if (isMoving) {
-            MountUtils.accumulateSpeedXp(mount.getUniqueId(), speed);
+        // Award speed XP only when the mount actually moved (not just pressing into a wall)
+        if (distanceMoved > 0.05) {
+            MountUtils.accumulateSpeedXp(mountId, distanceMoved);
         }
     }
 
@@ -823,6 +831,7 @@ public class MountListener implements Listener {
      */
     private void releaseMountControl(UUID id) {
         activeMounts.remove(id);
+        mountPrevLocations.remove(id);
         SpecialAction action = activeSpecialActions.remove(id);
         if (action != null) {
             action.cleanup(id);
