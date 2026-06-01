@@ -164,6 +164,7 @@ Minor Features
 [~] Added automatic unclaiming of chunks once per in-game week when exceeding chunk limit
 [~] Allowed interactions with lecterns but prevented the book from being taken at spawn, dominions, and shop islands
 [~] Fixed issue where you could not edit your last player shop (maximum number of shops being edited)
+[~] Fixed issue causing inventory loss when teleporting to a bed location after dying in the arena
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,6 +26,7 @@ public class PlayerRespawnEventListener implements Listener {
 
     /**
      * Saves the player's level and EXP before dying in the arena or creative world.
+     *
      * @param e The event.
      */
     @EventHandler
@@ -61,11 +63,16 @@ public class PlayerRespawnEventListener implements Listener {
 
     /**
      * Handles logic on the player's actual respawn.
+     *
      * @param e The event.
      */
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent e) {
-        String world = e.getPlayer().getWorld().getName();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+        Location deathLocation = aranarthPlayer.getLastKnownTeleportLocation();
+        String world = (deathLocation != null && deathLocation.getWorld() != null)
+                ? deathLocation.getWorld().getName()
+                : e.getPlayer().getWorld().getName();
         if (world.equalsIgnoreCase("arena") || world.equalsIgnoreCase("creative")) {
             new RespawnNonSurvival().execute(e);
         } else {
