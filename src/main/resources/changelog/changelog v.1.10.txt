@@ -169,6 +169,7 @@ Minor Features
 [~] Prevented the use of /me
 [+] Added bamboo to the compressor
 [+] Added dried ghasts to the dominion resources of soul sand valleys
+[~] Fixed issue where you were stuck in resource claim mode in chat until a number was entered
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

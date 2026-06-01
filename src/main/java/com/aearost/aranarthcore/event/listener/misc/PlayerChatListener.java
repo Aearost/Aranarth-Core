@@ -72,7 +72,8 @@ public class PlayerChatListener implements Listener {
                             player.playSound(player, Sound.ENTITY_PLAYER_LEVELUP, 0.5F, 1F);
                         });
                     } catch (NumberFormatException ex) {
-                        player.sendMessage(ChatUtils.chatMessage("&cThat number is invalid!"));
+                        player.sendMessage(ChatUtils.chatMessage("&cThat number is invalid! Please re-enter /dominion resources to try again."));
+                        dominion.setBiomeResourcesBeingClaimed(null);
                     }
                     return;
                 }
