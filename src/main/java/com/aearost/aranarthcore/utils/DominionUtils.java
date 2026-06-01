@@ -1729,6 +1729,11 @@ public class DominionUtils {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
 				}
 			}
+
+			// Simulates a happy ghast
+			if (random.nextInt(20) == 0) {
+				items.add(new ItemStack(Material.DRIED_GHAST, 1));
+			}
 		}
 		else if (biome == Biome.CRIMSON_FOREST) {
 			items.add(new ItemStack(Material.CRIMSON_NYLIUM, 32));

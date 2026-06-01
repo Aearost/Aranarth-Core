@@ -168,6 +168,7 @@ Minor Features
 [~] Fixed issue causing inventory loss when teleporting to a bed location after dying in the arena
 [~] Prevented the use of /me
 [+] Added bamboo to the compressor
+[+] Added dried ghasts to the dominion resources of soul sand valleys
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
