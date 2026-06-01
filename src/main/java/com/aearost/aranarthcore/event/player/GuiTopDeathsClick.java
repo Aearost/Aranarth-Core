@@ -29,11 +29,8 @@ public class GuiTopDeathsClick {
 					if (e.getSlot() == 45) {
 						int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 						if (currentPage > 0) {
-							currentPage--;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiTopDeaths gui = new GuiTopDeaths(player, currentPage);
-							gui.openGui();
 							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopDeaths.open(player, currentPage - 1);
 						} else if (currentPage == 0) {
 							int playerNum = AranarthUtils.getTopDeaths(player.getWorld()).size();
 							int maxPages;
@@ -44,10 +41,8 @@ public class GuiTopDeathsClick {
 								maxPages = (int) (double) (playerNum / 45) + 1;
 							}
 							if (maxPages > 1) {
-								aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
-								GuiTopDeaths gui = new GuiTopDeaths(player, maxPages - 1);
-								gui.openGui();
 								player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+								GuiTopDeaths.open(player, maxPages - 1);
 							}
 						}
 					}
@@ -68,17 +63,11 @@ public class GuiTopDeathsClick {
 						} else {
 							maxPages = (int) (double) (playerNum / 45) + 1;
 						}
+						player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 						if (currentPage + 1 < maxPages) {
-							currentPage++;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiTopDeaths gui = new GuiTopDeaths(player, currentPage);
-							gui.openGui();
-							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopDeaths.open(player, currentPage + 1);
 						} else {
-							aranarthPlayer.setCurrentGuiPageNum(0);
-							GuiTopDeaths gui = new GuiTopDeaths(player, 0);
-							gui.openGui();
-							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopDeaths.open(player, 0);
 						}
 					}
 				}

@@ -7,9 +7,9 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.destroystokyo.paper.profile.PlayerProfile;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -61,12 +61,12 @@ public class GuiDominionMembersClick {
             return;
         }
 
-        OfflinePlayer skullOwner = skullMeta.getOwningPlayer();
-        if (skullOwner == null) {
+        PlayerProfile skullProfile = skullMeta.getPlayerProfile();
+        if (skullProfile == null || skullProfile.getId() == null) {
             return;
         }
 
-        UUID targetUuid = skullOwner.getUniqueId();
+        UUID targetUuid = skullProfile.getId();
 
         // Cannot change the leader's rank through this GUI
         if (targetUuid.equals(dominion.getLeader())) {
@@ -89,7 +89,7 @@ public class GuiDominionMembersClick {
         DominionUtils.updateDominion(dominion);
         String rankName = DominionUtils.getFormattedRankName(nextRank);
 
-        String nickname = AranarthUtils.getNickname(skullOwner);
+        String nickname = AranarthUtils.getNickname(Bukkit.getOfflinePlayer(targetUuid));
         player.sendMessage(ChatUtils.chatMessage("&e" + nickname + "&7's rank has been set to " + rankName));
         player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
 
@@ -100,7 +100,7 @@ public class GuiDominionMembersClick {
         }
 
         // Refresh the GUI
-        new GuiDominionMembers(player).openGui();
+        GuiDominionMembers.open(player);
     }
 
     /**

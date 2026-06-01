@@ -33,9 +33,7 @@ public class GuiShopLocationClick {
 						int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 						if (currentPage > 0) {
 							currentPage--;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiShopLocation gui = new GuiShopLocation(player, currentPage);
-							gui.openGui();
+							GuiShopLocation.open(player, currentPage);
 							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 						} else if (currentPage == 0) {
 							int numOfShopLocations = AranarthUtils.getShopLocations().size();
@@ -47,9 +45,7 @@ public class GuiShopLocationClick {
 								maxPages = (int) (double) (numOfShopLocations / 27) + 1;
 							}
 							if (maxPages > 1) {
-								aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
-								GuiShopLocation gui = new GuiShopLocation(player, maxPages - 1);
-								gui.openGui();
+								GuiShopLocation.open(player, maxPages - 1);
 								player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 							}
 						}
@@ -75,14 +71,10 @@ public class GuiShopLocationClick {
 						}
 						if (currentPage + 1 < maxPages) {
 							currentPage++;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiShopLocation gui = new GuiShopLocation(player, currentPage);
-							gui.openGui();
+							GuiShopLocation.open(player, currentPage);
 							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 						} else {
-							aranarthPlayer.setCurrentGuiPageNum(0);
-							GuiShopLocation gui = new GuiShopLocation(player, 0);
-							gui.openGui();
+							GuiShopLocation.open(player, 0);
 							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 						}
 					} else {

@@ -79,7 +79,7 @@ public class GuiDominionPermissionsClick {
                 case "Neutral Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);
                 case "Enemied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ENEMIED);
                 case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
-                case "Members" -> new GuiDominionMembers(player).openGui();
+                case "Members" -> GuiDominionMembers.open(player);
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;

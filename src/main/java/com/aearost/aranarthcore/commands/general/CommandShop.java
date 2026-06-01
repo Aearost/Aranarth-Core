@@ -38,8 +38,7 @@ public class CommandShop implements CommandExecutor {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         if (args.length == 0) {
-            GuiShopLocation gui = new GuiShopLocation(player, 0);
-            gui.openGui();
+            GuiShopLocation.open(player, 0);
             return true;
         }
 

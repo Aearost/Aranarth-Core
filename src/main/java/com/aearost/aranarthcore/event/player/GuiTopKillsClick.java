@@ -1,6 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
-import com.aearost.aranarthcore.gui.GuiTopDeaths;
+import com.aearost.aranarthcore.gui.GuiTopKills;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -10,7 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 
 /**
- * Handles the logic for navigating the top deaths GUI.
+ * Handles the logic for navigating the top kills GUI.
  */
 public class GuiTopKillsClick {
 	public void execute(InventoryClickEvent e) {
@@ -29,11 +29,8 @@ public class GuiTopKillsClick {
 					if (e.getSlot() == 45) {
 						int currentPage = aranarthPlayer.getCurrentGuiPageNum();
 						if (currentPage > 0) {
-							currentPage--;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiTopDeaths gui = new GuiTopDeaths(player, currentPage);
-							gui.openGui();
 							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopKills.open(player, currentPage - 1);
 						} else if (currentPage == 0) {
 							int playerNum = AranarthUtils.getTopKills(player.getWorld()).size();
 							int maxPages;
@@ -44,10 +41,8 @@ public class GuiTopKillsClick {
 								maxPages = (int) (double) (playerNum / 45) + 1;
 							}
 							if (maxPages > 1) {
-								aranarthPlayer.setCurrentGuiPageNum(maxPages - 1);
-								GuiTopDeaths gui = new GuiTopDeaths(player, maxPages - 1);
-								gui.openGui();
 								player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+								GuiTopKills.open(player, maxPages - 1);
 							}
 						}
 					}
@@ -68,17 +63,11 @@ public class GuiTopKillsClick {
 						} else {
 							maxPages = (int) (double) (playerNum / 45) + 1;
 						}
+						player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
 						if (currentPage + 1 < maxPages) {
-							currentPage++;
-							aranarthPlayer.setCurrentGuiPageNum(currentPage);
-							GuiTopDeaths gui = new GuiTopDeaths(player, currentPage);
-							gui.openGui();
-							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopKills.open(player, currentPage + 1);
 						} else {
-							aranarthPlayer.setCurrentGuiPageNum(0);
-							GuiTopDeaths gui = new GuiTopDeaths(player, 0);
-							gui.openGui();
-							player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+							GuiTopKills.open(player, 0);
 						}
 					}
 				}
