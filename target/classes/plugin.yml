@@ -131,6 +131,10 @@ commands:
   pay:
     description: Pays the input player the specified amount
     permission: aranarth.pay
+  mctop:
+    description: Opens a GUI showing the top players in a given mcMMO skill
+    aliases: [skilltop]
+    permission: aranarth.mctop
   mount:
     description: Calls or dismisses the player's current mount
     permission: aranarth.mount

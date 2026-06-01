@@ -63,11 +63,12 @@ public class AranarthCore extends JavaPlugin {
         initializeCommands();
         initializeItems();
 
-        // Force /ac to be handled by AranarthCore after all plugins (including mcMMO) have enabled
         Bukkit.getScheduler().runTask(this, () -> {
             SimpleCommandMap commandMap = (SimpleCommandMap) Bukkit.getServer().getCommandMap();
             commandMap.getKnownCommands().put("ac", getCommand("ac"));
             commandMap.getKnownCommands().put("aranarthcore:ac", getCommand("ac"));
+            commandMap.getKnownCommands().put("mctop", getCommand("mctop"));
+            commandMap.getKnownCommands().put("aranarthcore:mctop", getCommand("mctop"));
         });
 
         // Sets default storm values
@@ -541,6 +542,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
         getCommand("mounts").setExecutor(new CommandMounts());
+        getCommand("mctop").setExecutor(new CommandMctop());
+        getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
     }
 
     /**

@@ -85,6 +85,10 @@ public class InventoryClickEventListener implements Listener {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Toggles")) {
                 new GuiToggleClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+                new GuiMctopClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {

@@ -50,6 +50,7 @@ Major Features
 [+] Added /mount(s) functionality to summon and train element-based pets
 [+] Added /d buychunks to allow dominions to buy additional chunks
 [+] Added descriptions to all custom arrowheads and arrows stating what each one does
+[+] Added GUI for /mctop
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
@@ -170,6 +171,7 @@ Minor Features
 [+] Added bamboo to the compressor
 [+] Added dried ghasts to the dominion resources of soul sand valleys
 [~] Fixed issue where you were stuck in resource claim mode in chat until a number was entered
+[~] Added 50/50 chance in Godly crates to get shulker shells or diamond blocks
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
