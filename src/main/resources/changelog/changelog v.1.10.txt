@@ -51,6 +51,7 @@ Major Features
 [+] Added /d buychunks to allow dominions to buy additional chunks
 [+] Added descriptions to all custom arrowheads and arrows stating what each one does
 [+] Added GUI for /mctop
+[+] Added GUI for /votetop
 [~] Updated the player head loading logic for all GUIs to no longer contain the "Dynamic" keyword
 
 Minor Features

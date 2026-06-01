@@ -1,11 +1,13 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.gui.GuiVoteTop;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -13,7 +15,8 @@ import java.time.ZoneId;
 import java.util.*;
 
 /**
- * Lists the top 10 players by vote count, with optional year/month filters.
+ * Opens a GUI showing the top voters, with optional year/month filters.
+ * Falls back to chat output for non-player senders.
  */
 public class CommandVoteTop implements CommandExecutor {
 
@@ -27,14 +30,14 @@ public class CommandVoteTop implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (args.length == 0) {
-			displayVoteTop(sender, null, null, "All-Time");
+			openOrDisplay(sender, null, null, "All-Time");
 		} else if (args.length == 2 && args[0].equalsIgnoreCase("year")) {
 			try {
 				int year = Integer.parseInt(args[1]);
 				if (year < 1000 || year > 9999) throw new NumberFormatException();
-				displayVoteTop(sender, year, null, "Year " + year);
+				openOrDisplay(sender, year, null, "Year " + year);
 			} catch (NumberFormatException e) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid year! &e(e.g. /vtop year 2025)"));
+				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid year!"));
 			}
 		} else if (args.length == 2 && args[0].equalsIgnoreCase("month")) {
 			try {
@@ -44,9 +47,9 @@ public class CommandVoteTop implements CommandExecutor {
 				int year = Integer.parseInt(parts[1]);
 				if (month < 1 || month > 12) throw new IllegalArgumentException();
 				String label = String.format("%02d-%d", month, year);
-				displayVoteTop(sender, year, month, label);
+				openOrDisplay(sender, year, month, label);
 			} catch (Exception e) {
-				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid month! &e(e.g. /vtop month 04-2025)"));
+				sender.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid month!"));
 			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cIncorrect syntax: &e/votetop [month|year] [MM-YYYY|YYYY]"));
@@ -55,11 +58,18 @@ public class CommandVoteTop implements CommandExecutor {
 	}
 
 	/**
-	 * Displays the top 10 voters for the given period.
-	 * @param sender The command sender.
-	 * @param year The year to filter by, or null for all-time.
-	 * @param month The month to filter by (1-12), or null for all months in the year.
-	 * @param label The label to show in the header.
+	 * Opens the GUI for players, or prints to chat for non-player senders.
+	 */
+	private void openOrDisplay(CommandSender sender, Integer year, Integer month, String label) {
+		if (sender instanceof Player player) {
+			GuiVoteTop.open(player, year, month, 0);
+			return;
+		}
+		displayVoteTop(sender, year, month, label);
+	}
+
+	/**
+	 * Prints the top 10 voters for the given period to chat (used for non-player senders).
 	 */
 	private void displayVoteTop(CommandSender sender, Integer year, Integer month, String label) {
 		List<AranarthVote> allVotes = AranarthUtils.getVotes();
