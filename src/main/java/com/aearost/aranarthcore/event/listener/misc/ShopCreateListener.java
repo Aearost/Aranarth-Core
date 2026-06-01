@@ -50,19 +50,23 @@ public class ShopCreateListener implements Listener {
 						return;
 					}
 
-					int playerShopNum = 0;
-					if (ShopUtils.getShops().get(player.getUniqueId()) != null) {
-						playerShopNum = ShopUtils.getShops().get(player.getUniqueId()).size();
-					}
+					// Only enforce the shop limit for new shops, not edits to existing ones
+					boolean isExistingShop = ShopUtils.getShopFromLocation(sign.getLocation()) != null;
+					if (!isExistingShop) {
+						int playerShopNum = 0;
+						if (ShopUtils.getShops().get(player.getUniqueId()) != null) {
+							playerShopNum = ShopUtils.getShops().get(player.getUniqueId()).size();
+						}
 
-					int maxShopNum = AranarthUtils.getMaxShopNum(player);
-					if (playerShopNum >= maxShopNum) {
-						if (maxShopNum == 0) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
-							return;
-						} else if (maxShopNum != -1) {
-							player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
-							return;
+						int maxShopNum = AranarthUtils.getMaxShopNum(player);
+						if (playerShopNum >= maxShopNum) {
+							if (maxShopNum == 0) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot create any shops yet!"));
+								return;
+							} else if (maxShopNum != -1) {
+								player.sendMessage(ChatUtils.chatMessage("&cYou cannot create more than &e" + maxShopNum + " &cshops!"));
+								return;
+							}
 						}
 					}
 
