@@ -43,7 +43,7 @@ public class GuiCrate {
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
-			updateGodlyCrateItems(indexes.get(0), indexes.get(1));
+			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
 		}
@@ -640,8 +640,9 @@ public class GuiCrate {
 	 * Provides the Aranarthium Ingot that is associated to the input index for a Godly Crate.
 	 * @param ingotIndex The index of the cluster.
 	 * @param eggIndex The index of the spawn egg.
+	 * @param diamondShulkerIndex The index of the diamond blocks/shulker shells.
 	 */
-	public void updateGodlyCrateItems(int ingotIndex, int eggIndex) {
+	public void updateGodlyCrateItems(int ingotIndex, int eggIndex, int diamondShulkerIndex) {
 		ItemStack ingot = null;
 		switch (ingotIndex) {
 			case 1 -> ingot = new AranarthiumAquatic().getItem();
@@ -675,6 +676,27 @@ public class GuiCrate {
 		cycledEggMeta.setLore(cycledEggLore);
 		egg.setItemMeta(cycledEggMeta);
 		initializedGui.setItem(23, egg);
+
+		// Cycle through Diamond Block x32 and Shulker Shells x16
+		ItemStack diamondShulker = null;
+		if (diamondShulkerIndex == 1) {
+			diamondShulker = new ItemStack(Material.SHULKER_SHELL, 16);
+			ItemMeta shulkerMeta = diamondShulker.getItemMeta();
+			shulkerMeta.setDisplayName(ChatUtils.translateToColor("#946794&lShulker Shells"));
+			List<String> shulkerLore = new ArrayList<>();
+			shulkerLore.add(ChatUtils.translateToColor("&a12% Chance"));
+			shulkerMeta.setLore(shulkerLore);
+			diamondShulker.setItemMeta(shulkerMeta);
+		} else {
+			diamondShulker = new ItemStack(Material.DIAMOND_BLOCK, 32);
+			ItemMeta diamondMeta = diamondShulker.getItemMeta();
+			diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
+			List<String> diamondLore = new ArrayList<>();
+			diamondLore.add(ChatUtils.translateToColor("&a12% Chance"));
+			diamondMeta.setLore(diamondLore);
+			diamondShulker.setItemMeta(diamondMeta);
+		}
+		initializedGui.setItem(3, diamondShulker);
 	}
 
 }

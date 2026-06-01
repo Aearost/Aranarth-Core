@@ -247,17 +247,19 @@ public class CrateOpen {
                                 // Sets default value to display at first
                                 indexes.add(0);
                                 indexes.add(0);
+                                indexes.add(0);
                                 GuiCrate gui = new GuiCrate(player, CrateType.GODLY, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
+                                indexes.set(2, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1));
+                                            gui.updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 
                                             // Cycle through the next enhanced aranarthium iteration
                                             if (indexes.get(0) < 5) {
@@ -271,6 +273,13 @@ public class CrateOpen {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
+                                            }
+
+                                            // Cycle through the next diamond block / shulker shells iteration
+                                            if (indexes.get(2) < 1) {
+                                                indexes.set(2, indexes.get(2) + 1);
+                                            } else {
+                                                indexes.set(2, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -743,8 +752,16 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
-                    reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
-                    name = "#a0f0ed&lDiamond Block x32";
+                    if (new Random().nextBoolean()) {
+                        reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
+                        name = "#a0f0ed&lDiamond Block x32";
+                    } else {
+                        reward = new ItemStack(Material.SHULKER_SHELL, 16);
+                        ItemMeta shulkerRewardMeta = reward.getItemMeta();
+                        shulkerRewardMeta.setDisplayName(ChatUtils.translateToColor("#946794&lShulker Shells"));
+                        reward.setItemMeta(shulkerRewardMeta);
+                        name = "#946794&lShulker Shells x16";
+                    }
                 } else if (chance <= 36) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
                     name = reward.getItemMeta().getDisplayName() + " x1";
