@@ -500,7 +500,7 @@ public class ChatUtils {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			String prefixStart = "&7⊰&r";
 			String prefixEnd = "&7⊱&r";
-			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e");
+			String senderPrefix = ChatUtils.translateToColor(prefixStart + "&7&l&oTo Yourself" + prefixEnd + " &7&o>> &e&o");
 			// Formats to color if the player sending has the permissions (no gradient for private messages)
 			String formattedMsg;
 			if (player.hasPermission("aranarth.chat.hex")) {
@@ -516,7 +516,7 @@ public class ChatUtils {
 			AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 			String prefixStart = "&7⊰&r";
 			String prefixEnd = "&7⊱&r";
-			String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> ";
+			String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o";
 			String targetPrefixRaw = prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o";
 
 			// Formats to color if the player sending has the permissions (no gradient for private messages)
@@ -529,12 +529,14 @@ public class ChatUtils {
 				formattedMsg = assembledMsg;
 			}
 
+			String coloredFormattedMsg = ChatUtils.translateToColor("&e&o") + formattedMsg;
+
 			Component senderComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(senderPrefixRaw))
-					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
+					.append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
 			player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor("&7Message &e" + targetAranarthPlayer.getNickname()), "/msg " + target.getName() + " ", true));
 
 			Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
-					.append(LegacyComponentSerializer.legacySection().deserialize(formattedMsg));
+					.append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
 			target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + aranarthPlayer.getNickname()), "/msg " + player.getName() + " ", true));
 
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
