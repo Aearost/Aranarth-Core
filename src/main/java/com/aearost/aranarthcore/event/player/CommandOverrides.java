@@ -77,6 +77,13 @@ public class CommandOverrides {
             return;
         }
 
+        // Prevent the command entirely
+        if (parts[0].equals("/me")) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
+            e.setCancelled(true);
+            return;
+        }
+
         // Adding and removing the sub-elements upon changing element without relogging
         if (parts[0].startsWith("/b")) {
             if (parts[0].equalsIgnoreCase("/b") || parts[0].toLowerCase().startsWith("/bend")) {
