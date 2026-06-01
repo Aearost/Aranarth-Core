@@ -260,6 +260,13 @@ public class GuiCompressor {
 		quartz.setItemMeta(quartzMeta);
 		gui.setItem(36, quartz);
 
+		ItemStack bamboo = new ItemStack(Material.BAMBOO);
+		String bambooActive = getStatusOfItem(uuid, bamboo.getType());
+		ItemMeta bambooMeta = bamboo.getItemMeta();
+		bambooMeta.setDisplayName(ChatUtils.translateToColor("#9dc334&lBamboo &7&l- " + bambooActive));
+		bamboo.setItemMeta(bambooMeta);
+		gui.setItem(37, bamboo);
+
 		ItemStack exit = new ItemStack(Material.BARRIER);
 		ItemMeta exitMeta = exit.getItemMeta();
 		exitMeta.setDisplayName(ChatUtils.translateToColor("&4&lExit"));

@@ -2421,7 +2421,7 @@ public class AranarthUtils {
 	 */
 	public static boolean isCompressible(ItemStack item, boolean shouldCheckItemMeta) {
 		if (shouldCheckItemMeta) {
-			if (item.hasItemMeta()) {
+			if (item.hasItemMeta() && !item.getItemMeta().getPersistentDataContainer().getKeys().isEmpty()) {
 				return false;
 			}
 		}
@@ -2436,7 +2436,7 @@ public class AranarthUtils {
 				|| type == Material.WHEAT || type == Material.MELON_SLICE || type == Material.DRIED_KELP
 				|| type == Material.SUGAR_CANE || type == Material.HONEYCOMB || type == Material.SLIME_BALL
 				|| type == Material.BONE_MEAL || type == Material.SNOWBALL || type == Material.CLAY_BALL
-				|| type == Material.QUARTZ;
+				|| type == Material.QUARTZ || type == Material.BAMBOO;
 	}
 
 	/**
@@ -2472,6 +2472,7 @@ public class AranarthUtils {
 		addCompressibleItem(uuid, Material.SNOWBALL);
 		addCompressibleItem(uuid, Material.CLAY_BALL);
 		addCompressibleItem(uuid, Material.QUARTZ);
+		addCompressibleItem(uuid, Material.BAMBOO);
 	}
 
 	/**
@@ -2507,6 +2508,7 @@ public class AranarthUtils {
 		removeCompressibleItem(uuid, Material.SNOWBALL);
 		removeCompressibleItem(uuid, Material.CLAY_BALL);
 		removeCompressibleItem(uuid, Material.QUARTZ);
+		removeCompressibleItem(uuid, Material.BAMBOO);
 	}
 
 	/**

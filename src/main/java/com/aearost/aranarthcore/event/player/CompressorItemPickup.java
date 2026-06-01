@@ -192,6 +192,7 @@ public class CompressorItemPickup {
 					case Material.SNOWBALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 					case Material.CLAY_BALL -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
 					case Material.QUARTZ -> calculateCompressedAmounts(player, compressibleItems.get(type), 4);
+					case Material.BAMBOO -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 				}
 			}
 		}
@@ -227,7 +228,7 @@ public class CompressorItemPickup {
 
 		if (totalAmountOfCompressedItem > 0) {
 			ItemStack compressedItemToAdd = null;
-			if (compressedType == Material.BAMBOO_BLOCK) {
+			if (type == Material.SUGAR_CANE) {
 				compressedItemToAdd = new SugarcaneBlock().getItem();
 				compressedItemToAdd.setAmount(totalAmountOfCompressedItem);
 			} else {
@@ -251,7 +252,7 @@ public class CompressorItemPickup {
 									}
 
 									// Increases non-full stacks within the shulker first
-									if (shulkerItem.getType() == compressedType) {
+									if (shulkerItem.isSimilar(compressedItemToAdd)) {
 										while (shulkerItem.getAmount() < shulkerItem.getMaxStackSize()) {
 											if (totalAmountOfCompressedItem > 0) {
 												shulkerItem.setAmount(shulkerItem.getAmount() + 1);
@@ -436,13 +437,14 @@ public class CompressorItemPickup {
             case Material.WHEAT -> Material.HAY_BLOCK;
             case Material.MELON_SLICE -> Material.MELON;
             case Material.DRIED_KELP -> Material.DRIED_KELP_BLOCK;
-            case Material.SUGAR_CANE -> Material.BAMBOO_BLOCK;
+            case Material.SUGAR_CANE -> null;
             case Material.HONEYCOMB -> Material.HONEYCOMB_BLOCK;
             case Material.SLIME_BALL -> Material.SLIME_BLOCK;
             case Material.BONE_MEAL -> Material.BONE_BLOCK;
             case Material.SNOWBALL -> Material.SNOW_BLOCK;
             case Material.CLAY_BALL -> Material.CLAY;
             case Material.QUARTZ -> Material.QUARTZ_BLOCK;
+            case Material.BAMBOO -> Material.BAMBOO_BLOCK;
             default -> null;
         };
 	}

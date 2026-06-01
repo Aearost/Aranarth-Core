@@ -29,7 +29,7 @@ public class GuiCompressorClick {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		int slot = e.getSlot();
-		if (slot < 9 || slot >= 37) {
+		if (slot < 9 || slot >= 38) {
 			// Toggle compressor
 			if (slot == 4) {
 				player.closeInventory();

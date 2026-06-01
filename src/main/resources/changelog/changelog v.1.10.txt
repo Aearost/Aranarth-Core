@@ -166,6 +166,7 @@ Minor Features
 [~] Fixed issue where you could not edit your last player shop (maximum number of shops being edited)
 [~] Fixed issue causing inventory loss when teleporting to a bed location after dying in the arena
 [~] Prevented the use of /me
+[+] Added bamboo to the compressor
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
