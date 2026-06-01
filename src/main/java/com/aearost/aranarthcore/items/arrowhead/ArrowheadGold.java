@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW_HEAD;
@@ -27,11 +28,12 @@ public class ArrowheadGold implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(ARROW_HEAD, PersistentDataType.STRING, "gold");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setLore(List.of(ChatUtils.translateToColor("&7&o+0.5-1 heart extra damage")));
 			item.setItemMeta(meta);
 		}
 	    return item;
 	}
-	
+
 	public String getName() {
 		return "&6Gold Arrowhead";
 	}

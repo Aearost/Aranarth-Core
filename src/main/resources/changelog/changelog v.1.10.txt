@@ -49,6 +49,7 @@ Major Features
 [+] Added fireworks during each start of a new month
 [+] Added /mount(s) functionality to summon and train element-based pets
 [+] Added /d buychunks to allow dominions to buy additional chunks
+[+] Added descriptions to all custom arrowheads and arrows stating what each one does
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

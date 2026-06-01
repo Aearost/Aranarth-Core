@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.ARROW;
@@ -27,11 +28,12 @@ public class ArrowAmethyst implements AranarthItem {
 			meta.setItemModel(key);
 			meta.getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "amethyst");
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
+			meta.setLore(List.of(ChatUtils.translateToColor("&7&o+2 hearts extra damage")));
 			item.setItemMeta(meta);
 		}
 	    return item;
 	}
-	
+
 	public String getName() {
 		return "#A020F0Amethyst Arrow";
 	}
