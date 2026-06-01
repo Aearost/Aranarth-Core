@@ -733,7 +733,9 @@ public class MountListener implements Listener {
                     Block foot = mount.getWorld().getBlockAt(cx, iy, cz);
                     Block clear1 = mount.getWorld().getBlockAt(cx, iy + 1, cz);
                     Block clear2 = mount.getWorld().getBlockAt(cx, iy + 2, cz);
-                    if (isSteppableObstacle(foot) && isClearForPassage(clear1) && isClearForPassage(clear2)) {
+                    double stepNeeded = foot.getBoundingBox().getMaxY() - loc.getY();
+                    if (isSteppableObstacle(foot) && isClearForPassage(clear1) && isClearForPassage(clear2)
+                            && stepNeeded >= 0.6) {
                         vertY = STEP_UP_VELOCITY;
                         break;
                     }
