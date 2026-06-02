@@ -152,7 +152,7 @@ public class CompressorItemPickup {
 					// Ensures the item gets correctly picked up when it is not being compressed
 					e.getItem().setItemStack(null);
 					e.getItem().remove();
-					addResultsToInventory(player, pickupClone);
+					addResultsToInventory(player, pickupClone, true);
 				}
 			}
 			// Fallback method to pick up normally if it's a non-compressible item that's picked up
@@ -272,22 +272,23 @@ public class CompressorItemPickup {
 			}
 
 			if (totalAmountOfCompressedItem > 0) {
-				addResultsToInventory(player, compressedItemToAdd);
+				addResultsToInventory(player, compressedItemToAdd, false);
 			}
 		}
 
 		if (remainder > 0) {
 			ItemStack remainderItemToAdd = new ItemStack(type, remainder);
-			addResultsToInventory(player, remainderItemToAdd);
+			addResultsToInventory(player, remainderItemToAdd, true);
 		}
 	}
 
 	/**
-	 * Adds the results of the compressed and remaining items to the inventory, prioritizing the inventory before the hotbar.
+	 * Adds the results of the compressed and remaining items to the inventory.
 	 * @param player The player that picked up the item.
 	 * @param item The compressed or remaining item being added to the inventory.
+	 * @param hotbarFirst When true, empty hotbar slots are filled before empty main-inventory slots.
 	 */
-	private void addResultsToInventory(Player player, ItemStack item) {
+	private void addResultsToInventory(Player player, ItemStack item, boolean hotbarFirst) {
 		int remainingToAdd = item.getAmount();
 
 		// Fills shulker boxes with the compressed blocks
@@ -364,44 +365,52 @@ public class CompressorItemPickup {
 			}
 		}
 
-		// Will then prioritize empty slots in inventory but not hotbar
-		for (int i = 9; i < player.getInventory().getStorageContents().length; i++) {
+		// Fill empty slots: order depends on hotbarFirst flag.
+		// Hotbar = indices 0-8, main inventory = indices 9-35 in getStorageContents().
+		int[] slotOrder;
+		if (hotbarFirst) {
+			slotOrder = new int[36];
+			for (int i = 0; i < 9; i++) slotOrder[i] = i;
+			for (int i = 9; i < 36; i++) slotOrder[i] = i;
+		} else {
+			slotOrder = new int[27];
+			for (int i = 0; i < 27; i++) slotOrder[i] = i + 9;
+		}
+		for (int idx = 0; idx < slotOrder.length && remainingToAdd > 0; idx++) {
+			int i = slotOrder[idx];
 			ItemStack inventoryItem = player.getInventory().getStorageContents()[i];
 			if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
+				ItemStack filling = null;
 				while (remainingToAdd > 0) {
-					if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
-						// For sugarcane blocks
+					if (filling == null || filling.getType() == Material.AIR) {
 						if (item.hasItemMeta()) {
-							inventoryItem = item.clone();
-							inventoryItem.setAmount(1);
+							filling = item.clone();
+							filling.setAmount(1);
 						} else {
-							inventoryItem = new ItemStack(item.getType(), 1);
+							filling = new ItemStack(item.getType(), 1);
 						}
-
 						remainingToAdd--;
 					} else {
-						inventoryItem.setAmount(inventoryItem.getAmount() + 1);
+						filling.setAmount(filling.getAmount() + 1);
 						remainingToAdd--;
 					}
 
-					if (inventoryItem.getAmount() == inventoryItem.getMaxStackSize()) {
-						player.getInventory().setItem(i, inventoryItem);
+					if (filling.getAmount() == filling.getMaxStackSize()) {
+						player.getInventory().setItem(i, filling);
+						filling = null;
 						break;
 					}
 				}
 
-				if (remainingToAdd == 0) {
-					player.getInventory().setItem(i, inventoryItem);
-					break;
+				if (filling != null) {
+					player.getInventory().setItem(i, filling);
 				}
-			} else {
-				continue;
 			}
 		}
 
 		item.setAmount(remainingToAdd);
 
-		// Will finally prioritize empty slots in hotbar (remaining slots) and will drop leftovers to the ground
+		// Drop any remaining leftovers to the ground
 		HashMap<Integer, ItemStack> leftover = player.getInventory().addItem(item);
 		// If the player's inventory was full, drop it to the ground
 		if (!leftover.isEmpty()) {
