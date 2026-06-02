@@ -135,9 +135,12 @@ public class Amplification extends SoundAbility implements AddonAbility {
      * or null if none is currently running.
      */
     private CoreAbility findActiveSoundAbility() {
-        for (CoreAbility ability : CoreAbility.getAbilities(player)) {
-            if (ability instanceof SoundAbility && !(ability instanceof Amplification)) {
-                return ability;
+        for (final Class<? extends SoundAbility> clazz : java.util.List.of(
+                DeafeningScream.class, SonicPulse.class, SonicClap.class, SonicBoom.class)) {
+            for (final CoreAbility ability : CoreAbility.getAbilities(clazz)) {
+                if (ability.getPlayer().equals(player)) {
+                    return ability;
+                }
             }
         }
         return null;

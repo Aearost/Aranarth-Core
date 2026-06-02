@@ -167,7 +167,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *compressor* -o -name *Compressor*)",
       "Bash(sed 's/.*import //')",
       "Bash(find ~/.m2/repository -name *mcMMO* -type f)",
-      "Bash(javap:*)"
+      "Bash(javap:*)",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -type d -iname *ability*)",
+      "Bash(find \"C:\\\\Users\\\\liamh\\\\IdeaProjects\\\\AranarthCore\\\\src\" -type f -name \"*.java\" -path \"*/abilities/*\" -exec grep -l \"^public class\\\\|^public interface\" {})"
     ]
   }
 }

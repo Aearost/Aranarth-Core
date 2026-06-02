@@ -213,9 +213,12 @@ public class IceDiscs extends IceAbility implements AddonAbility, ComboAbility {
         }
 
         // Keep IceSpike suppressed
-        for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(this.player))) {
-            if (ability.getName().equals("IceSpike")) {
-                ability.remove();
+        final CoreAbility iceSpikeProt = CoreAbility.getAbility("IceSpike");
+        if (iceSpikeProt != null) {
+            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(iceSpikeProt.getClass()))) {
+                if (ability.getPlayer().equals(this.player)) {
+                    ability.remove();
+                }
             }
         }
         this.bPlayer.addCooldown("IceSpike", 500L);

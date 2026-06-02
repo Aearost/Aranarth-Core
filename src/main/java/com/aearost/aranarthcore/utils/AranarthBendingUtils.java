@@ -169,9 +169,11 @@ public class AranarthBendingUtils {
      * @param abilityName The exact ability name to remove (case-sensitive).
      */
     public static void suppressComboTrigger(BendingPlayer bPlayer, Player player, String abilityName) {
+        final CoreAbility prototype = CoreAbility.getAbility(abilityName);
+        if (prototype == null) return;
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(player))) {
-                if (ability.getName().equals(abilityName)) {
+            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(prototype.getClass()))) {
+                if (ability.getPlayer().equals(player)) {
                     ability.remove();
                     bPlayer.removeCooldown(abilityName);
                 }

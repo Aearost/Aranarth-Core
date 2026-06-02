@@ -8,55 +8,50 @@ import com.projectkorra.projectkorra.ability.MetalAbility;
 import com.projectkorra.projectkorra.ability.util.Collision;
 import com.projectkorra.projectkorra.ability.util.ComboManager.AbilityInformation;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import com.projectkorra.projectkorra.command.Commands;
-import com.projectkorra.projectkorra.firebending.combo.ComboStream;
-import com.projectkorra.projectkorra.object.HorizontalVelocityTracker;
 import com.projectkorra.projectkorra.util.ClickType;
 import com.projectkorra.projectkorra.util.DamageHandler;
-import com.projectkorra.projectkorra.util.ParticleEffect;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CableSlash extends MetalAbility implements AddonAbility, ComboAbility {
 
-    private static final double RECALL_SPEED = 1.5;
+    private static final int SLASH_TICKS = 20;
+    private static final int SUB_STEPS = 4;
+    private static final double HIT_RADIUS = 1.5;
+    private static final double YAW_THRESHOLD = 0.01;
 
-    private int progressCounter;
+    private static final Particle.DustOptions CABLE_DUST =
+            new Particle.DustOptions(Color.fromRGB(55, 55, 58), 0.5f);
+
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
     @Attribute(Attribute.DAMAGE)
     private double damage;
-    @Attribute(Attribute.SPEED)
-    private double speed;
     @Attribute(Attribute.RANGE)
     private double range;
     @Attribute(Attribute.KNOCKBACK)
     private double knockback;
 
-    private Location origin;
-    private Location currentLoc;
-    private Location destination;
+    private int slashTick;
     private Vector direction;
-    private final ArrayList<Entity> affectedEntities;
-    private ArrayList<ComboStream> tasks;
-    private double radius;
-    private boolean recalling;
-    private final ArrayList<Location> recallPoints;
-    private int recallCounter;
+    private Vector prevDirection;
+    private double prevYawDelta;
+    private final Set<Entity> affectedEntities = new HashSet<>();
+
 
     public CableSlash(final Player player) {
         super(player);
-
-        this.affectedEntities = new ArrayList<>();
-        this.tasks = new ArrayList<>();
-        this.recallPoints = new ArrayList<>();
 
         if (!this.bPlayer.canBendIgnoreBindsCooldowns(this)) {
             return;
@@ -68,218 +63,124 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
             return;
         }
 
-        this.damage = 5.0;
-        this.range = 10.0;
-        this.speed = 1.0;
+        this.damage    = 5.0;
+        this.range     = 10.0;
         this.knockback = 0.3;
-        this.cooldown = 8000L;
-        this.radius = 1.5;
+        this.cooldown  = 8000L;
+
+        this.direction     = player.getEyeLocation().getDirection().normalize();
+        this.prevDirection = this.direction.clone();
+        this.prevYawDelta  = 0.0;
+        this.slashTick     = 0;
 
         this.bPlayer.addCooldown(this);
+
+        final Location loc = player.getLocation();
+        player.getWorld().playSound(loc, Sound.BLOCK_CHAIN_STEP,         0.8f,  1.4f);
+        player.getWorld().playSound(loc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.9f,  1.8f);
+
         this.start();
 
-        // MetalCable fires before the combo is recognised, so it's already active by the time
-        // CableSlash starts. Remove it and wipe its cooldown so the player isn't penalised.
+        // MetalCable fires before the combo is recognised- suppress it so the player isn't penalised.
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, this.player, "MetalCable");
     }
 
     @Override
     public void progress() {
-        this.progressCounter++;
-        if (this.player.isDead() || !this.player.isOnline()) {
-            this.remove();
-            return;
-        } else if (this.currentLoc != null && GeneralMethods.isRegionProtectedFromBuild(this, this.currentLoc)) {
-            this.remove();
+        if (player.isDead() || !player.isOnline()) {
+            remove();
             return;
         }
 
-        if (this.origin == null) {
-            this.direction = this.player.getEyeLocation().getDirection().normalize();
-            this.origin = GeneralMethods.getMainHandLocation(player).add(this.direction.clone().multiply(10));
-        }
+        slashTick++;
 
-        if (this.progressCounter < 8) {
+        final Vector curDirection = player.getEyeLocation().getDirection().normalize();
+
+        // Reversal detection
+        final double yawDelta = prevDirection.getX() * curDirection.getZ()
+                              - prevDirection.getZ() * curDirection.getX();
+        if (prevYawDelta != 0.0 && Math.abs(yawDelta) > YAW_THRESHOLD
+                && Math.signum(yawDelta) != Math.signum(prevYawDelta)) {
+            remove();
             return;
         }
-
-        if (this.recalling) {
-            this.manageRecall();
-            return;
+        if (Math.abs(yawDelta) > YAW_THRESHOLD) {
+            prevYawDelta = yawDelta;
         }
 
-        if (this.destination == null) {
-            this.destination = GeneralMethods.getMainHandLocation(player).add(
-                    GeneralMethods.getMainHandLocation(player).getDirection().normalize().multiply(10));
-            final Vector origToDest = GeneralMethods.getDirection(this.origin, this.destination);
-            final Location hand = GeneralMethods.getMainHandLocation(player);
-            for (double i = 0; i < 30; i++) {
-                final Location endLoc = this.origin.clone().add(origToDest.clone().multiply(i / 30));
-                if (GeneralMethods.locationEqualsIgnoreDirection(hand, endLoc)) {
-                    continue;
-                }
-                final Vector vec = GeneralMethods.getDirection(hand, endLoc);
-                final ComboStream fs = new ComboStream(this.player, this, vec, hand, this.range, this.speed);
-                fs.setDensity(1);
-                fs.setSpread(0F);
-                fs.setUseNewParticles(true);
-                fs.setParticleEffect(ParticleEffect.SMOKE_NORMAL);
-                fs.setCollides(false);
-                fs.start();
-                this.tasks.add(fs);
-            }
+        final Location hand = GeneralMethods.getMainHandLocation(player);
+
+        for (int s = 1; s <= SUB_STEPS; s++) {
+            final double t = (double) s / SUB_STEPS;
+            direction = prevDirection.clone()
+                    .add(curDirection.clone().subtract(prevDirection).multiply(t))
+                    .normalize();
+            drawSlashLine(hand);
         }
 
-        this.manageMetalVectors();
-    }
-
-    private void manageMetalVectors() {
-        for (int i = 0; i < this.tasks.size(); i++) {
-            if (this.tasks.get(i).isRemoved()) {
-                this.recallPoints.add(this.tasks.get(i).getLocation().clone());
-                this.tasks.remove(i);
-                i--;
-            }
+        // Hit-detection sub-steps (10)
+        final int HIT_STEPS = 10;
+        for (int s = 1; s <= HIT_STEPS; s++) {
+            final double t = (double) s / HIT_STEPS;
+            direction = prevDirection.clone()
+                    .add(curDirection.clone().subtract(prevDirection).multiply(t))
+                    .normalize();
+            checkHits(hand);
         }
-        if (this.tasks.isEmpty()) {
-            if (!this.recallPoints.isEmpty()) {
-                final Vector eyeDir = this.player.getEyeLocation().getDirection().normalize();
-                final Vector eyePos = this.player.getEyeLocation().toVector();
-                Location best = null;
-                double bestDot = Double.NEGATIVE_INFINITY;
-                for (final Location point : this.recallPoints) {
-                    final double dot = point.toVector().subtract(eyePos).normalize().dot(eyeDir);
-                    if (dot > bestDot) {
-                        bestDot = dot;
-                        best = point;
-                    }
-                }
-                this.recallPoints.clear();
-                this.recallPoints.add(best);
-                this.recalling = true;
-            } else {
-                this.remove();
-            }
-            return;
-        }
-        for (int i = 0; i < this.tasks.size(); i++) {
-            final ComboStream fstream = this.tasks.get(i);
-            final Location loc = fstream.getLocation();
 
-            if (GeneralMethods.isRegionProtectedFromBuild(this, loc)) {
-                fstream.remove();
-                return;
-            }
+        direction    = curDirection;
+        prevDirection = curDirection;
 
-            if (!this.isTransparent(loc.getBlock())) {
-                if (!this.isTransparent(loc.clone().add(0, 0.2, 0).getBlock())) {
-                    fstream.remove();
-                    return;
-                }
-            }
-
-            GeneralMethods.displayColoredParticle("#6e6e6e", loc);
-
-            if (i % 3 == 0) {
-                for (final Entity entity : GeneralMethods.getEntitiesAroundPoint(loc, this.radius)) {
-                    if (GeneralMethods.isRegionProtectedFromBuild(this, entity.getLocation())) {
-                        this.remove();
-                        return;
-                    }
-                    if (!entity.equals(this.player) && !(entity instanceof Player && Commands.invincible.contains(entity.getName()))) {
-                        if (this.knockback != 0) {
-                            final Vector force = fstream.getLocation().getDirection();
-                            GeneralMethods.setVelocity(this, entity, force.clone().multiply(this.knockback));
-                            new HorizontalVelocityTracker(entity, this.player, 200L, this);
-                            entity.setFallDistance(0);
-                        }
-                        if (!this.affectedEntities.contains(entity)) {
-                            this.affectedEntities.add(entity);
-                            if (this.damage != 0 && entity instanceof LivingEntity) {
-                                DamageHandler.damageEntity(entity, this.damage, this);
-                            }
-                        }
-                    }
-                }
-            }
+        if (slashTick >= SLASH_TICKS) {
+            remove();
         }
     }
 
-    private void manageRecall() {
-        this.recallCounter++;
-        final Location target = GeneralMethods.getMainHandLocation(this.player);
-
-        for (int i = 0; i < this.recallPoints.size(); i++) {
-            final Location point = this.recallPoints.get(i);
-            if (point.distanceSquared(target) <= (RECALL_SPEED + 0.5) * (RECALL_SPEED + 0.5)) {
-                this.recallPoints.remove(i);
-                i--;
-                continue;
-            }
-            point.add(GeneralMethods.getDirection(point, target).normalize().multiply(RECALL_SPEED));
-            final Vector trailDir = GeneralMethods.getDirection(point, target);
-            final double trailDist = point.distance(target);
-            final int steps = (int) (trailDist / 0.4);
-            for (int j = 0; j <= steps; j++) {
-                GeneralMethods.displayColoredParticle("#444444", point.clone().add(trailDir.clone().multiply(j * 0.4)));
-            }
-            // 3x3 grid of tip particles on the plane perpendicular to travel direction
-            final Vector perp1 = (Math.abs(trailDir.getY()) < 0.9 ? new Vector(0, 1, 0) : new Vector(1, 0, 0))
-                    .crossProduct(trailDir).normalize().multiply(0.3);
-            final Vector perp2 = trailDir.clone().crossProduct(perp1).normalize().multiply(0.3);
-            for (int dx = -1; dx <= 1; dx++) {
-                for (int dy = -1; dy <= 1; dy++) {
-                    GeneralMethods.displayColoredParticle("#444444",
-                            point.clone().add(perp1.clone().multiply(dx)).add(perp2.clone().multiply(dy)));
-                }
-            }
-        }
-
-        if (this.recallPoints.isEmpty()) {
-            this.remove();
-            return;
-        }
-
-        if (this.recallCounter % 3 == 0) {
-            final Location soundLoc = this.player.getLocation();
-            this.player.getWorld().playSound(soundLoc, Sound.ENTITY_BREEZE_IDLE_AIR, 0.55F, 0.7F);
-            this.player.getWorld().playSound(soundLoc, Sound.ENTITY_BREEZE_IDLE_AIR, 0.4F, 0.77F);
-            this.player.getWorld().playSound(soundLoc, Sound.ENTITY_BREEZE_IDLE_AIR, 0.25F, 0.85F);
+    /**
+     * Draws a full-length straight line of cable particles.
+     */
+    private void drawSlashLine(final Location hand) {
+        final int steps = Math.max(2, (int) (range / 0.25));
+        for (int i = 0; i <= steps; i++) {
+            final double s   = (double) i / steps;
+            final Location loc = hand.clone().add(direction.clone().multiply(s * range));
+            loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, CABLE_DUST);
         }
     }
 
-    @Override
-    public void remove() {
-        super.remove();
-        for (final ComboStream task : this.tasks) {
-            task.cancel();
-        }
-    }
+    private void checkHits(final Location hand) {
+        final Location end = hand.clone().add(direction.clone().multiply(range));
+        final double r = HIT_RADIUS;
+        final BoundingBox lineBounds = new BoundingBox(
+                Math.min(hand.getX(), end.getX()) - r,
+                Math.min(hand.getY(), end.getY()) - r,
+                Math.min(hand.getZ(), end.getZ()) - r,
+                Math.max(hand.getX(), end.getX()) + r,
+                Math.max(hand.getY(), end.getY()) + r,
+                Math.max(hand.getZ(), end.getZ()) + r);
 
-    @Override
-    public void handleCollision(final Collision collision) {
-        if (collision.isRemovingFirst()) {
-            final ArrayList<ComboStream> newTasks = new ArrayList<>();
-            final double collisionDistanceSquared = Math.pow(
-                    this.getCollisionRadius() + collision.getAbilitySecond().getCollisionRadius(), 2);
-            for (final ComboStream task : this.tasks) {
-                if (task.getLocation().distanceSquared(collision.getLocationSecond()) > collisionDistanceSquared) {
-                    newTasks.add(task);
-                } else {
-                    task.cancel();
-                }
+        final Vector origin = hand.toVector();
+
+        for (final Entity entity : hand.getWorld().getNearbyEntities(lineBounds)) {
+            if (entity.equals(player)) continue;
+            if (!(entity instanceof LivingEntity)) continue;
+            if (affectedEntities.contains(entity)) continue;
+
+            if (entity.getBoundingBox().expand(r).rayTrace(origin, direction, range) == null) continue;
+
+            affectedEntities.add(entity);
+
+            if (damage != 0) {
+                DamageHandler.damageEntity(entity, damage, this);
             }
-            this.setTasks(newTasks);
-        }
-    }
+            if (knockback != 0) {
+                GeneralMethods.setVelocity(this, entity, direction.clone().multiply(knockback));
+                entity.setFallDistance(0);
+            }
 
-    @Override
-    public List<Location> getLocations() {
-        final ArrayList<Location> locations = new ArrayList<>();
-        for (final ComboStream task : this.tasks) {
-            locations.add(task.getLocation());
+            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 1.0f, 1.9f);
+            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_METAL_HIT,          0.6f, 2.0f);
         }
-        return locations;
     }
 
     @Override
@@ -299,7 +200,7 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
 
     @Override
     public Location getLocation() {
-        return this.origin;
+        return player.getLocation();
     }
 
     @Override
@@ -331,26 +232,20 @@ public class CableSlash extends MetalAbility implements AddonAbility, ComboAbili
     @Override
     public ArrayList<AbilityInformation> getCombination() {
         final ArrayList<AbilityInformation> combo = new ArrayList<>();
-        combo.add(new AbilityInformation("EarthSmash", ClickType.SHIFT_DOWN));
-        combo.add(new AbilityInformation("MetalCable", ClickType.SHIFT_UP));
-        combo.add(new AbilityInformation("MetalCable", ClickType.SHIFT_DOWN));
-        combo.add(new AbilityInformation("MetalCable", ClickType.LEFT_CLICK));
+        combo.add(new AbilityInformation("EarthSmash",  ClickType.SHIFT_DOWN));
+        combo.add(new AbilityInformation("MetalCable",  ClickType.SHIFT_UP));
+        combo.add(new AbilityInformation("MetalCable",  ClickType.SHIFT_DOWN));
+        combo.add(new AbilityInformation("MetalCable",  ClickType.LEFT_CLICK));
         return combo;
     }
 
     @Override
+    public void handleCollision(final Collision collision) {}
+
+    @Override
     public String getDescription() {
-        return "Send out your metal cable and slash it at your foes to stun them. "
-                + "The radius and direction of CableSlash are controlled by moving your mouse in a sweeping motion. " +
-                "For example, if you want to use CableSlash upward, then move your mouse upward right after you left click CableSlash.\n"
+        return "Send out your metal cable and slash it at your foes. "
+                + "Move your mouse in a sweeping motion after activation to direct the cable.\n"
                 + "Usage: EarthSmash (Hold Sneak) > MetalCable (Release Sneak) > MetalCable (Hold Sneak) > MetalCable (Left Click)";
-    }
-
-    public ArrayList<ComboStream> getTasks() {
-        return this.tasks;
-    }
-
-    public void setTasks(final ArrayList<ComboStream> tasks) {
-        this.tasks = tasks;
     }
 }

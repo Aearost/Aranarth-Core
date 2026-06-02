@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
@@ -89,6 +90,7 @@ public class AranarthCoreBendingListener implements Listener {
 		AstralProjection.endAllProjections();
 		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
@@ -284,6 +286,10 @@ public class AranarthCoreBendingListener implements Listener {
 							new MagmaGlaives(player);
 						}
 					}
+				} else if (abilityName.equalsIgnoreCase("cablewhip")) {
+					if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
+						new CableWhip(player);
+					}
 				} else if (abilityName.equalsIgnoreCase("metalshots")) {
 					MetalShots.startRecall(player);
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
@@ -311,6 +317,13 @@ public class AranarthCoreBendingListener implements Listener {
 				case 1 -> projection.activateScream();
 				case 2 -> projection.activatePossess();
 			}
+			return;
+		}
+
+		// CableWhip: left-click while ready cracks one whip in the current look direction
+		CableWhip cableWhip = CableWhip.getActiveInstance(player.getUniqueId());
+		if (cableWhip != null) {
+			cableWhip.onLeftClick();
 			return;
 		}
 
@@ -409,7 +422,7 @@ public class AranarthCoreBendingListener implements Listener {
 	 * Cancels block breaking while an ability is active.
 	 */
 	@EventHandler(ignoreCancelled = true)
-	public void onBlockBreakVineWhip(BlockBreakEvent e) {
+	public void onBlockBreak(BlockBreakEvent e) {
 		Player player = e.getPlayer();
 		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
@@ -465,6 +478,9 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 		}
 		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
+		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
 	}
@@ -528,6 +544,16 @@ public class AranarthCoreBendingListener implements Listener {
 				magmaGlaives.cancelInstantly();
 			} else {
 				magmaGlaives.endWithCooldown();
+			}
+		}
+
+		// Slot change during charge or with no whips fired - no cooldown, otherwise apply it.
+		CableWhip cableWhip = CableWhip.getActiveInstance(e.getPlayer().getUniqueId());
+		if (cableWhip != null) {
+			if (cableWhip.getWhipsDone() > 0) {
+				cableWhip.endWithCooldown();
+			} else {
+				cableWhip.cancelInstantly();
 			}
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
@@ -707,6 +733,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}

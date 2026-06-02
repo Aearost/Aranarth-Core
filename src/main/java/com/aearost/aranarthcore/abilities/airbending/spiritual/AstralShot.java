@@ -70,10 +70,10 @@ public class AstralShot extends SpiritualAbility implements AddonAbility, ComboA
         // AirBlast fires before the combo is recognised; remove it and wipe its cooldown so the player isn't penalised.
         AranarthBendingUtils.suppressComboTrigger(this.bPlayer, player, "AirBlast");
 
-        // Remove AstralProjections that were created
+        // Remove AstralProjections
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(player))) {
-                if (ability.getName().equals("AstralProjection")) {
+            for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(AstralProjection.class))) {
+                if (ability.getPlayer().equals(player)) {
                     ability.remove();
                     this.bPlayer.removeCooldown("AstralProjection");
                 }

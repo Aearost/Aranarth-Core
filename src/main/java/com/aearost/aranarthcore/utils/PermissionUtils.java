@@ -279,6 +279,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.combustionstrike", true);
 		perms.setPermission("bending.ability.jetfumes", true);
 		perms.setPermission("bending.ability.metalshots", true);
+		perms.setPermission("bending.ability.cablewhip", true);
 
 		// Enable commands available to all players
 		perms.setPermission("aranarth.afk", true);
