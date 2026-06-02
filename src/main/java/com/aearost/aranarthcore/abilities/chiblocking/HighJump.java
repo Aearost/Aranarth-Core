@@ -18,7 +18,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     public enum JumpType { JUMP, DOUBLEJUMP, EVADE, LUNGE }
 
-    // 0.6 ≈ 2 blocks, 0.81 ≈ 4 blocks, 1.0 ≈ 5 blocks
+    // 0.6 ~ 2 blocks, 0.81 ~ 4 blocks, 1.0 ~5 blocks
     private static final double JUMP_HEIGHT        = 0.81;
     private static final double DOUBLE_JUMP_HEIGHT = 1.0;
     private static final double EVADE_HEIGHT       = 0.81;
@@ -163,7 +163,7 @@ public class HighJump extends ChiAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "A multi-use ability that lets a Chi-blocker move in four different ways: a high jump, a double jump, an evasive backflip, and a forward lunge.\n"
+        return "A multi-use ability that lets a Chiblocker move in four different ways: a high jump, a double jump, an evasive backflip, and a forward lunge.\n"
                 + ChatUtils.translateToColor("&fUsage: Left-click (jump) | Sprint + Left-click (lunge) | Sneak mid-air (double jump) | Sneak on ground (evade)");
     }
 

@@ -726,7 +726,9 @@ public class MountListener implements Listener {
             vz = moveVec.getZ();
             vertY = moveVec.getY(); // 0 when idle as the ghast hovers naturally
         } else {
-            vertY = mount.getVelocity().getY();
+            // Use 0 when grounded to avoid fighting Minecraft's gravity simulation (jitter).
+            // The step-up block below overrides this with STEP_UP_VELOCITY when needed.
+            vertY = mount.isOnGround() ? 0.0 : mount.getVelocity().getY();
 
             // Auto step-up over 1-block solid obstacles (not fences/walls)
             if (mount.isOnGround() && len > 0.001) {
