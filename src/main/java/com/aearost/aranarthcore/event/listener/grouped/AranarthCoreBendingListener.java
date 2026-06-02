@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
+import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
@@ -33,6 +34,7 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AirAbility;
+import com.projectkorra.projectkorra.ability.ChiAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.ability.FireAbility;
@@ -49,6 +51,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -296,6 +299,18 @@ public class AranarthCoreBendingListener implements Listener {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
 				}
 			}
+			// Chiblocking
+			else if (ability instanceof ChiAbility) {
+				if (abilityName.equalsIgnoreCase("highjump") && !HighJump.hasActiveInstance(player.getUniqueId())) {
+					boolean isOnGround = player.getLocation().getBlock()
+							.getRelative(BlockFace.DOWN).getType().isSolid();
+					if (isOnGround) {
+						new HighJump(player, HighJump.JumpType.EVADE);
+					} else {
+						new HighJump(player, HighJump.JumpType.DOUBLEJUMP);
+					}
+				}
+			}
 		}
 	}
 
@@ -387,6 +402,18 @@ public class AranarthCoreBendingListener implements Listener {
 		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
 		if (magmaGlaives != null) {
 			magmaGlaives.onLeftClick();
+			return;
+		}
+
+		// HighJump: left-click to jump straight up (or lunge forward while sprinting/in water)
+		BendingPlayer bpChi = BendingPlayer.getBendingPlayer(player);
+		if (bpChi != null && bpChi.getBoundAbilityName().equalsIgnoreCase("highjump")
+				&& !HighJump.hasActiveInstance(player.getUniqueId())) {
+			if (player.isSprinting() || player.isInWater()) {
+				new HighJump(player, HighJump.JumpType.LUNGE);
+			} else {
+				new HighJump(player, HighJump.JumpType.JUMP);
+			}
 			return;
 		}
 

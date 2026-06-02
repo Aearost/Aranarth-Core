@@ -26,6 +26,7 @@ Major Features
 [+] Implemented the IceDiscs combo for waterbenders
 [+] Implemented the JetFumes combo for Combustion benders
 [+] Implemented the CableWhip ability for metalbenders
+[+] Implemented the HighJump ability directly into AranarthCore
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week
