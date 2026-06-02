@@ -184,4 +184,5 @@ Backend Code Changes
 - Made Maven properly integrated with AranarthCore to build the jar
 - Fixed pom not deploying the correct jar to the plugins directory causing ClassNotFoundException
 - Added cleaning to the package lifecycle default, hopefully mitigating ClassNotFoundExceptions
+- Restructured reference to the snakeyaml part of the pom to hopefully address the ClassNotFoundExceptions
 - Fixed issues with outdated PK method reference causing several abilities to break/bug out
