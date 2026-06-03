@@ -57,6 +57,7 @@ Major Features
 [+] Added GUI for /mctop
 [+] Added GUI for /votetop
 [~] Updated the player head loading logic for all GUIs to no longer contain the "Dynamic" keyword
+[+] Added scaling based off in-game ranks instead of Unarmed level
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

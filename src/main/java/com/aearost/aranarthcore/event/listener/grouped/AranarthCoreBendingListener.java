@@ -29,7 +29,9 @@ import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
@@ -878,6 +880,27 @@ public class AranarthCoreBendingListener implements Listener {
 		// the pickup completes so the player never receives the internal instance-ID metadata.
 		e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
 		MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
+	}
+
+	private static final double[] RANK_DAMAGE_MULTIPLIERS = { 1.0, 1.05, 1.15, 1.3, 1.5, 1.75, 2.0, 2.25, 2.5 };
+
+	/**
+	 * Scales bending damage based on the caster's rank.
+	 * Peasant (rank 0) deals 1x damage, scaling up to 2.5x at Emperor (rank 8).
+	 */
+	@EventHandler
+	public void onRankBendingDamage(AbilityDamageEntityEvent e) {
+		Player p = e.getAbility().getPlayer();
+		if (p == null) return;
+
+		AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(p.getUniqueId());
+		if (ap == null) return;
+
+		int rank = ap.getRank();
+		if (rank <= 0) return;
+
+		double multiplier = RANK_DAMAGE_MULTIPLIERS[Math.min(rank, RANK_DAMAGE_MULTIPLIERS.length - 1)];
+		e.setDamage(e.getDamage() * multiplier);
 	}
 
 	/**
