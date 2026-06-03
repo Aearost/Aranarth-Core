@@ -43,13 +43,27 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             Material.QUARTZ
     );
 
+    private static final int MAX_BURST_SHOTS = 8;
+    private static final long BURST_WINDOW_TICKS = 50L; // 2.5 seconds
+    private static final long COOLDOWN_MS = 5000L;
+
+    private static final Set<UUID> pendingLeftClicks = new HashSet<>();
+
     private static final Map<UUID, List<Item>> trackedStrips = new HashMap<>();
 
     private static final Map<UUID, BukkitTask> recallTasks = new HashMap<>();
 
+    private static final Map<UUID, BurstData> activeBursts = new HashMap<>();
+
     private static NamespacedKey stripOwnerKey;
 
     private static NamespacedKey instanceKey;
+
+    private static class BurstData {
+        int shotsFired = 0;
+        BukkitTask endTask;
+        MetalStrips lastInstance;
+    }
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -61,13 +75,35 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private Item firedItem;
     private Location startLocation;
     private Vector direction;
+    private double distanceTraveled;
+
+    /**
+     * Must be called immediately before constructing a MetalStrips instance from the left-click
+     * handler so that PK's own right-click activation is silently ignored.
+     */
+    public static void markLeftClick(final UUID uuid) {
+        pendingLeftClicks.add(uuid);
+    }
 
     public MetalStrips(final Player player) {
         super(player);
 
+        final UUID uuid = player.getUniqueId();
+
+        // Only allow activation triggered explicitly by left-click, not PK's right-click handling
+        if (!pendingLeftClicks.remove(uuid)) {
+            return;
+        }
+
         if (!bPlayer.canBend(this)) {
             return;
         }
+        BurstData burst = activeBursts.get(uuid);
+
+        if (burst != null && burst.shotsFired >= MAX_BURST_SHOTS) {
+            return;
+        }
+
         if (!hasIronIngot(player)) {
             return;
         }
@@ -75,13 +111,42 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 1000L;
-        this.damage = 3.0;  // 1.5 hearts
+        // Start a new burst on the first shot
+        if (burst == null) {
+            burst = new BurstData();
+            activeBursts.put(uuid, burst);
+
+            final BurstData finalBurst = burst;
+            burst.endTask = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    endBurst(player, uuid);
+                }
+            }.runTaskLater(AranarthCore.getInstance(), BURST_WINDOW_TICKS);
+        }
+
+        burst.shotsFired++;
+        burst.lastInstance = this;
+
+        this.cooldown = COOLDOWN_MS;
+        this.damage = 6.0;
         this.range = 20.0;
 
         fireShot();
-        this.bPlayer.addCooldown(this);
         this.start();
+
+        // If all shots used, end burst immediately instead of waiting for the timer
+        if (burst.shotsFired >= MAX_BURST_SHOTS) {
+            burst.endTask.cancel();
+            endBurst(player, uuid);
+        }
+    }
+
+    private static void endBurst(final Player player, final UUID uuid) {
+        final BurstData burst = activeBursts.remove(uuid);
+        if (burst != null && burst.lastInstance != null) {
+            burst.lastInstance.bPlayer.addCooldown(burst.lastInstance);
+        }
     }
 
     private void fireShot() {
@@ -99,8 +164,9 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         }
 
         // Spawn the ingot just ahead of the player's eye so it does not immediately collide
+        this.distanceTraveled = 0.5;
         this.firedItem = player.getWorld().dropItem(
-                eyeLoc.clone().add(this.direction.clone().multiply(0.5)),
+                eyeLoc.clone().add(this.direction.clone().multiply(this.distanceTraveled)),
                 ingotStack
         );
         this.firedItem.setPickupDelay(Integer.MAX_VALUE); // Not able to be picked up
@@ -139,27 +205,17 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             return;
         }
 
-        final Location current = this.firedItem.getLocation();
-
-        // Passable blocks such as short grass, flowers, and vines are intentionally skipped
-        if (current.getBlock().getType().isSolid() && !current.getBlock().isPassable()) {
-            this.firedItem.setVelocity(new Vector(0, 0, 0));
-            landItem();
-            this.remove();
-            return;
-        }
-
-        // Examine every position this ingot will pass through next tick so it never enters a solid block
-        Location checkPos = current.clone();
+        // Advance along the exact ray in sub-steps for precise collision detection
         double remaining = SPEED;
-
         while (remaining > 0) {
             final double step = Math.min(STEP, remaining);
-            checkPos.add(this.direction.clone().multiply(step));
+            this.distanceTraveled += step;
 
-            // Stunt velocity to a short arc then let gravity take over as range was exceeded
-            if (checkPos.distanceSquared(this.startLocation) > this.range * this.range) {
-                this.firedItem.setVelocity(this.direction.clone().multiply(0.4));
+            final Location checkPos = this.startLocation.clone()
+                    .add(this.direction.clone().multiply(this.distanceTraveled));
+
+            // Range exceeded — let gravity finish it off
+            if (this.distanceTraveled > this.range) {
                 landItem();
                 this.remove();
                 return;
@@ -175,17 +231,20 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
 
             // Living entity in the path
             for (final Entity entity : checkPos.getWorld().getNearbyEntities(checkPos, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
-                if (!(entity instanceof LivingEntity)) continue;
-                if (entity.equals(player)) continue;
+                if (!(entity instanceof LivingEntity)) {
+                    continue;
+                }
+                if (entity.equals(player)) {
+                    continue;
+                }
 
                 DamageHandler.damageEntity(entity, this.damage, this);
 
                 entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_METAL_HIT, 1.1f, 0.7f);
                 entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 0.6f, 1.4f);
 
-                removeFromTracking();
-                this.firedItem.remove();
-                this.firedItem = null;
+                this.firedItem.setVelocity(new Vector(0, 0, 0));
+                landItem();
                 this.remove();
                 return;
             }
@@ -193,14 +252,21 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             remaining -= step;
         }
 
-        // Path is clear
-        current.getWorld().spawnParticle(
+        // Steer the item entity onto the exact ray position each tick.
+        // Using (exactPos - actualPos) as velocity means any physics drift is
+        // corrected in the very next tick without needing a laggy teleport call.
+        final Location exactPos = this.startLocation.clone()
+                .add(this.direction.clone().multiply(this.distanceTraveled));
+        final Vector correction = exactPos.toVector()
+                .subtract(this.firedItem.getLocation().toVector());
+        this.firedItem.setVelocity(correction);
+
+        exactPos.getWorld().spawnParticle(
                 Particle.DUST,
-                current,
+                exactPos,
                 1, 0.05, 0.05, 0.05, 0,
                 INGOT_TRAIL
         );
-        this.firedItem.setVelocity(this.direction.clone().multiply(SPEED));
     }
 
     private void landItem() {
@@ -220,7 +286,9 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     }
 
     private void removeFromTracking() {
-        if (this.firedItem == null) return;
+        if (this.firedItem == null) {
+            return;
+        }
         final List<Item> strips = trackedStrips.get(player.getUniqueId());
         if (strips != null) {
             strips.remove(this.firedItem);
@@ -287,14 +355,22 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 // Pull nearby ambient metal items
                 for (final Entity entity : player.getWorld().getNearbyEntities(
                         playerAnchor, RECALL_RANGE, RECALL_RANGE, RECALL_RANGE)) {
-                    if (!(entity instanceof Item item)) continue;
-                    if (!METAL_MATERIALS.contains(item.getItemStack().getType())) continue;
+                    if (!(entity instanceof Item item)) {
+                        continue;
+                    }
+                    if (!METAL_MATERIALS.contains(item.getItemStack().getType())) {
+                        continue;
+                    }
                     // Skip items belonging to any player's MetalStrips
                     if (item.getPersistentDataContainer().has(
-                            getStripOwnerKey(), PersistentDataType.STRING)) continue;
+                            getStripOwnerKey(), PersistentDataType.STRING)) {
+                        continue;
+                    }
 
                     final double distSq = item.getLocation().distanceSquared(playerAnchor);
-                    if (distSq > RECALL_RANGE * RECALL_RANGE) continue;
+                    if (distSq > RECALL_RANGE * RECALL_RANGE) {
+                        continue;
+                    }
 
                     // Within pickup radius, add the item's actual stack to inventory
                     if (distSq <= PICKUP_RADIUS * PICKUP_RADIUS) {
@@ -419,7 +495,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     }
 
     @Override
-    public void load() {}
+    public void load() {
+    }
 
     @Override
     public String getAuthor() {

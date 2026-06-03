@@ -437,6 +437,7 @@ public class AranarthCoreBendingListener implements Listener {
 		BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
 		if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
 				&& bpMetal.isElementToggled(Element.EARTH)) {
+			MetalStrips.markLeftClick(player.getUniqueId());
 			new MetalStrips(player);
 			return;
 		}

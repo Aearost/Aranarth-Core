@@ -11,6 +11,7 @@ import com.projectkorra.projectkorra.util.TempBlock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.*;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Transformation;
 import org.bukkit.util.Vector;
 import org.joml.Quaternionf;
@@ -29,7 +31,7 @@ import java.util.*;
 public class MetalShots extends MetalAbility implements AddonAbility {
 
     private static final int MAX_SOURCES = 3;
-    private static final int SHOTS_PER_SOURCE = 4;
+    private static final int SHOTS_PER_SOURCE = 8;
     private static final double SOURCE_RANGE = 6.0;
     private static final double ORBIT_RADIUS = 1.8;
     private static final double ORBIT_HEIGHT = 0.75;
@@ -90,11 +92,13 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         final Item entity;
         final Location startLocation;
         final Vector direction;
+        double distanceTraveled;
 
         FlyingShot(final Item entity, final Location start, final Vector direction) {
             this.entity = entity;
             this.startLocation = start.clone();
             this.direction = direction.clone();
+            this.distanceTraveled = 0.0;
         }
     }
 
@@ -106,8 +110,8 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         }
 
         this.cooldown = 10_000L;
-        this.damage = 2.0;    // 1 full heart
-        this.range = 16.0;
+        this.damage = 3.0;
+        this.range = 24.0;
         this.startTime = System.currentTimeMillis();
         this.lastShotTime = 0L;
 
@@ -210,7 +214,25 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         final Location fireFrom = source.entity.isValid()
                 ? source.entity.getLocation().clone().add(0.25, 0.25, 0.25)
                 : player.getEyeLocation();
-        final Vector direction = player.getEyeLocation().getDirection().normalize();
+
+        // Ray-trace from the player's eye to find the exact aim point in the world.
+        // This corrects for the source block being offset from the player's eye, which would
+        // cause shots fired with a raw eye-direction vector to miss close targets entirely.
+        final Location eyeLoc = player.getEyeLocation();
+        final RayTraceResult rayTrace = player.getWorld().rayTrace(
+                eyeLoc, eyeLoc.getDirection(), this.range,
+                FluidCollisionMode.NEVER, true, 0.3,
+                e -> e instanceof LivingEntity && !e.equals(player));
+        final Location aimPoint;
+        if (rayTrace != null && rayTrace.getHitEntity() != null) {
+            final LivingEntity hit = (LivingEntity) rayTrace.getHitEntity();
+            aimPoint = hit.getLocation().add(0, hit.getEyeHeight() * 0.5, 0);
+        } else if (rayTrace != null) {
+            aimPoint = rayTrace.getHitPosition().toLocation(player.getWorld());
+        } else {
+            aimPoint = eyeLoc.clone().add(eyeLoc.getDirection().clone().multiply(this.range));
+        }
+        final Vector direction = aimPoint.toVector().subtract(fireFrom.toVector()).normalize();
 
         final ItemStack shotStack = new ItemStack(source.projectileMaterial, 1);
         final ItemMeta meta = shotStack.getItemMeta();
@@ -299,18 +321,26 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                 continue;
             }
 
-            final Location current = shot.entity.getLocation();
-            final Location checkPos = current.clone();
             double remaining = PROJECTILE_SPEED;
             boolean shouldRemove = false;
+            boolean entityHit = false;
+            Location hitLocation = null;
 
-            // Sub-step scan so fast-moving projectiles never skip past a thin target
+            // Sub-step scan anchored to the exact ray so drift never skews hit detection.
+            // Particles are spawned at every sub-step so the trail is always visible,
+            // including ticks where the shot is removed on the same tick it was detected.
             while (remaining > 0 && !shouldRemove) {
                 final double step = Math.min(STEP, remaining);
-                checkPos.add(shot.direction.clone().multiply(step));
+                shot.distanceTraveled += step;
                 remaining -= step;
 
-                if (checkPos.distanceSquared(shot.startLocation) > range * range) {
+                final Location checkPos = shot.startLocation.clone()
+                        .add(shot.direction.clone().multiply(shot.distanceTraveled));
+
+                checkPos.getWorld().spawnParticle(
+                        Particle.DUST, checkPos, 1, 0, 0, 0, 0, SHOT_TRAIL_DUST);
+
+                if (shot.distanceTraveled > range) {
                     shouldRemove = true;
                     break;
                 }
@@ -333,18 +363,25 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                     DamageHandler.damageEntity(entity, damage, this);
                     entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_METAL_HIT, 1.0f, 0.8f);
                     entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_IRON_GOLEM_ATTACK, 0.6f, 1.5f);
+                    entityHit = true;
+                    hitLocation = checkPos;
                     shouldRemove = true;
                     break;
                 }
             }
 
             if (shouldRemove) {
+                // Spawn an impact burst at the hit point so close-range hits have a clear visual
+                if (entityHit && hitLocation != null) {
+                    hitLocation.getWorld().spawnParticle(
+                            Particle.DUST, hitLocation, 8, 0.15, 0.15, 0.15, 0, SHOT_TRAIL_DUST);
+                }
                 shot.entity.remove();
                 shots.remove(i);
             } else {
+                // Constant velocity every tick: overrides drag and keeps movement smooth.
+                // distanceTraveled is used solely for the range check and collision ray.
                 shot.entity.setVelocity(shot.direction.clone().multiply(PROJECTILE_SPEED));
-                current.getWorld().spawnParticle(
-                        Particle.DUST, current, 1, 0.04, 0.04, 0.04, 0, SHOT_TRAIL_DUST);
             }
         }
     }
@@ -393,6 +430,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
     @Override
     public void remove() {
         ACTIVE_INSTANCES.remove(player.getUniqueId());
+        player.removePotionEffect(PotionEffectType.SLOWNESS);
 
         for (final SourceBlock source : sources) {
             if (source.entity.isValid()) {
