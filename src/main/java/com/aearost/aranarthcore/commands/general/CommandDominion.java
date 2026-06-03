@@ -1057,8 +1057,8 @@ public class CommandDominion implements CommandExecutor {
 								AranarthPlayer oldLeader = AranarthUtils.getPlayer(player.getUniqueId());
 								AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
 								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + newLeader.getNickname() + " &7is the new leader of &e" + dominion.getName()));
-								DiscordUtils.dominionMessage(dominion, newLeader.getNickname() + " is the new leader of " + dominion.getName(), Color.CYAN);
 								DominionUtils.updateDominionLeader(dominion, uuid, false);
+								DiscordUtils.dominionMessage(dominion, newLeader.getNickname() + " is the new leader of " + dominion.getName(), Color.CYAN);
 							} else {
 								player.sendMessage(ChatUtils.chatMessage("&cYou cannot set yourself as the new leader!"));
 							}
