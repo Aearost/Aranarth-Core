@@ -330,6 +330,11 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
             return false;
         }
 
+        if (g.position.getBlock().getType() == Material.WATER) {
+            g.position.getWorld().playSound(g.position, Sound.BLOCK_LAVA_EXTINGUISH, 1.0f, 0.4f);
+            return false;
+        }
+
         if (checkGlaiveCollision(g)) {
             return false;
         }
