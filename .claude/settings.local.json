@@ -175,7 +175,8 @@
       "Bash(find /c/Users/liamh/.m2/repository/org/apache/maven/plugins/maven-shade-plugin/3.6.2 -name *.jar)",
       "Bash(find /c/Users/liamh/.m2/repository/org/ow2/asm -name *.jar)",
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore/src/main/java/com/aearost/aranarthcore/abilities -name *.java -type f)",
-      "Bash(find C:UsersliamhIdeaProjectsAranarthCore/src/main/java -name *Plugin.java -o -name *Main.java)"
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore/src/main/java -name *Plugin.java -o -name *Main.java)",
+      "Bash(find ~/.m2/repository/com/gmail/nossr50 -name *.jar)"
     ]
   }
 }

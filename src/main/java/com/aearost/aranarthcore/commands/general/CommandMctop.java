@@ -34,22 +34,19 @@ public class CommandMctop implements CommandExecutor {
             return true;
         }
 
-        if (args.length == 0) {
-            player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mctop <skill>"));
-            return true;
-        }
+        PrimarySkillType skill = null;
+        if (args.length > 0 && !args[0].equalsIgnoreCase("overall")) {
+            try {
+                skill = PrimarySkillType.valueOf(args[0].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                player.sendMessage(ChatUtils.chatMessage("&cUnknown skill &e" + args[0]));
+                return true;
+            }
 
-        PrimarySkillType skill;
-        try {
-            skill = PrimarySkillType.valueOf(args[0].toUpperCase());
-        } catch (IllegalArgumentException e) {
-            player.sendMessage(ChatUtils.chatMessage("&cUnknown skill &e" + args[0]));
-            return true;
-        }
-
-        if (SkillTools.isChildSkill(skill)) {
-            player.sendMessage(ChatUtils.chatMessage("&c" + args[0] + " &cis a child skill and does not have a leaderboard"));
-            return true;
+            if (SkillTools.isChildSkill(skill)) {
+                player.sendMessage(ChatUtils.chatMessage("&c" + args[0] + " &cis a child skill and does not have a leaderboard"));
+                return true;
+            }
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -63,7 +60,7 @@ public class CommandMctop implements CommandExecutor {
     /**
      * Fetches the leaderboard of the input skill and the page number.
      */
-    public static void openGui(Player player, PrimarySkillType skill, int pageNum) {
+    public static void openGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill, int pageNum) {
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             List<PlayerStat> leaderboard = new ArrayList<>();
             try {

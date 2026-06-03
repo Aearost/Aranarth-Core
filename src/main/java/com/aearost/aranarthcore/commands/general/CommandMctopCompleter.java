@@ -12,11 +12,17 @@ import java.util.List;
 
 public class CommandMctopCompleter implements TabCompleter {
 
-    // All non-child primary skills, loaded from mcMMO's enum at class-load time.
-    private static final List<String> SKILLS = Arrays.stream(PrimarySkillType.values())
-            .filter(skill -> !SkillTools.isChildSkill(skill))
-            .map(PrimarySkillType::name)
-            .toList();
+    // All non-child primary skills plus "overall", loaded from mcMMO's enum at class-load time.
+    private static final List<String> SKILLS;
+    static {
+        List<String> skills = new java.util.ArrayList<>();
+        skills.add("overall");
+        Arrays.stream(PrimarySkillType.values())
+                .filter(skill -> !SkillTools.isChildSkill(skill))
+                .map(PrimarySkillType::name)
+                .forEach(skills::add);
+        SKILLS = java.util.Collections.unmodifiableList(skills);
+    }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {

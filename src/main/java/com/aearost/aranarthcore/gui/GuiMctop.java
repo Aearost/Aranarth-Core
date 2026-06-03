@@ -25,7 +25,7 @@ public class GuiMctop {
 	private final Player player;
 	private final Inventory initializedGui;
 
-	public GuiMctop(Player player, PrimarySkillType skill, int pageNum,
+	public GuiMctop(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill, int pageNum,
 					List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
 		this.player = player;
 		this.initializedGui = initializeGui(player, skill, leaderboard, profiles);
@@ -38,9 +38,9 @@ public class GuiMctop {
 		}
 	}
 
-	private Inventory initializeGui(Player player, PrimarySkillType skill,
+	private Inventory initializeGui(Player player, @org.jetbrains.annotations.Nullable PrimarySkillType skill,
 									List<PlayerStat> leaderboard, Map<String, PlayerProfile> profiles) {
-		String skillDisplayName = skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
+		String skillDisplayName = skill == null ? "Overall" : skill.name().charAt(0) + skill.name().substring(1).toLowerCase();
 		Inventory gui = Bukkit.getServer().createInventory(player, 54, "Top " + skillDisplayName);
 
 		ItemStack previous = new ItemStack(Material.RED_WOOL);

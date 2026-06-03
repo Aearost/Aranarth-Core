@@ -21,13 +21,17 @@ public class GuiMctopClick {
             return;
         }
 
-        // Resolve the skill from the GUI title
+        // Resolve the skill from the GUI title (null means overall power level)
         String skillPart = title.substring("Top ".length()).toUpperCase();
         PrimarySkillType skill;
-        try {
-            skill = PrimarySkillType.valueOf(skillPart);
-        } catch (IllegalArgumentException ex) {
-            return;
+        if (skillPart.equals("OVERALL")) {
+            skill = null;
+        } else {
+            try {
+                skill = PrimarySkillType.valueOf(skillPart);
+            } catch (IllegalArgumentException ex) {
+                return;
+            }
         }
 
         if (e.getClickedInventory() == null) {
