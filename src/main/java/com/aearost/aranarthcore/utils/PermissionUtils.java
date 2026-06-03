@@ -280,6 +280,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.jetfumes", true);
 		perms.setPermission("bending.ability.metalshots", true);
 		perms.setPermission("bending.ability.cablewhip", true);
+		perms.setPermission("bending.ability.metalstrips", true);
 
 		// Enable commands available to all players
 		perms.setPermission("aranarth.afk", true);
@@ -394,8 +395,6 @@ public class PermissionUtils {
 
 		// Armor stand
 		perms.setPermission("aranarth.armorstand.lock", false);
-
-		// Armor stand poses
 		perms.setPermission("aranarthcore.armorstand.nopose", false);
 		perms.setPermission("aranarthcore.armorstand.solemn", false);
 		perms.setPermission("aranarthcore.armorstand.athena", false);

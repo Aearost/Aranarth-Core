@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
@@ -94,6 +95,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
@@ -295,6 +297,13 @@ public class AranarthCoreBendingListener implements Listener {
 					}
 				} else if (abilityName.equalsIgnoreCase("metalstrips")) {
 					MetalStrips.startRecall(player);
+				} else if (abilityName.equalsIgnoreCase("metalshots")) {
+					MetalShots existing = MetalShots.getActiveInstance(player.getUniqueId());
+					if (existing != null) {
+						existing.onSneak();
+					} else {
+						new MetalShots(player);
+					}
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
 				}
@@ -405,6 +414,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// MetalShots: left-click fires a projectile from the first available floating source block
+		MetalShots metalShots = MetalShots.getActiveInstance(player.getUniqueId());
+		if (metalShots != null) {
+			metalShots.onLeftClick();
+			return;
+		}
+
 		// HighJump: left-click to jump straight up (or lunge forward while sprinting/in water)
 		BendingPlayer bpChi = BendingPlayer.getBendingPlayer(player);
 		if (bpChi != null && bpChi.getBoundAbilityName().equalsIgnoreCase("highjump")
@@ -510,6 +526,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -582,6 +601,10 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				cableWhip.cancelInstantly();
 			}
+		}
+		MetalShots metalShots = MetalShots.getActiveInstance(e.getPlayer().getUniqueId());
+		if (metalShots != null) {
+			metalShots.endWithCooldown();
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
@@ -768,6 +791,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
