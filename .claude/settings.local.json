@@ -178,7 +178,11 @@
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore/src/main/java -name *Plugin.java -o -name *Main.java)",
       "Bash(find ~/.m2/repository/com/gmail/nossr50 -name *.jar)",
       "Bash(find C:/Users/liamh/.m2/repository/com/projectkorra -name *.jar)",
-      "Bash(find C:/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/ -name *.java)"
+      "Bash(find C:/Users/liamh/.m2/repository/com/projectkorra/projectkorra/1.12.1-PRE-RELEASE-1/ -name *.java)",
+      "Bash(find C:/Users/liamh/.m2 -name mcmmo*.jar)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/libs -name *.jar)",
+      "Bash(find ~/.gradle -path */mcmmo* -name *.jar)",
+      "Bash(find ~/.m2 -name *.jar)"
     ]
   }
 }
