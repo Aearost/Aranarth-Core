@@ -12,7 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
-import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
@@ -293,8 +293,8 @@ public class AranarthCoreBendingListener implements Listener {
 					if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
 						new CableWhip(player);
 					}
-				} else if (abilityName.equalsIgnoreCase("metalshots")) {
-					MetalShots.startRecall(player);
+				} else if (abilityName.equalsIgnoreCase("metalstrips")) {
+					MetalStrips.startRecall(player);
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
 				}
@@ -417,11 +417,11 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
-		// MetalShots: instant left-click fire — one iron ingot per shot
+		// MetalStrips: instant left-click fire — one iron ingot per shot
 		BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
-		if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalshots")
+		if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
 				&& bpMetal.isElementToggled(Element.EARTH)) {
-			new MetalShots(player);
+			new MetalStrips(player);
 			return;
 		}
 
@@ -829,16 +829,16 @@ public class AranarthCoreBendingListener implements Listener {
 	}
 
 	/**
-	 * Enforces owner-only pickup for iron ingots fired by MetalShots. Any player other than the
+	 * Enforces owner-only pickup for iron ingots fired by MetalStrips. Any player other than the
 	 * caster who tagged the item is prevented from collecting it. When the owner steps on their
-	 * own ingot, it is removed from the MetalShots tracking map so it is no longer subject to recall.
+	 * own ingot, it is removed from the MetalStrips tracking map so it is no longer subject to recall.
 	 */
 	@EventHandler(ignoreCancelled = true)
-	public void onPickupMetalShot(final EntityPickupItemEvent e) {
+	public void onPickupMetalStrip(final EntityPickupItemEvent e) {
 		if (!(e.getEntity() instanceof Player player)) return;
 
 		final String ownerUuid = e.getItem().getPersistentDataContainer().get(
-				MetalShots.getShotOwnerKey(), PersistentDataType.STRING);
+				MetalStrips.getStripOwnerKey(), PersistentDataType.STRING);
 		if (ownerUuid == null) return;
 
 		if (!player.getUniqueId().toString().equals(ownerUuid)) {
@@ -849,7 +849,7 @@ public class AranarthCoreBendingListener implements Listener {
 		// Owner is collecting their ingot — swap the tagged stack for a clean iron ingot before
 		// the pickup completes so the player never receives the internal instance-ID metadata.
 		e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
-		MetalShots.removeTrackedItem(e.getItem(), player.getUniqueId());
+		MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
 	}
 
 	/**

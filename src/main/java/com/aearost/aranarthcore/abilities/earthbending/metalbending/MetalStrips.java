@@ -18,7 +18,7 @@ import org.bukkit.util.Vector;
 import java.util.*;
 import java.util.Set;
 
-public class MetalShots extends MetalAbility implements AddonAbility {
+public class MetalStrips extends MetalAbility implements AddonAbility {
 
     private static final double SPEED = 3.0;
     private static final double STEP = 0.3;
@@ -43,11 +43,11 @@ public class MetalShots extends MetalAbility implements AddonAbility {
             Material.QUARTZ
     );
 
-    private static final Map<UUID, List<Item>> trackedShots = new HashMap<>();
+    private static final Map<UUID, List<Item>> trackedStrips = new HashMap<>();
 
     private static final Map<UUID, BukkitTask> recallTasks = new HashMap<>();
 
-    private static NamespacedKey shotOwnerKey;
+    private static NamespacedKey stripOwnerKey;
 
     private static NamespacedKey instanceKey;
 
@@ -62,7 +62,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
     private Location startLocation;
     private Vector direction;
 
-    public MetalShots(final Player player) {
+    public MetalStrips(final Player player) {
         super(player);
 
         if (!bPlayer.canBend(this)) {
@@ -111,13 +111,13 @@ public class MetalShots extends MetalAbility implements AddonAbility {
 
         // Tag the item so the recall system can verify it belongs to this player
         this.firedItem.getPersistentDataContainer().set(
-                getShotOwnerKey(),
+                getStripOwnerKey(),
                 PersistentDataType.STRING,
                 player.getUniqueId().toString()
         );
 
         // Register for potential recall
-        trackedShots.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(this.firedItem);
+        trackedStrips.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>()).add(this.firedItem);
 
         final World world = eyeLoc.getWorld();
         world.playSound(eyeLoc, Sound.ENTITY_IRON_GOLEM_ATTACK, 0.85f, 1.9f);
@@ -221,9 +221,9 @@ public class MetalShots extends MetalAbility implements AddonAbility {
 
     private void removeFromTracking() {
         if (this.firedItem == null) return;
-        final List<Item> shots = trackedShots.get(player.getUniqueId());
-        if (shots != null) {
-            shots.remove(this.firedItem);
+        final List<Item> strips = trackedStrips.get(player.getUniqueId());
+        if (strips != null) {
+            strips.remove(this.firedItem);
         }
     }
 
@@ -243,9 +243,9 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                 final Location playerAnchor = player.getLocation().add(0, 1.0, 0);
 
                 // Returned as regular iron ingots (no metadata)
-                final List<Item> shots = trackedShots.get(player.getUniqueId());
-                if (shots != null && !shots.isEmpty()) {
-                    final Iterator<Item> iter = shots.iterator();
+                final List<Item> strips = trackedStrips.get(player.getUniqueId());
+                if (strips != null && !strips.isEmpty()) {
+                    final Iterator<Item> iter = strips.iterator();
                     while (iter.hasNext()) {
                         final Item item = iter.next();
 
@@ -289,9 +289,9 @@ public class MetalShots extends MetalAbility implements AddonAbility {
                         playerAnchor, RECALL_RANGE, RECALL_RANGE, RECALL_RANGE)) {
                     if (!(entity instanceof Item item)) continue;
                     if (!METAL_MATERIALS.contains(item.getItemStack().getType())) continue;
-                    // Skip items belonging to any player's MetalShots
+                    // Skip items belonging to any player's MetalStrips
                     if (item.getPersistentDataContainer().has(
-                            getShotOwnerKey(), PersistentDataType.STRING)) continue;
+                            getStripOwnerKey(), PersistentDataType.STRING)) continue;
 
                     final double distSq = item.getLocation().distanceSquared(playerAnchor);
                     if (distSq > RECALL_RANGE * RECALL_RANGE) continue;
@@ -348,24 +348,24 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         return false;
     }
 
-    public static NamespacedKey getShotOwnerKey() {
-        if (shotOwnerKey == null) {
-            shotOwnerKey = new NamespacedKey(AranarthCore.getInstance(), "metalshots_owner");
+    public static NamespacedKey getStripOwnerKey() {
+        if (stripOwnerKey == null) {
+            stripOwnerKey = new NamespacedKey(AranarthCore.getInstance(), "metalstrips_owner");
         }
-        return shotOwnerKey;
+        return stripOwnerKey;
     }
 
     private static NamespacedKey getInstanceKey() {
         if (instanceKey == null) {
-            instanceKey = new NamespacedKey(AranarthCore.getInstance(), "metalshots_instance");
+            instanceKey = new NamespacedKey(AranarthCore.getInstance(), "metalstrips_instance");
         }
         return instanceKey;
     }
 
     public static void removeTrackedItem(final Item item, final UUID playerUuid) {
-        final List<Item> shots = trackedShots.get(playerUuid);
-        if (shots != null) {
-            shots.remove(item);
+        final List<Item> strips = trackedStrips.get(playerUuid);
+        if (strips != null) {
+            strips.remove(item);
         }
     }
 
@@ -407,7 +407,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
 
     @Override
     public String getName() {
-        return "MetalShots";
+        return "MetalStrips";
     }
 
     @Override
