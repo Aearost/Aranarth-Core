@@ -177,6 +177,7 @@ Minor Features
 [~] Fixed issue where you were stuck in resource claim mode in chat until a number was entered
 [~] Added 50/50 chance in Godly crates to get shulker shells or diamond blocks
 [~] Fixed issue where compressible items were being put in inventory and not hotbar when not able to craft a full stackvej
+[+] Added recipe for bee nest using honeycomb blocks instead of normal honeycomb
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
