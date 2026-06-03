@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.utils;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.enums.Weather;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -292,6 +293,9 @@ public class DateUtils {
 				AranarthCore.launchMonthFireworks(month);
 				if (month == Month.IGNIVOR) {
 					AranarthCore.resetResourceWorlds();
+					for (Boost boost : Boost.values()) {
+						AranarthUtils.addServerBoost(boost, null, null);
+					}
 				}
 			}
 

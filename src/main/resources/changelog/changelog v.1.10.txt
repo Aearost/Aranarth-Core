@@ -50,6 +50,7 @@ Major Features
 [~] Added a 7-day conquer period and a 7-day rebel period, automatically succeeding or ending based on inactivity, and increasing lost money and food reserves per death
 [~] Added automatically resetting resource world at the start of every in-game year (once a month~)
 [+] Added fireworks during each start of a new month
+[+] Added all server boosts every in-game new year
 [+] Added /mount(s) functionality to summon and train element-based pets
 [+] Added /d buychunks to allow dominions to buy additional chunks
 [+] Added descriptions to all custom arrowheads and arrows stating what each one does
