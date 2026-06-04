@@ -75,7 +75,7 @@ public class CommandMount implements CommandExecutor {
     }
 
     private void setNickname(Player player, String name) {
-        if (name.length() > 32) {
+        if (ChatUtils.stripColorFormatting(name).length() > 32) {
             player.sendMessage(ChatUtils.chatMessage("&cNicknames cannot exceed 32 characters"));
             return;
         }
