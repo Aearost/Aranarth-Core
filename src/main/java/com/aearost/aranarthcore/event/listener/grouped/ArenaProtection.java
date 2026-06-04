@@ -311,6 +311,13 @@ public class ArenaProtection implements Listener {
 						player.getInventory().addItem(new ItemStack(Material.ARROW, 64));
 					}
 				}
+				// Iron Ingots
+				else if (loc.getBlockX() == 0 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
+					e.setCancelled(true);
+					for (int i = 0; i < 9; i++) {
+						player.getInventory().addItem(new ItemStack(Material.IRON_INGOT, 64));
+					}
+				}
 				// Water Bottles
 				else if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == 3) {
 					e.setCancelled(true);

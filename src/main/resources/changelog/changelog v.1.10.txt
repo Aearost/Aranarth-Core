@@ -182,6 +182,7 @@ Minor Features
 [~] Fixed issue where compressible items were being put in inventory and not hotbar when not able to craft a full stackvej
 [+] Added recipe for bee nest using honeycomb blocks instead of normal honeycomb
 [~] Fixed issue where incorrect player skin was shown in dominion new leader messages
+[+] Added iron ingots to the arena spawn for metalbending
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
