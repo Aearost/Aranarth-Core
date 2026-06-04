@@ -806,7 +806,8 @@ public class DominionUtils {
 			for (int x = 0; x < 16; x++) {
 				for (int z = 0; z < 16; z++) {
 					Biome biome = chunk.getBlock(x, y, z).getBiome();
-					if (!biomes.contains(biome)) {
+					if (!biomes.contains(biome) && biome != Biome.LUSH_CAVES
+							&& biome != Biome.DRIPSTONE_CAVES && biome != Biome.DEEP_DARK) {
 						biomes.add(biome);
 					}
 				}
