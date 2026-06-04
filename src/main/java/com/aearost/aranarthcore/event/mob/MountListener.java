@@ -616,10 +616,11 @@ public class MountListener implements Listener {
                 }
             }
             cleanupMount(id);
+            mount.remove();
             return;
         }
 
-        cleanupMount(id);
+       cleanupMount(id);
     }
 
     @EventHandler
