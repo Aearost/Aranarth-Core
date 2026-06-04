@@ -1578,6 +1578,10 @@ public class CommandDominion implements CommandExecutor {
 	 * @param player The player.
 	 */
 	private static void resources(Dominion dominion, Player player) {
+		if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+			player.sendMessage(ChatUtils.chatMessage("&cYou can only claim Dominion resources in a survival world!"));
+			return;
+		}
 		if (dominion != null) {
 			if (DominionUtils.hasPermission(player, dominion, DominionPermission.RESOURCES)) {
 				if (dominion.getClaimableResources() > 0) {

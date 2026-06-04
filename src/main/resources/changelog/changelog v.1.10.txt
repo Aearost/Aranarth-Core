@@ -183,6 +183,7 @@ Minor Features
 [+] Added recipe for bee nest using honeycomb blocks instead of normal honeycomb
 [~] Fixed issue where incorrect player skin was shown in dominion new leader messages
 [+] Added iron ingots to the arena spawn for metalbending
+[~] Fixed issue where you could claim dominion resources in non-survival worlds
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
