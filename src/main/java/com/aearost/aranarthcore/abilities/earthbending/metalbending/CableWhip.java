@@ -69,7 +69,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
         if (bPlayer.isOnCooldown(this)) {
             return;
         }
-        if (!AranarthBendingUtils.hasMetalArmor(player)) {
+        if (!AranarthBendingUtils.hasMetalRequirement(player)) {
             return;
         }
 

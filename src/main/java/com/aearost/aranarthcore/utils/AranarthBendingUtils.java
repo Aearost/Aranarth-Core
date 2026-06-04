@@ -188,6 +188,10 @@ public class AranarthBendingUtils {
             Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS
     );
 
+    private static final Set<Material> METAL_INGOTS = EnumSet.of(
+            Material.IRON_INGOT, Material.COPPER_INGOT, Material.GOLD_INGOT, Material.NETHERITE_INGOT
+    );
+
     /**
      * Determines if the player is wearing at least 1 piece of metal armor.
      * @param player The player.
@@ -201,5 +205,29 @@ public class AranarthBendingUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Determines if the player has at least 1 metal ingot in their inventory.
+     * Accepted ingots: iron, copper, gold, netherite.
+     * @param player The player.
+     * @return Whether the player has at least 1 metal ingot.
+     */
+    public static boolean hasMetalIngot(final Player player) {
+        for (final ItemStack item : player.getInventory().getContents()) {
+            if (item != null && METAL_INGOTS.contains(item.getType())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Determines if the player meets the metal requirement: wearing metal armor or carrying a metal ingot.
+     * @param player The player.
+     * @return Whether the player has metal armor or a metal ingot.
+     */
+    public static boolean hasMetalRequirement(final Player player) {
+        return hasMetalArmor(player) || hasMetalIngot(player);
     }
 }

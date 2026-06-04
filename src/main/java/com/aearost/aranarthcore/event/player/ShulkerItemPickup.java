@@ -19,6 +19,9 @@ import org.bukkit.inventory.meta.BlockStateMeta;
 public class ShulkerItemPickup {
 
 	public void execute(EntityPickupItemEvent e) {
+		if (e.isCancelled()) {
+			return;
+		}
 		Player player = (Player) e.getEntity();
 		ItemStack pickupItem = e.getItem().getItemStack();
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -71,7 +74,6 @@ public class ShulkerItemPickup {
 										if (shulkerStack.getAmount() < shulkerStack.getMaxStackSize()) {
 											shulkerStack.setAmount(shulkerStack.getAmount() + 1);
 											amountRemaining--;
-											e.getItem().getItemStack().setAmount(pickupItem.getAmount() - 1);
 										} else {
 											break;
 										}
