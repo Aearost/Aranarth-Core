@@ -32,15 +32,15 @@ import static com.aearost.aranarthcore.objects.CustomKeys.QUEST_NPC;
  */
 public class QuestUtils {
 
-    // All possible quests per rank: rank (0-8) -> list of quests
+    // All possible quests per rank
     private static final HashMap<Integer, List<Quest>> dailyQuestPool = new HashMap<>();
     private static final HashMap<Integer, List<Quest>> weeklyQuestPool = new HashMap<>();
 
-    // Per-player active quests (lazily assigned from pool based on rank)
+    // Per-player active quests
     private static final HashMap<UUID, List<Quest>> playerActiveDailyQuests = new HashMap<>();
     private static final HashMap<UUID, List<Quest>> playerActiveWeeklyQuests = new HashMap<>();
 
-    // Player quest progress: UUID -> int[3] progress per active quest
+    // Player quest progress
     private static final HashMap<UUID, int[]> playerDailyProgress = new HashMap<>();
     private static final HashMap<UUID, boolean[]> playerDailyCompleted = new HashMap<>();
     private static final HashMap<UUID, boolean[]> playerDailyClaimed = new HashMap<>();
@@ -63,10 +63,6 @@ public class QuestUtils {
         MONEY_FORMAT.setGroupingUsed(true);
     }
 
-    // -------------------------------------------------------------------------
-    // Initialization
-    // -------------------------------------------------------------------------
-
     /**
      * Initializes all quest pools. Per-player quest assignments are loaded from
      * persistence or assigned lazily when players first interact with the system.
@@ -78,7 +74,7 @@ public class QuestUtils {
     private static void initializeQuestPools() {
         // Rewards are all 0.0 — they are randomized per-player at assignment time.
 
-        // ---- RANK 0 (getRank() == 0) — Starter ----
+        // Peasant
         List<Quest> r0d = new ArrayList<>();
         r0d.add(new Quest(QuestTaskType.BREAK_LOG, 25, 0.0, QuestType.DAILY, 0, "Break 25 Logs"));
         r0d.add(new Quest(QuestTaskType.MINE_STONE, 50, 0.0, QuestType.DAILY, 0, "Mine 50 Stone"));
@@ -107,7 +103,7 @@ public class QuestUtils {
         r0w.add(new Quest(QuestTaskType.KILL_PLAYER, 2, 0.0, QuestType.WEEKLY, 0, "Kill 2 Players"));
         weeklyQuestPool.put(0, r0w);
 
-        // ---- RANK 1 (getRank() == 1) — $250 ----
+        // Esquire
         List<Quest> r1d = new ArrayList<>();
         r1d.add(new Quest(QuestTaskType.MINE_STONE, 128, 0.0, QuestType.DAILY, 1, "Mine 128 Stone"));
         r1d.add(new Quest(QuestTaskType.BREAK_LOG, 64, 0.0, QuestType.DAILY, 1, "Break 64 Logs"));
@@ -136,7 +132,7 @@ public class QuestUtils {
         r1w.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.WEEKLY, 1, "Kill 3 Players"));
         weeklyQuestPool.put(1, r1w);
 
-        // ---- RANK 2 (getRank() == 2) — $1,250 ----
+        // Knight
         List<Quest> r2d = new ArrayList<>();
         r2d.add(new Quest(QuestTaskType.MINE_STONE, 256, 0.0, QuestType.DAILY, 2, "Mine 256 Stone"));
         r2d.add(new Quest(QuestTaskType.MINE_COAL_ORE, 32, 0.0, QuestType.DAILY, 2, "Mine 32 Coal Ore"));
@@ -165,7 +161,7 @@ public class QuestUtils {
         r2w.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.WEEKLY, 2, "Kill 5 Players"));
         weeklyQuestPool.put(2, r2w);
 
-        // ---- RANK 3 (getRank() == 3) — $5,000 ----
+        // Baron
         List<Quest> r3d = new ArrayList<>();
         r3d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 48, 0.0, QuestType.DAILY, 3, "Mine 48 Iron Ore"));
         r3d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 50, 0.0, QuestType.DAILY, 3, "Kill 50 Hostile Mobs"));
@@ -194,7 +190,7 @@ public class QuestUtils {
         r3w.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.WEEKLY, 3, "Kill 8 Players"));
         weeklyQuestPool.put(3, r3w);
 
-        // ---- RANK 4 (getRank() == 4) — $25,000 ----
+        // Count
         List<Quest> r4d = new ArrayList<>();
         r4d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 96, 0.0, QuestType.DAILY, 4, "Mine 96 Iron Ore"));
         r4d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 32, 0.0, QuestType.DAILY, 4, "Mine 32 Gold Ore"));
@@ -223,7 +219,7 @@ public class QuestUtils {
         r4w.add(new Quest(QuestTaskType.KILL_PLAYER, 10, 0.0, QuestType.WEEKLY, 4, "Kill 10 Players"));
         weeklyQuestPool.put(4, r4w);
 
-        // ---- RANK 5 (getRank() == 5) — $100,000 ----
+        // Duke
         List<Quest> r5d = new ArrayList<>();
         r5d.add(new Quest(QuestTaskType.MINE_DIAMOND, 24, 0.0, QuestType.DAILY, 5, "Mine 24 Diamonds"));
         r5d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 48, 0.0, QuestType.DAILY, 5, "Mine 48 Gold Ore"));
@@ -252,7 +248,7 @@ public class QuestUtils {
         r5w.add(new Quest(QuestTaskType.KILL_PLAYER, 12, 0.0, QuestType.WEEKLY, 5, "Kill 12 Players"));
         weeklyQuestPool.put(5, r5w);
 
-        // ---- RANK 6 (getRank() == 6) — $500,000 ----
+        // Prince
         List<Quest> r6d = new ArrayList<>();
         r6d.add(new Quest(QuestTaskType.MINE_DIAMOND, 40, 0.0, QuestType.DAILY, 6, "Mine 40 Diamonds"));
         r6d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 80, 0.0, QuestType.DAILY, 6, "Mine 80 Gold Ore"));
@@ -281,7 +277,7 @@ public class QuestUtils {
         r6w.add(new Quest(QuestTaskType.KILL_PLAYER, 15, 0.0, QuestType.WEEKLY, 6, "Kill 15 Players"));
         weeklyQuestPool.put(6, r6w);
 
-        // ---- RANK 7 (getRank() == 7) — $2,500,000 ----
+        // King
         List<Quest> r7d = new ArrayList<>();
         r7d.add(new Quest(QuestTaskType.MINE_DIAMOND, 64, 0.0, QuestType.DAILY, 7, "Mine 64 Diamonds"));
         r7d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 180, 0.0, QuestType.DAILY, 7, "Kill 180 Hostile Mobs"));
@@ -310,7 +306,7 @@ public class QuestUtils {
         r7w.add(new Quest(QuestTaskType.KILL_PLAYER, 18, 0.0, QuestType.WEEKLY, 7, "Kill 18 Players"));
         weeklyQuestPool.put(7, r7w);
 
-        // ---- RANK 8 (getRank() == 8) — $10,000,000 ----
+        // Emperor
         List<Quest> r8d = new ArrayList<>();
         r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
         r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
@@ -340,10 +336,6 @@ public class QuestUtils {
         weeklyQuestPool.put(8, r8w);
     }
 
-    // -------------------------------------------------------------------------
-    // Per-Player Quest Assignment
-    // -------------------------------------------------------------------------
-
     /**
      * Assigns daily and weekly quests to a player if they don't have any assigned yet.
      */
@@ -367,7 +359,7 @@ public class QuestUtils {
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
-            assigned.add(q.withReward(generateRandomReward(rank, QuestType.DAILY)));
+            assigned.add(q.withReward(generateRandomReward(rank, QuestType.DAILY, q.getTaskType())));
         }
         playerActiveDailyQuests.put(uuid, assigned);
     }
@@ -382,7 +374,7 @@ public class QuestUtils {
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
-            assigned.add(q.withReward(generateRandomReward(rank, QuestType.WEEKLY)));
+            assigned.add(q.withReward(generateRandomReward(rank, QuestType.WEEKLY, q.getTaskType())));
         }
 
         // 25% chance that exactly one of the three weekly quests rewards an item instead of money
@@ -398,7 +390,6 @@ public class QuestUtils {
 
     /**
      * Returns the list of possible item rewards for a weekly quest of the given rank.
-     * Each item has equal probability of being selected when the 25% roll triggers.
      */
     private static List<ItemStack> getWeeklyItemRewardOptions(int rank) {
         List<ItemStack> options = new ArrayList<>();
@@ -451,8 +442,6 @@ public class QuestUtils {
 
     /**
      * Returns a human-readable display name for an item reward.
-     * Uses the item's custom display name if present, otherwise formats the material name.
-     * Prepends the amount when greater than 1.
      */
     public static String getItemRewardDisplayName(ItemStack item) {
         String name;
@@ -476,51 +465,82 @@ public class QuestUtils {
         return name;
     }
 
-    // -------------------------------------------------------------------------
-    // Reward Generation
-    // -------------------------------------------------------------------------
-
     /**
-     * Generates a random reward within the rank-appropriate range, rounded to the
-     * correct interval (×5 under $100, ×10 under $500, ×100 under $10,000, ×1,000 at $10,000+).
+     * Generates a random reward within the rank-appropriate range.
      */
     public static double generateRandomReward(int rank, QuestType type) {
+        return generateRandomReward(rank, type, null);
+    }
+
+    /**
+     * Generates a random reward scaled by the difficulty of the given quest task type.
+     */
+    public static double generateRandomReward(int rank, QuestType type, QuestTaskType taskType) {
         int[] range = getRewardRange(rank, type);
-        int min = range[0];
-        int max = range[1];
+        double multiplier = getDifficultyMultiplier(taskType);
+        int min = (int) Math.round(range[0] * multiplier);
+        int max = (int) Math.round(range[1] * multiplier);
+        if (min > max) {
+            min = max;
+        }
         int raw = min + RANDOM.nextInt(max - min + 1);
         int rounded = roundReward(raw);
-        // Clamp to valid rounded boundaries so we never exceed the intended range
         rounded = Math.max(ceilRound(min), Math.min(floorRound(max), rounded));
         return rounded;
+    }
+
+    /**
+     * Returns a difficulty multiplier for the given task type.
+     */
+    private static double getDifficultyMultiplier(QuestTaskType taskType) {
+        if (taskType == null) {
+            return 1.0;
+        }
+        return switch (taskType) {
+            // Easy
+            case HARVEST_CROPS, PLANT_CROPS, BREED_ANIMALS, COOK_FOOD,
+                 CRAFT_PLANKS, CRAFT_TORCHES, CRAFT_GLASS, CRAFT_BREAD, CRAFT_IRON_INGOTS,
+                 BREAK_LOG, BREAK_SAND, BREAK_DIRT, BREAK_GRAVEL,
+                 TRAVEL_BLOCKS, KILL_PASSIVE_MOB -> 0.5;
+            // Medium
+            case MINE_STONE, MINE_COAL_ORE, MINE_IRON_ORE,
+                 KILL_HOSTILE_MOB, KILL_ZOMBIE, KILL_SKELETON, KILL_SPIDER, KILL_CREEPER,
+                 KILL_WITH_SWORD, KILL_WITH_BOW -> 1.0;
+            // Hard
+            case FISH, MINE_GOLD_ORE, MINE_DIAMOND, MINE_ANCIENT_DEBRIS,
+                 KILL_ENDERMAN, KILL_WITCH, KILL_BLAZE, KILL_GHAST,
+                 CRAFT_GOLDEN_APPLE -> 1.5;
+            // Very hard
+            case KILL_PLAYER -> 2.0;
+        };
     }
 
     private static int[] getRewardRange(int rank, QuestType type) {
         if (type == QuestType.DAILY) {
             return switch (rank) {
-                case 0 -> new int[]{25, 75};
-                case 1 -> new int[]{75, 200};
-                case 2 -> new int[]{200, 450};
-                case 3 -> new int[]{450, 750};
-                case 4 -> new int[]{750, 1200};
-                case 5 -> new int[]{1200, 1750};
-                case 6 -> new int[]{1750, 2250};
-                case 7 -> new int[]{2250, 3500};
-                case 8 -> new int[]{3500, 10000};
-                default -> new int[]{25, 75};
+                case 0 -> new int[]{150, 450};
+                case 1 -> new int[]{450, 1200};
+                case 2 -> new int[]{1200, 2500};
+                case 3 -> new int[]{2500, 4500};
+                case 4 -> new int[]{4500, 7500};
+                case 5 -> new int[]{7500, 11000};
+                case 6 -> new int[]{10000, 14000};
+                case 7 -> new int[]{14000, 21000};
+                case 8 -> new int[]{21000, 60000};
+                default -> new int[]{150, 450};
             };
         } else {
             return switch (rank) {
-                case 0 -> new int[]{100, 250};
-                case 1 -> new int[]{250, 500};
-                case 2 -> new int[]{500, 1000};
-                case 3 -> new int[]{1000, 2250};
-                case 4 -> new int[]{2250, 3500};
-                case 5 -> new int[]{3500, 5000};
-                case 6 -> new int[]{5000, 7500};
-                case 7 -> new int[]{7500, 12500};
-                case 8 -> new int[]{12500, 20000};
-                default -> new int[]{100, 250};
+                case 0 -> new int[]{700, 1750};
+                case 1 -> new int[]{1750, 3500};
+                case 2 -> new int[]{3500, 7000};
+                case 3 -> new int[]{7000, 15000};
+                case 4 -> new int[]{15000, 25000};
+                case 5 -> new int[]{25000, 35000};
+                case 6 -> new int[]{35000, 52500};
+                case 7 -> new int[]{50000, 87500};
+                case 8 -> new int[]{87500, 140000};
+                default -> new int[]{700, 1750};
             };
         }
     }
@@ -560,10 +580,6 @@ public class QuestUtils {
         }
         return 1000;
     }
-
-    // -------------------------------------------------------------------------
-    // Reset Logic
-    // -------------------------------------------------------------------------
 
     /**
      * Checks whether a daily or weekly reset is due and performs it if so.
@@ -612,10 +628,6 @@ public class QuestUtils {
             online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Progress Tracking
-    // -------------------------------------------------------------------------
 
     /**
      * Updates a player's quest progress for the given task type by the given amount.
@@ -696,7 +708,7 @@ public class QuestUtils {
     }
 
     /**
-     * Claims the reward for a completed, unclaimed quest. Returns true if successful.
+     * Claims the reward for a completed, unclaimed quest.
      */
     public static boolean claimQuestReward(Player player, QuestType type, int index) {
         UUID uuid = player.getUniqueId();
@@ -731,10 +743,8 @@ public class QuestUtils {
                     : null;
             boolean isCrateKey = crateKeyType != null;
             String worldName = player.getWorld().getName();
-            boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp")
-                    || worldName.startsWith("resource") || worldName.startsWith("spawn");
             String itemName = getItemRewardDisplayName(rewardItem);
-            if (isCrateKey && !validWorld) {
+            if (isCrateKey && !AranarthUtils.isSurvivalWorld(worldName)) {
                 AranarthUtils.addPendingKey(player.getUniqueId(), rewardItem, rewardItem.getAmount());
                 player.sendMessage(ChatUtils.chatMessage("&7You have been rewarded &f" + itemName
                         + " &7for completing the quest (use &e/keyclaim &7in Survival to claim)"));
@@ -757,10 +767,6 @@ public class QuestUtils {
         }
         return true;
     }
-
-    // -------------------------------------------------------------------------
-    // Getters for GUI
-    // -------------------------------------------------------------------------
 
     public static List<Quest> getActiveDailyQuests(UUID uuid, int rank) {
         assignQuestsIfNeeded(uuid, rank);
@@ -820,10 +826,6 @@ public class QuestUtils {
         return claimed[index];
     }
 
-    // -------------------------------------------------------------------------
-    // NPC Helpers
-    // -------------------------------------------------------------------------
-
     public static boolean isQuestNpc(Entity entity) {
         if (!(entity instanceof Villager)) {
             return false;
@@ -854,10 +856,6 @@ public class QuestUtils {
         }
         return false;
     }
-
-    // -------------------------------------------------------------------------
-    // Persistence Support
-    // -------------------------------------------------------------------------
 
     public static HashMap<UUID, List<Quest>> getPlayerActiveDailyQuestsMap() {
         return playerActiveDailyQuests;
@@ -927,19 +925,15 @@ public class QuestUtils {
         return weeklyQuestPool.getOrDefault(rank, new ArrayList<>());
     }
 
-    // -------------------------------------------------------------------------
-    // World Helpers
-    // -------------------------------------------------------------------------
-
     /**
-     * Returns true if the world allows crafting quest progress (survival worlds + spawn).
+     * Returns true if the world allows crafting quest progress.
      */
     public static boolean isCraftingAllowedWorld(String worldName) {
-        return AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("spawn");
+        return AranarthUtils.isSurvivalWorld(worldName);
     }
 
     /**
-     * Returns true if the world allows player-kill quest progress (survival + arena).
+     * Returns true if the world allows player-kill quest progress.
      */
     public static boolean isAllowedKillWorld(String worldName) {
         return AranarthUtils.isSurvivalWorld(worldName) || worldName.equals("arena");

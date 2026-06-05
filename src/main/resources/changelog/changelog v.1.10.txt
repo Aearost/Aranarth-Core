@@ -185,6 +185,7 @@ Minor Features
 [+] Added iron ingots to the arena spawn for metalbending
 [~] Fixed issue where you could claim dominion resources in non-survival worlds
 [~] Fixed issue where you could claim dominion resources from lush caves, dripstone caves, and deep dark biomes
+[~] Increased the money rewarded from quests based on market and rank prices
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
