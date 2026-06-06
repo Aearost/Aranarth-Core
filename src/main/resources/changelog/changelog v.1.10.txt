@@ -28,6 +28,7 @@ Major Features
 [+] Implemented the CableWhip ability for metalbenders
 [+] Implemented the HighJump ability directly into AranarthCore
 [+] Implemented the MetalShots ability for metalbenders
+[+] Implemented the MetalBlade ability for metalbenders
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week
@@ -196,3 +197,5 @@ Backend Code Changes
 - Added cleaning to the package lifecycle default, hopefully mitigating ClassNotFoundExceptions
 - Restructured reference to the snakeyaml part of the pom to hopefully address the ClassNotFoundExceptions
 - Fixed issues with outdated PK method reference causing several abilities to break/bug out
+- Added cooldown to the missing permission message in Dominion protection
+- Also added event handler parameter to the BlockBreakEvent listener

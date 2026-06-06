@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
@@ -97,6 +98,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(MetalBlade.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
@@ -305,6 +307,10 @@ public class AranarthCoreBendingListener implements Listener {
 						existing.onSneak();
 					} else {
 						new MetalShots(player);
+					}
+				} else if (abilityName.equalsIgnoreCase("metalblade")) {
+					if (!MetalBlade.hasActiveInstance(player.getUniqueId())) {
+						new MetalBlade(player);
 					}
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
@@ -532,6 +538,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (MetalBlade.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -608,6 +617,15 @@ public class AranarthCoreBendingListener implements Listener {
 		MetalShots metalShots = MetalShots.getActiveInstance(e.getPlayer().getUniqueId());
 		if (metalShots != null) {
 			metalShots.endWithCooldown();
+		}
+		// Slot change during charge cancels without cooldown; slot change while READY applies cooldown
+		MetalBlade metalBlade = MetalBlade.getActiveInstance(e.getPlayer().getUniqueId());
+		if (metalBlade != null) {
+			if (metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
+				metalBlade.cancelInstantly();
+			} else {
+				metalBlade.endWithCooldown();
+			}
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
@@ -920,6 +938,31 @@ public class AranarthCoreBendingListener implements Listener {
 		if (amp == null) return;
 
 		amp.applyMultiplier(e);
+	}
+
+	/**
+	 * Applies MetalBlade's melee buff when the player punches a living entity while the blade is
+	 * ready. The vanilla damage is replaced entirely by the ability's damage so that region
+	 * protection and rank scaling are applied through ProjectKorra's standard pipeline.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onMetalBladeMeleeHit(final EntityDamageByEntityEvent e) {
+		if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+			return;
+		}
+		if (!(e.getDamager() instanceof Player player)) {
+			return;
+		}
+		if (!(e.getEntity() instanceof LivingEntity target)) {
+			return;
+		}
+
+		final MetalBlade metalBlade = MetalBlade.getActiveInstance(player.getUniqueId());
+		if (metalBlade == null || metalBlade.getPhase() != MetalBlade.Phase.READY) {
+			return;
+		}
+
+		metalBlade.onMeleeHit(target, e);
 	}
 
 }
