@@ -29,12 +29,18 @@ import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 /**
  * Enforces Dominion block and entity protection rules with configurable per-rank/relation permissions.
  */
 public class DominionProtectionListener implements Listener {
 
     private static final Logger log = LoggerFactory.getLogger(DominionProtectionListener.class);
+    private static final long DENY_MESSAGE_COOLDOWN_MS = 1000L;
+    private final Map<UUID, Long> lastDenyMessageTime = new HashMap<>();
 
     public DominionProtectionListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -619,7 +625,12 @@ public class DominionProtectionListener implements Listener {
 
         if (dominion != null) {
             if (!DominionUtils.hasPermission(player, dominion, permission)) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
+                long now = System.currentTimeMillis();
+                Long last = lastDenyMessageTime.get(player.getUniqueId());
+                if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + dominion.getName()));
+                    lastDenyMessageTime.put(player.getUniqueId(), now);
+                }
                 return true;
             }
         }

@@ -30,7 +30,7 @@ public class BlockBreakEventListener implements Listener {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
         handlePlentifulBreak(e);
         handleMagnetismBreak(e);
