@@ -33,7 +33,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private static final long CHARGE_DURATION_MS = 1000L;
     private static final long CAST_DURATION_MS = 3000L;
     private static final long DAMAGE_INTERVAL_MS = 250L;
-    /** Damage per tick in HP — 1.0 HP = 0.5 hearts in the Bukkit API. */
     private static final double DAMAGE_PER_TICK = 1.0;
     private static final int MAX_SLOWNESS_LEVEL = 5;
     private static final double TARGET_HIT_RADIUS = 0.5;
@@ -60,11 +59,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     );
 
     private static final Map<UUID, BloodFreeze> ACTIVE_INSTANCES = new HashMap<>();
-
-    /**
-     * Tracks target UUIDs while they are actively being frozen so a second caster
-     * cannot stack the effect on the same target simultaneously.
-     */
     private static final Set<UUID> FROZEN_PLAYERS = new HashSet<>();
 
     @Attribute(Attribute.COOLDOWN)
@@ -83,7 +77,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private LivingEntity target;
     private int slownessLevel;
     private boolean decayStarted;
-    /** Whether the target player had bending toggled ON before freezing — restored on release. */
     private boolean targetBendingWasToggled;
 
     public BloodFreeze(final Player player) {
@@ -215,10 +208,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
 
     /**
      * Schedules a per-second staircase decay of the Slowness effect applied to the target.
-     * Each second the amplifier decreases by one and the remaining duration matches, until
-     * the effect fully expires. This preserves the full slowing penalty for as long as the
-     * target was hit, then gradually recovers — e.g. 3 ticks applied yields Slowness III
-     * for 3 s, then Slowness II for 2 s, then Slowness I for 1 s.
      */
     private void scheduleSlownessDecay() {
         if (decayStarted || slownessLevel <= 0 || !target.isValid()) {
@@ -249,7 +238,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         Location center = target.getLocation().add(0, target.getHeight() / 2.0, 0);
         double elapsed = (System.currentTimeMillis() - chargeStartTime) / 1000.0;
         double progress = Math.min(elapsed / (chargeDuration / 1000.0), 1.0);
-        // Radius tightens toward the target as the charge builds up.
+        // Radius tightens toward the target as the charge builds up
         double radius = 0.8 - progress * 0.3;
         int pointsPerStrand = 6;
 
@@ -298,7 +287,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
 
     /**
      * Performs a ray trace from the caster's eye outward to find the nearest valid target
-     * within range. Undead entities and already-frozen players are excluded.
+     * within range.
      */
     private LivingEntity findTarget() {
         Location eye = player.getEyeLocation();
@@ -440,10 +429,9 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
 
     @Override
     public String getDescription() {
-        return "Seize control of a target's blood and constrict it from within, dealing damage that " +
-                "pierces all armor. Each pulse of the ability stacks a growing Slowness effect on the " +
-                "target that lingers and steps down gradually after the ability ends.\n" +
-                ChatUtils.translateToColor("&fUsage: Sneak (on target) > Hold Sneak (to cast)");
+        return "Take control of a player's bloodstream, and lower the temperature of their blood to freeze them from the inside. " +
+                "Each pulse of the ability will slow the target further, gradually thawing once the ability ends.\n" +
+                ChatUtils.translateToColor("&fUsage: Sneak (hold)");
     }
 
 }
