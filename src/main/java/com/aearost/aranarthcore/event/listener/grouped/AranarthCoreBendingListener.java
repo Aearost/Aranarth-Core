@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
@@ -105,6 +106,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -444,6 +446,13 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				new HighJump(player, HighJump.JumpType.JUMP);
 			}
+			return;
+		}
+
+		// DaggerVolley: instant left-click fire — advances the 3 → 6 → 9 arrow cycle
+		BendingPlayer bpDaggerVolley = BendingPlayer.getBendingPlayer(player);
+		if (bpDaggerVolley != null && bpDaggerVolley.getBoundAbilityName().equalsIgnoreCase("daggervolley")) {
+			new DaggerVolley(player);
 			return;
 		}
 
@@ -887,6 +896,7 @@ public class AranarthCoreBendingListener implements Listener {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
+		DaggerVolley.resetStage(player.getUniqueId());
 	}
 
 	/**
@@ -951,6 +961,29 @@ public class AranarthCoreBendingListener implements Listener {
 		if (amp == null) return;
 
 		amp.applyMultiplier(e);
+	}
+
+	/**
+	 * Cancels vanilla arrow damage for DaggerVolley projectiles and replaces it with the
+	 * per-arrow damage roll so that region protection and rank scaling are applied through
+	 * ProjectKorra's standard pipeline.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onDaggerVolleyArrowHit(final EntityDamageByEntityEvent e) {
+		if (!(e.getDamager() instanceof Arrow arrow)) return;
+		if (!arrow.hasMetadata("daggervolley")) return;
+		if (!(e.getEntity() instanceof LivingEntity target)) return;
+		if (!(arrow.getShooter() instanceof Player shooter)) return;
+
+		e.setCancelled(true);
+
+		final DaggerVolley dv = CoreAbility.getAbility(shooter, DaggerVolley.class);
+		if (dv == null) {
+			// Ability already ended (all other arrows resolved); discard without dealing damage.
+			arrow.remove();
+			return;
+		}
+		dv.damageEntityFromArrow(target, arrow);
 	}
 
 	/**
