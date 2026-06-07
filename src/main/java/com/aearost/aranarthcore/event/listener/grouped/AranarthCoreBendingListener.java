@@ -26,6 +26,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
@@ -110,6 +111,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -247,6 +249,10 @@ public class AranarthCoreBendingListener implements Listener {
 					if (abilityName.equalsIgnoreCase("bloodgrip")) {
 						if (!BloodGrip.hasActiveInstance(player.getUniqueId())) {
 							new BloodGrip(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("bloodfreeze")) {
+						if (!BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+							new BloodFreeze(player);
 						}
 					}
 				} else if (ability instanceof PlantAbility) {
@@ -586,6 +592,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -680,6 +689,15 @@ public class AranarthCoreBendingListener implements Listener {
 		if (bloodGrip != null) {
 			bloodGrip.endWithCooldown();
 		}
+		// Slot change during charging cancels without cooldown; slot change while casting applies cooldown.
+		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(e.getPlayer().getUniqueId());
+		if (bloodFreeze != null) {
+			if (bloodFreeze.getPhase() == BloodFreeze.Phase.CHARGING) {
+				bloodFreeze.remove();
+			} else {
+				bloodFreeze.endWithCooldown();
+			}
+		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
 
@@ -763,6 +781,19 @@ public class AranarthCoreBendingListener implements Listener {
 		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
 		if (bloodGrip != null) {
 			bloodGrip.cancelFromDamage();
+		}
+	}
+
+	/**
+	 * Ends an active BloodFreeze immediately when the caster takes any damage while casting,
+	 * applying the cooldown and releasing the frozen target.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onBloodFreezeCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) return;
+		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
+		if (bloodFreeze != null) {
+			bloodFreeze.cancelFromDamage();
 		}
 	}
 
@@ -882,6 +913,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
