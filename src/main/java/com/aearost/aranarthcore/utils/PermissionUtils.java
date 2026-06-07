@@ -148,6 +148,7 @@ public class PermissionUtils {
 				}
 			}
 
+
 			Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), new Runnable() {
 				@Override
 				public void run() {
@@ -284,6 +285,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.metalblade", true);
 		perms.setPermission("bending.ability.cablethrash", true);
 		perms.setPermission("bending.ability.daggervolley", true);
+		perms.setPermission("bending.ability.bloodgrip", true);
 
 		// Enable commands available to all players
 		perms.setPermission("aranarth.afk", true);

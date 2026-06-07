@@ -183,7 +183,9 @@
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/libs -name *.jar)",
       "Bash(find ~/.gradle -path */mcmmo* -name *.jar)",
       "Bash(find ~/.m2 -name *.jar)",
-      "WebFetch(domain:spark.lucko.me)"
+      "WebFetch(domain:spark.lucko.me)",
+      "Bash(xargs -I {} sh -c \"unzip -p projectkorra-1.12.0-sources.jar {} 2>/dev/null | grep -l \"\"getMoonPhase\\\\|getFullMoon\\\\|isFullMoon\\\\|isNight\\\\|getTime\"\" | head -1\")",
+      "Bash(xxd)"
     ]
   }
 }

@@ -26,6 +26,8 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
+import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
@@ -107,6 +109,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -193,6 +196,10 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 
 		if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
+			if (BloodGrip.isControlled(player.getUniqueId())) {
+				e.setCancelled(true);
+				return;
+			}
 			if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
 				return;
 			}
@@ -236,7 +243,13 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 			// Waterbending
 			else if (ability instanceof WaterAbility && bendingPlayer.isElementToggled(Element.WATER)) {
-				if (ability instanceof PlantAbility) {
+				if (ability instanceof BloodAbility) {
+					if (abilityName.equalsIgnoreCase("bloodgrip")) {
+						if (!BloodGrip.hasActiveInstance(player.getUniqueId())) {
+							new BloodGrip(player);
+						}
+					}
+				} else if (ability instanceof PlantAbility) {
 					if (abilityName.equalsIgnoreCase("vinewhip")) {
 						// Guard: only one active instance per player
 						if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
@@ -349,6 +362,10 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		Player player = e.getPlayer();
 
+		if (BloodGrip.isControlled(player.getUniqueId())) {
+			return;
+		}
+
 		// AstralProjection sub-ability activation (Slot 0 = Aura, 1 = Scream, 2 = Possess)
 		if (AstralProjection.isProjecting(player.getUniqueId())) {
 			AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
@@ -357,6 +374,13 @@ public class AranarthCoreBendingListener implements Listener {
 				case 1 -> projection.activateScream();
 				case 2 -> projection.activatePossess();
 			}
+			return;
+		}
+
+		// BloodGrip: left-click while controlling flings the target in the look direction
+		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
+		if (bloodGrip != null) {
+			bloodGrip.onLeftClick();
 			return;
 		}
 
@@ -559,6 +583,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (CableThrash.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -649,6 +676,10 @@ public class AranarthCoreBendingListener implements Listener {
 		if (cableThrash != null) {
 			cableThrash.endWithCooldown();
 		}
+		BloodGrip bloodGrip = BloodGrip.getActiveInstance(e.getPlayer().getUniqueId());
+		if (bloodGrip != null) {
+			bloodGrip.endWithCooldown();
+		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
 
@@ -720,6 +751,19 @@ public class AranarthCoreBendingListener implements Listener {
 		JetFumes jf = JetFumes.getActiveInstance(player.getUniqueId());
 		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) return;
 		e.setCancelled(true);
+	}
+
+	/**
+	 * Ends an active BloodGrip immediately when the caster takes any damage while casting
+	 * or controlling, applying the cooldown and freeing the controlled target.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onBloodGripCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) return;
+		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
+		if (bloodGrip != null) {
+			bloodGrip.cancelFromDamage();
+		}
 	}
 
 	/**
@@ -809,6 +853,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (BloodGrip.isControlled(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -830,6 +878,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
