@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
@@ -98,6 +99,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MetalBlade.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
@@ -311,6 +313,10 @@ public class AranarthCoreBendingListener implements Listener {
 				} else if (abilityName.equalsIgnoreCase("metalblade")) {
 					if (!MetalBlade.hasActiveInstance(player.getUniqueId())) {
 						new MetalBlade(player);
+					}
+				} else if (abilityName.equalsIgnoreCase("cablethrash")) {
+					if (!CableThrash.hasActiveInstance(player.getUniqueId())) {
+						new CableThrash(player);
 					}
 				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
 					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
@@ -541,6 +547,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (MetalBlade.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (CableThrash.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -626,6 +635,10 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				metalBlade.endWithCooldown();
 			}
+		}
+		CableThrash cableThrash = CableThrash.getActiveInstance(e.getPlayer().getUniqueId());
+		if (cableThrash != null) {
+			cableThrash.endWithCooldown();
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
