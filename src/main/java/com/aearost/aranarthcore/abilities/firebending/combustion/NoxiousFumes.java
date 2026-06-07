@@ -33,6 +33,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
 
     private Phase phase;
     private Location sourceLocation; // Top-center of the nearest fire/lava block
+    private Location sourceBlockLocation; // Actual block location of the source
+    private Material sourceBlockType; // Material of the source block at last check
     private long readyStartTime;
     private long channelingStartTime;
     private long lastTravelerLaunchTime;
@@ -183,6 +185,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             phase = Phase.DISPERSING;
             bPlayer.addCooldown(this);
             clearChargeTimestamp(player.getUniqueId());
+            consumeSource();
         }
         // If already DISPERSING, do nothing — let it finish naturally.
     }
@@ -433,6 +436,26 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     // -------------------------------------------------------------------------
 
     /**
+     * Consumes the source block when the ability goes on cooldown.
+     * Fire/soul fire is extinguished (set to AIR with extinguish sound).
+     * Lava is solidified into obsidian.
+     */
+    private void consumeSource() {
+        if (sourceBlockLocation == null || sourceBlockType == null) return;
+        org.bukkit.block.Block block = sourceBlockLocation.getBlock();
+        // Verify the block still matches what we recorded
+        if (block.getType() != sourceBlockType) return;
+
+        if (sourceBlockType == Material.FIRE || sourceBlockType == Material.SOUL_FIRE) {
+            block.setType(Material.AIR);
+            block.getWorld().playSound(sourceBlockLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+        } else if (sourceBlockType == Material.LAVA) {
+            block.setType(Material.OBSIDIAN);
+            block.getWorld().playSound(sourceBlockLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+        }
+    }
+
+    /**
      * Returns the approximate position of the player's right hand.
      */
     private Location getRightHandLocation() {
@@ -498,6 +521,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
                     if (distSq < nearestDistSq) {
                         nearestDistSq = distSq;
                         nearest = blockLoc;
+                        sourceBlockLocation = playerLoc.getBlock().getRelative(x, y, z).getLocation();
+                        sourceBlockType = mat;
                     }
                 }
             }
