@@ -32,9 +32,13 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     private double sourceCheckRadius;
 
     private Phase phase;
-    private Location sourceLocation; // Top-center of the nearest fire/lava block
-    private Location sourceBlockLocation; // Actual block location of the source
-    private Material sourceBlockType; // Material of the source block at last check
+    private Location sourceLocation; // Self-fire source point only (used when selfOnFire)
+    private final List<Location> sourceLocations = new ArrayList<>();      // Top-center of each block source
+    private final List<Location> sourceBlockLocations = new ArrayList<>(); // Actual block positions
+    private final List<Material> sourceBlockTypes = new ArrayList<>();     // Material at each source
+    private boolean selfOnFire; // True when the player's own fire is being used as the source
+    private boolean selfFireExtinguished; // True once we've consumed the player's fire at charge time
+    private int activeSourceCount = 1; // Number of sources captured at channeling start (drives launch rate)
     private long readyStartTime;
     private long channelingStartTime;
     private long lastTravelerLaunchTime;
@@ -147,9 +151,14 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         puffRadius = 3.0;
         sourceCheckRadius = 6.0;
 
-        sourceLocation = findNearestFireOrLava();
-        if (sourceLocation == null) {
-            return;
+        if (player.getFireTicks() > 0) {
+            selfOnFire = true;
+            sourceLocation = getSelfFireSourceLocation();
+        } else {
+            findNearestSources(isDay() ? 5 : 1);
+            if (sourceLocations.isEmpty()) {
+                return;
+            }
         }
 
         phase = Phase.READY;
@@ -172,6 +181,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         phase = Phase.CHANNELING;
         channelingStartTime = System.currentTimeMillis();
         lastTravelerLaunchTime = 0;
+        activeSourceCount = selfOnFire ? 1 : Math.max(1, sourceLocations.size());
         player.getWorld().playSound(player.getLocation(), Sound.ITEM_FIRECHARGE_USE, 0.5f, 0.6f);
     }
 
@@ -215,17 +225,31 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             remove();
             return;
         }
-        // Re-find source each tick so it stays valid (fire can be extinguished)
-        sourceLocation = findNearestFireOrLava();
-        if (sourceLocation == null) {
-            remove();
-            return;
+        // Re-derive source each tick so it stays valid
+        if (selfOnFire) {
+            if (!selfFireExtinguished && player.getFireTicks() <= 0) {
+                // Player's fire was extinguished externally before charge — cancel
+                remove();
+                return;
+            }
+            sourceLocation = getSelfFireSourceLocation();
+        } else {
+            findNearestSources(isDay() ? 5 : 1);
+            if (sourceLocations.isEmpty()) {
+                remove();
+                return;
+            }
         }
         // Gradually extend the line from source to hand over the charge duration
         double chargeFraction = Math.min(1.0,
                 (double)(System.currentTimeMillis() - readyStartTime) / CHARGE_DURATION_MS);
         drawSourceLine(chargeFraction);
         if (isCharged()) {
+            if (selfOnFire && !selfFireExtinguished) {
+                selfFireExtinguished = true;
+                player.setFireTicks(0);
+                player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            }
             recordChargeComplete(player.getUniqueId());
         }
     }
@@ -242,7 +266,8 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             return;
         }
 
-        if (now - lastTravelerLaunchTime >= TRAVELER_LAUNCH_INTERVAL_MS) {
+        long effectiveInterval = Math.max(1L, TRAVELER_LAUNCH_INTERVAL_MS / activeSourceCount);
+        if (now - lastTravelerLaunchTime >= effectiveInterval) {
             launchTraveler();
             lastTravelerLaunchTime = now;
         }
@@ -271,29 +296,38 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     // -------------------------------------------------------------------------
 
     /**
-     * Draws a line of smoke particles from the source to the player's left hand.
+     * Draws a line of smoke particles from each source to the player's left hand.
      * @param fraction 0.0 = nothing drawn, 1.0 = full line drawn (used for gradual charge).
      */
     private void drawSourceLine(double fraction) {
-        if (sourceLocation == null) return;
         Location leftHand = getLeftHandLocation();
         World world = player.getWorld();
-        Vector toHand = leftHand.toVector().subtract(sourceLocation.toVector());
-        double totalLength = toHand.length();
-        if (totalLength < 0.1) return;
-        Vector dir = toHand.clone().normalize();
-        double drawLength = totalLength * fraction;
 
-        double sx = sourceLocation.getX();
-        double sy = sourceLocation.getY();
-        double sz = sourceLocation.getZ();
+        List<Location> origins = new ArrayList<>();
+        if (selfOnFire && sourceLocation != null) {
+            origins.add(sourceLocation);
+        } else {
+            origins.addAll(sourceLocations);
+        }
+
         double step = 0.3;
-        for (double d = 0; d < drawLength; d += step) {
-            world.spawnParticle(Particle.SMOKE,
-                    sx + dir.getX() * d,
-                    sy + dir.getY() * d,
-                    sz + dir.getZ() * d,
-                    1, 0, 0, 0, 0);
+        for (Location origin : origins) {
+            Vector toHand = leftHand.toVector().subtract(origin.toVector());
+            double totalLength = toHand.length();
+            if (totalLength < 0.1) continue;
+            Vector dir = toHand.clone().normalize();
+            double drawLength = totalLength * fraction;
+
+            double sx = origin.getX();
+            double sy = origin.getY();
+            double sz = origin.getZ();
+            for (double d = 0; d < drawLength; d += step) {
+                world.spawnParticle(Particle.SMOKE,
+                        sx + dir.getX() * d,
+                        sy + dir.getY() * d,
+                        sz + dir.getZ() * d,
+                        1, 0, 0, 0, 0);
+            }
         }
     }
 
@@ -436,22 +470,33 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     // -------------------------------------------------------------------------
 
     /**
-     * Consumes the source block when the ability goes on cooldown.
-     * Fire/soul fire is extinguished (set to AIR with extinguish sound).
-     * Lava is solidified into obsidian.
+     * Consumes the source when the ability goes on cooldown.
+     * If the player was on fire, extinguishes them.
+     * Fire/soul fire blocks are extinguished (set to AIR). Lava is solidified into obsidian.
      */
     private void consumeSource() {
-        if (sourceBlockLocation == null || sourceBlockType == null) return;
-        org.bukkit.block.Block block = sourceBlockLocation.getBlock();
-        // Verify the block still matches what we recorded
-        if (block.getType() != sourceBlockType) return;
+        if (selfOnFire) {
+            player.setFireTicks(0);
+            player.getWorld().playSound(player.getLocation(), Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            if (sourceLocation != null) {
+                player.getWorld().spawnParticle(Particle.LARGE_SMOKE, sourceLocation,
+                        12, 0.3, 0.3, 0.3, 0.02);
+            }
+            return;
+        }
+        for (int i = 0; i < sourceBlockLocations.size(); i++) {
+            Location blockLoc = sourceBlockLocations.get(i);
+            Material mat = sourceBlockTypes.get(i);
+            org.bukkit.block.Block block = blockLoc.getBlock();
+            if (block.getType() != mat) continue;
 
-        if (sourceBlockType == Material.FIRE || sourceBlockType == Material.SOUL_FIRE) {
-            block.setType(Material.AIR);
-            block.getWorld().playSound(sourceBlockLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
-        } else if (sourceBlockType == Material.LAVA) {
-            block.setType(Material.OBSIDIAN);
-            block.getWorld().playSound(sourceBlockLocation, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            if (mat == Material.FIRE || mat == Material.SOUL_FIRE) {
+                block.setType(Material.AIR);
+                block.getWorld().playSound(blockLoc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            } else if (mat == Material.LAVA) {
+                block.setType(Material.OBSIDIAN);
+                block.getWorld().playSound(blockLoc, Sound.BLOCK_FIRE_EXTINGUISH, 1.0f, 1.0f);
+            }
         }
     }
 
@@ -500,34 +545,58 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
     }
 
     /**
-     * Finds the nearest fire or lava block and returns its top-center location, or null if none exists.
+     * Populates the source lists with up to {@code max} nearest fire/lava blocks, sorted by distance.
+     * During the day up to 5 sources are allowed; at night only 1.
      */
-    private Location findNearestFireOrLava() {
+    private void findNearestSources(int max) {
+        sourceLocations.clear();
+        sourceBlockLocations.clear();
+        sourceBlockTypes.clear();
+
         Location playerLoc = player.getLocation();
         int r = (int) Math.ceil(sourceCheckRadius);
         double radiusSq = sourceCheckRadius * sourceCheckRadius;
-        Location nearest = null;
-        double nearestDistSq = Double.MAX_VALUE;
+
+        record Candidate(double distSq, Location topCenter, Location blockLoc, Material mat) {}
+        List<Candidate> candidates = new ArrayList<>();
 
         for (int x = -r; x <= r; x++) {
             for (int y = -r; y <= r; y++) {
                 for (int z = -r; z <= r; z++) {
                     if (x * x + y * y + z * z > radiusSq) continue;
-                    Material mat = playerLoc.getBlock().getRelative(x, y, z).getType();
+                    org.bukkit.block.Block rel = playerLoc.getBlock().getRelative(x, y, z);
+                    Material mat = rel.getType();
                     if (mat != Material.FIRE && mat != Material.SOUL_FIRE && mat != Material.LAVA) continue;
-                    Location blockLoc = playerLoc.getBlock().getRelative(x, y, z)
-                            .getLocation().add(0.5, 1.0, 0.5);
-                    double distSq = playerLoc.distanceSquared(blockLoc);
-                    if (distSq < nearestDistSq) {
-                        nearestDistSq = distSq;
-                        nearest = blockLoc;
-                        sourceBlockLocation = playerLoc.getBlock().getRelative(x, y, z).getLocation();
-                        sourceBlockType = mat;
-                    }
+                    Location topCenter = rel.getLocation().add(0.5, 1.0, 0.5);
+                    candidates.add(new Candidate(playerLoc.distanceSquared(topCenter), topCenter, rel.getLocation(), mat));
                 }
             }
         }
-        return nearest;
+
+        candidates.sort(Comparator.comparingDouble(Candidate::distSq));
+        for (int i = 0; i < Math.min(max, candidates.size()); i++) {
+            Candidate c = candidates.get(i);
+            sourceLocations.add(c.topCenter());
+            sourceBlockLocations.add(c.blockLoc());
+            sourceBlockTypes.add(c.mat());
+        }
+    }
+
+    /** Returns true if it is currently daytime in the player's world. */
+    private boolean isDay() {
+        long time = player.getWorld().getTime();
+        return time < 13000;
+    }
+
+    /**
+     * Returns the position of the self-fire smoke ball: 1.2 blocks in front of the
+     * player at roughly chest height. Tracked every tick so it follows the player's
+     * facing direction while charging.
+     */
+    private Location getSelfFireSourceLocation() {
+        Location eye = player.getEyeLocation();
+        Vector forward = eye.getDirection().normalize();
+        return eye.clone().add(forward.multiply(1.2)).add(0, -0.3, 0);
     }
 
     // -------------------------------------------------------------------------
