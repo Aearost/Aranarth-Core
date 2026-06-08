@@ -2,6 +2,7 @@ AranarthCore v. 1.10
 
 Major Features
 [+] Implemented permission-based custom armor stand poses
+[+] Added Blood Bending to Emperors
 [+] Implemented the CableSlash metal combo
 [+] Added the Sound sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders

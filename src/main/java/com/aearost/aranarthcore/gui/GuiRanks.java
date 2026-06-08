@@ -311,6 +311,7 @@ public class GuiRanks {
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x bending damage"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- #690213&oCombustion Bending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- #aa0808&oBlood Bending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Ability to create unlimited player shops"));

@@ -192,6 +192,9 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.suffocate", true);
 			perms.setPermission("bending.earth.lavaflux", true);
 			perms.setPermission("bending.earth.fissure", true);
+
+			// Disable blood bending in the arena
+			perms.setPermission("bending.water.bloodbending", false);
 		}
 		else {
 			// Disable sub-elements
@@ -734,6 +737,7 @@ public class PermissionUtils {
 		// Emperor
 		if (rank >= 8) {
 			perms.setPermission("bending.fire.combustionbending", true);
+			perms.setPermission("bending.water.bloodbending", true);
 			perms.setPermission("bending.command.preset.create.25", true);
 		} else {
 			return;
