@@ -327,12 +327,15 @@ public class MountListener implements Listener {
     }
 
     private static final double STEP_UP_VELOCITY = 0.42;
+    private static final int TETHER_DISTANCE = 32;
     private static final Map<UUID, AranarthMount> activeMounts = new HashMap<>();
     private static final Map<UUID, double[]> playerInputs = new HashMap<>();
     private static final Map<UUID, SpecialAction> activeSpecialActions = new HashMap<>();
     private static final Map<UUID, Double> originalSpeeds = new HashMap<>();
     private static final Map<UUID, Double> originalFlyingSpeeds = new HashMap<>();
     private static final Map<UUID, Location> mountPrevLocations = new HashMap<>();
+    /** Tracks dismounted mounts that are alive in the world: mount UUID → owner UUID. */
+    private static final Map<UUID, UUID> wanderingMounts = new HashMap<>();
     private final Random random = new Random();
     private static MountListener instance;
 
@@ -371,6 +374,28 @@ public class MountListener implements Listener {
                 }
             }
         }.runTaskTimer(plugin, 0L, 1L);
+
+        // Tether task: pathfind wandering mounts back to their owner if they stray too far.
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (UUID mountId : new HashSet<>(wanderingMounts.keySet())) {
+                    UUID ownerUUID = wanderingMounts.get(mountId);
+                    Entity e = Bukkit.getEntity(mountId);
+                    if (!(e instanceof Mob mount) || mount.isDead()) {
+                        wanderingMounts.remove(mountId);
+                        continue;
+                    }
+                    Player owner = Bukkit.getPlayer(ownerUUID);
+                    if (owner == null || !owner.isOnline() || owner.getWorld() != mount.getWorld()) {
+                        continue;
+                    }
+                    if (mount.getLocation().distance(owner.getLocation()) > TETHER_DISTANCE) {
+                        mount.getPathfinder().moveTo(owner, 1.0);
+                    }
+                }
+            }
+        }.runTaskTimer(plugin, 20L, 40L);
     }
 
     private MountTypeConfig getConfig(LivingEntity entity) {
@@ -877,6 +902,7 @@ public class MountListener implements Listener {
                         if (mountData != null) {
                             mountData.setCurrentHealth(living.getHealth());
                         }
+                        wanderingMounts.put(id, ownerUUID);
                     } catch (IllegalArgumentException ignored) {
                     }
                 }
@@ -886,6 +912,7 @@ public class MountListener implements Listener {
 
     private void cleanupMount(UUID id) {
         releaseMountControl(id);
+        wanderingMounts.remove(id);
         MountUtils.unregisterActive(id);
     }
 
