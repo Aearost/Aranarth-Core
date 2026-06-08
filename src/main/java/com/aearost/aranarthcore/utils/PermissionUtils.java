@@ -287,6 +287,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.daggervolley", true);
 		perms.setPermission("bending.ability.bloodgrip", true);
 		perms.setPermission("bending.ability.bloodfreeze", true);
+		perms.setPermission("bending.ability.disalignment", true);
 
 		// Enable commands available to all players
 		perms.setPermission("aranarth.afk", true);

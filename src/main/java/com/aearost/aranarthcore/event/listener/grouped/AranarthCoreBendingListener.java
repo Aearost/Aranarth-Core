@@ -28,6 +28,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
@@ -112,6 +113,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -254,6 +256,10 @@ public class AranarthCoreBendingListener implements Listener {
 						if (!BloodFreeze.hasActiveInstance(player.getUniqueId())) {
 							new BloodFreeze(player);
 						}
+					} else if (abilityName.equalsIgnoreCase("disalignment")) {
+						if (!Disalignment.hasActiveInstance(player.getUniqueId())) {
+							new Disalignment(player);
+						}
 					}
 				} else if (ability instanceof PlantAbility) {
 					if (abilityName.equalsIgnoreCase("vinewhip")) {
@@ -387,6 +393,13 @@ public class AranarthCoreBendingListener implements Listener {
 		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
 		if (bloodGrip != null) {
 			bloodGrip.onLeftClick();
+			return;
+		}
+
+		// Disalignment: left-click while charged applies the disalignment to the target
+		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+		if (disalignment != null) {
+			disalignment.onLeftClick();
 			return;
 		}
 
@@ -595,6 +608,10 @@ public class AranarthCoreBendingListener implements Listener {
 		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**
@@ -698,6 +715,11 @@ public class AranarthCoreBendingListener implements Listener {
 				bloodFreeze.endWithCooldown();
 			}
 		}
+		// Slot change during charging or charged cancels without cooldown; disalignment in progress continues uninterrupted.
+		Disalignment disalignment = Disalignment.getActiveInstance(e.getPlayer().getUniqueId());
+		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
+			disalignment.remove();
+		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 	}
 
@@ -794,6 +816,19 @@ public class AranarthCoreBendingListener implements Listener {
 		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
 		if (bloodFreeze != null) {
 			bloodFreeze.cancelFromDamage();
+		}
+	}
+
+	/**
+	 * Cancels a Disalignment charge or charged state when the caster takes damage. Has no effect
+	 * once the disalignment has been applied, as the effect persists independently of the caster.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onDisalignmentCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) return;
+		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+		if (disalignment != null) {
+			disalignment.cancelFromDamage();
 		}
 	}
 
@@ -917,6 +952,11 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
+		if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
 			return;
 		}
