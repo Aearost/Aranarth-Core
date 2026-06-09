@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.abilities.earthbending.lavabending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.LavaAbility;
@@ -132,7 +133,7 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
         phase = Phase.CHARGING;
 
         // Source block turns to stone immediately on acquisition
-        sourceBlock.setType(Material.STONE);
+        sourceBlock.setType(AranarthBendingUtils.LAVA_WARMUP_SEQUENCE[0]);
         playTransitionSound(0.65f);
 
         activeInstances.put(player.getUniqueId(), this);
@@ -167,17 +168,17 @@ public class MagmaGlaives extends LavaAbility implements AddonAbility {
         long elapsed = System.currentTimeMillis() - chargeStartTime;
 
         if (!graniteApplied && elapsed >= STAGE_1_MS) {
-            sourceBlock.setType(Material.GRANITE);
+            sourceBlock.setType(AranarthBendingUtils.LAVA_WARMUP_SEQUENCE[1]);
             graniteApplied = true;
             playTransitionSound(0.80f);
         }
         if (!netherrackApplied && elapsed >= STAGE_2_MS) {
-            sourceBlock.setType(Material.NETHERRACK);
+            sourceBlock.setType(AranarthBendingUtils.LAVA_WARMUP_SEQUENCE[2]);
             netherrackApplied = true;
             playTransitionSound(0.95f);
         }
         if (!fullyCharged && elapsed >= CHARGE_DURATION) {
-            sourceBlock.setType(Material.MAGMA_BLOCK);
+            sourceBlock.setType(AranarthBendingUtils.LAVA_WARMUP_SEQUENCE[3]);
             fullyCharged = true;
             playChargeCompleteSound();
         }

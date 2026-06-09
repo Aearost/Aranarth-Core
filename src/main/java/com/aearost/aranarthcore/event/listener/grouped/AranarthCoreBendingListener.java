@@ -9,7 +9,9 @@ import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicPulse;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SonicBoom;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
+import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
+import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
@@ -114,6 +116,8 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -323,6 +327,16 @@ public class AranarthCoreBendingListener implements Listener {
 						if (!MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
 							new MagmaGlaives(player);
 						}
+					} else if (abilityName.equalsIgnoreCase("eruption")) {
+						if (!Eruption.hasActiveInstance(player.getUniqueId())) {
+							new Eruption(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("magmawave")) {
+						// Tap sneak selects a nearby lava source; left-click fires the wave.
+						if (!MagmaWave.hasActiveInstance(player.getUniqueId())
+								&& !bendingPlayer.isOnCooldown("MagmaWave")) {
+							MagmaWave.trySelectSource(player);
+						}
 					}
 				} else if (abilityName.equalsIgnoreCase("cablewhip")) {
 					if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
@@ -466,6 +480,23 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// Eruption: left-click during SOURCING confirms the target and begins the warm-up.
+		Eruption eruption = Eruption.getActiveInstance(player.getUniqueId());
+		if (eruption != null) {
+			eruption.onLeftClick();
+			return;
+		}
+
+		// MagmaWave: left-click fires the wave from the previously-tapped lava source.
+		if (MagmaWave.hasPendingSource(player.getUniqueId())
+				&& !MagmaWave.hasActiveInstance(player.getUniqueId())) {
+			BendingPlayer bpMagmaWave = BendingPlayer.getBendingPlayer(player);
+			if (bpMagmaWave != null && bpMagmaWave.getBoundAbilityName().equalsIgnoreCase("magmawave")) {
+				new MagmaWave(player);
+				return;
+			}
+		}
+
 		// MagmaGlaives: left-click fires the next glaive (right first, then left)
 		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
 		if (magmaGlaives != null) {
@@ -590,6 +621,12 @@ public class AranarthCoreBendingListener implements Listener {
 		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (Eruption.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
+		if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -674,6 +711,21 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				magmaGlaives.endWithCooldown();
 			}
+		}
+		// Slot change during SOURCING cancels without cooldown; once warm-up begins the cooldown applies.
+		Eruption eruption = Eruption.getActiveInstance(e.getPlayer().getUniqueId());
+		if (eruption != null) {
+			if (eruption.getPhase() == Eruption.Phase.SOURCING) {
+				eruption.cancelInstantly();
+			} else {
+				eruption.endWithCooldown();
+			}
+		}
+		// Slot change clears any pending source and ends an active wave with cooldown.
+		MagmaWave.clearPendingSource(e.getPlayer().getUniqueId());
+		MagmaWave magmaWave = MagmaWave.getActiveInstance(e.getPlayer().getUniqueId());
+		if (magmaWave != null) {
+			magmaWave.endWithCooldown();
 		}
 
 		// Slot change during charge or with no whips fired - no cooldown, otherwise apply it.
@@ -833,6 +885,32 @@ public class AranarthCoreBendingListener implements Listener {
 	}
 
 	/**
+	 * Suppresses lava and fire damage for the Eruption caster throughout the ability,
+	 * and for enemy entities that are still within the geyser's ground footprint while
+	 * the column is actively rising. Once entities are airborne and the column is gone
+	 * the suppression ends, so natural lava damage from other sources is unaffected.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onEruptionLavaDamage(EntityDamageEvent e) {
+		EntityDamageEvent.DamageCause cause = e.getCause();
+		if (cause != EntityDamageEvent.DamageCause.LAVA
+				&& cause != EntityDamageEvent.DamageCause.FIRE
+				&& cause != EntityDamageEvent.DamageCause.FIRE_TICK
+				&& cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
+			return;
+		}
+		if (!(e.getEntity() instanceof LivingEntity entity)) {
+			return;
+		}
+		for (Eruption eruption : Eruption.getActiveInstances().values()) {
+			if (eruption.isLavaProtected(entity)) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+	}
+
+	/**
 	 * Cancels fire and lava damage to the JetFumes caster while they are in flight.
 	 * The ability starts near a fire/lava source, so without this the player would
 	 * immediately take environmental fire damage the moment the ability activates.
@@ -943,6 +1021,14 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (Eruption.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -1011,6 +1097,7 @@ public class AranarthCoreBendingListener implements Listener {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
+		MagmaWave.clearPendingSource(player.getUniqueId());
 	}
 
 	/**
@@ -1023,6 +1110,7 @@ public class AranarthCoreBendingListener implements Listener {
 			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
+		MagmaWave.clearPendingSource(player.getUniqueId());
 		DaggerVolley.resetStage(player.getUniqueId());
 	}
 
@@ -1111,6 +1199,56 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		dv.damageEntityFromArrow(target, arrow);
+	}
+
+	/**
+	 * Suppresses lava and fire damage for the MagmaWave caster throughout the ability,
+	 * and for enemy entities that remain within the active wave's footprint.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onMagmaWaveLavaDamage(EntityDamageEvent e) {
+		EntityDamageEvent.DamageCause cause = e.getCause();
+		if (cause != EntityDamageEvent.DamageCause.LAVA
+				&& cause != EntityDamageEvent.DamageCause.FIRE
+				&& cause != EntityDamageEvent.DamageCause.FIRE_TICK
+				&& cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
+			return;
+		}
+		if (!(e.getEntity() instanceof LivingEntity entity)) {
+			return;
+		}
+		for (MagmaWave wave : MagmaWave.getActiveInstances().values()) {
+			if (wave.isLavaProtected(entity)) {
+				e.setCancelled(true);
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Prevents wave lava blocks from flowing to adjacent blocks.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onMagmaWaveBlockFromTo(final BlockFromToEvent e) {
+		if (e.getBlock().getType() != Material.LAVA) {
+			return;
+		}
+		if (MagmaWave.isWaveBlock(e.getBlock())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Suppresses physics updates on wave lava blocks so their placed levels remain stable.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onMagmaWaveBlockPhysics(final BlockPhysicsEvent e) {
+		if (e.getBlock().getType() != Material.LAVA) {
+			return;
+		}
+		if (MagmaWave.isWaveBlock(e.getBlock())) {
+			e.setCancelled(true);
+		}
 	}
 
 	/**

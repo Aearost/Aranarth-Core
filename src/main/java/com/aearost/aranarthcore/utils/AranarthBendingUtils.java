@@ -22,6 +22,17 @@ import java.util.Set;
 
 public class AranarthBendingUtils {
 
+    /**
+     * Ordered block progression used by lava warm-up abilities (MagmaGlaives, Eruption).
+     * Index 0 = first transition (Stone), index 3 = fully charged (Magma Block).
+     */
+    public static final Material[] LAVA_WARMUP_SEQUENCE = {
+            Material.STONE,
+            Material.GRANITE,
+            Material.NETHERRACK,
+            Material.MAGMA_BLOCK,
+    };
+
     // -------------------------------------------------------------------------
     // Spiritual energy palette — shared across spiritual abilities
     // -------------------------------------------------------------------------

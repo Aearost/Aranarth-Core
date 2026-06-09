@@ -187,7 +187,8 @@
       "Bash(xargs -I {} sh -c \"unzip -p projectkorra-1.12.0-sources.jar {} 2>/dev/null | grep -l \"\"getMoonPhase\\\\|getFullMoon\\\\|isFullMoon\\\\|isNight\\\\|getTime\"\" | head -1\")",
       "Bash(xxd)",
       "Bash(find C:/Users/liamh/.m2 -name ProjectKorra*.jar)",
-      "Bash(find C:/Users/liamh -name ProjectKorra*.jar)"
+      "Bash(find C:/Users/liamh -name ProjectKorra*.jar)",
+      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *Flow* -o -name *flow*)"
     ]
   }
 }
