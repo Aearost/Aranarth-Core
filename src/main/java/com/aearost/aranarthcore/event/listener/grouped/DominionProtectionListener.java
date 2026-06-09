@@ -23,6 +23,8 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.event.hanging.HangingBreakByEntityEvent;
 import org.bukkit.event.hanging.HangingPlaceEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
@@ -57,6 +59,58 @@ public class DominionProtectionListener implements Listener {
                 e.setCancelled(true);
             }
         }
+    }
+
+    /**
+     * Prevents players from emptying buckets in another Dominion.
+     */
+    @EventHandler
+    public void onBucketEmpty(PlayerBucketEmptyEvent e) {
+        if (!applyBucketLogic(e.getPlayer(), e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents players from picking up liquids (water, lava, powder snow) in another Dominion.
+     */
+    @EventHandler
+    public void onBucketFill(PlayerBucketFillEvent e) {
+        Material blockType = e.getBlock().getType();
+        if (blockType != Material.WATER && blockType != Material.LAVA && blockType != Material.POWDER_SNOW) {
+            return;
+        }
+        if (!applyBucketLogic(e.getPlayer(), e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Shared bucket logic for both empty and fill events.
+     */
+    private boolean applyBucketLogic(Player player, Block block) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        if (aranarthPlayer.isInAdminMode()) {
+            return true;
+        }
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
+        if (chunkDominion == null) {
+            return true;
+        }
+        if (DominionUtils.hasPermission(player, chunkDominion, DominionPermission.BUILD)) {
+            return true;
+        }
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (playerDominion != null && playerDominion.isEnemied(chunkDominion)) {
+            return true;
+        }
+        long now = System.currentTimeMillis();
+        Long last = lastDenyMessageTime.get(player.getUniqueId());
+        if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to do this in &e" + chunkDominion.getName()));
+            lastDenyMessageTime.put(player.getUniqueId(), now);
+        }
+        return false;
     }
 
     /**
@@ -579,7 +633,7 @@ public class DominionProtectionListener implements Listener {
         }
         // Only prevent natural spawning of hostile mobs
         boolean isNaturalSpawn = e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL
-                              || e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.JOCKEY;
+                || e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.JOCKEY;
         if (!isNaturalSpawn || e.getEntity().getSpawnCategory() != SpawnCategory.MONSTER) {
             return;
         }

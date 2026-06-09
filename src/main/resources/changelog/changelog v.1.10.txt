@@ -197,6 +197,7 @@ Minor Features
 [~] Increased the money rewarded from quests based on market and rank prices
 [~] Added shelf blocks to the list of invalid blocks for snow to form on top of during the winter months
 [~] Added lightning rods to the list of invalid blocks for snow to form on top of during the winter months
+[~] Added limitation to using buckets in dominion land and at spawn
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

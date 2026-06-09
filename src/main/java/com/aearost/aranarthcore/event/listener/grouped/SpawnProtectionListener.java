@@ -50,6 +50,36 @@ public class SpawnProtectionListener implements Listener {
 	}
 
 	/**
+	 * Prevents players from emptying buckets at spawn.
+	 */
+	@EventHandler
+	public void onBucketEmpty(PlayerBucketEmptyEvent e) {
+		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
+	 * Prevents players from picking up water, lava, or powder snow at spawn.
+	 */
+	@EventHandler
+	public void onBucketFill(PlayerBucketFillEvent e) {
+		Material blockType = e.getBlock().getType();
+		if (blockType != Material.WATER && blockType != Material.LAVA && blockType != Material.POWDER_SNOW) {
+			return;
+		}
+		if (AranarthUtils.isSpawnLocation(e.getBlock().getLocation())) {
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
+			if (!aranarthPlayer.isInAdminMode()) {
+				e.setCancelled(true);
+			}
+		}
+	}
+
+	/**
 	 * Prevents players from breaking blocks at spawn.
 	 */
 	@EventHandler

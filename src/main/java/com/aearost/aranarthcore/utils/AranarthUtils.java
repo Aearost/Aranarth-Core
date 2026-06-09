@@ -1665,6 +1665,12 @@ public class AranarthUtils {
 			boolean result = handleTeleportLogic(player, from, to);
 			resultCallback.accept(result);
 		} else {
+			AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
+			if (aranarthPlayerCheck != null && !aranarthPlayerCheck.getCombatLogTime().isEmpty()) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport while in combat!"));
+				resultCallback.accept(false);
+				return;
+			}
 			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
 			initiateTeleport(player, () -> {
 				boolean result = handleTeleportLogic(player, from, to);
