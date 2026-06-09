@@ -70,7 +70,7 @@ public class DateUtils {
 					|| name.endsWith("DOOR") || name.endsWith("_PLATE") || name.endsWith("_CARPET") || name.endsWith("_PANE")
 					|| name.endsWith("_BED") || name.endsWith("_CANDLE") || name.endsWith("_BANNER") || name.endsWith("_SIGN")
 					|| name.endsWith("_SAPLING") || name.endsWith("_CORAL") || name.endsWith("_FAN") || name.startsWith("POTTED_")
-					|| name.startsWith("_SHELF")) {
+					|| name.startsWith("_SHELF") || name.endsWith("LIGHTNING_ROD")) {
 				INVALID_SURFACE_BLOCKS.add(material);
 			}
 		}

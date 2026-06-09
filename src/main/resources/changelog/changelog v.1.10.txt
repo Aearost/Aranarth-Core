@@ -196,6 +196,7 @@ Minor Features
 [~] Fixed issue where you could claim dominion resources from lush caves, dripstone caves, and deep dark biomes
 [~] Increased the money rewarded from quests based on market and rank prices
 [~] Added shelf blocks to the list of invalid blocks for snow to form on top of during the winter months
+[~] Added lightning rods to the list of invalid blocks for snow to form on top of during the winter months
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
