@@ -120,6 +120,10 @@ public class DominionProtectionListener implements Listener {
     public void onBreak(BlockBreakEvent e) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(e.getPlayer().getUniqueId());
         if (!aranarthPlayer.isInAdminMode()) {
+            // CropHarvest already processed this so it would be air, no message to be sent
+            if (e.getBlock().getType() == Material.AIR) {
+                return;
+            }
             // Crops can be destroyed by enemies
             if (isEnemyHarvestableCrop(e.getBlock().getType())) {
                 Dominion blockDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
