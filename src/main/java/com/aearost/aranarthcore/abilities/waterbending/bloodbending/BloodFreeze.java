@@ -347,19 +347,21 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     }
 
     private void releaseFrozenTarget() {
-        if (target == null || !target.isValid()) {
+        if (target == null) {
             return;
         }
-        target.setFreezeTicks(0);
         if (target instanceof Player targetPlayer) {
             FROZEN_PLAYERS.remove(targetPlayer.getUniqueId());
-            if (targetBendingWasToggled) {
+            if (targetBendingWasToggled && target.isValid()) {
                 BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
                 if (targetBP != null && !targetBP.isToggled()) {
                     targetBP.toggleBending();
                 }
                 targetBendingWasToggled = false;
             }
+        }
+        if (target.isValid()) {
+            target.setFreezeTicks(0);
         }
     }
 
