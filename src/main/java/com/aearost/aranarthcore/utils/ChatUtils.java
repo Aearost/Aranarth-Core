@@ -538,6 +538,7 @@ public class ChatUtils {
 			Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
 					.append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
 			target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + aranarthPlayer.getNickname()), "/msg " + player.getName() + " ", true));
+			target.playSound(target, org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
 
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
 			AranarthUtils.setPlayer(target.getUniqueId(), targetAranarthPlayer);
