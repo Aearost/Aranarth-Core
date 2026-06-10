@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
@@ -656,7 +657,8 @@ public class SpawnProtectionListener implements Listener {
 					break;
 				}
 
-				if (world.getHighestBlockAt(x, z).getType() != Material.WATER) {
+				if (world.getHighestBlockAt(x, z).getType() != Material.WATER
+						&& (!worldName.equals("world") || DominionUtils.getDominionOfChunk(world.getChunkAt(x >> 4, z >> 4)) == null)) {
 					isLocationFound = true;
 					selectedLocation = world.getHighestBlockAt(x, z).getLocation();
 					selectedLocation.add(0, 1, 0);

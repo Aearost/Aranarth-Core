@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -50,7 +51,8 @@ public class CommandSurvival implements CommandExecutor {
 			while (!isLocationFound) {
 				int x = random.nextInt(24501) - 12250;
 				int z = random.nextInt(24501) - 12250;
-				if (world.getHighestBlockAt(x, z).getType() != Material.WATER) {
+				if (world.getHighestBlockAt(x, z).getType() != Material.WATER
+						&& DominionUtils.getDominionOfChunk(world.getChunkAt(x >> 4, z >> 4)) == null) {
 					isLocationFound = true;
 					selectedLocation = world.getHighestBlockAt(x, z).getLocation();
 					selectedLocation.add(0, 1, 0);
