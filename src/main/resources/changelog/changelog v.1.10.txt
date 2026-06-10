@@ -203,6 +203,7 @@ Minor Features
 [~] Fixed error causing the date to appear incorrectly in /ac punishments
 [+] Made it so /toggle chat stops messages from discord from coming through as well
 [+] Made it so once every hour, a message is sent reminding the player that their chat is toggled
+[~] Prevented the enderchest from being able to be opened while combat tagged
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

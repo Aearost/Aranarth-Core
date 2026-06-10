@@ -34,6 +34,11 @@ public class CommandEnderchest implements CommandExecutor {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to use this command!"));
 				return true;
 			}
+			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+			if (!aranarthPlayer.getCombatLogTime().isEmpty()) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command while combat tagged!"));
+				return true;
+			}
 			player.openInventory(player.getEnderChest());
 			return true;
 		}
