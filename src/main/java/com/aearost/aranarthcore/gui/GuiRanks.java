@@ -76,7 +76,7 @@ public class GuiRanks {
 		}
 		peasantLore.add(ChatUtils.translateToColor("&f&lBending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- Basic abilities"));
-		peasantLore.add(ChatUtils.translateToColor("&f&o- " + Element.ICE.getColor() + "&oIce Bending"));
+		peasantLore.add(ChatUtils.translateToColor("&f&o- " + Element.ICE.getColor() + "&oIcebending"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1x bending damage"));
 		peasantLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		peasantLore.add(ChatUtils.translateToColor("&f&o- 1 home"));
@@ -95,8 +95,8 @@ public class GuiRanks {
 		}
 		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- &3&oHealing"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- " + Element.PLANT.getColor() + "&oPlant Bending"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- " + Element.SAND.getColor() + "&oSand Bending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- " + Element.PLANT.getColor() + "&oPlantbending"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- " + Element.SAND.getColor() + "&oSandbending"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 1.05x bending damage"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- Summon your &e/mount"));
@@ -118,7 +118,7 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- " + Element.METAL.getColor() + "&oMetal Bending"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- " + Element.METAL.getColor() + "&oMetalbending"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x bending damage"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- /back"));
@@ -181,7 +181,7 @@ public class GuiRanks {
 			}
 		}
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
-		countLore.add(ChatUtils.translateToColor("&f&o- " + Element.SPIRITUAL.getColor() + "&oSpiritual Bending"));
+		countLore.add(ChatUtils.translateToColor("&f&o- " + Element.SPIRITUAL.getColor() + "&oSpiritual"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 1.5x bending damage"));
 		countLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		countLore.add(ChatUtils.translateToColor("&f&o- Ability to store EXP in bottles"));
@@ -244,7 +244,7 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- " + Element.LIGHTNING.getColor() + "&oLightning Bending"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- " + Element.LIGHTNING.getColor() + "&oLightningbending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x bending damage"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- /toggle msg"));
@@ -277,7 +277,7 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- " + SoundAbility.SOUND.getColor() + "&oSound Bending"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- " + SoundAbility.SOUND.getColor() + "&oSoundbending"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &c&oFireComet"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 2.25x bending damage"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
@@ -310,10 +310,10 @@ public class GuiRanks {
 		}
 
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.COMBUSTION.getColor() + "&oCombustion Bending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.COMBUSTION.getColor() + "&oCombustion"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.FLIGHT.getColor() + "&oFlight"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.BLOOD.getColor() + "&oBlood Bending"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.LAVA.getColor() + "&oLava Bending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.BLOOD.getColor() + "&oBloodbending"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- " + Element.LAVA.getColor() + "&oLavabending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x bending damage"));
 		emperorLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- Access to #server-chat in Discord"));

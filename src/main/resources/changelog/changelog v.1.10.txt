@@ -210,6 +210,7 @@ Minor Features
 [~] Prevented the enderchest from being able to be opened while combat tagged
 [~] Fixed issue causing flint and steels to disappear when using them
 [+] Added ping sound effect when receiving a private message
+[~] Updated the way the sub-elements are worded in /ranks
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
