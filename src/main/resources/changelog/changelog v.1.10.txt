@@ -201,6 +201,8 @@ Minor Features
 [~] Added automatic untoggle after not interacting with a container for lock, unlock, trust, and untrust
 [~] Prevented /survival from bringing players into another dominion's land
 [~] Fixed error causing the date to appear incorrectly in /ac punishments
+[+] Made it so /toggle chat stops messages from discord from coming through as well
+[+] Made it so once every hour, a message is sent reminding the player that their chat is toggled
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

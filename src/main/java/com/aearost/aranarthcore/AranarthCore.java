@@ -200,6 +200,19 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 0, 100);
 
+        // Remind players every hour if their chat is toggled off
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    if (aranarthPlayer.isTogglingChat()) {
+                        player.sendMessage(ChatUtils.chatMessage("&7Your chat is currently &cdisabled&7. Use &e/toggle chat &7to re-enable it."));
+                    }
+                }
+            }
+        }, 72000, 72000);
+
         // Pull drops harvested with Magnetism
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override

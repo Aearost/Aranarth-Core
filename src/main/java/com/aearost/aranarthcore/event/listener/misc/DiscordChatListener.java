@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.api.Subscribe;
@@ -46,6 +48,10 @@ public class DiscordChatListener {
         Component message = LegacyComponentSerializer.legacySection().deserialize(formatted);
 
         for (Player player : Bukkit.getOnlinePlayers()) {
+            AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+            if (aranarthPlayer.isTogglingChat()) {
+                continue;
+            }
             player.sendMessage(message);
         }
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(formatted));
