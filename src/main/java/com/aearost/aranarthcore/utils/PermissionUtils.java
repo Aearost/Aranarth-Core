@@ -193,8 +193,9 @@ public class PermissionUtils {
 			perms.setPermission("bending.earth.lavaflux", true);
 			perms.setPermission("bending.earth.fissure", true);
 
-			// Disable blood bending in the arena
+			// Disable blood and flight bending in the arena
 			perms.setPermission("bending.water.bloodbending", false);
+			perms.setPermission("bending.air.flight", false);
 		}
 		else {
 			// Disable sub-elements
@@ -691,7 +692,7 @@ public class PermissionUtils {
 
 		// Count
 		if (rank >= 4) {
-			perms.setPermission("bending.air.sound", true);
+			perms.setPermission("bending.air.spiritual", true);
 			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("bending.command.preset.create.10", true);
 			perms.setPermission("aranarthcore.armorstand.solemn", true);
@@ -712,7 +713,6 @@ public class PermissionUtils {
 		// Prince
 		if (rank >= 6) {
 			perms.setPermission("bending.fire.lightningbending", true);
-			perms.setPermission("bending.air.spiritual", true);
 			perms.setPermission("aranarth.toggle.msg", true);
 			perms.setPermission("aranarth.toggle.tp", true);
 			perms.setPermission("bending.command.preset.create.15", true);
@@ -725,12 +725,10 @@ public class PermissionUtils {
 
 		// King
 		if (rank >= 7) {
-			perms.setPermission("bending.earth.lavabending", true);
+			perms.setPermission("bending.air.sound", true);
 			perms.setPermission("bending.ability.firecomet", true);
 			perms.setPermission("aranarth.toggle.chat", true);
 			perms.setPermission("aranarth.nick.color", true);
-			perms.setPermission("bending.earth.lavaflux", true);
-			perms.setPermission("bending.earth.fissure", true);
 			perms.setPermission("bending.command.preset.create.20", true);
 		} else {
 			return;
@@ -738,8 +736,12 @@ public class PermissionUtils {
 
 		// Emperor
 		if (rank >= 8) {
+			perms.setPermission("bending.earth.lavabending", true);
+			perms.setPermission("bending.earth.lavaflux", true);
+			perms.setPermission("bending.earth.fissure", true);
 			perms.setPermission("bending.fire.combustionbending", true);
 			perms.setPermission("bending.water.bloodbending", true);
+			perms.setPermission("bending.air.flight", true);
 			perms.setPermission("bending.command.preset.create.25", true);
 		} else {
 			return;

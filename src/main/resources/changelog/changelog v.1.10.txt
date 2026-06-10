@@ -3,6 +3,7 @@ AranarthCore v. 1.10
 Major Features
 [+] Implemented permission-based custom armor stand poses
 [+] Added Blood Bending to Emperors
+[+] Added Flight to Emperors
 [+] Implemented the CableSlash metal combo
 [+] Added the Sound sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders
@@ -67,6 +68,9 @@ Major Features
 [+] Added GUI for /votetop
 [~] Updated the player head loading logic for all GUIs to no longer contain the "Dynamic" keyword
 [+] Added scaling based off in-game ranks instead of Unarmed level
+[~] Made Spiritual unlocked at Count instead of Duke
+[~] Made Sound unlocked at King instead of Count
+[~] Made Lava unlocked at Emperor instead of King
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
@@ -219,3 +223,4 @@ Backend Code Changes
 - Added cooldown to the missing permission message in Dominion protection
 - Also added event handler parameter to the BlockBreakEvent listener
 - Ensured that AranarthCore data saves upon automatic server restarts as well as onDisable() is not reliably called
+- Dynamically sourced sub-element color codes in /ranks
