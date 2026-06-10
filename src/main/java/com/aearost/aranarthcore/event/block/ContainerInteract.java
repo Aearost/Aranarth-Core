@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.block;
 
+import com.aearost.aranarthcore.commands.general.CommandLock;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.LockedContainer;
@@ -67,6 +68,8 @@ public class ContainerInteract {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
+        CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {
@@ -98,6 +101,8 @@ public class ContainerInteract {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
+        CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {
@@ -134,6 +139,8 @@ public class ContainerInteract {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
+        CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (!AranarthUtils.isSurvivalWorld(block.getWorld().getName()) || AranarthUtils.isSpawnLocation(block.getLocation())) {
@@ -161,6 +168,8 @@ public class ContainerInteract {
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+        aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
+        CommandLock.scheduleToggleExpiry(uuid);
         LockedContainer container = AranarthUtils.getLockedContainerAtBlock(block);
 
         if (container == null) {

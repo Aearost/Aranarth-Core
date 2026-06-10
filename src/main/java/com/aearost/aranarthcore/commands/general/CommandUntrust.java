@@ -10,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import static com.aearost.aranarthcore.commands.general.CommandLock.scheduleToggleExpiry;
+
 /**
  * Allows for the specified player to be untrusted to a specified container.
  */
@@ -49,11 +51,13 @@ public class CommandUntrust implements CommandExecutor {
 									aranarthPlayer.setUntrustedPlayerUUID(offlinePlayer.getUniqueId());
 									aranarthPlayer.setUnlockingContainer(false);
 									aranarthPlayer.setLockingContainer(false);
+									aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 									AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 									String nickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
 									sender.sendMessage(ChatUtils.chatMessage("&7You are now untrusting &e" + nickname
 											+ " &7from your containers - right-click to untrust them"));
 									sender.sendMessage(ChatUtils.chatMessage("&7Run &e/untrust &7again to exit the untrust mode"));
+									scheduleToggleExpiry(player.getUniqueId());
 								}
 								isPlayerFound = true;
 								return true;

@@ -8,6 +8,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import static com.aearost.aranarthcore.commands.general.CommandLock.scheduleToggleExpiry;
+
 /**
  * Allows for the player to unlock the next clicked Locked Container.
  */
@@ -33,9 +35,11 @@ public class CommandUnlock implements CommandExecutor {
 				aranarthPlayer.setUntrustedPlayerUUID(null);
 				aranarthPlayer.setUnlockingContainer(true);
 				aranarthPlayer.setLockingContainer(false);
+				aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				sender.sendMessage(ChatUtils.chatMessage("&7You are now unlocking containers - right-click to unlock them"));
 				sender.sendMessage(ChatUtils.chatMessage("&7Run &e/unlock &7again to exit unlocking mode"));
+				scheduleToggleExpiry(player.getUniqueId());
 			}
         } else {
 			sender.sendMessage(ChatUtils.chatMessage("&cThis command can only be executed in-game!"));

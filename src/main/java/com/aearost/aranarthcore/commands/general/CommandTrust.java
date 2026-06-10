@@ -10,6 +10,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import static com.aearost.aranarthcore.commands.general.CommandLock.scheduleToggleExpiry;
+
 /**
  * Allows for the specified player to be trusted to a specified container.
  */
@@ -45,11 +47,13 @@ public class CommandTrust implements CommandExecutor {
 								aranarthPlayer.setUntrustedPlayerUUID(null);
 								aranarthPlayer.setUnlockingContainer(false);
 								aranarthPlayer.setLockingContainer(false);
+								aranarthPlayer.setContainerToggleExpiry(System.currentTimeMillis() + 5000);
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 								String nickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
 								sender.sendMessage(ChatUtils.chatMessage("&7You are now trusting &e" + nickname
 										+ " &7to your containers - right-click to trust them"));
 								sender.sendMessage(ChatUtils.chatMessage("&7Run &e/trust &7again to exit trust mode"));
+								scheduleToggleExpiry(player.getUniqueId());
 							}
 							isPlayerFound = true;
 							return true;

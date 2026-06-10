@@ -93,6 +93,7 @@ public class AranarthPlayer {
 	private boolean isDayMessageDisabled = false;
 	private boolean isWeatherMessageDisabled = false;
 	private boolean isBulkSellShulkerEnabled = false;
+	private long containerToggleExpiry = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1436,5 +1437,13 @@ public class AranarthPlayer {
 
 	public void setBulkSellShulkerEnabled(boolean isBulkSellShulkerEnabled) {
 		this.isBulkSellShulkerEnabled = isBulkSellShulkerEnabled;
+	}
+
+	public long getContainerToggleExpiry() {
+		return containerToggleExpiry;
+	}
+
+	public void setContainerToggleExpiry(long containerToggleExpiry) {
+		this.containerToggleExpiry = containerToggleExpiry;
 	}
 }
