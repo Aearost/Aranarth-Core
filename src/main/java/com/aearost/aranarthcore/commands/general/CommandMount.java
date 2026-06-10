@@ -30,10 +30,11 @@ public class CommandMount implements CommandExecutor {
         }
 
         switch (args[0].toLowerCase()) {
-            case "skills", "info" -> {
+            case "skills" -> {
                 String element = args.length >= 2 ? args[1].toUpperCase() : null;
                 showSkills(player, element);
             }
+            case "info" -> sendInfo(player);
             case "nickname" -> {
                 if (args.length < 2) {
                     player.sendMessage(ChatUtils.chatMessage(
@@ -48,9 +49,50 @@ public class CommandMount implements CommandExecutor {
                 }
             }
             default -> player.sendMessage(ChatUtils.chatMessage(
-                    "&cInvalid syntax: &e/mount [skills|remove]"));
+                    "&cInvalid syntax: &e/mount [info|skills|nickname]"));
         }
         return true;
+    }
+
+    private void sendInfo(Player player) {
+        String element = MountUtils.getElementForPlayer(player);
+        if (element == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must have an element to use this!"));
+            return;
+        }
+
+        Mount mount = MountUtils.getOrCreate(player.getUniqueId(), element);
+        String color = MountUtils.getElementColor(element);
+        String displayName = MountUtils.getDisplayName(player.getUniqueId(), element);
+        String thirdLabel = MountUtils.getThirdAttrLabel(element);
+
+        String healthFoodHint = switch (element) {
+            case "AIR" -> " (carrots, potatoes, beetroot)";
+            case "FIRE" -> " (raw meats)";
+            case "WATER" -> " (cod, salmon)";
+            default -> " (mushrooms, melon, pumpkin)";
+        };
+        String thirdHowTo = switch (element) {
+            case "EARTH" -> "Use the Tunnel ability (spacebar)";
+            case "FIRE" -> "Use the Ram ability (run into mobs)";
+            case "WATER" -> "Use the Bite ability (spacebar)";
+            case "AIR" -> "Use the Bellow ability (spacebar)";
+            default -> "Not yet implemented";
+        };
+
+        player.sendMessage(ChatUtils.translateToColor("&8&l- - - &6&l" + displayName + "&6&l's Information &8&l- - -"));
+        player.sendMessage(ChatUtils.translateToColor("&6Health &8\u00bb &fLvl " + skillProgress(mount.getHealthLevel(), mount.getHealthXp(), mount.xpNeededForNextHealthLevel())));
+        player.sendMessage(ChatUtils.translateToColor("  &7&oTake damage or heal your mount" + healthFoodHint));
+        player.sendMessage(ChatUtils.translateToColor("&6Speed &8\u00bb &fLvl " + skillProgress(mount.getSpeedLevel(), mount.getSpeedXp(), mount.xpNeededForNextSpeedLevel())));
+        player.sendMessage(ChatUtils.translateToColor("  &7&oRide your mount"));
+        player.sendMessage(ChatUtils.translateToColor("&6" + thirdLabel + " &8\u00bb &fLvl " + skillProgress(mount.getThirdLevel(), mount.getThirdXp(), mount.xpNeededForNextThirdLevel())));
+        player.sendMessage(ChatUtils.translateToColor("  &7&o" + thirdHowTo));
+    }
+
+    private String skillProgress(int level, long xp, long needed) {
+        return level >= Mount.MAX_LEVEL
+                ? level + " &a(MAX)"
+                : level + " &8(&e" + xp + "&8/&e" + needed + " XP&8)";
     }
 
     private void showSkills(Player player, String requestedElement) {

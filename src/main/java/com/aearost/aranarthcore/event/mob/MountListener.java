@@ -251,6 +251,16 @@ public class MountListener implements Listener {
     );
 
     /**
+     * Extra foods accepted only by the Sniffer (Earth mount).
+     */
+    private static final Map<Material, Double> SNIFFER_EXTRA_FOODS = Map.of(
+            Material.BROWN_MUSHROOM, 20.0,
+            Material.RED_MUSHROOM, 20.0,
+            Material.MELON_SLICE, 25.0,
+            Material.PUMPKIN, 25.0
+    );
+
+    /**
      * Extra foods accepted only by the Ravager (Fire mount).
      */
     private static final Map<Material, Double> RAVAGER_EXTRA_FOODS = Map.of(
@@ -635,7 +645,7 @@ public class MountListener implements Listener {
                         owner.sendMessage(ChatUtils.chatMessage(
                                 MountUtils.getElementColor(mountElement) + mountDisplayName
                                         + " &7needs some time to recover! "
-                                        + "Use &e/mounts &7to check their status"));
+                                        + "Use &e/mount info &7to check their status"));
                     }
                 } catch (IllegalArgumentException ignored) {
                 }
@@ -931,7 +941,7 @@ public class MountListener implements Listener {
 
         return switch (element) {
             case "FIRE" -> RAVAGER_EXTRA_FOODS.get(item);
-            case "EARTH" -> AranarthUtils.isFlower(item) ? 20.0 : null;
+            case "EARTH" -> SNIFFER_EXTRA_FOODS.get(item);
             case "WATER" -> POLAR_BEAR_EXTRA_FOODS.get(item);
             case "AIR" -> GHAST_EXTRA_FOODS.get(item);
             default -> null;

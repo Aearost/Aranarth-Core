@@ -9,7 +9,7 @@ import java.util.List;
 
 public class CommandMountCompleter implements TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = List.of("skills", "nickname");
+    private static final List<String> SUBCOMMANDS = List.of("info", "skills", "nickname");
     private static final List<String> ELEMENTS = List.of("fire", "water", "earth", "air");
 
     @Override

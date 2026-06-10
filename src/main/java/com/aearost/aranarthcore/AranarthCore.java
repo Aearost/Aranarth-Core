@@ -555,7 +555,6 @@ public class AranarthCore extends JavaPlugin {
         getCommand("streak").setExecutor(new CommandStreak());
         getCommand("mount").setExecutor(new CommandMount());
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
-        getCommand("mounts").setExecutor(new CommandMounts());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
     }
