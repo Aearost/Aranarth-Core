@@ -27,7 +27,7 @@ public class PlayerAutoReplenishSlot {
 			return;
 		}
 
-		if (e.getItemInHand().getAmount() - 1 == 0) {
+		if (e.getItemInHand().getMaxStackSize() > 1 && e.getItemInHand().getAmount() - 1 == 0) {
 			PlayerInventory inventory = player.getInventory();
 			ItemStack[] contents = inventory.getContents();
 			int placedSlot = 0;

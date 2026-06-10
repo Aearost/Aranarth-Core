@@ -113,16 +113,14 @@ public class ItemUtils {
 				if (amount == 0) {
 					return 0;
 				}
-				// Fill up an empty stack until it's full while removing one amount each iteration
-				if (Objects.nonNull(is.getItemMeta()) && Objects.nonNull(itemToAdd.getItemMeta())) {
-					if (is.getItemMeta().getDisplayName().equals(itemToAdd.getItemMeta().getDisplayName())) {
-						while (amount > 0) {
-							if (is.getAmount() < 64) {
-								is.setAmount(is.getAmount() + 1);
-								amount--;
-							} else {
-								break;
-							}
+				// Fill up an existing stack of the same item until it's full
+				if (is.isSimilar(itemToAdd)) {
+					while (amount > 0) {
+						if (is.getAmount() < is.getMaxStackSize()) {
+							is.setAmount(is.getAmount() + 1);
+							amount--;
+						} else {
+							break;
 						}
 					}
 				}
