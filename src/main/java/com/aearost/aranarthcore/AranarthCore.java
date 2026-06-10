@@ -47,6 +47,7 @@ public class AranarthCore extends JavaPlugin {
     private DiscordChatListener discordChatListener;
     private ListenerAdapter discordMemberJoinListener;
     private ListenerAdapter discordMemberLeaveListener;
+    private volatile boolean savedOnDisable = false;
 
     /**
      * Called when the plugin is first enabled on server startup.
@@ -87,6 +88,14 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info("AranarthCore Bending has been loaded");
 
         runRepeatingTasks();
+
+        // Fallback shutdown hook for restarters (i.e UltimateAutoRestart) that may
+        // terminate the JVM via System.exit() without triggering onDisable()
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!savedOnDisable) {
+                saveAll();
+            }
+        }, "AranarthCore-ShutdownHook"));
     }
 
     private void runRepeatingTasks() {
@@ -916,6 +925,29 @@ public class AranarthCore extends JavaPlugin {
      */
     @Override
     public void onDisable() {
+        savedOnDisable = true;
+        saveAll();
+
+        Bukkit.resetRecipes();
+        discordChatListener.unsubscribe();
+
+        JDA jda = DiscordSRV.getPlugin().getJda();
+        if (jda != null) {
+            if (discordMemberJoinListener != null) {
+                jda.removeEventListener(discordMemberJoinListener);
+            }
+            if (discordMemberLeaveListener != null) {
+                jda.removeEventListener(discordMemberLeaveListener);
+            }
+        }
+    }
+
+    /**
+     * Saves all persistent data to disk.
+     * Called from onDisable() and from the JVM shutdown hook (fallback for
+     * restarters like UltimateAutoRestart that may bypass onDisable()).
+     */
+    private void saveAll() {
         // End all active AstralProjections/cancel the abilities
         AstralProjection.endAllProjections();
 
@@ -948,19 +980,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveGates();
         MountUtils.syncAllActiveHealthToData();
         PersistenceUtils.saveMounts();
-
-        Bukkit.resetRecipes();
-        discordChatListener.unsubscribe();
-
-        JDA jda = DiscordSRV.getPlugin().getJda();
-        if (jda != null) {
-            if (discordMemberJoinListener != null) {
-                jda.removeEventListener(discordMemberJoinListener);
-            }
-            if (discordMemberLeaveListener != null) {
-                jda.removeEventListener(discordMemberLeaveListener);
-            }
-        }
+        Bukkit.getLogger().info("Aranarth data has been saved (shutdown)");
     }
 
 }

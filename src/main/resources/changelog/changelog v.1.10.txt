@@ -218,3 +218,4 @@ Backend Code Changes
 - Fixed issues with outdated PK method reference causing several abilities to break/bug out
 - Added cooldown to the missing permission message in Dominion protection
 - Also added event handler parameter to the BlockBreakEvent listener
+- Ensured that AranarthCore data saves upon automatic server restarts as well as onDisable() is not reliably called
