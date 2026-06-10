@@ -83,7 +83,7 @@ public class CommandPunishments {
 						}
 						String day = punishment.getDate().getDayOfMonth() + "";
 						if (day.length() == 1) {
-							day = "0" + month;
+							day = "0" + day;
 						}
 						String hour = punishment.getDate().getHour() + "";
 						if (hour.length() == 1) {

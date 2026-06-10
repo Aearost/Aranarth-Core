@@ -200,6 +200,7 @@ Minor Features
 [~] Added limitation to using buckets in dominion land and at spawn
 [~] Added automatic untoggle after not interacting with a container for lock, unlock, trust, and untrust
 [~] Prevented /survival from bringing players into another dominion's land
+[~] Fixed error causing the date to appear incorrectly in /ac punishments
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
