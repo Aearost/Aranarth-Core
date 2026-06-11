@@ -61,6 +61,17 @@ public class AranarthBendingUtils {
     /** Amplifier used for all spiritual-ability curse effects (0 = level I). */
     public static final int SPIRIT_EFFECT_AMPLIFIER = 0;
 
+    // -------------------------------------------------------------------------
+    // Bloodbending dust palette — shared across all bloodbending abilities
+    // -------------------------------------------------------------------------
+
+    /** Dark crimson dust used for sustained bloodbending particle effects. */
+    public static final Particle.DustOptions BLOOD_DUST =
+            new Particle.DustOptions(Color.fromRGB(170, 8, 8), 1.3f);
+    /** Bright red dust used for bursts and impacts in bloodbending abilities. */
+    public static final Particle.DustOptions BLOOD_DUST_BRIGHT =
+            new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
+
     /**
      * Applies one randomly chosen spirit curse to the target entity using the
      * standard duration and amplifier shared across spiritual abilities.

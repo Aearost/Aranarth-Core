@@ -1,12 +1,16 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -36,11 +40,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private static final double DAMAGE_PER_TICK = 1.0;
     private static final int MAX_SLOWNESS_LEVEL = 5;
     private static final double TARGET_HIT_RADIUS = 0.5;
-
-    private static final Particle.DustOptions BLOOD_DUST =
-            new Particle.DustOptions(Color.fromRGB(170, 8, 8), 1.3f);
-    private static final Particle.DustOptions BLOOD_DUST_BRIGHT =
-            new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -77,7 +76,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private LivingEntity target;
     private int slownessLevel;
     private boolean decayStarted;
-    private boolean targetBendingWasToggled;
+    private final Set<Element> suppressedElements = new HashSet<>();
 
     public BloodFreeze(final Player player) {
         super(player);
@@ -102,7 +101,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         this.slownessLevel = 0;
         this.lastDamageTime = 0L;
         this.decayStarted = false;
-        this.targetBendingWasToggled = false;
 
         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PHANTOM_AMBIENT, 0.3f, 0.8f);
 
@@ -154,9 +152,19 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         if (target instanceof Player targetPlayer) {
             FROZEN_PLAYERS.add(targetPlayer.getUniqueId());
             BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
-            if (targetBP != null && targetBP.isToggled()) {
-                targetBP.toggleBending();
-                targetBendingWasToggled = true;
+            if (targetBP != null) {
+                for (Element element : targetBP.getElements()) {
+                    if (element != Element.CHI && targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
+                for (Element element : targetBP.getSubElements()) {
+                    if (targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
             }
         }
 
@@ -175,6 +183,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         }
 
         target.setFreezeTicks(target.getMaxFreezeTicks());
+        target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, false, true, true), true);
         spawnCastingParticles();
 
         if (System.currentTimeMillis() - lastDamageTime >= DAMAGE_INTERVAL_MS) {
@@ -251,7 +260,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
                 double x = Math.cos(angle) * radius;
                 double z = Math.sin(angle) * radius;
                 center.getWorld().spawnParticle(Particle.DUST,
-                        center.clone().add(x, y, z), 1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                        center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
             }
         }
     }
@@ -267,10 +276,10 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             double yOffset = Math.sin(tick * 0.2 + i) * 0.25;
             center.getWorld().spawnParticle(Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.25, yOffset, Math.sin(angle) * 0.25),
-                    1, 0, 0, 0, 0, BLOOD_DUST);
+                    1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
             center.getWorld().spawnParticle(Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.5, -yOffset, Math.sin(angle) * 0.5),
-                    1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                    1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
     }
 
@@ -281,7 +290,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             double angle = (2.0 * Math.PI / points) * i;
             center.getWorld().spawnParticle(Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.65, 0, Math.sin(angle) * 0.65),
-                    1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                    1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
     }
 
@@ -292,6 +301,7 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private LivingEntity findTarget() {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
+        Dominion casterDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         LivingEntity closest = null;
         double closestDist = Double.MAX_VALUE;
 
@@ -310,6 +320,18 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             }
             if (entity instanceof Player targetPlayer && FROZEN_PLAYERS.contains(targetPlayer.getUniqueId())) {
                 continue;
+            }
+            if (entity instanceof Player targetPlayer) {
+                Dominion targetDominion = DominionUtils.getPlayerDominion(targetPlayer.getUniqueId());
+                if (casterDominion != null && targetDominion != null) {
+                    if (casterDominion.isSameDominion(targetDominion)) {
+                        continue;
+                    }
+                    DominionRank relation = DominionUtils.getRelationKey(casterDominion, targetDominion);
+                    if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+                        continue;
+                    }
+                }
             }
 
             double dist = entity.getLocation().distance(eye);
@@ -352,12 +374,16 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
         }
         if (target instanceof Player targetPlayer) {
             FROZEN_PLAYERS.remove(targetPlayer.getUniqueId());
-            if (targetBendingWasToggled && target.isValid()) {
+            if (!suppressedElements.isEmpty()) {
                 BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
-                if (targetBP != null && !targetBP.isToggled()) {
-                    targetBP.toggleBending();
+                if (targetBP != null) {
+                    for (Element element : suppressedElements) {
+                        if (!targetBP.isElementToggled(element)) {
+                            targetBP.toggleElement(element);
+                        }
+                    }
                 }
-                targetBendingWasToggled = false;
+                suppressedElements.clear();
             }
         }
         if (target.isValid()) {

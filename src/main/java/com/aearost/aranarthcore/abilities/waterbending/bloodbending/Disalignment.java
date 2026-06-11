@@ -1,13 +1,17 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
@@ -15,6 +19,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.EnumSet;
@@ -32,11 +38,6 @@ public class Disalignment extends BloodAbility implements AddonAbility {
     private static final long DISALIGNMENT_DURATION_MS = 10000L;
     private static final long ACTION_BAR_INTERVAL_MS = 500L;
     private static final double TARGET_HIT_RADIUS = 0.5;
-
-    private static final Particle.DustOptions BLOOD_DUST =
-            new Particle.DustOptions(Color.fromRGB(170, 8, 8), 1.3f);
-    private static final Particle.DustOptions BLOOD_DUST_BRIGHT =
-            new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -72,6 +73,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
     private long lastActionBarTime;
     private LivingEntity target;
     private boolean disalignmentApplied;
+    private final Set<Element> suppressedElements = new HashSet<>();
 
     public Disalignment(final Player player) {
         super(player);
@@ -180,10 +182,21 @@ public class Disalignment extends BloodAbility implements AddonAbility {
 
     private void applyDisalignment() {
         if (target instanceof Player targetPlayer) {
+            DISALIGNED_PLAYERS.add(targetPlayer.getUniqueId());
             BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
             if (targetBP != null) {
-                targetBP.blockChi();
-                DISALIGNED_PLAYERS.add(targetPlayer.getUniqueId());
+                for (Element element : targetBP.getElements()) {
+                    if (element != Element.CHI && targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
+                for (Element element : targetBP.getSubElements()) {
+                    if (targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
             }
         }
 
@@ -200,6 +213,10 @@ public class Disalignment extends BloodAbility implements AddonAbility {
         if (System.currentTimeMillis() - disalignmentStartTime >= disalignmentDuration) {
             finishWithCooldown();
             return;
+        }
+
+        if (target.isValid()) {
+            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, false, true, true), true);
         }
 
         if (target instanceof Player targetPlayer && target.isValid()) {
@@ -235,11 +252,16 @@ public class Disalignment extends BloodAbility implements AddonAbility {
         }
         if (target instanceof Player targetPlayer) {
             DISALIGNED_PLAYERS.remove(targetPlayer.getUniqueId());
-            if (targetPlayer.isOnline()) {
+            if (!suppressedElements.isEmpty() && targetPlayer.isOnline()) {
                 BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
-                if (targetBP != null && targetBP.isChiBlocked()) {
-                    targetBP.unblockChi();
+                if (targetBP != null) {
+                    for (Element element : suppressedElements) {
+                        if (!targetBP.isElementToggled(element)) {
+                            targetBP.toggleElement(element);
+                        }
+                    }
                 }
+                suppressedElements.clear();
             }
         }
         disalignmentApplied = false;
@@ -262,7 +284,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
                 double x = Math.cos(angle) * radius;
                 double z = Math.sin(angle) * radius;
                 center.getWorld().spawnParticle(Particle.DUST,
-                        center.clone().add(x, y, z), 1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                        center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
             }
         }
     }
@@ -277,7 +299,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
             double x = Math.cos(pitch) * Math.cos(yaw) * 0.6;
             double y = Math.sin(pitch) * 0.6;
             double z = Math.cos(pitch) * Math.sin(yaw) * 0.6;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, BLOOD_DUST);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -288,10 +310,10 @@ public class Disalignment extends BloodAbility implements AddonAbility {
 
         center.getWorld().spawnParticle(Particle.DUST,
                 center.clone().add(Math.cos(angle) * 0.3, 0, Math.sin(angle) * 0.3),
-                1, 0, 0, 0, 0, BLOOD_DUST);
+                1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         center.getWorld().spawnParticle(Particle.DUST,
                 center.clone().add(Math.cos(angle + Math.PI) * 0.3, 0, Math.sin(angle + Math.PI) * 0.3),
-                1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
     }
 
     private void spawnDisalignmentImpact() {
@@ -302,13 +324,13 @@ public class Disalignment extends BloodAbility implements AddonAbility {
             double angle = (2.0 * Math.PI / outerPoints) * i;
             center.getWorld().spawnParticle(Particle.DUST,
                     center.clone().add(Math.cos(angle) * 0.6, 0, Math.sin(angle) * 0.6),
-                    1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+                    1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
         // Vertical column of particles through the body to represent disrupted chi flow
         for (int i = 0; i < 8; i++) {
             center.getWorld().spawnParticle(Particle.DUST,
                     center.clone().add(0, (i - 3.5) * (target.getHeight() / 8.0), 0),
-                    1, 0, 0, 0, 0, BLOOD_DUST);
+                    1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -319,6 +341,7 @@ public class Disalignment extends BloodAbility implements AddonAbility {
     private LivingEntity findTarget() {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
+        Dominion casterDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         LivingEntity closest = null;
         double closestDist = Double.MAX_VALUE;
 
@@ -337,6 +360,18 @@ public class Disalignment extends BloodAbility implements AddonAbility {
             }
             if (entity instanceof Player targetPlayer && DISALIGNED_PLAYERS.contains(targetPlayer.getUniqueId())) {
                 continue;
+            }
+            if (entity instanceof Player targetPlayer) {
+                Dominion targetDominion = DominionUtils.getPlayerDominion(targetPlayer.getUniqueId());
+                if (casterDominion != null && targetDominion != null) {
+                    if (casterDominion.isSameDominion(targetDominion)) {
+                        continue;
+                    }
+                    DominionRank relation = DominionUtils.getRelationKey(casterDominion, targetDominion);
+                    if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+                        continue;
+                    }
+                }
             }
 
             double dist = entity.getLocation().distance(eye);

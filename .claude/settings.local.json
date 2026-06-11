@@ -188,7 +188,12 @@
       "Bash(xxd)",
       "Bash(find C:/Users/liamh/.m2 -name ProjectKorra*.jar)",
       "Bash(find C:/Users/liamh -name ProjectKorra*.jar)",
-      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *Flow* -o -name *flow*)"
+      "Bash(find C:/Users/liamh/IdeaProjects/ProjectKorra-wip -type f -name *Flow* -o -name *flow*)",
+      "Bash(find C:/Users/liamh/.gradle -name projectkorra*.jar)",
+      "Bash(find C:/Users/liamh -name projectkorra*.jar)",
+      "Bash(/dev/null grep:*)",
+      "Bash(sed -n '17,25p' /tmp/com/projectkorra/projectkorra/ability/BloodAbility.java)",
+      "Bash(sed -n '51,57p' /tmp/com/projectkorra/projectkorra/ability/WaterAbility.java)"
     ]
   }
 }

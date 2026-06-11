@@ -32,6 +32,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
@@ -117,6 +118,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(LifeRip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
@@ -265,6 +267,10 @@ public class AranarthCoreBendingListener implements Listener {
 					} else if (abilityName.equalsIgnoreCase("disalignment")) {
 						if (!Disalignment.hasActiveInstance(player.getUniqueId())) {
 							new Disalignment(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("liferip")) {
+						if (!LifeRip.hasActiveInstance(player.getUniqueId())) {
+							new LifeRip(player);
 						}
 					}
 				} else if (ability instanceof PlantAbility) {
@@ -660,6 +666,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (LifeRip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -787,6 +796,11 @@ public class AranarthCoreBendingListener implements Listener {
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			disalignment.remove();
 		}
+		// Slot change always cancels LifeRip without a cooldown
+		LifeRip lifeRip = LifeRip.getActiveInstance(e.getPlayer().getUniqueId());
+		if (lifeRip != null) {
+			lifeRip.remove();
+		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 
 		// Slot change during CASTING cancels without cooldown; later phases run to completion.
@@ -903,6 +917,18 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		if (Burial.isBuried(e.getEntity().getUniqueId())) {
 			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Cancels an active LifeRip immediately when the user takes damage.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onLifeRipCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) return;
+		LifeRip lifeRip = LifeRip.getActiveInstance(player.getUniqueId());
+		if (lifeRip != null) {
+			lifeRip.cancelFromDamage();
 		}
 	}
 
@@ -1076,6 +1102,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (LifeRip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -1137,6 +1167,19 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
 		MagmaWave.clearPendingSource(player.getUniqueId());
+		LifeRip.resetTargetDrain(player);
+		LifeRip.resetCasterGain(player);
+	}
+
+	/**
+	 * Removes any LifeRip health bonus from a player when they enter the arena world.
+	 * Arena fights should always start on a level playing field.
+	 */
+	@EventHandler
+	public void onWorldChange(PlayerChangedWorldEvent e) {
+		if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
+			LifeRip.resetCasterGain(e.getPlayer());
+		}
 	}
 
 	/**

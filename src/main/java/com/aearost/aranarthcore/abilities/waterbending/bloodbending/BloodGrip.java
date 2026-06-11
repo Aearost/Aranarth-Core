@@ -1,12 +1,13 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
+import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -18,6 +19,8 @@ import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.EntityEquipment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
 import java.util.EnumSet;
@@ -39,11 +42,6 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
     private static final double FLING_ARMOR_DRAG = 0.35;
     private static final double DRAG_DEAD_ZONE = 1.2;
     private static final double TARGET_HIT_RADIUS = 0.5;
-
-    private static final Particle.DustOptions BLOOD_DUST =
-            new Particle.DustOptions(Color.fromRGB(170, 8, 8), 1.3f);
-    private static final Particle.DustOptions BLOOD_DUST_BRIGHT =
-            new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
 
     private static final Set<EntityType> UNDEAD_TYPES = EnumSet.of(
             EntityType.ZOMBIE,
@@ -78,8 +76,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
     private long controlStartTime;
     private LivingEntity target;
     private boolean targetAiDisabled;
-    private float originalWalkSpeed = 0.2f;
-    private boolean targetBendingWasToggled = false;
+    private final Set<Element> suppressedElements = new HashSet<>();
 
     public BloodGrip(final Player player) {
         super(player);
@@ -160,13 +157,20 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
 
         if (target instanceof Player targetPlayer) {
             CONTROLLED_PLAYERS.add(targetPlayer.getUniqueId());
-            originalWalkSpeed = targetPlayer.getWalkSpeed();
-            targetPlayer.setWalkSpeed(0.0f);
-            // Suppress all bending for the duration of the grip.
             BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
-            if (targetBP != null && targetBP.isToggled()) {
-                targetBP.toggleBending();
-                targetBendingWasToggled = true;
+            if (targetBP != null) {
+                for (Element element : targetBP.getElements()) {
+                    if (element != Element.CHI && targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
+                for (Element element : targetBP.getSubElements()) {
+                    if (targetBP.isElementToggled(element)) {
+                        targetBP.toggleElement(element);
+                        suppressedElements.add(element);
+                    }
+                }
             }
         }
 
@@ -190,6 +194,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             return;
         }
 
+        target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 40, 1, false, true, true), true);
         spawnControlParticles();
         dragTarget();
     }
@@ -257,7 +262,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double x = Math.cos(angle) * radius;
             double z = Math.sin(angle) * radius;
             double y = Math.sin(elapsed * 4.0 + i) * 0.35;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, BLOOD_DUST);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -271,7 +276,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double x = Math.cos(pitch) * Math.cos(yaw);
             double y = Math.sin(pitch);
             double z = Math.cos(pitch) * Math.sin(yaw);
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, BLOOD_DUST_BRIGHT);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, y, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST_BRIGHT);
         }
     }
 
@@ -285,7 +290,7 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
             double angle = baseAngle + (2.0 * Math.PI / points) * i;
             double x = Math.cos(angle) * 0.6;
             double z = Math.sin(angle) * 0.6;
-            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, BLOOD_DUST);
+            center.getWorld().spawnParticle(Particle.DUST, center.clone().add(x, 0, z), 1, 0, 0, 0, 0, AranarthBendingUtils.BLOOD_DUST);
         }
     }
 
@@ -435,13 +440,16 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
         }
         if (target instanceof Player targetPlayer) {
             CONTROLLED_PLAYERS.remove(targetPlayer.getUniqueId());
-            targetPlayer.setWalkSpeed(originalWalkSpeed);
-            if (targetBendingWasToggled) {
+            if (!suppressedElements.isEmpty()) {
                 BendingPlayer targetBP = BendingPlayer.getBendingPlayer(targetPlayer);
-                if (targetBP != null && !targetBP.isToggled()) {
-                    targetBP.toggleBending();
+                if (targetBP != null) {
+                    for (Element element : suppressedElements) {
+                        if (!targetBP.isElementToggled(element)) {
+                            targetBP.toggleElement(element);
+                        }
+                    }
                 }
-                targetBendingWasToggled = false;
+                suppressedElements.clear();
             }
         }
     }

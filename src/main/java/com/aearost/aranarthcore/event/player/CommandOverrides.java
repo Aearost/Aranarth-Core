@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mount;
@@ -95,6 +96,8 @@ public class CommandOverrides {
                         }
                         // Dismiss any active mount — the new element may have a different mount
                         dismissActiveMountIfPresent(player);
+                        // Strip any LifeRip health bonus
+                        LifeRip.resetCasterGain(player);
                     }
                 }
             }
