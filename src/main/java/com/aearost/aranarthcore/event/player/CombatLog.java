@@ -19,6 +19,9 @@ import java.util.UUID;
  */
 public class CombatLog {
 	public void execute(EntityDamageByEntityEvent e) {
+		if (e.isCancelled()) {
+			return;
+		}
 		if (e.getDamager() instanceof Player attacker) {
 			if (e.getEntity() instanceof Player player) {
 				Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());

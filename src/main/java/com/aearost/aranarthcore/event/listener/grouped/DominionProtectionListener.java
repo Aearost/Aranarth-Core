@@ -15,6 +15,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -206,7 +207,7 @@ public class DominionProtectionListener implements Listener {
      * Handles entity damage in Dominion land.
      * Armor stand attacks are treated as BUILD (destruction). PvP is controlled by the PVP permission.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     public void onAttackEntity(EntityDamageEvent e) {
         String name = e.getEntity().getLocation().getWorld().getName();
         if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("resource")) {

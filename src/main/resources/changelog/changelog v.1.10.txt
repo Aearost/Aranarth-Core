@@ -216,6 +216,7 @@ Minor Features
 [-] Removed the periods from the phantom spawn messages for consistency
 [~] Corrected PvP damage dealing/taking logic for dominions (in and out of dominion land)
 [-] Removed PvP permission from Neutral, Wanderer, and Enemy relations
+[~] Fixed issue where combat tagging was applying regardless of dominion permission
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
