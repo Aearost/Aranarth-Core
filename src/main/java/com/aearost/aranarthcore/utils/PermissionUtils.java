@@ -273,6 +273,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.noxiousfumes", true);
 		perms.setPermission("bending.ability.angeredspirits", true);
 		perms.setPermission("bending.ability.sandwave", true);
+		perms.setPermission("bending.ability.burial", true);
 		perms.setPermission("bending.ability.amplification", true);
 		perms.setPermission("bending.ability.deafeningscream", true);
 		perms.setPermission("bending.ability.sonicpulse", true);

@@ -19,6 +19,7 @@ import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
+import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Sandstorm;
 import com.aearost.aranarthcore.abilities.earthbending.combo.CableSlash;
@@ -118,6 +119,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -547,6 +549,16 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// Burial: left-click while sneaking fires the crevice toward the target
+		BendingPlayer bpBurial = BendingPlayer.getBendingPlayer(player);
+		if (bpBurial != null && bpBurial.getBoundAbilityName().equalsIgnoreCase("burial")
+				&& bpBurial.isElementToggled(Element.EARTH)
+				&& player.isSneaking()
+				&& !Burial.hasActiveInstance(player.getUniqueId())) {
+			new Burial(player);
+			return;
+		}
+
 		// SandWave: left-click launches the wave from a previously sneaked source
 		if (SandWave.hasPendingSource(player.getUniqueId())) {
 			BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
@@ -616,6 +628,9 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 		}
 		if (SandWave.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
+		if (Burial.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
 		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
@@ -773,6 +788,12 @@ public class AranarthCoreBendingListener implements Listener {
 			disalignment.remove();
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
+
+		// Slot change during CASTING cancels without cooldown; later phases run to completion.
+		Burial burial = Burial.getActiveInstance(e.getPlayer().getUniqueId());
+		if (burial != null && burial.getPhase() == Burial.Phase.CASTING) {
+			burial.cancelInstantly();
+		}
 	}
 
 	/**
@@ -868,6 +889,20 @@ public class AranarthCoreBendingListener implements Listener {
 		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
 		if (bloodFreeze != null) {
 			bloodFreeze.cancelFromDamage();
+		}
+	}
+
+	/**
+	 * Suppresses vanilla suffocation damage for entities currently buried by Burial.
+	 * Manual ticking damage is applied by the ability itself instead.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onBurialSuffocation(final EntityDamageEvent e) {
+		if (e.getCause() != EntityDamageEvent.DamageCause.SUFFOCATION) {
+			return;
+		}
+		if (Burial.isBuried(e.getEntity().getUniqueId())) {
+			e.setCancelled(true);
 		}
 	}
 
@@ -1051,6 +1086,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (Burial.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
