@@ -49,8 +49,6 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
             return;
         }
 
-        this.cooldown = 12000L;
-
         start();
         if (!isRemoved()) {
             if (fire()) {
@@ -86,6 +84,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
             return false;
         }
 
+        this.cooldown = toFire * 1000L;
         STAGE_MAP.put(player.getUniqueId(), (stage + 1) % ARROW_COUNTS.length);
 
         // Snapshot per-arrow templates before consuming so counts are accurate
@@ -153,8 +152,9 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
             return;
         }
 
-        // Remove arrows that have hit something or exceeded their flight
-        arrows.removeIf(arrow -> !arrow.isValid() || arrow.isOnGround() || arrow.getTicksLived() > 200);
+        // Remove arrows that have been picked up, hit an entity, or exceeded their flight time.
+        // Ground arrows are intentionally kept tracked so remove() doesn't clean them up early.
+        arrows.removeIf(arrow -> !arrow.isValid() || arrow.getTicksLived() > 200);
         if (arrows.isEmpty()) {
             remove();
         }
@@ -347,7 +347,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
     @Override
     public void remove() {
         for (final Arrow arrow : arrows) {
-            if (arrow.isValid()) {
+            if (arrow.isValid() && !arrow.isOnGround()) {
                 arrow.remove();
             }
         }
