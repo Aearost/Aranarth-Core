@@ -212,6 +212,7 @@ Minor Features
 [~] Fixed issue causing flint and steels to disappear when using them
 [+] Added ping sound effect when receiving a private message
 [~] Updated the way the sub-elements are worded in /ranks
+[-] Removed the periods from the phantom spawn messages for consistency
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

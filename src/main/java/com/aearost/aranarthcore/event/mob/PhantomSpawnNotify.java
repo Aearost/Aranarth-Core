@@ -75,7 +75,7 @@ public class PhantomSpawnNotify {
                 return;
             }
             int count = waveSize.getOrDefault(waveId, 1);
-            String message = count > 1 ? "&7Phantoms have started attacking you." : "&7A phantom has started attacking you.";
+            String message = count > 1 ? "&7Phantoms have started attacking you" : "&7A phantom has started attacking you";
             player.sendMessage(ChatUtils.chatMessage(message));
         }, 5L);
     }
