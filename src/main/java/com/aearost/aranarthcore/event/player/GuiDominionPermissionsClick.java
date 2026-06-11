@@ -110,6 +110,12 @@ public class GuiDominionPermissionsClick {
                 return;
             }
 
+            // PvP for NEUTRAL, ENEMIED, and WANDERER is not toggleable
+            if (perm == DominionPermission.PVP
+                    && (rank == DominionRank.NEUTRAL || rank == DominionRank.ENEMIED || rank == DominionRank.WANDERER)) {
+                return;
+            }
+
             dominion.getDominionPermissions().togglePermission(rank, perm);
             DominionUtils.updateDominion(dominion);
 

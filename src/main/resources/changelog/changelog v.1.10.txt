@@ -214,6 +214,8 @@ Minor Features
 [+] Added ping sound effect when receiving a private message
 [~] Updated the way the sub-elements are worded in /ranks
 [-] Removed the periods from the phantom spawn messages for consistency
+[~] Corrected PvP damage dealing/taking logic for dominions (in and out of dominion land)
+[-] Removed PvP permission from Neutral, Wanderer, and Enemy relations
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

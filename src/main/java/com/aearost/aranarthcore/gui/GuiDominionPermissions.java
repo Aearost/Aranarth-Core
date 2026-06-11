@@ -194,7 +194,11 @@ public class GuiDominionPermissions {
             gui.setItem(36 + i, filler);
         }
 
+        boolean omitPvp = rank == DominionRank.NEUTRAL || rank == DominionRank.ENEMIED || rank == DominionRank.WANDERER;
         for (Map.Entry<Integer, DominionPermission> entry : getRelationSlotPermissions().entrySet()) {
+            if (omitPvp && entry.getValue() == DominionPermission.PVP) {
+                continue;
+            }
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
         gui.setItem(40, buildBackButton());

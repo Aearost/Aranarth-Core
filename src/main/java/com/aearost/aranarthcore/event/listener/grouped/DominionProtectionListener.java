@@ -281,16 +281,6 @@ public class DominionProtectionListener implements Listener {
 
     /**
      * Handles PvP between players with relation-based and chunk-based rules.
-     *
-     * <ul>
-     *   <li>Same dominion — governed by the dominion-wide {@code memberPvpEnabled} flag,
-     *       regardless of location.</li>
-     *   <li>ALLIED / TRUCED — can never harm each other, regardless of location.</li>
-     *   <li>ENEMIED — can always harm each other, regardless of location.</li>
-     *   <li>Dominion member vs outsider in the member's land — the member may always
-     *       attack; the outsider (WANDERER / NEUTRAL) may not attack the member.</li>
-     *   <li>Outside all dominion land — no restrictions.</li>
-     * </ul>
      */
     private void handlePvP(Player attacker, Player target, EntityDamageEvent e) {
         if (AranarthUtils.isSpawnLocation(target.getLocation())) {
@@ -300,8 +290,6 @@ public class DominionProtectionListener implements Listener {
         Dominion attackerDominion = DominionUtils.getPlayerDominion(attacker.getUniqueId());
         Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
         AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
-
-        // --- Location-independent rules ---
 
         // Same dominion — check the single dominion-wide PvP flag
         if (attackerDominion != null && targetDominion != null
@@ -314,54 +302,54 @@ public class DominionProtectionListener implements Listener {
             return;
         }
 
-        // Different dominions: apply relation rules
+        // Both players belong to different dominions
         if (attackerDominion != null && targetDominion != null) {
             DominionRank relation = DominionUtils.getRelationKey(attackerDominion, targetDominion);
-            if (relation == DominionRank.ALLIED) {
-                e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-                        + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.ALLIED)));
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
+
+            if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+                // BOTH dominions must have PvP enabled for this relation
+                boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                boolean targetPvp = targetDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                if (!(attackerPvp && targetPvp)) {
+                    e.setCancelled(true);
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                            + " &7as you are " + DominionUtils.getFormattedRankName(relation)));
+                }
                 return;
             }
-            if (relation == DominionRank.TRUCED) {
-                e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-                        + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.TRUCED)));
+
+            if (relation == DominionRank.NEUTRAL) {
+                // Blocked only when the target is in their own dominion's land
+                if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                    e.setCancelled(true);
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                            + " &7in their lands as you are " + DominionUtils.getFormattedRankName(DominionRank.NEUTRAL)));
+                }
                 return;
             }
-            // Enemies can always harm each other
+
             if (relation == DominionRank.ENEMIED) {
+                // Always allowed
                 return;
             }
-        }
-
-        // --- Chunk-based rules (WANDERER / NEUTRAL vs dominion members) ---
-        Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
-        if (chunkDominion == null) {
-            return; // Outside all dominion land — no restrictions
-        }
-
-        boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
-        boolean targetIsMember = targetDominion != null && targetDominion.isSameDominion(chunkDominion);
-
-        // Attacker is a member of the chunk dominion — may harm outsiders in their land
-        if (attackerIsMember) {
             return;
         }
 
-        // Chunk-based protection only applies when the target is a member of the chunk dominion
-        if (!targetIsMember) {
+        // Attacker has a dominion, target is a wanderer — always allowed
+        if (attackerDominion != null) {
             return;
         }
 
-        // Outsider attacking a dominion member in their land — cancel for WANDERER / NEUTRAL
-        DominionRank attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
-        if (attackerRelation == DominionRank.ENEMIED) {
-            return;
+        // Attacker is a wanderer, target has a dominion — blocked in target's own land
+        if (targetDominion != null) {
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
+            if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
+                        + " &7in their dominion's lands as a wanderer"));
+            }
         }
-        e.setCancelled(true);
-        attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
-                + " &7in their lands as you are " + DominionUtils.getFormattedRankName(attackerRelation)));
     }
 
     /**
@@ -445,49 +433,53 @@ public class DominionProtectionListener implements Listener {
             return;
         }
 
-        // Different dominions: apply relation rules
+        // Both players belong to different dominions
         if (attackerDominion != null && ownerDominion != null) {
             DominionRank relation = DominionUtils.getRelationKey(attackerDominion, ownerDominion);
-            if (relation == DominionRank.ALLIED) {
-                e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
-                        + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.ALLIED)));
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+
+            if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+                boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                boolean ownerPvp = ownerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+                if (!(attackerPvp && ownerPvp)) {
+                    e.setCancelled(true);
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                            + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(relation)));
+                }
                 return;
             }
-            if (relation == DominionRank.TRUCED) {
-                e.setCancelled(true);
-                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
-                        + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(DominionRank.TRUCED)));
+
+            if (relation == DominionRank.NEUTRAL) {
+                // Blocked only when the mount owner is in their own dominion's land
+                if (chunkDominion != null && chunkDominion.isSameDominion(ownerDominion)) {
+                    e.setCancelled(true);
+                    attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                            + "'s &e" + mountTypeName + " &7in their lands as you are " + DominionUtils.getFormattedRankName(DominionRank.NEUTRAL)));
+                }
                 return;
             }
+
             if (relation == DominionRank.ENEMIED) {
+                // Always allowed
                 return;
             }
-        }
-
-        // Chunk-based rules (outsider attacking a mount in the owner's dominion land)
-        Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
-        if (chunkDominion == null) {
             return;
         }
 
-        boolean attackerIsMember = attackerDominion != null && attackerDominion.isSameDominion(chunkDominion);
-        boolean ownerIsMember = ownerDominion != null && ownerDominion.isSameDominion(chunkDominion);
-
-        if (attackerIsMember) {
-            return;
-        }
-        if (!ownerIsMember) {
+        // Attacker has a dominion, mount owner is a wanderer
+        if (attackerDominion != null) {
             return;
         }
 
-        DominionRank attackerRelation = DominionUtils.getRelationKey(attackerDominion, chunkDominion);
-        if (attackerRelation == DominionRank.ENEMIED) {
-            return;
+        // Attacker is a wanderer, mount owner has a dominion
+        if (ownerDominion != null) {
+            Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
+            if (chunkDominion != null && chunkDominion.isSameDominion(ownerDominion)) {
+                e.setCancelled(true);
+                attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
+                        + "'s &e" + mountTypeName + " &7in their dominion's lands as a wanderer"));
+            }
         }
-        e.setCancelled(true);
-        attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
-                + "'s &e" + mountTypeName + " &7in their lands as you are " + DominionUtils.getFormattedRankName(attackerRelation)));
     }
 
     /**

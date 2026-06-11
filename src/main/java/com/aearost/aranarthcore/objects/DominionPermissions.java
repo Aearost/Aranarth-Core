@@ -75,10 +75,8 @@ public class DominionPermissions {
         // WANDERER (no dominion) — no access by default
         perms.put(DominionRank.WANDERER, new HashSet<>());
 
-        // ENEMIED dominions — no access, PvP enabled by default
-        Set<DominionPermission> enemiedPerms = new HashSet<>();
-        enemiedPerms.add(DominionPermission.PVP);
-        perms.put(DominionRank.ENEMIED, enemiedPerms);
+        // ENEMIED dominions — no access by default (PvP is hardcoded, not permission-based)
+        perms.put(DominionRank.ENEMIED, new HashSet<>());
 
         return new DominionPermissions(perms);
     }
