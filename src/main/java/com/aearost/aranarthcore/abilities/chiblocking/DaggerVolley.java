@@ -12,12 +12,17 @@ import com.projectkorra.projectkorra.region.RegionProtection;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.SpectralArrow;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -37,7 +42,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
-    private final List<Arrow> arrows = new ArrayList<>();
+    private final List<AbstractArrow> arrows = new ArrayList<>();
 
     public DaggerVolley(final Player player) {
         super(player);
@@ -128,10 +133,9 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
                             rng.nextDouble(-NOISE, NOISE),
                             rng.nextDouble(-NOISE, NOISE)));
 
-            final Arrow arrow = player.launchProjectile(Arrow.class);
+            final AbstractArrow arrow = launchTypedArrow(template);
             arrow.setVelocity(velocity);
-            arrow.setPickupStatus(Arrow.PickupStatus.ALLOWED);
-            arrow.setItemStack(template.clone());
+            arrow.setPickupStatus(AbstractArrow.PickupStatus.ALLOWED);
             arrow.setMetadata("daggervolley", new FixedMetadataValue(AranarthCore.getInstance(), arrowDamage));
 
             // Propagate the Aranarth arrow type so ArrowHit can apply any custom effects
@@ -140,6 +144,9 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
             }
 
             arrows.add(arrow);
+
+            final float pitch = 1.5F + rng.nextFloat() * 0.5F;
+            player.getWorld().playSound(eyeLoc, Sound.ENTITY_BREEZE_LAND, 1.0F, pitch);
         }
 
         return true;
@@ -161,13 +168,37 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
     }
 
     /**
+     * Launches the correct arrow entity type for the consumed template and, for tipped arrows,
+     * copies the potion effects from the item meta onto the entity so they apply on hit.
+     */
+    private AbstractArrow launchTypedArrow(final ItemStack template) {
+        if (template.getType() == Material.SPECTRAL_ARROW) {
+            final SpectralArrow arrow = player.launchProjectile(SpectralArrow.class);
+            arrow.setItemStack(template.clone());
+            return arrow;
+        }
+        final Arrow arrow = player.launchProjectile(Arrow.class);
+        arrow.setItemStack(template.clone());
+        if (template.getType() == Material.TIPPED_ARROW
+                && template.getItemMeta() instanceof PotionMeta meta) {
+            if (meta.getBasePotionType() != null) {
+                arrow.setBasePotionType(meta.getBasePotionType());
+            }
+            for (final PotionEffect effect : meta.getCustomEffects()) {
+                arrow.addCustomEffect(effect, true);
+            }
+        }
+        return arrow;
+    }
+
+    /**
      * Cancels vanilla arrow damage, resets invincibility frames, and applies the rolled damage
      * value for this arrow through ProjectKorra's damage pipeline.
      *
      * @param entity The living entity struck by the arrow.
      * @param arrow  The DaggerVolley arrow projectile.
      */
-    public void damageEntityFromArrow(final LivingEntity entity, final Arrow arrow) {
+    public void damageEntityFromArrow(final LivingEntity entity, final AbstractArrow arrow) {
         if (!(arrow.getShooter() instanceof Player shooter)) {
             return;
         }
@@ -346,7 +377,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
 
     @Override
     public void remove() {
-        for (final Arrow arrow : arrows) {
+        for (final AbstractArrow arrow : arrows) {
             if (arrow.isValid() && !arrow.isOnGround()) {
                 arrow.remove();
             }
@@ -358,7 +389,7 @@ public class DaggerVolley extends ChiAbility implements AddonAbility {
     public boolean isSneakAbility() {
         return false;
     }
-
+    
     @Override
     public boolean isHarmlessAbility() {
         return false;

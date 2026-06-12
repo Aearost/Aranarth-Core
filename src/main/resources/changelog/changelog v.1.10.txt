@@ -32,7 +32,6 @@ Major Features
 [+] Implemented the MetalShots ability for metalbenders
 [+] Implemented the MetalBlade ability for metalbenders
 [+] Implemented the CableThrash ability for metalbenders
-[+] Implemented the DaggerVolley ability for chiblockers
 [+] Implemented the BloodGrip ability for bloodbenders
 [+] Implemented the BloodFreeze ability for bloodbenders
 [+] Implemented the Disalignment ability for bloodbenders
@@ -40,6 +39,8 @@ Major Features
 [+] Implemented the MagmaWave ability for lavabenders
 [+] Implemented the Burial ability for sandbenders
 [+] Implemented the LifeRip ability for bloodbenders
+[+] Implemented an AranarthCore-based DaggerThrow ability that works with a Quiver
+[+] Implemented the DaggerVolley ability for chiblockers
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week

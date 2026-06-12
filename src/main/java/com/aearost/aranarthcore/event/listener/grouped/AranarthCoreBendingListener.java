@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
+import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
@@ -66,6 +67,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -528,6 +530,13 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				new HighJump(player, HighJump.JumpType.JUMP);
 			}
+			return;
+		}
+
+		// DaggerThrow: left-click fires one aimed dagger; rapid clicks throw up to 5 in succession
+		BendingPlayer bpDaggerThrow = BendingPlayer.getBendingPlayer(player);
+		if (bpDaggerThrow != null && bpDaggerThrow.getBoundAbilityName().equalsIgnoreCase("daggerthrow")) {
+			new DaggerThrow(player);
 			return;
 		}
 
@@ -1261,13 +1270,34 @@ public class AranarthCoreBendingListener implements Listener {
 	}
 
 	/**
+	 * Cancels vanilla arrow damage for DaggerThrow projectiles and applies the fixed damage
+	 * value through ProjectKorra's pipeline so that region protection is respected.
+	 */
+	@EventHandler(ignoreCancelled = true)
+	public void onDaggerThrowArrowHit(final EntityDamageByEntityEvent e) {
+		if (!(e.getDamager() instanceof AbstractArrow arrow)) return;
+		if (!arrow.hasMetadata("daggerthrow")) return;
+		if (!(e.getEntity() instanceof LivingEntity target)) return;
+		if (!(arrow.getShooter() instanceof Player shooter)) return;
+
+		e.setCancelled(true);
+
+		final DaggerThrow dt = CoreAbility.getAbility(shooter, DaggerThrow.class);
+		if (dt == null) {
+			arrow.remove();
+			return;
+		}
+		dt.damageEntityFromArrow(target, arrow);
+	}
+
+	/**
 	 * Cancels vanilla arrow damage for DaggerVolley projectiles and replaces it with the
 	 * per-arrow damage roll so that region protection and rank scaling are applied through
 	 * ProjectKorra's standard pipeline.
 	 */
 	@EventHandler(ignoreCancelled = true)
 	public void onDaggerVolleyArrowHit(final EntityDamageByEntityEvent e) {
-		if (!(e.getDamager() instanceof Arrow arrow)) return;
+		if (!(e.getDamager() instanceof AbstractArrow arrow)) return;
 		if (!arrow.hasMetadata("daggervolley")) return;
 		if (!(e.getEntity() instanceof LivingEntity target)) return;
 		if (!(arrow.getShooter() instanceof Player shooter)) return;
