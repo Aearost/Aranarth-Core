@@ -1,6 +1,7 @@
 AranarthCore v. 1.10
 
 Major Features
+[+] Added per-user permissions for Dominions
 [+] Implemented permission-based custom armor stand poses
 [+] Added Blood Bending to Emperors
 [+] Added Flight to Emperors
@@ -218,6 +219,8 @@ Minor Features
 [~] Corrected PvP damage dealing/taking logic for dominions (in and out of dominion land)
 [-] Removed PvP permission from Neutral, Wanderer, and Enemy relations
 [~] Fixed issue where combat tagging was applying regardless of dominion permission
+[~] Restructured the positioning of mob spawning and of pvp flags in the main Dominion Permissions GUI
+[~] Renamed the role/relation permission titles in the dominion permissions GUI
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

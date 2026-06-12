@@ -72,6 +72,12 @@ public class DominionUtils {
 	 * @return True if the player has the permission.
 	 */
 	public static boolean hasPermission(Player player, Dominion dominion, DominionPermission permission) {
+		// Player-specific overrides take precedence over all rank/relation permissions
+		Boolean playerOverride = dominion.getPlayerPermissionOverride(player.getUniqueId(), permission);
+		if (playerOverride != null) {
+			return playerOverride;
+		}
+
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
 		if (playerDominion != null && playerDominion.isSameDominion(dominion)) {
 			DominionRank rank = dominion.getMemberRank(player.getUniqueId());

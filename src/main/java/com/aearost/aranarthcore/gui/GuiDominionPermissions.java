@@ -29,7 +29,8 @@ import java.util.*;
  */
 public class GuiDominionPermissions {
 
-    private static final int MEMBERS_SLOT = 31;
+    private static final int MEMBERS_SLOT = 30;
+    private static final int USER_SEARCH_SLOT = 32;
 
     private final Player player;
     private final Inventory initializedGui;
@@ -113,16 +114,16 @@ public class GuiDominionPermissions {
      * Returns the natural-language title for a permission sub-screen.
      */
     public static String getPermissionsTitle(DominionRank rank) {
-        return "Perms for " + switch (rank) {
-            case NEWCOMER -> "Newcomers";
-            case CITIZEN -> "Citizens";
-            case LIEUTENANT -> "the Lieutenant";
-            case LEADER -> "the Leader";
-            case ALLIED -> "Allied Dominions";
-            case TRUCED -> "Truced Dominions";
-            case NEUTRAL -> "Neutral Dominions";
-            case ENEMIED -> "Enemied Dominions";
-            case WANDERER -> "Wanderers";
+        return switch (rank) {
+            case NEWCOMER -> "Newcomer Permissions";
+            case CITIZEN -> "Citizen Permissions";
+            case LIEUTENANT -> "Lieutenant Permissions";
+            case LEADER -> "Leader Permissions";
+            case ALLIED -> "Allied Dominion Permissions";
+            case TRUCED -> "Truced Dominion Permissions";
+            case NEUTRAL -> "Neutral Dominion Permissions";
+            case ENEMIED -> "Enemied Dominion Permissions";
+            case WANDERER -> "Wanderer Permissions";
         };
     }
 
@@ -165,6 +166,7 @@ public class GuiDominionPermissions {
         for (Map.Entry<Integer, DominionPermission> entry : getRankSlotPermissions().entrySet()) {
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
+        gui.setItem(4, buildRestoreDefaultsButton("&7Resets this rank's permissions to server defaults"));
         gui.setItem(40, buildBackButton());
 
         player.closeInventory();
@@ -201,6 +203,7 @@ public class GuiDominionPermissions {
             }
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
+        gui.setItem(4, buildRestoreDefaultsButton("&7Resets this relation's permissions to server defaults"));
         gui.setItem(40, buildBackButton());
 
         player.closeInventory();
@@ -234,10 +237,11 @@ public class GuiDominionPermissions {
         gui.setItem(23, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", "&7Click to manage permissions"));
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", "&7Click to manage permissions"));
 
-        // Row 3: Mob Spawning toggle, Members button, and Member PvP toggle
-        gui.setItem(27, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
-        gui.setItem(35, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
+        // Row 3: Mob Spawning toggle, Members button, User Search, and Member PvP toggle
+        gui.setItem(18, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
+        gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
         gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(dominion.getLeader()));
+        gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem());
 
         return gui;
     }
@@ -372,6 +376,31 @@ public class GuiDominionPermissions {
         ItemStack item = new ItemStack(Material.GRAY_STAINED_GLASS_PANE);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(" ");
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the User Search button for the main permissions screen.
+     */
+    public static ItemStack buildUserSearchItem() {
+        ItemStack item = new ItemStack(Material.COMPASS);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&b&lUser Search"));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Modify a specific player's permissions")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Restore Defaults button used in permission sub-screens.
+     * @param loreLine Descriptive lore explaining what will be restored.
+     */
+    public static ItemStack buildRestoreDefaultsButton(String loreLine) {
+        ItemStack item = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lRestore Defaults"));
+        meta.setLore(List.of(ChatUtils.translateToColor(loreLine)));
         item.setItemMeta(meta);
         return item;
     }

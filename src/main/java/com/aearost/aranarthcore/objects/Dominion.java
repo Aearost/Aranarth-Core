@@ -47,6 +47,9 @@ public class Dominion {
 	private boolean mobSpawningEnabled;
 	private int boughtChunks;
 
+	// A null entry for a permission means it is inherited from the player's rank or relation.
+	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
+
 	// Keep balance at the end
 	private double balance;
 
@@ -70,6 +73,7 @@ public class Dominion {
 		this.members = members;
 		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
 		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
+		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
 		this.food = food;
@@ -186,6 +190,60 @@ public class Dominion {
 	 */
 	public void setDominionPermissions(DominionPermissions dominionPermissions) {
 		this.dominionPermissions = dominionPermissions;
+	}
+
+	/**
+	 * Provides the full map of per-player permission overrides.
+	 * @return A map of player UUID to their permission overrides (permission -> Boolean override, null means inherited).
+	 */
+	public Map<UUID, Map<DominionPermission, Boolean>> getPlayerPermissionOverrides() {
+		if (playerPermissionOverrides == null) {
+			playerPermissionOverrides = new HashMap<>();
+		}
+		return playerPermissionOverrides;
+	}
+
+	/**
+	 * Replaces the full per-player permission overrides map (used during persistence load).
+	 * @param overrides The new overrides map.
+	 */
+	public void setPlayerPermissionOverrides(Map<UUID, Map<DominionPermission, Boolean>> overrides) {
+		this.playerPermissionOverrides = overrides != null ? overrides : new HashMap<>();
+	}
+
+	/**
+	 * Returns the explicit override value for a specific player and permission.
+	 * @param playerUuid The player's UUID.
+	 * @param permission The permission to check.
+	 * @return True/false if explicitly overridden, or null if inherited.
+	 */
+	public Boolean getPlayerPermissionOverride(UUID playerUuid, DominionPermission permission) {
+		Map<DominionPermission, Boolean> overrides = getPlayerPermissionOverrides().get(playerUuid);
+		if (overrides == null) return null;
+		return overrides.get(permission);
+	}
+
+	/**
+	 * Toggles an explicit override for the given player and permission.
+	 * @param playerUuid The player's UUID.
+	 * @param permission The permission to toggle.
+	 * @param inheritedValue The value the player would inherit without any override.
+	 */
+	public void togglePlayerPermissionOverride(UUID playerUuid, DominionPermission permission, boolean inheritedValue) {
+		Map<DominionPermission, Boolean> overrides = getPlayerPermissionOverrides().computeIfAbsent(playerUuid, k -> new HashMap<>());
+		if (overrides.containsKey(permission)) {
+			overrides.put(permission, !overrides.get(permission));
+		} else {
+			overrides.put(permission, !inheritedValue);
+		}
+	}
+
+	/**
+	 * Removes all per-player permission overrides for the given player.
+	 * @param playerUuid The player's UUID.
+	 */
+	public void clearPlayerPermissionOverrides(UUID playerUuid) {
+		getPlayerPermissionOverrides().remove(playerUuid);
 	}
 
 	/**

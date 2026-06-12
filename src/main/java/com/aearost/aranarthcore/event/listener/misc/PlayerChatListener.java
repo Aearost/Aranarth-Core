@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -41,6 +42,13 @@ public class PlayerChatListener implements Listener {
     public void chatEvent(final AsyncPlayerChatEvent e) {
         Player player = e.getPlayer();
         String message = e.getMessage();
+
+        // If the player is awaiting a user-search input for the player permission GUI, handle it first
+        if (GuiDominionPlayerPermissions.isAwaitingSearch(player.getUniqueId())) {
+            e.setCancelled(true);
+            GuiDominionPlayerPermissions.handleSearchInput(player, message);
+            return;
+        }
 
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         // If resources are actively being claimed by the Dominion, prioritize this above all other chat functionality

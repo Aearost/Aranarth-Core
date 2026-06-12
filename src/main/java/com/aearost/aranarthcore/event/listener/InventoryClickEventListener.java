@@ -67,8 +67,11 @@ public class InventoryClickEventListener implements Listener {
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Permissions")
-                    || ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Perms for ")) {
+                    || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Permissions")
+                        && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
                 new GuiDominionPermissionsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")) {
+                new GuiDominionPlayerPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {
                 new GuiDominionMembersClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Vote Shop")) {

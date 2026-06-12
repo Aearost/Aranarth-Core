@@ -1480,6 +1480,150 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads per-player dominion permission overrides from dominions_player_permissions.txt.
+     */
+    public static void loadDominionPlayerPermissions() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "dominions_player_permissions.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            Bukkit.getLogger().info("Attempting to read the dominions_player_permissions file...");
+
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#") || row.isBlank()) {
+                    continue;
+                }
+
+                String[] fields = row.split("\\|", -1);
+                if (fields.length < 2) continue;
+
+                UUID dominionId;
+                try {
+                    dominionId = UUID.fromString(fields[0]);
+                } catch (IllegalArgumentException ignored) {
+                    continue;
+                }
+
+                Dominion dominion = DominionUtils.getDominionById(dominionId);
+                if (dominion == null) continue;
+
+                Map<UUID, Map<DominionPermission, Boolean>> allOverrides = new HashMap<>();
+
+                if (!fields[1].isEmpty()) {
+                    for (String playerEntry : fields[1].split(";")) {
+                        String[] parts = playerEntry.split(":", 2);
+                        if (parts.length != 2) continue;
+
+                        UUID playerUuid;
+                        try {
+                            playerUuid = UUID.fromString(parts[0]);
+                        } catch (IllegalArgumentException ignored) {
+                            continue;
+                        }
+
+                        Map<DominionPermission, Boolean> overrides = new HashMap<>();
+                        if (!parts[1].isEmpty()) {
+                            for (String permEntry : parts[1].split(",")) {
+                                String[] kv = permEntry.split("=", 2);
+                                if (kv.length != 2) continue;
+                                try {
+                                    DominionPermission perm = DominionPermission.valueOf(kv[0]);
+                                    boolean value = Boolean.parseBoolean(kv[1]);
+                                    overrides.put(perm, value);
+                                } catch (IllegalArgumentException ignored) {
+                                }
+                            }
+                        }
+                        if (!overrides.isEmpty()) {
+                            allOverrides.put(playerUuid, overrides);
+                        }
+                    }
+                }
+
+                dominion.setPlayerPermissionOverrides(allOverrides);
+            }
+
+            Bukkit.getLogger().info("All dominion player permissions have been initialized");
+            reader.close();
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("Something went wrong with loading dominion player permissions!");
+        }
+    }
+
+    /**
+     * Saves per-player dominion permission overrides to dominions_player_permissions.txt.
+     */
+    public static void saveDominionPlayerPermissions() {
+        List<Dominion> dominions = DominionUtils.getDominions();
+        if (dominions == null || dominions.isEmpty()) {
+            return;
+        }
+
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "dominions_player_permissions.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (isDirectoryCreated) {
+            try {
+                if (file.createNewFile()) {
+                    Bukkit.getLogger().info("A new dominions_player_permissions.txt file has been generated");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("An error occurred creating dominions_player_permissions.txt");
+                return;
+            }
+
+            try {
+                FileWriter writer = new FileWriter(filePath);
+                writer.write("#dominionId|playerOverrides\n");
+                writer.write("#format: dominionId|playerUUID:PERM1=true,PERM2=false;playerUUID2:PERM3=true\n");
+
+                for (Dominion dominion : dominions) {
+                    Map<UUID, Map<DominionPermission, Boolean>> allOverrides =
+                            dominion.getPlayerPermissionOverrides();
+                    if (allOverrides.isEmpty()) continue;
+
+                    StringBuilder builder = new StringBuilder();
+                    for (Map.Entry<UUID, Map<DominionPermission, Boolean>> playerEntry
+                            : allOverrides.entrySet()) {
+                        if (playerEntry.getValue().isEmpty()) continue;
+
+                        if (!builder.isEmpty()) builder.append(";");
+                        builder.append(playerEntry.getKey().toString()).append(":");
+
+                        String permStr = playerEntry.getValue().entrySet().stream()
+                                .map(e -> e.getKey().name() + "=" + e.getValue())
+                                .collect(Collectors.joining(","));
+                        builder.append(permStr);
+                    }
+
+                    if (!builder.isEmpty()) {
+                        writer.write(dominion.getId().toString() + "|" + builder + "\n");
+                    }
+                }
+                writer.close();
+            } catch (IOException e) {
+                Bukkit.getLogger().info("There was an error saving dominion player permissions!");
+            }
+        }
+    }
+
+    /**
      * Initializes the warps list based on the contents of warps.txt.
      */
     public static void loadWarps() {

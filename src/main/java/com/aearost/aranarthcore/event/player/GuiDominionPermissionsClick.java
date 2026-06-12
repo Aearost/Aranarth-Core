@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDominionMembers;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
+import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
@@ -21,7 +22,6 @@ import java.util.Map;
  */
 public class GuiDominionPermissionsClick {
 
-    private static final String RANK_PREFIX = "Perms for ";
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
@@ -79,18 +79,34 @@ public class GuiDominionPermissionsClick {
                 case "Neutral Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.NEUTRAL);
                 case "Enemied Dominions" -> GuiDominionPermissions.openRelationGui(player, DominionRank.ENEMIED);
                 case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
-                case "Members" -> GuiDominionMembers.open(player);
+                case "Members"     -> GuiDominionMembers.open(player);
+                case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
         }
-
-        // Rank/relation permissions sub-screen — "Permissions: {RANK_NAME}"
-        if (title.startsWith(RANK_PREFIX)) {
+        // Rank/relation permissions sub-screen (any title that isn't the main screen)
+        else {
             // Back button
             if (clicked.getType() == Material.BARRIER) {
                 new GuiDominionPermissions(player).openGui();
                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
+                return;
+            }
+
+            // Restore Defaults button (slot 4)
+            if (e.getSlot() == 4 && clicked.getType() == Material.ENDER_PEARL) {
+                DominionRank rank = GuiDominionPermissions.getRankFromTitle(title);
+                if (rank != null && rank != DominionRank.LEADER) {
+                    dominion.getDominionPermissions().restoreDefaults(rank);
+                    DominionUtils.updateDominion(dominion);
+                    if (isRelationRank(rank)) {
+                        GuiDominionPermissions.openRelationGui(player, rank);
+                    } else {
+                        GuiDominionPermissions.openRankGui(player, rank);
+                    }
+                    player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
+                }
                 return;
             }
 

@@ -122,4 +122,13 @@ public class DominionPermissions {
     public Map<DominionRank, Set<DominionPermission>> getPermissionsMap() {
         return permissions;
     }
+
+    /**
+     * Resets a single rank's permissions to the server-defined defaults.
+     * @param rank The rank to reset.
+     */
+    public void restoreDefaults(DominionRank rank) {
+        DominionPermissions defaults = DominionPermissions.createDefaults();
+        permissions.put(rank, new HashSet<>(defaults.getPermissions(rank)));
+    }
 }
