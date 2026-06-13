@@ -190,8 +190,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.waterarms", true);
 			perms.setPermission("bending.ability.firecomet", true);
 			perms.setPermission("bending.ability.suffocate", true);
-			perms.setPermission("bending.earth.lavaflux", true);
-			perms.setPermission("bending.earth.fissure", true);
+			perms.setPermission("bending.ability.LavaFlux", true);
+			perms.setPermission("bending.ability.Fissure", true);
 
 			// Disable blood and flight bending in the arena
 			perms.setPermission("bending.water.bloodbending", false);
@@ -215,8 +215,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.waterarms", false);
 			perms.setPermission("bending.ability.firecomet", false);
 			perms.setPermission("bending.ability.suffocate", false);
-			perms.setPermission("bending.earth.lavaflux", false);
-			perms.setPermission("bending.earth.fissure", false);
+			perms.setPermission("bending.ability.LavaFlux", false);
+			perms.setPermission("bending.ability.Fissure", false);
 			setRankPermissions(perms, AranarthUtils.getPlayer(player.getUniqueId()).getRank());
 		}
 	}
@@ -256,8 +256,8 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.waterarms", false);
 		perms.setPermission("bending.ability.firecomet", false);
 		perms.setPermission("bending.ability.suffocate", false);
-		perms.setPermission("bending.earth.lavaflux", false);
-		perms.setPermission("bending.earth.fissure", false);
+		perms.setPermission("bending.ability.LavaFlux", false);
+		perms.setPermission("bending.ability.Fissure", false);
 
 		// Enable all Aranarth abilities by default as sub-element permission takes precedence
 		perms.setPermission("bending.ability.astralprojection", true);
@@ -484,7 +484,7 @@ public class PermissionUtils {
 					perms.setPermission("bending.ability.elementsphere.water", false);
 					perms.setPermission("bending.ability.elementsphere.stream", false);
 					perms.setPermission("bending.ability.spiritbeam", false);
-					perms.setPermission("bending.earth.lavaflux", true);
+					perms.setPermission("bending.ability.LavaFlux", true);
 
 					evaluatePlayerPermissions(player.getPlayer());
 				}
@@ -740,8 +740,8 @@ public class PermissionUtils {
 		// Emperor
 		if (rank >= 8) {
 			perms.setPermission("bending.earth.lavabending", true);
-			perms.setPermission("bending.earth.lavaflux", true);
-			perms.setPermission("bending.earth.fissure", true);
+			perms.setPermission("bending.ability.LavaFlux", true);
+			perms.setPermission("bending.ability.Fissure", true);
 			perms.setPermission("bending.fire.combustionbending", true);
 			perms.setPermission("bending.water.bloodbending", true);
 			perms.setPermission("bending.air.flight", true);
