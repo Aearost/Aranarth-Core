@@ -759,6 +759,9 @@ public class ChatUtils {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
 			}
 		}
+
+		Bukkit.getConsoleSender().sendMessage(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().deserialize(
+				prefixReceive + assembledMsg));
 	}
 
 	/**

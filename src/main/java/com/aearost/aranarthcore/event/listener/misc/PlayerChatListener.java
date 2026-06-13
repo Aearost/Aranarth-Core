@@ -161,8 +161,10 @@ public class PlayerChatListener implements Listener {
             }
         }
 
-        Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
-                ChatUtils.translateToColor(prefix + chatMessage)));
+        if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
+            Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(
+                    ChatUtils.translateToColor(prefix + chatMessage)));
+        }
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
             DiscordUtils.sendChatMessage(prefix + chatMessage);
