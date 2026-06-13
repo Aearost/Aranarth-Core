@@ -222,6 +222,7 @@ Minor Features
 [~] Restructured the positioning of mob spawning and of pvp flags in the main Dominion Permissions GUI
 [~] Renamed the role/relation permission titles in the dominion permissions GUI
 [~] Fixed Fissure and LavaFlux not working for emperors due to invalid permission
+[~] Fixed vote links not being for the correct label
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
