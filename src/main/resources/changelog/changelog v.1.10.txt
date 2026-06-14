@@ -72,9 +72,12 @@ Major Features
 [+] Added GUI for /votetop
 [~] Updated the player head loading logic for all GUIs to no longer contain the "Dynamic" keyword
 [+] Added scaling based off in-game ranks instead of Unarmed level
-[~] Made Spiritual unlocked at Count instead of Duke
-[~] Made Sound unlocked at King instead of Count
-[~] Made Lava unlocked at Emperor instead of King
+[~] Made Healing unlocked at Knight instead of Esquire
+[~] Made Spiritual unlocked at Baron instead of Duke
+[~] Made Sound unlocked at Duke instead of Count
+[~] Made Lava unlocked at Duke instead of King
+[~] Made Combustion unlocked at King instead of Emperor
+[~] Made Blood unlocked at Prince instead of Emperor
 
 Minor Features
 [+] Added dynamic snow layering during the winter months
