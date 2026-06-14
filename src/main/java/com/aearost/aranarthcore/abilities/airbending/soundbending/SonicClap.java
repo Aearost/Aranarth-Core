@@ -45,7 +45,7 @@ public class SonicClap extends SoundAbility implements AddonAbility {
     public SonicClap(Player player) {
         super(player);
 
-        this.cooldown = 3000L;
+        this.cooldown = 2250L;
         this.range = 12.0;
 
         if (!bPlayer.canBend(this)) {
