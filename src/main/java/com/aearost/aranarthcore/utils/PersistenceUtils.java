@@ -604,6 +604,11 @@ public class PersistenceUtils {
                     aranarthPlayer.setWeatherMessageDisabled(!fields[15].equals("0"));
                 }
 
+                // Dominion Msg Compact (index 16)
+                if (fields.length > 16) {
+                    aranarthPlayer.setDominionMsgCompact(!fields[16].equals("0"));
+                }
+
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
             Bukkit.getLogger().info("All toggled features have been initialized");
@@ -664,10 +669,12 @@ public class PersistenceUtils {
                         String gradientColors = aranarthPlayer.getGradientChatColors().isEmpty() ? "none" : aranarthPlayer.getGradientChatColors();
                         String dayMessage = aranarthPlayer.isDayMessageDisabled() ? "1" : "0";
                         String weatherMessage = aranarthPlayer.isWeatherMessageDisabled() ? "1" : "0";
+                        String dominionMsgCompact = aranarthPlayer.isDominionMsgCompact() ? "1" : "0";
 
                         String row = uuid + "|" + chat + "|" + messages + "|" + teleport + "|" + spawnboost + "|" + changeClaim
                                 + "|" + inventory + "|" + shulker + "|" + blacklist + "|" + compressing + "|" + chestLock + "|"
-                                + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage + "\n";
+                                + bluefire + "|" + gradientEnabled + "|" + gradientColors + "|" + dayMessage + "|" + weatherMessage
+                                + "|" + dominionMsgCompact + "\n";
                         writer.write(row);
                     }
                     writer.close();

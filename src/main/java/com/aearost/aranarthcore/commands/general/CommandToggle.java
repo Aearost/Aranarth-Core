@@ -291,6 +291,15 @@ public class CommandToggle implements CommandExecutor {
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cYou do not have the Shulker Assist perk!"));
 					}
+				} else if (args[0].equalsIgnoreCase("dmsgcompact")) {
+					if (aranarthPlayer.isDominionMsgCompact()) {
+						aranarthPlayer.setDominionMsgCompact(false);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7compact dominion messages"));
+					} else {
+						aranarthPlayer.setDominionMsgCompact(true);
+						player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7compact dominion messages"));
+					}
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/toggle <option>"));
 				}

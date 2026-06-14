@@ -78,6 +78,7 @@ Major Features
 [~] Made Lava unlocked at Duke instead of King
 [~] Made Combustion unlocked at King instead of Emperor
 [~] Made Blood unlocked at Prince instead of Emperor
+[+] Added /toggle dmsgcompact
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

@@ -279,6 +279,18 @@ public class GuiToggleClick {
                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                 refreshGui(player);
             }
+            // Dominion Msg Compact
+            case 26 -> {
+                if (aranarthPlayer.isDominionMsgCompact()) {
+                    aranarthPlayer.setDominionMsgCompact(false);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &cdisabled &7compact dominion messages"));
+                } else {
+                    aranarthPlayer.setDominionMsgCompact(true);
+                    player.sendMessage(ChatUtils.chatMessage("&7You have &aenabled &7compact dominion messages"));
+                }
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                refreshGui(player);
+            }
         }
     }
 

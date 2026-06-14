@@ -148,6 +148,9 @@ public class GuiToggle {
         // Weather Messages
         gui.setItem(25, buildToggleItem(Material.WIND_CHARGE, "&f&lWeather Messages", !aranarthPlayer.isWeatherMessageDisabled()));
 
+        // Dominion Msg Compact
+        gui.setItem(26, buildToggleItem(Material.COMPASS, "&f&lDominion Msg Compact", aranarthPlayer.isDominionMsgCompact()));
+
         return gui;
     }
 

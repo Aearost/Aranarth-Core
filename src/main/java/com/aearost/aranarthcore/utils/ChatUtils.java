@@ -712,16 +712,29 @@ public class ChatUtils {
 		String dominionName = ChatUtils.stripColorFormatting(dominion.getName());
 		String chatType = aranarthPlayer.getDominionChatType();
 
-		String typeLabel = switch (chatType) {
-			case "ally" -> "&5[Ally] ";
-			case "truce" -> "&d[Truce] ";
-			case "allytruce" -> "&5[AllyTruce] ";
-			default -> "";
-		};
+		String typeLabel;
+		String formattedRank;
+		if (aranarthPlayer.isDominionMsgCompact()) {
+			typeLabel = switch (chatType) {
+				case "ally" -> "&5[A] ";
+				case "truce" -> "&d[T] ";
+				case "allytruce" -> "&5[A]&d[T] ";
+				default -> "";
+			};
+			formattedRank = DominionUtils.getRankColor(rank) + "[" + rank.name().charAt(0) + "]";
+		} else {
+			typeLabel = switch (chatType) {
+				case "ally" -> "&5[Ally] ";
+				case "truce" -> "&d[Truce] ";
+				case "allytruce" -> "&5[AllyTruce] ";
+				default -> "";
+			};
+			formattedRank = DominionUtils.getFormattedRankName(rank);
+		}
 
 		String prefixStart = "&7⊰&r";
 		String prefixEnd = "&7⊱&r";
-		String prefixReceive = ChatUtils.translateToColor(prefixStart + typeLabel + "&e" + dominionName + " &7| " + DominionUtils.getFormattedRankName(rank) + " &f" + nickname + prefixEnd + " &7&o>> &7&o");
+		String prefixReceive = ChatUtils.translateToColor(prefixStart + typeLabel + "&e" + dominionName + " &7| " + formattedRank + " &f" + nickname + prefixEnd + " &7&o>> &7&o");
 
 		List<UUID> recipientLeaders = new ArrayList<>();
 		recipientLeaders.add(dominion.getLeader());
