@@ -316,9 +316,7 @@ public class DominionUtils {
 		for (UUID memberUuid : dominion.getMembers()) {
 			playerToDominion.remove(memberUuid);
 		}
-		for (Chunk chunk : dominion.getChunks()) {
-			chunkKeyToDominion.remove(getChunkKey(chunk));
-		}
+		chunkKeyToDominion.values().removeIf(d -> d.isSameDominion(dominion));
 
 		dominions.remove(dominion);
 	}
@@ -793,6 +791,7 @@ public class DominionUtils {
 				return -1;
 			} else {
 				dominion.getChunks().remove(chunkToRemove);
+				chunkKeyToDominion.remove(getChunkKey(chunkToRemove));
 				resizeFoodArray(dominion);
 				updateDominion(dominion);
 				return 0;

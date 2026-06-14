@@ -201,7 +201,11 @@
       "Bash(find C:/Users/liamh/IdeaProjects/JedCore-1.21.11 -name *.xml -o -name maven.config)",
       "Bash(find /c/Users/liamh/IdeaProjects/JedCore -type f -name *[Pp]ermission*)",
       "Bash(find /c/Users/liamh/IdeaProjects/JedCore -type f \\\\\\(-name *[Pp]ermission* -o -name *[Aa]bility* \\\\\\))",
-      "Bash(find /c/Users/liamh/IdeaProjects/JedCore/src/main/java -type f -name *.java)"
+      "Bash(find /c/Users/liamh/IdeaProjects/JedCore/src/main/java -type f -name *.java)",
+      "Bash(gunzip -c 2026-06-13-1.log.gz)",
+      "Bash(gunzip -c 2026-06-13-2.log.gz)",
+      "Bash(gunzip -c 2026-06-13-3.log.gz)",
+      "Bash(gunzip -c C:/Users/liamh/Downloads/2026-06-13-3.log.gz)"
     ]
   }
 }

@@ -227,6 +227,7 @@ Minor Features
 [~] Fixed Fissure and LavaFlux not working for emperors due to invalid permission
 [~] Fixed vote links not being for the correct label
 [~] Fixed issue where dominion chat messages were not being logged to console correctly
+[~] Fixed issue where dominions would be disbanded but would retain claimed chunks
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
