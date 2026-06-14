@@ -984,10 +984,12 @@ public class CommandDominion implements CommandExecutor {
 								resetDominionRelations(dominion, dominionFromList);
 
 								for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-									if (dominion.getMembers().contains(onlinePlayer.getUniqueId())
-											|| dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+									if (dominion.getMembers().contains(onlinePlayer.getUniqueId())) {
 										onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
 										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominionFromList.getName()));
+									} else if (dominionFromList.getMembers().contains(onlinePlayer.getUniqueId())) {
+										onlinePlayer.playSound(onlinePlayer, Sound.ITEM_GOAT_HORN_SOUND_0, 1F, 0.9F);
+										onlinePlayer.sendMessage(ChatUtils.chatMessage("&7Your Dominion has become &fNeutral &7with &e" + dominion.getName()));
 									}
 								}
 							} else {

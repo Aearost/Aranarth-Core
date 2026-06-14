@@ -229,6 +229,7 @@ Minor Features
 [~] Fixed vote links not being for the correct label
 [~] Fixed issue where dominion chat messages were not being logged to console correctly
 [~] Fixed issue where dominions would be disbanded but would retain claimed chunks
+[~] Updated incorrect dominion being displayed when you become neutral
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
