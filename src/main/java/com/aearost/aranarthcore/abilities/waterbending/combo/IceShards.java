@@ -117,7 +117,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         }
 
         this.cooldown = 14000L;
-        this.damage = 16.0;
+        this.damage = 12.0;
         this.phase = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();
         this.heldSlot = player.getInventory().getHeldItemSlot();

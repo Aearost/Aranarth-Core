@@ -73,7 +73,7 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         this.activeProjectiles = new ArrayList<>();
         this.cooldown = 12000L;
         this.chargeDuration = 1500L;
-        this.damage = 3.0;
+        this.damage = 2.0;
         this.speed = 2.0;
 
         this.state = State.CHARGING;
@@ -434,7 +434,8 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
 
         private void applyHitEffects(final LivingEntity entity) {
             entity.addPotionEffect(new PotionEffect(shotType.effectType(), AranarthBendingUtils.SPIRIT_EFFECT_DURATION, shotType.amplifier(), false, true, true));
-            DamageHandler.damageEntity(entity, damage, AngeredSpirits.this);
+            double actualDamage = Math.random() < 0.5 ? 2.0 : 3.0;
+            DamageHandler.damageEntity(entity, actualDamage, AngeredSpirits.this);
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_VEX_HURT, 1.0f, 1.2f);
         }
 

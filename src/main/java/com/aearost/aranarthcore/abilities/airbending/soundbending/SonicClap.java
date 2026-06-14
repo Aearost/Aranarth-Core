@@ -31,7 +31,7 @@ public class SonicClap extends SoundAbility implements AddonAbility {
     private static final double HIT_RADIUS_V = 1.55; // vertical (up/down)
     private static final double HALO_SPACING = 1.2;
     private static final double CLAP_SPEED = 1.5; // blocks per tick
-    private static final double BASE_PLAYER_DAMAGE = 5.0;
+    private static final double BASE_PLAYER_DAMAGE = 3.0;
     private static final double MOB_DAMAGE_MULTIPLIER = 1.5;
 
     @Attribute(Attribute.COOLDOWN)

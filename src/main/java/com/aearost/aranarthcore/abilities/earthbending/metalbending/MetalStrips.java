@@ -129,7 +129,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         burst.lastInstance = this;
 
         this.cooldown = COOLDOWN_MS;
-        this.damage = 6.0;
+        this.damage = 2.0;
         this.range = 20.0;
 
         fireShot();

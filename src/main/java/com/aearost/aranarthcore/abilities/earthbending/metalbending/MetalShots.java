@@ -110,7 +110,7 @@ public class MetalShots extends MetalAbility implements AddonAbility {
         }
 
         this.cooldown = 10_000L;
-        this.damage = 3.0;
+        this.damage = 2.0;
         this.range = 24.0;
         this.startTime = System.currentTimeMillis();
         this.lastShotTime = 0L;

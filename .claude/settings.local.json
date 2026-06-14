@@ -205,7 +205,9 @@
       "Bash(gunzip -c 2026-06-13-1.log.gz)",
       "Bash(gunzip -c 2026-06-13-2.log.gz)",
       "Bash(gunzip -c 2026-06-13-3.log.gz)",
-      "Bash(gunzip -c C:/Users/liamh/Downloads/2026-06-13-3.log.gz)"
+      "Bash(gunzip -c C:/Users/liamh/Downloads/2026-06-13-3.log.gz)",
+      "Bash(find C:/Users/liamh/Downloads/JedCore-master -type f -name *.java)",
+      "Bash(head -20 grep -n \"damage\\\\|DAMAGE\\\\|BASE_PLAYER\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/abilities/airbending/soundbending/SonicClap.java\")"
     ]
   }
 }

@@ -74,7 +74,7 @@ public class Sandstorm extends SandAbility implements AddonAbility {
         maxRadius = 10.0;
         baseDamage = 1.0;
         damageIncrement = 1.0;
-        maxDamagePerInterval = 4.0;
+        maxDamagePerInterval = 3.0;
         expansionInterval = 500;
         damageInterval = 500;
         maxCastingDuration = 10000L;

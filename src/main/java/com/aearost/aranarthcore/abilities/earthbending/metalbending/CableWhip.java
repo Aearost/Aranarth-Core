@@ -74,7 +74,7 @@ public class CableWhip extends MetalAbility implements AddonAbility {
         }
 
         this.cooldown        = 6000L;
-        this.damage          = 5.0;
+        this.damage          = 3.0;
         this.range           = 6.0;
         this.phase           = Phase.CHARGING;
         this.chargeStartTime = System.currentTimeMillis();

@@ -43,7 +43,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
         this.chargeDuration = 3000L;
         this.cooldown = 15000L;
         this.radius = 7.0;
-        this.damage = 16.0; // 8 hearts
+        this.damage = 14.0; // 7 hearts
 
         if (!bPlayer.canBend(this)) {
             remove();
