@@ -74,6 +74,7 @@ public class AranarthUtils {
 	private static final List<UUID> originalPlayers = new ArrayList<>();
 	private static int phantomSpawnDelay = 0;
 	private static final HashMap<Boost, LocalDateTime> serverBoosts = new HashMap<>();
+	private static final Set<String> sentBoostReminders = new HashSet<>();
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
@@ -2237,6 +2238,11 @@ public class AranarthUtils {
 				serverBoosts.put(boost, newBoostEnd);
 			}
 
+			// Clear reminders so they fire again for the new/extended duration
+			sentBoostReminders.remove(boost.name() + "_60");
+			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_1");
+
 			// Handles messages
 			if (uuid == null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
@@ -2274,6 +2280,9 @@ public class AranarthUtils {
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
 			DiscordUtils.updateBoostInDiscord(null, boost, false);
 			serverBoosts.remove(boost);
+			sentBoostReminders.remove(boost.name() + "_60");
+			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_1");
 		}
 	}
 
@@ -2353,6 +2362,43 @@ public class AranarthUtils {
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
 			DiscordUtils.updateBoostInDiscord(null, boost, false);
 			serverBoosts.remove(boost);
+			sentBoostReminders.remove(boost.name() + "_60");
+			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_1");
+		}
+
+		// Send reminder messages at 60, 30, and 1 minute remaining
+		for (Boost boost : serverBoosts.keySet()) {
+			String name = "";
+			if (boost == Boost.MINER) {
+				name = "&8&lBoost of the Miner";
+			} else if (boost == Boost.HARVEST) {
+				name = "&6&lBoost of the Harvest";
+			} else if (boost == Boost.HUNTER) {
+				name = "&c&lBoost of the Hunter";
+			} else if (boost == Boost.CHI) {
+				name = "&f&lBoost of Chi";
+			} else {
+				name = "&7&lUnspecified Boost";
+			}
+
+			Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
+			long minutesLeft = remaining.toMinutes();
+
+			int[] thresholds = {60, 30, 1};
+			String[] labels = {"&e1 hour", "&e30 minutes", "&e1 minute"};
+			String[] discordLabels = {"1 hour", "30 minutes", "1 minute"};
+			for (int i = 0; i < thresholds.length; i++) {
+				String key = boost.name() + "_" + thresholds[i];
+				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
+					sentBoostReminders.add(key);
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
+					DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+					for (Player player : Bukkit.getOnlinePlayers()) {
+						player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, 1.0f, 0.7f);
+					}
+				}
+			}
 		}
 
 		if (serverBoosts.containsKey(Boost.MINER)) {

@@ -674,6 +674,37 @@ public class DiscordUtils {
 	}
 
 	/**
+	 * Sends a reminder embed to #server-chat when a boost is about to expire.
+	 * @param boost The boost.
+	 * @param timeLabel Human-readable time remaining (e.g. "1 hour", "30 minutes", "1 minute").
+	 */
+	public static void sendBoostReminderToDiscord(Boost boost, String timeLabel) {
+		String name = "";
+		Color color = null;
+		if (boost == Boost.MINER) {
+			name = "Boost of the Miner";
+			color = new Color(85, 85, 85);
+		} else if (boost == Boost.HARVEST) {
+			name = "Boost of the Harvest";
+			color = new Color(255, 170, 0);
+		} else if (boost == Boost.HUNTER) {
+			name = "Boost of the Hunter";
+			color = new Color(255, 85, 85);
+		} else if (boost == Boost.CHI) {
+			name = "Boost of Chi";
+			color = new Color(255, 255, 255);
+		} else {
+			name = "Unspecified Boost";
+			color = new Color(255, 85, 255);
+		}
+		EmbedBuilder embed = new EmbedBuilder()
+				.setAuthor("The " + name + " expires in " + timeLabel + "!")
+				.setColor(color);
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
+		serverChatChannel.sendMessage("<@&1515810206741823508>").queue();
+	}
+
+	/**
 	 * Sends a notification when a player donates.
 	 * Updates both #notifications and #role-changes in Discord.
 	 * @param message The message to be sent.
