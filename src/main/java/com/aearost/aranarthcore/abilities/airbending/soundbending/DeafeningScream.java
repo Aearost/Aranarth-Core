@@ -40,7 +40,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
     public DeafeningScream(Player player) {
         super(player);
 
-        this.chargeDuration = 3000L;
+        this.chargeDuration = 2000L;
         this.cooldown = 15000L;
         this.radius = 7.0;
         this.damage = 14.0; // 7 hearts
@@ -98,8 +98,11 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
 
         for (LivingEntity entity : origin.getWorld().getLivingEntities()) {
             if (entity.equals(player)) continue;
-            if (entity.getLocation().distance(origin) <= radius) {
-                DamageHandler.damageEntity(entity, damage, this);
+            double dist = entity.getLocation().distance(origin);
+            if (dist <= radius) {
+                // Scale from full damage at point-blank to 50% at max radius
+                double falloff = 1.0 - (0.5 * (dist / radius));
+                DamageHandler.damageEntity(entity, damage * falloff, this);
                 applySoundDebuff(entity);
             }
         }
