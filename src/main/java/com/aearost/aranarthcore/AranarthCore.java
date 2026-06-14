@@ -318,6 +318,7 @@ public class AranarthCore extends JavaPlugin {
         new EntityBreedEventListener(this);
         new PlayerDropItemEventListener(this);
         new PlayerItemDamageEventListener(this);
+        new PlayerItemHeldEventListener(this);
         new ItemSpawnEventListener(this);
 
         // Multi-event listeners for single purpose

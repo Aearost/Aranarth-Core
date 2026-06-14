@@ -231,6 +231,7 @@ Minor Features
 [~] Fixed issue where dominions would be disbanded but would retain claimed chunks
 [~] Updated incorrect dominion being displayed when you become neutral
 [~] Added reminders for boosts ending
+[~] Prevented scrolling while in a held shulker box causing duplication bug
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
