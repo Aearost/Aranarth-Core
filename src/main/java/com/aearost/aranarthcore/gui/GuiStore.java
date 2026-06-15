@@ -429,7 +429,7 @@ public class GuiStore {
 
 		ItemStack hunter = new ItemStack(Material.CROSSBOW);
 		ItemMeta hunterMeta = hunter.getItemMeta();
-		hunterMeta.setDisplayName(ChatUtils.translateToColor("&4&lBoost of the Hunter - $2.99"));
+		hunterMeta.setDisplayName(ChatUtils.translateToColor("&4&lBoost of the Hunter - $1.99"));
 		List<String> hunterLore = new ArrayList<>();
 		hunterLore.add(ChatUtils.translateToColor("&cIncreased passive and hostile mob drops"));
 		hunterMeta.setLore(hunterLore);
@@ -438,7 +438,7 @@ public class GuiStore {
 
 		ItemStack chi = new ItemStack(Material.SUGAR);
 		ItemMeta chiMeta = chi.getItemMeta();
-		chiMeta.setDisplayName(ChatUtils.translateToColor("&7&lBoost of Chi - $2.99"));
+		chiMeta.setDisplayName(ChatUtils.translateToColor("&7&lBoost of Chi - $1.49"));
 		List<String> chiLore = new ArrayList<>();
 		chiLore.add(ChatUtils.translateToColor("&fIncreased bending damage and decreased cooldowns"));
 		chiMeta.setLore(chiLore);

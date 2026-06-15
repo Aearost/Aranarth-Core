@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
@@ -229,6 +230,30 @@ public class GuiVoteShopPurchaseClick {
                     // Seraph
                     else if (clicked.getType() == Material.PURPLE_CONCRETE_POWDER) {
                         Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3");
+                    }
+                    // Boost of the Miner
+                    else if (clicked.getType() == Material.NETHERITE_PICKAXE) {
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        AranarthUtils.addServerBoost(Boost.MINER, null, player.getUniqueId());
+                        return;
+                    }
+                    // Boost of the Harvest
+                    else if (clicked.getType() == Material.NETHERITE_HOE) {
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        AranarthUtils.addServerBoost(Boost.HARVEST, null, player.getUniqueId());
+                        return;
+                    }
+                    // Boost of the Hunter
+                    else if (clicked.getType() == Material.CROSSBOW) {
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        AranarthUtils.addServerBoost(Boost.HUNTER, null, player.getUniqueId());
+                        return;
+                    }
+                    // Boost of Chi
+                    else if (clicked.getType() == Material.SUGAR) {
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        AranarthUtils.addServerBoost(Boost.CHI, null, player.getUniqueId());
+                        return;
                     }
 
                     player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));

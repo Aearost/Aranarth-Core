@@ -269,6 +269,42 @@ public class GuiVoteShop {
 		saint3monthly.setItemMeta(saint3monthlyMeta);
 		gui.setItem(42, saint3monthly);
 
+		ItemStack boostMiner = new ItemStack(Material.NETHERITE_PICKAXE);
+		ItemMeta boostMinerMeta = boostMiner.getItemMeta();
+		boostMinerMeta.setDisplayName(ChatUtils.translateToColor("&8&lBoost of the Miner"));
+		List<String> boostMinerLore = new ArrayList<>();
+		boostMinerLore.add(ChatUtils.translateToColor("&e100 vote points"));
+		boostMinerMeta.setLore(boostMinerLore);
+		boostMiner.setItemMeta(boostMinerMeta);
+		gui.setItem(27, boostMiner);
+
+		ItemStack boostHarvest = new ItemStack(Material.NETHERITE_HOE);
+		ItemMeta boostHarvestMeta = boostHarvest.getItemMeta();
+		boostHarvestMeta.setDisplayName(ChatUtils.translateToColor("&6&lBoost of the Harvest"));
+		List<String> boostHarvestLore = new ArrayList<>();
+		boostHarvestLore.add(ChatUtils.translateToColor("&e80 vote points"));
+		boostHarvestMeta.setLore(boostHarvestLore);
+		boostHarvest.setItemMeta(boostHarvestMeta);
+		gui.setItem(36, boostHarvest);
+
+		ItemStack boostHunter = new ItemStack(Material.CROSSBOW);
+		ItemMeta boostHunterMeta = boostHunter.getItemMeta();
+		boostHunterMeta.setDisplayName(ChatUtils.translateToColor("&c&lBoost of the Hunter"));
+		List<String> boostHunterLore = new ArrayList<>();
+		boostHunterLore.add(ChatUtils.translateToColor("&e50 vote points"));
+		boostHunterMeta.setLore(boostHunterLore);
+		boostHunter.setItemMeta(boostHunterMeta);
+		gui.setItem(35, boostHunter);
+
+		ItemStack boostChi = new ItemStack(Material.SUGAR);
+		ItemMeta boostChiMeta = boostChi.getItemMeta();
+		boostChiMeta.setDisplayName(ChatUtils.translateToColor("&f&lBoost of Chi"));
+		List<String> boostChiLore = new ArrayList<>();
+		boostChiLore.add(ChatUtils.translateToColor("&e30 vote points"));
+		boostChiMeta.setLore(boostChiLore);
+		boostChi.setItemMeta(boostChiMeta);
+		gui.setItem(44, boostChi);
+
 		gui.setItem(45, headerFooter);
 		gui.setItem(46, headerFooter);
 		gui.setItem(47, headerFooter);

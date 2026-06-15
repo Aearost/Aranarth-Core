@@ -2247,7 +2247,7 @@ public class AranarthUtils {
 			if (uuid == null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
 				DiscordUtils.updateBoostInDiscord(null, boost, true);
-			} else {Bukkit.broadcastMessage(ChatUtils.translateToColor(""));
+			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
 				DiscordUtils.updateBoostInDiscord(uuid, boost, true);
