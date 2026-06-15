@@ -1,12 +1,13 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.gui.GuiInvsee;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
- * Allows the player to see another player's inventory.
+ * Allows the player to see another player's inventory, including armor and off-hand slots.
  */
 public class CommandInvsee {
 
@@ -27,7 +28,7 @@ public class CommandInvsee {
 			} else {
 				Player target = Bukkit.getPlayer(args[1]);
 				if (target != null) {
-					player.openInventory(target.getInventory());
+					GuiInvsee.open(player, target);
 					return true;
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));

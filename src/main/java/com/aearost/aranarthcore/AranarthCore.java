@@ -366,6 +366,7 @@ public class AranarthCore extends JavaPlugin {
         new VotifierListener(this);
         new ArmorStandInteractListener(this);
         new PlayerFishEventListener(this);
+        new InvseeListener(this);
 
         // Discord server join and quit messages
         new BukkitRunnable() {
