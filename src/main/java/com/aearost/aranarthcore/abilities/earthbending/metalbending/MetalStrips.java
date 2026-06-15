@@ -27,8 +27,22 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private static final double RECALL_SPEED = 1.2;
     private static final double PICKUP_RADIUS = 1.5;
 
-    private static final Particle.DustOptions INGOT_TRAIL =
-            new Particle.DustOptions(Color.fromRGB(160, 160, 165), 0.7f);
+    // Base damage = 2.0 (iron)
+    private static final Map<Material, Double> METAL_DAMAGE = Map.of(
+            Material.QUARTZ,          1.0,
+            Material.COPPER_INGOT,    1.0,
+            Material.IRON_INGOT,      2.0,
+            Material.GOLD_INGOT,      3.0,
+            Material.NETHERITE_INGOT, 6.0
+    );
+
+    private static final Map<Material, Particle.DustOptions> METAL_PARTICLES = Map.of(
+            Material.QUARTZ,          new Particle.DustOptions(Color.fromRGB(240, 240, 240), 0.7f),
+            Material.COPPER_INGOT,    new Particle.DustOptions(Color.fromRGB(184, 115, 51), 0.7f),
+            Material.IRON_INGOT,      new Particle.DustOptions(Color.fromRGB(160, 160, 165), 0.7f),
+            Material.GOLD_INGOT,      new Particle.DustOptions(Color.fromRGB(255, 215, 0), 0.7f),
+            Material.NETHERITE_INGOT, new Particle.DustOptions(Color.fromRGB(60, 50, 60), 0.7f)
+    );
 
     private static final Set<Material> METAL_MATERIALS = Set.of(
             Material.IRON_INGOT,
@@ -56,8 +70,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private static final Map<UUID, BurstData> activeBursts = new HashMap<>();
 
     private static NamespacedKey stripOwnerKey;
-
     private static NamespacedKey instanceKey;
+    private static NamespacedKey stripMaterialKey;
 
     private static class BurstData {
         int shotsFired = 0;
@@ -76,6 +90,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     private Location startLocation;
     private Vector direction;
     private double distanceTraveled;
+    private Material metalMaterial;
+    private Particle.DustOptions trailParticle;
 
     /**
      * Must be called immediately before constructing a MetalStrips instance from the left-click
@@ -104,12 +120,16 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             return;
         }
 
-        if (!hasIronIngot(player)) {
+        final Material found = findMetalMaterial(player);
+        if (found == null) {
             return;
         }
-        if (!consumeIronIngot(player)) {
+        if (!consumeMetal(player, found)) {
             return;
         }
+
+        this.metalMaterial = found;
+        this.trailParticle = METAL_PARTICLES.getOrDefault(found, METAL_PARTICLES.get(Material.IRON_INGOT));
 
         // Start a new burst on the first shot
         if (burst == null) {
@@ -129,7 +149,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         burst.lastInstance = this;
 
         this.cooldown = COOLDOWN_MS;
-        this.damage = 2.0;
+        this.damage = METAL_DAMAGE.getOrDefault(found, 2.0);
         this.range = 20.0;
 
         fireShot();
@@ -155,7 +175,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         this.startLocation = eyeLoc.clone();
 
         // Build a unique ItemStack so the shot items never merge with each other
-        final ItemStack ingotStack = new ItemStack(Material.IRON_INGOT, 1);
+        final ItemStack ingotStack = new ItemStack(this.metalMaterial, 1);
         final ItemMeta meta = ingotStack.getItemMeta();
         if (meta != null) {
             meta.getPersistentDataContainer().set(
@@ -169,9 +189,9 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 eyeLoc.clone().add(this.direction.clone().multiply(this.distanceTraveled)),
                 ingotStack
         );
-        this.firedItem.setPickupDelay(Integer.MAX_VALUE); // Not able to be picked up
+        this.firedItem.setPickupDelay(Integer.MAX_VALUE); // Not able to be picked up by others
         this.firedItem.setCanMobPickup(false);
-        this.firedItem.setCanPlayerPickup(true);  // Owner can step on it after landing via event
+        this.firedItem.setCanPlayerPickup(false); // Only the owner can pick it up via recall
         this.firedItem.setGravity(false);
         this.firedItem.setVelocity(this.direction.clone().multiply(SPEED));
 
@@ -180,6 +200,13 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 getStripOwnerKey(),
                 PersistentDataType.STRING,
                 player.getUniqueId().toString()
+        );
+
+        // Store the material so recall can return the correct item
+        this.firedItem.getPersistentDataContainer().set(
+                getStripMaterialKey(),
+                PersistentDataType.STRING,
+                this.metalMaterial.name()
         );
 
         // Register for potential recall
@@ -265,14 +292,14 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                 Particle.DUST,
                 exactPos,
                 1, 0.05, 0.05, 0.05, 0,
-                INGOT_TRAIL
+                this.trailParticle
         );
     }
 
     private void landItem() {
         if (this.firedItem != null && !this.firedItem.isDead()) {
             this.firedItem.setGravity(true);
-            this.firedItem.setPickupDelay(20); // Owner can step on it 1 second after landing
+            this.firedItem.setPickupDelay(Integer.MAX_VALUE); // Only retrievable via recall, not by walking over
         }
         this.firedItem = null;
     }
@@ -310,7 +337,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
 
                 final Location playerAnchor = player.getLocation().add(0, 1.0, 0);
 
-                // Returned as regular iron ingots (no metadata)
+                // Recall own fired strips (returns the correct metal type)
                 final List<Item> strips = trackedStrips.get(player.getUniqueId());
                 if (strips != null && !strips.isEmpty()) {
                     final Iterator<Item> iter = strips.iterator();
@@ -328,19 +355,21 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                             continue;
                         }
 
-                        // Within pickup radius
+                        // Within pickup radius, return the correct material
                         if (distSq <= PICKUP_RADIUS * PICKUP_RADIUS) {
+                            final Material returnMaterial = getStoredMaterial(item);
                             final HashMap<Integer, ItemStack> overflow =
-                                    player.getInventory().addItem(new ItemStack(Material.IRON_INGOT, 1));
+                                    player.getInventory().addItem(new ItemStack(returnMaterial, 1));
                             if (!overflow.isEmpty()) {
                                 player.getWorld().dropItemNaturally(
-                                        player.getLocation(), new ItemStack(Material.IRON_INGOT, 1));
+                                        player.getLocation(), new ItemStack(returnMaterial, 1));
                             }
                             item.remove();
                             iter.remove();
                             continue;
                         }
 
+                        final Particle.DustOptions particle = getParticleForItem(item);
                         final Vector toPlayer = playerAnchor.toVector()
                                 .subtract(item.getLocation().toVector())
                                 .normalize()
@@ -348,7 +377,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                         item.setGravity(false);
                         item.setVelocity(toPlayer);
                         item.getWorld().spawnParticle(
-                                Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0, INGOT_TRAIL);
+                                Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0, particle);
                     }
                 }
 
@@ -389,7 +418,8 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
                             .multiply(RECALL_SPEED);
                     item.setVelocity(toPlayer);
                     item.getWorld().spawnParticle(
-                            Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0, INGOT_TRAIL);
+                            Particle.DUST, item.getLocation(), 1, 0.05, 0.05, 0.05, 0,
+                            METAL_PARTICLES.get(Material.IRON_INGOT));
                 }
             }
         }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
@@ -404,15 +434,23 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
         }
     }
 
-    private static boolean hasIronIngot(final Player player) {
-        return player.getInventory().contains(Material.IRON_INGOT);
+    /**
+     * Returns the first supported fireable metal found by scanning inventory slots in order.
+     */
+    private static Material findMetalMaterial(final Player player) {
+        for (final ItemStack stack : player.getInventory().getContents()) {
+            if (stack != null && METAL_DAMAGE.containsKey(stack.getType())) {
+                return stack.getType();
+            }
+        }
+        return null;
     }
 
-    private static boolean consumeIronIngot(final Player player) {
+    private static boolean consumeMetal(final Player player, final Material material) {
         final ItemStack[] contents = player.getInventory().getContents();
         for (int i = 0; i < contents.length; i++) {
             final ItemStack stack = contents[i];
-            if (stack != null && stack.getType() == Material.IRON_INGOT) {
+            if (stack != null && stack.getType() == material) {
                 if (stack.getAmount() > 1) {
                     stack.setAmount(stack.getAmount() - 1);
                 } else {
@@ -422,6 +460,26 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             }
         }
         return false;
+    }
+
+    /** Reads the stored material from a fired strip item. */
+    private static Material getStoredMaterial(final Item item) {
+        final String name = item.getPersistentDataContainer().get(
+                getStripMaterialKey(), PersistentDataType.STRING);
+        if (name == null) {
+            return Material.IRON_INGOT;
+        }
+        try {
+            return Material.valueOf(name);
+        } catch (final IllegalArgumentException e) {
+            return Material.IRON_INGOT;
+        }
+    }
+
+    /** Returns the trail particle for a fired strip item based on its stored material. */
+    private static Particle.DustOptions getParticleForItem(final Item item) {
+        final Material mat = getStoredMaterial(item);
+        return METAL_PARTICLES.getOrDefault(mat, METAL_PARTICLES.get(Material.IRON_INGOT));
     }
 
     public static NamespacedKey getStripOwnerKey() {
@@ -436,6 +494,13 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
             instanceKey = new NamespacedKey(AranarthCore.getInstance(), "metalstrips_instance");
         }
         return instanceKey;
+    }
+
+    public static NamespacedKey getStripMaterialKey() {
+        if (stripMaterialKey == null) {
+            stripMaterialKey = new NamespacedKey(AranarthCore.getInstance(), "metalstrips_material");
+        }
+        return stripMaterialKey;
     }
 
     public static void removeTrackedItem(final Item item, final UUID playerUuid) {
@@ -512,6 +577,7 @@ public class MetalStrips extends MetalAbility implements AddonAbility {
     public String getDescription() {
         return "Rapidly fire metal ingots from your inventory as harmful projectiles, "
                 + "requiring one ingot per shot, and striking hit targets. "
+                + "Different metals deal different damage: Quartz/Copper (0.5x), Iron (1x), Gold (1.5x), Netherite (3x). "
                 + "Hold sneak to recall all nearby ingots you have fired back into your hand.\n"
                 + ChatUtils.translateToColor("&fUsage: Left-click (Launch) | Hold Sneak (Pull)");
     }
