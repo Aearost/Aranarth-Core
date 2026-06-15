@@ -18,6 +18,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -104,8 +105,9 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         }
 
         final Weather weather = AranarthUtils.getWeather();
-        if (weather != Weather.RAIN && weather != Weather.THUNDER) {
-            player.sendMessage(ChatUtils.chatMessage("&7You can only use " + Element.ICE.getColor() + this.getName() + " &7while it is raining!"));
+        if (weather != Weather.RAIN && weather != Weather.THUNDER
+                && this.countNearbyWaterSources(player.getLocation(), 50, 50) < 50) {
+            player.sendMessage(ChatUtils.chatMessage("&7You can only use " + Element.ICE.getColor() + this.getName() + " &7while it is raining, or while near a large body of water!"));
             return;
         }
 
@@ -129,6 +131,31 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         this.generateDomeTargets();
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         this.start();
+    }
+
+    // -----------------------------------------------------------------------
+    // Water source detection
+    // -----------------------------------------------------------------------
+
+    /**
+     * Counts water source blocks (level 0, not flowing) within {@code radius} blocks
+     * of {@code centre}, stopping as soon as {@code limit} is reached for performance.
+     */
+    private int countNearbyWaterSources(final Location centre, final int radius, final int limit) {
+        int count = 0;
+        for (int x = -radius; x <= radius && count < limit; x++) {
+            for (int y = -radius; y <= radius && count < limit; y++) {
+                for (int z = -radius; z <= radius && count < limit; z++) {
+                    if (x * x + y * y + z * z > radius * radius) continue;
+                    final Block block = centre.clone().add(x, y, z).getBlock();
+                    if (block.getType() != Material.WATER) continue;
+                    if (block.getBlockData() instanceof Levelled levelled && levelled.getLevel() == 0) {
+                        count++;
+                    }
+                }
+            }
+        }
+        return count;
     }
 
     // -----------------------------------------------------------------------
