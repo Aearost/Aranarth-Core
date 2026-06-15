@@ -105,8 +105,7 @@ public class IceShards extends IceAbility implements AddonAbility, ComboAbility 
         }
 
         final Weather weather = AranarthUtils.getWeather();
-        if (weather != Weather.RAIN && weather != Weather.THUNDER
-                && this.countNearbyWaterSources(player.getLocation(), 50, 50) < 50) {
+        if (weather == Weather.CLEAR && this.countNearbyWaterSources(player.getLocation(), 50, 50) < 50) {
             player.sendMessage(ChatUtils.chatMessage("&7You can only use " + Element.ICE.getColor() + this.getName() + " &7while it is raining, or while near a large body of water!"));
             return;
         }
