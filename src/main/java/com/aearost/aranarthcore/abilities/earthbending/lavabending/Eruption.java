@@ -484,6 +484,7 @@ public class Eruption extends LavaAbility implements AddonAbility {
      * Restores every block touched by any geyser to its true pre-eruption state.
      */
     private void restoreAllBlocks() {
+        if (geysers == null) return;
         // First restore column layers (top-to-bottom) for all geysers
         for (Geyser geyser : geysers) {
             for (int i = geyser.columnLayers.size() - 1; i >= 0; i--) {

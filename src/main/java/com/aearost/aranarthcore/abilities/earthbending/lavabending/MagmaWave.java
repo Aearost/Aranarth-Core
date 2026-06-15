@@ -377,6 +377,7 @@ public class MagmaWave extends LavaAbility implements AddonAbility {
     }
 
     private void restoreAllBlocks() {
+        if (waveBlocks == null) return;
         for (Block b : new HashSet<>(waveBlocks)) restoreBlock(b);
         waveBlocks.clear();
         for (Map.Entry<Block, BlockData> e : new HashMap<>(originalData).entrySet())

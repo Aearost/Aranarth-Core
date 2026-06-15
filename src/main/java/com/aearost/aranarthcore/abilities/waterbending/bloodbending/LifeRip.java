@@ -314,17 +314,18 @@ public class LifeRip extends BloodAbility implements AddonAbility {
     }
 
     private void releaseTarget() {
-        if (!suppressedElements.isEmpty() && target != null) {
-            BendingPlayer targetBP = BendingPlayer.getBendingPlayer(target);
-            if (targetBP != null) {
-                for (Element element : suppressedElements) {
-                    if (!targetBP.isElementToggled(element)) {
-                        targetBP.toggleElement(element);
-                    }
+        if (suppressedElements == null || suppressedElements.isEmpty() || target == null) {
+            return;
+        }
+        BendingPlayer targetBP = BendingPlayer.getBendingPlayer(target);
+        if (targetBP != null) {
+            for (Element element : suppressedElements) {
+                if (!targetBP.isElementToggled(element)) {
+                    targetBP.toggleElement(element);
                 }
             }
-            suppressedElements.clear();
         }
+        suppressedElements.clear();
     }
 
     @Override
