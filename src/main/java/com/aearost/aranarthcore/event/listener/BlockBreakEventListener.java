@@ -11,6 +11,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Ageable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -33,6 +34,7 @@ public class BlockBreakEventListener implements Listener {
     @EventHandler(ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent e) {
         handlePlentifulBreak(e);
+        if (e.isCancelled()) return;
         handleMagnetismBreak(e);
 
         // Blocks that are not necessarily destroyed
@@ -93,6 +95,17 @@ public class BlockBreakEventListener implements Listener {
                 if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
                     String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
                     if (type.equals("incantation_plentiful")) {
+                        // Only activate plentiful for fully matured crops to avoid durability draining
+                        if (heldItem.getType().name().endsWith("_HOE")) {
+                            Block block = e.getBlock();
+                            if (block.getBlockData() instanceof Ageable ageable) {
+                                if (ageable.getAge() < ageable.getMaximumAge()) {
+                                    e.setCancelled(true);
+                                    AranarthUtils.setPlayer(uuid, aranarthPlayer);
+                                    return;
+                                }
+                            }
+                        }
                         aranarthPlayer.setPlentifulBlocksToDestroy(9);
                         new IncantationPlentifulBlockBreak().execute(e);
                     }
