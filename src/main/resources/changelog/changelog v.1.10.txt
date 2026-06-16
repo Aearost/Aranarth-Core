@@ -233,7 +233,8 @@ Minor Features
 [~] Fixed issue where dominion chat messages were not being logged to console correctly
 [~] Fixed issue where dominions would be disbanded but would retain claimed chunks
 [~] Updated incorrect dominion being displayed when you become neutral
-[~] Added reminders for boosts ending
+[+] Added reminders for boosts ending
+[+] Implemented pings to the Boosts role in the #boosts channel in Discord
 [~] Prevented scrolling while in a held shulker box causing duplication bug
 [~] Implemented support for modifying a player's armour and off-hand item with /ac invsee
 

@@ -42,6 +42,10 @@ public class DiscordUtils {
 	private static final TextChannel dominions = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("dominions");
 	private static final TextChannel welcome = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("welcome");
 
+	private static TextChannel getBoostsChannel() {
+		return DiscordSRV.getPlugin().getJda().getTextChannelById("1516249987795779604");
+	}
+
 	private static String discordRole(String key) {
 		return AranarthCore.getInstance().getConfig().getString("discord.roles." + key);
 	}
@@ -664,11 +668,23 @@ public class DiscordUtils {
 		if (uuid != null) {
 			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
 			donationNotification(username + " has applied the " + name, uuid, color);
-			serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+			EmbedBuilder boostEmbed = new EmbedBuilder().setAuthor(username + " has applied the " + name, null, url).setColor(color);
+			TextChannel boostsChannel = getBoostsChannel();
+			if (boostsChannel != null) {
+				boostsChannel.sendMessageEmbeds(boostEmbed.build()).queue();
+				boostsChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+			}
 		} else {
 			if (isAdding) {
 				donationNotification("The " + name + " has been applied", null, color);
-				serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+				EmbedBuilder boostEmbed = new EmbedBuilder().setAuthor("The " + name + " has been applied").setColor(color);
+				TextChannel boostsChannel = getBoostsChannel();
+				if (boostsChannel != null) {
+					boostsChannel.sendMessageEmbeds(boostEmbed.build()).queue();
+					boostsChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+				}
 			} else {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor("The " + name + " has expired")
@@ -706,7 +722,11 @@ public class DiscordUtils {
 				.setAuthor("The " + name + " expires in " + timeLabel + "!")
 				.setColor(color);
 		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-		serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+		TextChannel boostsChannel = getBoostsChannel();
+		if (boostsChannel != null) {
+			boostsChannel.sendMessageEmbeds(embed.build()).queue();
+			boostsChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
+		}
 	}
 
 	/**
