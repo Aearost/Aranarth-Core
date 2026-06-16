@@ -21,7 +21,10 @@ import java.awt.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.Message;
+
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -661,9 +664,11 @@ public class DiscordUtils {
 		if (uuid != null) {
 			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
 			donationNotification(username + " has applied the " + name, uuid, color);
+			serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
 		} else {
 			if (isAdding) {
 				donationNotification("The " + name + " has been applied", null, color);
+				serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
 			} else {
 				EmbedBuilder embed = new EmbedBuilder()
 						.setAuthor("The " + name + " has expired")
@@ -701,7 +706,7 @@ public class DiscordUtils {
 				.setAuthor("The " + name + " expires in " + timeLabel + "!")
 				.setColor(color);
 		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
-		serverChatChannel.sendMessage("<@&1515810206741823508>").queue();
+		serverChatChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
 	}
 
 	/**

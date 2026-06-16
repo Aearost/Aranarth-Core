@@ -2241,6 +2241,8 @@ public class AranarthUtils {
 			// Clear reminders so they fire again for the new/extended duration
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_10");
+			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 
 			// Handles messages
@@ -2282,6 +2284,8 @@ public class AranarthUtils {
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_10");
+			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 		}
 	}
@@ -2364,6 +2368,8 @@ public class AranarthUtils {
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
+			sentBoostReminders.remove(boost.name() + "_10");
+			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 		}
 
@@ -2385,9 +2391,9 @@ public class AranarthUtils {
 			Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
 			long minutesLeft = remaining.toMinutes();
 
-			int[] thresholds = {60, 30, 1};
-			String[] labels = {"&e1 hour", "&e30 minutes", "&e1 minute"};
-			String[] discordLabels = {"1 hour", "30 minutes", "1 minute"};
+			int[] thresholds = {60, 30, 10, 5, 1};
+			String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e5 minutes", "&e1 minute"};
+			String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", "5 minutes", "1 minute"};
 			for (int i = 0; i < thresholds.length; i++) {
 				String key = boost.name() + "_" + thresholds[i];
 				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
