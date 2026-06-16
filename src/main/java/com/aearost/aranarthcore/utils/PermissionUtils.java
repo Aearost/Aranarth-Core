@@ -231,6 +231,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.metalblade", true);
 			perms.setPermission("bending.ability.cablethrash", true);
 			perms.setPermission("bending.ability.daggervolley", true);
+			perms.setPermission("bending.ability.healinghelix", true);
+			perms.setPermission("bending.ability.corruptinghelix", true);
 			perms.setPermission("bending.ability.bloodfreeze", true);
 			perms.setPermission("bending.ability.disalignment", true);
 			perms.setPermission("bending.ability.liferip", true);
@@ -303,6 +305,8 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.metalblade", false);
 			perms.setPermission("bending.ability.cablethrash", false);
 			perms.setPermission("bending.ability.daggervolley", false);
+			perms.setPermission("bending.ability.healinghelix", false);
+			perms.setPermission("bending.ability.corruptinghelix", false);
 			perms.setPermission("bending.ability.bloodfreeze", false);
 			perms.setPermission("bending.ability.disalignment", false);
 			perms.setPermission("bending.ability.liferip", false);
@@ -349,7 +353,6 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.Fissure", false);
 
 		// Aranarth abilities available at same rank as their sub-element unlock
-		perms.setPermission("bending.ability.healinghelix", true);   // healing - Knight
 		perms.setPermission("bending.ability.razorleaves", true);    // plant - Esquire
 		perms.setPermission("bending.ability.icediscs", true);       // water combo - always
 		perms.setPermission("bending.ability.noxiousfumes", true);   // combustion - King
@@ -386,6 +389,8 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.metalblade", false);         // metal - Baron
 		perms.setPermission("bending.ability.cablethrash", false);        // metal - Baron
 		perms.setPermission("bending.ability.daggervolley", false);       // chi - Count
+		perms.setPermission("bending.ability.healinghelix", false);         // healing - Count
+		perms.setPermission("bending.ability.corruptinghelix", false);    // healing - Prince
 		perms.setPermission("bending.ability.bloodfreeze", false);        // blood - King
 		perms.setPermission("bending.ability.disalignment", false);       // blood - Emperor
 		perms.setPermission("bending.ability.liferip", false);            // blood - Emperor
@@ -866,6 +871,7 @@ public class PermissionUtils {
 
 		// Count
 		if (rank >= 4) {
+			perms.setPermission("bending.ability.healinghelix", true);        // healing
 			perms.setPermission("bending.ability.angeredspirits", true);      // spiritual
 			perms.setPermission("bending.ability.iceshards", true);           // ice
 			perms.setPermission("bending.ability.daggervolley", true);        // chi
@@ -897,6 +903,7 @@ public class PermissionUtils {
 		if (rank >= 6) {
 			perms.setPermission("bending.fire.lightningbending", true);
 			perms.setPermission("bending.water.bloodbending", true);
+			perms.setPermission("bending.ability.corruptinghelix", true);     // healing
 			perms.setPermission("bending.ability.Discharge", true);           // JedCore lightning
 			perms.setPermission("bending.ability.BloodPuppet", true);         // JedCore blood
 			perms.setPermission("bending.ability.energyburst", true);         // spiritual
