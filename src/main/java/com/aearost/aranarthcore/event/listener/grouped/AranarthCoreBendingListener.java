@@ -595,8 +595,7 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 		}
 
-		// HealingHelix: left-click aims at a water/ice/snow block to register it as the source.
-		// Uses FluidCollisionMode.ALWAYS so liquid water blocks are included in the ray trace.
+		// HealingHelix: left-click aims at a water/ice/snow block to register it as the source
 		if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
 			BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
 			if (bpHelix != null && bpHelix.getBoundAbilityName().equalsIgnoreCase("healinghelix")) {
@@ -714,7 +713,6 @@ public class AranarthCoreBendingListener implements Listener {
 	 */
 	@EventHandler
 	public void onSlotChange(PlayerItemHeldEvent e) {
-		// HealingHelix does not permit slot changes while active; cancel the event entirely.
 		if (HealingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -731,8 +729,6 @@ public class AranarthCoreBendingListener implements Listener {
 		if (sandstorm != null) {
 			sandstorm.cancelFromSlotChange();
 		}
-		// IceShards slot-change cancel is handled inside progress(), but we also
-		// call remove() here for immediate cleanup without waiting a tick.
 		IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
 		if (iceShards != null) {
 			iceShards.remove();
@@ -761,12 +757,10 @@ public class AranarthCoreBendingListener implements Listener {
 		if (energyBurst != null) {
 			energyBurst.onSlotChange();
 		}
-		// Slot change before the strike is fired cancels without cooldown; once TRAVELING it continues on its own
 		CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
 		if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
 			combustionStrike.cancelInstantly();
 		}
-		// Slot change while charging cancels without cooldown; slot change while READY or FLYING applies cooldown
 		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
 		if (magmaGlaives != null) {
 			if (magmaGlaives.getPhase() == MagmaGlaives.Phase.CHARGING) {
@@ -775,7 +769,6 @@ public class AranarthCoreBendingListener implements Listener {
 				magmaGlaives.endWithCooldown();
 			}
 		}
-		// Slot change during SOURCING cancels without cooldown; once warm-up begins the cooldown applies.
 		Eruption eruption = Eruption.getActiveInstance(e.getPlayer().getUniqueId());
 		if (eruption != null) {
 			if (eruption.getPhase() == Eruption.Phase.SOURCING) {
@@ -784,14 +777,11 @@ public class AranarthCoreBendingListener implements Listener {
 				eruption.endWithCooldown();
 			}
 		}
-		// Slot change clears any pending source and ends an active wave with cooldown.
 		MagmaWave.clearPendingSource(e.getPlayer().getUniqueId());
 		MagmaWave magmaWave = MagmaWave.getActiveInstance(e.getPlayer().getUniqueId());
 		if (magmaWave != null) {
 			magmaWave.endWithCooldown();
 		}
-
-		// Slot change during charge or with no whips fired - no cooldown, otherwise apply it.
 		CableWhip cableWhip = CableWhip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (cableWhip != null) {
 			if (cableWhip.getWhipsDone() > 0) {
@@ -804,7 +794,6 @@ public class AranarthCoreBendingListener implements Listener {
 		if (metalShots != null) {
 			metalShots.endWithCooldown();
 		}
-		// Slot change during charge cancels without cooldown; slot change while READY applies cooldown
 		MetalBlade metalBlade = MetalBlade.getActiveInstance(e.getPlayer().getUniqueId());
 		if (metalBlade != null) {
 			if (metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
@@ -821,7 +810,6 @@ public class AranarthCoreBendingListener implements Listener {
 		if (bloodGrip != null) {
 			bloodGrip.endWithCooldown();
 		}
-		// Slot change during charging cancels without cooldown; slot change while casting applies cooldown.
 		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(e.getPlayer().getUniqueId());
 		if (bloodFreeze != null) {
 			if (bloodFreeze.getPhase() == BloodFreeze.Phase.CHARGING) {
@@ -830,12 +818,10 @@ public class AranarthCoreBendingListener implements Listener {
 				bloodFreeze.endWithCooldown();
 			}
 		}
-		// Slot change during charging or charged cancels without cooldown; disalignment in progress continues uninterrupted.
 		Disalignment disalignment = Disalignment.getActiveInstance(e.getPlayer().getUniqueId());
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			disalignment.remove();
 		}
-		// Slot change always cancels LifeRip without a cooldown
 		LifeRip lifeRip = LifeRip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (lifeRip != null) {
 			lifeRip.remove();
@@ -843,7 +829,6 @@ public class AranarthCoreBendingListener implements Listener {
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
 		HealingHelix.clearPendingSource(e.getPlayer().getUniqueId());
 
-		// Slot change during CASTING cancels without cooldown; later phases run to completion.
 		Burial burial = Burial.getActiveInstance(e.getPlayer().getUniqueId());
 		if (burial != null && burial.getPhase() == Burial.Phase.CASTING) {
 			burial.cancelInstantly();
