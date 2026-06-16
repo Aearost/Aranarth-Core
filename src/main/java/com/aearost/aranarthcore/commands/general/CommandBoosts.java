@@ -59,7 +59,7 @@ public class CommandBoosts implements CommandExecutor {
 							if (args.length >= 3) {
 								uuid = AranarthUtils.getUUIDFromUsername(args[2]);
 							}
-							AranarthUtils.addServerBoost(applied, null, uuid);
+							AranarthUtils.addServerBoost(applied, null, uuid, false);
 							return true;
 						}
 						// Removing a boost

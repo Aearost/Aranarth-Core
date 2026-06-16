@@ -295,7 +295,7 @@ public class DateUtils {
 				if (month == Month.IGNIVOR) {
 					AranarthCore.resetResourceWorlds();
 					for (Boost boost : Boost.values()) {
-						AranarthUtils.addServerBoost(boost, null, null);
+						AranarthUtils.addServerBoost(boost, null, null, false);
 					}
 				}
 			}

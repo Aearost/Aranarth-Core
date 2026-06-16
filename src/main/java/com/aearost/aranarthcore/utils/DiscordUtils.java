@@ -642,7 +642,7 @@ public class DiscordUtils {
 	 * @param boost The boost being applied.
 	 * @param isAdding Whether a boost is being added.
 	 */
-	public static void updateBoostInDiscord(UUID uuid, Boost boost, boolean isAdding) {
+	public static void updateBoostInDiscord(UUID uuid, Boost boost, boolean isAdding, boolean fromVoteShop) {
 		Guild guild = getGuild();
 
 		String name = "";
@@ -666,11 +666,24 @@ public class DiscordUtils {
 
 		// If it was applied by a user
 		if (uuid != null) {
-			String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
-			donationNotification(username + " has applied the " + name, uuid, color);
+			String nickname = AranarthUtils.getPlayer(uuid).getNickname();
+			if (fromVoteShop) {
+				String notifMessage = nickname + " used vote points to purchase the " + name;
+				voteShopNotification(notifMessage, uuid, color);
+				String uuidNoDashes = uuid.toString().replaceAll("-", "");
+				String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+				EmbedBuilder boostEmbed = new EmbedBuilder().setAuthor(notifMessage, null, url).setColor(color);
+				TextChannel boostsChannel = getBoostsChannel();
+				if (boostsChannel != null) {
+					boostsChannel.sendMessageEmbeds(boostEmbed.build()).queue();
+				}
+				return;
+			}
+			String notifMessage = nickname + " has applied the " + name;
+			donationNotification(notifMessage, uuid, color);
 			String uuidNoDashes = uuid.toString().replaceAll("-", "");
 			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
-			EmbedBuilder boostEmbed = new EmbedBuilder().setAuthor(username + " has applied the " + name, null, url).setColor(color);
+			EmbedBuilder boostEmbed = new EmbedBuilder().setAuthor(notifMessage, null, url).setColor(color);
 			TextChannel boostsChannel = getBoostsChannel();
 			if (boostsChannel != null) {
 				boostsChannel.sendMessageEmbeds(boostEmbed.build()).queue();
@@ -760,6 +773,29 @@ public class DiscordUtils {
 		notifications.sendMessageEmbeds(embed.build()).queue();
 		// Server owner's Discord User ID
 		notifications.sendMessage("<@" + ownerUserId() + ">").queue();
+	}
+
+	/**
+	 * Sends a notification for a vote shop purchase to #server-chat only.
+	 * @param message The message to be sent.
+	 * @param uuid The UUID of the purchasing player.
+	 * @param color The embed color.
+	 */
+	public static void voteShopNotification(String message, UUID uuid, Color color) {
+		EmbedBuilder embed = new EmbedBuilder();
+		message = ChatUtils.stripColorFormatting(message);
+		message = message.replaceAll("&[a-z0-9]", "");
+
+		if (uuid == null) {
+			embed.setAuthor(message);
+		} else {
+			String uuidNoDashes = uuid.toString().replaceAll("-", "");
+			String url = "https://crafthead.net/avatar/" + uuidNoDashes + "/128";
+			embed.setAuthor(message, null, url);
+		}
+		embed.setColor(color);
+
+		serverChatChannel.sendMessageEmbeds(embed.build()).queue();
 	}
 
 	/**

@@ -2209,7 +2209,7 @@ public class AranarthUtils {
 	 * @param duration The duration of the boost being applied.
 	 * @param uuid The username of the player that is applying the boost.
 	 */
-	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid) {
+	public static void addServerBoost(Boost boost, LocalDateTime duration, UUID uuid, boolean fromVoteShop) {
 		String name = "";
 		if (boost == Boost.MINER) {
 			name = "&8&lBoost of the Miner";
@@ -2248,11 +2248,15 @@ public class AranarthUtils {
 			// Handles messages
 			if (uuid == null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
-				DiscordUtils.updateBoostInDiscord(null, boost, true);
+				DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
-				DiscordUtils.updateBoostInDiscord(uuid, boost, true);
+				if (fromVoteShop) {
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7used vote points to purchase the " + name));
+				} else {
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+				}
+				DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
 			}
 		}
 		// Should only be called during server startup
@@ -2280,7 +2284,7 @@ public class AranarthUtils {
 				name = "&7&lUnspecified Boost";
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			DiscordUtils.updateBoostInDiscord(null, boost, false);
+			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
@@ -2364,7 +2368,7 @@ public class AranarthUtils {
 				name = "&7&lUnspecified Boost";
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			DiscordUtils.updateBoostInDiscord(null, boost, false);
+			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");

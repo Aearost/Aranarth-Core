@@ -10,6 +10,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.awt.Color;
 import java.time.Instant;
 
 /**
@@ -31,10 +32,11 @@ public class CommandRankSet {
 			}
 		}
 
-		if (args.length == 4) {
+		if (args.length == 4 || args.length == 5) {
 			if (args[1].equalsIgnoreCase("rank") || args[1].equalsIgnoreCase("saint")
 					|| args[1].equalsIgnoreCase("council") || args[1].equalsIgnoreCase("architect")
 					|| args[1].equalsIgnoreCase("saintmonth")) {
+				boolean silent = args.length == 5 && args[4].equalsIgnoreCase("silent");
 				OfflinePlayer player = null;
 
 				// Does the player exist
@@ -137,7 +139,12 @@ public class CommandRankSet {
 								aranarthPlayer.setSaintExpireDate(end.toEpochMilli());
 								AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 							}
-							DiscordUtils.updateSaint(player, rank, true);
+							DiscordUtils.updateSaint(player, rank, !silent);
+							if (silent && rank > 0) {
+								String[] saintRankNames = {"", "&5&lAcolyte", "&5&lDisciple", "&5&lSeraph"};
+								Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + name + " &7used vote points to purchase " + saintRankNames[rank]));
+								DiscordUtils.voteShopNotification(name + " used vote points to purchase " + saintRankNames[rank], player.getUniqueId(), Color.MAGENTA);
+							}
 							isSuccessful = true;
 						} else {
 							sender.sendMessage(ChatUtils.chatMessage("&cThere is no rank with this value!"));

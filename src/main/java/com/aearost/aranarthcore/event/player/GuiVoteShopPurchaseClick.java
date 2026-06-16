@@ -221,38 +221,44 @@ public class GuiVoteShopPurchaseClick {
                     }
                     // Acolyte
                     else if (clicked.getType() == Material.PINK_CONCRETE_POWDER) {
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 1");
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 1 silent");
+                        return;
                     }
                     // Disciple
                     else if (clicked.getType() == Material.MAGENTA_CONCRETE_POWDER) {
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 2");
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 2 silent");
+                        return;
                     }
                     // Seraph
                     else if (clicked.getType() == Material.PURPLE_CONCRETE_POWDER) {
-                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3");
+                        player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
+                        Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac rankset saintmonth " + player.getName() + " 3 silent");
+                        return;
                     }
                     // Boost of the Miner
                     else if (clicked.getType() == Material.NETHERITE_PICKAXE) {
                         player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        AranarthUtils.addServerBoost(Boost.MINER, null, player.getUniqueId());
+                        AranarthUtils.addServerBoost(Boost.MINER, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of the Harvest
                     else if (clicked.getType() == Material.NETHERITE_HOE) {
                         player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        AranarthUtils.addServerBoost(Boost.HARVEST, null, player.getUniqueId());
+                        AranarthUtils.addServerBoost(Boost.HARVEST, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of the Hunter
                     else if (clicked.getType() == Material.CROSSBOW) {
                         player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        AranarthUtils.addServerBoost(Boost.HUNTER, null, player.getUniqueId());
+                        AranarthUtils.addServerBoost(Boost.HUNTER, null, player.getUniqueId(), true);
                         return;
                     }
                     // Boost of Chi
                     else if (clicked.getType() == Material.SUGAR) {
                         player.sendMessage(ChatUtils.chatMessage("&7You have purchased " + itemName));
-                        AranarthUtils.addServerBoost(Boost.CHI, null, player.getUniqueId());
+                        AranarthUtils.addServerBoost(Boost.CHI, null, player.getUniqueId(), true);
                         return;
                     }
 

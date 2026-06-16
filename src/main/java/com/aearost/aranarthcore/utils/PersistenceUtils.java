@@ -2084,7 +2084,7 @@ public class PersistenceUtils {
 
                 Boost boost = Boost.valueOf(parts[0]);
                 LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[1])), ZoneId.systemDefault());
-                AranarthUtils.addServerBoost(boost, end, null);
+                AranarthUtils.addServerBoost(boost, end, null, false);
             }
             Bukkit.getLogger().info("The server boosts have been initialized");
             reader.close();
