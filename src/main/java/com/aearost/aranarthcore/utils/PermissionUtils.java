@@ -349,6 +349,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.Fissure", false);
 
 		// Aranarth abilities available at same rank as their sub-element unlock
+		perms.setPermission("bending.ability.healinghelix", true);   // healing - Knight
 		perms.setPermission("bending.ability.razorleaves", true);    // plant - Esquire
 		perms.setPermission("bending.ability.icediscs", true);       // water combo - always
 		perms.setPermission("bending.ability.noxiousfumes", true);   // combustion - King

@@ -34,7 +34,9 @@ import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
+import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
 import com.projectkorra.projectkorra.ability.BloodAbility;
+import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
@@ -63,6 +65,7 @@ import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.event.PlayerCooldownChangeEvent;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -121,6 +124,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(LifeRip.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(HealingHelix.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
@@ -257,7 +261,13 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 			// Waterbending
 			else if (ability instanceof WaterAbility && bendingPlayer.isElementToggled(Element.WATER)) {
-				if (ability instanceof BloodAbility) {
+				if (ability instanceof HealingAbility) {
+					if (abilityName.equalsIgnoreCase("healinghelix")) {
+						if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
+							new HealingHelix(player);
+						}
+					}
+				} else if (ability instanceof BloodAbility) {
 					if (abilityName.equalsIgnoreCase("bloodgrip")) {
 						if (!BloodGrip.hasActiveInstance(player.getUniqueId())) {
 							new BloodGrip(player);
@@ -584,6 +594,18 @@ public class AranarthCoreBendingListener implements Listener {
 				new SandWave(player, sourceBlock);
 			}
 		}
+
+		// HealingHelix: left-click aims at a water/ice/snow block to register it as the source.
+		// Uses FluidCollisionMode.ALWAYS so liquid water blocks are included in the ray trace.
+		if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
+			BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
+			if (bpHelix != null && bpHelix.getBoundAbilityName().equalsIgnoreCase("healinghelix")) {
+				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+				if (sourceBlock != null) {
+					HealingHelix.trySelectSource(player, sourceBlock);
+				}
+			}
+		}
 	}
 
 	/**
@@ -678,6 +700,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (LifeRip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -689,6 +714,11 @@ public class AranarthCoreBendingListener implements Listener {
 	 */
 	@EventHandler
 	public void onSlotChange(PlayerItemHeldEvent e) {
+		// HealingHelix does not permit slot changes while active; cancel the event entirely.
+		if (HealingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (vineWhip != null) {
 			vineWhip.cancelInstantly();
@@ -811,6 +841,7 @@ public class AranarthCoreBendingListener implements Listener {
 			lifeRip.remove();
 		}
 		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
+		HealingHelix.clearPendingSource(e.getPlayer().getUniqueId());
 
 		// Slot change during CASTING cancels without cooldown; later phases run to completion.
 		Burial burial = Burial.getActiveInstance(e.getPlayer().getUniqueId());
@@ -1006,6 +1037,7 @@ public class AranarthCoreBendingListener implements Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		AstralProjection.restoreArmorFromPdc(e.getPlayer());
+		HealingHelix.cleanupOrphanedAbsorption(e.getPlayer());
 	}
 
 	/**
@@ -1115,6 +1147,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -1176,6 +1212,7 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
 		MagmaWave.clearPendingSource(player.getUniqueId());
+		HealingHelix.clearPendingSource(player.getUniqueId());
 		LifeRip.resetTargetDrain(player);
 		LifeRip.resetCasterGain(player);
 	}
@@ -1202,6 +1239,7 @@ public class AranarthCoreBendingListener implements Listener {
 		}
 		SandWave.clearPendingSource(player.getUniqueId());
 		MagmaWave.clearPendingSource(player.getUniqueId());
+		HealingHelix.clearPendingSource(player.getUniqueId());
 		DaggerVolley.resetStage(player.getUniqueId());
 	}
 
