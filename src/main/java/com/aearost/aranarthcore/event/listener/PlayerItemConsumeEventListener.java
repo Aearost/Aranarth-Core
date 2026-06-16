@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.HoneyGlazedHamEat;
+import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,10 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
  */
 public class PlayerItemConsumeEventListener implements Listener {
 
+    private final AranarthCore plugin;
+
     public PlayerItemConsumeEventListener(AranarthCore plugin) {
+        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -22,5 +26,6 @@ public class PlayerItemConsumeEventListener implements Listener {
         if (e.getItem().getType() == Material.COOKED_PORKCHOP) {
             new HoneyGlazedHamEat().execute(e);
         }
+        new PlayerAutoReplenishSlot().execute(e, plugin);
     }
 }

@@ -24,7 +24,6 @@ public class BlockPlaceEventListener implements Listener {
     public void onBlockPlace(BlockPlaceEvent e) {
         ItemStack is = e.getItemInHand();
 
-        // Skip auto-replenish of slot
         if (is.getType() == Material.HOPPER) {
             new HopperPlace().execute(e);
         } else if (is.getType() == Material.BAMBOO_BLOCK) {
@@ -42,7 +41,7 @@ public class BlockPlaceEventListener implements Listener {
                 new ContainerAutoLock().execute(e);
             }
             new RandomizerBlockPlace().execute(e);
-            new PlayerAutoReplenishSlot().execute(e);
         }
+        new PlayerAutoReplenishSlot().execute(e);
     }
 }

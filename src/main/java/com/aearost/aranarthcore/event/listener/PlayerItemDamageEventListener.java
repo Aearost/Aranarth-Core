@@ -2,9 +2,11 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.DurabilityDecreaseWarning;
+import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
 
 /**
@@ -12,12 +14,20 @@ import org.bukkit.event.player.PlayerItemDamageEvent;
  */
 public class PlayerItemDamageEventListener implements Listener {
 
+    private final AranarthCore plugin;
+
     public PlayerItemDamageEventListener(AranarthCore plugin) {
+        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     @EventHandler
     public void onItemDamage(PlayerItemDamageEvent e) {
         new DurabilityDecreaseWarning().execute(e);
+    }
+
+    @EventHandler
+    public void onItemBreak(PlayerItemBreakEvent e) {
+        new PlayerAutoReplenishSlot().execute(e, plugin);
     }
 }

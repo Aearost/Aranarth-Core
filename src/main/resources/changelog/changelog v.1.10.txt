@@ -2,6 +2,7 @@ AranarthCore v. 1.10
 
 Major Features
 [+] Added per-user permissions for Dominions
+[+] Implemented auto replenishment of items, supporting eating, tools breaking, thrown projectiles, dropped items, etc
 [+] Implemented permission-based custom armor stand poses
 [+] Added Blood Bending to Emperors
 [+] Added Flight to Emperors

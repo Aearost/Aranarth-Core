@@ -13,7 +13,10 @@ import org.bukkit.inventory.meta.MusicInstrumentMeta;
 
 public class PlayerInteractEventListener implements Listener {
 
+    private final AranarthCore plugin;
+
     public PlayerInteractEventListener(AranarthCore plugin) {
+        this.plugin = plugin;
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -38,6 +41,7 @@ public class PlayerInteractEventListener implements Listener {
         }
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+            new PlayerAutoReplenishSlot().execute(e, plugin);
             new SweetBerryHarvest().execute(e);
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
