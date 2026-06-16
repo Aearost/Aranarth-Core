@@ -106,18 +106,14 @@ public class PlayerAutoReplenishSlot {
             return;
         }
 
-        // At event time the inventory is already updated, check which hand slot became empty
+        // At event time the inventory is already updated; players can only drop from main hand,
+        // so only replenish if the main hand slot is now empty
         PlayerInventory inventory = player.getInventory();
-        final int droppedSlot;
-        if (inventory.getItemInMainHand().getType() == Material.AIR) {
-            droppedSlot = inventory.getHeldItemSlot();
-        } else if (inventory.getItemInOffHand().getType() == Material.AIR) {
-            droppedSlot = 40;
-        } else {
+        if (inventory.getItemInMainHand().getType() != Material.AIR) {
             return;
         }
 
-        replenishSlot(player, e.getItemDrop().getItemStack(), droppedSlot, ItemStack::isSimilar);
+        replenishSlot(player, e.getItemDrop().getItemStack(), inventory.getHeldItemSlot(), ItemStack::isSimilar);
     }
 
     public void execute(ProjectileLaunchEvent e, Plugin plugin) {
