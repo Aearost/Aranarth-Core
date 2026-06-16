@@ -285,6 +285,11 @@ public class PlayerAutoReplenishSlot {
         ItemStack[] contents = inventory.getContents();
 
         for (int i = 0; i < inventory.getSize(); i++) {
+            // Skip armor slots (36-39) and off-hand slot (40) to avoid pulling equipped gear
+            if (i >= 36) {
+                continue;
+            }
+
             ItemStack itemStack = contents[i];
             if (itemStack == null) {
                 continue;
