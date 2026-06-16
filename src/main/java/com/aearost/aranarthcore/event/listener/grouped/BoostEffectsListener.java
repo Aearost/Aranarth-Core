@@ -145,8 +145,7 @@ public class BoostEffectsListener implements Listener {
 	public void onBendAttack(AbilityDamageEntityEvent e) {
 		if (e.getAbility().getPlayer() != null) {
 			String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
-			// Omits buffed damage in the arena world
-			if (name.startsWith("arena")) {
+			if (!AranarthUtils.isSurvivalWorld(name)) {
 				return;
 			}
 
@@ -157,13 +156,13 @@ public class BoostEffectsListener implements Listener {
 	}
 
 	/**
-	 * Handles decreasing bending ability damage.
+	 * Handles decreasing bending ability cooldowns.
 	 */
 	@EventHandler
 	public void onAbilityEnd(AbilityEndEvent e) {
 		if (e.getAbility().getPlayer() != null) {
 			String name = e.getAbility().getPlayer().getLocation().getWorld().getName();
-			if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+			if (!AranarthUtils.isSurvivalWorld(name)) {
 				return;
 			}
 
