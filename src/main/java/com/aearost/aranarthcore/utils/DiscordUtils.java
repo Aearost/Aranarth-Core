@@ -742,6 +742,34 @@ public class DiscordUtils {
 		}
 	}
 
+	public static void sendBoostExpiredToDiscord(Boost boost) {
+		String name = "";
+		Color color = null;
+		if (boost == Boost.MINER) {
+			name = "Boost of the Miner";
+			color = new Color(85, 85, 85);
+		} else if (boost == Boost.HARVEST) {
+			name = "Boost of the Harvest";
+			color = new Color(255, 170, 0);
+		} else if (boost == Boost.HUNTER) {
+			name = "Boost of the Hunter";
+			color = new Color(255, 85, 85);
+		} else if (boost == Boost.CHI) {
+			name = "Boost of Chi";
+			color = new Color(255, 255, 255);
+		} else {
+			name = "Unspecified Boost";
+			color = new Color(255, 85, 255);
+		}
+		EmbedBuilder embed = new EmbedBuilder()
+				.setAuthor("The " + name + " has expired!")
+				.setColor(color);
+		TextChannel boostsChannel = getBoostsChannel();
+		if (boostsChannel != null) {
+			boostsChannel.sendMessageEmbeds(embed.build()).queue();
+		}
+	}
+
 	/**
 	 * Sends a notification when a player donates.
 	 * Updates both #notifications and #role-changes in Discord.

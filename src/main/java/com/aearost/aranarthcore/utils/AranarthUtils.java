@@ -2242,7 +2242,6 @@ public class AranarthUtils {
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
 			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 
 			// Handles messages
@@ -2285,11 +2284,11 @@ public class AranarthUtils {
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
 			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+			DiscordUtils.sendBoostExpiredToDiscord(boost);
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
 			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 		}
 	}
@@ -2369,11 +2368,11 @@ public class AranarthUtils {
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
 			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+			DiscordUtils.sendBoostExpiredToDiscord(boost);
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
 			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_5");
 			sentBoostReminders.remove(boost.name() + "_1");
 		}
 
@@ -2395,15 +2394,17 @@ public class AranarthUtils {
 			Duration remaining = Duration.between(LocalDateTime.now(), serverBoosts.get(boost));
 			long minutesLeft = remaining.toMinutes();
 
-			int[] thresholds = {60, 30, 10, 5, 1};
-			String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e5 minutes", "&e1 minute"};
-			String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", "5 minutes", "1 minute"};
+			int[] thresholds = {60, 30, 10, 1};
+			String[] labels = {"&e1 hour", "&e30 minutes", "&e10 minutes", "&e1 minute"};
+			String[] discordLabels = {"1 hour", "30 minutes", "10 minutes", null};
 			for (int i = 0; i < thresholds.length; i++) {
 				String key = boost.name() + "_" + thresholds[i];
 				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
 					sentBoostReminders.add(key);
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
-					DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+					if (discordLabels[i] != null) {
+						DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+					}
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, 1.0f, 0.7f);
 					}
