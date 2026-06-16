@@ -47,6 +47,7 @@ public class AranarthCore extends JavaPlugin {
     private DiscordChatListener discordChatListener;
     private ListenerAdapter discordMemberJoinListener;
     private ListenerAdapter discordMemberLeaveListener;
+    private RoleReactionListener roleReactionListener;
     private volatile boolean savedOnDisable = false;
 
     /**
@@ -193,6 +194,9 @@ public class AranarthCore extends JavaPlugin {
                 AranarthUtils.updateAfkLocations();
                 AranarthUtils.updateTab();
                 QuestUtils.checkAndPerformResets();
+                if (roleReactionListener != null) {
+                    roleReactionListener.pollReactions();
+                }
 
                 // Seasons functionality
                 DateUtils dateUtils = new DateUtils();
@@ -388,6 +392,8 @@ public class AranarthCore extends JavaPlugin {
                 };
                 jda.addEventListener(discordMemberJoinListener);
                 jda.addEventListener(discordMemberLeaveListener);
+                roleReactionListener = new RoleReactionListener();
+                roleReactionListener.initReactions();
             }
         }.runTaskLater(AranarthCore.getInstance(), 1);
     }
