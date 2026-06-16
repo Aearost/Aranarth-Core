@@ -241,6 +241,7 @@ Minor Features
 [~] Prevented scrolling while in a held shulker box causing duplication bug
 [~] Implemented support for modifying a player's armour and off-hand item with /ac invsee
 [-] Disabled purchase messages when a player purchases a perk, boost, or a Saint rank using vote points
+[~] Fixed issue where the boost of chi was not actually applying increased damage with bending
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
