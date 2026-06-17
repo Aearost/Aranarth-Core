@@ -1656,36 +1656,40 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.NETHERRACK, 64));
 			items.add(new ItemStack(Material.BLACKSTONE, 32));
 			items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-			items.add(new ItemStack(Material.QUARTZ, 32));
-			items.add(new ItemStack(Material.GOLD_NUGGET, 32));
+			items.add(new ItemStack(Material.QUARTZ, 64));
+			items.add(new ItemStack(Material.GOLD_NUGGET, 64));
 
-			int tearOdds = 4;
-			int oddsAmount = 25;
+			int tearOdds = 2;
+			int scrapOdds = 10;
 			// Increases the odds based on the size
 			if (dominionSize == 2) {
 				tearOdds = tearOdds - 1;
-				oddsAmount = oddsAmount - 5;
+				scrapOdds = scrapOdds - 5;
 			} else if (dominionSize == 3) {
 				tearOdds = tearOdds - 2;
-				oddsAmount = oddsAmount - 10;
+				scrapOdds = scrapOdds - 8;
 			}
 
 			if (random.nextInt(tearOdds) == 0) {
 				items.add(new ItemStack(Material.GHAST_TEAR, 1));
 			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
 			// Simulates a fortress
-			if (random.nextInt(10) == 0) {
-				items.add(new ItemStack(Material.NETHER_BRICK, 32));
-				items.add(new ItemStack(Material.NETHER_WART, 8));
+			if (random.nextInt(8) == 0) {
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_WART, 32));
 			}
 			// Simulates a bastion
-			if (random.nextInt(20) == 0) {
-				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 32));
-				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 16));
+			if (random.nextInt(12) == 0) {
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
 				items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
 				if (random.nextInt(3) == 0) {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
@@ -1704,75 +1708,85 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
 			items.add(new ItemStack(Material.BONE, 4));
 
-			int tearOdds = 4;
-			int oddsAmount = 25;
+			int tearOdds = 1;
+			int scrapOdds = 10;
 			// Increases the odds based on the size
 			if (dominionSize == 2) {
-				tearOdds = tearOdds - 1;
-				oddsAmount = oddsAmount - 5;
+				tearOdds = 2;
+				scrapOdds = scrapOdds - 5;
 			} else if (dominionSize == 3) {
-				tearOdds = tearOdds - 2;
-				oddsAmount = oddsAmount - 10;
+				tearOdds = 3;
+				scrapOdds = scrapOdds - 8;
 			}
-			if (random.nextInt(tearOdds) == 0) {
-				items.add(new ItemStack(Material.GHAST_TEAR, 1));
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+
+			// 1-3 ghast tears
+			items.add(new ItemStack(Material.GHAST_TEAR, random.nextInt(tearOdds) + 1));
+
+			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
 			// Simulates a fortress
-			if (random.nextInt(10) == 0) {
-				items.add(new ItemStack(Material.NETHER_BRICK, 32));
-				items.add(new ItemStack(Material.NETHER_WART, 8));
+			if (random.nextInt(8) == 0) {
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_WART, 32));
 			}
 			// Simulates a bastion
-			if (random.nextInt(20) == 0) {
-				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 32));
-				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 16));
+			if (random.nextInt(12) == 0) {
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
 				items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
 				if (random.nextInt(3) == 0) {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
 				}
 			}
 
-			// Simulates a happy ghast
-			if (random.nextInt(20) == 0) {
+			// Simulates a dried ghast
+			if (random.nextInt(8) == 0) {
 				items.add(new ItemStack(Material.DRIED_GHAST, 1));
 			}
 		}
 		else if (biome == Biome.CRIMSON_FOREST) {
-			items.add(new ItemStack(Material.CRIMSON_NYLIUM, 32));
+			items.add(new ItemStack(Material.CRIMSON_NYLIUM, 64));
 			items.add(new ItemStack(Material.NETHERRACK, 64));
-			items.add(new ItemStack(Material.BLACKSTONE, 32));
-			items.add(new ItemStack(Material.CRIMSON_STEM, 32));
-			items.add(new ItemStack(Material.SHROOMLIGHT, 8));
-			items.add(new ItemStack(Material.WEEPING_VINES, 8));
-			items.add(new ItemStack(Material.CRIMSON_FUNGUS, 8));
-			items.add(new ItemStack(Material.QUARTZ, 16));
-			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
+			items.add(new ItemStack(Material.BLACKSTONE, 64));
+			items.add(new ItemStack(Material.CRIMSON_STEM, 64));
+			items.add(new ItemStack(Material.SHROOMLIGHT, 16));
+			items.add(new ItemStack(Material.WEEPING_VINES, 16));
+			items.add(new ItemStack(Material.CRIMSON_FUNGUS, 16));
+			items.add(new ItemStack(Material.QUARTZ, 32));
+			items.add(new ItemStack(Material.GOLD_NUGGET, 32));
 			items.add(new ItemStack(Material.PORKCHOP, 16));
 
-			int oddsAmount = 25;
+			int scrapOdds = 10;
 			// Increases the odds based on the size
 			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 5;
+				scrapOdds = scrapOdds - 5;
 			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 10;
+				scrapOdds = scrapOdds - 8;
 			}
-			if (random.nextInt(oddsAmount) == 0) {
+
+			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
 			// Simulates a fortress
-			if (random.nextInt(10) == 0) {
-				items.add(new ItemStack(Material.NETHER_BRICK, 32));
-				items.add(new ItemStack(Material.NETHER_WART, 8));
+			if (random.nextInt(8) == 0) {
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_WART, 32));
 			}
 			// Simulates a bastion
-			if (random.nextInt(20) == 0) {
-				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 32));
-				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 16));
+			if (random.nextInt(12) == 0) {
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
 				items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
 				if (random.nextInt(3) == 0) {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
@@ -1790,33 +1804,37 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.QUARTZ, 16));
 			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
 
-			int pearlOdds = 5;
-			int oddsAmount = 25;
-
+			int pearlOdds = 1;
+			int scrapOdds = 10;
 			// Increases the odds based on the size
 			if (dominionSize == 2) {
-				pearlOdds = pearlOdds - 1;
-				oddsAmount = oddsAmount - 5;
+				pearlOdds = 2;
+				scrapOdds = scrapOdds - 5;
 			} else if (dominionSize == 3) {
-				pearlOdds = pearlOdds - 2;
-				oddsAmount = oddsAmount - 10;
+				pearlOdds = 3;
+				scrapOdds = scrapOdds - 8;
 			}
-			if (random.nextInt(pearlOdds) == 0) {
-				items.add(new ItemStack(Material.ENDER_PEARL, 1));
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+
+			// 1-3 ender pearls
+			items.add(new ItemStack(Material.ENDER_PEARL, random.nextInt(pearlOdds) + 1));
+
+			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
 			// Simulates a fortress
-			if (random.nextInt(10) == 0) {
-				items.add(new ItemStack(Material.NETHER_BRICK, 32));
-				items.add(new ItemStack(Material.NETHER_WART, 8));
+			if (random.nextInt(8) == 0) {
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_WART, 32));
 			}
 			// Simulates a bastion
-			if (random.nextInt(20) == 0) {
-				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 32));
-				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 16));
+			if (random.nextInt(12) == 0) {
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
 				items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
 				if (random.nextInt(3) == 0) {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
@@ -1824,42 +1842,47 @@ public class DominionUtils {
 			}
 		}
 		else if (biome == Biome.BASALT_DELTAS) {
-			items.add(new ItemStack(Material.NETHERRACK, 16));
+			items.add(new ItemStack(Material.NETHERRACK, 32));
 			items.add(new ItemStack(Material.BASALT, 64));
 			items.add(new ItemStack(Material.BASALT, 64));
-			items.add(new ItemStack(Material.BLACKSTONE, 16));
+			items.add(new ItemStack(Material.BLACKSTONE, 64));
+			items.add(new ItemStack(Material.BLACKSTONE, 64));
 			items.add(new ItemStack(Material.MAGMA_BLOCK, 8));
-			items.add(new ItemStack(Material.QUARTZ, 16));
-			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
-			items.add(new ItemStack(Material.MAGMA_CREAM, 2));
+			items.add(new ItemStack(Material.QUARTZ, 32));
+			items.add(new ItemStack(Material.GOLD_NUGGET, 64));
+			items.add(new ItemStack(Material.MAGMA_CREAM, 4));
 
-			int tearOdds = 6; // Lower odds than other biomes
-			int oddsAmount = 25;
+			int tearOdds = 1;
+			int scrapOdds = 10;
 			// Increases the odds based on the size
 			if (dominionSize == 2) {
-				tearOdds = tearOdds - 1;
-				oddsAmount = oddsAmount - 5;
+				tearOdds = 1;
+				scrapOdds = scrapOdds - 5;
 			} else if (dominionSize == 3) {
-				tearOdds = tearOdds - 2;
-				oddsAmount = oddsAmount - 10;
+				tearOdds = 2;
+				scrapOdds = scrapOdds - 8;
 			}
 
-			if (random.nextInt(tearOdds) == 0) {
-				items.add(new ItemStack(Material.GHAST_TEAR, 1));
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			// 0-2 ghast tears, lower than other biomes
+			items.add(new ItemStack(Material.GHAST_TEAR, random.nextInt(tearOdds)));
+
+			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
 			// Simulates a fortress
-			if (random.nextInt(10) == 0) {
-				items.add(new ItemStack(Material.NETHER_BRICK, 32));
-				items.add(new ItemStack(Material.NETHER_WART, 8));
+			if (random.nextInt(8) == 0) {
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_BRICKS, 64));
+				items.add(new ItemStack(Material.NETHER_WART, 32));
 			}
 			// Simulates a bastion
-			if (random.nextInt(20) == 0) {
-				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 32));
-				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 16));
+			if (random.nextInt(12) == 0) {
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.BLACKSTONE, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.POLISHED_BLACKSTONE_BRICKS, 64));
+				items.add(new ItemStack(Material.GILDED_BLACKSTONE, 32));
 				items.add(new ItemStack(Material.GOLDEN_CARROT, 32));
 				if (random.nextInt(3) == 0) {
 					items.add(new ItemStack(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 1));
@@ -1870,7 +1893,7 @@ public class DominionUtils {
 				|| biome == Biome.END_MIDLANDS || biome == Biome.SMALL_END_ISLANDS) {
 			items.add(new ItemStack(Material.END_STONE, 64));
 			items.add(new ItemStack(Material.END_STONE, 64));
-			items.add(new ItemStack(Material.OBSIDIAN, 8));
+			items.add(new ItemStack(Material.OBSIDIAN, 16));
 			items.add(new ItemStack(Material.CHORUS_PLANT, 16));
 			items.add(new ItemStack(Material.CHORUS_FLOWER, 4));
 
@@ -1881,6 +1904,18 @@ public class DominionUtils {
 				items.add(new ItemStack(Material.PURPUR_BLOCK, 64));
 				items.add(new ItemStack(Material.PURPUR_PILLAR, 64));
 				items.add(new ItemStack(Material.END_ROD, 16));
+
+				int elytraOdds = 8;
+				// Increases the odds based on the size
+				if (dominionSize == 2) {
+					elytraOdds = 6;
+				} else if (dominionSize == 3) {
+					elytraOdds = 3;
+				}
+
+				if (random.nextInt(elytraOdds) == 0) {
+					items.add(new ItemStack(Material.ELYTRA, 1));
+				}
 			}
 		}
 
