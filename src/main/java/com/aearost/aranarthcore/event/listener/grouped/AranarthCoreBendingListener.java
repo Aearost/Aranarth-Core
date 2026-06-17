@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralShot;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.Eruption;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaGlaives;
 import com.aearost.aranarthcore.abilities.earthbending.lavabending.MagmaWave;
+import com.aearost.aranarthcore.abilities.earthbending.lavabending.combo.MoltenBlast;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerThrow;
 import com.aearost.aranarthcore.abilities.chiblocking.DaggerVolley;
 import com.aearost.aranarthcore.abilities.chiblocking.HighJump;
@@ -130,6 +131,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(CorruptingHelix.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(MoltenBlast.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
@@ -207,12 +209,23 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 		}
 
-		// Sneak release — cancel IceDiscs immediately rather than waiting for the next progress() tick
+		// Sneak release
 		if (!e.isSneaking()) {
 			IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
 			if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.CHARGING) {
 				iceDiscs.cancelWithCooldown();
 				return;
+			}
+			MoltenBlast moltenBlastSneak = MoltenBlast.getActiveInstance(player.getUniqueId());
+			if (moltenBlastSneak != null) {
+				MoltenBlast.Phase p = moltenBlastSneak.getPhase();
+				if (p == MoltenBlast.Phase.CHARGING || p == MoltenBlast.Phase.GRABBED) {
+					moltenBlastSneak.onSneakRelease();
+					return;
+				}
+			}
+			if (abilityName.equalsIgnoreCase("earthsmash")) {
+				MoltenBlast.markEarthSmashSneak(player.getUniqueId());
 			}
 		}
 
@@ -367,6 +380,21 @@ public class AranarthCoreBendingListener implements Listener {
 						if (!MagmaWave.hasActiveInstance(player.getUniqueId())
 								&& !bendingPlayer.isOnCooldown("MagmaWave")) {
 							MagmaWave.trySelectSource(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("lavaflow")) {
+						// MoltenBlast sneak-press path: player held sneak on EarthSmash, released it
+						// (or switched first), then presses sneak again on LavaFlow within the window.
+						// This is the reliable fallback when no slot-change-while-sneaking event fired.
+						if (!MoltenBlast.hasActiveInstance(player.getUniqueId())
+								&& MoltenBlast.hasRecentEarthSmashSneak(player.getUniqueId())) {
+							new MoltenBlast(player);
+							return;
+						}
+					} else if (abilityName.equalsIgnoreCase("lavathrow")) {
+						MoltenBlast moltenBlastGrab = MoltenBlast.getActiveInstance(player.getUniqueId());
+						if (moltenBlastGrab != null && moltenBlastGrab.getPhase() == MoltenBlast.Phase.LIFTED) {
+							moltenBlastGrab.grab();
+							return;
 						}
 					}
 				} else if (abilityName.equalsIgnoreCase("cablewhip")) {
@@ -532,6 +560,13 @@ public class AranarthCoreBendingListener implements Listener {
 		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
 		if (magmaGlaives != null) {
 			magmaGlaives.onLeftClick();
+			return;
+		}
+
+		// MoltenBlast: left-click with LavaThrow equipped fires the heated ball
+		MoltenBlast moltenBlast = MoltenBlast.getActiveInstance(player.getUniqueId());
+		if (moltenBlast != null) {
+			moltenBlast.fire();
 			return;
 		}
 
@@ -718,6 +753,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -819,6 +857,11 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				magmaGlaives.endWithCooldown();
 			}
+		}
+		// Slot changes during CHARGING cancel the ability
+		MoltenBlast moltenBlastSlot = MoltenBlast.getActiveInstance(e.getPlayer().getUniqueId());
+		if (moltenBlastSlot != null && moltenBlastSlot.getPhase() == MoltenBlast.Phase.CHARGING) {
+			moltenBlastSlot.cancelInstantly();
 		}
 		Eruption eruption = Eruption.getActiveInstance(e.getPlayer().getUniqueId());
 		if (eruption != null) {
@@ -1186,6 +1229,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
@@ -1462,6 +1509,32 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (MagmaWave.isWaveBlock(e.getBlock())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Prevents MoltenBlast ball lava blocks from flowing to adjacent blocks.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onMoltenBlastBlockFromTo(final BlockFromToEvent e) {
+		if (e.getBlock().getType() != Material.LAVA) {
+			return;
+		}
+		if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
+			e.setCancelled(true);
+		}
+	}
+
+	/**
+	 * Suppresses physics updates on MoltenBlast ball lava blocks so their level remains stable.
+	 */
+	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+	public void onMoltenBlastBlockPhysics(final BlockPhysicsEvent e) {
+		if (e.getBlock().getType() != Material.LAVA) {
+			return;
+		}
+		if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
 			e.setCancelled(true);
 		}
 	}

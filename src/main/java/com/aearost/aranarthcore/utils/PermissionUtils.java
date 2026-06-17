@@ -223,6 +223,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.toxicspores", true);
 			perms.setPermission("bending.ability.energyburst", true);
 			perms.setPermission("bending.ability.magmaglaives", true);
+			perms.setPermission("bending.ability.moltenblast", true);
 			perms.setPermission("bending.ability.eruption", true);
 			perms.setPermission("bending.ability.magmawave", true);
 			perms.setPermission("bending.ability.combustionstrike", true);
@@ -298,6 +299,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.toxicspores", false);
 			perms.setPermission("bending.ability.energyburst", false);
 			perms.setPermission("bending.ability.magmaglaives", false);
+			perms.setPermission("bending.ability.moltenblast", false);
 			perms.setPermission("bending.ability.eruption", false);
 			perms.setPermission("bending.ability.magmawave", false);
 			perms.setPermission("bending.ability.combustionstrike", false);
@@ -383,6 +385,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.toxicspores", false);        // plant - Baron
 		perms.setPermission("bending.ability.energyburst", false);        // spiritual - Prince
 		perms.setPermission("bending.ability.magmaglaives", false);       // lava - King
+		perms.setPermission("bending.ability.moltenblast", false);        // lava combo - King
 		perms.setPermission("bending.ability.eruption", false);           // lava - Emperor
 		perms.setPermission("bending.ability.magmawave", false);          // lava - King
 		perms.setPermission("bending.ability.combustionstrike", false);   // combustion - Emperor
@@ -705,6 +708,7 @@ public class PermissionUtils {
 					perms.setPermission("bending.ability.toxicspores", true);
 					perms.setPermission("bending.ability.energyburst", true);
 					perms.setPermission("bending.ability.magmaglaives", true);
+					perms.setPermission("bending.ability.moltenblast", true);
 					perms.setPermission("bending.ability.eruption", true);
 					perms.setPermission("bending.ability.magmawave", true);
 					perms.setPermission("bending.ability.combustionstrike", true);
@@ -935,6 +939,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.LavaFlux", true);            // JedCore lava
 			perms.setPermission("bending.ability.magmawave", true);           // lava
 			perms.setPermission("bending.ability.magmaglaives", true);        // lava
+			perms.setPermission("bending.ability.moltenblast", true);         // lava combo
 			perms.setPermission("bending.ability.firecomet", true);
 			perms.setPermission("aranarth.toggle.chat", true);
 			perms.setPermission("aranarth.nick.color", true);
