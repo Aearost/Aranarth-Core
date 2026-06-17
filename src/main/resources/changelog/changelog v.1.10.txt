@@ -245,6 +245,7 @@ Minor Features
 [-] Disabled purchase messages when a player purchases a perk, boost, or a Saint rank using vote points
 [~] Fixed issue where the boost of chi was not actually applying increased damage with bending
 [~] Buffed dominion resources yields of nether biomes and end biomes
+[~] Made it so Hoglins no longer target users wearing Scorched Aranarthium
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -92,7 +92,7 @@ public class CommandAranarthium implements CommandExecutor {
 	private static String scorchedArmour() {
 		return ChatUtils.translateToColor(
 				"#ff4500&lScorched Aranarthium\n&r" +
-						"Provides the wearer with &oFire Resistance&r and Resistance I&r, and if in the Nether, will also provide &oSpeed III &rand &oStrength II.\n\n&rAdditionally causes melee/bending damage to ignite targets, and the wearer is not targeted by Piglins."
+						"Provides the wearer with &oFire Resistance&r and Resistance I&r, and if in the Nether, will also provide &oSpeed III &rand &oStrength II.\n\n&rAdditionally causes dealt damage to ignite targets, and prevents being targeted by Piglins or Hoglins."
 		);
 	}
 
