@@ -231,6 +231,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.metalblade", true);
 			perms.setPermission("bending.ability.cablethrash", true);
 			perms.setPermission("bending.ability.daggervolley", true);
+			perms.setPermission("bending.ability.mendingwaters", true);
 			perms.setPermission("bending.ability.healinghelix", true);
 			perms.setPermission("bending.ability.corruptinghelix", true);
 			perms.setPermission("bending.ability.bloodfreeze", true);
@@ -305,6 +306,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.metalblade", false);
 			perms.setPermission("bending.ability.cablethrash", false);
 			perms.setPermission("bending.ability.daggervolley", false);
+			perms.setPermission("bending.ability.mendingwaters", false);
 			perms.setPermission("bending.ability.healinghelix", false);
 			perms.setPermission("bending.ability.corruptinghelix", false);
 			perms.setPermission("bending.ability.bloodfreeze", false);
@@ -389,6 +391,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.metalblade", false);         // metal - Baron
 		perms.setPermission("bending.ability.cablethrash", false);        // metal - Baron
 		perms.setPermission("bending.ability.daggervolley", false);       // chi - Count
+		perms.setPermission("bending.ability.mendingwaters", false);        // healing - Knight
 		perms.setPermission("bending.ability.healinghelix", false);         // healing - Count
 		perms.setPermission("bending.ability.corruptinghelix", false);    // healing - Prince
 		perms.setPermission("bending.ability.bloodfreeze", false);        // blood - King
@@ -837,6 +840,7 @@ public class PermissionUtils {
 		// Knight
 		if (rank >= 2) {
 			perms.setPermission("bending.water.healing", true);
+			perms.setPermission("bending.ability.mendingwaters", true);         // healing
 			perms.setPermission("bending.earth.metalbending", true);
 			perms.setPermission("bending.ability.MetalShred", true);          // JedCore metal
 			perms.setPermission("bending.ability.MagnetShield", true);        // JedCore metal

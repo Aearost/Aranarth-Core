@@ -72,6 +72,13 @@ public class AranarthBendingUtils {
     public static final Particle.DustOptions BLOOD_DUST_BRIGHT =
             new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
 
+    /** Bright blue water dust shared by healing waterbending abilities during their water phase. */
+    public static final Particle.DustOptions WATER_DUST =
+            new Particle.DustOptions(Color.fromRGB(40, 120, 255), 1.0f);
+    /** Darker blue water dust shared by healing waterbending abilities during their water phase. */
+    public static final Particle.DustOptions WATER_DUST_DARK =
+            new Particle.DustOptions(Color.fromRGB(20, 75, 225), 0.8f);
+
     /**
      * Applies one randomly chosen spirit curse to the target entity using the
      * standard duration and amplifier shared across spiritual abilities.

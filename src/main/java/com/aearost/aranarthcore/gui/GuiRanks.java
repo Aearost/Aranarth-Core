@@ -116,7 +116,7 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oHealingWaters"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oHealingWaters, MendingWaters"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oMetalShred, MetalCable, CableWhip, Extraction, MagnetShield"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oAcrobatStance, WarriorStance"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x bending damage"));
@@ -184,7 +184,7 @@ public class GuiRanks {
 		}
 		countLore.add(ChatUtils.translateToColor("&f&lBending"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oAngeredSpirits"));
-		countLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oIceShards"));
+		countLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oIceShards, &3&oHealingHelix"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oMetalShots, MetalStrips"));
 		countLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oDaggerVolley"));
 		countLore.add(ChatUtils.translateToColor("&f&o- 1.5x bending damage"));
@@ -252,7 +252,7 @@ public class GuiRanks {
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oLightning, Discharge"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oBloodGrip, BloodPuppet"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&oBloodGrip, BloodPuppet"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaDisc, MagmaBlast"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x bending damage"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));

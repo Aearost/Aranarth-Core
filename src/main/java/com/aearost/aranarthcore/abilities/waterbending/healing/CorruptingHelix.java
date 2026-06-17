@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.healing;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -52,8 +53,6 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
             Material.POWDER_SNOW
     );
 
-    private static final Particle.DustOptions WATER_DUST = new Particle.DustOptions(Color.fromRGB(40, 120, 255), 1.0f);
-    private static final Particle.DustOptions WATER_DUST_DARK = new Particle.DustOptions(Color.fromRGB(20, 75, 225), 0.8f);
     private static final Particle.DustOptions PURPLE_DUST = new Particle.DustOptions(Color.fromRGB(120, 30, 175), 1.2f);
     private static final Particle.DustOptions PURPLE_DUST_PALE = new Particle.DustOptions(Color.fromRGB(160, 90, 220), 1.0f);
 
@@ -298,7 +297,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                 double z = HELIX_RADIUS * Math.sin(angle);
 
                 Location loc = base.clone().add(x, y, z);
-                Particle.DustOptions dust = (i % 3 == 0) ? WATER_DUST_DARK : WATER_DUST;
+                Particle.DustOptions dust = (i % 3 == 0) ? AranarthBendingUtils.WATER_DUST_DARK : AranarthBendingUtils.WATER_DUST;
                 loc.getWorld().spawnParticle(Particle.DUST, loc, 1, 0, 0, 0, 0, dust);
 
                 if (Math.random() < 0.08) {
@@ -370,7 +369,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
                 double radius = HELIX_RADIUS + t * 2.0;
                 int count = Math.max(1, (int) (10 * (1.0 - t * 0.7)));
 
-                Particle.DustOptions dust = (endPhase == Phase.PURPLE) ? PURPLE_DUST : WATER_DUST;
+                Particle.DustOptions dust = (endPhase == Phase.PURPLE) ? PURPLE_DUST : AranarthBendingUtils.WATER_DUST;
 
                 for (int i = 0; i < count; i++) {
                     double angle = Math.random() * 2.0 * Math.PI;

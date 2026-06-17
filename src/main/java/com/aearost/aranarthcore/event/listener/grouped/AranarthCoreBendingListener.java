@@ -36,6 +36,7 @@ import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.LifeRip;
 import com.aearost.aranarthcore.abilities.waterbending.healing.CorruptingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
+import com.aearost.aranarthcore.abilities.waterbending.healing.MendingWaters;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
@@ -271,6 +272,10 @@ public class AranarthCoreBendingListener implements Listener {
 					} else if (abilityName.equalsIgnoreCase("corruptinghelix")) {
 						if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
 							new CorruptingHelix(player);
+						}
+					} else if (abilityName.equalsIgnoreCase("mendingwaters")) {
+						if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
+							new MendingWaters(player);
 						}
 					}
 				} else if (ability instanceof BloodAbility) {
@@ -601,6 +606,13 @@ public class AranarthCoreBendingListener implements Listener {
 			}
 		}
 
+		// MendingWaters: left-click fires a water projectile while the ability is active
+		MendingWaters mendingWaters = MendingWaters.getActiveInstance(player.getUniqueId());
+		if (mendingWaters != null) {
+			mendingWaters.onLeftClick();
+			return;
+		}
+
 		// HealingHelix: left-click aims at a water/ice/snow block to register it as the source
 		if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
 			BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
@@ -619,6 +631,17 @@ public class AranarthCoreBendingListener implements Listener {
 				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
 				if (sourceBlock != null) {
 					CorruptingHelix.trySelectSource(player, sourceBlock);
+				}
+			}
+		}
+
+		// MendingWaters: left-click aims at a water/ice/snow block to register it as the source
+		if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
+			BendingPlayer bpMending = BendingPlayer.getBendingPlayer(player);
+			if (bpMending != null && bpMending.getBoundAbilityName().equalsIgnoreCase("mendingwaters")) {
+				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+				if (sourceBlock != null) {
+					MendingWaters.trySelectSource(player, sourceBlock);
 				}
 			}
 		}
@@ -722,6 +745,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -737,6 +763,10 @@ public class AranarthCoreBendingListener implements Listener {
 				|| CorruptingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
 			e.setCancelled(true);
 			return;
+		}
+		MendingWaters mendingWatersSlot = MendingWaters.getActiveInstance(e.getPlayer().getUniqueId());
+		if (mendingWatersSlot != null) {
+			mendingWatersSlot.endWithCooldown();
 		}
 		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (vineWhip != null) {
@@ -1177,6 +1207,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
