@@ -264,7 +264,7 @@ public class DaggerThrow extends ChiAbility implements AddonAbility {
 
     @Override
     public String getAuthor() {
-        return "Aearost";
+        return "jedk1, Cozmyc (Maintainer), Aearost (Maintainer)";
     }
 
     @Override
