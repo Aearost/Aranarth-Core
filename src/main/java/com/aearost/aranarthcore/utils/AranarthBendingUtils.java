@@ -79,6 +79,13 @@ public class AranarthBendingUtils {
     public static final Particle.DustOptions WATER_DUST_DARK =
             new Particle.DustOptions(Color.fromRGB(20, 75, 225), 0.8f);
 
+    /** Warm yellow dust used for the Jolt orbital ready state and shot trail. */
+    public static final Particle.DustOptions LIGHTNING_DUST =
+            new Particle.DustOptions(Color.fromRGB(255, 240, 80), 0.8f);
+    /** Pale yellow-white dust used for alternating orbital particles and trail bursts in Jolt. */
+    public static final Particle.DustOptions LIGHTNING_DUST_BRIGHT =
+            new Particle.DustOptions(Color.fromRGB(255, 255, 180), 1.0f);
+
     /**
      * Applies one randomly chosen spirit curse to the target entity using the
      * standard duration and amplifier shared across spiritual abilities.

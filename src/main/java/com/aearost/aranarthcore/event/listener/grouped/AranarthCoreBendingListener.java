@@ -30,6 +30,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrik
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
@@ -134,6 +135,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MoltenBlast.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
 
 		new BukkitRunnable() {
 			@Override
@@ -348,6 +350,11 @@ public class AranarthCoreBendingListener implements Listener {
 				} else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
 					if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
 						new NoxiousFumes(player);
+					}
+				} else if (abilityName.equalsIgnoreCase("jolt")) {
+					if (!Jolt.hasActiveInstance(player.getUniqueId())) {
+						Jolt.markPendingCharge(player.getUniqueId());
+						new Jolt(player);
 					}
 				}
 			}
@@ -590,6 +597,13 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 
+		// Jolt: left-click fires the charged lightning bolt
+		Jolt jolt = Jolt.getActiveInstance(player.getUniqueId());
+		if (jolt != null) {
+			jolt.onLeftClick();
+			return;
+		}
+
 		// Discharge: left-click fires a branching lightning bolt in the player's look direction
 		BendingPlayer bpDischarge = BendingPlayer.getBendingPlayer(player);
 		if (bpDischarge != null && bpDischarge.getBoundAbilityName().equalsIgnoreCase("discharge")
@@ -796,6 +810,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (Jolt.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -816,6 +833,11 @@ public class AranarthCoreBendingListener implements Listener {
 		if (mendingWatersSlot != null) {
 			mendingWatersSlot.endWithCooldown();
 		}
+		Jolt joltSlot = Jolt.getActiveInstance(e.getPlayer().getUniqueId());
+		if (joltSlot != null) {
+			joltSlot.endWithCooldown();
+		}
+		Jolt.clearPendingCharge(e.getPlayer().getUniqueId());
 		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
 		if (vineWhip != null) {
 			vineWhip.cancelInstantly();
@@ -1271,6 +1293,10 @@ public class AranarthCoreBendingListener implements Listener {
 			e.setCancelled(true);
 			return;
 		}
+		if (Jolt.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
 		Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
 		if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
 			e.setCancelled(true);
@@ -1334,6 +1360,7 @@ public class AranarthCoreBendingListener implements Listener {
 		MagmaWave.clearPendingSource(player.getUniqueId());
 		HealingHelix.clearPendingSource(player.getUniqueId());
 		CorruptingHelix.clearPendingSource(player.getUniqueId());
+		Jolt.clearPendingCharge(player.getUniqueId());
 		LifeRip.resetTargetDrain(player);
 		LifeRip.resetCasterGain(player);
 	}
@@ -1362,6 +1389,7 @@ public class AranarthCoreBendingListener implements Listener {
 		MagmaWave.clearPendingSource(player.getUniqueId());
 		HealingHelix.clearPendingSource(player.getUniqueId());
 		CorruptingHelix.clearPendingSource(player.getUniqueId());
+		Jolt.clearPendingCharge(player.getUniqueId());
 		DaggerVolley.resetStage(player.getUniqueId());
 	}
 
