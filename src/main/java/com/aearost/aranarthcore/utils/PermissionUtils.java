@@ -230,6 +230,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.combustionstrike", true);
 			perms.setPermission("bending.ability.metalshots", true);
 			perms.setPermission("bending.ability.metalstrips", true);
+			perms.setPermission("bending.ability.metalshred", true);
 			perms.setPermission("bending.ability.metalblade", true);
 			perms.setPermission("bending.ability.cablethrash", true);
 			perms.setPermission("bending.ability.daggervolley", true);
@@ -307,6 +308,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.combustionstrike", false);
 			perms.setPermission("bending.ability.metalshots", false);
 			perms.setPermission("bending.ability.metalstrips", false);
+			perms.setPermission("bending.ability.metalshred", false);
 			perms.setPermission("bending.ability.metalblade", false);
 			perms.setPermission("bending.ability.cablethrash", false);
 			perms.setPermission("bending.ability.daggervolley", false);
@@ -718,6 +720,7 @@ public class PermissionUtils {
 					perms.setPermission("bending.ability.combustionstrike", true);
 					perms.setPermission("bending.ability.metalshots", true);
 					perms.setPermission("bending.ability.metalstrips", true);
+					perms.setPermission("bending.ability.metalshred", true);
 					perms.setPermission("bending.ability.metalblade", true);
 					perms.setPermission("bending.ability.cablethrash", true);
 					perms.setPermission("bending.ability.daggervolley", true);
@@ -889,6 +892,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.daggervolley", true);        // chi
 			perms.setPermission("bending.ability.metalshots", true);          // metal
 			perms.setPermission("bending.ability.metalstrips", true);         // metal
+			perms.setPermission("bending.ability.metalshred", true);          // metal
 			perms.setPermission("aranarth.exp", true);
 			perms.setPermission("bending.command.preset.create.10", true);
 			perms.setPermission("aranarthcore.armorstand.solemn", true);

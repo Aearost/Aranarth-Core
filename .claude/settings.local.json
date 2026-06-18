@@ -214,7 +214,13 @@
       "Bash(JAVA_HOME=\"/c/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot\" \"C:/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn\" compile -q)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/abilities -name *ife* -o -name *eath* -o -name *orm*)",
       "Bash(find /c/Users/liamh/.m2 -name *.jar)",
-      "Bash(find /c/Users/liamh/IdeaProjects -name *.jar)"
+      "Bash(find /c/Users/liamh/IdeaProjects -name *.jar)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name *.java)",
+      "Bash(head -10 grep -rn \"getMovedEarth\\\\|moveEarthBlock\" /c/Users/liamh/IdeaProjects/JedCore/src/main/java/com/jedk1/jedcore/ability/earthbending/Fissure.java)",
+      "Bash(head -10 grep -rn \"isBendableSource\\\\|setBendableSource\" /c/Users/liamh/IdeaProjects/ProjectKorra-wip/core/src/)",
+      "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name pom.xml -not -path */target/*)",
+      "Bash(head -5 find /c/Users/liamh/IdeaProjects/Hyperion -name pom.xml -not -path */target/*)",
+      "Bash(find /c/Users/liamh/.m2 -name paper-api-26*.jar -not -name *sources*)"
     ]
   }
 }

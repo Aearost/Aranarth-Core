@@ -20,6 +20,7 @@ import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableWhip;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.CableThrash;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalBlade;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShots;
+import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalShred;
 import com.aearost.aranarthcore.abilities.earthbending.metalbending.MetalStrips;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.Burial;
 import com.aearost.aranarthcore.abilities.earthbending.sandbending.SandWave;
@@ -119,6 +120,7 @@ public class AranarthCoreBendingListener implements Listener {
 		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
+		new ArrayList<>(CoreAbility.getAbilities(MetalShred.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MetalBlade.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
 		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
@@ -409,6 +411,10 @@ public class AranarthCoreBendingListener implements Listener {
 					if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
 						new CableWhip(player);
 					}
+				} else if (abilityName.equalsIgnoreCase("metalshred")) {
+					if (!MetalShred.hasActiveInstance(player.getUniqueId())) {
+						new MetalShred(player);
+					}
 				} else if (abilityName.equalsIgnoreCase("metalstrips")) {
 					MetalStrips.startRecall(player);
 				} else if (abilityName.equalsIgnoreCase("metalshots")) {
@@ -488,6 +494,13 @@ public class AranarthCoreBendingListener implements Listener {
 		CableWhip cableWhip = CableWhip.getActiveInstance(player.getUniqueId());
 		if (cableWhip != null) {
 			cableWhip.onLeftClick();
+			return;
+		}
+
+		// MetalShred: left-click while sourced fires the coil toward the look direction
+		MetalShred metalShred = MetalShred.getActiveInstance(player.getUniqueId());
+		if (metalShred != null) {
+			metalShred.onLeftClick();
 			return;
 		}
 
@@ -783,6 +796,9 @@ public class AranarthCoreBendingListener implements Listener {
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
+		if (MetalShred.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+		}
 		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 		}
@@ -914,6 +930,15 @@ public class AranarthCoreBendingListener implements Listener {
 				cableWhip.endWithCooldown();
 			} else {
 				cableWhip.cancelInstantly();
+			}
+		}
+		MetalShred metalShred = MetalShred.getActiveInstance(e.getPlayer().getUniqueId());
+		if (metalShred != null) {
+			if (metalShred.getPhase() == MetalShred.Phase.FIRING
+					|| metalShred.getPhase() == MetalShred.Phase.STAYING) {
+				metalShred.endWithCooldown();
+			} else {
+				metalShred.cancelInstantly();
 			}
 		}
 		MetalShots metalShots = MetalShots.getActiveInstance(e.getPlayer().getUniqueId());
@@ -1266,6 +1291,10 @@ public class AranarthCoreBendingListener implements Listener {
 			return;
 		}
 		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
+			e.setCancelled(true);
+			return;
+		}
+		if (MetalShred.hasActiveInstance(player.getUniqueId())) {
 			e.setCancelled(true);
 			return;
 		}
