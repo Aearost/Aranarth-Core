@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -8,6 +9,7 @@ import com.projectkorra.projectkorra.ability.LightningAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -134,8 +136,9 @@ public class Discharge extends LightningAbility implements AddonAbility {
             l.add(createBranch(), createBranch(), createBranch());
             branchSpace += 0.001;
 
-            for (int j = 0; j < 5; j++) {
-                playLightningbendingParticle(l.clone(), 0f, 0f, 0f);
+            for (int j = 0; j < 10; j++) {
+                Particle.DustOptions dust = (j % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
+                l.getWorld().spawnParticle(Particle.DUST, l.clone(), 1, 0.03, 0.03, 0.03, 0, dust);
 
                 if (rand.nextInt(6) == 0) {
                     l.getWorld().playSound(l, Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);
@@ -179,12 +182,9 @@ public class Discharge extends LightningAbility implements AddonAbility {
             }
 
             for (int k = 0; k < 5; k++) {
-                playLightningbendingParticle(
-                        entity.getLocation(),
-                        (float) rand.nextDouble(),
-                        (float) rand.nextDouble(),
-                        (float) rand.nextDouble()
-                );
+                Particle.DustOptions dust = (k % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
+                entity.getLocation().getWorld().spawnParticle(Particle.DUST, entity.getLocation(), 1,
+                        rand.nextDouble() * 0.5, rand.nextDouble() * 0.5, rand.nextDouble() * 0.5, 0, dust);
             }
 
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);

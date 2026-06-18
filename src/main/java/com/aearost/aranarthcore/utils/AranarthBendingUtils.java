@@ -85,6 +85,9 @@ public class AranarthBendingUtils {
     /** Pale yellow-white dust used for alternating orbital particles and trail bursts in Jolt. */
     public static final Particle.DustOptions LIGHTNING_DUST_BRIGHT =
             new Particle.DustOptions(Color.fromRGB(255, 255, 180), 1.0f);
+    /** Light blue dust used for the Discharge bolt path. */
+    public static final Particle.DustOptions LIGHTNING_DUST_BLUE =
+            new Particle.DustOptions(Color.fromRGB(100, 200, 255), 1.0f);
 
     /**
      * Applies one randomly chosen spirit curse to the target entity using the
