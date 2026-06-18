@@ -912,7 +912,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.fire.lightningbending", true);
 			perms.setPermission("bending.water.bloodbending", true);
 			perms.setPermission("bending.ability.corruptinghelix", true);     // healing
-			perms.setPermission("bending.ability.Discharge", true);           // JedCore lightning
+			perms.setPermission("bending.ability.Discharge", true);           // lightning
 			perms.setPermission("bending.ability.BloodPuppet", true);         // JedCore blood
 			perms.setPermission("bending.ability.energyburst", true);         // spiritual
 			perms.setPermission("bending.ability.sonicpulse", true);          // sound

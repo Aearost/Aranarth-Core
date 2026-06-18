@@ -29,6 +29,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.Barrage;
 import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrike;
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
@@ -586,6 +587,15 @@ public class AranarthCoreBendingListener implements Listener {
 			} else {
 				new HighJump(player, HighJump.JumpType.JUMP);
 			}
+			return;
+		}
+
+		// Discharge: left-click fires a branching lightning bolt in the player's look direction
+		BendingPlayer bpDischarge = BendingPlayer.getBendingPlayer(player);
+		if (bpDischarge != null && bpDischarge.getBoundAbilityName().equalsIgnoreCase("discharge")
+				&& bpDischarge.isElementToggled(Element.FIRE)
+				&& !Discharge.hasActiveInstance(player.getUniqueId())) {
+			new Discharge(player);
 			return;
 		}
 

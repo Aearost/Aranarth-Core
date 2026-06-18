@@ -48,6 +48,7 @@ Major Features
 [+] Implemented the CorruptingHelix ability for healers
 [+] Implemented the MendingWaters ability for healers
 [+] Implemented the MoltenBlast lava combo
+[+] Implemented an AranarthCore-based Discharge ability
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week
