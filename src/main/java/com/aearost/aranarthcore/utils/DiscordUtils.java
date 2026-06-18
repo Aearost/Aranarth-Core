@@ -676,6 +676,7 @@ public class DiscordUtils {
 				TextChannel boostsChannel = getBoostsChannel();
 				if (boostsChannel != null) {
 					boostsChannel.sendMessageEmbeds(boostEmbed.build()).queue();
+					boostsChannel.sendMessage("<@&1515810206741823508>").allowedMentions(EnumSet.of(Message.MentionType.ROLE)).queue();
 				}
 				return;
 			}

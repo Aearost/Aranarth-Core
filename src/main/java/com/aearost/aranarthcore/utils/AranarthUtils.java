@@ -2253,7 +2253,7 @@ public class AranarthUtils {
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				if (fromVoteShop) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7used vote points to purchase the " + name));
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
 				} else {
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
 				}
