@@ -2247,7 +2247,9 @@ public class AranarthUtils {
 			// Handles messages
 			if (uuid == null) {
 				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
-				DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
+				if (AranarthCore.isPublicServer()) {
+					DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
+				}
 			} else {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 				if (fromVoteShop) {
@@ -2255,7 +2257,9 @@ public class AranarthUtils {
 				} else {
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
 				}
-				DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
+				if (AranarthCore.isPublicServer()) {
+					DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
+				}
 			}
 		}
 		// Should only be called during server startup
@@ -2283,8 +2287,10 @@ public class AranarthUtils {
 				name = "&7&lUnspecified Boost";
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-			DiscordUtils.sendBoostExpiredToDiscord(boost);
+			if (AranarthCore.isPublicServer()) {
+				DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+				DiscordUtils.sendBoostExpiredToDiscord(boost);
+			}
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
@@ -2367,8 +2373,10 @@ public class AranarthUtils {
 				name = "&7&lUnspecified Boost";
 			}
 			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-			DiscordUtils.sendBoostExpiredToDiscord(boost);
+			if (AranarthCore.isPublicServer()) {
+				DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+				DiscordUtils.sendBoostExpiredToDiscord(boost);
+			}
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
 			sentBoostReminders.remove(boost.name() + "_30");
@@ -2402,7 +2410,7 @@ public class AranarthUtils {
 				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
 					sentBoostReminders.add(key);
 					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
-					if (discordLabels[i] != null) {
+					if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
 						DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
 					}
 					for (Player player : Bukkit.getOnlinePlayers()) {
