@@ -11,6 +11,7 @@ import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -19,6 +20,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Random;
+import java.util.Set;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_LEVEL;
 import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
@@ -27,6 +29,19 @@ import static com.aearost.aranarthcore.objects.CustomKeys.INCANTATION_TYPE;
  * Increases damage for various weapons depending on the Aranarthium armor set that is worn.
  */
 public class WeaponsExtraDamage {
+
+	private static final Set<EntityType> NETHER_MOBS = Set.of(
+			EntityType.BLAZE,
+			EntityType.GHAST,
+			EntityType.MAGMA_CUBE,
+			EntityType.WITHER_SKELETON,
+			EntityType.ZOMBIFIED_PIGLIN,
+			EntityType.PIGLIN,
+			EntityType.PIGLIN_BRUTE,
+			EntityType.HOGLIN,
+			EntityType.ZOGLIN,
+			EntityType.STRIDER
+	);
 	public void execute(EntityDamageEvent e) {
 		Entity entity = e.getEntity();
 		if (isPlayerCausedDamage(e.getCause())) {
@@ -100,16 +115,18 @@ public class WeaponsExtraDamage {
 								return;
 							}
 
-							// Applies fire ticks for any source of melee damage
-							entity.setFireTicks(60);
-							if (weapon.containsEnchantment(Enchantment.FIRE_ASPECT)) {
-								if (weapon.getEnchantmentLevel(Enchantment.FIRE_ASPECT) == 1) {
-									entity.setFireTicks(140);
-								} else {
-									entity.setFireTicks(240);
+							// Applies fire ticks for any source of melee damage (skip nether mobs)
+							if (!NETHER_MOBS.contains(entity.getType())) {
+								entity.setFireTicks(60);
+								if (weapon.containsEnchantment(Enchantment.FIRE_ASPECT)) {
+									if (weapon.getEnchantmentLevel(Enchantment.FIRE_ASPECT) == 1) {
+										entity.setFireTicks(140);
+									} else {
+										entity.setFireTicks(240);
+									}
+								} else if (weapon.containsEnchantment(Enchantment.FLAME)) {
+									entity.setFireTicks(160);
 								}
-							} else if (weapon.containsEnchantment(Enchantment.FLAME)) {
-								entity.setFireTicks(160);
 							}
 						}
 					}
