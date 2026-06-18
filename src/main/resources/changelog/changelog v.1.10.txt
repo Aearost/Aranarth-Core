@@ -253,6 +253,7 @@ Minor Features
 [~] Added requirements to require dominions to be enemied when conquered
 [-] Made it so nether mobs do not take damage from Scorched Aranarthium
 [+] Added support for shulker boxes, barrels, and copper chests to be usable as shop containers
+[~] Added dynamic rates in which crate keys can be obtained from quests
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

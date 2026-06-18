@@ -2,16 +2,13 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
-import com.aearost.aranarthcore.items.aranarthium.ingots.AranarthiumIngot;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
-import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Quest;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
@@ -361,6 +358,14 @@ public class QuestUtils {
         for (Quest q : selected) {
             assigned.add(q.withReward(generateRandomReward(rank, QuestType.DAILY, q.getTaskType())));
         }
+
+        // Rank-scaled chance that exactly one daily quest rewards a crate key instead of money
+        float dailyKeyChance = getDailyKeyChance(rank);
+        if (dailyKeyChance > 0f && RANDOM.nextFloat() < dailyKeyChance) {
+            int keyIndex = RANDOM.nextInt(assigned.size());
+            assigned.set(keyIndex, assigned.get(keyIndex).withItemReward(getDailyKeyReward()));
+        }
+
         playerActiveDailyQuests.put(uuid, assigned);
     }
 
@@ -377,67 +382,71 @@ public class QuestUtils {
             assigned.add(q.withReward(generateRandomReward(rank, QuestType.WEEKLY, q.getTaskType())));
         }
 
-        // 25% chance that exactly one of the three weekly quests rewards an item instead of money
-        List<ItemStack> itemOptions = getWeeklyItemRewardOptions(rank);
-        if (!itemOptions.isEmpty() && RANDOM.nextFloat() < 0.25f) {
-            int itemIndex = RANDOM.nextInt(assigned.size());
-            ItemStack itemReward = itemOptions.get(RANDOM.nextInt(itemOptions.size()));
-            assigned.set(itemIndex, assigned.get(itemIndex).withItemReward(itemReward));
+        // Rank-scaled chance that exactly one weekly quest rewards an epic or godly crate key
+        // Higher ranks have a better chance of a key, and a higher chance that key is godly
+        float weeklyKeyChance = getWeeklyKeyChance(rank);
+        if (RANDOM.nextFloat() < weeklyKeyChance) {
+            int keyIndex = RANDOM.nextInt(assigned.size());
+            assigned.set(keyIndex, assigned.get(keyIndex).withItemReward(getWeeklyKeyReward(rank)));
         }
 
         playerActiveWeeklyQuests.put(uuid, assigned);
     }
 
     /**
-     * Returns the list of possible item rewards for a weekly quest of the given rank.
+     * Returns the probability that a daily quest assignment will include a crate key reward.
      */
-    private static List<ItemStack> getWeeklyItemRewardOptions(int rank) {
-        List<ItemStack> options = new ArrayList<>();
-        switch (rank) {
-            case 0 -> options.add(new KeyVote().getItem());
-            case 1 -> {
-                options.add(new KeyVote().getItem());
-                options.add(new ItemStack(Material.DIAMOND, 16));
-            }
-            case 2 -> {
-                options.add(new KeyVote().getItem());
-                options.add(new KeyRare().getItem());
-                options.add(new ItemStack(Material.DIAMOND, 24));
-            }
-            case 3 -> {
-                options.add(new KeyRare().getItem());
-                options.add(new ItemStack(Material.TRIDENT, 1));
-                options.add(new ItemStack(Material.HEART_OF_THE_SEA, 1));
-            }
-            case 4 -> {
-                options.add(new KeyRare().getItem());
-                options.add(new KeyEpic().getItem());
-                options.add(new ItemStack(Material.TRIDENT, 1));
-                options.add(new ItemStack(Material.NETHERITE_INGOT, 1));
-            }
-            case 5 -> {
-                options.add(new KeyEpic().getItem());
-                options.add(new ItemStack(Material.ELYTRA, 1));
-                options.add(new ItemStack(Material.NETHERITE_INGOT, 1));
-            }
-            case 6 -> {
-                options.add(new KeyEpic().getItem());
-                options.add(new KeyGodly().getItem());
-                options.add(new AranarthiumIngot().getItem());
-            }
-            case 7 -> {
-                options.add(new KeyGodly().getItem());
-                options.add(new AranarthiumIngot().getItem());
-                options.add(new ItemStack(Material.NETHER_STAR, 1));
-            }
-            case 8 -> {
-                options.add(new KeyGodly().getItem());
-                options.add(new AranarthiumIngot().getItem());
-                options.add(new ItemStack(Material.NETHER_STAR, 1));
-                options.add(new ItemStack(Material.HEAVY_CORE, 1));
-            }
-        }
-        return options;
+    private static float getDailyKeyChance(int rank) {
+        return switch (rank) {
+            case 1 -> 0.05f;
+            case 2 -> 0.10f;
+            case 3 -> 0.15f;
+            case 4 -> 0.25f;
+            case 5 -> 0.35f;
+            case 6 -> 0.45f;
+            case 7 -> 0.55f;
+            case 8 -> 0.65f;
+            default -> 0f;
+        };
+    }
+
+    /**
+     * Returns a crate key for a daily quest
+     */
+    private static ItemStack getDailyKeyReward() {
+        // 85% rare, 15% epic
+        return RANDOM.nextFloat() < 0.15f ? new KeyEpic().getItem() : new KeyRare().getItem();
+    }
+
+    /**
+     * Returns the probability that a weekly quest assignment will include a crate key reward.
+     */
+    private static float getWeeklyKeyChance(int rank) {
+        return switch (rank) {
+            case 1 -> 0.20f;
+            case 2 -> 0.25f;
+            case 3 -> 0.35f;
+            case 4 -> 0.45f;
+            case 5 -> 0.55f;
+            case 6 -> 0.65f;
+            case 7 -> 0.75f;
+            case 8 -> 0.80f;
+            default -> 0.15f;
+        };
+    }
+
+    /**
+     * Returns a crate key for a weekly quest.
+     */
+    private static ItemStack getWeeklyKeyReward(int rank) {
+        float godlyChance = switch (rank) {
+            case 3, 4    -> 0.10f;
+            case 5, 6    -> 0.15f;
+            case 7       -> 0.20f;
+            case 8       -> 0.25f;
+            default      -> 0.05f;
+        };
+        return RANDOM.nextFloat() < godlyChance ? new KeyGodly().getItem() : new KeyEpic().getItem();
     }
 
     /**
