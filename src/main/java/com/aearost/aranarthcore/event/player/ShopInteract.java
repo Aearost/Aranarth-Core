@@ -36,7 +36,7 @@ public class ShopInteract {
             Shop shop = ShopUtils.getShopFromLocation(signLocation);
 
             // Player shop
-            if (isChest(locationBelow.getBlock().getType()) && shop != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
+            if (isContainer(locationBelow.getBlock()) && shop != null && AranarthUtils.getPlayer(shop.getUuid()) != null) {
                 if (shop != null) {
                     e.setCancelled(true);
 
@@ -151,7 +151,7 @@ public class ShopInteract {
             }
         }
         // Left or right-clicking the chest, including opening and breaking
-        else if (isChest(e.getClickedBlock().getType())) {
+        else if (isContainer(e.getClickedBlock())) {
             // Gets both locations if it is a double chest
             BlockState state = e.getClickedBlock().getState();
             Container container = (Container) state;
@@ -792,13 +792,13 @@ public class ShopInteract {
 
 
     /**
-     * Determines if the clicked block is a chest OR A trapped chest.
+     * Determines if the block is a valid shop container (chest, trapped chest, barrel, copper chest, or shulker box).
      *
-     * @param type The type of material.
-     * @return Confirmation of whether the block is a chest OR A trapped chest.
+     * @param block The block to check.
+     * @return Confirmation of whether the block is a valid shop container.
      */
-    private boolean isChest(Material type) {
-        return type == Material.CHEST || type == Material.TRAPPED_CHEST;
+    private boolean isContainer(Block block) {
+        return AranarthUtils.isContainerBlock(block);
     }
 
 

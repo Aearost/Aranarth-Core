@@ -252,6 +252,7 @@ Minor Features
 [~] Made it so Hoglins no longer target users wearing Scorched Aranarthium
 [~] Added requirements to require dominions to be enemied when conquered
 [-] Made it so nether mobs do not take damage from Scorched Aranarthium
+[+] Added support for shulker boxes, barrels, and copper chests to be usable as shop containers
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

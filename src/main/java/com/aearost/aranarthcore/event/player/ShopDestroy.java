@@ -37,7 +37,7 @@ public class ShopDestroy {
 			else {
 				return;
 			}
-		} else if (type == Material.CHEST || type == Material.TRAPPED_CHEST) {
+		} else if (AranarthUtils.isContainerBlock(e.getBlock())) {
 			Location signLocation = e.getBlock().getRelative(BlockFace.UP).getLocation();
 			Shop playerShop = ShopUtils.getShopFromLocation(signLocation);
 			if (playerShop != null) {

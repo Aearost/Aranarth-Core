@@ -174,8 +174,8 @@ public class ShopCreateListener implements Listener {
 	 */
 	private boolean canCreateShop(SignChangeEvent e) {
 		Block signBlock = e.getBlock();
-		// If no chest is below, no need to verify further
-		if (!isBlockBelowChest(signBlock)) {
+		// If no container is below, no need to verify further
+		if (!isBlockBelowContainer(signBlock)) {
 			return true;
 		}
 
@@ -342,7 +342,7 @@ public class ShopCreateListener implements Listener {
 	 * @return Confirmation whether the chest is correctly placed for the shop.
 	 */
 	private boolean isValidChestFormat(Player player, Block sign) {
-		if (!isBlockBelowChest(sign)) {
+		if (!isBlockBelowContainer(sign)) {
 			player.sendMessage(ChatUtils.chatMessage("&cYou do not have a chest for the shop!"));
 			return false;
 		}
@@ -357,17 +357,12 @@ public class ShopCreateListener implements Listener {
 	}
 
 	/**
-	 * Determines if the block below is a chest or a trapped chest.
+	 * Determines if the block below is a valid shop container (chest, trapped chest, barrel, copper chest, or shulker box).
 	 * @param sign The sign above the block.
-	 * @return Confirmation of whether the block is a chest or a trapped chest.
+	 * @return Confirmation of whether the block is a valid shop container.
 	 */
-	private boolean isBlockBelowChest(Block sign) {
-		Location signLocation = sign.getLocation();
-		Location blockBelowLocation = new Location(signLocation.getWorld(),
-				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
-
-		return signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.CHEST
-				|| signLocation.getWorld().getBlockAt(blockBelowLocation).getType() == Material.TRAPPED_CHEST;
+	private boolean isBlockBelowContainer(Block sign) {
+		return AranarthUtils.isContainerBlock(sign.getRelative(BlockFace.DOWN));
 	}
 
 	/**
@@ -382,7 +377,7 @@ public class ShopCreateListener implements Listener {
 				signLocation.getBlockX(), signLocation.getBlockY() - 1, signLocation.getBlockZ());
 
 		// If it is a server shop
-		if (!isBlockBelowChest(blockBelowSign.getBlock()) && !isPlayerShop) {
+		if (!isBlockBelowContainer(blockBelowSign.getBlock()) && !isPlayerShop) {
 			return new ItemStack(Material.AIR);
 		}
 
