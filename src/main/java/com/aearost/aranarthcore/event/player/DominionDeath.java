@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
@@ -17,6 +18,15 @@ import java.util.Random;
  */
 public class DominionDeath {
 
+    // The percentage of the Dominion's balance lost on death (0.005 = 0.5%).
+    // Consider reducing to 0.0025 (0.25%) if this proves too punishing over time.
+    private static final double BALANCE_LOSS_PERCENT = 0.005;
+    // Maximum money that can be lost to the balance percentage per death.
+    private static final int BALANCE_LOSS_MAX = 50000;
+    // Flat base money lost on death (floor when balance scaling is lower).
+    private static final int BASE_MONEY_MOB = 100;
+    private static final int BASE_MONEY_PVP = 500;
+
     public void execute(EntityDeathEvent e) {
         Player player = (Player) e.getEntity();
         if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
@@ -24,10 +34,11 @@ public class DominionDeath {
             Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
             if (dominion != null) {
                 boolean wasKilledByPlayer = e.getDamageSource().getCausingEntity() != null && e.getDamageSource().getCausingEntity() instanceof Player;
-                int moneyToConsume = 100;
-                if (wasKilledByPlayer) {
-                    moneyToConsume = 500;
-                }
+
+                double roleMultiplier = getRoleMultiplier(dominion, player);
+                int scaledAmount = (int) Math.min(dominion.getBalance() * BALANCE_LOSS_PERCENT * roleMultiplier, BALANCE_LOSS_MAX);
+                int flatBase = wasKilledByPlayer ? BASE_MONEY_PVP : BASE_MONEY_MOB;
+                int moneyToConsume = Math.max(flatBase, scaledAmount);
 
                 int warMultiplier = 1;
                 if (wasKilledByPlayer) {
@@ -78,6 +89,22 @@ public class DominionDeath {
                 }
             }
         }
+    }
+
+    /**
+     * Returns the role-based multiplier for balance loss on death.
+     * NEWCOMER 0.25x / CITIZEN 0.75x / LIEUTENANT 1.5x / LEADER 2.0x
+     */
+    private double getRoleMultiplier(Dominion dominion, Player player) {
+        DominionRank rank = dominion.getMemberRank(player.getUniqueId());
+        if (rank == null) return 1.0;
+        return switch (rank) {
+            case NEWCOMER -> 0.25;
+            case CITIZEN -> 0.75;
+            case LIEUTENANT -> 1.5;
+            case LEADER -> 2.0;
+            default -> 1.0;
+        };
     }
 
     /**

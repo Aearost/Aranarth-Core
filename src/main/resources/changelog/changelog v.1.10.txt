@@ -255,6 +255,7 @@ Minor Features
 [+] Added support for shulker boxes, barrels, and copper chests to be usable as shop containers
 [~] Added dynamic rates in which crate keys can be obtained from quests
 [-] Prevented /d food from being accessed in non-survival worlds
+[~] Increased the amount of lost money when a player in a Dominion dies (based on role and proportional to dominion balance)
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
