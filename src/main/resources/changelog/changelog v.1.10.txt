@@ -259,6 +259,7 @@ Minor Features
 [-] Prevented /d food from being accessed in non-survival worlds
 [~] Increased the amount of lost money when a player in a Dominion dies (based on role and proportional to dominion balance)
 [~] Decreased the prices of crate keys in the vote shop
+[~] Fixed issue where the /quests GUI would not auto-close after claiming a reward
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

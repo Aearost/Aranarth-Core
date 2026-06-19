@@ -1,18 +1,12 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.enums.QuestType;
-import com.aearost.aranarthcore.gui.GuiQuests;
-import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.Quest;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -58,21 +52,6 @@ public class GuiQuestsClick {
         if (!success) return;
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
-
-        // Update the slot to show the claimed (gray) state
-        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-        int rank = aranarthPlayer.getRank();
-
-        List<Quest> active = type == QuestType.DAILY
-                ? QuestUtils.getActiveDailyQuests(uuid, rank)
-                : QuestUtils.getActiveWeeklyQuests(uuid, rank);
-
-        if (index < active.size()) {
-            int progress = type == QuestType.DAILY
-                    ? QuestUtils.getDailyProgress(uuid, index)
-                    : QuestUtils.getWeeklyProgress(uuid, index);
-            ItemStack updatedItem = GuiQuests.makeQuestItem(active.get(index), progress, true, true);
-            e.getInventory().setItem(slot, updatedItem);
-        }
+        player.closeInventory();
     }
 }
