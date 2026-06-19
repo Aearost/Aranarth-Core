@@ -103,1532 +103,1609 @@ import java.util.UUID;
  */
 public class AranarthCoreBendingListener implements Listener {
 
-	public AranarthCoreBendingListener(AranarthCore plugin) {
-		Bukkit.getPluginManager().registerEvents(this, plugin);
-	}
+    public AranarthCoreBendingListener(AranarthCore plugin) {
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
 
-	/**
-	 * Handles reloading the abilities when ProjectKorra is reloaded.
-	 * @param event The event.
-	 */
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPKReload(final BendingReloadEvent event) {
-		// End all active projections before PK clears and re-registers abilities,
-		// so players are safely returned to their body location.
-		AstralProjection.endAllProjections();
-		new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(MetalShred.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(MetalBlade.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(LifeRip.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(HealingHelix.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(CorruptingHelix.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(MoltenBlast.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
-		new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
+    /**
+     * Handles reloading the abilities when ProjectKorra is reloaded.
+     *
+     * @param event The event.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPKReload(final BendingReloadEvent event) {
+        // End all active projections before PK clears and re-registers abilities,
+        // so players are safely returned to their body location.
+        AstralProjection.endAllProjections();
+        new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(CableThrash.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(MetalShred.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(MetalBlade.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(MetalShots.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(IceDiscs.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(IceShards.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(JetFumes.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(DaggerVolley.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(BloodGrip.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(BloodFreeze.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(Disalignment.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(LifeRip.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(HealingHelix.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(CorruptingHelix.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(Eruption.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(MagmaWave.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(MoltenBlast.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
 
-		new BukkitRunnable() {
-			@Override
-			public void run() {
-				CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
-				Bukkit.getLogger().info("AranarthCore Bending Reloaded");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
+                Bukkit.getLogger().info("AranarthCore Bending Reloaded");
+            }
+        }.runTaskLater(AranarthCore.getInstance(), 1L);
+    }
+
+    /**
+     * Cancels water flow from IceShards dome blocks, or into the dome radius,
+     * preventing external water from entering and creating infinite sources.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onIceShardsBlockFromTo(final BlockFromToEvent e) {
+		if (e.getBlock().getType() != Material.WATER) {
+			return;
+		}
+        if (TempBlock.isTempBlock(e.getBlock())) {
+            e.setCancelled(true);
+            return;
+        }
+        final Location toLoc = e.getToBlock().getLocation();
+        for (final IceShards inst : IceShards.getActiveInstances()) {
+			if (!inst.getPlayer().getWorld().equals(toLoc.getWorld())) {
+				continue;
 			}
-		}.runTaskLater(AranarthCore.getInstance(), 1L);
-	}
+            final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
+            final double r = 12; // domeRadius + 2
+            if (toLoc.distanceSquared(centre) <= r * r) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
 
-	/**
-	 * Cancels water flow from IceShards dome blocks, or into the dome radius,
-	 * preventing external water from entering and creating infinite sources.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onIceShardsBlockFromTo(final BlockFromToEvent e) {
-		if (e.getBlock().getType() != Material.WATER) return;
-		if (TempBlock.isTempBlock(e.getBlock())) {
-			e.setCancelled(true);
+    /**
+     * Suppresses fluid physics on IceShards dome water blocks and any water within
+     * the dome radius, preventing flow ticks that bypass BlockFromToEvent.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onIceShardsBlockPhysics(final BlockPhysicsEvent e) {
+		if (e.getBlock().getType() != Material.WATER) {
 			return;
 		}
-		final Location toLoc = e.getToBlock().getLocation();
-		for (final IceShards inst : IceShards.getActiveInstances()) {
-			if (!inst.getPlayer().getWorld().equals(toLoc.getWorld())) continue;
-			final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
-			final double r = 12; // domeRadius + 2
-			if (toLoc.distanceSquared(centre) <= r * r) {
-				e.setCancelled(true);
-				return;
+        if (TempBlock.isTempBlock(e.getBlock())) {
+            e.setCancelled(true);
+            return;
+        }
+        final Location loc = e.getBlock().getLocation();
+        for (final IceShards inst : IceShards.getActiveInstances()) {
+			if (!inst.getPlayer().getWorld().equals(loc.getWorld())) {
+				continue;
 			}
-		}
-	}
-
-	/**
-	 * Suppresses fluid physics on IceShards dome water blocks and any water within
-	 * the dome radius, preventing flow ticks that bypass BlockFromToEvent.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onIceShardsBlockPhysics(final BlockPhysicsEvent e) {
-		if (e.getBlock().getType() != Material.WATER) return;
-		if (TempBlock.isTempBlock(e.getBlock())) {
-			e.setCancelled(true);
-			return;
-		}
-		final Location loc = e.getBlock().getLocation();
-		for (final IceShards inst : IceShards.getActiveInstances()) {
-			if (!inst.getPlayer().getWorld().equals(loc.getWorld())) continue;
-			final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
-			final double r = 12; // domeRadius + 2
-			if (loc.distanceSquared(centre) <= r * r) {
-				e.setCancelled(true);
-				return;
-			}
-		}
-	}
-
-	@EventHandler
-	public void onPlayerSneak(final PlayerToggleSneakEvent e) {
-		Player player = e.getPlayer();
-		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-		if (bendingPlayer == null) {
-			return;
-		}
-
-		CoreAbility ability = bendingPlayer.getBoundAbility();
-		String abilityName = bendingPlayer.getBoundAbilityName();
-
-		// Sneak press during FIRING — cancel so PK cannot activate IceSpike via SHIFT_DOWN
-		if (e.isSneaking()) {
-			IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
-			if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.FIRING) {
-				e.setCancelled(true);
-				return;
-			}
-		}
-
-		// Sneak release
-		if (!e.isSneaking()) {
-			IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
-			if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.CHARGING) {
-				iceDiscs.cancelWithCooldown();
-				return;
-			}
-			MoltenBlast moltenBlastSneak = MoltenBlast.getActiveInstance(player.getUniqueId());
-			if (moltenBlastSneak != null) {
-				MoltenBlast.Phase p = moltenBlastSneak.getPhase();
-				if (p == MoltenBlast.Phase.CHARGING || p == MoltenBlast.Phase.GRABBED) {
-					moltenBlastSneak.onSneakRelease();
-					return;
-				}
-			}
-			if (abilityName.equalsIgnoreCase("earthsmash")) {
-				MoltenBlast.markEarthSmashSneak(player.getUniqueId());
-			}
-		}
-
-		if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
-			if (BloodGrip.isControlled(player.getUniqueId())) {
-				e.setCancelled(true);
-				return;
-			}
-			if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
-				return;
-			}
-
-			// Airbending
-			if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
-				if (ability instanceof SpiritualAbility) {
-					if (abilityName.equalsIgnoreCase("astralprojection")) {
-						// Guard: do not start a new projection while already projecting
-						if (!AstralProjection.isProjecting(player.getUniqueId())) {
-							new AstralProjection(e.getPlayer());
-						}
-					} else if (abilityName.equalsIgnoreCase("astralshot")) {
-						new AstralShot(player);
-					} else if (abilityName.equalsIgnoreCase("angeredspirits")) {
-						if (!AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
-							new AngeredSpirits(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("energyburst")) {
-						if (!EnergyBurst.hasActiveInstance(player.getUniqueId())) {
-							new EnergyBurst(player);
-						}
-					}
-				} else if (ability instanceof SoundAbility) {
-					if (abilityName.equalsIgnoreCase("sonicboom")) {
-						new SonicBoom(player);
-					} else if (abilityName.equalsIgnoreCase("amplification")) {
-						if (!CoreAbility.hasAbility(player, Amplification.class)) {
-							new Amplification(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("deafeningscream")) {
-						if (!CoreAbility.hasAbility(player, DeafeningScream.class)) {
-							new DeafeningScream(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("sonicpulse")) {
-						if (!CoreAbility.hasAbility(player, SonicPulse.class)) {
-							new SonicPulse(player);
-						}
-					}
-				}
-			}
-			// Waterbending
-			else if (ability instanceof WaterAbility && bendingPlayer.isElementToggled(Element.WATER)) {
-				if (ability instanceof HealingAbility) {
-					if (abilityName.equalsIgnoreCase("healinghelix")) {
-						if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
-							new HealingHelix(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("corruptinghelix")) {
-						if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
-							new CorruptingHelix(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("mendingwaters")) {
-						if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
-							new MendingWaters(player);
-						}
-					}
-				} else if (ability instanceof BloodAbility) {
-					if (abilityName.equalsIgnoreCase("bloodgrip")) {
-						if (!BloodGrip.hasActiveInstance(player.getUniqueId())) {
-							new BloodGrip(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("bloodfreeze")) {
-						if (!BloodFreeze.hasActiveInstance(player.getUniqueId())) {
-							new BloodFreeze(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("disalignment")) {
-						if (!Disalignment.hasActiveInstance(player.getUniqueId())) {
-							new Disalignment(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("liferip")) {
-						if (!LifeRip.hasActiveInstance(player.getUniqueId())) {
-							new LifeRip(player);
-						}
-					}
-				} else if (ability instanceof PlantAbility) {
-					if (abilityName.equalsIgnoreCase("vinewhip")) {
-						// Guard: only one active instance per player
-						if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
-							new VineWhip(e.getPlayer());
-						}
-					} else if (abilityName.equalsIgnoreCase("razorleaves")) {
-						RazorLeaves existing = RazorLeaves.getActiveInstance(player.getUniqueId());
-						if (existing == null) {
-							new RazorLeaves(player);
-						} else {
-							// Re-source in SOURCED phase; ignored in CASTING phase
-							existing.onSneak();
-						}
-					} else if (abilityName.equalsIgnoreCase("toxicspores")) {
-						if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
-							new ToxicSpores(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("regrowth")) {
-						if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
-							new Regrowth(player);
-						}
-					}
-				}
-			}
-			// Firebending
-			else if (ability instanceof FireAbility && bendingPlayer.isElementToggled(Element.FIRE)) {
-				if (abilityName.equalsIgnoreCase("barrage")) {
-					if (!Barrage.hasActiveInstance(player.getUniqueId())) {
-						new Barrage(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("combustionstrike")) {
-					if (!CombustionStrike.hasActiveInstance(player.getUniqueId())) {
-						new CombustionStrike(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
-					if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
-						new NoxiousFumes(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("jolt")) {
-					if (!Jolt.hasActiveInstance(player.getUniqueId())) {
-						Jolt.markPendingCharge(player.getUniqueId());
-						new Jolt(player);
-					}
-				}
-			}
-			// Earthbending
-			else if (ability instanceof EarthAbility && bendingPlayer.isElementToggled(Element.EARTH)) {
-				if (ability instanceof SandAbility) {
-					if (abilityName.equalsIgnoreCase("sandstorm")) {
-						Sandstorm sandstorm = Sandstorm.getActiveInstance(player.getUniqueId());
-						if (sandstorm != null) {
-							sandstorm.startCasting();
-						}
-					} else if (abilityName.equalsIgnoreCase("sandwave")) {
-						if (!SandWave.hasActiveInstance(player.getUniqueId())) {
-							org.bukkit.block.Block target = player.getTargetBlock(null, 5);
-							if (target != null && EarthAbility.isSandbendable(player, target.getType())) {
-								SandWave.setPendingSource(player.getUniqueId(), target);
-							}
-						}
-					}
-				} else if (ability instanceof LavaAbility) {
-					if (abilityName.equalsIgnoreCase("magmaglaives")) {
-						if (!MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
-							new MagmaGlaives(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("eruption")) {
-						if (!Eruption.hasActiveInstance(player.getUniqueId())) {
-							new Eruption(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("magmawave")) {
-						// Tap sneak selects a nearby lava source; left-click fires the wave.
-						if (!MagmaWave.hasActiveInstance(player.getUniqueId())
-								&& !bendingPlayer.isOnCooldown("MagmaWave")) {
-							MagmaWave.trySelectSource(player);
-						}
-					} else if (abilityName.equalsIgnoreCase("lavaflow")) {
-						// MoltenBlast sneak-press path: player held sneak on EarthSmash, released it
-						// (or switched first), then presses sneak again on LavaFlow within the window.
-						// This is the reliable fallback when no slot-change-while-sneaking event fired.
-						if (!MoltenBlast.hasActiveInstance(player.getUniqueId())
-								&& MoltenBlast.hasRecentEarthSmashSneak(player.getUniqueId())) {
-							new MoltenBlast(player);
-							return;
-						}
-					} else if (abilityName.equalsIgnoreCase("lavathrow")) {
-						MoltenBlast moltenBlastGrab = MoltenBlast.getActiveInstance(player.getUniqueId());
-						if (moltenBlastGrab != null && moltenBlastGrab.getPhase() == MoltenBlast.Phase.LIFTED) {
-							moltenBlastGrab.grab();
-							return;
-						}
-					}
-				} else if (abilityName.equalsIgnoreCase("cablewhip")) {
-					if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
-						new CableWhip(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("metalshred")) {
-					if (!MetalShred.hasActiveInstance(player.getUniqueId())) {
-						new MetalShred(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("metalstrips")) {
-					MetalStrips.startRecall(player);
-				} else if (abilityName.equalsIgnoreCase("metalshots")) {
-					MetalShots existing = MetalShots.getActiveInstance(player.getUniqueId());
-					if (existing != null) {
-						existing.onSneak();
-					} else {
-						new MetalShots(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("metalblade")) {
-					if (!MetalBlade.hasActiveInstance(player.getUniqueId())) {
-						new MetalBlade(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("cablethrash")) {
-					if (!CableThrash.hasActiveInstance(player.getUniqueId())) {
-						new CableThrash(player);
-					}
-				} else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
-					e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
-				}
-			}
-			// Chiblocking
-			else if (ability instanceof ChiAbility) {
-				if (abilityName.equalsIgnoreCase("highjump") && !HighJump.hasActiveInstance(player.getUniqueId())) {
-					boolean isOnGround = player.getLocation().getBlock()
-							.getRelative(BlockFace.DOWN).getType().isSolid();
-					if (isOnGround) {
-						new HighJump(player, HighJump.JumpType.EVADE);
-					} else {
-						new HighJump(player, HighJump.JumpType.DOUBLEJUMP);
-					}
-				}
-			}
-		}
-	}
-
-	/**
-	 * Handles left-click activation for AstralProjection sub-abilities and VineWhip firing.
-	 */
-	@EventHandler
-	public void onLeftClick(PlayerAnimationEvent e) {
-		if (e.getAnimationType() != PlayerAnimationType.ARM_SWING) {
-			return;
-		}
-		Player player = e.getPlayer();
-
-		if (BloodGrip.isControlled(player.getUniqueId())) {
-			return;
-		}
-
-		// AstralProjection sub-ability activation (Slot 0 = Aura, 1 = Scream, 2 = Possess)
-		if (AstralProjection.isProjecting(player.getUniqueId())) {
-			AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
-			switch (player.getInventory().getHeldItemSlot()) {
-				case 0 -> projection.activateAura();
-				case 1 -> projection.activateScream();
-				case 2 -> projection.activatePossess();
-			}
-			return;
-		}
-
-		// BloodGrip: left-click while controlling flings the target in the look direction
-		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
-		if (bloodGrip != null) {
-			bloodGrip.onLeftClick();
-			return;
-		}
-
-		// Disalignment: left-click while charged applies the disalignment to the target
-		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
-		if (disalignment != null) {
-			disalignment.onLeftClick();
-			return;
-		}
-
-		// CableWhip: left-click while ready cracks one whip in the current look direction
-		CableWhip cableWhip = CableWhip.getActiveInstance(player.getUniqueId());
-		if (cableWhip != null) {
-			cableWhip.onLeftClick();
-			return;
-		}
-
-		// MetalShred: left-click while sourced fires the coil toward the look direction
-		MetalShred metalShred = MetalShred.getActiveInstance(player.getUniqueId());
-		if (metalShred != null) {
-			metalShred.onLeftClick();
-			return;
-		}
-
-		// VineWhip: left-click while selecting fires the vine
-		VineWhip vineWhip = VineWhip.getActiveInstance(player.getUniqueId());
-		if (vineWhip != null) {
-			vineWhip.onLeftClick();
-			return;
-		}
-
-		// RazorLeaves: left-click fires a leaf in the player's current look direction
-		RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(player.getUniqueId());
-		if (razorLeaves != null) {
-			razorLeaves.onLeftClick();
-			return;
-		}
-
-		// JetFumes: left-click cancels active flight
-		JetFumes jetFumes = JetFumes.getActiveInstance(player.getUniqueId());
-		if (jetFumes != null) {
-			jetFumes.onLeftClick();
-			return;
-		}
-
-		// NoxiousFumes: left-click begins channeling from the READY state
-		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(player.getUniqueId());
-		if (noxiousFumes != null) {
-			noxiousFumes.startChanneling();
-			return;
-		}
-
-		// ToxicSpores: left-click begins channeling from the READY state
-		ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(player.getUniqueId());
-		if (toxicSpores != null) {
-			toxicSpores.startChanneling();
-			return;
-		}
-
-		// IceShards: left-click fires the charged shards
-		IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
-		if (iceShards != null) {
-			iceShards.fire();
-			return;
-		}
-
-		// IceDiscs: left-click fires the next disc from the pillar
-		IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
-		if (iceDiscs != null) {
-			iceDiscs.fireDisc();
-			return;
-		}
-
-		// AngeredSpirits: left-click fires the next spirit during the firing window
-		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
-		if (angeredSpirits != null) {
-			angeredSpirits.onLeftClick();
-			return;
-		}
-
-		// Eruption: left-click during SOURCING confirms the target and begins the warm-up.
-		Eruption eruption = Eruption.getActiveInstance(player.getUniqueId());
-		if (eruption != null) {
-			eruption.onLeftClick();
-			return;
-		}
-
-		// MagmaWave: left-click fires the wave from the previously-tapped lava source.
-		if (MagmaWave.hasPendingSource(player.getUniqueId())
-				&& !MagmaWave.hasActiveInstance(player.getUniqueId())) {
-			BendingPlayer bpMagmaWave = BendingPlayer.getBendingPlayer(player);
-			if (bpMagmaWave != null && bpMagmaWave.getBoundAbilityName().equalsIgnoreCase("magmawave")) {
-				new MagmaWave(player);
-				return;
-			}
-		}
-
-		// MagmaGlaives: left-click fires the next glaive (right first, then left)
-		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
-		if (magmaGlaives != null) {
-			magmaGlaives.onLeftClick();
-			return;
-		}
-
-		// MoltenBlast: left-click with LavaThrow equipped fires the heated ball
-		MoltenBlast moltenBlast = MoltenBlast.getActiveInstance(player.getUniqueId());
-		if (moltenBlast != null) {
-			moltenBlast.fire();
-			return;
-		}
-
-		// MetalShots: left-click fires a projectile from the first available floating source block
-		MetalShots metalShots = MetalShots.getActiveInstance(player.getUniqueId());
-		if (metalShots != null) {
-			metalShots.onLeftClick();
-			return;
-		}
-
-		// HighJump: left-click to jump straight up (or lunge forward while sprinting/in water)
-		BendingPlayer bpChi = BendingPlayer.getBendingPlayer(player);
-		if (bpChi != null && bpChi.getBoundAbilityName().equalsIgnoreCase("highjump")
-				&& !HighJump.hasActiveInstance(player.getUniqueId())) {
-			if (player.isSprinting() || player.isInWater()) {
-				new HighJump(player, HighJump.JumpType.LUNGE);
-			} else {
-				new HighJump(player, HighJump.JumpType.JUMP);
-			}
-			return;
-		}
-
-		// Jolt: left-click fires the charged lightning bolt
-		Jolt jolt = Jolt.getActiveInstance(player.getUniqueId());
-		if (jolt != null) {
-			jolt.onLeftClick();
-			return;
-		}
-
-		// Discharge: left-click fires a branching lightning bolt in the player's look direction
-		BendingPlayer bpDischarge = BendingPlayer.getBendingPlayer(player);
-		if (bpDischarge != null && bpDischarge.getBoundAbilityName().equalsIgnoreCase("discharge")
-				&& bpDischarge.isElementToggled(Element.FIRE)
-				&& !Discharge.hasActiveInstance(player.getUniqueId())) {
-			new Discharge(player);
-			return;
-		}
-
-		// DaggerThrow: left-click fires one aimed dagger; rapid clicks throw up to 5 in succession
-		BendingPlayer bpDaggerThrow = BendingPlayer.getBendingPlayer(player);
-		if (bpDaggerThrow != null && bpDaggerThrow.getBoundAbilityName().equalsIgnoreCase("daggerthrow")) {
-			new DaggerThrow(player);
-			return;
-		}
-
-		// DaggerVolley: instant left-click fire — advances the 3 → 6 → 9 arrow cycle
-		BendingPlayer bpDaggerVolley = BendingPlayer.getBendingPlayer(player);
-		if (bpDaggerVolley != null && bpDaggerVolley.getBoundAbilityName().equalsIgnoreCase("daggervolley")) {
-			new DaggerVolley(player);
-			return;
-		}
-
-		// MetalStrips: instant left-click fire — one iron ingot per shot
-		BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
-		if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
-				&& bpMetal.isElementToggled(Element.EARTH)) {
-			MetalStrips.markLeftClick(player.getUniqueId());
-			new MetalStrips(player);
-			return;
-		}
-
-		// SonicClap: instant left-click fire
-		BendingPlayer bpClap = BendingPlayer.getBendingPlayer(player);
-		if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
-				&& bpClap.isElementToggled(Element.AIR)) {
-			new SonicClap(player);
-			return;
-		}
-
-		// Burial: left-click while sneaking fires the crevice toward the target
-		BendingPlayer bpBurial = BendingPlayer.getBendingPlayer(player);
-		if (bpBurial != null && bpBurial.getBoundAbilityName().equalsIgnoreCase("burial")
-				&& bpBurial.isElementToggled(Element.EARTH)
-				&& player.isSneaking()
-				&& !Burial.hasActiveInstance(player.getUniqueId())) {
-			new Burial(player);
-			return;
-		}
-
-		// SandWave: left-click launches the wave from a previously sneaked source
-		if (SandWave.hasPendingSource(player.getUniqueId())) {
-			BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
-			if (bp != null && bp.getBoundAbilityName().equalsIgnoreCase("sandwave")
-					&& !SandWave.hasActiveInstance(player.getUniqueId())) {
-				org.bukkit.block.Block sourceBlock = SandWave.getPendingSource(player.getUniqueId());
-				SandWave.clearPendingSource(player.getUniqueId());
-				new SandWave(player, sourceBlock);
-			}
-		}
-
-		// MendingWaters: left-click fires a water projectile while the ability is active
-		MendingWaters mendingWaters = MendingWaters.getActiveInstance(player.getUniqueId());
-		if (mendingWaters != null) {
-			mendingWaters.onLeftClick();
-			return;
-		}
-
-		// HealingHelix: left-click aims at a water/ice/snow block to register it as the source
-		if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
-			BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
-			if (bpHelix != null && bpHelix.getBoundAbilityName().equalsIgnoreCase("healinghelix")) {
-				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
-				if (sourceBlock != null) {
-					HealingHelix.trySelectSource(player, sourceBlock);
-				}
-			}
-		}
-
-		// CorruptingHelix: left-click aims at a water/ice/snow block to register it as the source
-		if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
-			BendingPlayer bpCorrupting = BendingPlayer.getBendingPlayer(player);
-			if (bpCorrupting != null && bpCorrupting.getBoundAbilityName().equalsIgnoreCase("corruptinghelix")) {
-				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
-				if (sourceBlock != null) {
-					CorruptingHelix.trySelectSource(player, sourceBlock);
-				}
-			}
-		}
-
-		// MendingWaters: left-click aims at a water/ice/snow block to register it as the source
-		if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
-			BendingPlayer bpMending = BendingPlayer.getBendingPlayer(player);
-			if (bpMending != null && bpMending.getBoundAbilityName().equalsIgnoreCase("mendingwaters")) {
-				org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
-				if (sourceBlock != null) {
-					MendingWaters.trySelectSource(player, sourceBlock);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Cancels block breaking while an ability is active.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onBlockBreak(BlockBreakEvent e) {
-		Player player = e.getPlayer();
-		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Sandstorm.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (IceShards.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Barrage.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (CombustionStrike.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (JetFumes.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Regrowth.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (EnergyBurst.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (SandWave.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (Burial.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (Eruption.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MetalShred.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MetalBlade.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (CableThrash.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (LifeRip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		if (Jolt.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
-		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Immediately cancels an ability when the player switches to a different ability slot.
-	 */
-	@EventHandler
-	public void onSlotChange(PlayerItemHeldEvent e) {
-		if (HealingHelix.hasActiveInstance(e.getPlayer().getUniqueId())
-				|| CorruptingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		MendingWaters mendingWatersSlot = MendingWaters.getActiveInstance(e.getPlayer().getUniqueId());
-		if (mendingWatersSlot != null) {
-			mendingWatersSlot.endWithCooldown();
-		}
-		Jolt joltSlot = Jolt.getActiveInstance(e.getPlayer().getUniqueId());
-		if (joltSlot != null) {
-			joltSlot.endWithCooldown();
-		}
-		Jolt.clearPendingCharge(e.getPlayer().getUniqueId());
-		VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
-		if (vineWhip != null) {
-			vineWhip.cancelInstantly();
-		}
-		RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(e.getPlayer().getUniqueId());
-		if (razorLeaves != null) {
-			razorLeaves.endWithCooldown();
-		}
-		Sandstorm sandstorm = Sandstorm.getActiveInstance(e.getPlayer().getUniqueId());
-		if (sandstorm != null) {
-			sandstorm.cancelFromSlotChange();
-		}
-		IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
-		if (iceShards != null) {
-			iceShards.remove();
-		}
-		IceDiscs iceDiscs = IceDiscs.getActiveInstance(e.getPlayer().getUniqueId());
-		if (iceDiscs != null) {
-			iceDiscs.cancelWithCooldown();
-		}
-		NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
-		if (noxiousFumes != null) {
-			noxiousFumes.endChanneling();
-		}
-		ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
-		if (toxicSpores != null) {
-			toxicSpores.endChanneling();
-		}
-		Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
-		if (regrowth != null) {
-			regrowth.remove();
-		}
-		AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
-		if (angeredSpirits != null) {
-			angeredSpirits.onSlotChange();
-		}
-		EnergyBurst energyBurst = EnergyBurst.getActiveInstance(e.getPlayer().getUniqueId());
-		if (energyBurst != null) {
-			energyBurst.onSlotChange();
-		}
-		CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
-		if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
-			combustionStrike.cancelInstantly();
-		}
-		MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
-		if (magmaGlaives != null) {
-			if (magmaGlaives.getPhase() == MagmaGlaives.Phase.CHARGING) {
-				magmaGlaives.cancelInstantly();
-			} else {
-				magmaGlaives.endWithCooldown();
-			}
-		}
-		// Slot changes during CHARGING cancel the ability
-		MoltenBlast moltenBlastSlot = MoltenBlast.getActiveInstance(e.getPlayer().getUniqueId());
-		if (moltenBlastSlot != null && moltenBlastSlot.getPhase() == MoltenBlast.Phase.CHARGING) {
-			moltenBlastSlot.cancelInstantly();
-		}
-		Eruption eruption = Eruption.getActiveInstance(e.getPlayer().getUniqueId());
-		if (eruption != null) {
-			if (eruption.getPhase() == Eruption.Phase.SOURCING) {
-				eruption.cancelInstantly();
-			} else {
-				eruption.endWithCooldown();
-			}
-		}
-		MagmaWave.clearPendingSource(e.getPlayer().getUniqueId());
-		MagmaWave magmaWave = MagmaWave.getActiveInstance(e.getPlayer().getUniqueId());
-		if (magmaWave != null) {
-			magmaWave.endWithCooldown();
-		}
-		CableWhip cableWhip = CableWhip.getActiveInstance(e.getPlayer().getUniqueId());
-		if (cableWhip != null) {
-			if (cableWhip.getWhipsDone() > 0) {
-				cableWhip.endWithCooldown();
-			} else {
-				cableWhip.cancelInstantly();
-			}
-		}
-		MetalShred metalShred = MetalShred.getActiveInstance(e.getPlayer().getUniqueId());
-		if (metalShred != null) {
-			if (metalShred.getPhase() == MetalShred.Phase.FIRING
-					|| metalShred.getPhase() == MetalShred.Phase.STAYING) {
-				metalShred.endWithCooldown();
-			} else {
-				metalShred.cancelInstantly();
-			}
-		}
-		MetalShots metalShots = MetalShots.getActiveInstance(e.getPlayer().getUniqueId());
-		if (metalShots != null) {
-			metalShots.endWithCooldown();
-		}
-		MetalBlade metalBlade = MetalBlade.getActiveInstance(e.getPlayer().getUniqueId());
-		if (metalBlade != null) {
-			if (metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
-				metalBlade.cancelInstantly();
-			} else {
-				metalBlade.endWithCooldown();
-			}
-		}
-		CableThrash cableThrash = CableThrash.getActiveInstance(e.getPlayer().getUniqueId());
-		if (cableThrash != null) {
-			cableThrash.endWithCooldown();
-		}
-		BloodGrip bloodGrip = BloodGrip.getActiveInstance(e.getPlayer().getUniqueId());
-		if (bloodGrip != null) {
-			bloodGrip.endWithCooldown();
-		}
-		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(e.getPlayer().getUniqueId());
-		if (bloodFreeze != null) {
-			if (bloodFreeze.getPhase() == BloodFreeze.Phase.CHARGING) {
-				bloodFreeze.remove();
-			} else {
-				bloodFreeze.endWithCooldown();
-			}
-		}
-		Disalignment disalignment = Disalignment.getActiveInstance(e.getPlayer().getUniqueId());
-		if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
-			disalignment.remove();
-		}
-		LifeRip lifeRip = LifeRip.getActiveInstance(e.getPlayer().getUniqueId());
-		if (lifeRip != null) {
-			lifeRip.remove();
-		}
-		SandWave.clearPendingSource(e.getPlayer().getUniqueId());
-		HealingHelix.clearPendingSource(e.getPlayer().getUniqueId());
-		CorruptingHelix.clearPendingSource(e.getPlayer().getUniqueId());
-
-		Burial burial = Burial.getActiveInstance(e.getPlayer().getUniqueId());
-		if (burial != null && burial.getPhase() == Burial.Phase.CASTING) {
-			burial.cancelInstantly();
-		}
-	}
-
-	/**
-	 * Locks XYZ for any ability that roots the player in place.
-	 */
-	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-	public void onPlayerMoveRooted(PlayerMoveEvent e) {
-		Player player = e.getPlayer();
-		UUID uuid = player.getUniqueId();
-
-		Sandstorm sandstorm = Sandstorm.getActiveInstance(uuid);
-		IceShards iceShards = IceShards.getActiveInstance(uuid);
-		boolean rooted = (sandstorm != null && sandstorm.isCasting())
-				|| (iceShards != null && iceShards.isCharging());
-
-		if (!rooted) return;
-		lockXYZ(e);
-	}
-
-	/** Snaps the player's XYZ back to the event's from-location while preserving head rotation. */
-	private static void lockXYZ(PlayerMoveEvent e) {
-		Location to = e.getTo();
-		if (to == null) return;
-		Location from = e.getFrom();
-		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) return;
-		Location locked = from.clone();
-		locked.setYaw(to.getYaw());
-		locked.setPitch(to.getPitch());
-		e.setTo(locked);
-	}
-
-
-	/**
-	 * Prevents the projecting player from dealing any melee or projectile damage.
-	 * Their sub-abilities use living.damage() directly and are unaffected by this.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onDamageByProjector(EntityDamageByEntityEvent e) {
-		Entity damager = e.getDamager();
-		Player attacker = null;
-
-		if (damager instanceof Player p) {
-			attacker = p;
-		} else if (damager instanceof Projectile proj && proj.getShooter() instanceof Player p) {
-			attacker = p;
-		}
-
-		if (attacker != null && AstralProjection.isProjecting(attacker.getUniqueId())
-				&& !AstralProjection.isSubAbilityDamaging(attacker.getUniqueId())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Blocks FireJet from receiving a cooldown while the player is in JetFumes FLYING phase.
-	 * Every PK addCooldown() call fires this cancellable event, so this intercepts all sources
-	 * (combo manager, CoreAbility.remove(), etc.) without any timing fragility.
-	 * endFlight() switches phase to DISPERSING before applying the real cooldown, so that
-	 * call is unaffected. remove() clears ACTIVE_INSTANCES before applying cooldowns, so
-	 * death/disconnect edge cases are also unaffected.
-	 */
-	@EventHandler
-	public void onFireJetCooldownDuringJetFumes(PlayerCooldownChangeEvent e) {
-		if (!e.getAbility().equalsIgnoreCase("FireJet")) return;
-		if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) return;
-		if (!e.isOnline()) return;
-		Player player = (Player) e.getPlayer();
-		JetFumes jf = JetFumes.getActiveInstance(player.getUniqueId());
-		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) return;
-		e.setCancelled(true);
-	}
-
-	/**
-	 * Ends an active BloodGrip immediately when the caster takes any damage while casting
-	 * or controlling, applying the cooldown and freeing the controlled target.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onBloodGripCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-		BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
-		if (bloodGrip != null) {
-			bloodGrip.cancelFromDamage();
-		}
-	}
-
-	/**
-	 * Ends an active BloodFreeze immediately when the caster takes any damage while casting,
-	 * applying the cooldown and releasing the frozen target.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onBloodFreezeCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-		BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
-		if (bloodFreeze != null) {
-			bloodFreeze.cancelFromDamage();
-		}
-	}
-
-	/**
-	 * Suppresses vanilla suffocation damage for entities currently buried by Burial.
-	 * Manual ticking damage is applied by the ability itself instead.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onBurialSuffocation(final EntityDamageEvent e) {
-		if (e.getCause() != EntityDamageEvent.DamageCause.SUFFOCATION) {
-			return;
-		}
-		if (Burial.isBuried(e.getEntity().getUniqueId())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Cancels an active LifeRip immediately when the user takes damage.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onLifeRipCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-		LifeRip lifeRip = LifeRip.getActiveInstance(player.getUniqueId());
-		if (lifeRip != null) {
-			lifeRip.cancelFromDamage();
-		}
-	}
-
-	/**
-	 * Cancels a Disalignment charge or charged state when the caster takes damage. Has no effect
-	 * once the disalignment has been applied, as the effect persists independently of the caster.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onDisalignmentCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-		Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
-		if (disalignment != null) {
-			disalignment.cancelFromDamage();
-		}
-	}
-
-	/**
-	 * Ends HealingHelix or CorruptingHelix immediately when the caster takes any damage
-	 * while casting, applying the cooldown.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onHelixCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-		HealingHelix healingHelix = HealingHelix.getActiveInstance(player.getUniqueId());
-		if (healingHelix != null) {
-			healingHelix.cancelFromDamage();
-			return;
-		}
-		CorruptingHelix corruptingHelix = CorruptingHelix.getActiveInstance(player.getUniqueId());
-		if (corruptingHelix != null) {
-			corruptingHelix.cancelFromDamage();
-		}
-	}
-
-	/**
-	 * Suppresses lava and fire damage for the Eruption caster throughout the ability,
-	 * and for enemy entities that are still within the geyser's ground footprint while
-	 * the column is actively rising. Once entities are airborne and the column is gone
-	 * the suppression ends, so natural lava damage from other sources is unaffected.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onEruptionLavaDamage(EntityDamageEvent e) {
-		EntityDamageEvent.DamageCause cause = e.getCause();
-		if (cause != EntityDamageEvent.DamageCause.LAVA
-				&& cause != EntityDamageEvent.DamageCause.FIRE
-				&& cause != EntityDamageEvent.DamageCause.FIRE_TICK
-				&& cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
-			return;
-		}
-		if (!(e.getEntity() instanceof LivingEntity entity)) {
-			return;
-		}
-		for (Eruption eruption : Eruption.getActiveInstances().values()) {
-			if (eruption.isLavaProtected(entity)) {
-				e.setCancelled(true);
-				return;
-			}
-		}
-	}
-
-	/**
-	 * Cancels fire and lava damage to the JetFumes caster while they are in flight.
-	 * The ability starts near a fire/lava source, so without this the player would
-	 * immediately take environmental fire damage the moment the ability activates.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onJetFumesFireDamage(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player p)) return;
-		JetFumes jf = JetFumes.getActiveInstance(p.getUniqueId());
-		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) return;
-		EntityDamageEvent.DamageCause cause = e.getCause();
-		if (cause == EntityDamageEvent.DamageCause.FIRE
-				|| cause == EntityDamageEvent.DamageCause.FIRE_TICK
-				|| cause == EntityDamageEvent.DamageCause.LAVA
-				|| cause == EntityDamageEvent.DamageCause.HOT_FLOOR) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Restores armor from PDC when the player joins, covering the case where the
-	 * server crashed while the player was mid-projection (so endAbility never ran).
-	 */
-	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		AstralProjection.restoreArmorFromPdc(e.getPlayer());
-		HealingHelix.cleanupOrphanedAbsorption(e.getPlayer());
-	}
-
-	/**
-	 * When a mannequin belonging to a projection is damaged, the damage is transferred
-	 * to the projecting player and the projection ends.
-	 */
-	@EventHandler
-	public void onMannequinDamage(final EntityDamageEvent e) {
-		if (e.getEntityType() != EntityType.MANNEQUIN) {
-			return;
-		}
-		if (e.getCause() == EntityDamageEvent.DamageCause.KILL) {
-			return;
-		}
-
-		UUID projectorUuid = null;
-		for (UUID uuid : AstralProjection.getActiveProjections().keySet()) {
-			AstralProjection projection = AstralProjection.getActiveProjection(uuid);
-			if (projection.getMannequin() != null && projection.getMannequin().equals(e.getEntity())) {
-				projectorUuid = uuid;
-				break;
-			}
-		}
-
-		if (projectorUuid == null) {
-			return;
-		}
-
-		double damage = e.getFinalDamage();
-		e.setDamage(0);
-
-		AstralProjection projection = AstralProjection.getActiveProjection(projectorUuid);
-		if (projection != null) {
-			projection.endAbilityWithDamage(damage);
-		}
-	}
-
-	/**
-	 * Cancels commands while the player is astral projecting.
-	 */
-	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent e) {
-		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
-		}
-	}
-
-	/**
-	 * Cancels all block interactions while the player is astral projecting or has VineWhip active.
-	 * Also handles Sandstorm source-block selection on left-click.
-	 * Sub-ability activation uses PlayerAnimationEvent and is unaffected.
-	 */
-	@EventHandler
-	public void onInteract(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-
-		if (AstralProjection.isProjecting(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (BloodGrip.isControlled(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (VineWhip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Regrowth.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Eruption.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (CableWhip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MetalShred.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (LifeRip.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Jolt.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
-		if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
-			e.setCancelled(true);
-			return;
-		}
-		if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (MetalShots.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-		if (Burial.hasActiveInstance(player.getUniqueId())) {
-			e.setCancelled(true);
-			return;
-		}
-
-		// Sandstorm: left-clicking a sandbendable block selects the source
-		if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock() != null) {
-			BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-			if (bendingPlayer != null
-					&& bendingPlayer.getBoundAbilityName().equalsIgnoreCase("sandstorm")
-					&& EarthAbility.isSandbendable(player, e.getClickedBlock().getType())
-					&& !Sandstorm.hasActiveInstance(player.getUniqueId())) {
-				new Sandstorm(player, e.getClickedBlock());
-			}
-		}
-	}
-
-	/**
-	 * Cancels inventory clicks while the player is astral projecting.
-	 */
-	@EventHandler
-	public void onInteract(InventoryClickEvent e) {
-		if (e.getWhoClicked() instanceof Player player && AstralProjection.isProjecting(player.getUniqueId())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Cancels item drops while the player is astral projecting.
-	 */
-	@EventHandler
-	public void onDropItem(PlayerDropItemEvent e) {
-		if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Ends the projection cleanly if the player dies while projecting.
-	 */
-	@EventHandler
-	public void onDeath(PlayerDeathEvent e) {
-		Player player = e.getPlayer();
-		if (AstralProjection.isProjecting(player.getUniqueId())) {
-			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
-		}
-		SandWave.clearPendingSource(player.getUniqueId());
-		MagmaWave.clearPendingSource(player.getUniqueId());
-		HealingHelix.clearPendingSource(player.getUniqueId());
-		CorruptingHelix.clearPendingSource(player.getUniqueId());
-		Jolt.clearPendingCharge(player.getUniqueId());
-		LifeRip.resetTargetDrain(player);
-		LifeRip.resetCasterGain(player);
-	}
-
-	/**
-	 * Removes any LifeRip health bonus from a player when they enter the arena world.
-	 * Arena fights should always start on a level playing field.
-	 */
-	@EventHandler
-	public void onWorldChange(PlayerChangedWorldEvent e) {
-		if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
-			LifeRip.resetCasterGain(e.getPlayer());
-		}
-	}
-
-	/**
-	 * Ends the projection when the player disconnects.
-	 */
-	@EventHandler
-	public void onDisconnect(PlayerQuitEvent e) {
-		Player player = e.getPlayer();
-		if (AstralProjection.isProjecting(player.getUniqueId())) {
-			AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
-		}
-		SandWave.clearPendingSource(player.getUniqueId());
-		MagmaWave.clearPendingSource(player.getUniqueId());
-		HealingHelix.clearPendingSource(player.getUniqueId());
-		CorruptingHelix.clearPendingSource(player.getUniqueId());
-		Jolt.clearPendingCharge(player.getUniqueId());
-		DaggerVolley.resetStage(player.getUniqueId());
-	}
-
-	/**
-	 * Enforces owner-only pickup for iron ingots fired by MetalStrips. Any player other than the
-	 * caster who tagged the item is prevented from collecting it. When the owner steps on their
-	 * own ingot, it is removed from the MetalStrips tracking map so it is no longer subject to recall.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onPickupMetalStrip(final EntityPickupItemEvent e) {
-		if (!(e.getEntity() instanceof Player player)) return;
-
-		final String ownerUuid = e.getItem().getPersistentDataContainer().get(
-				MetalStrips.getStripOwnerKey(), PersistentDataType.STRING);
-		if (ownerUuid == null) return;
-
-		if (!player.getUniqueId().toString().equals(ownerUuid)) {
-			e.setCancelled(true);
-			return;
-		}
-
-		// Owner is collecting their ingot — swap the tagged stack for a clean iron ingot before
-		// the pickup completes so the player never receives the internal instance-ID metadata.
-		e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
-		MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
-	}
-
-	private static final double[] RANK_DAMAGE_MULTIPLIERS = { 1.0, 1.05, 1.15, 1.3, 1.5, 1.75, 2.0, 2.25, 2.5 };
-
-	/**
-	 * Scales bending damage based on the caster's rank.
-	 * Peasant (rank 0) deals 1x damage, scaling up to 2.5x at Emperor (rank 8).
-	 */
-	@EventHandler
-	public void onRankBendingDamage(AbilityDamageEntityEvent e) {
-		Player p = e.getAbility().getPlayer();
-		if (p == null) return;
-
-		AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(p.getUniqueId());
-		if (ap == null) return;
-
-		int rank = ap.getRank();
-		if (rank <= 0) return;
-
-		double multiplier = RANK_DAMAGE_MULTIPLIERS[Math.min(rank, RANK_DAMAGE_MULTIPLIERS.length - 1)];
-		e.setDamage(e.getDamage() * multiplier);
-	}
-
-	/**
-	 * Applies the Amplification damage multiplier to all hits from the SoundAbility that consumed the buff.
-	 * The multiplier is locked in on first contact and reused for every subsequent hit from the same cast.
-	 */
-	@EventHandler
-	public void onAmplificationDamage(AbilityDamageEntityEvent e) {
-		Ability ability = e.getAbility();
-		if (!(ability instanceof SoundAbility)) return;
-		if (ability instanceof Amplification) return;
-
-		Player p = ability.getPlayer();
-		if (p == null) return;
-
-		Amplification amp = Amplification.getActiveAmplification(p);
-		if (amp == null) return;
-
-		amp.applyMultiplier(e);
-	}
-
-	/**
-	 * Cancels vanilla arrow damage for DaggerThrow projectiles and applies the fixed damage
-	 * value through ProjectKorra's pipeline so that region protection is respected.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onDaggerThrowArrowHit(final EntityDamageByEntityEvent e) {
-		if (!(e.getDamager() instanceof AbstractArrow arrow)) return;
-		if (!arrow.hasMetadata("daggerthrow")) return;
-		if (!(e.getEntity() instanceof LivingEntity target)) return;
-		if (!(arrow.getShooter() instanceof Player shooter)) return;
-
-		e.setCancelled(true);
-
-		final DaggerThrow dt = CoreAbility.getAbility(shooter, DaggerThrow.class);
-		if (dt == null) {
-			arrow.remove();
-			return;
-		}
-		dt.damageEntityFromArrow(target, arrow);
-	}
-
-	/**
-	 * Cancels vanilla arrow damage for DaggerVolley projectiles and replaces it with the
-	 * per-arrow damage roll so that region protection and rank scaling are applied through
-	 * ProjectKorra's standard pipeline.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onDaggerVolleyArrowHit(final EntityDamageByEntityEvent e) {
-		if (!(e.getDamager() instanceof AbstractArrow arrow)) return;
-		if (!arrow.hasMetadata("daggervolley")) return;
-		if (!(e.getEntity() instanceof LivingEntity target)) return;
-		if (!(arrow.getShooter() instanceof Player shooter)) return;
-
-		e.setCancelled(true);
-
-		final DaggerVolley dv = CoreAbility.getAbility(shooter, DaggerVolley.class);
-		if (dv == null) {
-			// Ability already ended (all other arrows resolved); discard without dealing damage.
-			arrow.remove();
-			return;
-		}
-		dv.damageEntityFromArrow(target, arrow);
-	}
-
-	/**
-	 * Suppresses lava and fire damage for the MagmaWave caster throughout the ability,
-	 * and for enemy entities that remain within the active wave's footprint.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onMagmaWaveLavaDamage(EntityDamageEvent e) {
-		EntityDamageEvent.DamageCause cause = e.getCause();
-		if (cause != EntityDamageEvent.DamageCause.LAVA
-				&& cause != EntityDamageEvent.DamageCause.FIRE
-				&& cause != EntityDamageEvent.DamageCause.FIRE_TICK
-				&& cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
-			return;
-		}
-		if (!(e.getEntity() instanceof LivingEntity entity)) {
-			return;
-		}
-		for (MagmaWave wave : MagmaWave.getActiveInstances().values()) {
-			if (wave.isLavaProtected(entity)) {
-				e.setCancelled(true);
-				return;
-			}
-		}
-	}
-
-	/**
-	 * Prevents wave lava blocks from flowing to adjacent blocks.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onMagmaWaveBlockFromTo(final BlockFromToEvent e) {
-		if (e.getBlock().getType() != Material.LAVA) {
-			return;
-		}
-		if (MagmaWave.isWaveBlock(e.getBlock())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Suppresses physics updates on wave lava blocks so their placed levels remain stable.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onMagmaWaveBlockPhysics(final BlockPhysicsEvent e) {
-		if (e.getBlock().getType() != Material.LAVA) {
-			return;
-		}
-		if (MagmaWave.isWaveBlock(e.getBlock())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Prevents MoltenBlast ball lava blocks from flowing to adjacent blocks.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onMoltenBlastBlockFromTo(final BlockFromToEvent e) {
-		if (e.getBlock().getType() != Material.LAVA) {
-			return;
-		}
-		if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Suppresses physics updates on MoltenBlast ball lava blocks so their level remains stable.
-	 */
-	@EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-	public void onMoltenBlastBlockPhysics(final BlockPhysicsEvent e) {
-		if (e.getBlock().getType() != Material.LAVA) {
-			return;
-		}
-		if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
-			e.setCancelled(true);
-		}
-	}
-
-	/**
-	 * Applies MetalBlade's melee buff when the player punches a living entity while the blade is
-	 * ready. The vanilla damage is replaced entirely by the ability's damage so that region
-	 * protection and rank scaling are applied through ProjectKorra's standard pipeline.
-	 */
-	@EventHandler(ignoreCancelled = true)
-	public void onMetalBladeMeleeHit(final EntityDamageByEntityEvent e) {
-		if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
-			return;
-		}
-		if (!(e.getDamager() instanceof Player player)) {
+            final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
+            final double r = 12; // domeRadius + 2
+            if (loc.distanceSquared(centre) <= r * r) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerSneak(final PlayerToggleSneakEvent e) {
+        Player player = e.getPlayer();
+        BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bendingPlayer == null) {
+            return;
+        }
+
+        CoreAbility ability = bendingPlayer.getBoundAbility();
+        String abilityName = bendingPlayer.getBoundAbilityName();
+
+        // Sneak press during FIRING — cancel so PK cannot activate IceSpike via SHIFT_DOWN
+        if (e.isSneaking()) {
+            IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+            if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.FIRING) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+
+        // Sneak release
+        if (!e.isSneaking()) {
+            IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+            if (iceDiscs != null && iceDiscs.getPhase() == IceDiscs.Phase.CHARGING) {
+                iceDiscs.cancelWithCooldown();
+                return;
+            }
+            MoltenBlast moltenBlastSneak = MoltenBlast.getActiveInstance(player.getUniqueId());
+            if (moltenBlastSneak != null) {
+                MoltenBlast.Phase p = moltenBlastSneak.getPhase();
+                if (p == MoltenBlast.Phase.CHARGING || p == MoltenBlast.Phase.GRABBED) {
+                    moltenBlastSneak.onSneakRelease();
+                    return;
+                }
+            }
+            if (abilityName.equalsIgnoreCase("earthsmash")) {
+                MoltenBlast.markEarthSmashSneak(player.getUniqueId());
+            }
+        }
+
+        if (e.isSneaking() && player.getGameMode() == GameMode.SURVIVAL) {
+            if (BloodGrip.isControlled(player.getUniqueId())) {
+                e.setCancelled(true);
+                return;
+            }
+            if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
+                return;
+            }
+
+            // Airbending
+            if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
+                if (ability instanceof SpiritualAbility) {
+                    if (abilityName.equalsIgnoreCase("astralprojection")) {
+                        // Guard: do not start a new projection while already projecting
+                        if (!AstralProjection.isProjecting(player.getUniqueId())) {
+                            new AstralProjection(e.getPlayer());
+                        }
+                    } else if (abilityName.equalsIgnoreCase("astralshot")) {
+                        new AstralShot(player);
+                    } else if (abilityName.equalsIgnoreCase("angeredspirits")) {
+                        if (!AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
+                            new AngeredSpirits(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("energyburst")) {
+                        if (!EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+                            new EnergyBurst(player);
+                        }
+                    }
+                } else if (ability instanceof SoundAbility) {
+                    if (abilityName.equalsIgnoreCase("sonicboom")) {
+                        new SonicBoom(player);
+                    } else if (abilityName.equalsIgnoreCase("amplification")) {
+                        if (!CoreAbility.hasAbility(player, Amplification.class)) {
+                            new Amplification(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("deafeningscream")) {
+                        if (!CoreAbility.hasAbility(player, DeafeningScream.class)) {
+                            new DeafeningScream(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("sonicpulse")) {
+                        if (!CoreAbility.hasAbility(player, SonicPulse.class)) {
+                            new SonicPulse(player);
+                        }
+                    }
+                }
+            }
+            // Waterbending
+            else if (ability instanceof WaterAbility && bendingPlayer.isElementToggled(Element.WATER)) {
+                if (ability instanceof HealingAbility) {
+                    if (abilityName.equalsIgnoreCase("healinghelix")) {
+                        if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
+                            new HealingHelix(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("corruptinghelix")) {
+                        if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
+                            new CorruptingHelix(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("mendingwaters")) {
+                        if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
+                            new MendingWaters(player);
+                        }
+                    }
+                } else if (ability instanceof BloodAbility) {
+                    if (abilityName.equalsIgnoreCase("bloodgrip")) {
+                        if (!BloodGrip.hasActiveInstance(player.getUniqueId())) {
+                            new BloodGrip(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("bloodfreeze")) {
+                        if (!BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+                            new BloodFreeze(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("disalignment")) {
+                        if (!Disalignment.hasActiveInstance(player.getUniqueId())) {
+                            new Disalignment(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("liferip")) {
+                        if (!LifeRip.hasActiveInstance(player.getUniqueId())) {
+                            new LifeRip(player);
+                        }
+                    }
+                } else if (ability instanceof PlantAbility) {
+                    if (abilityName.equalsIgnoreCase("vinewhip")) {
+                        // Guard: only one active instance per player
+                        if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
+                            new VineWhip(e.getPlayer());
+                        }
+                    } else if (abilityName.equalsIgnoreCase("razorleaves")) {
+                        RazorLeaves existing = RazorLeaves.getActiveInstance(player.getUniqueId());
+                        if (existing == null) {
+                            new RazorLeaves(player);
+                        } else {
+                            // Re-source in SOURCED phase; ignored in CASTING phase
+                            existing.onSneak();
+                        }
+                    } else if (abilityName.equalsIgnoreCase("toxicspores")) {
+                        if (!ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+                            new ToxicSpores(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("regrowth")) {
+                        if (!Regrowth.hasActiveInstance(player.getUniqueId())) {
+                            new Regrowth(player);
+                        }
+                    }
+                }
+            }
+            // Firebending
+            else if (ability instanceof FireAbility && bendingPlayer.isElementToggled(Element.FIRE)) {
+                if (abilityName.equalsIgnoreCase("barrage")) {
+                    if (!Barrage.hasActiveInstance(player.getUniqueId())) {
+                        new Barrage(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("combustionstrike")) {
+                    if (!CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+                        new CombustionStrike(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("noxiousfumes")) {
+                    if (!NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
+                        new NoxiousFumes(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("jolt")) {
+                    if (!Jolt.hasActiveInstance(player.getUniqueId())) {
+                        Jolt.markPendingCharge(player.getUniqueId());
+                        new Jolt(player);
+                    }
+                }
+            }
+            // Earthbending
+            else if (ability instanceof EarthAbility && bendingPlayer.isElementToggled(Element.EARTH)) {
+                if (ability instanceof SandAbility) {
+                    if (abilityName.equalsIgnoreCase("sandstorm")) {
+                        Sandstorm sandstorm = Sandstorm.getActiveInstance(player.getUniqueId());
+                        if (sandstorm != null) {
+                            sandstorm.startCasting();
+                        }
+                    } else if (abilityName.equalsIgnoreCase("sandwave")) {
+                        if (!SandWave.hasActiveInstance(player.getUniqueId())) {
+                            org.bukkit.block.Block target = player.getTargetBlock(null, 5);
+                            if (target != null && EarthAbility.isSandbendable(player, target.getType())) {
+                                SandWave.setPendingSource(player.getUniqueId(), target);
+                            }
+                        }
+                    }
+                } else if (ability instanceof LavaAbility) {
+                    if (abilityName.equalsIgnoreCase("magmaglaives")) {
+                        if (!MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
+                            new MagmaGlaives(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("eruption")) {
+                        if (!Eruption.hasActiveInstance(player.getUniqueId())) {
+                            new Eruption(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("magmawave")) {
+                        // Tap sneak selects a nearby lava source; left-click fires the wave.
+                        if (!MagmaWave.hasActiveInstance(player.getUniqueId())
+                                && !bendingPlayer.isOnCooldown("MagmaWave")) {
+                            MagmaWave.trySelectSource(player);
+                        }
+                    } else if (abilityName.equalsIgnoreCase("lavaflow")) {
+                        // MoltenBlast sneak-press path: player held sneak on EarthSmash, released it
+                        // (or switched first), then presses sneak again on LavaFlow within the window.
+                        // This is the reliable fallback when no slot-change-while-sneaking event fired.
+                        if (!MoltenBlast.hasActiveInstance(player.getUniqueId())
+                                && MoltenBlast.hasRecentEarthSmashSneak(player.getUniqueId())) {
+                            new MoltenBlast(player);
+                            return;
+                        }
+                    } else if (abilityName.equalsIgnoreCase("lavathrow")) {
+                        MoltenBlast moltenBlastGrab = MoltenBlast.getActiveInstance(player.getUniqueId());
+                        if (moltenBlastGrab != null && moltenBlastGrab.getPhase() == MoltenBlast.Phase.LIFTED) {
+                            moltenBlastGrab.grab();
+                            return;
+                        }
+                    }
+                } else if (abilityName.equalsIgnoreCase("cablewhip")) {
+                    if (!CableWhip.hasActiveInstance(player.getUniqueId())) {
+                        new CableWhip(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("metalshred")) {
+                    if (!MetalShred.hasActiveInstance(player.getUniqueId())) {
+                        new MetalShred(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("metalstrips")) {
+                    MetalStrips.startRecall(player);
+                } else if (abilityName.equalsIgnoreCase("metalshots")) {
+                    MetalShots existing = MetalShots.getActiveInstance(player.getUniqueId());
+                    if (existing != null) {
+                        existing.onSneak();
+                    } else {
+                        new MetalShots(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("metalblade")) {
+                    if (!MetalBlade.hasActiveInstance(player.getUniqueId())) {
+                        new MetalBlade(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("cablethrash")) {
+                    if (!CableThrash.hasActiveInstance(player.getUniqueId())) {
+                        new CableThrash(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("earthtunnel") || abilityName.equalsIgnoreCase("collapse")) {
+                    e.setCancelled(AranarthBendingUtils.preventAbilityNearDominion(player));
+                }
+            }
+            // Chiblocking
+            else if (ability instanceof ChiAbility) {
+                if (abilityName.equalsIgnoreCase("highjump") && !HighJump.hasActiveInstance(player.getUniqueId())) {
+                    boolean isOnGround = player.getLocation().getBlock()
+                            .getRelative(BlockFace.DOWN).getType().isSolid();
+                    if (isOnGround) {
+                        new HighJump(player, HighJump.JumpType.EVADE);
+                    } else {
+                        new HighJump(player, HighJump.JumpType.DOUBLEJUMP);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles left-click activation for AstralProjection sub-abilities and VineWhip firing.
+     */
+    @EventHandler
+    public void onLeftClick(PlayerAnimationEvent e) {
+        if (e.getAnimationType() != PlayerAnimationType.ARM_SWING) {
+            return;
+        }
+        Player player = e.getPlayer();
+
+        if (BloodGrip.isControlled(player.getUniqueId())) {
+            return;
+        }
+
+        // AstralProjection sub-ability activation (Slot 0 = Aura, 1 = Scream, 2 = Possess)
+        if (AstralProjection.isProjecting(player.getUniqueId())) {
+            AstralProjection projection = AstralProjection.getActiveProjection(player.getUniqueId());
+            switch (player.getInventory().getHeldItemSlot()) {
+                case 0 -> projection.activateAura();
+                case 1 -> projection.activateScream();
+                case 2 -> projection.activatePossess();
+            }
+            return;
+        }
+
+        // BloodGrip: left-click while controlling flings the target in the look direction
+        BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
+        if (bloodGrip != null) {
+            bloodGrip.onLeftClick();
+            return;
+        }
+
+        // Disalignment: left-click while charged applies the disalignment to the target
+        Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+        if (disalignment != null) {
+            disalignment.onLeftClick();
+            return;
+        }
+
+        // CableWhip: left-click while ready cracks one whip in the current look direction
+        CableWhip cableWhip = CableWhip.getActiveInstance(player.getUniqueId());
+        if (cableWhip != null) {
+            cableWhip.onLeftClick();
+            return;
+        }
+
+        // MetalShred: left-click while sourced fires the coil toward the look direction
+        MetalShred metalShred = MetalShred.getActiveInstance(player.getUniqueId());
+        if (metalShred != null) {
+            metalShred.onLeftClick();
+            return;
+        }
+
+        // VineWhip: left-click while selecting fires the vine
+        VineWhip vineWhip = VineWhip.getActiveInstance(player.getUniqueId());
+        if (vineWhip != null) {
+            vineWhip.onLeftClick();
+            return;
+        }
+
+        // RazorLeaves: left-click fires a leaf in the player's current look direction
+        RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(player.getUniqueId());
+        if (razorLeaves != null) {
+            razorLeaves.onLeftClick();
+            return;
+        }
+
+        // JetFumes: left-click cancels active flight
+        JetFumes jetFumes = JetFumes.getActiveInstance(player.getUniqueId());
+        if (jetFumes != null) {
+            jetFumes.onLeftClick();
+            return;
+        }
+
+        // NoxiousFumes: left-click begins channeling from the READY state
+        NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(player.getUniqueId());
+        if (noxiousFumes != null) {
+            noxiousFumes.startChanneling();
+            return;
+        }
+
+        // ToxicSpores: left-click begins channeling from the READY state
+        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(player.getUniqueId());
+        if (toxicSpores != null) {
+            toxicSpores.startChanneling();
+            return;
+        }
+
+        // IceShards: left-click fires the charged shards
+        IceShards iceShards = IceShards.getActiveInstance(player.getUniqueId());
+        if (iceShards != null) {
+            iceShards.fire();
+            return;
+        }
+
+        // IceDiscs: left-click fires the next disc from the pillar
+        IceDiscs iceDiscs = IceDiscs.getActiveInstance(player.getUniqueId());
+        if (iceDiscs != null) {
+            iceDiscs.fireDisc();
+            return;
+        }
+
+        // AngeredSpirits: left-click fires the next spirit during the firing window
+        AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(player.getUniqueId());
+        if (angeredSpirits != null) {
+            angeredSpirits.onLeftClick();
+            return;
+        }
+
+        // Eruption: left-click during SOURCING confirms the target and begins the warm-up.
+        Eruption eruption = Eruption.getActiveInstance(player.getUniqueId());
+        if (eruption != null) {
+            eruption.onLeftClick();
+            return;
+        }
+
+        // MagmaWave: left-click fires the wave from the previously-tapped lava source.
+        if (MagmaWave.hasPendingSource(player.getUniqueId())
+                && !MagmaWave.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpMagmaWave = BendingPlayer.getBendingPlayer(player);
+            if (bpMagmaWave != null && bpMagmaWave.getBoundAbilityName().equalsIgnoreCase("magmawave")) {
+                new MagmaWave(player);
+                return;
+            }
+        }
+
+        // MagmaGlaives: left-click fires the next glaive (right first, then left)
+        MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(player.getUniqueId());
+        if (magmaGlaives != null) {
+            magmaGlaives.onLeftClick();
+            return;
+        }
+
+        // MoltenBlast: left-click with LavaThrow equipped fires the heated ball
+        MoltenBlast moltenBlast = MoltenBlast.getActiveInstance(player.getUniqueId());
+        if (moltenBlast != null) {
+            moltenBlast.fire();
+            return;
+        }
+
+        // MetalShots: left-click fires a projectile from the first available floating source block
+        MetalShots metalShots = MetalShots.getActiveInstance(player.getUniqueId());
+        if (metalShots != null) {
+            metalShots.onLeftClick();
+            return;
+        }
+
+        // HighJump: left-click to jump straight up (or lunge forward while sprinting/in water)
+        BendingPlayer bpChi = BendingPlayer.getBendingPlayer(player);
+        if (bpChi != null && bpChi.getBoundAbilityName().equalsIgnoreCase("highjump")
+                && !HighJump.hasActiveInstance(player.getUniqueId())) {
+            if (player.isSprinting() || player.isInWater()) {
+                new HighJump(player, HighJump.JumpType.LUNGE);
+            } else {
+                new HighJump(player, HighJump.JumpType.JUMP);
+            }
+            return;
+        }
+
+        // Jolt: left-click fires the charged lightning bolt
+        Jolt jolt = Jolt.getActiveInstance(player.getUniqueId());
+        if (jolt != null) {
+            jolt.onLeftClick();
+            return;
+        }
+
+        // Discharge: left-click fires a branching lightning bolt in the player's look direction
+        BendingPlayer bpDischarge = BendingPlayer.getBendingPlayer(player);
+        if (bpDischarge != null && bpDischarge.getBoundAbilityName().equalsIgnoreCase("discharge")
+                && bpDischarge.isElementToggled(Element.FIRE)
+                && !Discharge.hasActiveInstance(player.getUniqueId())) {
+            new Discharge(player);
+            return;
+        }
+
+        // DaggerThrow: left-click fires one aimed dagger; rapid clicks throw up to 5 in succession
+        BendingPlayer bpDaggerThrow = BendingPlayer.getBendingPlayer(player);
+        if (bpDaggerThrow != null && bpDaggerThrow.getBoundAbilityName().equalsIgnoreCase("daggerthrow")) {
+            new DaggerThrow(player);
+            return;
+        }
+
+        // DaggerVolley: instant left-click fire — advances the 3 → 6 → 9 arrow cycle
+        BendingPlayer bpDaggerVolley = BendingPlayer.getBendingPlayer(player);
+        if (bpDaggerVolley != null && bpDaggerVolley.getBoundAbilityName().equalsIgnoreCase("daggervolley")) {
+            new DaggerVolley(player);
+            return;
+        }
+
+        // MetalStrips: instant left-click fire — one iron ingot per shot
+        BendingPlayer bpMetal = BendingPlayer.getBendingPlayer(player);
+        if (bpMetal != null && bpMetal.getBoundAbilityName().equalsIgnoreCase("metalstrips")
+                && bpMetal.isElementToggled(Element.EARTH)) {
+            MetalStrips.markLeftClick(player.getUniqueId());
+            new MetalStrips(player);
+            return;
+        }
+
+        // SonicClap: instant left-click fire
+        BendingPlayer bpClap = BendingPlayer.getBendingPlayer(player);
+        if (bpClap != null && bpClap.getBoundAbilityName().equalsIgnoreCase("sonicclap")
+                && bpClap.isElementToggled(Element.AIR)) {
+            new SonicClap(player);
+            return;
+        }
+
+        // Burial: left-click while sneaking fires the crevice toward the target
+        BendingPlayer bpBurial = BendingPlayer.getBendingPlayer(player);
+        if (bpBurial != null && bpBurial.getBoundAbilityName().equalsIgnoreCase("burial")
+                && bpBurial.isElementToggled(Element.EARTH)
+                && player.isSneaking()
+                && !Burial.hasActiveInstance(player.getUniqueId())) {
+            new Burial(player);
+            return;
+        }
+
+        // SandWave: left-click launches the wave from a previously sneaked source
+        if (SandWave.hasPendingSource(player.getUniqueId())) {
+            BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
+            if (bp != null && bp.getBoundAbilityName().equalsIgnoreCase("sandwave")
+                    && !SandWave.hasActiveInstance(player.getUniqueId())) {
+                org.bukkit.block.Block sourceBlock = SandWave.getPendingSource(player.getUniqueId());
+                SandWave.clearPendingSource(player.getUniqueId());
+                new SandWave(player, sourceBlock);
+            }
+        }
+
+        // MendingWaters: left-click fires a water projectile while the ability is active
+        MendingWaters mendingWaters = MendingWaters.getActiveInstance(player.getUniqueId());
+        if (mendingWaters != null) {
+            mendingWaters.onLeftClick();
+            return;
+        }
+
+        // HealingHelix: left-click aims at a water/ice/snow block to register it as the source
+        if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
+            if (bpHelix != null && bpHelix.getBoundAbilityName().equalsIgnoreCase("healinghelix")) {
+                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                if (sourceBlock != null) {
+                    HealingHelix.trySelectSource(player, sourceBlock);
+                }
+            }
+        }
+
+        // CorruptingHelix: left-click aims at a water/ice/snow block to register it as the source
+        if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpCorrupting = BendingPlayer.getBendingPlayer(player);
+            if (bpCorrupting != null && bpCorrupting.getBoundAbilityName().equalsIgnoreCase("corruptinghelix")) {
+                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                if (sourceBlock != null) {
+                    CorruptingHelix.trySelectSource(player, sourceBlock);
+                }
+            }
+        }
+
+        // MendingWaters: left-click aims at a water/ice/snow block to register it as the source
+        if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
+            BendingPlayer bpMending = BendingPlayer.getBendingPlayer(player);
+            if (bpMending != null && bpMending.getBoundAbilityName().equalsIgnoreCase("mendingwaters")) {
+                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                if (sourceBlock != null) {
+                    MendingWaters.trySelectSource(player, sourceBlock);
+                }
+            }
+        }
+    }
+
+    /**
+     * Cancels block breaking while an ability is active.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBlockBreak(BlockBreakEvent e) {
+        Player player = e.getPlayer();
+        if (VineWhip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Sandstorm.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (IceShards.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Barrage.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (CombustionStrike.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (NoxiousFumes.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (JetFumes.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Regrowth.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (AngeredSpirits.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (EnergyBurst.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (SandWave.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (Burial.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (Eruption.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (CableWhip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MetalShred.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MetalBlade.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (CableThrash.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (LifeRip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        if (Jolt.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+        Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+        if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Immediately cancels an ability when the player switches to a different ability slot.
+     */
+    @EventHandler
+    public void onSlotChange(PlayerItemHeldEvent e) {
+        if (HealingHelix.hasActiveInstance(e.getPlayer().getUniqueId())
+                || CorruptingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        MendingWaters mendingWatersSlot = MendingWaters.getActiveInstance(e.getPlayer().getUniqueId());
+        if (mendingWatersSlot != null) {
+            mendingWatersSlot.endWithCooldown();
+        }
+        Jolt joltSlot = Jolt.getActiveInstance(e.getPlayer().getUniqueId());
+        if (joltSlot != null) {
+            joltSlot.endWithCooldown();
+        }
+        Jolt.clearPendingCharge(e.getPlayer().getUniqueId());
+        VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
+        if (vineWhip != null) {
+            vineWhip.cancelInstantly();
+        }
+        RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(e.getPlayer().getUniqueId());
+        if (razorLeaves != null) {
+            razorLeaves.endWithCooldown();
+        }
+        Sandstorm sandstorm = Sandstorm.getActiveInstance(e.getPlayer().getUniqueId());
+        if (sandstorm != null) {
+            sandstorm.cancelFromSlotChange();
+        }
+        IceShards iceShards = IceShards.getActiveInstance(e.getPlayer().getUniqueId());
+        if (iceShards != null) {
+            iceShards.remove();
+        }
+        IceDiscs iceDiscs = IceDiscs.getActiveInstance(e.getPlayer().getUniqueId());
+        if (iceDiscs != null) {
+            iceDiscs.cancelWithCooldown();
+        }
+        NoxiousFumes noxiousFumes = NoxiousFumes.getActiveInstance(e.getPlayer().getUniqueId());
+        if (noxiousFumes != null) {
+            noxiousFumes.endChanneling();
+        }
+        ToxicSpores toxicSpores = ToxicSpores.getActiveInstance(e.getPlayer().getUniqueId());
+        if (toxicSpores != null) {
+            toxicSpores.endChanneling();
+        }
+        Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
+        if (regrowth != null) {
+            regrowth.remove();
+        }
+        AngeredSpirits angeredSpirits = AngeredSpirits.getActiveInstance(e.getPlayer().getUniqueId());
+        if (angeredSpirits != null) {
+            angeredSpirits.onSlotChange();
+        }
+        EnergyBurst energyBurst = EnergyBurst.getActiveInstance(e.getPlayer().getUniqueId());
+        if (energyBurst != null) {
+            energyBurst.onSlotChange();
+        }
+        CombustionStrike combustionStrike = CombustionStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (combustionStrike != null && combustionStrike.getPhase() != CombustionStrike.Phase.TRAVELING) {
+            combustionStrike.cancelInstantly();
+        }
+        MagmaGlaives magmaGlaives = MagmaGlaives.getActiveInstance(e.getPlayer().getUniqueId());
+        if (magmaGlaives != null) {
+            if (magmaGlaives.getPhase() == MagmaGlaives.Phase.CHARGING) {
+                magmaGlaives.cancelInstantly();
+            } else {
+                magmaGlaives.endWithCooldown();
+            }
+        }
+        // Slot changes during CHARGING cancel the ability
+        MoltenBlast moltenBlastSlot = MoltenBlast.getActiveInstance(e.getPlayer().getUniqueId());
+        if (moltenBlastSlot != null && moltenBlastSlot.getPhase() == MoltenBlast.Phase.CHARGING) {
+            moltenBlastSlot.cancelInstantly();
+        }
+        Eruption eruption = Eruption.getActiveInstance(e.getPlayer().getUniqueId());
+        if (eruption != null) {
+            if (eruption.getPhase() == Eruption.Phase.SOURCING) {
+                eruption.cancelInstantly();
+            } else {
+                eruption.endWithCooldown();
+            }
+        }
+        MagmaWave.clearPendingSource(e.getPlayer().getUniqueId());
+        MagmaWave magmaWave = MagmaWave.getActiveInstance(e.getPlayer().getUniqueId());
+        if (magmaWave != null) {
+            magmaWave.endWithCooldown();
+        }
+        CableWhip cableWhip = CableWhip.getActiveInstance(e.getPlayer().getUniqueId());
+        if (cableWhip != null) {
+            if (cableWhip.getWhipsDone() > 0) {
+                cableWhip.endWithCooldown();
+            } else {
+                cableWhip.cancelInstantly();
+            }
+        }
+        MetalShred metalShred = MetalShred.getActiveInstance(e.getPlayer().getUniqueId());
+        if (metalShred != null) {
+            if (metalShred.getPhase() == MetalShred.Phase.FIRING
+                    || metalShred.getPhase() == MetalShred.Phase.STAYING) {
+                metalShred.endWithCooldown();
+            } else {
+                metalShred.cancelInstantly();
+            }
+        }
+        MetalShots metalShots = MetalShots.getActiveInstance(e.getPlayer().getUniqueId());
+        if (metalShots != null) {
+            metalShots.endWithCooldown();
+        }
+        MetalBlade metalBlade = MetalBlade.getActiveInstance(e.getPlayer().getUniqueId());
+        if (metalBlade != null) {
+            if (metalBlade.getPhase() == MetalBlade.Phase.CHARGING) {
+                metalBlade.cancelInstantly();
+            } else {
+                metalBlade.endWithCooldown();
+            }
+        }
+        CableThrash cableThrash = CableThrash.getActiveInstance(e.getPlayer().getUniqueId());
+        if (cableThrash != null) {
+            cableThrash.endWithCooldown();
+        }
+        BloodGrip bloodGrip = BloodGrip.getActiveInstance(e.getPlayer().getUniqueId());
+        if (bloodGrip != null) {
+            bloodGrip.endWithCooldown();
+        }
+        BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(e.getPlayer().getUniqueId());
+        if (bloodFreeze != null) {
+            if (bloodFreeze.getPhase() == BloodFreeze.Phase.CHARGING) {
+                bloodFreeze.remove();
+            } else {
+                bloodFreeze.endWithCooldown();
+            }
+        }
+        Disalignment disalignment = Disalignment.getActiveInstance(e.getPlayer().getUniqueId());
+        if (disalignment != null && disalignment.getPhase() != Disalignment.Phase.DISALIGNING) {
+            disalignment.remove();
+        }
+        LifeRip lifeRip = LifeRip.getActiveInstance(e.getPlayer().getUniqueId());
+        if (lifeRip != null) {
+            lifeRip.remove();
+        }
+        SandWave.clearPendingSource(e.getPlayer().getUniqueId());
+        HealingHelix.clearPendingSource(e.getPlayer().getUniqueId());
+        CorruptingHelix.clearPendingSource(e.getPlayer().getUniqueId());
+
+        Burial burial = Burial.getActiveInstance(e.getPlayer().getUniqueId());
+        if (burial != null && burial.getPhase() == Burial.Phase.CASTING) {
+            burial.cancelInstantly();
+        }
+    }
+
+    /**
+     * Locks XYZ for any ability that roots the player in place.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPlayerMoveRooted(PlayerMoveEvent e) {
+        Player player = e.getPlayer();
+        UUID uuid = player.getUniqueId();
+
+        Sandstorm sandstorm = Sandstorm.getActiveInstance(uuid);
+        IceShards iceShards = IceShards.getActiveInstance(uuid);
+        boolean rooted = (sandstorm != null && sandstorm.isCasting())
+                || (iceShards != null && iceShards.isCharging());
+
+		if (!rooted) {
+			return;
+		}
+        lockXYZ(e);
+    }
+
+    /**
+     * Snaps the player's XYZ back to the event's from-location while preserving head rotation.
+     */
+    private static void lockXYZ(PlayerMoveEvent e) {
+        Location to = e.getTo();
+		if (to == null) {
+			return;
+		}
+        Location from = e.getFrom();
+		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+			return;
+		}
+        Location locked = from.clone();
+        locked.setYaw(to.getYaw());
+        locked.setPitch(to.getPitch());
+        e.setTo(locked);
+    }
+
+
+    /**
+     * Prevents the projecting player from dealing any melee or projectile damage.
+     * Their sub-abilities use living.damage() directly and are unaffected by this.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onDamageByProjector(EntityDamageByEntityEvent e) {
+        Entity damager = e.getDamager();
+        Player attacker = null;
+
+        if (damager instanceof Player p) {
+            attacker = p;
+        } else if (damager instanceof Projectile proj && proj.getShooter() instanceof Player p) {
+            attacker = p;
+        }
+
+        if (attacker != null && AstralProjection.isProjecting(attacker.getUniqueId())
+                && !AstralProjection.isSubAbilityDamaging(attacker.getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Blocks FireJet from receiving a cooldown while the player is in JetFumes FLYING phase.
+     * Every PK addCooldown() call fires this cancellable event, so this intercepts all sources
+     * (combo manager, CoreAbility.remove(), etc.) without any timing fragility.
+     * endFlight() switches phase to DISPERSING before applying the real cooldown, so that
+     * call is unaffected. remove() clears ACTIVE_INSTANCES before applying cooldowns, so
+     * death/disconnect edge cases are also unaffected.
+     */
+    @EventHandler
+    public void onFireJetCooldownDuringJetFumes(PlayerCooldownChangeEvent e) {
+		if (!e.getAbility().equalsIgnoreCase("FireJet")) {
+			return;
+		}
+		if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
+			return;
+		}
+		if (!e.isOnline()) {
+			return;
+		}
+        Player player = (Player) e.getPlayer();
+        JetFumes jf = JetFumes.getActiveInstance(player.getUniqueId());
+		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) {
+			return;
+		}
+        e.setCancelled(true);
+    }
+
+    /**
+     * Ends an active BloodGrip immediately when the caster takes any damage while casting
+     * or controlling, applying the cooldown and freeing the controlled target.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBloodGripCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+        BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
+        if (bloodGrip != null) {
+            bloodGrip.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Ends an active BloodFreeze immediately when the caster takes any damage while casting,
+     * applying the cooldown and releasing the frozen target.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBloodFreezeCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+        BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
+        if (bloodFreeze != null) {
+            bloodFreeze.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Suppresses vanilla suffocation damage for entities currently buried by Burial.
+     * Manual ticking damage is applied by the ability itself instead.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onBurialSuffocation(final EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.SUFFOCATION) {
+            return;
+        }
+        if (Burial.isBuried(e.getEntity().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Cancels an active LifeRip immediately when the user takes damage.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onLifeRipCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+        LifeRip lifeRip = LifeRip.getActiveInstance(player.getUniqueId());
+        if (lifeRip != null) {
+            lifeRip.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Cancels a Disalignment charge or charged state when the caster takes damage. Has no effect
+     * once the disalignment has been applied, as the effect persists independently of the caster.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onDisalignmentCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+        Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
+        if (disalignment != null) {
+            disalignment.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Ends HealingHelix or CorruptingHelix immediately when the caster takes any damage
+     * while casting, applying the cooldown.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onHelixCasterDamaged(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+        HealingHelix healingHelix = HealingHelix.getActiveInstance(player.getUniqueId());
+        if (healingHelix != null) {
+            healingHelix.cancelFromDamage();
+            return;
+        }
+        CorruptingHelix corruptingHelix = CorruptingHelix.getActiveInstance(player.getUniqueId());
+        if (corruptingHelix != null) {
+            corruptingHelix.cancelFromDamage();
+        }
+    }
+
+    /**
+     * Suppresses lava and fire damage for the Eruption caster throughout the ability,
+     * and for enemy entities that are still within the geyser's ground footprint while
+     * the column is actively rising. Once entities are airborne and the column is gone
+     * the suppression ends, so natural lava damage from other sources is unaffected.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onEruptionLavaDamage(EntityDamageEvent e) {
+        EntityDamageEvent.DamageCause cause = e.getCause();
+        if (cause != EntityDamageEvent.DamageCause.LAVA
+                && cause != EntityDamageEvent.DamageCause.FIRE
+                && cause != EntityDamageEvent.DamageCause.FIRE_TICK
+                && cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
+            return;
+        }
+        if (!(e.getEntity() instanceof LivingEntity entity)) {
+            return;
+        }
+        for (Eruption eruption : Eruption.getActiveInstances().values()) {
+            if (eruption.isLavaProtected(entity)) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Cancels fire and lava damage to the JetFumes caster while they are in flight.
+     * The ability starts near a fire/lava source, so without this the player would
+     * immediately take environmental fire damage the moment the ability activates.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onJetFumesFireDamage(final EntityDamageEvent e) {
+		if (!(e.getEntity() instanceof Player p)) {
+			return;
+		}
+        JetFumes jf = JetFumes.getActiveInstance(p.getUniqueId());
+		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) {
+			return;
+		}
+        EntityDamageEvent.DamageCause cause = e.getCause();
+        if (cause == EntityDamageEvent.DamageCause.FIRE
+                || cause == EntityDamageEvent.DamageCause.FIRE_TICK
+                || cause == EntityDamageEvent.DamageCause.LAVA
+                || cause == EntityDamageEvent.DamageCause.HOT_FLOOR) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Restores armor from PDC when the player joins, covering the case where the
+     * server crashed while the player was mid-projection (so endAbility never ran).
+     */
+    @EventHandler
+    public void onJoin(PlayerJoinEvent e) {
+        AstralProjection.restoreArmorFromPdc(e.getPlayer());
+        HealingHelix.cleanupOrphanedAbsorption(e.getPlayer());
+    }
+
+    /**
+     * When a mannequin belonging to a projection is damaged, the damage is transferred
+     * to the projecting player and the projection ends.
+     */
+    @EventHandler
+    public void onMannequinDamage(final EntityDamageEvent e) {
+        if (e.getEntityType() != EntityType.MANNEQUIN) {
+            return;
+        }
+        if (e.getCause() == EntityDamageEvent.DamageCause.KILL) {
+            return;
+        }
+
+        UUID projectorUuid = null;
+        for (UUID uuid : AstralProjection.getActiveProjections().keySet()) {
+            AstralProjection projection = AstralProjection.getActiveProjection(uuid);
+            if (projection.getMannequin() != null && projection.getMannequin().equals(e.getEntity())) {
+                projectorUuid = uuid;
+                break;
+            }
+        }
+
+        if (projectorUuid == null) {
+            return;
+        }
+
+        double damage = e.getFinalDamage();
+        e.setDamage(0);
+
+        AstralProjection projection = AstralProjection.getActiveProjection(projectorUuid);
+        if (projection != null) {
+            projection.endAbilityWithDamage(damage);
+        }
+    }
+
+    /**
+     * Cancels commands while the player is astral projecting.
+     */
+    @EventHandler
+    public void onCommand(PlayerCommandPreprocessEvent e) {
+        if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+            e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou cannot run commands while Astral Projecting!"));
+        }
+    }
+
+    /**
+     * Cancels all block interactions while the player is astral projecting or has VineWhip active.
+     * Also handles Sandstorm source-block selection on left-click.
+     * Sub-ability activation uses PlayerAnimationEvent and is unaffected.
+     */
+    @EventHandler
+    public void onInteract(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+
+        if (AstralProjection.isProjecting(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (BloodGrip.isControlled(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (VineWhip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Regrowth.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MagmaGlaives.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Eruption.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MagmaWave.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MoltenBlast.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (CableWhip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MetalShred.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (BloodGrip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (BloodFreeze.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (LifeRip.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (HealingHelix.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MendingWaters.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Jolt.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        Disalignment disalignmentInteract = Disalignment.getActiveInstance(player.getUniqueId());
+        if (disalignmentInteract != null && disalignmentInteract.getPhase() != Disalignment.Phase.DISALIGNING) {
+            e.setCancelled(true);
+            return;
+        }
+        if (IceDiscs.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (MetalShots.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (Burial.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+
+        // Sandstorm: left-clicking a sandbendable block selects the source
+        if (e.getAction() == Action.LEFT_CLICK_BLOCK && e.getClickedBlock() != null) {
+            BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
+            if (bendingPlayer != null
+                    && bendingPlayer.getBoundAbilityName().equalsIgnoreCase("sandstorm")
+                    && EarthAbility.isSandbendable(player, e.getClickedBlock().getType())
+                    && !Sandstorm.hasActiveInstance(player.getUniqueId())) {
+                new Sandstorm(player, e.getClickedBlock());
+            }
+        }
+    }
+
+    /**
+     * Cancels inventory clicks while the player is astral projecting.
+     */
+    @EventHandler
+    public void onInteract(InventoryClickEvent e) {
+        if (e.getWhoClicked() instanceof Player player && AstralProjection.isProjecting(player.getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Cancels item drops while the player is astral projecting.
+     */
+    @EventHandler
+    public void onDropItem(PlayerDropItemEvent e) {
+        if (AstralProjection.isProjecting(e.getPlayer().getUniqueId())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Ends the projection cleanly if the player dies while projecting.
+     */
+    @EventHandler
+    public void onDeath(PlayerDeathEvent e) {
+        Player player = e.getPlayer();
+        if (AstralProjection.isProjecting(player.getUniqueId())) {
+            AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
+        }
+        SandWave.clearPendingSource(player.getUniqueId());
+        MagmaWave.clearPendingSource(player.getUniqueId());
+        HealingHelix.clearPendingSource(player.getUniqueId());
+        CorruptingHelix.clearPendingSource(player.getUniqueId());
+        Jolt.clearPendingCharge(player.getUniqueId());
+        LifeRip.resetTargetDrain(player);
+        LifeRip.resetCasterGain(player);
+    }
+
+    /**
+     * Removes any LifeRip health bonus from a player when they enter the arena world.
+     * Arena fights should always start on a level playing field.
+     */
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
+            LifeRip.resetCasterGain(e.getPlayer());
+        }
+    }
+
+    /**
+     * Ends the projection when the player disconnects.
+     */
+    @EventHandler
+    public void onDisconnect(PlayerQuitEvent e) {
+        Player player = e.getPlayer();
+        if (AstralProjection.isProjecting(player.getUniqueId())) {
+            AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
+        }
+        SandWave.clearPendingSource(player.getUniqueId());
+        MagmaWave.clearPendingSource(player.getUniqueId());
+        HealingHelix.clearPendingSource(player.getUniqueId());
+        CorruptingHelix.clearPendingSource(player.getUniqueId());
+        Jolt.clearPendingCharge(player.getUniqueId());
+        DaggerVolley.resetStage(player.getUniqueId());
+    }
+
+    /**
+     * Enforces owner-only pickup for iron ingots fired by MetalStrips. Any player other than the
+     * caster who tagged the item is prevented from collecting it. When the owner steps on their
+     * own ingot, it is removed from the MetalStrips tracking map so it is no longer subject to recall.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onPickupMetalStrip(final EntityPickupItemEvent e) {
+		if (!(e.getEntity() instanceof Player player)) {
+			return;
+		}
+
+        final String ownerUuid = e.getItem().getPersistentDataContainer().get(
+                MetalStrips.getStripOwnerKey(), PersistentDataType.STRING);
+		if (ownerUuid == null) {
+			return;
+		}
+
+        if (!player.getUniqueId().toString().equals(ownerUuid)) {
+            e.setCancelled(true);
+            return;
+        }
+
+        // Owner is collecting their ingot — swap the tagged stack for a clean iron ingot before
+        // the pickup completes so the player never receives the internal instance-ID metadata.
+        e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
+        MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
+    }
+
+    private static final double[] RANK_DAMAGE_MULTIPLIERS = {1.0, 1.05, 1.15, 1.3, 1.5, 1.75, 2.0, 2.25, 2.5};
+
+    /**
+     * Scales bending damage based on the caster's rank.
+     * Peasant (rank 0) deals 1x damage, scaling up to 2.5x at Emperor (rank 8).
+     */
+    @EventHandler
+    public void onRankBendingDamage(AbilityDamageEntityEvent e) {
+		if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+			return;
+		}
+
+        Player p = e.getAbility().getPlayer();
+		if (p == null) {
+			return;
+		}
+
+        AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(p.getUniqueId());
+		if (ap == null) {
+			return;
+		}
+
+        int rank = ap.getRank();
+		if (rank <= 0) {
+			return;
+		}
+
+        double multiplier = RANK_DAMAGE_MULTIPLIERS[Math.min(rank, RANK_DAMAGE_MULTIPLIERS.length - 1)];
+        e.setDamage(e.getDamage() * multiplier);
+    }
+
+    /**
+     * Applies the Amplification damage multiplier to all hits from the SoundAbility that consumed the buff.
+     * The multiplier is locked in on first contact and reused for every subsequent hit from the same cast.
+     */
+    @EventHandler
+    public void onAmplificationDamage(AbilityDamageEntityEvent e) {
+        Ability ability = e.getAbility();
+		if (!(ability instanceof SoundAbility)) {
+			return;
+		}
+		if (ability instanceof Amplification) {
+			return;
+		}
+
+        Player p = ability.getPlayer();
+		if (p == null) {
+			return;
+		}
+
+        Amplification amp = Amplification.getActiveAmplification(p);
+		if (amp == null) {
+			return;
+		}
+
+        amp.applyMultiplier(e);
+    }
+
+    /**
+     * Cancels vanilla arrow damage for DaggerThrow projectiles and applies the fixed damage
+     * value through ProjectKorra's pipeline so that region protection is respected.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onDaggerThrowArrowHit(final EntityDamageByEntityEvent e) {
+		if (!(e.getDamager() instanceof AbstractArrow arrow)) {
+			return;
+		}
+		if (!arrow.hasMetadata("daggerthrow")) {
 			return;
 		}
 		if (!(e.getEntity() instanceof LivingEntity target)) {
 			return;
 		}
-
-		final MetalBlade metalBlade = MetalBlade.getActiveInstance(player.getUniqueId());
-		if (metalBlade == null || metalBlade.getPhase() != MetalBlade.Phase.READY) {
+		if (!(arrow.getShooter() instanceof Player shooter)) {
 			return;
 		}
 
-		metalBlade.onMeleeHit(target, e);
-	}
+        e.setCancelled(true);
+
+        final DaggerThrow dt = CoreAbility.getAbility(shooter, DaggerThrow.class);
+        if (dt == null) {
+            arrow.remove();
+            return;
+        }
+        dt.damageEntityFromArrow(target, arrow);
+    }
+
+    /**
+     * Cancels vanilla arrow damage for DaggerVolley projectiles and replaces it with the
+     * per-arrow damage roll so that region protection and rank scaling are applied through
+     * ProjectKorra's standard pipeline.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onDaggerVolleyArrowHit(final EntityDamageByEntityEvent e) {
+		if (!(e.getDamager() instanceof AbstractArrow arrow)) {
+			return;
+		}
+		if (!arrow.hasMetadata("daggervolley")) {
+			return;
+		}
+		if (!(e.getEntity() instanceof LivingEntity target)) {
+			return;
+		}
+		if (!(arrow.getShooter() instanceof Player shooter)) {
+			return;
+		}
+
+        e.setCancelled(true);
+
+        final DaggerVolley dv = CoreAbility.getAbility(shooter, DaggerVolley.class);
+        if (dv == null) {
+            // Ability already ended (all other arrows resolved); discard without dealing damage.
+            arrow.remove();
+            return;
+        }
+        dv.damageEntityFromArrow(target, arrow);
+    }
+
+    /**
+     * Suppresses lava and fire damage for the MagmaWave caster throughout the ability,
+     * and for enemy entities that remain within the active wave's footprint.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onMagmaWaveLavaDamage(EntityDamageEvent e) {
+        EntityDamageEvent.DamageCause cause = e.getCause();
+        if (cause != EntityDamageEvent.DamageCause.LAVA
+                && cause != EntityDamageEvent.DamageCause.FIRE
+                && cause != EntityDamageEvent.DamageCause.FIRE_TICK
+                && cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
+            return;
+        }
+        if (!(e.getEntity() instanceof LivingEntity entity)) {
+            return;
+        }
+        for (MagmaWave wave : MagmaWave.getActiveInstances().values()) {
+            if (wave.isLavaProtected(entity)) {
+                e.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Prevents wave lava blocks from flowing to adjacent blocks.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onMagmaWaveBlockFromTo(final BlockFromToEvent e) {
+        if (e.getBlock().getType() != Material.LAVA) {
+            return;
+        }
+        if (MagmaWave.isWaveBlock(e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Suppresses physics updates on wave lava blocks so their placed levels remain stable.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onMagmaWaveBlockPhysics(final BlockPhysicsEvent e) {
+        if (e.getBlock().getType() != Material.LAVA) {
+            return;
+        }
+        if (MagmaWave.isWaveBlock(e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Prevents MoltenBlast ball lava blocks from flowing to adjacent blocks.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onMoltenBlastBlockFromTo(final BlockFromToEvent e) {
+        if (e.getBlock().getType() != Material.LAVA) {
+            return;
+        }
+        if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Suppresses physics updates on MoltenBlast ball lava blocks so their level remains stable.
+     */
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onMoltenBlastBlockPhysics(final BlockPhysicsEvent e) {
+        if (e.getBlock().getType() != Material.LAVA) {
+            return;
+        }
+        if (MoltenBlast.isBallLavaBlock(e.getBlock())) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
+     * Applies MetalBlade's melee buff when the player punches a living entity while the blade is
+     * ready. The vanilla damage is replaced entirely by the ability's damage so that region
+     * protection and rank scaling are applied through ProjectKorra's standard pipeline.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onMetalBladeMeleeHit(final EntityDamageByEntityEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            return;
+        }
+        if (!(e.getDamager() instanceof Player player)) {
+            return;
+        }
+        if (!(e.getEntity() instanceof LivingEntity target)) {
+            return;
+        }
+
+        final MetalBlade metalBlade = MetalBlade.getActiveInstance(player.getUniqueId());
+        if (metalBlade == null || metalBlade.getPhase() != MetalBlade.Phase.READY) {
+            return;
+        }
+
+        metalBlade.onMeleeHit(target, e);
+    }
 
 }
