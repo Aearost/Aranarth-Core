@@ -223,6 +223,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.sonicpulse", true);
 			perms.setPermission("bending.ability.toxicspores", true);
 			perms.setPermission("bending.ability.leafscythe", true);
+			perms.setPermission("bending.ability.rootsnare", true);
 			perms.setPermission("bending.ability.energyburst", true);
 			perms.setPermission("bending.ability.magmaglaives", true);
 			perms.setPermission("bending.ability.moltenblast", true);
@@ -302,6 +303,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.sonicpulse", false);
 			perms.setPermission("bending.ability.toxicspores", false);
 			perms.setPermission("bending.ability.leafscythe", false);
+			perms.setPermission("bending.ability.rootsnare", false);
 			perms.setPermission("bending.ability.energyburst", false);
 			perms.setPermission("bending.ability.magmaglaives", false);
 			perms.setPermission("bending.ability.moltenblast", false);
@@ -390,6 +392,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.sonicpulse", false);         // sound - Prince
 		perms.setPermission("bending.ability.toxicspores", false);        // plant - Baron
 		perms.setPermission("bending.ability.leafscythe", false);         // plant - Baron
+		perms.setPermission("bending.ability.rootsnare", false);          // plant - Baron
 		perms.setPermission("bending.ability.energyburst", false);        // spiritual - Prince
 		perms.setPermission("bending.ability.magmaglaives", false);       // lava - King
 		perms.setPermission("bending.ability.moltenblast", false);        // lava combo - King
@@ -716,6 +719,7 @@ public class PermissionUtils {
 					perms.setPermission("bending.ability.sonicpulse", true);
 					perms.setPermission("bending.ability.toxicspores", true);
 					perms.setPermission("bending.ability.leafscythe", true);
+					perms.setPermission("bending.ability.rootsnare", true);
 					perms.setPermission("bending.ability.energyburst", true);
 					perms.setPermission("bending.ability.magmaglaives", true);
 					perms.setPermission("bending.ability.moltenblast", true);
@@ -875,6 +879,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.toxicspores", true);         // plant
 			perms.setPermission("bending.ability.vinewhip", true);            // plant
 			perms.setPermission("bending.ability.leafscythe", true);          // plant
+			perms.setPermission("bending.ability.rootsnare", true);           // plant
 			perms.setPermission("bending.ability.sandstorm", true);           // sand
 			perms.setPermission("bending.ability.burial", true);              // sand
 			perms.setPermission("bending.ability.cablethrash", true);         // metal

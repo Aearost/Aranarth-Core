@@ -46,6 +46,7 @@ import com.projectkorra.projectkorra.ability.HealingAbility;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.LeafScythe;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
+import com.aearost.aranarthcore.abilities.waterbending.plantbending.RootSnare;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
@@ -239,6 +240,11 @@ public class AranarthCoreBendingListener implements Listener {
                     return;
                 }
             }
+            RootSnare rootSnareRelease = RootSnare.getActiveInstance(player.getUniqueId());
+            if (rootSnareRelease != null) {
+                rootSnareRelease.onSneakRelease();
+                return;
+            }
             if (abilityName.equalsIgnoreCase("earthsmash")) {
                 MoltenBlast.markEarthSmashSneak(player.getUniqueId());
             }
@@ -329,6 +335,10 @@ public class AranarthCoreBendingListener implements Listener {
                         // Guard: only one active instance per player
                         if (!VineWhip.hasActiveInstance(e.getPlayer().getUniqueId())) {
                             new VineWhip(e.getPlayer());
+                        }
+                    } else if (abilityName.equalsIgnoreCase("rootsnare")) {
+                        if (!RootSnare.hasActiveInstance(player.getUniqueId())) {
+                            new RootSnare(player);
                         }
                     } else if (abilityName.equalsIgnoreCase("razorleaves")) {
                         RazorLeaves existing = RazorLeaves.getActiveInstance(player.getUniqueId());
@@ -794,6 +804,10 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
+        if (RootSnare.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
         // Left-clicking on a plant to source it should never destroy the block
         BendingPlayer bpLeafBreak = BendingPlayer.getBendingPlayer(player);
         if (bpLeafBreak != null) {
@@ -924,6 +938,10 @@ public class AranarthCoreBendingListener implements Listener {
         if (toxicSpores != null) {
             toxicSpores.endChanneling();
         }
+        RootSnare rootSnareSlot = RootSnare.getActiveInstance(e.getPlayer().getUniqueId());
+        if (rootSnareSlot != null) {
+            rootSnareSlot.cancelFromSlotChange();
+        }
         Regrowth regrowth = Regrowth.getActiveInstance(e.getPlayer().getUniqueId());
         if (regrowth != null) {
             regrowth.remove();
@@ -1040,7 +1058,8 @@ public class AranarthCoreBendingListener implements Listener {
         Sandstorm sandstorm = Sandstorm.getActiveInstance(uuid);
         IceShards iceShards = IceShards.getActiveInstance(uuid);
         boolean rooted = (sandstorm != null && sandstorm.isCasting())
-                || (iceShards != null && iceShards.isCharging());
+                || (iceShards != null && iceShards.isCharging())
+                || RootSnare.isSnaredPlayer(uuid);
 
 		if (!rooted) {
 			return;
@@ -1343,6 +1362,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (ToxicSpores.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (RootSnare.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
