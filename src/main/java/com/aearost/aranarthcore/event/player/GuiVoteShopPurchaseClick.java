@@ -190,6 +190,17 @@ public class GuiVoteShopPurchaseClick {
                         }
                         return;
                     }
+                    // Homes perk
+                    else if (clicked.getType() == Material.RED_BED) {
+                        if (aranarthPlayer.getPerks().get(Perk.HOMES) <= 12) {
+                            Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "ac perks " + player.getName() + " homes silent");
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou already have the maximum amount of additional homes!"));
+                            aranarthPlayer.setVotePointsSpent(aranarthPlayer.getVotePointsSpent() - requiredPoints);
+                            AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                        }
+                        return;
+                    }
                     // mcMMO Boost
                     else if (clicked.getType() == Material.PAPER) {
                         String amount = clicked.getItemMeta().getDisplayName().split(" ")[4];

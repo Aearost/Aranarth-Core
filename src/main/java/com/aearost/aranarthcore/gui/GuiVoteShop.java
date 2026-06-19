@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Perk;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -187,6 +188,17 @@ public class GuiVoteShop {
 		invisFramesMeta.setLore(invisFramesLore);
 		invisFrames.setItemMeta(invisFramesMeta);
 		gui.setItem(21, invisFrames);
+
+		ItemStack homes = new ItemStack(Material.RED_BED);
+		ItemMeta homesMeta = homes.getItemMeta();
+		homesMeta.setDisplayName(ChatUtils.translateToColor("&4&lAdditional 3 Homes"));
+		List<String> homesLore = new ArrayList<>();
+		homesLore.add(ChatUtils.translateToColor("&e200 vote points"));
+		homesLore.add(ChatUtils.translateToColor("&cProvides 3 additional homes (capped at 15)"));
+		homesLore.add(ChatUtils.translateToColor("&7Current: &c" + aranarthPlayer.getPerks().get(Perk.HOMES) + "/15"));
+		homesMeta.setLore(homesLore);
+		homes.setItemMeta(homesMeta);
+		gui.setItem(22, homes);
 
 		ItemStack chat = new ItemStack(Material.WRITABLE_BOOK);
 		ItemMeta chatMeta = chat.getItemMeta();
