@@ -43,6 +43,7 @@ import com.aearost.aranarthcore.abilities.waterbending.healing.HealingHelix;
 import com.aearost.aranarthcore.abilities.waterbending.healing.MendingWaters;
 import com.projectkorra.projectkorra.ability.BloodAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
+import com.aearost.aranarthcore.abilities.waterbending.plantbending.LeafScythe;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.RazorLeaves;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.Regrowth;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
@@ -527,6 +528,21 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
+        // LeafScythe: left-click a plant source to confirm it or initiate the swing
+        LeafScythe leafScythe = LeafScythe.getActiveInstance(player.getUniqueId());
+        if (leafScythe != null) {
+            leafScythe.onLeftClick();
+            return;
+        }
+        BendingPlayer bpLeaf = BendingPlayer.getBendingPlayer(player);
+        if (bpLeaf != null) {
+            CoreAbility boundLeaf = bpLeaf.getBoundAbility();
+            if (boundLeaf != null && boundLeaf.getName().equalsIgnoreCase("leafscythe")) {
+                new LeafScythe(player);
+                return;
+            }
+        }
+
         // JetFumes: left-click cancels active flight
         JetFumes jetFumes = JetFumes.getActiveInstance(player.getUniqueId());
         if (jetFumes != null) {
@@ -774,6 +790,19 @@ public class AranarthCoreBendingListener implements Listener {
             e.setCancelled(true);
             return;
         }
+        if (LeafScythe.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        // Left-clicking on a plant to source it should never destroy the block
+        BendingPlayer bpLeafBreak = BendingPlayer.getBendingPlayer(player);
+        if (bpLeafBreak != null) {
+            CoreAbility boundLeafBreak = bpLeafBreak.getBoundAbility();
+            if (boundLeafBreak != null && boundLeafBreak.getName().equalsIgnoreCase("leafscythe")) {
+                e.setCancelled(true);
+                return;
+            }
+        }
         if (Regrowth.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
@@ -870,6 +899,10 @@ public class AranarthCoreBendingListener implements Listener {
         RazorLeaves razorLeaves = RazorLeaves.getActiveInstance(e.getPlayer().getUniqueId());
         if (razorLeaves != null) {
             razorLeaves.endWithCooldown();
+        }
+        LeafScythe leafScytheSlot = LeafScythe.getActiveInstance(e.getPlayer().getUniqueId());
+        if (leafScytheSlot != null) {
+            leafScytheSlot.cancelInstantly();
         }
         Sandstorm sandstorm = Sandstorm.getActiveInstance(e.getPlayer().getUniqueId());
         if (sandstorm != null) {
@@ -1302,6 +1335,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (RazorLeaves.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (LeafScythe.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
