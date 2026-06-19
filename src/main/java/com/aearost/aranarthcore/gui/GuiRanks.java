@@ -93,8 +93,8 @@ public class GuiRanks {
 			esquireMeta.setDisplayName(ChatUtils.translateToColor("&d&l&nEsquire&r&f&l ($1,000)"));
 		}
 		esquireLore.add(ChatUtils.translateToColor("&f&lBending"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.PLANT.getColor() + "&oRegrowth, RazorLeaves"));
-		esquireLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandBlast, SandWave"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.PLANT.getColor() + "&oBasic plantbending abilities"));
+		esquireLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oBasic sandbending abilities"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- 1.05x bending damage"));
 		esquireLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		esquireLore.add(ChatUtils.translateToColor("&f&o- Summon your &e/mount"));
@@ -116,8 +116,8 @@ public class GuiRanks {
 			knightMeta.setDisplayName(ChatUtils.translateToColor("&7&l&nKnight&r&f&l ($5,000)"));
 		}
 		knightLore.add(ChatUtils.translateToColor("&f&lBending"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oHealingWaters, MendingWaters"));
-		knightLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oMetalShred, MetalCable, CableWhip, Extraction, MagnetShield"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oBasic healing abilities"));
+		knightLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.METAL.getColor() + "&oBasic metalbending abilities"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- &6[&eC&6] &6&oAcrobatStance, WarriorStance"));
 		knightLore.add(ChatUtils.translateToColor("&f&o- 1.15x bending damage"));
 		knightLore.add(ChatUtils.translateToColor("&f&lPerks"));
@@ -148,9 +148,11 @@ public class GuiRanks {
 			}
 		}
 		baronLore.add(ChatUtils.translateToColor("&f&lBending"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oMeditate"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oToxicSpores, VineWhip"));
-		baronLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandstorm, Burial, " + Element.METAL.getColor() + "&oCableThrash, CableSlash, MetalBlade, MetalFragments"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oBasic spiritual abilities"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &b&oWaterArms, " + Element.PLANT.getColor() + "&oToxicSpores, "));
+		baronLore.add(ChatUtils.translateToColor(Element.PLANT.getColor() + "       &oVineWhip, LeafScythe"));
+		baronLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.SAND.getColor() + "&oSandstorm, Burial, " + Element.METAL.getColor() + "&oCableThrash,"));
+		baronLore.add(ChatUtils.translateToColor(Element.METAL.getColor() + "       &oCableSlash, MetalBlade, MetalFragments"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- 1.3x bending damage"));
 		baronLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		baronLore.add(ChatUtils.translateToColor("&f&o- /dominion create"));
@@ -218,8 +220,9 @@ public class GuiRanks {
 			}
 		}
 		dukeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oSuffocate, " + Element.SPIRITUAL.getColor() + "&oAstralProjection, AstralShot, " + SoundAbility.SOUND.getColor() + "&oSonicClap, Amplification"));
-		dukeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlow, LavaThrow"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] &7&oSuffocate, " + Element.SPIRITUAL.getColor() + "&oAstralProjection, AstralShot,"));
+		dukeLore.add(ChatUtils.translateToColor(SoundAbility.SOUND.getColor() + "       &oBasic soundbending abilities"));
+		dukeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oBasic lavabending abilities"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 1.75x bending damage"));
 		dukeLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- /nick (and a nickname in Discord)"));
@@ -250,9 +253,9 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oLightning, Discharge"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oBasic lightningbending abilities"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&oBloodGrip, BloodPuppet"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&oBasic blood abilities"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaDisc, MagmaBlast"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- 2.0x bending damage"));
 		princeLore.add(ChatUtils.translateToColor("&f&lPerks"));
@@ -286,10 +289,12 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst, " + Element.COMBUSTION.getColor() + "&oNoxiousFumes, JetFumes"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst,"));
+		kingLore.add(ChatUtils.translateToColor(Element.COMBUSTION.getColor() + "       &oBasic combustion abilities"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + SoundAbility.SOUND.getColor() + "&oSonicBoom, DeafeningScream"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oBloodFreeze"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlux, MagmaWave, MagmaGlaives"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlux, MagmaWave,"));
+		kingLore.add(ChatUtils.translateToColor(Element.LAVA.getColor() + "       &oMagmaGlaives, MoltenBlast"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- 2.25x bending damage"));
 		kingLore.add(ChatUtils.translateToColor("&f&lPerks"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- /toggle chat"));
@@ -322,7 +327,7 @@ public class GuiRanks {
 
 		emperorLore.add(ChatUtils.translateToColor("&f&lBending"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.COMBUSTION.getColor() + "&oCombustion, CombustionStrike, Barrage"));
-		emperorLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.FLIGHT.getColor() + "&oFlight, SwiftStream"));
+		emperorLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.FLIGHT.getColor() + "&oBasic flight abilities"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oLifeRip, Disalignment"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oEruption, Fissure"));
 		emperorLore.add(ChatUtils.translateToColor("&f&o- 2.5x bending damage"));
