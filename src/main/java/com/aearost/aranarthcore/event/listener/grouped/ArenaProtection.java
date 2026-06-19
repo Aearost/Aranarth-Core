@@ -17,6 +17,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockFadeEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.BlockSpreadEvent;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
@@ -144,7 +146,15 @@ public class ArenaProtection implements Listener {
 	}
 
 	/**
+	 * Tracks the arena-capped damage value from AbilityDamageEntityEvent so it can be enforced
+	 * in EntityDamageByEntityEvent at HIGHEST priority (after any other plugins inflate the value).
+	 * Set to null when not in an ability damage pipeline.
+	 */
+	private Double pendingArenaCap = null;
+
+	/**
 	 * Reduces bending ability damage in the arena world using a tiered scale.
+	 * Stores the capped value so it can be enforced in onBendingEntityDamageInArena.
 	 * Damage is expressed in health points (2 HP = 1 heart).
 	 */
 	@EventHandler
@@ -157,7 +167,7 @@ public class ArenaProtection implements Listener {
 
 		double reducedHp;
 		if (hearts <= 0.5) {
-			return;                // 0.5 hearts or less — keep as is
+			reducedHp = e.getDamage(); // 0.5 hearts or less — keep as is
 		} else if (hearts <= 1.5) {
 			reducedHp = 2.0;       // cap at 1 heart
 		} else if (hearts <= 3.0) {
@@ -170,7 +180,29 @@ public class ArenaProtection implements Listener {
 			reducedHp = 6.0;       // cap at 3 hearts (hard max)
 		}
 
+		// Store the intended cap — enforced at HIGHEST in onBendingEntityDamageInArena
+		// since another plugin inflates the EntityDamageByEntityEvent after LOWEST
+		pendingArenaCap = reducedHp;
 		e.setDamage(reducedHp);
+	}
+
+	/**
+	 * Enforces the arena damage cap at HIGHEST priority on the EntityDamageByEntityEvent
+	 * that ProjectKorra fires internally after AbilityDamageEntityEvent. This counteracts
+	 * any other plugin that inflates bending damage between LOWEST and HIGHEST.
+	 */
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onBendingEntityDamageInArena(EntityDamageByEntityEvent e) {
+		if (pendingArenaCap == null) {
+			return;
+		}
+		double cap = pendingArenaCap;
+		pendingArenaCap = null;
+
+		if (!e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+			return;
+		}
+		e.setDamage(cap);
 	}
 
 	/**
