@@ -27,7 +27,7 @@ public class CommandDominionCompleter implements TabCompleter {
 	private static final List<String> DOMINION_OPTIONS = List.of(
 		"accept", "ally", "autoclaim", "balance", "buychunks", "claim", "conquer", "create",
 		"deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
-		"leave", "list", "map", "msg", "neutral", "permissions", "perms", "rank", "setrank",
+		"leave", "list", "map", "msg", "neutral", "rank", "setrank",
 		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
 		"surrender", "truce", "unclaim", "who", "withdraw"
 	);

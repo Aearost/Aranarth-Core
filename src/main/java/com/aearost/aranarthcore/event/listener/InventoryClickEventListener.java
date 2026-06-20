@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -66,7 +67,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Permissions")
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDominionPermissions.HUB_TITLE)
                     || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Permissions")
                         && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
                 new GuiDominionPermissionsClick().execute(e);

@@ -3,6 +3,7 @@ AranarthCore v. 1.10
 Major Features
 [+] Added per-user permissions for Dominions
 [+] Implemented a Dominion levels system with different categories and thresholds to level up your Dominion
+[~] Replaced /d permissions with the base /d
 [+] Implemented auto replenishment of items, supporting eating, tools breaking, thrown projectiles, dropped items, etc
 [+] Implemented permission-based custom armor stand poses
 [+] Added automatic role applying from emoji reactions to a message in the #info channel

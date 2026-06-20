@@ -42,12 +42,13 @@ public class CommandDominion implements CommandExecutor {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
-        // Shorthand of /dominion info
+        // No-args: open the Dominion Hub GUI
         if (args.length == 0) {
             if (sender instanceof Player player) {
                 Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
                 if (dominion != null) {
-                    displayInfoForDominion(player, dominion);
+                    new GuiDominionPermissions(player).openGui();
+                    player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
                 }
@@ -212,8 +213,6 @@ public class CommandDominion implements CommandExecutor {
                     ChatUtils.evaluateDominionMessage(player, args, true);
                 } else if (args[0].equalsIgnoreCase("guide")) {
                     CommandDominions.giveBook(player);
-                } else if (args[0].equalsIgnoreCase("perms") || args[0].equalsIgnoreCase("permissions")) {
-                    openPermissionsGui(dominion, player);
                 } else if (args[0].equalsIgnoreCase("rank")) {
                     showDominionLevel(player, dominion);
                 } else if (args[0].equalsIgnoreCase("setrank")) {
@@ -2014,24 +2013,6 @@ public class CommandDominion implements CommandExecutor {
     }
 
     /**
-     * Opens the Dominion Permissions GUI for the player.
-     *
-     * @param dominion The player's dominion.
-     * @param player   The player.
-     */
-    private static void openPermissionsGui(Dominion dominion, Player player) {
-        if (dominion == null) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
-            return;
-        }
-        if (!dominion.getLeader().equals(player.getUniqueId())) {
-            player.sendMessage(ChatUtils.chatMessage("&cOnly the leader can manage Dominion permissions!"));
-            return;
-        }
-        new GuiDominionPermissions(player).openGui();
-        player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
-    }
-
     /**
      * Displays the dominion's current level, progress toward the next level across all 6
      * criteria, and the global leaderboard placement summary.

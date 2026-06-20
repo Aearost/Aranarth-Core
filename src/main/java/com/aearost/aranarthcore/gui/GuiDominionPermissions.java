@@ -17,20 +17,23 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.*;
 
 /**
- * Manages the Dominion Permissions GUI.
+ * Manages the Dominion Hub GUI — the main menu opened by /dominion (no args).
  *
- * <p>The main screen shows selectable groups (ranks and relations).
- * Clicking a group opens a 27-slot permissions screen grouped into three sections:
- * Interactions, Block Interactions, and Commands.
+ * <p>The hub screen shows rank/relation permission groups, toggles (Mob Spawning, Member PvP),
+ * and navigation buttons for Members, User Search, Guardians, and Outposts.
+ * Clicking a rank or relation group opens a 45-slot permissions sub-screen.
  *
- * <p>Title format for the main screen: "Dominion Permissions"
- * Title format for a rank screen: "Permissions: {RANK_NAME}"
- * Title format for a relation screen: "Permissions: {RELATION_NAME}"
+ * <p>Title of the hub screen: {@link #HUB_TITLE} ("Dominion Hub")
+ * Title of rank/relation sub-screens: "[Group] Permissions"
  */
 public class GuiDominionPermissions {
 
+    public static final String HUB_TITLE = "Dominion Hub";
+
     private static final int MEMBERS_SLOT = 30;
     private static final int USER_SEARCH_SLOT = 32;
+    private static final int GUARDIANS_SLOT = 28;
+    private static final int OUTPOSTS_SLOT = 34;
 
     private final Player player;
     private final Inventory initializedGui;
@@ -213,10 +216,10 @@ public class GuiDominionPermissions {
     private Inventory initializeMainGui(Player player) {
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         if (dominion == null) {
-            return Bukkit.createInventory(player, 9, ChatUtils.translateToColor("Permissions"));
+            return Bukkit.createInventory(player, 9, ChatUtils.translateToColor("Dominion Hub"));
         }
 
-        String title = ChatUtils.translateToColor("Dominion Permissions");
+        String title = ChatUtils.translateToColor(HUB_TITLE);
         Inventory gui = Bukkit.createInventory(player, 45, title);
 
         ItemStack filler = buildFiller();
@@ -237,11 +240,15 @@ public class GuiDominionPermissions {
         gui.setItem(23, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", "&7Click to manage permissions"));
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", "&7Click to manage permissions"));
 
-        // Row 3: Mob Spawning toggle, Members button, User Search, and Member PvP toggle
+        // Row 2 toggles
         gui.setItem(18, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
         gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
+
+        // Row 3: navigation and new hub sections
+        gui.setItem(GUARDIANS_SLOT, buildGuardiansItem());
         gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(dominion.getLeader()));
         gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem());
+        gui.setItem(OUTPOSTS_SLOT, buildOutpostsItem());
 
         return gui;
     }
@@ -293,12 +300,36 @@ public class GuiDominionPermissions {
      * Builds the Member PvP toggle item for the main screen.
      */
     public static ItemStack buildMemberPvpToggleItem(boolean enabled) {
-        ItemStack item = new ItemStack(Material.IRON_SWORD);
+        ItemStack item = new ItemStack(Material.REDSTONE);
         ItemMeta meta = item.getItemMeta();
         String statusColor = enabled ? "&a" : "&c";
         String statusText = enabled ? "Enabled" : "Disabled";
         meta.setDisplayName(ChatUtils.translateToColor("&6&lMember PvP &7&l- " + statusColor + "&l" + statusText));
         meta.setLore(List.of(ChatUtils.translateToColor("&7Allows dominion members to harm each other")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Guardians hub button.
+     */
+    public static ItemStack buildGuardiansItem() {
+        ItemStack item = new ItemStack(Material.IRON_SWORD);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&c&lGuardians"));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's guardian warriors")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Outposts hub button.
+     */
+    public static ItemStack buildOutpostsItem() {
+        ItemStack item = new ItemStack(Material.OAK_LOG);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lOutposts"));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's outposts")));
         item.setItemMeta(meta);
         return item;
     }

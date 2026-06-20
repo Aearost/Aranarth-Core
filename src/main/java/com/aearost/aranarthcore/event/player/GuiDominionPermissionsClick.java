@@ -49,8 +49,8 @@ public class GuiDominionPermissionsClick {
 
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
 
-        // Main permissions screen — navigate to rank or relation sub-screens
-        if (title.equals("Dominion Permissions")) {
+        // Main hub screen — navigate to sections or toggle settings
+        if (title.equals(GuiDominionPermissions.HUB_TITLE)) {
             String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
             if (itemName.startsWith("Mob Spawning")) {
                 boolean newState = !dominion.isMobSpawningEnabled();
@@ -81,6 +81,8 @@ public class GuiDominionPermissionsClick {
                 case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
                 case "Members"     -> GuiDominionMembers.open(player);
                 case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
+                case "Guardians"   -> { /* TODO: open Guardians GUI when implemented */ }
+                case "Outposts"    -> { /* TODO: open Outposts GUI when implemented */ }
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
