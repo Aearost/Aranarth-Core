@@ -265,6 +265,7 @@ Minor Features
 [~] Increased the amount of lost money when a player in a Dominion dies (based on role and proportional to dominion balance)
 [~] Decreased the prices of crate keys in the vote shop
 [~] Fixed issue where the /quests GUI would not auto-close after claiming a reward
+[~] Added the Foundation Date of dominions to /d info
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

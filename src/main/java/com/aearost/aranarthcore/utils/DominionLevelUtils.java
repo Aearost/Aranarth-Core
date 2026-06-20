@@ -164,6 +164,33 @@ public class DominionLevelUtils {
     }
 
     /**
+     * Converts a total-in-game-days value (as stored in foundedTimestamp) back into a
+     * formatted calendar string, e.g. "4th of Florivór, 108". Returns null for legacy
+     * dominions (foundedTimestamp == 0).
+     */
+    public static String formatFoundedDate(long totalDays) {
+        if (totalDays == 0L) {
+            return null;
+        }
+        int year = (int) (totalDays / DAYS_PER_YEAR);
+        long remaining = totalDays % DAYS_PER_YEAR;
+        if (remaining == 0) {
+            year--;
+            remaining = DAYS_PER_YEAR;
+        }
+        int monthIdx = 0;
+        while (monthIdx < MONTH_DAYS.length - 1 && remaining > MONTH_DAYS[monthIdx]) {
+            remaining -= MONTH_DAYS[monthIdx];
+            monthIdx++;
+        }
+        Month month = Month.values()[monthIdx];
+        int day = (int) remaining;
+        String dayWithSuffix = DateUtils.getDayNumWithSuffix(day);
+        String monthName = DateUtils.provideMonthName(month);
+        return dayWithSuffix + " of " + monthName + ", " + year;
+    }
+
+    /**
      * Returns the number of complete in-game years this dominion has existed,
      * based on the custom Aranarth calendar.
      */

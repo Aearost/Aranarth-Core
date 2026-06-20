@@ -1584,6 +1584,11 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.translateToColor(conquered));
         }
 
+        String foundedDate = DominionLevelUtils.formatFoundedDate(dominion.getFoundedTimestamp());
+        if (foundedDate != null) {
+            player.sendMessage(ChatUtils.translateToColor("&7&oFounded on &e&o" + foundedDate));
+        }
+
         List<Outpost> dominionOutposts = OutpostUtils.getDominionOutposts(dominion.getId());
         StringBuilder outpostsBuilder = new StringBuilder("&6Outposts: ");
         if (dominionOutposts.isEmpty()) {
