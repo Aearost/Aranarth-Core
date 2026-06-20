@@ -31,6 +31,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.CombustionStrik
 import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
@@ -141,6 +142,7 @@ public class AranarthCoreBendingListener implements Listener {
         new ArrayList<>(CoreAbility.getAbilities(MoltenBlast.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(ElectricStrike.class)).forEach(CoreAbility::remove);
 
         new BukkitRunnable() {
             @Override
@@ -243,6 +245,11 @@ public class AranarthCoreBendingListener implements Listener {
             RootSnare rootSnareRelease = RootSnare.getActiveInstance(player.getUniqueId());
             if (rootSnareRelease != null) {
                 rootSnareRelease.onSneakRelease();
+                return;
+            }
+            ElectricStrike electricStrikeRelease = ElectricStrike.getActiveInstance(player.getUniqueId());
+            if (electricStrikeRelease != null && electricStrikeRelease.getPhase() == ElectricStrike.Phase.CHARGING) {
+                electricStrikeRelease.onSneakRelease();
                 return;
             }
             if (abilityName.equalsIgnoreCase("earthsmash")) {
@@ -377,6 +384,11 @@ public class AranarthCoreBendingListener implements Listener {
                     if (!Jolt.hasActiveInstance(player.getUniqueId())) {
                         Jolt.markPendingCharge(player.getUniqueId());
                         new Jolt(player);
+                    }
+                } else if (abilityName.equalsIgnoreCase("electricstrike")) {
+                    if (!ElectricStrike.hasActiveInstance(player.getUniqueId())) {
+                        ElectricStrike.markPendingCharge(player.getUniqueId());
+                        new ElectricStrike(player);
                     }
                 }
             }
@@ -906,6 +918,11 @@ public class AranarthCoreBendingListener implements Listener {
             joltSlot.endWithCooldown();
         }
         Jolt.clearPendingCharge(e.getPlayer().getUniqueId());
+        ElectricStrike electricStrikeSlot = ElectricStrike.getActiveInstance(e.getPlayer().getUniqueId());
+        if (electricStrikeSlot != null && electricStrikeSlot.getPhase() == ElectricStrike.Phase.CHARGING) {
+            electricStrikeSlot.remove();
+        }
+        ElectricStrike.clearPendingCharge(e.getPlayer().getUniqueId());
         VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
         if (vineWhip != null) {
             vineWhip.cancelInstantly();
@@ -1489,6 +1506,7 @@ public class AranarthCoreBendingListener implements Listener {
         HealingHelix.clearPendingSource(player.getUniqueId());
         CorruptingHelix.clearPendingSource(player.getUniqueId());
         Jolt.clearPendingCharge(player.getUniqueId());
+        ElectricStrike.clearPendingCharge(player.getUniqueId());
         LifeRip.resetTargetDrain(player);
         LifeRip.resetCasterGain(player);
     }
@@ -1518,6 +1536,7 @@ public class AranarthCoreBendingListener implements Listener {
         HealingHelix.clearPendingSource(player.getUniqueId());
         CorruptingHelix.clearPendingSource(player.getUniqueId());
         Jolt.clearPendingCharge(player.getUniqueId());
+        ElectricStrike.clearPendingCharge(player.getUniqueId());
         DaggerVolley.resetStage(player.getUniqueId());
     }
 
