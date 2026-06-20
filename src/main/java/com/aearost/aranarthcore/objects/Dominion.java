@@ -47,6 +47,13 @@ public class Dominion {
 	private boolean mobSpawningEnabled;
 	private int boughtChunks;
 
+	// Dominion level system (1–5), updated automatically every 30 minutes.
+	private int dominionLevel;
+	private int cachedFarmlandCount;
+	private int cachedLivestockCount;
+	private long foundedTimestamp;     // ms epoch; 0 = "ancient" (pre-feature legacy dominion)
+	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
+
 	// A null entry for a permission means it is inherited from the player's rank or relation.
 	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
 
@@ -81,6 +88,12 @@ public class Dominion {
 		this.biomeResourcesBeingClaimed = null;
 		this.conquered = conquered;
 		this.conqueredRequest = null;
+
+		// Dominion level system defaults
+		this.dominionLevel = 1;
+		this.cachedFarmlandCount = 0;
+		this.cachedLivestockCount = 0;
+		this.foundedTimestamp = 0L;
 
 		// Keep balance at the end
 		this.balance = balance;
@@ -672,6 +685,89 @@ public class Dominion {
 	 */
 	public void setConqueredTimestamp(long conqueredTimestamp) {
 		this.conqueredTimestamp = conqueredTimestamp;
+	}
+
+	/**
+	 * Provides the current dominion level (1–5).
+	 * @return The dominion level.
+	 */
+	public int getDominionLevel() {
+		return dominionLevel;
+	}
+
+	/**
+	 * Updates the dominion level (1–5).
+	 * @param dominionLevel The new dominion level.
+	 */
+	public void setDominionLevel(int dominionLevel) {
+		this.dominionLevel = dominionLevel;
+	}
+
+	/**
+	 * Provides the cached farmland-with-crop count from the last periodic scan.
+	 * @return The cached farmland block count.
+	 */
+	public int getCachedFarmlandCount() {
+		return cachedFarmlandCount;
+	}
+
+	/**
+	 * Updates the cached farmland-with-crop count.
+	 * @param cachedFarmlandCount The new count.
+	 */
+	public void setCachedFarmlandCount(int cachedFarmlandCount) {
+		this.cachedFarmlandCount = cachedFarmlandCount;
+	}
+
+	/**
+	 * Provides the cached domesticated livestock count from the last periodic scan.
+	 * @return The cached livestock count.
+	 */
+	public int getCachedLivestockCount() {
+		return cachedLivestockCount;
+	}
+
+	/**
+	 * Updates the cached domesticated livestock count.
+	 * @param cachedLivestockCount The new count.
+	 */
+	public void setCachedLivestockCount(int cachedLivestockCount) {
+		this.cachedLivestockCount = cachedLivestockCount;
+	}
+
+	/**
+	 * Provides the epoch-millisecond timestamp when this dominion was founded.
+	 * A value of 0 indicates a legacy dominion (treated as "ancient" for age criteria).
+	 * @return The founded timestamp, or 0 for legacy dominions.
+	 */
+	public long getFoundedTimestamp() {
+		return foundedTimestamp;
+	}
+
+	/**
+	 * Updates the epoch-millisecond timestamp when this dominion was founded.
+	 * @param foundedTimestamp The founded timestamp.
+	 */
+	public void setFoundedTimestamp(long foundedTimestamp) {
+		this.foundedTimestamp = foundedTimestamp;
+	}
+
+	/**
+	 * Provides the epoch-millisecond timestamp when this dominion first dropped a level.
+	 * A value of 0 indicates the dominion is currently compliant (no active penalty window).
+	 * @return The level-drop timestamp, or 0 if compliant.
+	 */
+	public long getLevelDropTimestamp() {
+		return levelDropTimestamp;
+	}
+
+	/**
+	 * Updates the epoch-millisecond timestamp when this dominion first dropped a level.
+	 * Set to 0 to clear the penalty window (dominion has recovered).
+	 * @param levelDropTimestamp The timestamp, or 0 to clear.
+	 */
+	public void setLevelDropTimestamp(long levelDropTimestamp) {
+		this.levelDropTimestamp = levelDropTimestamp;
 	}
 
 	/**

@@ -11,6 +11,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.command.Command;
@@ -117,14 +118,21 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("who")) {
                     getDominionWho(args, player);
                 } else if (args[0].equalsIgnoreCase("list")) {
-                    int i = 0;
-                    for (Dominion dominionFromList : DominionUtils.getDominions()) {
-                        i++;
+                    List<Dominion> sortedDominions = DominionLevelUtils.getDominionsSortedByPlacement();
+                    if (sortedDominions.isEmpty()) {
+                        player.sendMessage(ChatUtils.chatMessage("&cThere are no dominions yet!"));
+                    } else {
+                        player.sendMessage(ChatUtils.translateToColor("&6&l――― &7Dominion Leaderboard &6&l―――"));
                         NumberFormat formatter = NumberFormat.getCurrencyInstance();
-                        String valueWithTwoDecimals = formatter.format(dominionFromList.getBalance());
-                        player.sendMessage(ChatUtils.translateToColor("&7" + i + ". &e" + dominionFromList.getName() + "&7, ruled by &e"
-                                + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
+                        for (int i = 0; i < sortedDominions.size(); i++) {
+                            Dominion dominionFromList = sortedDominions.get(i);
+                            String valueWithTwoDecimals = formatter.format(dominionFromList.getBalance());
+                            player.sendMessage(ChatUtils.translateToColor(
+                                "&7" + (i + 1) + ". &e" + dominionFromList.getName()
+                                + " &8[&6Lvl." + dominionFromList.getDominionLevel() + "&8]"
+                                + " &7ruled by &e" + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
                                 + " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6" + valueWithTwoDecimals));
+                        }
                     }
                 } else if (args[0].equalsIgnoreCase("info")) {
                     if (args.length == 1) {
@@ -207,6 +215,8 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("perms") || args[0].equalsIgnoreCase("permissions")) {
                     openPermissionsGui(dominion, player);
                 } else if (args[0].equalsIgnoreCase("rank")) {
+                    showDominionLevel(player, dominion);
+                } else if (args[0].equalsIgnoreCase("setrank")) {
                     setMemberRank(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("buychunks")) {
                     buyChunks(args, dominion, player);
@@ -354,6 +364,7 @@ public class CommandDominion implements CommandExecutor {
                                         conquered, null,
                                         // Keep the balance at the end
                                         dominionCost);
+                                dominion.setFoundedTimestamp(System.currentTimeMillis());
                                 DominionUtils.createDominion(dominion);
                                 Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -2022,8 +2033,114 @@ public class CommandDominion implements CommandExecutor {
     }
 
     /**
+     * Displays the dominion's current level, progress toward the next level across all 6
+     * criteria, and the global leaderboard placement summary.
+     * Usage: /dominion rank
+     *
+     * @param player   The player running the command.
+     * @param dominion The player's dominion.
+     */
+    private static void showDominionLevel(Player player, Dominion dominion) {
+        if (dominion == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+            return;
+        }
+
+        NumberFormat formatter = NumberFormat.getCurrencyInstance();
+        int currentLevel = dominion.getDominionLevel();
+        int totalDominions = DominionUtils.getDominions().size();
+
+        // --- Header ---
+        String levelTag = currentLevel == DominionLevelUtils.MAX_LEVEL
+                ? "&6Level " + currentLevel + " &7(MAX)"
+                : "&6Level " + currentLevel;
+        player.sendMessage(ChatUtils.translateToColor(
+                "&6&l――― &e" + dominion.getName() + " &8[" + levelTag + "&8] &6&l―――"));
+
+        // --- Level progress section ---
+        if (currentLevel < DominionLevelUtils.MAX_LEVEL) {
+            int nextLevel = currentLevel + 1;
+            boolean[] criteria = DominionLevelUtils.getCriteriaStatus(dominion, nextLevel);
+            int metCount = 0;
+            for (boolean b : criteria) if (b) metCount++;
+
+            player.sendMessage(ChatUtils.translateToColor(
+                    "&7Progress to Level &e" + nextLevel
+                    + " &8(&e" + DominionLevelUtils.CRITERIA_REQUIRED + "&8/&7"
+                    + DominionLevelUtils.CRITERIA_COUNT + " &7required&8):"));
+
+            // Members
+            int membThresh = DominionLevelUtils.getMembersThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[0] ? "&a✔" : "&c✗") + " &7Members:   &e"
+                    + dominion.getMembers().size() + " &8/ &7" + membThresh));
+
+            // Balance
+            double balThresh = DominionLevelUtils.getBalanceThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[1] ? "&a✔" : "&c✗") + " &7Balance:   &6"
+                    + formatter.format(dominion.getBalance()) + " &8/ &6" + formatter.format(balThresh)));
+
+            // Farmland
+            int farmThresh = DominionLevelUtils.getFarmlandThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[2] ? "&a✔" : "&c✗") + " &7Farmland:  &e"
+                    + dominion.getCachedFarmlandCount() + " &8/ &e" + farmThresh + " &7blocks"));
+
+            // Livestock
+            int liveThresh = DominionLevelUtils.getLivestockThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[3] ? "&a✔" : "&c✗") + " &7Livestock: &e"
+                    + dominion.getCachedLivestockCount() + " &8/ &e" + liveThresh + " &7mobs"));
+
+            // Chunks
+            int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[4] ? "&a✔" : "&c✗") + " &7Chunks:    &e"
+                    + dominion.getChunks().size() + " &8/ &e" + chunkThresh));
+
+            // Age
+            int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  " + (criteria[5] ? "&a✔" : "&c✗") + " &7Age:       &e"
+                    + DominionLevelUtils.getFormattedAge(dominion) + " &8/ &e" + ageThresh + " &7yrs"));
+
+            // Summary line
+            boolean advancing = metCount >= DominionLevelUtils.CRITERIA_REQUIRED;
+            String summaryMark = advancing ? "&a✔ Criteria met!" : "&c✗ Not yet met";
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  &7Meeting &e" + metCount + "&8/&7" + DominionLevelUtils.CRITERIA_COUNT
+                    + " &8— " + summaryMark));
+        } else {
+            player.sendMessage(ChatUtils.translateToColor("  &a✔ Maximum dominion level reached!"));
+        }
+
+        // --- Leaderboard placement section ---
+        player.sendMessage(ChatUtils.translateToColor("&6&l――― &7Leaderboard &6&l―――"));
+        Map<UUID, int[]> placements = DominionLevelUtils.computeAllPlacements();
+        int[] myPlacements = placements.getOrDefault(dominion.getId(),
+                new int[DominionLevelUtils.CRITERIA_COUNT]);
+
+        int totalScore = 0;
+        for (int i = 0; i < DominionLevelUtils.CRITERIA_COUNT; i++) {
+            totalScore += myPlacements[i];
+            player.sendMessage(ChatUtils.translateToColor(
+                    "  &7" + DominionLevelUtils.CATEGORY_NAMES[i] + ": &e#"
+                    + myPlacements[i] + " &8of &e" + totalDominions));
+        }
+
+        List<Dominion> sortedByPlacement = DominionLevelUtils.getDominionsSortedByPlacement();
+        int overallRank = DominionLevelUtils.getOverallRank(dominion, sortedByPlacement);
+        player.sendMessage(ChatUtils.translateToColor(
+                "  &7Total Points: &e" + totalScore
+                + " &8— Overall: &6#" + overallRank + " &8of &6" + totalDominions));
+        player.sendMessage(ChatUtils.translateToColor(
+                "&8(Farmland & livestock updated every 30 minutes)"));
+    }
+
+    /**
      * Sets the rank of a Dominion member. Only the leader can do this.
-     * Usage: /dominion rank <player> <rank>
+     * Usage: /dominion setrank <player> <rank>
      *
      * @param args     The command arguments.
      * @param dominion The player's dominion.
@@ -2039,7 +2156,7 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
         if (args.length < 3) {
-            player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion rank <player> <rank>"));
+            player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion setrank <player> <rank>"));
             return;
         }
 

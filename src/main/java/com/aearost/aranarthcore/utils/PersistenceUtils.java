@@ -1180,6 +1180,11 @@ public class PersistenceUtils {
                 long lastRebelAttemptTimestamp = fields.length > 26 ? Long.parseLong(fields[26]) : 0L;
                 long conqueredTimestamp = fields.length > 27 ? Long.parseLong(fields[27]) : 0L;
                 int boughtChunks = fields.length > 28 ? Integer.parseInt(fields[28]) : 0;
+                int dominionLevel = fields.length > 29 ? Integer.parseInt(fields[29]) : 1;
+                int cachedFarmlandCount = fields.length > 30 ? Integer.parseInt(fields[30]) : 0;
+                int cachedLivestockCount = fields.length > 31 ? Integer.parseInt(fields[31]) : 0;
+                long foundedTimestamp = fields.length > 32 ? Long.parseLong(fields[32]) : 0L;
+                long levelDropTimestamp = fields.length > 33 ? Long.parseLong(fields[33]) : 0L;
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1195,6 +1200,11 @@ public class PersistenceUtils {
                 dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
                 dominion.setConqueredTimestamp(conqueredTimestamp);
                 dominion.setBoughtChunks(boughtChunks);
+                dominion.setDominionLevel(dominionLevel);
+                dominion.setCachedFarmlandCount(cachedFarmlandCount);
+                dominion.setCachedLivestockCount(cachedLivestockCount);
+                dominion.setFoundedTimestamp(foundedTimestamp);
+                dominion.setLevelDropTimestamp(levelDropTimestamp);
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
@@ -1237,7 +1247,7 @@ public class PersistenceUtils {
                 List<Dominion> dominions = DominionUtils.getDominions();
                 try {
                     FileWriter writer = new FileWriter(filePath);
-                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks\n");
+                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
@@ -1339,7 +1349,12 @@ public class PersistenceUtils {
                                     + "|" + dominion.getRebelRequestConquerorLastSeen()
                                     + "|" + dominion.getLastRebelAttemptTimestamp()
                                     + "|" + dominion.getConqueredTimestamp()
-                                    + "|" + dominion.getBoughtChunks() + "\n";
+                                    + "|" + dominion.getBoughtChunks()
+                                    + "|" + dominion.getDominionLevel()
+                                    + "|" + dominion.getCachedFarmlandCount()
+                                    + "|" + dominion.getCachedLivestockCount()
+                                    + "|" + dominion.getFoundedTimestamp()
+                                    + "|" + dominion.getLevelDropTimestamp() + "\n";
                             writer.write(row);
                         }
                     }

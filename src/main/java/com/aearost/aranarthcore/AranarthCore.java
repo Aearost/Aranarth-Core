@@ -122,6 +122,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveDominionPermissions();
                 PersistenceUtils.saveDominionPlayerPermissions();
                 DominionUtils.checkAndProcessConquestDeadlines();
+                DominionLevelUtils.runPeriodicScan();
                 PersistenceUtils.saveWarps();
                 PersistenceUtils.savePunishments();
                 PersistenceUtils.saveAvatars();

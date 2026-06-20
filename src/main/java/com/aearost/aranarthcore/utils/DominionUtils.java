@@ -690,6 +690,22 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Removes a specific chunk from a dominion, updates the internal chunk-key index,
+	 * resizes the food array, and persists the change.
+	 * Used by the level penalty system. The caller is responsible for verifying
+	 * connectivity before calling this method.
+	 *
+	 * @param dominion The dominion to remove the chunk from.
+	 * @param chunk    The chunk to remove.
+	 */
+	public static void removePenaltyChunk(Dominion dominion, Chunk chunk) {
+		dominion.getChunks().remove(chunk);
+		chunkKeyToDominion.remove(getChunkKey(chunk));
+		resizeFoodArray(dominion);
+		updateDominion(dominion);
+	}
+
+	/**
 	 * Resizes the dominion's food array to match the correct size for its current chunk count.
 	 * Items in slots that fall outside the new size are lost when shrinking.
 	 */
