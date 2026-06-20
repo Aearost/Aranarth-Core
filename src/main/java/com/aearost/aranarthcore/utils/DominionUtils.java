@@ -359,6 +359,11 @@ public class DominionUtils {
 			onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_WITHER_SPAWN, 0.5F, 1.5F);
 		}
 
+		// Clean up outposts
+		for (Outpost outpost : new ArrayList<>(OutpostUtils.getDominionOutposts(dominion.getId()))) {
+			OutpostUtils.disbandOutpost(dominion, outpost);
+		}
+
 		// Clean up lookup maps
 		dominionById.remove(dominion.getId());
 		for (UUID memberUuid : dominion.getMembers()) {
