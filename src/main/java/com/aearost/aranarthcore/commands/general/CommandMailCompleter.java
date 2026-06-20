@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class CommandMailCompleter implements TabCompleter {
 
-    private static final List<String> SUBCOMMANDS = List.of("delete", "deleteall", "read", "send");
+    private static final List<String> SUBCOMMANDS = List.of("clear", "clearall", "read", "send");
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -44,7 +44,7 @@ public class CommandMailCompleter implements TabCompleter {
                         .collect(Collectors.toList());
             }
 
-            if (sub.equals("delete")) {
+            if (sub.equals("clear")) {
                 if (!input.isEmpty() && !input.chars().allMatch(Character::isDigit)) {
                     return List.of();
                 }

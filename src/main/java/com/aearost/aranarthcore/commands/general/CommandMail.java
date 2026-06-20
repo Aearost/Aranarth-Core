@@ -124,9 +124,9 @@ public class CommandMail implements CommandExecutor {
                     player.sendMessage(ChatColor.GRAY + "" + ChatColor.ITALIC + mail.getMessage());
                 }
             }
-            case "delete" -> {
+            case "clear" -> {
                 if (args.length < 2) {
-                    player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail delete <number>"));
+                    player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail clear <number>"));
                     return true;
                 }
                 List<Mail> mailList = MailUtils.getMail(player.getUniqueId());
@@ -148,7 +148,7 @@ public class CommandMail implements CommandExecutor {
                 MailUtils.removeMail(player.getUniqueId(), num - 1);
                 player.sendMessage(ChatUtils.chatMessage("&7Mail #&e" + num + " &7has been deleted"));
             }
-            case "deleteall" -> {
+            case "clearall" -> {
                 if (MailUtils.getMail(player.getUniqueId()).isEmpty()) {
                     player.sendMessage(ChatUtils.chatMessage("&7You have no mail"));
                     return true;
