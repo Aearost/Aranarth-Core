@@ -111,6 +111,9 @@ commands:
   lock:
     description: Locks the next-clicked chest block
     permission: aranarth.lock
+  mail:
+    description: Allows players to send and read in-game mail
+    permission: aranarth.mail
   loom:
     description: Opens a loom GUI
     permission: aranarth.tables

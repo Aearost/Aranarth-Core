@@ -450,6 +450,7 @@ public class PermissionUtils {
 		perms.setPermission("aranarth.keyclaim", true);
 		perms.setPermission("aranarth.kills", true);
 		perms.setPermission("aranarth.lock", true);
+		perms.setPermission("aranarth.mail", true);
 		perms.setPermission("aranarth.message", true);
 		perms.setPermission("aranarth.motd", true);
 		perms.setPermission("aranarth.particles", true);

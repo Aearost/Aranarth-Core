@@ -3617,4 +3617,92 @@ public class PersistenceUtils {
         }
     }
 
+    /**
+     * Loads player mail from mail.txt.
+     * Format: {@code recipientUUID|senderUUID|timestamp|message}
+     */
+    public static void loadMail() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "mail.txt";
+        File file = new File(filePath);
+        if (!file.exists()) {
+            return;
+        }
+
+        try {
+            Scanner reader = new Scanner(file);
+            Bukkit.getLogger().info("Attempting to read the mail file...");
+            HashMap<UUID, List<com.aearost.aranarthcore.objects.Mail>> mailData = new HashMap<>();
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine().trim();
+                if (row.startsWith("#") || row.isEmpty()) {
+                    continue;
+                }
+                String[] f = row.split("\\|", 4);
+                if (f.length < 4) {
+                    continue;
+                }
+                try {
+                    UUID recipientUUID = UUID.fromString(f[0]);
+                    UUID senderUUID = UUID.fromString(f[1]);
+                    long timestamp = Long.parseLong(f[2]);
+                    String message = f[3];
+                    mailData.computeIfAbsent(recipientUUID, k -> new ArrayList<>())
+                            .add(new com.aearost.aranarthcore.objects.Mail(senderUUID, recipientUUID, timestamp, message));
+                } catch (Exception ignored) {
+                }
+            }
+            reader.close();
+            MailUtils.setAllMail(mailData);
+            Bukkit.getLogger().info("Mail has been initialised");
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("Something went wrong with loading mail.txt!");
+        }
+    }
+
+    /**
+     * Saves all player mail to mail.txt.
+     * Format: {@code recipientUUID|senderUUID|timestamp|message}
+     */
+    public static void saveMail() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "mail.txt";
+        File pluginDirectory = new File(
+                currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (!isDirectoryCreated) {
+            return;
+        }
+
+        try {
+            if (file.createNewFile()) {
+                Bukkit.getLogger().info("A new mail.txt file has been generated");
+            }
+        } catch (IOException e) {
+            Bukkit.getLogger().info("An error occurred in the creation of mail.txt");
+        }
+
+        try {
+            FileWriter writer = new FileWriter(filePath);
+            writer.write("#Mail data — do not edit manually\n");
+            for (Map.Entry<UUID, List<com.aearost.aranarthcore.objects.Mail>> entry : MailUtils.getAllMail().entrySet()) {
+                UUID recipientUUID = entry.getKey();
+                for (com.aearost.aranarthcore.objects.Mail mail : entry.getValue()) {
+                    writer.write(recipientUUID + "|" + mail.getSenderUUID() + "|"
+                            + mail.getTimestamp() + "|" + mail.getMessage() + "\n");
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            Bukkit.getLogger().info("There was an error in saving mail data");
+        }
+    }
+
 }

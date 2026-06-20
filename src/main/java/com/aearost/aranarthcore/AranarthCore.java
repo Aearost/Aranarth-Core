@@ -136,6 +136,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveGates();
                 MountUtils.syncAllActiveHealthToData();
                 PersistenceUtils.saveMounts();
+                PersistenceUtils.saveMail();
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info("Aranarth data has been saved");
 
@@ -285,6 +286,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadLoginStreaks();
         PersistenceUtils.loadGates();
         PersistenceUtils.loadMounts();
+        PersistenceUtils.loadMail();
     }
 
     /**
@@ -577,6 +579,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mount").setTabCompleter(new CommandMountCompleter());
         getCommand("mctop").setExecutor(new CommandMctop());
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
+        getCommand("mail").setExecutor(new CommandMail());
+        getCommand("mail").setTabCompleter(new CommandMailCompleter());
     }
 
     /**
@@ -992,6 +996,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveGates();
         MountUtils.syncAllActiveHealthToData();
         PersistenceUtils.saveMounts();
+        PersistenceUtils.saveMail();
         Bukkit.getLogger().info("Aranarth data has been saved (shutdown)");
     }
 

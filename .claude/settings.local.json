@@ -220,7 +220,12 @@
       "Bash(head -10 grep -rn \"isBendableSource\\\\|setBendableSource\" /c/Users/liamh/IdeaProjects/ProjectKorra-wip/core/src/)",
       "Bash(find /c/Users/liamh/IdeaProjects/ProjectKorra-wip -name pom.xml -not -path */target/*)",
       "Bash(head -5 find /c/Users/liamh/IdeaProjects/Hyperion -name pom.xml -not -path */target/*)",
-      "Bash(find /c/Users/liamh/.m2 -name paper-api-26*.jar -not -name *sources*)"
+      "Bash(find /c/Users/liamh/.m2 -name paper-api-26*.jar -not -name *sources*)",
+      "Bash(find /c/Users/liamh/IdeaProjects -name *.jar -path */ProjectKorra*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/JedCore -name *.jar)",
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn package:*)",
+      "Bash(find /c/Users/liamh/Desktop/Folders/Minecraft -name JedCore*.jar -not -path */BuildTools/*)",
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn clean:*)"
     ]
   }
 }

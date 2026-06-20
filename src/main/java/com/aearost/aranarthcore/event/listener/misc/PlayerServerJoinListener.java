@@ -306,8 +306,10 @@ public class PlayerServerJoinListener implements Listener {
 
 		player.sendMessage("  " + messages[1]); // Date message
 
-		// Once mail is added in, use the below format
-//		player.sendMessage(ChatUtils.chatMessage("&7You have &e" + aranarthPlayer.getMail().size() + " &7messages in your mail!"));
+		int mailCount = MailUtils.getMail(player.getUniqueId()).size();
+		if (mailCount > 0) {
+			player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + mailCount + " &7mail message" + (mailCount == 1 ? "" : "s")));
+		}
 
 		// Login streak notification
 		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());

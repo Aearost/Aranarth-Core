@@ -5,6 +5,7 @@ Major Features
 [+] Implemented auto replenishment of items, supporting eating, tools breaking, thrown projectiles, dropped items, etc
 [+] Implemented permission-based custom armor stand poses
 [+] Added automatic role applying from emoji reactions to a message in the #info channel
+[+] Added the /mail command, allowing players to send mail to offline players
 [+] Added Blood Bending to Emperors
 [+] Added Flight to Emperors
 [+] Implemented the CableSlash metal combo
