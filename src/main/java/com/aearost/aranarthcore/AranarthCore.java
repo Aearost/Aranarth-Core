@@ -122,7 +122,6 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveDominionPermissions();
                 PersistenceUtils.saveDominionPlayerPermissions();
                 DominionUtils.checkAndProcessConquestDeadlines();
-                DominionLevelUtils.runPeriodicScan();
                 PersistenceUtils.saveWarps();
                 PersistenceUtils.savePunishments();
                 PersistenceUtils.saveAvatars();
@@ -180,6 +179,7 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     PermissionUtils.reEvaluateMonthlySaints(player);
                 }
+                DominionLevelUtils.runPeriodicScan();
             }
         }, 12000, 12000);
 
@@ -266,6 +266,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadDominions();
         PersistenceUtils.loadDominionPermissions();
         PersistenceUtils.loadDominionPlayerPermissions();
+        PersistenceUtils.loadOutposts();
         PersistenceUtils.loadWarps();
         PersistenceUtils.loadPunishments();
         PersistenceUtils.loadAvatars();
@@ -324,6 +325,7 @@ public class AranarthCore extends JavaPlugin {
         new ProjectileLaunchEventListener(this);
         new PlayerCommandPreprocessEventListener(this);
         new EntityBreedEventListener(this);
+        new EntityTameEventListener(this);
         new PlayerDropItemEventListener(this);
         new PlayerItemDamageEventListener(this);
         new PlayerItemHeldEventListener(this);
@@ -982,6 +984,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveShops();
         PersistenceUtils.saveLockedContainers();
         PersistenceUtils.saveDominions();
+        PersistenceUtils.saveOutposts();
         PersistenceUtils.saveDominionPermissions();
         PersistenceUtils.saveDominionPlayerPermissions();
         PersistenceUtils.saveWarps();

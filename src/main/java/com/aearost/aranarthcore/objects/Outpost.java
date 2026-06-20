@@ -1,0 +1,79 @@
+package com.aearost.aranarthcore.objects;
+
+import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
+
+import java.util.List;
+import java.util.UUID;
+
+/**
+ * Represents a dominion outpost that is a land claim which is disconnected from the main dominion.
+ * Each dominion may have up to 4 outposts, unlocked at dominion levels 2–5 respectively.
+ */
+public class Outpost {
+
+    private final UUID id;
+    private String name;
+    private final UUID dominionId;
+    private int outpostIndex;
+    private Location home;
+    private List<Chunk> chunks;
+    private final long createdTimestamp;
+
+    public Outpost(UUID id, String name, UUID dominionId, int outpostIndex,
+                   String worldName, double homeX, double homeY, double homeZ,
+                   float homeYaw, float homePitch, List<Chunk> chunks, long createdTimestamp) {
+        this.id = id != null ? id : UUID.randomUUID();
+        this.name = name;
+        this.dominionId = dominionId;
+        this.outpostIndex = outpostIndex;
+        this.home = new Location(Bukkit.getWorld(worldName), homeX, homeY, homeZ, homeYaw, homePitch);
+        this.chunks = chunks;
+        this.createdTimestamp = createdTimestamp;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public UUID getDominionId() {
+        return dominionId;
+    }
+
+    public int getOutpostIndex() {
+        return outpostIndex;
+    }
+
+    public void setOutpostIndex(int outpostIndex) {
+        this.outpostIndex = outpostIndex;
+    }
+
+    public Location getHome() {
+        return home;
+    }
+
+    public void setHome(Location home) {
+        this.home = home;
+    }
+
+    public List<Chunk> getChunks() {
+        return chunks;
+    }
+
+    public void setChunks(List<Chunk> chunks) {
+        this.chunks = chunks;
+    }
+
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+}

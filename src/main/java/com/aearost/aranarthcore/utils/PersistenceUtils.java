@@ -1184,7 +1184,12 @@ public class PersistenceUtils {
                 int cachedFarmlandCount = fields.length > 30 ? Integer.parseInt(fields[30]) : 0;
                 int cachedLivestockCount = fields.length > 31 ? Integer.parseInt(fields[31]) : 0;
                 long foundedTimestamp = fields.length > 32 ? Long.parseLong(fields[32]) : 0L;
+                // Migrate old real-time ms values (pre-calendar system) to 0 (Ancient)
+                if (foundedTimestamp > 1_000_000_000L) {
+                    foundedTimestamp = 0L;
+                }
                 long levelDropTimestamp = fields.length > 33 ? Long.parseLong(fields[33]) : 0L;
+                int boughtOutpostChunks = fields.length > 34 ? Integer.parseInt(fields[34]) : 0;
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1205,6 +1210,7 @@ public class PersistenceUtils {
                 dominion.setCachedLivestockCount(cachedLivestockCount);
                 dominion.setFoundedTimestamp(foundedTimestamp);
                 dominion.setLevelDropTimestamp(levelDropTimestamp);
+                dominion.setBoughtOutpostChunks(boughtOutpostChunks);
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
@@ -1247,7 +1253,7 @@ public class PersistenceUtils {
                 List<Dominion> dominions = DominionUtils.getDominions();
                 try {
                     FileWriter writer = new FileWriter(filePath);
-                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp\n");
+                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
@@ -1354,7 +1360,8 @@ public class PersistenceUtils {
                                     + "|" + dominion.getCachedFarmlandCount()
                                     + "|" + dominion.getCachedLivestockCount()
                                     + "|" + dominion.getFoundedTimestamp()
-                                    + "|" + dominion.getLevelDropTimestamp() + "\n";
+                                    + "|" + dominion.getLevelDropTimestamp()
+                                    + "|" + dominion.getBoughtOutpostChunks() + "\n";
                             writer.write(row);
                         }
                     }
@@ -3717,6 +3724,142 @@ public class PersistenceUtils {
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("There was an error in saving mail data");
+        }
+    }
+
+    /**
+     * Loads all outposts from outposts.txt and registers them with OutpostUtils.
+     * Must be called after loadDominions().
+     */
+    public static void loadOutposts() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "outposts.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            Bukkit.getLogger().info("Attempting to read the outposts file...");
+
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#")) {
+                    continue;
+                }
+
+                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp
+                String[] fields = row.split("\\|", -1);
+                if (fields.length < 12) {
+                    continue;
+                }
+
+                UUID id = UUID.fromString(fields[0]);
+                UUID dominionId = UUID.fromString(fields[1]);
+                String name = fields[2];
+                int outpostIndex = Integer.parseInt(fields[3]);
+                String worldName = fields[4];
+                double homeX = Double.parseDouble(fields[5]);
+                double homeY = Double.parseDouble(fields[6]);
+                double homeZ = Double.parseDouble(fields[7]);
+                float homeYaw = Float.parseFloat(fields[8]);
+                float homePitch = Float.parseFloat(fields[9]);
+
+                org.bukkit.World world = Bukkit.getWorld(worldName);
+                if (world == null) {
+                    Bukkit.getLogger().warning("Outpost " + name + " references unknown world: " + worldName + " — skipping.");
+                    continue;
+                }
+
+                List<Chunk> chunks = new ArrayList<>();
+                if (!fields[10].isEmpty()) {
+                    for (String chunkEntry : fields[10].split("\\*\\*\\*")) {
+                        String[] parts = chunkEntry.split(",");
+                        int cx = Integer.parseInt(parts[0]);
+                        int cz = Integer.parseInt(parts[1]);
+                        chunks.add(world.getChunkAt(cx, cz));
+                    }
+                }
+
+                long createdTimestamp = Long.parseLong(fields[11]);
+
+                com.aearost.aranarthcore.objects.Outpost outpost = new com.aearost.aranarthcore.objects.Outpost(
+                        id, name, dominionId, outpostIndex,
+                        worldName, homeX, homeY, homeZ, homeYaw, homePitch,
+                        chunks, createdTimestamp
+                );
+                OutpostUtils.registerOutpost(outpost);
+            }
+
+            Bukkit.getLogger().info("All outposts have been initialized");
+            reader.close();
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().warning("outposts.txt not found — skipping outpost load.");
+        }
+    }
+
+    /**
+     * Saves all outposts to outposts.txt.
+     */
+    public static void saveOutposts() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "outposts.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (!isDirectoryCreated) {
+            return;
+        }
+
+        try {
+            if (file.createNewFile()) {
+                Bukkit.getLogger().info("A new outposts.txt file has been generated");
+            }
+        } catch (IOException e) {
+            Bukkit.getLogger().info("An error occurred creating outposts.txt");
+            return;
+        }
+
+        try {
+            FileWriter writer = new FileWriter(filePath);
+            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp\n");
+
+            for (com.aearost.aranarthcore.objects.Dominion dominion : DominionUtils.getDominions()) {
+                for (com.aearost.aranarthcore.objects.Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+                    StringBuilder chunks = new StringBuilder();
+                    for (Chunk chunk : outpost.getChunks()) {
+                        if (!chunks.isEmpty()) chunks.append("***");
+                        chunks.append(chunk.getX()).append(",").append(chunk.getZ());
+                    }
+
+                    org.bukkit.Location home = outpost.getHome();
+                    String row = outpost.getId() + "|"
+                            + outpost.getDominionId() + "|"
+                            + outpost.getName() + "|"
+                            + outpost.getOutpostIndex() + "|"
+                            + home.getWorld().getName() + "|"
+                            + home.getX() + "|"
+                            + home.getY() + "|"
+                            + home.getZ() + "|"
+                            + home.getYaw() + "|"
+                            + home.getPitch() + "|"
+                            + chunks + "|"
+                            + outpost.getCreatedTimestamp() + "\n";
+                    writer.write(row);
+                }
+            }
+            writer.close();
+        } catch (IOException e) {
+            Bukkit.getLogger().info("There was an error saving outposts!");
         }
     }
 

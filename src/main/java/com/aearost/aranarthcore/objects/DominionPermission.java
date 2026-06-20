@@ -27,6 +27,7 @@ public enum DominionPermission {
 
     // Member commands
     HOME,
+    OUTPOST_HOME,
     FOOD,
     RESOURCES,
     INVITE,
@@ -36,6 +37,9 @@ public enum DominionPermission {
     SURRENDER,
     REBEL,
     RETREAT,
+
+    // Outpost management (create is leader-only, but rename/sethome/claim are configurable)
+    MANAGE_OUTPOSTS,
 
     // Leader-restricted commands (enforced in commands, not configurable per rank)
     WITHDRAW

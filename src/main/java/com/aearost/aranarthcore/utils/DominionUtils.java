@@ -186,57 +186,73 @@ public class DominionUtils {
 	}
 
 	/**
-	 * Claims the chunk for the dominion.
+	 * Claims the chunk for the dominion or one of its outposts.
+	 *
 	 * @param player The player attempting to claim the chunk.
 	 * @param chunkToClaim The chunk the player is attempting to claim.
-	 * @return The message of whether the chunk was claimed.
+	 * @return A chat-formatted message describing the outcome.
 	 */
 	public static String claimChunk(Player player, Chunk chunkToClaim) {
+		// Reject if already claimed
 		Dominion dominionOfChunk = getDominionOfChunk(chunkToClaim);
+		if (dominionOfChunk != null) {
+			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
+			if (playerDominion != null && playerDominion.isSameDominion(dominionOfChunk)) {
+				return "&cThis chunk is already claimed by your dominion";
+			}
+			return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
+		}
+		Outpost outpostOfChunk = OutpostUtils.getOutpostOfChunk(chunkToClaim);
+		if (outpostOfChunk != null) {
+			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
+			if (playerDominion != null && outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
+				return "&cThis chunk is already claimed by your outpost &e" + outpostOfChunk.getName();
+			}
+			return "&cThis chunk is already claimed by another dominion's outpost";
+		}
 
 		Dominion playerDominion = getPlayerDominion(player.getUniqueId());
-		if (playerDominion != null) {
-			if (playerDominion.getLeader().equals(player.getUniqueId()) || playerDominion.getMemberRank(player.getUniqueId()) == DominionRank.LIEUTENANT) {
-				if (playerDominion.getConqueredRequest() != null) {
-					return "&cYou cannot claim chunks while your Dominion is under active conquest!";
-				}
-				if (dominionOfChunk == null) {
-					int claimPrice = 250;
-					if (playerDominion.getBalance() >= claimPrice) {
-						if (playerDominion.getChunks().size() < playerDominion.getMaxChunks()) {
-							if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
-								double newBalance = playerDominion.getBalance() - claimPrice;
-								playerDominion.setBalance(newBalance);
-								List<Chunk> chunks = playerDominion.getChunks();
-								chunks.add(chunkToClaim);
-								chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
-								resizeFoodArray(playerDominion);
-								updateDominion(playerDominion);
-								return "&e" + playerDominion.getName() + " &7has claimed &e" +
-										playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
-							} else {
-								return "&cThis chunk is not connected to the rest of your Dominion!";
-							}
-						} else {
-							return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
-						}
-					} else {
-						return "&cYour dominion cannot afford this!";
-					}
-				} else {
-					if (playerDominion.isSameDominion(dominionOfChunk)) {
-						return "&cThis chunk is already claimed by your dominion";
-					} else {
-						return "&cThis chunk is already claimed by &e" + dominionOfChunk.getName();
-					}
-				}
-			} else {
-				return "&cOnly the Leader or Lieutenant can claim land!";
-			}
-		} else {
+		if (playerDominion == null) {
 			return "&cYou are not part of a dominion!";
 		}
-    }
+		if (!playerDominion.getLeader().equals(player.getUniqueId())
+				&& playerDominion.getMemberRank(player.getUniqueId()) != DominionRank.LIEUTENANT) {
+			return "&cOnly the Leader or Lieutenant can claim land!";
+		}
+		if (playerDominion.getConqueredRequest() != null) {
+			return "&cYou cannot claim chunks while your Dominion is under active conquest!";
+		}
+
+		int claimPrice = 250;
+
+		// Adjacent to main dominion
+		if (isConnectedToClaims(playerDominion.getChunks(), chunkToClaim)) {
+			if (playerDominion.getBalance() < claimPrice) {
+				return "&cYour dominion cannot afford this!";
+			}
+			if (playerDominion.getChunks().size() >= playerDominion.getMaxChunks()) {
+				return "&cYou cannot claim more than &e" + playerDominion.getMaxChunks() + " chunks!";
+			}
+			playerDominion.setBalance(playerDominion.getBalance() - claimPrice);
+			playerDominion.getChunks().add(chunkToClaim);
+			chunkKeyToDominion.put(getChunkKey(chunkToClaim), playerDominion);
+			resizeFoodArray(playerDominion);
+			updateDominion(playerDominion);
+			DominionLevelUtils.reevaluateDominion(playerDominion);
+			return "&e" + playerDominion.getName() + " &7has claimed &e"
+					+ playerDominion.getChunks().size() + "/" + playerDominion.getMaxChunks() + " chunks";
+		}
+
+		// Adjacent to an outpost (lowest index first)
+		List<Outpost> outposts = OutpostUtils.getDominionOutposts(playerDominion.getId());
+		for (Outpost outpost : outposts) {
+			if (OutpostUtils.isConnectedToOutpostClaims(outpost.getChunks(), chunkToClaim)) {
+				return OutpostUtils.claimOutpostChunk(player, outpost, playerDominion, chunkToClaim);
+			}
+		}
+
+		return "&cThis chunk is not connected to your Dominion or an outpost";
+	}
 
 	/**
 	 * Provides the dominion that owns the chunk.
@@ -248,12 +264,43 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Returns the dominion that owns the given chunk, checking both main dominion
+	 * claims and outpost claims. Returns null if the chunk is unclaimed.
+	 */
+	public static Dominion getDominionOfChunkAnywhere(Chunk chunk) {
+		Dominion dominion = getDominionOfChunk(chunk);
+		if (dominion != null) {
+			return dominion;
+		}
+		Outpost outpost = OutpostUtils.getOutpostOfChunk(chunk);
+		if (outpost != null) {
+			return getDominionById(outpost.getDominionId());
+		}
+		return null;
+	}
+
+	/**
 	 * Unclaims the chunk that the user is standing in.
+	 * If the chunk belongs to an outpost, delegates to {@link OutpostUtils#unclaimOutpostChunk}.
 	 * @param player The player that is attempting to unclaim the chunk.
 	 * @return The message of whether the chunk was unclaimed.
 	 */
 	public static String unclaimChunk(Player player) {
 		Chunk chunk = player.getLocation().getChunk();
+
+		Outpost outpostOfChunk = OutpostUtils.getOutpostOfChunk(chunk);
+		if (outpostOfChunk != null) {
+			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
+			if (playerDominion == null) {
+				return "&cYou are not part of a Dominion";
+			}
+			if (!outpostOfChunk.getDominionId().equals(playerDominion.getId())) {
+				return "&cThis chunk is claimed by another dominion's outpost!";
+			}
+			return OutpostUtils.unclaimOutpostChunk(player, outpostOfChunk, playerDominion, chunk);
+		}
+
+		// Main dominion chunk
 		Dominion dominionOfChunk = getDominionOfChunk(chunk);
 		if (dominionOfChunk != null) {
 			Dominion playerDominion = getPlayerDominion(player.getUniqueId());
@@ -275,6 +322,7 @@ public class DominionUtils {
 								chunkKeyToDominion.remove(getChunkKey(chunk));
 								resizeFoodArray(playerDominion);
 								updateDominion(playerDominion);
+								DominionLevelUtils.reevaluateDominion(playerDominion);
 								return "&7This chunk has been unclaimed successfully";
 							} else {
 								return "&cYou cannot unclaim this chunk as they all must remain connected!";

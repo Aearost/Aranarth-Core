@@ -56,8 +56,10 @@ public class GuiDominionPermissions {
      * Row 1 — Interactions:       slots 10-14 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER)
      * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
      * Row 3 — Commands:           slots 28-35 (HOME, FOOD, RESOURCES, INVITE, REMOVE_MEMBER, SURRENDER, REBEL, RETREAT)
-     * Row 4 — Buffer:             slots 36-44 (gray panes)
+     * Row 4 — (no section header) slots 36-37 (OUTPOST_HOME, MANAGE_OUTPOSTS)
+     * Row 5 — Buffer:             slots 45-53 (gray panes)
      * </pre>
+     * The rank sub-screen uses 54 slots to accommodate the extra row.
      */
     public static Map<Integer, DominionPermission> getRankSlotPermissions() {
         Map<Integer, DominionPermission> map = new LinkedHashMap<>();
@@ -81,6 +83,8 @@ public class GuiDominionPermissions {
         map.put(33, DominionPermission.SURRENDER);
         map.put(34, DominionPermission.REBEL);
         map.put(35, DominionPermission.RETREAT);
+        map.put(36, DominionPermission.OUTPOST_HOME);
+        map.put(37, DominionPermission.MANAGE_OUTPOSTS);
         return map;
     }
 
@@ -90,7 +94,7 @@ public class GuiDominionPermissions {
      * Row 0 — Buffer:              slots 0-8  (gray panes)
      * Row 1 — Interactions:       slots 10-15 (BUILD, MISC_INTERACT, ARMOR_STAND, ITEM_FRAME, VILLAGER, PVP)
      * Row 2 — Block Interactions: slots 19-25 (DOOR, TRAPDOOR, FENCE_GATE, LEVER, BUTTON, PRESSURE_PLATE, CONTAINER)
-     * Row 3 — Commands:           slot 28    (HOME)
+     * Row 3 — Commands:           slots 28-29 (HOME, OUTPOST_HOME)
      * Row 4 — Buffer:             slots 36-44 (gray panes)
      * </pre>
      */
@@ -110,6 +114,7 @@ public class GuiDominionPermissions {
         map.put(24, DominionPermission.PRESSURE_PLATE);
         map.put(25, DominionPermission.CONTAINER);
         map.put(28, DominionPermission.HOME);
+        map.put(29, DominionPermission.OUTPOST_HOME);
         return map;
     }
 
@@ -154,7 +159,7 @@ public class GuiDominionPermissions {
 
         Set<DominionPermission> enabled = dominion.getDominionPermissions().getPermissions(rank);
         String title = ChatUtils.translateToColor(getPermissionsTitle(rank));
-        Inventory gui = Bukkit.createInventory(player, 45, title);
+        Inventory gui = Bukkit.createInventory(player, 54, title);
 
         gui.setItem(9,  buildSectionHeader(Material.LIGHT_BLUE_STAINED_GLASS_PANE,   "&b&lInteractions"));
         gui.setItem(18, buildSectionHeader(Material.YELLOW_STAINED_GLASS_PANE, "&e&lBlock Interactions"));
@@ -163,14 +168,14 @@ public class GuiDominionPermissions {
         ItemStack filler = buildFiller();
         for (int i = 0; i < 9; i++) {
             gui.setItem(i, filler);
-            gui.setItem(36 + i, filler);
+            gui.setItem(45 + i, filler);
         }
 
         for (Map.Entry<Integer, DominionPermission> entry : getRankSlotPermissions().entrySet()) {
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
         gui.setItem(4, buildRestoreDefaultsButton("&7Resets this rank's permissions to server defaults"));
-        gui.setItem(40, buildBackButton());
+        gui.setItem(49, buildBackButton());
 
         player.closeInventory();
         player.openInventory(gui);
@@ -300,7 +305,7 @@ public class GuiDominionPermissions {
      * Builds the Member PvP toggle item for the main screen.
      */
     public static ItemStack buildMemberPvpToggleItem(boolean enabled) {
-        ItemStack item = new ItemStack(Material.REDSTONE);
+        ItemStack item = new ItemStack(Material.IRON_SWORD);
         ItemMeta meta = item.getItemMeta();
         String statusColor = enabled ? "&a" : "&c";
         String statusText = enabled ? "Enabled" : "Disabled";
@@ -314,7 +319,7 @@ public class GuiDominionPermissions {
      * Builds the Guardians hub button.
      */
     public static ItemStack buildGuardiansItem() {
-        ItemStack item = new ItemStack(Material.IRON_SWORD);
+        ItemStack item = new ItemStack(Material.SHIELD);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor("&c&lGuardians"));
         meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's guardian warriors")));
@@ -372,7 +377,8 @@ public class GuiDominionPermissions {
             case ITEM_FRAME -> Material.ITEM_FRAME;
             case VILLAGER -> Material.EMERALD;
             case PVP -> Material.IRON_SWORD;
-            case HOME -> Material.COMPASS;
+            case HOME -> Material.RED_BED;
+            case OUTPOST_HOME -> Material.GREEN_BED;
             case FOOD -> Material.COOKED_BEEF;
             case RESOURCES -> Material.DIAMOND_PICKAXE;
             case INVITE -> Material.PAPER;
@@ -380,6 +386,7 @@ public class GuiDominionPermissions {
             case SURRENDER -> Material.WHITE_BANNER;
             case REBEL -> Material.CROSSBOW;
             case RETREAT -> Material.FEATHER;
+            case MANAGE_OUTPOSTS -> Material.OAK_LOG;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }

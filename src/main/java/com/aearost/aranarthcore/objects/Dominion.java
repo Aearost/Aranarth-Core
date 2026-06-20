@@ -54,6 +54,9 @@ public class Dominion {
 	private long foundedTimestamp;     // ms epoch; 0 = "ancient" (pre-feature legacy dominion)
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
 
+	// Outpost system
+	private int boughtOutpostChunks;
+
 	// A null entry for a permission means it is inherited from the player's rank or relation.
 	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
 
@@ -768,6 +771,23 @@ public class Dominion {
 	 */
 	public void setLevelDropTimestamp(long levelDropTimestamp) {
 		this.levelDropTimestamp = levelDropTimestamp;
+	}
+
+	/**
+	 * Provides the number of extra outpost chunks purchased beyond each outpost's base limit.
+	 * This value applies equally to every outpost owned by this dominion.
+	 * @return The number of bought extra outpost chunks.
+	 */
+	public int getBoughtOutpostChunks() {
+		return boughtOutpostChunks;
+	}
+
+	/**
+	 * Updates the number of extra outpost chunks purchased.
+	 * @param boughtOutpostChunks The new count.
+	 */
+	public void setBoughtOutpostChunks(int boughtOutpostChunks) {
+		this.boughtOutpostChunks = boughtOutpostChunks;
 	}
 
 	/**

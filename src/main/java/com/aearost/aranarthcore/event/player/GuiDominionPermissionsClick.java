@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.player;
 import com.aearost.aranarthcore.gui.GuiDominionMembers;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
+import com.aearost.aranarthcore.gui.GuiOutposts;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
@@ -82,7 +83,7 @@ public class GuiDominionPermissionsClick {
                 case "Members"     -> GuiDominionMembers.open(player);
                 case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
                 case "Guardians"   -> { /* TODO: open Guardians GUI when implemented */ }
-                case "Outposts"    -> { /* TODO: open Outposts GUI when implemented */ }
+                case "Outposts"    -> GuiOutposts.open(player);
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;

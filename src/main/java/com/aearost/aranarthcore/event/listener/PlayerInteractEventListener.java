@@ -3,7 +3,12 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.*;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -37,6 +42,27 @@ public class PlayerInteractEventListener implements Listener {
                     new GoatHornUse().execute(e);
                     return;
                 }
+            }
+        }
+
+        // Hoe used on till-able block - check 1 tick later
+        if (e.getAction() == Action.RIGHT_CLICK_BLOCK
+                && e.getItem() != null
+                && e.getItem().getType().name().endsWith("_HOE")
+                && e.getClickedBlock() != null) {
+            Block clickedBlock = e.getClickedBlock();
+            Material type = clickedBlock.getType();
+            if (type == Material.DIRT || type == Material.GRASS_BLOCK
+                    || type == Material.DIRT_PATH || type == Material.COARSE_DIRT) {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                    if (clickedBlock.getType() == Material.FARMLAND) {
+                        Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(clickedBlock.getChunk());
+                        if (dominion != null) {
+                            dominion.setCachedFarmlandCount(dominion.getCachedFarmlandCount() + 1);
+                            DominionLevelUtils.reevaluateDominion(dominion);
+                        }
+                    }
+                }, 1L);
             }
         }
 

@@ -1,13 +1,17 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Player;
 import org.bukkit.entity.Tameable;
 
 import java.text.NumberFormat;
@@ -16,36 +20,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Manages the Dominion level system (levels 1–5).
- * <p>
- * A dominion advances to the next level when it meets at least {@link #CRITERIA_REQUIRED}
- * out of {@link #CRITERIA_COUNT} criteria simultaneously. Levels drop automatically when
- * criteria are no longer met.
- * <p>
- * Criteria categories (index order used throughout):
- * 0 = Members, 1 = Balance, 2 = Farmland, 3 = Livestock, 4 = Chunks, 5 = Age
- * <p>
- * Farmland and livestock counts are cached from the 30-minute periodic scan.
- * Other criteria (members, balance, chunks, age) are evaluated live.
  */
 public class DominionLevelUtils {
 
-    /**
-     * One in-game year expressed in real milliseconds.
-     * Based on ~2160 Minecraft days (each 20 real minutes) ≈ 30 real-world days.
-     */
-    public static final long MS_PER_INGAME_YEAR = 2_592_000_000L;
+    private static final int[] MONTH_DAYS = {147, 147, 146, 145, 146, 145, 146, 146, 146, 146, 146, 146, 146, 147, 147};
+    public static final int DAYS_PER_YEAR = 2192;
 
     public static final int MAX_LEVEL = 5;
-    public static final int CRITERIA_REQUIRED = 4; // of 6 needed to advance/hold a level
+    public static final int CRITERIA_REQUIRED = 4;
     public static final int CRITERIA_COUNT = 6;
 
-    // Thresholds per level: index 0 = level 2, index 1 = level 3, ..., index 3 = level 5
+    // Thresholds per level
     private static final int[] MEMBERS_THRESHOLDS = {2, 4, 8, 12};
     private static final double[] BALANCE_THRESHOLDS = {50_000, 500_000, 5_000_000, 50_000_000};
     private static final int[] FARMLAND_THRESHOLDS = {50, 250, 1_000, 5_000};
     private static final int[] LIVESTOCK_THRESHOLDS = {15, 50, 120, 250};
     private static final int[] CHUNKS_THRESHOLDS = {10, 75, 250, 350};
-    private static final int[] AGE_THRESHOLDS = {1, 2, 3, 4}; // in-game years
+    private static final int[] AGE_THRESHOLDS = {1, 2, 3, 4}; // Aranarth years
 
 
     private static final Set<EntityType> FARM_ANIMAL_TYPES = Set.of(
@@ -152,16 +143,36 @@ public class DominionLevelUtils {
     }
 
     /**
-     * Returns the number of complete in-game years this dominion has existed.
-     * Legacy dominions (foundedTimestamp == 0) return {@link Long#MAX_VALUE}, meaning
-     * they always satisfy the age criterion at any level.
+     * Returns the total number of in-game days elapsed since a given Aranarth date,
+     * measured from year 0 day 0.
+     */
+    public static long toTotalInGameDays(int year, Month month, int day) {
+        long total = (long) year * DAYS_PER_YEAR;
+        for (int i = 0; i < month.ordinal(); i++) {
+            total += MONTH_DAYS[i];
+        }
+        total += day;
+        return total;
+    }
+
+    /**
+     * Returns the total in-game days for the current server date.
+     * Call this when recording a dominion's founding date.
+     */
+    public static long getCurrentInGameDayTotal() {
+        return toTotalInGameDays(AranarthUtils.getYear(), AranarthUtils.getMonth(), AranarthUtils.getDay());
+    }
+
+    /**
+     * Returns the number of complete in-game years this dominion has existed,
+     * based on the custom Aranarth calendar.
      */
     public static long getInGameYears(Dominion dominion) {
         if (dominion.getFoundedTimestamp() == 0L) {
             return Long.MAX_VALUE;
         }
-        long elapsed = System.currentTimeMillis() - dominion.getFoundedTimestamp();
-        return Math.max(0L, elapsed / MS_PER_INGAME_YEAR);
+        long elapsed = getCurrentInGameDayTotal() - dominion.getFoundedTimestamp();
+        return Math.max(0L, elapsed / DAYS_PER_YEAR);
     }
 
     /**
@@ -171,15 +182,13 @@ public class DominionLevelUtils {
         if (dominion.getFoundedTimestamp() == 0L) {
             return "Ancient";
         }
-        long elapsed = System.currentTimeMillis() - dominion.getFoundedTimestamp();
-        double years = elapsed / (double) MS_PER_INGAME_YEAR;
-        return String.format("%.1f yrs", years);
+        long elapsed = getCurrentInGameDayTotal() - dominion.getFoundedTimestamp();
+        double years = Math.max(0.0, elapsed / (double) DAYS_PER_YEAR);
+        return String.format("%.1f", years);
     }
 
     /**
      * Computes each dominion's placement (1-indexed, 1 = best) in all 6 categories.
-     * Higher is better for all categories (more members, more balance, etc.).
-     * Tied entries share the same rank.
      *
      * @return Map from dominion UUID to int[6] placement array.
      */
@@ -194,7 +203,7 @@ public class DominionLevelUtils {
             placements.put(d.getId(), new int[CRITERIA_COUNT]);
         }
 
-        // Comparators: higher value = better rank (rank 1)
+        // Higher value = better rank (rank 1)
         assignPlacements(placements, sortedBy(dominions, (a, b) ->
                         Integer.compare(b.getMembers().size(), a.getMembers().size())), 0,
                 (a, b) -> a.getMembers().size() == b.getMembers().size());
@@ -325,6 +334,13 @@ public class DominionLevelUtils {
                 int maxY = chunk.getWorld().getMaxHeight();
                 bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
             }
+            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+                for (Chunk chunk : outpost.getChunks()) {
+                    int minY = chunk.getWorld().getMinHeight();
+                    int maxY = chunk.getWorld().getMaxHeight();
+                    bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
+                }
+            }
             snapshotMap.put(dominion.getId(), bundles);
         }
 
@@ -360,10 +376,19 @@ public class DominionLevelUtils {
                 }
             }
         }
+        for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+            for (Chunk chunk : outpost.getChunks()) {
+                for (Entity entity : chunk.getEntities()) {
+                    if (isCountedLivestock(entity)) {
+                        count++;
+                    }
+                }
+            }
+        }
         return count;
     }
 
-    private static boolean isCountedLivestock(Entity entity) {
+    public static boolean isCountedLivestock(Entity entity) {
         EntityType type = entity.getType();
         if (FARM_ANIMAL_TYPES.contains(type)) {
             return true;
@@ -417,13 +442,37 @@ public class DominionLevelUtils {
                 if (dominion.getLevelDropTimestamp() != 0L) {
                     dominion.setLevelDropTimestamp(0L);
                     notifyMembers(dominion, "&7Your dominion &e" + dominion.getName()
-                            + " &7has recovered — penalties have been lifted!");
+                            + " &7has recovered - penalties have been lifted!");
                 }
                 dominion.setDominionLevel(newLevel);
-                notifyMembers(dominion, "&7Your dominion &e" + dominion.getName()
-                        + " &7has &aleveled up to &6Level " + newLevel + "&7!");
+                notifyMembersLevelUp(dominion, newLevel);
             }
             // Level unchanged: do not modify levelDropTimestamp
+        }
+    }
+
+    /**
+     * Re-evaluates a single dominion's level immediately.
+     */
+    public static void reevaluateDominion(Dominion dominion) {
+        int newLevel = evaluateLevel(dominion);
+        int oldLevel = dominion.getDominionLevel();
+
+        if (newLevel < oldLevel) {
+            if (dominion.getLevelDropTimestamp() == 0L) {
+                dominion.setLevelDropTimestamp(System.currentTimeMillis());
+            }
+            dominion.setDominionLevel(newLevel);
+            notifyMembers(dominion, "&cYour dominion &e" + dominion.getName()
+                    + " &chas dropped to &6Level " + newLevel + "&7!"
+                    + " &cRegain 4/6 criteria within 1 in-game month to avoid penalties!");
+        } else if (newLevel > oldLevel) {
+            if (dominion.getLevelDropTimestamp() != 0L) {
+                dominion.setLevelDropTimestamp(0L);
+                notifyMembers(dominion, "&7Your dominion is no longer subject to penalties");
+            }
+            dominion.setDominionLevel(newLevel);
+            notifyMembersLevelUp(dominion, newLevel);
         }
     }
 
@@ -436,20 +485,19 @@ public class DominionLevelUtils {
         }
     }
 
+    private static void notifyMembersLevelUp(Dominion dominion, int newLevel) {
+        for (UUID memberUuid : dominion.getMembers()) {
+            Player member = Bukkit.getPlayer(memberUuid);
+            if (member != null && member.isOnline()) {
+                member.sendMessage(ChatUtils.chatMessage(
+                        "&7Your Dominion has ranked up to &eLevel " + newLevel));
+                member.playSound(member, Sound.ENTITY_PLAYER_LEVELUP, 1.0F, 1.5F);
+            }
+        }
+    }
+
     /**
-     * Applies level-drop penalties for all dominions that have been non-compliant
-     * for longer than {@link #PENALTY_BUFFER_MS}. Must be called on the main thread.
-     *
-     * <p>Penalty order per 30-minute cycle:</p>
-     * <ol>
-     *   <li>Drain money from dominion balance.</li>
-     *   <li>If balance is insufficient, drain food power reserves.</li>
-     *   <li>If food is also empty, unclaim the most recently added chunk.
-     *       (TODO: once outposts are implemented, unclaim entire outposts at a time,
-     *       starting from the most recently created outpost.)</li>
-     * </ol>
-     *
-     * <p>Conquered dominions are exempt (they already face conquest penalties).</p>
+     * Applies level-drop penalties for all dominions that have been non-compliant.
      */
     public static void applyLevelPenalties(List<Dominion> dominions) {
         long now = System.currentTimeMillis();
@@ -467,9 +515,28 @@ public class DominionLevelUtils {
                 continue; // Exempt if conquered
             }
 
-            // The dominion failed to maintain (currentLevel + 1); use that as the penalty tier
+            // Excess outpost penalty
+            int allowedOutposts = OutpostUtils.allowedOutpostCount(dominion.getDominionLevel());
+            List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominion.getId());
+            if (outposts.size() > allowedOutposts) {
+                // Find the highest-index excess outpost
+                Outpost excess = outposts.get(outposts.size() - 1);
+                boolean disbanded = OutpostUtils.removePenaltyChunkFromOutpost(dominion, excess);
+                if (disbanded) {
+                    notifyMembers(dominion, "&cOutpost &e" + excess.getName()
+                            + " &chas been lost due to your dominion failing to maintain &6Level "
+                            + (excess.getOutpostIndex() + 1));
+                } else {
+                    notifyMembers(dominion, "&cA chunk has been lost from outpost &e" + excess.getName()
+                            + " &cdue to your dominion failing to maintain &6Level "
+                            + (excess.getOutpostIndex() + 1));
+                }
+                continue;
+            }
+
+            // Normal level-drop penalty
             int failedLevel = Math.min(dominion.getDominionLevel() + 1, MAX_LEVEL);
-            int penaltyIdx = failedLevel - 2; // index into penalty arrays
+            int penaltyIdx = failedLevel - 2;
             double moneyPenalty = PENALTY_MONEY[penaltyIdx];
             int foodPenalty = PENALTY_FOOD_POWER[penaltyIdx];
 
@@ -477,8 +544,8 @@ public class DominionLevelUtils {
                 dominion.setBalance(dominion.getBalance() - moneyPenalty);
                 DominionUtils.updateDominion(dominion);
                 notifyMembers(dominion, "&e" + dominion.getName()
-                        + " &7has been penalized &6" + formatter.format(moneyPenalty)
-                        + " &7for failing to maintain &6Level " + failedLevel + "&7.");
+                        + " &chas been penalized &6" + formatter.format(moneyPenalty)
+                        + " &cfor failing to maintain &6Level " + failedLevel);
                 continue;
             }
 
@@ -486,18 +553,31 @@ public class DominionLevelUtils {
             if (totalFoodPower > 0) {
                 DominionUtils.consumeFood(dominion, Math.min(foodPenalty, totalFoodPower));
                 notifyMembers(dominion, "&e" + dominion.getName()
-                        + " &7had food reserves drained as a penalty for failing to maintain &6Level "
-                        + failedLevel + "&7.");
+                        + " &chad food reserves drained as a penalty for failing to maintain &6Level "
+                        + failedLevel);
                 continue;
             }
 
-            // Iterate backwards through the chunk list (most recently claimed first).
-            // TODO: when outposts are implemented, unclaim entire outposts at a time,
-            //       starting from the most recently created outpost.
+            // Work through outposts highest-index first, then main dominion.
+            List<Outpost> currentOutposts = OutpostUtils.getDominionOutposts(dominion.getId());
+            if (!currentOutposts.isEmpty()) {
+                Outpost highestOutpost = currentOutposts.get(currentOutposts.size() - 1);
+                boolean disbanded = OutpostUtils.removePenaltyChunkFromOutpost(dominion, highestOutpost);
+                if (disbanded) {
+                    notifyMembers(dominion, "&cOutpost &e" + highestOutpost.getName()
+                            + " &chas been disbanded as a penalty for failing to maintain &6Level " + failedLevel);
+                } else {
+                    notifyMembers(dominion, "&cA chunk has been lost from outpost &e" + highestOutpost.getName()
+                            + " &cas a penalty for failing to maintain &6Level " + failedLevel);
+                }
+                continue;
+            }
+
+            // No outposts left, unclaim from the main dominion
             if (dominion.getChunks().size() == 1) {
-                // Only the home chunk remains — disband the dominion
+                // Only the home chunk remains, disband the dominion
                 DominionUtils.updateDominionLeader(dominion, null, true);
-                return; // Dominion is gone, skip further processing
+                return;
             }
 
             Chunk homeChunk = dominion.getDominionHome().getChunk();
@@ -517,8 +597,7 @@ public class DominionLevelUtils {
             if (toRemove != null) {
                 DominionUtils.removePenaltyChunk(dominion, toRemove);
                 notifyMembers(dominion, "&cA chunk has been lost from &e" + dominion.getName()
-                        + " &cas a penalty for failing to maintain &6Level " + failedLevel
-                        + "&c. Recover your criteria to stop losing territory!");
+                        + " &cas a penalty for failing to maintain &6Level " + failedLevel);
             }
         }
     }

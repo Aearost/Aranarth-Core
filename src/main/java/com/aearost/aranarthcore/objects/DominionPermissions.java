@@ -42,9 +42,10 @@ public class DominionPermissions {
         Set<DominionPermission> lieutenantPerms = new HashSet<>(fullInteraction);
         lieutenantPerms.addAll(Arrays.asList(
                 DominionPermission.BUILD,
-                DominionPermission.HOME, DominionPermission.FOOD,
+                DominionPermission.HOME, DominionPermission.OUTPOST_HOME, DominionPermission.FOOD,
                 DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER,
-                DominionPermission.SURRENDER, DominionPermission.REBEL, DominionPermission.RETREAT
+                DominionPermission.SURRENDER, DominionPermission.REBEL, DominionPermission.RETREAT,
+                DominionPermission.MANAGE_OUTPOSTS
         ));
         perms.put(DominionRank.LIEUTENANT, lieutenantPerms);
 
@@ -52,18 +53,19 @@ public class DominionPermissions {
         Set<DominionPermission> citizenPerms = new HashSet<>(fullInteraction);
         citizenPerms.addAll(Arrays.asList(
                 DominionPermission.BUILD,
-                DominionPermission.HOME, DominionPermission.FOOD
+                DominionPermission.HOME, DominionPermission.OUTPOST_HOME, DominionPermission.FOOD
         ));
         perms.put(DominionRank.CITIZEN, citizenPerms);
 
         // NEWCOMER gets very restricted permissions — no interaction
         perms.put(DominionRank.NEWCOMER, new HashSet<>(List.of(
-                DominionPermission.HOME
+                DominionPermission.HOME, DominionPermission.OUTPOST_HOME
         )));
 
         // ALLIED dominions get full interaction access, building rights, and home access
         Set<DominionPermission> alliedPerms = new HashSet<>(fullInteraction);
         alliedPerms.add(DominionPermission.HOME);
+        alliedPerms.add(DominionPermission.OUTPOST_HOME);
         perms.put(DominionRank.ALLIED, alliedPerms);
 
         // TRUCED dominions — no access by default

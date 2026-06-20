@@ -2,9 +2,11 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -15,55 +17,76 @@ import org.bukkit.event.player.PlayerMoveEvent;
 public class DominionChunkChange {
 
 	public void execute(PlayerMoveEvent e) {
-		// If they did not move to a different coordinate and only their mouse
 		if (e.getTo() == null) {
 			return;
 		}
 
-		if (e.getTo().getWorld().getName().startsWith("world")) {
-			Chunk from = e.getFrom().getChunk();
-			Chunk to = e.getTo().getChunk();
-			// If it's the same chunk
-			if (from.getX() == to.getX() && from.getZ() == to.getZ() && from.getWorld().getName().equals(to.getWorld().getName())) {
-				return;
-			} else {
-				Dominion dominionFrom = DominionUtils.getDominionOfChunk(from);
-				Dominion dominionTo = DominionUtils.getDominionOfChunk(to);
-				Player player = e.getPlayer();
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+		if (!e.getTo().getWorld().getName().startsWith("world")) {
+			return;
+		}
 
-				// If entering a dominion
-				if (dominionFrom == null && dominionTo != null) {
-					if (aranarthPlayer.isTogglingChangeClaim()) {
-						return;
-					}
-					player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
+		Chunk from = e.getFrom().getChunk();
+		Chunk to = e.getTo().getChunk();
+
+		if (from.getX() == to.getX() && from.getZ() == to.getZ()
+				&& from.getWorld().getName().equals(to.getWorld().getName())) {
+			return;
+		}
+
+		Player player = e.getPlayer();
+		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+		// Resolve ownership of both chunks
+		Dominion dominionFrom = DominionUtils.getDominionOfChunk(from);
+		Outpost outpostFrom = (dominionFrom == null) ? OutpostUtils.getOutpostOfChunk(from) : null;
+		Dominion outpostDominionFrom = (outpostFrom != null) ? DominionUtils.getDominionById(outpostFrom.getDominionId()) : null;
+
+		Dominion dominionTo = DominionUtils.getDominionOfChunk(to);
+		Outpost outpostTo = (dominionTo == null) ? OutpostUtils.getOutpostOfChunk(to) : null;
+		Dominion outpostDominionTo = (outpostTo != null) ? DominionUtils.getDominionById(outpostTo.getDominionId()) : null;
+
+		Dominion effectiveFrom = (dominionFrom != null) ? dominionFrom : outpostDominionFrom;
+		Dominion effectiveTo = (dominionTo != null) ? dominionTo : outpostDominionTo;
+
+		// Determine if moving within the same territory
+		if (effectiveFrom != null && effectiveTo != null && effectiveFrom.isSameDominion(effectiveTo)) {
+			if (dominionFrom == null && dominionTo == null && outpostFrom != null && outpostTo != null
+					&& outpostFrom.getId().equals(outpostTo.getId())) {
+				return; // Same outpost
+			}
+			if (dominionFrom != null && dominionTo != null) {
+				return; // Same main dominion
+			}
+			// Show messages
+		}
+
+		boolean sameDominionTransition = effectiveFrom != null && effectiveTo != null
+				&& effectiveFrom.isSameDominion(effectiveTo);
+
+		// Exit message
+		if (effectiveFrom != null && !sameDominionTransition) {
+			if (effectiveTo == null && aranarthPlayer.isAutoClaimEnabled()) {
+				String result = DominionUtils.claimChunk(player, to);
+				player.sendMessage(ChatUtils.chatMessage(result));
+				return;
+			}
+			if (!aranarthPlayer.isTogglingChangeClaim()) {
+				if (dominionFrom != null) {
+					player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
+				} else if (outpostFrom != null && outpostDominionFrom != null) {
+					player.sendMessage(ChatUtils.chatMessage("&7You have exited &e" + outpostDominionFrom.getName()
+							+ "&7's outpost, &e" + outpostFrom.getName()));
 				}
-				// If exiting a dominion
-				else if (dominionFrom != null && dominionTo == null) {
-					if (aranarthPlayer.isAutoClaimEnabled()) {
-						String result = DominionUtils.claimChunk(player, to);
-						player.sendMessage(ChatUtils.chatMessage(result));
-					} else {
-						if (aranarthPlayer.isTogglingChangeClaim()) {
-							return;
-						}
-						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
-					}
-				} else if (dominionFrom != null && dominionTo != null) {
-					// If you are changing chunk within the same dominion
-					if (dominionFrom.isSameDominion(dominionTo)) {
-						return;
-					}
-					// If entering one dominion next to another
-					else {
-						if (aranarthPlayer.isTogglingChangeClaim()) {
-							return;
-						}
-						player.sendMessage(ChatUtils.chatMessage("&7You have exited the Dominion of &e" + dominionFrom.getName()));
-						player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
-					}
-				}
+			}
+		}
+
+		// Enter message
+		if (effectiveTo != null && !aranarthPlayer.isTogglingChangeClaim()) {
+			if (dominionTo != null) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have entered the Dominion of &e" + dominionTo.getName()));
+			} else if (outpostTo != null && outpostDominionTo != null) {
+				player.sendMessage(ChatUtils.chatMessage("&7You have entered &e" + outpostDominionTo.getName()
+						+ "&7's outpost, &e" + outpostTo.getName()));
 			}
 		}
 	}

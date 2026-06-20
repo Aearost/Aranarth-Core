@@ -1,32 +1,25 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.mob.BabyMobSpawn;
 import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityTameEvent;
 
-public class EntityBreedEventListener implements Listener {
+public class EntityTameEventListener implements Listener {
 
-    public EntityBreedEventListener(AranarthCore plugin) {
+    public EntityTameEventListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     /**
-     * Centralizes all logic to be called by an entity being bred.
+     * Increments the owning dominion's cached livestock count when a tameable mob is tamed.
      */
     @EventHandler
-    public void onEntityBreed(EntityBreedEvent e) {
-        if (AranarthUtils.getMonth() == Month.CALORVOR) {
-            new BabyMobSpawn().execute(e);
-        }
-        // Real-time livestock count
+    public void onEntityTame(EntityTameEvent e) {
         if (DominionLevelUtils.isCountedLivestock(e.getEntity())) {
             Dominion dominion = DominionUtils.getDominionOfChunkAnywhere(e.getEntity().getLocation().getChunk());
             if (dominion != null) {

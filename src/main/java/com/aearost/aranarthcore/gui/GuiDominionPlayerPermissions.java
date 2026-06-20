@@ -234,7 +234,8 @@ public class GuiDominionPlayerPermissions {
             case ITEM_FRAME -> Material.ITEM_FRAME;
             case VILLAGER -> Material.EMERALD;
             case PVP -> Material.IRON_SWORD;
-            case HOME -> Material.COMPASS;
+            case HOME -> Material.RED_BED;
+            case OUTPOST_HOME -> Material.GREEN_BED;
             case FOOD -> Material.COOKED_BEEF;
             case RESOURCES -> Material.DIAMOND_PICKAXE;
             case INVITE -> Material.PAPER;
@@ -242,6 +243,7 @@ public class GuiDominionPlayerPermissions {
             case SURRENDER -> Material.WHITE_BANNER;
             case REBEL -> Material.CROSSBOW;
             case RETREAT -> Material.FEATHER;
+            case MANAGE_OUTPOSTS -> Material.BROWN_BED;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }
