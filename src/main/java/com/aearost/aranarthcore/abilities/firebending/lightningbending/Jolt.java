@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -14,7 +13,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
@@ -34,7 +32,6 @@ public class Jolt extends LightningAbility implements AddonAbility {
 
     private static final Map<UUID, Jolt> ACTIVE_INSTANCES = new HashMap<>();
     private static final Set<UUID> PENDING_CHARGES = new HashSet<>();
-    private static final Map<UUID, Long> STUNNED_ENTITIES = new HashMap<>();
 
     @Attribute(Attribute.DAMAGE)
     private double damage;
@@ -149,7 +146,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
             DamageHandler.damageEntity(living, damage, this);
 
             if (Math.random() < stunChance) {
-                applyStun(living, stunDuration);
+                AranarthBendingUtils.applyElectrocution(living, stunDuration);
             }
 
             for (int k = 0; k < 6; k++) {
@@ -224,32 +221,6 @@ public class Jolt extends LightningAbility implements AddonAbility {
         playLightningbendingParticle(pos.clone(), 0f, 0f, 0f);
     }
 
-    private static void applyStun(LivingEntity target, long durationMs) {
-        UUID uuid = target.getUniqueId();
-        STUNNED_ENTITIES.put(uuid, System.currentTimeMillis() + durationMs);
-        int stunTicks = (int) (durationMs / 50L);
-
-        new BukkitRunnable() {
-            int ticks = 0;
-
-            @Override
-            public void run() {
-                if (ticks >= stunTicks || !STUNNED_ENTITIES.containsKey(uuid)) {
-                    STUNNED_ENTITIES.remove(uuid);
-                    cancel();
-                    return;
-                }
-                if (target.isDead() || (target instanceof Player p && !p.isOnline())) {
-                    STUNNED_ENTITIES.remove(uuid);
-                    cancel();
-                    return;
-                }
-                target.setVelocity(new Vector(0, target.getVelocity().getY(), 0));
-                ticks++;
-            }
-        }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
-    }
-
     public static void markPendingCharge(UUID uuid) {
         PENDING_CHARGES.add(uuid);
     }
@@ -267,13 +238,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
     }
 
     public static boolean isStunned(UUID uuid) {
-        Long expiry = STUNNED_ENTITIES.get(uuid);
-        if (expiry == null) return false;
-        if (System.currentTimeMillis() >= expiry) {
-            STUNNED_ENTITIES.remove(uuid);
-            return false;
-        }
-        return true;
+        return AranarthBendingUtils.isElectrocuted(uuid);
     }
 
     @Override

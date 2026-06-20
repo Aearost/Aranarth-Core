@@ -203,6 +203,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.Discharge", true);
 			perms.setPermission("bending.ability.jolt", true);
 			perms.setPermission("bending.ability.electricstrike", true);
+			perms.setPermission("bending.ability.static", true);
 			perms.setPermission("bending.ability.LavaDisc", true);
 			perms.setPermission("bending.ability.MagmaBlast", true);
 			perms.setPermission("bending.ability.LightningBurst", true);
@@ -283,6 +284,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.Discharge", false);
 			perms.setPermission("bending.ability.jolt", false);
 			perms.setPermission("bending.ability.electricstrike", false);
+			perms.setPermission("bending.ability.static", false);
 			perms.setPermission("bending.ability.BloodPuppet", false);
 			perms.setPermission("bending.ability.LavaDisc", false);
 			perms.setPermission("bending.ability.MagmaBlast", false);
@@ -410,6 +412,7 @@ public class PermissionUtils {
 		perms.setPermission("bending.ability.healinghelix", false);         // healing - Count
 		perms.setPermission("bending.ability.corruptinghelix", false);    // healing - Prince
 		perms.setPermission("bending.ability.jolt", false);               // lightning - Prince
+		perms.setPermission("bending.ability.static", false);             // lightning - Prince
 		perms.setPermission("bending.ability.electricstrike", false);     // lightning - King
 		perms.setPermission("bending.ability.bloodfreeze", false);        // blood - King
 		perms.setPermission("bending.ability.disalignment", false);       // blood - Emperor
@@ -702,6 +705,7 @@ public class PermissionUtils {
 					perms.setPermission("bending.ability.Discharge", true);
 					perms.setPermission("bending.ability.jolt", true);
 					perms.setPermission("bending.ability.electricstrike", true);
+					perms.setPermission("bending.ability.static", true);
 					perms.setPermission("bending.ability.BloodPuppet", true);
 					perms.setPermission("bending.ability.LavaDisc", true);
 					perms.setPermission("bending.ability.MagmaBlast", true);
@@ -937,6 +941,7 @@ public class PermissionUtils {
 			perms.setPermission("bending.ability.corruptinghelix", true);     // healing
 			perms.setPermission("bending.ability.Discharge", true);           // lightning
 			perms.setPermission("bending.ability.jolt", true);                // lightning
+			perms.setPermission("bending.ability.static", true);              // lightning
 			perms.setPermission("bending.ability.BloodPuppet", true);         // JedCore blood
 			perms.setPermission("bending.ability.energyburst", true);         // spiritual
 			perms.setPermission("bending.ability.sonicpulse", true);          // sound

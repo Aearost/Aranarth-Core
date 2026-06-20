@@ -33,6 +33,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
@@ -670,6 +671,15 @@ public class AranarthCoreBendingListener implements Listener {
                 && bpDischarge.isElementToggled(Element.FIRE)
                 && !Discharge.hasActiveInstance(player.getUniqueId())) {
             new Discharge(player);
+            return;
+        }
+
+        // Static: left-click fires a chaining bolt of static electricity
+        BendingPlayer bpStatic = BendingPlayer.getBendingPlayer(player);
+        if (bpStatic != null && bpStatic.getBoundAbilityName().equalsIgnoreCase("static")
+                && bpStatic.isElementToggled(Element.FIRE)
+                && !Static.hasActiveInstance(player.getUniqueId())) {
+            new Static(player);
             return;
         }
 

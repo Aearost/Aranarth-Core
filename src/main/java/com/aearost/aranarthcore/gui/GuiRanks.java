@@ -253,7 +253,7 @@ public class GuiRanks {
 			}
 		}
 		princeLore.add(ChatUtils.translateToColor("&f&lBending"));
-		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oBasic lightningbending abilities"));
+		princeLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] " + Element.LIGHTNING.getColor() + "&oBasic lightningbending abilities, Static"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + Element.SPIRITUAL.getColor() + "&oEnergyBurst, " + SoundAbility.SOUND.getColor() + "&oSonicPulse"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] &3&oCorruptingHelix, " + Element.BLOOD.getColor() + "&oBasic blood abilities"));
 		princeLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaDisc, MagmaBlast"));
@@ -289,8 +289,7 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst, ElectricStrike,"));
-		kingLore.add(ChatUtils.translateToColor(Element.COMBUSTION.getColor() + "       &oBasic combustion abilities"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst, ElectricStrike, " + Element.COMBUSTION.getColor() + "&oBasic combustion abilities"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + SoundAbility.SOUND.getColor() + "&oSonicBoom, DeafeningScream"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oBloodFreeze"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlux, MagmaWave,"));

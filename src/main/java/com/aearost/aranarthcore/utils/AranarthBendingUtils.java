@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Color;
@@ -15,10 +17,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 public class AranarthBendingUtils {
 
@@ -88,6 +95,66 @@ public class AranarthBendingUtils {
     /** Light blue dust used for the Discharge bolt path. */
     public static final Particle.DustOptions LIGHTNING_DUST_BLUE =
             new Particle.DustOptions(Color.fromRGB(100, 200, 255), 1.0f);
+
+    private static final Map<UUID, Long> ELECTROCUTED_ENTITIES = new HashMap<>();
+
+    /** Hex colour used for the action bar electrocution message, matching LIGHTNING_DUST. */
+    private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");
+
+    /**
+     * Electrocutes a living entity for the given duration, freezing their horizontal
+     * movement each tick while allowing vertical movement and head rotation. If the
+     * target is a player, they also receive a {@code * ELECTROCUTED *} action bar
+     * message. Repeated calls refresh the duration.
+     *
+     * @param target     The entity to electrocute.
+     * @param durationMs How long the electrocution lasts in milliseconds.
+     */
+    public static void applyElectrocution(LivingEntity target, long durationMs) {
+        UUID uuid = target.getUniqueId();
+        ELECTROCUTED_ENTITIES.put(uuid, System.currentTimeMillis() + durationMs);
+        int stunTicks = (int) (durationMs / 50L);
+
+        if (target instanceof Player p) {
+            p.sendActionBar(Component.text("* ELECTROCUTED *").color(ELECTROCUTION_COLOR));
+        }
+
+        new BukkitRunnable() {
+            int ticks = 0;
+
+            @Override
+            public void run() {
+                if (ticks >= stunTicks || !ELECTROCUTED_ENTITIES.containsKey(uuid)) {
+                    ELECTROCUTED_ENTITIES.remove(uuid);
+                    cancel();
+                    return;
+                }
+                if (target.isDead() || (target instanceof Player p && !p.isOnline())) {
+                    ELECTROCUTED_ENTITIES.remove(uuid);
+                    cancel();
+                    return;
+                }
+                target.setVelocity(new Vector(0, target.getVelocity().getY(), 0));
+                ticks++;
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
+    }
+
+    /**
+     * Returns whether the entity with the given UUID is currently electrocuted.
+     *
+     * @param uuid The UUID to check.
+     * @return Whether the entity is electrocuted.
+     */
+    public static boolean isElectrocuted(UUID uuid) {
+        Long expiry = ELECTROCUTED_ENTITIES.get(uuid);
+        if (expiry == null) return false;
+        if (System.currentTimeMillis() >= expiry) {
+            ELECTROCUTED_ENTITIES.remove(uuid);
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Applies one randomly chosen spirit curse to the target entity using the

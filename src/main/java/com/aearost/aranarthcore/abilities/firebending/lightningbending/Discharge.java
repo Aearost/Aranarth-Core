@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -14,7 +13,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
@@ -57,7 +55,6 @@ public class Discharge extends LightningAbility implements AddonAbility {
     private final Random rand = new Random();
 
     private static final Map<UUID, Discharge> activeInstances = new HashMap<>();
-    private static final Map<UUID, Long> stunnedEntities = new HashMap<>();
 
     public Discharge(Player player) {
         super(player);
@@ -178,7 +175,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
             DamageHandler.damageEntity(living, damage, this);
 
             if (rand.nextDouble() < stunChance) {
-                applyStun(living, stunDuration);
+                AranarthBendingUtils.applyElectrocution(living, stunDuration);
             }
 
             for (int k = 0; k < 5; k++) {
@@ -194,33 +191,6 @@ public class Discharge extends LightningAbility implements AddonAbility {
         }
 
         return false;
-    }
-
-    private static void applyStun(LivingEntity target, long durationMs) {
-        UUID uuid = target.getUniqueId();
-        long expiry = System.currentTimeMillis() + durationMs;
-        stunnedEntities.put(uuid, expiry);
-        int stunTicks = (int) (durationMs / 50L);
-
-        new BukkitRunnable() {
-            int ticks = 0;
-
-            @Override
-            public void run() {
-                if (ticks >= stunTicks || !stunnedEntities.containsKey(uuid)) {
-                    stunnedEntities.remove(uuid);
-                    cancel();
-                    return;
-                }
-                if (target.isDead() || (target instanceof Player p && !p.isOnline())) {
-                    stunnedEntities.remove(uuid);
-                    cancel();
-                    return;
-                }
-                target.setVelocity(new Vector(0, target.getVelocity().getY(), 0));
-                ticks++;
-            }
-        }.runTaskTimer(AranarthCore.getInstance(), 0L, 1L);
     }
 
     private double createBranch() {
@@ -244,13 +214,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
     }
 
     public static boolean isStunned(UUID uuid) {
-        Long expiry = stunnedEntities.get(uuid);
-        if (expiry == null) return false;
-        if (System.currentTimeMillis() >= expiry) {
-            stunnedEntities.remove(uuid);
-            return false;
-        }
-        return true;
+        return AranarthBendingUtils.isElectrocuted(uuid);
     }
 
     @Override
