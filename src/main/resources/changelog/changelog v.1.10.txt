@@ -282,3 +282,4 @@ Backend Code Changes
 - Also added event handler parameter to the BlockBreakEvent listener
 - Ensured that AranarthCore data saves upon automatic server restarts as well as onDisable() is not reliably called
 - Dynamically sourced sub-element color codes in /ranks
+- Prevented the first avatar from being auto-selected - it must be manually selected with the command

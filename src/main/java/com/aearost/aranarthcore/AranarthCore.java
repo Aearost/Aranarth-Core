@@ -157,7 +157,7 @@ public class AranarthCore extends JavaPlugin {
                 // TODO Re-enable once we do the Avatar event
 //				// Attempts to automatically assign an avatar if there currently is none
 //				if (AvatarUtils.getCurrentAvatar() == null) {
-//					boolean wasAvatarFound = AvatarUtils.selectAvatar();
+//					boolean wasAvatarFound = AvatarUtils.selectAvatar(false);
 //					if (!wasAvatarFound) {
 //						Bukkit.getLogger().info("A new Avatar could not be selected");
 //					}

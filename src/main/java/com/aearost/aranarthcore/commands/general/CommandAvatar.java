@@ -43,7 +43,7 @@ public class CommandAvatar implements CommandExecutor {
 						return false;
 					}
 				}
-				boolean wasAvatarFound = AvatarUtils.selectAvatar();
+				boolean wasAvatarFound = AvatarUtils.selectAvatar(true);
 				if (!wasAvatarFound) {
 					sender.sendMessage(ChatUtils.chatMessage("&7No Avatar was selected, will try again the next execution"));
 				}

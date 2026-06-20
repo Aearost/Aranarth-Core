@@ -62,11 +62,18 @@ public class AvatarUtils {
 
 	/**
 	 * Selects a new Avatar from the list of online players.
+	 * @param isManual Whether this call was triggered manually via /avatar set.
+	 *                 If false and no avatar has ever existed, selection is skipped.
 	 * @return Confirmation if a new Avatar was selected.
 	 */
-	public static boolean selectAvatar() {
+	public static boolean selectAvatar(boolean isManual) {
 		// Nobody online to select as a new avatar
 		if (Bukkit.getOnlinePlayers().isEmpty() && getCurrentAvatar() == null) {
+			return false;
+		}
+
+		// The first-ever avatar must be set manually via /avatar set, not auto-selected
+		if (avatars.isEmpty() && !isManual) {
 			return false;
 		}
 
