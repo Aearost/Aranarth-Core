@@ -266,6 +266,7 @@ Minor Features
 [~] Decreased the prices of crate keys in the vote shop
 [~] Fixed issue where the /quests GUI would not auto-close after claiming a reward
 [+] Added the Foundation Date of dominions to /d info
+[-] Prevented the summoning of withers in the survival worlds
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -23,6 +23,11 @@ public class EntitySpawnEventListener implements Listener {
      */
     @EventHandler
     public void onEntitySpawn(EntitySpawnEvent e) {
+        if (e.getEntityType() == EntityType.WITHER && e.getLocation().getWorld().getName().startsWith("world")) {
+            e.setCancelled(true);
+            return;
+        }
+
         if (e.getEntityType() == EntityType.WANDERING_TRADER) {
             new WanderingTraderSpawnAnnounce().execute(e);
         } else if (e.getEntityType() == EntityType.CREEPER) {
