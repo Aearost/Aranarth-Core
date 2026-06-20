@@ -752,6 +752,7 @@ public class DominionUtils {
 	 * @param chunk    The chunk to remove.
 	 */
 	public static void removePenaltyChunk(Dominion dominion, Chunk chunk) {
+		AranarthUtils.removeLocksInChunk(chunk);
 		dominion.getChunks().remove(chunk);
 		chunkKeyToDominion.remove(getChunkKey(chunk));
 		resizeFoodArray(dominion);

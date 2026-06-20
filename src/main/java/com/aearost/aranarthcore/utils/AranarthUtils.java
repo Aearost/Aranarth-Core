@@ -9,7 +9,9 @@ import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
+import org.bukkit.Chunk;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.data.Levelled;
@@ -1007,6 +1009,35 @@ public class AranarthUtils {
 			}
 		} else {
 			return -1;
+		}
+	}
+
+	/**
+	 * Removes all non-shop chest lock protections for containers located in the given chunk.
+	 * @param chunk The chunk whose locks should be cleared.
+	 */
+	public static void removeLocksInChunk(Chunk chunk) {
+		if (lockedContainers == null || lockedContainers.isEmpty()) {
+			return;
+		}
+		Iterator<LockedContainer> iterator = lockedContainers.iterator();
+		while (iterator.hasNext()) {
+			LockedContainer container = iterator.next();
+			Location loc1 = container.getLocations()[0];
+			Location loc2 = container.getLocations()[1];
+			boolean inChunk = (loc1 != null && loc1.getChunk().equals(chunk))
+					|| (loc2 != null && loc2.getChunk().equals(chunk));
+			if (!inChunk) {
+				continue;
+			}
+			// Skip chest shops
+			boolean isShop = (loc1 != null && ShopUtils.getShopFromLocation(
+					loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
+					|| (loc2 != null && ShopUtils.getShopFromLocation(
+					loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
+			if (!isShop) {
+				iterator.remove();
+			}
 		}
 	}
 

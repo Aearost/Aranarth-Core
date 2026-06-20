@@ -267,6 +267,7 @@ Minor Features
 [~] Fixed issue where the /quests GUI would not auto-close after claiming a reward
 [+] Added the Foundation Date of dominions to /d info
 [-] Prevented the summoning of withers in the survival worlds
+[~] Made it so auto-unclaimed chunks automatically remove chest lock protections
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

@@ -282,6 +282,7 @@ public class OutpostUtils {
 
         if (outpost.getChunks().size() == 1) {
             // Only the home chunk left, disband the outpost
+            AranarthUtils.removeLocksInChunk(homeChunk);
             disbandOutpost(dominion, outpost);
             return true;
         }
@@ -301,6 +302,7 @@ public class OutpostUtils {
         }
 
         if (toRemove != null) {
+            AranarthUtils.removeLocksInChunk(toRemove);
             chunks.remove(toRemove);
             chunkKeyToOutpost.remove(getChunkKey(toRemove));
             updateOutpost(outpost);
