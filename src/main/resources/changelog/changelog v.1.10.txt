@@ -7,6 +7,7 @@ Major Features
 [~] Replaced /d permissions with the base /d
 [+] Implemented auto replenishment of items, supporting eating, tools breaking, thrown projectiles, dropped items, etc
 [+] Implemented permission-based custom armor stand poses
+[~] Overrode the color of the lightning sub-element to a shade of yellow
 [+] Added automatic role applying from emoji reactions to a message in the #info channel
 [+] Added the /mail command, allowing players to send mail to offline players
 [+] Added Blood Bending to Emperors

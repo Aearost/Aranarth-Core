@@ -82,6 +82,7 @@ public class AranarthCore extends JavaPlugin {
             Field colorField = Element.class.getDeclaredField("color");
             colorField.setAccessible(true);
             colorField.set(SoundAbility.SOUND, net.md_5.bungee.api.ChatColor.of("#6644CC"));
+            colorField.set(Element.LIGHTNING, net.md_5.bungee.api.ChatColor.of("#FFF050"));
         } catch (Exception e) {
             Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
         }
