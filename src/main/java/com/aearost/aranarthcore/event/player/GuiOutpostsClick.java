@@ -75,7 +75,7 @@ public class GuiOutpostsClick {
         // Empty slot (outpost available but not yet created)
         String displayName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
         if (displayName.startsWith("Outpost Slot")) {
-            player.sendMessage(ChatUtils.chatMessage("&7Use &e/d outpost create <name> &7to establish an outpost in this slot."));
+            player.sendMessage(ChatUtils.chatMessage("&7Use &e/d outpost create <name> &7to establish an outpost"));
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
             return;
         }

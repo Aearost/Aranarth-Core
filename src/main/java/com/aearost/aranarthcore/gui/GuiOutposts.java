@@ -82,9 +82,9 @@ public class GuiOutposts {
     private static ItemStack buildEmptySlotItem(int outpostIndex, Dominion dominion) {
         ItemStack item = new ItemStack(Material.OAK_LOG);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&e&lOutpost Slot " + outpostIndex + " &7— Available"));
+        meta.setDisplayName(ChatUtils.translateToColor("&e&lOutpost Slot " + outpostIndex + " &7- Available"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Use &e/d outpost create <name> &7to establish an outpost here."));
+        lore.add(ChatUtils.translateToColor("&7Use &e/d outpost create <name> &7to establish an outpost"));
         lore.add(ChatUtils.translateToColor("&7Cost to create: &6" + OutpostUtils.getFormattedOutpostCost(outpostIndex)));
         lore.add(ChatUtils.translateToColor("&7Base chunk limit: &e" + OutpostUtils.getBaseChunkLimit(outpostIndex)));
         meta.setLore(lore);
