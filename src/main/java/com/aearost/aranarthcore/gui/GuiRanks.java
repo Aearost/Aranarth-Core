@@ -289,7 +289,9 @@ public class GuiRanks {
 			}
 		}
 		kingLore.add(ChatUtils.translateToColor("&f&lBending"));
-		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst, ElectricStrike, " + Element.COMBUSTION.getColor() + "&oBasic combustion abilities"));
+		kingLore.add(ChatUtils.translateToColor("&f&o- &4[&cF&4] &c&oFireComet, " + Element.LIGHTNING.getColor() + "&oBolt, LightningBurst,"));
+		kingLore.add(ChatUtils.translateToColor(Element.LIGHTNING.getColor() + "       &oElectricStrike, JetBolt,"));
+		kingLore.add(ChatUtils.translateToColor(Element.COMBUSTION.getColor() + "       &oBasic combustion abilities"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &8[&7A&8] " + SoundAbility.SOUND.getColor() + "&oSonicBoom, DeafeningScream"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &3[&bW&3] " + Element.BLOOD.getColor() + "&oBloodFreeze"));
 		kingLore.add(ChatUtils.translateToColor("&f&o- &2[&aE&2] " + Element.LAVA.getColor() + "&oLavaFlux, MagmaWave,"));

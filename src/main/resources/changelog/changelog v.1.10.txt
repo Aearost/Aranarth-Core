@@ -60,6 +60,7 @@ Major Features
 [+] Implemented the RootSnare ability for plantbenders
 [+] Implemented the ElectricStrike ability for lightningbenders
 [+] Implemented the Static ability for lightningbenders
+[+] Implemented the JetBolt combo for lightningbenders
 [+] Fixed and re-implemented chest sorting, limiting it to Saint II
 [+] Added a basic starter kit to new players
 [~] Adjusted daily login streaks to be over 28 days (4 weeks) instead of just 1 week

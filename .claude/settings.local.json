@@ -225,7 +225,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects/JedCore -name *.jar)",
       "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn package:*)",
       "Bash(find /c/Users/liamh/Desktop/Folders/Minecraft -name JedCore*.jar -not -path */BuildTools/*)",
-      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn clean:*)"
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn clean:*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name *ranks* -o -name *Ranks*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name *GUI* -o -name *gui*)"
     ]
   }
 }

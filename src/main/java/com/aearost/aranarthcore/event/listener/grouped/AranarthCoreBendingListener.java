@@ -32,6 +32,7 @@ import com.aearost.aranarthcore.abilities.firebending.combustion.JetFumes;
 import com.aearost.aranarthcore.abilities.firebending.combustion.NoxiousFumes;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.JetBolt;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
@@ -144,6 +145,7 @@ public class AranarthCoreBendingListener implements Listener {
         new ArrayList<>(CoreAbility.getAbilities(Burial.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(ElectricStrike.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(JetBolt.class)).forEach(CoreAbility::remove);
 
         new BukkitRunnable() {
             @Override
@@ -566,6 +568,11 @@ public class AranarthCoreBendingListener implements Listener {
             }
         }
 
+        // JetBolt: block other left-click abilities during active flight
+        if (JetBolt.hasActiveInstance(player.getUniqueId())) {
+            return;
+        }
+
         // JetFumes: left-click cancels active flight
         JetFumes jetFumes = JetFumes.getActiveInstance(player.getUniqueId());
         if (jetFumes != null) {
@@ -815,6 +822,10 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         if (JetFumes.hasActiveInstance(player.getUniqueId())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (JetBolt.hasActiveInstance(player.getUniqueId())) {
             e.setCancelled(true);
             return;
         }
@@ -1135,30 +1146,35 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
-     * Blocks FireJet from receiving a cooldown while the player is in JetFumes FLYING phase.
-     * Every PK addCooldown() call fires this cancellable event, so this intercepts all sources
-     * (combo manager, CoreAbility.remove(), etc.) without any timing fragility.
-     * endFlight() switches phase to DISPERSING before applying the real cooldown, so that
-     * call is unaffected. remove() clears ACTIVE_INSTANCES before applying cooldowns, so
-     * death/disconnect edge cases are also unaffected.
+     * Blocks FireJet from receiving a cooldown while the player is in the flying phase of a
+     * jet combo ability (JetFumes or JetBolt). Every PK addCooldown() call fires this
+     * cancellable event, so this intercepts all sources (combo manager, CoreAbility.remove(),
+     * etc.) without any timing fragility. Each ability's endFlight() leaves the flying state
+     * before applying the real cooldown, and remove() clears ACTIVE_INSTANCES before applying
+     * cooldowns, so death/disconnect edge cases are also unaffected.
      */
     @EventHandler
-    public void onFireJetCooldownDuringJetFumes(PlayerCooldownChangeEvent e) {
-		if (!e.getAbility().equalsIgnoreCase("FireJet")) {
-			return;
-		}
-		if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
-			return;
-		}
-		if (!e.isOnline()) {
-			return;
-		}
+    public void onFireJetCooldownDuringJetCombo(PlayerCooldownChangeEvent e) {
+        if (!e.getAbility().equalsIgnoreCase("FireJet")) {
+            return;
+        }
+        if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
+            return;
+        }
+        if (!e.isOnline()) {
+            return;
+        }
         Player player = (Player) e.getPlayer();
-        JetFumes jf = JetFumes.getActiveInstance(player.getUniqueId());
-		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) {
-			return;
-		}
-        e.setCancelled(true);
+        UUID uuid = player.getUniqueId();
+        JetFumes jf = JetFumes.getActiveInstance(uuid);
+        if (jf != null && jf.getPhase() == JetFumes.Phase.FLYING) {
+            e.setCancelled(true);
+            return;
+        }
+        JetBolt jb = JetBolt.getActiveInstance(uuid);
+        if (jb != null && !jb.isFlightEnded()) {
+            e.setCancelled(true);
+        }
     }
 
     /**
@@ -1281,24 +1297,31 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
-     * Cancels fire and lava damage to the JetFumes caster while they are in flight.
-     * The ability starts near a fire/lava source, so without this the player would
-     * immediately take environmental fire damage the moment the ability activates.
+     * Cancels fire and lava damage to the caster of any jet combo ability (JetFumes or JetBolt)
+     * while they are in active flight. JetFumes starts near a fire/lava source so the player
+     * would take immediate environmental fire damage; JetBolt's combo sequence leaves a fire
+     * block behind that causes FIRE_TICK damage the moment the ability activates.
      */
     @EventHandler(ignoreCancelled = true)
-    public void onJetFumesFireDamage(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player p)) {
-			return;
-		}
-        JetFumes jf = JetFumes.getActiveInstance(p.getUniqueId());
-		if (jf == null || jf.getPhase() != JetFumes.Phase.FLYING) {
-			return;
-		}
+    public void onJetComboFireDamage(final EntityDamageEvent e) {
+        if (!(e.getEntity() instanceof Player p)) {
+            return;
+        }
         EntityDamageEvent.DamageCause cause = e.getCause();
-        if (cause == EntityDamageEvent.DamageCause.FIRE
-                || cause == EntityDamageEvent.DamageCause.FIRE_TICK
-                || cause == EntityDamageEvent.DamageCause.LAVA
-                || cause == EntityDamageEvent.DamageCause.HOT_FLOOR) {
+        if (cause != EntityDamageEvent.DamageCause.FIRE
+                && cause != EntityDamageEvent.DamageCause.FIRE_TICK
+                && cause != EntityDamageEvent.DamageCause.LAVA
+                && cause != EntityDamageEvent.DamageCause.HOT_FLOOR) {
+            return;
+        }
+        UUID uuid = p.getUniqueId();
+        JetFumes jf = JetFumes.getActiveInstance(uuid);
+        if (jf != null && jf.getPhase() == JetFumes.Phase.FLYING) {
+            e.setCancelled(true);
+            return;
+        }
+        JetBolt jb = JetBolt.getActiveInstance(uuid);
+        if (jb != null && !jb.isFlightEnded()) {
             e.setCancelled(true);
         }
     }
