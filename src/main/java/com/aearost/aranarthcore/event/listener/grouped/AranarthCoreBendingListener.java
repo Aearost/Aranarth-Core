@@ -34,6 +34,7 @@ import com.aearost.aranarthcore.abilities.firebending.lightningbending.Discharge
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricStrike;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.JetBolt;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
@@ -146,6 +147,7 @@ public class AranarthCoreBendingListener implements Listener {
         new ArrayList<>(CoreAbility.getAbilities(Jolt.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(ElectricStrike.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(JetBolt.class)).forEach(CoreAbility::remove);
+        new ArrayList<>(CoreAbility.getAbilities(Lightning.class)).forEach(a -> a.removeWithTasks());
 
         new BukkitRunnable() {
             @Override
@@ -162,18 +164,18 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onIceShardsBlockFromTo(final BlockFromToEvent e) {
-		if (e.getBlock().getType() != Material.WATER) {
-			return;
-		}
+        if (e.getBlock().getType() != Material.WATER) {
+            return;
+        }
         if (TempBlock.isTempBlock(e.getBlock())) {
             e.setCancelled(true);
             return;
         }
         final Location toLoc = e.getToBlock().getLocation();
         for (final IceShards inst : IceShards.getActiveInstances()) {
-			if (!inst.getPlayer().getWorld().equals(toLoc.getWorld())) {
-				continue;
-			}
+            if (!inst.getPlayer().getWorld().equals(toLoc.getWorld())) {
+                continue;
+            }
             final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
             final double r = 12; // domeRadius + 2
             if (toLoc.distanceSquared(centre) <= r * r) {
@@ -189,18 +191,18 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onIceShardsBlockPhysics(final BlockPhysicsEvent e) {
-		if (e.getBlock().getType() != Material.WATER) {
-			return;
-		}
+        if (e.getBlock().getType() != Material.WATER) {
+            return;
+        }
         if (TempBlock.isTempBlock(e.getBlock())) {
             e.setCancelled(true);
             return;
         }
         final Location loc = e.getBlock().getLocation();
         for (final IceShards inst : IceShards.getActiveInstances()) {
-			if (!inst.getPlayer().getWorld().equals(loc.getWorld())) {
-				continue;
-			}
+            if (!inst.getPlayer().getWorld().equals(loc.getWorld())) {
+                continue;
+            }
             final Location centre = inst.getPlayer().getLocation().clone().add(0, 1, 0);
             final double r = 12; // domeRadius + 2
             if (loc.distanceSquared(centre) <= r * r) {
@@ -393,6 +395,8 @@ public class AranarthCoreBendingListener implements Listener {
                         ElectricStrike.markPendingCharge(player.getUniqueId());
                         new ElectricStrike(player);
                     }
+                } else if (abilityName.equalsIgnoreCase("lightning")) {
+                    new Lightning(player);
                 }
             }
             // Earthbending
@@ -944,6 +948,10 @@ public class AranarthCoreBendingListener implements Listener {
             electricStrikeSlot.remove();
         }
         ElectricStrike.clearPendingCharge(e.getPlayer().getUniqueId());
+        Lightning lightningSlot = CoreAbility.getAbility(e.getPlayer(), Lightning.class);
+        if (lightningSlot != null && lightningSlot.getState() == Lightning.State.START) {
+            lightningSlot.removeWithTasks();
+        }
         VineWhip vineWhip = VineWhip.getActiveInstance(e.getPlayer().getUniqueId());
         if (vineWhip != null) {
             vineWhip.cancelInstantly();
@@ -1099,9 +1107,9 @@ public class AranarthCoreBendingListener implements Listener {
                 || (iceShards != null && iceShards.isCharging())
                 || RootSnare.isSnaredPlayer(uuid);
 
-		if (!rooted) {
-			return;
-		}
+        if (!rooted) {
+            return;
+        }
         lockXYZ(e);
     }
 
@@ -1110,13 +1118,13 @@ public class AranarthCoreBendingListener implements Listener {
      */
     private static void lockXYZ(PlayerMoveEvent e) {
         Location to = e.getTo();
-		if (to == null) {
-			return;
-		}
+        if (to == null) {
+            return;
+        }
         Location from = e.getFrom();
-		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
-			return;
-		}
+        if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+            return;
+        }
         Location locked = from.clone();
         locked.setYaw(to.getYaw());
         locked.setPitch(to.getPitch());
@@ -1183,9 +1191,9 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onBloodGripCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
         BloodGrip bloodGrip = BloodGrip.getActiveInstance(player.getUniqueId());
         if (bloodGrip != null) {
             bloodGrip.cancelFromDamage();
@@ -1198,9 +1206,9 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onBloodFreezeCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
         BloodFreeze bloodFreeze = BloodFreeze.getActiveInstance(player.getUniqueId());
         if (bloodFreeze != null) {
             bloodFreeze.cancelFromDamage();
@@ -1226,9 +1234,9 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onLifeRipCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
         LifeRip lifeRip = LifeRip.getActiveInstance(player.getUniqueId());
         if (lifeRip != null) {
             lifeRip.cancelFromDamage();
@@ -1241,9 +1249,9 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onDisalignmentCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
         Disalignment disalignment = Disalignment.getActiveInstance(player.getUniqueId());
         if (disalignment != null) {
             disalignment.cancelFromDamage();
@@ -1256,9 +1264,9 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onHelixCasterDamaged(final EntityDamageEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
         HealingHelix healingHelix = HealingHelix.getActiveInstance(player.getUniqueId());
         if (healingHelix != null) {
             healingHelix.cancelFromDamage();
@@ -1580,15 +1588,15 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onPickupMetalStrip(final EntityPickupItemEvent e) {
-		if (!(e.getEntity() instanceof Player player)) {
-			return;
-		}
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
 
         final String ownerUuid = e.getItem().getPersistentDataContainer().get(
                 MetalStrips.getStripOwnerKey(), PersistentDataType.STRING);
-		if (ownerUuid == null) {
-			return;
-		}
+        if (ownerUuid == null) {
+            return;
+        }
 
         if (!player.getUniqueId().toString().equals(ownerUuid)) {
             e.setCancelled(true);
@@ -1609,24 +1617,24 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler
     public void onRankBendingDamage(AbilityDamageEntityEvent e) {
-		if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
-			return;
-		}
+        if (e.getEntity().getWorld().getName().equalsIgnoreCase("arena")) {
+            return;
+        }
 
         Player p = e.getAbility().getPlayer();
-		if (p == null) {
-			return;
-		}
+        if (p == null) {
+            return;
+        }
 
         AranarthPlayer ap = AranarthUtils.getAranarthPlayers().get(p.getUniqueId());
-		if (ap == null) {
-			return;
-		}
+        if (ap == null) {
+            return;
+        }
 
         int rank = ap.getRank();
-		if (rank <= 0) {
-			return;
-		}
+        if (rank <= 0) {
+            return;
+        }
 
         double multiplier = RANK_DAMAGE_MULTIPLIERS[Math.min(rank, RANK_DAMAGE_MULTIPLIERS.length - 1)];
         e.setDamage(e.getDamage() * multiplier);
@@ -1639,22 +1647,22 @@ public class AranarthCoreBendingListener implements Listener {
     @EventHandler
     public void onAmplificationDamage(AbilityDamageEntityEvent e) {
         Ability ability = e.getAbility();
-		if (!(ability instanceof SoundAbility)) {
-			return;
-		}
-		if (ability instanceof Amplification) {
-			return;
-		}
+        if (!(ability instanceof SoundAbility)) {
+            return;
+        }
+        if (ability instanceof Amplification) {
+            return;
+        }
 
         Player p = ability.getPlayer();
-		if (p == null) {
-			return;
-		}
+        if (p == null) {
+            return;
+        }
 
         Amplification amp = Amplification.getActiveAmplification(p);
-		if (amp == null) {
-			return;
-		}
+        if (amp == null) {
+            return;
+        }
 
         amp.applyMultiplier(e);
     }
@@ -1665,18 +1673,18 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onDaggerThrowArrowHit(final EntityDamageByEntityEvent e) {
-		if (!(e.getDamager() instanceof AbstractArrow arrow)) {
-			return;
-		}
-		if (!arrow.hasMetadata("daggerthrow")) {
-			return;
-		}
-		if (!(e.getEntity() instanceof LivingEntity target)) {
-			return;
-		}
-		if (!(arrow.getShooter() instanceof Player shooter)) {
-			return;
-		}
+        if (!(e.getDamager() instanceof AbstractArrow arrow)) {
+            return;
+        }
+        if (!arrow.hasMetadata("daggerthrow")) {
+            return;
+        }
+        if (!(e.getEntity() instanceof LivingEntity target)) {
+            return;
+        }
+        if (!(arrow.getShooter() instanceof Player shooter)) {
+            return;
+        }
 
         e.setCancelled(true);
 
@@ -1695,18 +1703,18 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler(ignoreCancelled = true)
     public void onDaggerVolleyArrowHit(final EntityDamageByEntityEvent e) {
-		if (!(e.getDamager() instanceof AbstractArrow arrow)) {
-			return;
-		}
-		if (!arrow.hasMetadata("daggervolley")) {
-			return;
-		}
-		if (!(e.getEntity() instanceof LivingEntity target)) {
-			return;
-		}
-		if (!(arrow.getShooter() instanceof Player shooter)) {
-			return;
-		}
+        if (!(e.getDamager() instanceof AbstractArrow arrow)) {
+            return;
+        }
+        if (!arrow.hasMetadata("daggervolley")) {
+            return;
+        }
+        if (!(e.getEntity() instanceof LivingEntity target)) {
+            return;
+        }
+        if (!(arrow.getShooter() instanceof Player shooter)) {
+            return;
+        }
 
         e.setCancelled(true);
 
