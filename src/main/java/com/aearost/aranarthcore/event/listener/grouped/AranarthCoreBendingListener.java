@@ -35,6 +35,7 @@ import com.aearost.aranarthcore.abilities.firebending.lightningbending.ElectricS
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.JetBolt;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Jolt;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning;
+import com.aearost.aranarthcore.abilities.firebending.lightningbending.LightningBurst;
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
@@ -148,6 +149,7 @@ public class AranarthCoreBendingListener implements Listener {
         new ArrayList<>(CoreAbility.getAbilities(ElectricStrike.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(JetBolt.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(Lightning.class)).forEach(a -> a.removeWithTasks());
+        new ArrayList<>(CoreAbility.getAbilities(LightningBurst.class)).forEach(CoreAbility::remove);
 
         new BukkitRunnable() {
             @Override
@@ -397,6 +399,10 @@ public class AranarthCoreBendingListener implements Listener {
                     }
                 } else if (abilityName.equalsIgnoreCase("lightning")) {
                     new Lightning(player);
+                } else if (abilityName.equalsIgnoreCase("lightningburst")) {
+                    if (!LightningBurst.hasActiveInstance(player.getUniqueId())) {
+                        new LightningBurst(player);
+                    }
                 }
             }
             // Earthbending
