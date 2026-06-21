@@ -33,7 +33,7 @@ public class PotionConsumeListener implements Listener {
 	 */
 	@EventHandler
 	public void onPotionUse(final PlayerItemConsumeEvent e) {
-		if (e.getPlayer().getLocation().getWorld().getName().startsWith("world") || e.getPlayer().getLocation().getWorld().getName().startsWith("smp")) {
+		if (AranarthUtils.isSurvivalWorld(e.getPlayer().getWorld().getName())) {
             replacePotion(e.getPlayer(), e.getItem(), e.getHand() == EquipmentSlot.HAND);
 		}
 	}
