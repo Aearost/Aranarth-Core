@@ -337,7 +337,7 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
 
             entityLastStrikeTime.put(id, now);
             DamageHandler.damageEntity(living, damage, this);
-            AranarthBendingUtils.applyElectrocution(living, ELECTROCUTION_DURATION_MS);
+            AranarthBendingUtils.applyElectrocution(living, ELECTROCUTION_DURATION_MS, 0.75);
 
             for (int k = 0; k < 8; k++) {
                 Particle.DustOptions dust = switch (k % 3) {

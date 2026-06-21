@@ -59,7 +59,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
         cooldown = 4000L;
         range = 45.0;
         stunChance = 0.5;
-        stunDuration = 1000L;
+        stunDuration = 1500L;
 
         phase = Phase.CHARGING;
         chargeStart = System.currentTimeMillis();
@@ -145,9 +145,7 @@ public class Jolt extends LightningAbility implements AddonAbility {
 
             DamageHandler.damageEntity(living, damage, this);
 
-            if (Math.random() < stunChance) {
-                AranarthBendingUtils.applyElectrocution(living, stunDuration);
-            }
+            AranarthBendingUtils.applyElectrocution(living, stunDuration, stunChance);
 
             for (int k = 0; k < 6; k++) {
                 playLightningbendingParticle(

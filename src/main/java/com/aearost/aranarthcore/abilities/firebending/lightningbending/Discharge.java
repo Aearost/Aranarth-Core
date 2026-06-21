@@ -174,9 +174,7 @@ public class Discharge extends LightningAbility implements AddonAbility {
             GeneralMethods.setVelocity(this, entity, knockback);
             DamageHandler.damageEntity(living, damage, this);
 
-            if (rand.nextDouble() < stunChance) {
-                AranarthBendingUtils.applyElectrocution(living, stunDuration);
-            }
+            AranarthBendingUtils.applyElectrocution(living, stunDuration, stunChance);
 
             for (int k = 0; k < 5; k++) {
                 Particle.DustOptions dust = (k % 2 == 0) ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT : AranarthBendingUtils.LIGHTNING_DUST_BLUE;

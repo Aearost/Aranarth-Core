@@ -28,7 +28,7 @@ public class Static extends LightningAbility implements AddonAbility {
     private static final double PROJECTILE_SPEED = 1.5;
     private static final double STEP = 0.15;
     private static final double HIT_RADIUS = 0.8;
-    private static final long ELECTROCUTION_DURATION_MS = 1000L;
+    private static final long ELECTROCUTION_DURATION_MS = 500L;
 
     private static final Map<UUID, Static> ACTIVE_INSTANCES = new HashMap<>();
 
@@ -169,7 +169,7 @@ public class Static extends LightningAbility implements AddonAbility {
     private void strikeEntity(LivingEntity target) {
         double actualDamage = (target instanceof Player) ? damage : damage * 3.0;
         DamageHandler.damageEntity(target, actualDamage, this);
-        AranarthBendingUtils.applyElectrocution(target, ELECTROCUTION_DURATION_MS);
+        AranarthBendingUtils.applyElectrocution(target, ELECTROCUTION_DURATION_MS, 0.1);
 
         for (int k = 0; k < 6; k++) {
             Particle.DustOptions dust = (k % 2 == 0)

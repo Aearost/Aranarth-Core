@@ -12,8 +12,7 @@ import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -102,15 +101,32 @@ public class AranarthBendingUtils {
     private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");
 
     /**
-     * Electrocutes a living entity for the given duration, freezing their horizontal
-     * movement each tick while allowing vertical movement and head rotation. If the
-     * target is a player, they also receive a {@code * ELECTROCUTED *} action bar
-     * message. Repeated calls refresh the duration.
+     * Applies electrocution effects to a living entity.
      *
      * @param target     The entity to electrocute.
-     * @param durationMs How long the electrocution lasts in milliseconds.
+     * @param durationMs How long the stun lasts in milliseconds, if it triggers.
+     * @param chance     Probability [0.0–1.0] that the stun is applied.
      */
-    public static void applyElectrocution(LivingEntity target, long durationMs) {
+    public static void applyElectrocution(LivingEntity target, long durationMs, double chance) {
+        if (!target.isDead()) {
+            if (target instanceof Pig pig) {
+                pig.getWorld().spawn(pig.getLocation(), PigZombie.class);
+                pig.remove();
+                return;
+            } else if (target instanceof Villager villager) {
+                villager.getWorld().spawn(villager.getLocation(), Witch.class);
+                villager.remove();
+                return;
+            } else if (target instanceof Creeper creeper) {
+                creeper.setPowered(true);
+            }
+        }
+
+        // If it will not electrocute, skip rest of logic
+        if (Math.random() >= chance) {
+            return;
+        }
+
         UUID uuid = target.getUniqueId();
         ELECTROCUTED_ENTITIES.put(uuid, System.currentTimeMillis() + durationMs);
         int stunTicks = (int) (durationMs / 50L);
