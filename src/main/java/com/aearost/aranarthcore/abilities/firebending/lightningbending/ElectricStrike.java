@@ -23,12 +23,15 @@ import java.util.UUID;
 
 public class ElectricStrike extends LightningAbility implements AddonAbility {
 
-    public enum Phase { CHARGING, TRAVELING }
+    public enum Phase { CHARGING, TRAVELING, FIZZLING }
 
     private static final long CHARGE_DURATION_MS = 1000L;
     private static final double PROJECTILE_SPEED = 5.0;
     private static final double STEP = 0.2;
     private static final double HIT_RADIUS = 0.5;
+
+    private static final double AOE_RADIUS = 3.5;
+    private static final long FIZZLE_DURATION_MS = 1200L;
 
     private static final Map<UUID, ElectricStrike> ACTIVE_INSTANCES = new HashMap<>();
     private static final Set<UUID> PENDING_CHARGES = new HashSet<>();
@@ -46,6 +49,8 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
     private Vector direction;
     private Location shotLocation;
     private double distanceTraveled;
+    private long fizzleStart;
+    private Location fizzleLocation;
 
     public ElectricStrike(Player player) {
         super(player);
@@ -83,6 +88,7 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
         switch (phase) {
             case CHARGING -> progressCharging();
             case TRAVELING -> progressTraveling();
+            case FIZZLING -> progressFizzling();
         }
     }
 
@@ -134,12 +140,15 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
             }
 
             if (!isTransparent(shotLocation.getBlock())) {
-                endWithCooldown();
+                triggerImpactAoe(shotLocation, null);
+                startFizzle(shotLocation);
                 return;
             }
 
-            if (checkEntityHit(shotLocation)) {
-                endWithCooldown();
+            LivingEntity hit = checkEntityHit(shotLocation);
+            if (hit != null) {
+                triggerImpactAoe(shotLocation, hit);
+                startFizzle(shotLocation);
                 return;
             }
         }
@@ -147,8 +156,9 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
 
     /**
      * Checks for a living entity within hit radius of the given location.
+     * Returns the hit entity, or null if none was found.
      */
-    private boolean checkEntityHit(Location loc) {
+    private LivingEntity checkEntityHit(Location loc) {
         for (Entity entity : loc.getWorld().getNearbyEntities(loc, HIT_RADIUS, HIT_RADIUS, HIT_RADIUS)) {
             if (!(entity instanceof LivingEntity living) || entity.equals(player)) continue;
 
@@ -164,9 +174,89 @@ public class ElectricStrike extends LightningAbility implements AddonAbility {
 
             entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_BEE_HURT, 0.8f, 0.2f);
             player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);
-            return true;
+            return living;
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * Spawns an AOE electric cloud at the impact location, damaging all nearby entities.
+     * The directHit entity (if any) is excluded to avoid double damage from the primary hit.
+     */
+    private void triggerImpactAoe(Location loc, LivingEntity directHit) {
+        // Cloud particle burst
+        for (int i = 0; i < 40; i++) {
+            Particle.DustOptions dust = (i % 2 == 0)
+                    ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
+                    : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
+            double rx = (Math.random() - 0.5) * AOE_RADIUS * 2;
+            double ry = (Math.random() - 0.5) * AOE_RADIUS * 2;
+            double rz = (Math.random() - 0.5) * AOE_RADIUS * 2;
+            loc.getWorld().spawnParticle(Particle.DUST, loc.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
+        }
+        loc.getWorld().spawnParticle(Particle.ELECTRIC_SPARK, loc, 40, AOE_RADIUS * 0.4, AOE_RADIUS * 0.4, AOE_RADIUS * 0.4, 0.05);
+        loc.getWorld().playSound(loc, Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 0.7f, 1.8f);
+
+        // Damage all nearby entities (half damage for AOE)
+        for (Entity entity : loc.getWorld().getNearbyEntities(loc, AOE_RADIUS, AOE_RADIUS, AOE_RADIUS)) {
+            if (!(entity instanceof LivingEntity living) || entity.equals(player)) continue;
+            if (entity.equals(directHit)) continue;
+
+            DamageHandler.damageEntity(living, damage * 0.5, this);
+
+            for (int k = 0; k < 6; k++) {
+                Particle.DustOptions dust = (k % 2 == 0)
+                        ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
+                        : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
+                entity.getLocation().getWorld().spawnParticle(Particle.DUST, entity.getLocation(), 1,
+                        Math.random() * 0.4, Math.random() * living.getHeight() * 0.5, Math.random() * 0.4, 0, dust);
+            }
+            entity.getWorld().playSound(entity.getLocation(), Sound.ENTITY_BEE_HURT, 0.6f, 0.2f);
+        }
+    }
+
+    private void startFizzle(Location loc) {
+        fizzleLocation = loc.clone();
+        fizzleStart = System.currentTimeMillis();
+        phase = Phase.FIZZLING;
+    }
+
+    private void progressFizzling() {
+        long elapsed = System.currentTimeMillis() - fizzleStart;
+        if (elapsed >= FIZZLE_DURATION_MS) {
+            endWithCooldown();
+            return;
+        }
+
+        double progress = (double) elapsed / FIZZLE_DURATION_MS;
+
+        // Erratic electric sparks that thin out as the fizzle dies
+        int sparkCount = (int) (5 * (1.0 - progress * 0.6));
+        for (int i = 0; i < sparkCount; i++) {
+            double rx = (Math.random() - 0.5) * AOE_RADIUS * 1.6;
+            double ry = (Math.random() - 0.5) * AOE_RADIUS * 1.0;
+            double rz = (Math.random() - 0.5) * AOE_RADIUS * 1.6;
+            fizzleLocation.getWorld().spawnParticle(Particle.ELECTRIC_SPARK,
+                    fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0.03);
+        }
+
+        // Occasional dust flickers
+        if (Math.random() < 0.55 - progress * 0.3) {
+            Particle.DustOptions dust = (Math.random() < 0.5)
+                    ? AranarthBendingUtils.LIGHTNING_DUST_BRIGHT
+                    : AranarthBendingUtils.LIGHTNING_DUST_BLUE;
+            double rx = (Math.random() - 0.5) * AOE_RADIUS;
+            double ry = (Math.random() - 0.5) * AOE_RADIUS * 0.8;
+            double rz = (Math.random() - 0.5) * AOE_RADIUS;
+            fizzleLocation.getWorld().spawnParticle(Particle.DUST,
+                    fizzleLocation.clone().add(rx, ry, rz), 1, 0, 0, 0, 0, dust);
+        }
+
+        // Intermittent buzzing crackle that fades
+        if (Math.random() < 0.18 * (1.0 - progress)) {
+            fizzleLocation.getWorld().playSound(fizzleLocation, Sound.ENTITY_BEE_HURT,
+                    0.35f * (float) (1.0 - progress), 0.15f + (float) (Math.random() * 0.25));
+        }
     }
 
     /**
