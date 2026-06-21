@@ -61,7 +61,7 @@ public class Static extends LightningAbility implements AddonAbility {
         damage = 2.0;
         cooldown = 7000L;
         range = 7.0;
-        bounceRadius = 3.0;
+        bounceRadius = 5.0;
         maxBounces = 6;
         shotLocation = player.getEyeLocation().clone();
         distanceTraveled = 0.0;
@@ -69,6 +69,7 @@ public class Static extends LightningAbility implements AddonAbility {
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         bPlayer.addCooldown(this);
+        player.getWorld().playSound(player.getEyeLocation(), Sound.ENTITY_BEE_HURT, 0.8f, 0.3f);
         start();
     }
 
@@ -103,11 +104,13 @@ public class Static extends LightningAbility implements AddonAbility {
             spawnBoltParticle(shotLocation, stepIndex++);
 
             if (distanceTraveled > range) {
+                shotLocation.getWorld().playSound(shotLocation, Sound.ENTITY_BEE_HURT, 0.4f, 0.5f);
                 remove();
                 return;
             }
 
             if (!isTransparent(shotLocation.getBlock())) {
+                shotLocation.getWorld().playSound(shotLocation, Sound.ENTITY_BEE_HURT, 0.4f, 0.5f);
                 remove();
                 return;
             }
