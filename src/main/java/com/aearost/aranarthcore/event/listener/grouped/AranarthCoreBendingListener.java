@@ -1574,7 +1574,7 @@ public class AranarthCoreBendingListener implements Listener {
         }
         PastLives pastLivesDeath = PastLives.getActiveInstance(player.getUniqueId());
         if (pastLivesDeath != null) {
-            pastLivesDeath.endAbility(false);
+            pastLivesDeath.endAbility(true);
         }
         SandWave.clearPendingSource(player.getUniqueId());
         MagmaWave.clearPendingSource(player.getUniqueId());
@@ -1864,6 +1864,24 @@ public class AranarthCoreBendingListener implements Listener {
         }
 
         metalBlade.onMeleeHit(target, e);
+    }
+
+    /**
+     * Applies Wan's spirit damage bonus when the player in Wan form lands a melee hit.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onWanSpiritDamage(final EntityDamageByEntityEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
+            return;
+        }
+        if (!(e.getDamager() instanceof Player attacker)) {
+            return;
+        }
+        PastLives pastLives = PastLives.getActiveInstance(attacker.getUniqueId());
+        if (pastLives == null) {
+            return;
+        }
+        pastLives.onPlayerMeleeHit(e);
     }
 
 }

@@ -8,9 +8,17 @@ import com.projectkorra.projectkorra.ability.MultiAbility;
 import com.projectkorra.projectkorra.ability.util.MultiAbilityManager;
 import com.projectkorra.projectkorra.ability.util.MultiAbilityManager.MultiAbilityInfoSub;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,6 +71,8 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private static final Map<UUID, PastLives> activeInstances = new HashMap<>();
 
+    private static final double WAN_DAMAGE_BONUS = 0.25;
+
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
 
@@ -72,6 +82,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private State state;
     private AvatarForm activeForm;
     private final int pastLivesSlot;
+    private PotionEffect savedHealthBoostEffect = null; // Kyoshi: original Health Boost to restore on form end
 
     public PastLives(final Player player) {
         super(player);
@@ -94,6 +105,9 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         start();
         activeInstances.put(player.getUniqueId(), this);
         MultiAbilityManager.bindMultiAbility(player, "PastLives");
+        // Move off slot 0 so the player can press key 1 to select Wan (slot 0).
+        // bindMultiAbility forces slot 0, which means pressing key 1 again fires no event.
+        player.getInventory().setHeldItemSlot(8);
     }
 
     @Override
@@ -171,6 +185,8 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         if (info != null) {
             info.setAbilities(buildAvatarList());
         }
+        // Move off slot 0 so both "Continue" (slot 0) and "Exit" (slot 1) are reachable
+        player.getInventory().setHeldItemSlot(2);
     }
 
     private void closeCancelMenu() {
@@ -197,17 +213,25 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         MultiAbilityManager.unbindMultiAbility(player);
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 0.7f);
         player.sendMessage(ChatUtils.chatMessage("&5You have channeled the spirit of &dAvatar " + form.getDisplayName() + "&5!"));
-        // TODO Apply form-specific effects
+        switch (form) {
+            case WAN    -> activateWan();
+            case KYOSHI -> activateKyoshi();
+            case KORRA  -> activateKorra();
+            default     -> {}
+        }
     }
 
     private void tickForm() {
-        // TODO Per-tick logic for each active form
+        if (activeForm == AvatarForm.WAN) {
+            tickWan();
+        }
+        // TODO Per-tick logic for each other active form
     }
 
     public void endAbility(final boolean applyCooldown) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage("&7Your connection to &e" + activeForm.getDisplayName() + " &7has faded"));
-            // TODO Remove form-specific effects
+            player.sendMessage(ChatUtils.chatMessage("&5Your connection to &dAvatar " + activeForm.getDisplayName() + " &5has faded"));
+            removeFormEffects();
         }
         if (applyCooldown) {
             bPlayer.addCooldown(this);
@@ -217,11 +241,106 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public void endAbilityWithCooldown(final long overrideCooldownMs) {
         if (activeForm != null) {
-            player.sendMessage(ChatUtils.chatMessage("&7Your connection to &e" + activeForm.getDisplayName() + " &7has faded"));
-            // TODO: Remove form-specific effects
+            player.sendMessage(ChatUtils.chatMessage("&5Your connection to &dAvatar " + activeForm.getDisplayName() + " &5has faded"));
+            removeFormEffects();
         }
         bPlayer.addCooldown(getName(), overrideCooldownMs);
         remove();
+    }
+
+    private void removeFormEffects() {
+        if (activeForm == null) return;
+        switch (activeForm) {
+            case WAN    -> player.removePotionEffect(PotionEffectType.STRENGTH);
+            case KYOSHI -> {
+                player.removePotionEffect(PotionEffectType.HEALTH_BOOST);
+                if (savedHealthBoostEffect != null) {
+                    player.addPotionEffect(new PotionEffect(
+                            PotionEffectType.HEALTH_BOOST,
+                            savedHealthBoostEffect.getDuration(),
+                            savedHealthBoostEffect.getAmplifier(),
+                            savedHealthBoostEffect.isAmbient(),
+                            savedHealthBoostEffect.hasParticles(),
+                            savedHealthBoostEffect.hasIcon()
+                    ));
+                    savedHealthBoostEffect = null;
+                }
+                player.removePotionEffect(PotionEffectType.RESISTANCE);
+            }
+            case KORRA  -> {
+                player.removePotionEffect(PotionEffectType.STRENGTH);
+                player.removePotionEffect(PotionEffectType.SPEED);
+            }
+            default     -> {}
+        }
+    }
+
+    private void activateWan() {
+        player.removePotionEffect(PotionEffectType.STRENGTH);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, -1, 2, false, true, true));
+    }
+
+    private void activateKyoshi() {
+        savedHealthBoostEffect = player.getPotionEffect(PotionEffectType.HEALTH_BOOST);
+        int baseAmplifier = savedHealthBoostEffect != null ? savedHealthBoostEffect.getAmplifier() : -1;
+
+        player.removePotionEffect(PotionEffectType.HEALTH_BOOST);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, -1, baseAmplifier + 5, false, true, true));
+
+        player.removePotionEffect(PotionEffectType.RESISTANCE);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, -1, 3, false, true, true));
+    }
+
+    private void activateKorra() {
+        player.removePotionEffect(PotionEffectType.STRENGTH);
+        player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, -1, 4, false, true, true));
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, 4, false, true, true));
+    }
+
+    private void tickWan() {
+        World world = player.getWorld();
+        // Use getDirection() for an accurate forward vector (yaw-only, ignore pitch for positioning)
+        Location eyeLoc = player.getEyeLocation();
+        Vector forward = new Vector(-Math.sin(Math.toRadians(eyeLoc.getYaw())), 0,
+                Math.cos(Math.toRadians(eyeLoc.getYaw()))).normalize();
+        // Right vector: perpendicular to forward in the horizontal plane
+        Vector right = new Vector(forward.getZ(), 0, -forward.getX());
+
+        // Chest center: just touching the front of the player model
+        Location chest = player.getLocation().clone()
+                .add(forward.getX() * 0.3, 1.0, forward.getZ() * 0.1);
+
+        Particle.DustOptions dustOptions = new Particle.DustOptions(Color.WHITE, 1.2f);
+
+        // Oval body: Raava's teardrop shape centered on the chest
+        for (int i = 0; i < 10; i++) {
+            double angle = 2 * Math.PI * i / 10;
+            double rightOffset = Math.cos(angle) * 0.12;
+            double upOffset = Math.sin(angle) * 0.22;
+            Location particleLoc = chest.clone()
+                    .add(right.getX() * rightOffset, upOffset, right.getZ() * rightOffset);
+            world.spawnParticle(Particle.DUST, particleLoc, 1, 0, 0, 0, 0, dustOptions);
+        }
+
+        // Trailing tendrils below the oval, animated
+        for (int i = 0; i < 3; i++) {
+            double phase = (System.currentTimeMillis() / 300.0) + i * (2 * Math.PI / 3);
+            double wave = Math.sin(phase) * 0.06;
+            double sideOffset = (i - 1) * 0.08;
+            double downOffset = 0.18 + i * 0.12;
+            Location tendrilLoc = chest.clone()
+                    .add(right.getX() * (sideOffset + wave), -downOffset, right.getZ() * (sideOffset + wave));
+            world.spawnParticle(Particle.DUST, tendrilLoc, 1, 0, 0, 0, 0, dustOptions);
+        }
+    }
+
+    public void onPlayerMeleeHit(EntityDamageByEntityEvent e) {
+        if (activeForm != AvatarForm.WAN) return;
+        e.setDamage(e.getDamage() * 1.5);
+        if (e.getEntity() instanceof LivingEntity target) {
+            Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(220, 240, 255), 1.0f);
+            target.getWorld().spawnParticle(Particle.DUST, target.getLocation().add(0, 1, 0), 8, 0.2, 0.4, 0.2, 0, dustOptions);
+        }
     }
 
     @Override
@@ -301,13 +420,13 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 ChatUtils.translateToColor("&fTo select: Hold Sneak > Select Slot (1-8)\n") +
                 ChatUtils.translateToColor("&fTo exit: Hold Sneak > Select Slot (1-2)\n") +
                 ChatUtils.translateToColor("&fAvatars:\n") +
-                ChatUtils.translateToColor("  &f1. Wan - XXX") +
-                ChatUtils.translateToColor("  &f2. Szeto - XXX") +
-                ChatUtils.translateToColor("  &f3. Yangchen - XXX") +
-                ChatUtils.translateToColor("  &f4. Kuruk - XXX") +
-                ChatUtils.translateToColor("  &f5. Kyoshi - XXX") +
-                ChatUtils.translateToColor("  &f6. Roku - XXX") +
-                ChatUtils.translateToColor("  &f7. Aang - XXX") +
-                ChatUtils.translateToColor("  &f8. Korra - XXX");
+                ChatUtils.translateToColor("  &f1. Wan - Channels Raava's spirit, granting strength and dealing bonus damage to those you strike\n") +
+                ChatUtils.translateToColor("  &f2. Szeto - Heightens all of your active beneficial effects, pushing them beyond their normal limits\n") +
+                ChatUtils.translateToColor("  &f3. Yangchen - Purifies all harmful effects on you, turning them into their positive counterparts\n") +
+                ChatUtils.translateToColor("  &f4. Kuruk - Builds power with every consecutive hit, but becomes a blur of speed when close to death\n") +
+                ChatUtils.translateToColor("  &f5. Kyoshi - Fortifies the body with an extra row of hearts that vanish when the form ends\n") +
+                ChatUtils.translateToColor("  &f6. Roku - Calls upon Fang, soaring through the skies at ever-growing speed\n") +
+                ChatUtils.translateToColor("  &f7. Aang - Runs faster the longer you sprint, and reduces the wait on all your other abilities\n") +
+                ChatUtils.translateToColor("  &f8. Korra - Overwhelms enemies with raw strength and blazing speed");
     }
 }
