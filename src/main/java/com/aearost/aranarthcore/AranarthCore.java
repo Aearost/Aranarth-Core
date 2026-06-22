@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
@@ -969,6 +970,7 @@ public class AranarthCore extends JavaPlugin {
     private void saveAll() {
         // End all active AstralProjections/cancel the abilities
         AstralProjection.endAllProjections();
+        PastLives.endAllInstances();
 
         ShopUtils.removeAllHolograms();
         PersistenceUtils.saveServerDate();

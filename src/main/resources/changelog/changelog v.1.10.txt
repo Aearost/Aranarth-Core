@@ -12,6 +12,7 @@ Major Features
 [+] Added the /mail command, allowing players to send mail to offline players
 [+] Added Blood Bending to Emperors
 [+] Added Flight to Emperors
+[+] Implemented the basis to the PastLives ability for the Avatar
 [+] Implemented the CableSlash metal combo
 [+] Added the Sound sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders

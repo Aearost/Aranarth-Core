@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.Disalignment;
@@ -64,6 +65,7 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AirAbility;
+import com.projectkorra.projectkorra.ability.AvatarAbility;
 import com.projectkorra.projectkorra.ability.ChiAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
@@ -124,6 +126,7 @@ public class AranarthCoreBendingListener implements Listener {
         // End all active projections before PK clears and re-registers abilities,
         // so players are safely returned to their body location.
         AstralProjection.endAllProjections();
+        PastLives.endAllInstances();
         new ArrayList<>(CoreAbility.getAbilities(AstralShot.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableSlash.class)).forEach(CoreAbility::remove);
         new ArrayList<>(CoreAbility.getAbilities(CableWhip.class)).forEach(CoreAbility::remove);
@@ -261,6 +264,10 @@ public class AranarthCoreBendingListener implements Listener {
             }
             if (abilityName.equalsIgnoreCase("earthsmash")) {
                 MoltenBlast.markEarthSmashSneak(player.getUniqueId());
+            }
+            PastLives pastLivesRelease = PastLives.getActiveInstance(player.getUniqueId());
+            if (pastLivesRelease != null) {
+                pastLivesRelease.onSneakRelease();
             }
         }
 
@@ -490,6 +497,17 @@ public class AranarthCoreBendingListener implements Listener {
                         new HighJump(player, HighJump.JumpType.EVADE);
                     } else {
                         new HighJump(player, HighJump.JumpType.DOUBLEJUMP);
+                    }
+                }
+            }
+            // Avatar abilities
+            else if (ability instanceof AvatarAbility && bendingPlayer.isElementToggled(Element.AVATAR)) {
+                if (abilityName.equalsIgnoreCase("pastlives")) {
+                    PastLives existingPastLives = PastLives.getActiveInstance(player.getUniqueId());
+                    if (existingPastLives == null) {
+                        new PastLives(player);
+                    } else {
+                        existingPastLives.onSneakPress();
                     }
                 }
             }
@@ -935,6 +953,12 @@ public class AranarthCoreBendingListener implements Listener {
      */
     @EventHandler
     public void onSlotChange(PlayerItemHeldEvent e) {
+        // In ACTIVE state it returns false, letting normal slot-change logic proceed.
+        PastLives pastLives = PastLives.getActiveInstance(e.getPlayer().getUniqueId());
+        if (pastLives != null && pastLives.onSlotChange(e.getNewSlot())) {
+            return;
+        }
+
         if (HealingHelix.hasActiveInstance(e.getPlayer().getUniqueId())
                 || CorruptingHelix.hasActiveInstance(e.getPlayer().getUniqueId())) {
             e.setCancelled(true);
@@ -1548,6 +1572,10 @@ public class AranarthCoreBendingListener implements Listener {
         if (AstralProjection.isProjecting(player.getUniqueId())) {
             AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
         }
+        PastLives pastLivesDeath = PastLives.getActiveInstance(player.getUniqueId());
+        if (pastLivesDeath != null) {
+            pastLivesDeath.endAbility(false);
+        }
         SandWave.clearPendingSource(player.getUniqueId());
         MagmaWave.clearPendingSource(player.getUniqueId());
         HealingHelix.clearPendingSource(player.getUniqueId());
@@ -1577,6 +1605,10 @@ public class AranarthCoreBendingListener implements Listener {
         Player player = e.getPlayer();
         if (AstralProjection.isProjecting(player.getUniqueId())) {
             AstralProjection.getActiveProjection(player.getUniqueId()).endAbility();
+        }
+        PastLives pastLivesQuit = PastLives.getActiveInstance(player.getUniqueId());
+        if (pastLivesQuit != null) {
+            pastLivesQuit.endAbility(false);
         }
         SandWave.clearPendingSource(player.getUniqueId());
         MagmaWave.clearPendingSource(player.getUniqueId());

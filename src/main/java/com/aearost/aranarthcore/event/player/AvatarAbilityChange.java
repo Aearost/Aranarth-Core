@@ -50,7 +50,10 @@ public class AvatarAbilityChange {
         return name.equals("Air") || name.equals("Earth") || name.equals("Fire") || name.equals("Water") || name.equals("Stream")
                 || name.equals("Pull") || name.equals("Punch") || name.equals("Grapple") || name.equals("Grab") || name.equals("Freeze")
                 || name.equals("Spear")
-                || name.equals("Aura") || name.equals("Scream") || name.equals("Possess");
+                || name.equals("Aura") || name.equals("Scream") || name.equals("Possess")
+                || name.equals("Wan") || name.equals("Szeto") || name.equals("Yangchen") || name.equals("Kuruk")
+                || name.equals("Kyoshi") || name.equals("Roku") || name.equals("Aang") || name.equals("Korra")
+                || name.equals("Continue") || name.equals("Exit");
     }
 
 }
