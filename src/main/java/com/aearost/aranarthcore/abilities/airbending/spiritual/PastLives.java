@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.MountListener;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.AddonAbility;
@@ -8,15 +11,19 @@ import com.projectkorra.projectkorra.ability.MultiAbility;
 import com.projectkorra.projectkorra.ability.util.MultiAbilityManager;
 import com.projectkorra.projectkorra.ability.util.MultiAbilityManager.MultiAbilityInfoSub;
 import com.projectkorra.projectkorra.attribute.Attribute;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.entity.EnderDragon;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
@@ -24,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class PastLives extends AvatarAbility implements AddonAbility, MultiAbility {
 
@@ -70,8 +78,15 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     }
 
     private static final Map<UUID, PastLives> activeInstances = new HashMap<>();
+    private static final Map<UUID, PastLives> fangInstances = new HashMap<>();
 
     private static final double WAN_DAMAGE_BONUS = 0.25;
+
+    public static final double ROKU_MIN_SPEED = 1.0;   // 20 m/s at 20 TPS
+    private static final double ROKU_MAX_SPEED = 3.75;  // 75 m/s at 20 TPS
+    // Over 10 seconds
+    private static final double ROKU_RAMP_RATE = (ROKU_MAX_SPEED - ROKU_MIN_SPEED) / 200.0;
+    static final long ROKU_DEATH_COOLDOWN_MS = 900_000L; // 15 minutes
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -83,6 +98,10 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private AvatarForm activeForm;
     private final int pastLivesSlot;
     private PotionEffect savedHealthBoostEffect = null; // Kyoshi: original Health Boost to restore on form end
+
+    // Roku state
+    private UUID fangUUID = null;
+    private double rokuCurrentSpeed = ROKU_MIN_SPEED;
 
     public PastLives(final Player player) {
         super(player);
@@ -216,6 +235,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         switch (form) {
             case WAN    -> activateWan();
             case KYOSHI -> activateKyoshi();
+            case ROKU   -> activateRoku();
             case KORRA  -> activateKorra();
             default     -> {}
         }
@@ -224,6 +244,8 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private void tickForm() {
         if (activeForm == AvatarForm.WAN) {
             tickWan();
+        } else if (activeForm == AvatarForm.ROKU) {
+            tickRoku();
         }
         // TODO Per-tick logic for each other active form
     }
@@ -267,6 +289,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 }
                 player.removePotionEffect(PotionEffectType.RESISTANCE);
             }
+            case ROKU   -> removeRokuEffects();
             case KORRA  -> {
                 player.removePotionEffect(PotionEffectType.STRENGTH);
                 player.removePotionEffect(PotionEffectType.SPEED);
@@ -289,6 +312,112 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
         player.removePotionEffect(PotionEffectType.RESISTANCE);
         player.addPotionEffect(new PotionEffect(PotionEffectType.RESISTANCE, -1, 3, false, true, true));
+    }
+
+    private void activateRoku() {
+        if (player.getWorld().getName().equalsIgnoreCase("arena")) {
+            player.sendMessage(ChatUtils.chatMessage("&cFang cannot fly in the arena!"));
+            remove();
+            return;
+        }
+
+        rokuCurrentSpeed = ROKU_MIN_SPEED;
+
+        Location spawnLoc = player.getLocation().clone().add(0, 4, 0);
+        EnderDragon dragon = player.getWorld().spawn(spawnLoc, EnderDragon.class, entity -> {
+            entity.setPersistent(false);
+            entity.setCustomName("Fang");
+            entity.setCustomNameVisible(true);
+
+            var maxHpAttr = entity.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+            if (maxHpAttr != null) {
+                maxHpAttr.setBaseValue(200.0);
+            }
+            entity.setHealth(200.0);
+            entity.setPhase(EnderDragon.Phase.HOVER);
+
+            entity.getPersistentDataContainer().set(
+                    CustomKeys.FANG_OWNER, PersistentDataType.STRING, player.getUniqueId().toString());
+        });
+
+        // Silence all vanilla sounds as we play our own occasional sounds in tickRoku
+        dragon.setSilent(true);
+
+        fangUUID = dragon.getUniqueId();
+        fangInstances.put(fangUUID, this);
+
+        // Delay mounting by 3 ticks so the player's sneak key is released first
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (!dragon.isDead() && fangUUID != null) {
+                dragon.addPassenger(player);
+                MountListener.getInstance().registerFang(dragon, player, ROKU_MIN_SPEED);
+            }
+        }, 3L);
+
+        player.playSound(player.getLocation(), Sound.ENTITY_ENDER_DRAGON_AMBIENT, 1.0f, 1.2f);
+    }
+
+    private static final float[] ROKU_SOUND_PITCHES = {1.2f, 1.25f, 1.5f};
+
+    private void tickRoku() {
+        if (fangUUID == null) return;
+        Entity e = Bukkit.getEntity(fangUUID);
+        if (!(e instanceof EnderDragon dragon) || dragon.isDead()) return;
+
+        boolean playerIsRiding = dragon.getPassengers().contains(player);
+
+        if (!playerIsRiding) {
+            dragon.setGravity(false); // Handled manually so AI doesn't fight the descent
+            dragon.setPhase(EnderDragon.Phase.HOVER);
+            rokuCurrentSpeed = ROKU_MIN_SPEED;
+
+            // Descend toward the ground so the player can easily reach Fang again
+            Location loc = dragon.getLocation();
+            boolean nearGround = false;
+            for (int i = 1; i <= 5; i++) {
+                if (!dragon.getWorld()
+                        .getBlockAt((int) loc.getX(), (int) (loc.getY() - i), (int) loc.getZ())
+                        .isPassable()) {
+                    nearGround = true;
+                    break;
+                }
+            }
+            if (!nearGround) {
+                dragon.teleport(loc.subtract(0, 0.4, 0));
+            }
+            return;
+        }
+
+        // Disable gravity while riding so Fang floats in place when the player makes no input
+        dragon.setGravity(false);
+        // Lock phase to prevent the dragon entering attack or circling phases
+        dragon.setPhase(EnderDragon.Phase.HOVER);
+
+        // Ramp speed toward maximum each tick
+        rokuCurrentSpeed = Math.min(ROKU_MAX_SPEED, rokuCurrentSpeed + ROKU_RAMP_RATE);
+
+        // Push the updated speed into MountListener
+        MountListener.getInstance().updateFangSpeed(fangUUID, rokuCurrentSpeed);
+
+        // Occasionally play a pitched ambient roar (every 10~ seconds)
+        ThreadLocalRandom rng = ThreadLocalRandom.current();
+        if (rng.nextDouble() < 0.005) {
+            float pitch = ROKU_SOUND_PITCHES[rng.nextInt(ROKU_SOUND_PITCHES.length)];
+            dragon.getWorld().playSound(dragon.getLocation(), Sound.ENTITY_ENDER_DRAGON_AMBIENT, 0.8f, pitch);
+        }
+    }
+
+    private void removeRokuEffects() {
+        if (fangUUID == null) return;
+        fangInstances.remove(fangUUID);
+        Entity e = Bukkit.getEntity(fangUUID);
+        if (e instanceof EnderDragon dragon && !dragon.isDead()) {
+            for (Entity passenger : new ArrayList<>(dragon.getPassengers())) {
+                passenger.leaveVehicle();
+            }
+            dragon.remove();
+        }
+        fangUUID = null;
     }
 
     private void activateKorra() {
@@ -347,6 +476,9 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     public void remove() {
         MultiAbilityManager.unbindMultiAbility(player);
         activeInstances.remove(player.getUniqueId());
+        if (fangUUID != null) {
+            fangInstances.remove(fangUUID);
+        }
         super.remove();
     }
 
@@ -360,6 +492,21 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public static PastLives getActiveInstance(final UUID uuid) {
         return activeInstances.get(uuid);
+    }
+
+    public static PastLives getFangInstance(final UUID fangEntityUUID) {
+        return fangInstances.get(fangEntityUUID);
+    }
+
+    /**
+     * Called when Fang is killed by an external source.
+     */
+    public void onFangDeath() {
+        fangInstances.remove(fangUUID);
+        fangUUID = null;
+        player.sendMessage(ChatUtils.chatMessage("&cFang has fallen! You must wait before calling upon Roku again."));
+        bPlayer.addCooldown(getName(), ROKU_DEATH_COOLDOWN_MS);
+        remove();
     }
 
     @Override

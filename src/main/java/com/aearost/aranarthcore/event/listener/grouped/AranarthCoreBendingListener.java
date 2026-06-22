@@ -57,6 +57,7 @@ import com.aearost.aranarthcore.abilities.waterbending.plantbending.ToxicSpores;
 import com.aearost.aranarthcore.abilities.waterbending.plantbending.VineWhip;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceDiscs;
 import com.aearost.aranarthcore.abilities.waterbending.combo.IceShards;
+import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -96,8 +97,10 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -1589,11 +1592,16 @@ public class AranarthCoreBendingListener implements Listener {
     /**
      * Removes any LifeRip health bonus from a player when they enter the arena world.
      * Arena fights should always start on a level playing field.
+     * Also ends the Roku form if the player enters the arena while Fang is summoned.
      */
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent e) {
         if (e.getPlayer().getWorld().getName().equalsIgnoreCase("arena")) {
             LifeRip.resetCasterGain(e.getPlayer());
+            PastLives pastLivesWorld = PastLives.getActiveInstance(e.getPlayer().getUniqueId());
+            if (pastLivesWorld != null) {
+                pastLivesWorld.endAbility(true);
+            }
         }
     }
 
@@ -1864,6 +1872,80 @@ public class AranarthCoreBendingListener implements Listener {
         }
 
         metalBlade.onMeleeHit(target, e);
+    }
+
+    /**
+     * Prevents Fang from dealing any contact or melee damage to surrounding entities.
+     * The dragon has AI disabled, but Minecraft still fires collision damage events.
+     */
+    @EventHandler
+    public void onFangDamageEntity(final EntityDamageByEntityEvent e) {
+        if (!(e.getDamager() instanceof EnderDragon)) {
+            return;
+        }
+        if (PastLives.getFangInstance(e.getDamager().getUniqueId()) == null) {
+            return;
+        }
+        e.setCancelled(true);
+    }
+
+    /**
+     * Allows the Avatar to right-click Fang to re-mount after dismounting.
+     * The mount is delayed by 2 ticks to avoid an immediate sneak-dismount if the
+     * player is still holding shift when the interaction fires.
+     */
+    @EventHandler
+    public void onFangInteract(final PlayerInteractEntityEvent e) {
+        // Resolve the clicked entity to the main EnderDragon — the player often
+        // clicks a body part (head, wing, tail) which is a ComplexEntityPart, not the dragon itself.
+        EnderDragon dragon;
+        if (e.getRightClicked() instanceof EnderDragon d) {
+            dragon = d;
+        } else if (e.getRightClicked() instanceof org.bukkit.entity.ComplexEntityPart part
+                   && part.getParent() instanceof EnderDragon d) {
+            dragon = d;
+        } else {
+            return;
+        }
+        if (e.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        PastLives pastLives = PastLives.getFangInstance(dragon.getUniqueId());
+        if (pastLives == null) {
+            return;
+        }
+        Player player = e.getPlayer();
+        if (!pastLives.getPlayer().equals(player)) {
+            return;
+        }
+        if (dragon.getPassengers().contains(player)) {
+            return;
+        }
+        e.setCancelled(true);
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            if (!dragon.isDead() && !dragon.getPassengers().contains(player)) {
+                dragon.addPassenger(player);
+                MountListener.getInstance().registerFang(dragon, player, PastLives.ROKU_MIN_SPEED);
+            }
+        }, 2L);
+    }
+
+    /**
+     * When Fang (the Roku form's Ender Dragon) is killed by an external source, clears
+     * drops and applies a 15-minute cooldown penalty to the Avatar.
+     */
+    @EventHandler
+    public void onFangDeath(final EntityDeathEvent e) {
+        if (!(e.getEntity() instanceof EnderDragon)) {
+            return;
+        }
+        PastLives pastLives = PastLives.getFangInstance(e.getEntity().getUniqueId());
+        if (pastLives == null) {
+            return;
+        }
+        e.getDrops().clear();
+        e.setDroppedExp(0);
+        pastLives.onFangDeath();
     }
 
     /**

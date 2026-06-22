@@ -702,9 +702,12 @@ public class MountListener implements Listener {
 
     private void applyMovement(LivingEntity mount, Player rider) {
         float riderYaw = rider.getLocation().getYaw();
-        mount.setRotation(riderYaw, 0);
-        if (mount instanceof Mob mob) {
-            mob.setBodyYaw(riderYaw);
+        // EnderDragon rotation is handled exclusively by the teleport location below
+        if (!(mount instanceof EnderDragon)) {
+            mount.setRotation(riderYaw, 0);
+            if (mount instanceof Mob mob) {
+                mob.setBodyYaw(riderYaw);
+            }
         }
 
         // While the Polar Bear Dog is lunging, the PolarBearBite runnable controls velocity
@@ -745,10 +748,28 @@ public class MountListener implements Listener {
 
         double vertY;
 
-        if (mount instanceof HappyGhast) {
+        if (mount instanceof EnderDragon dragon) {
+            // EnderDragon's NMS movement system ignores setVelocity
+            Vector lookDir = rider.getEyeLocation().getDirection();
+            Vector strafeDir = new Vector(Math.cos(yaw), 0, Math.sin(yaw));
+            Vector moveVec = lookDir.clone().multiply(forward)
+                    .add(strafeDir.clone().multiply(strafe));
+            double moveLen = moveVec.length();
+            if (moveLen > 0.001) {
+                moveVec.multiply(speed / moveLen);
+                Location newLoc = dragon.getLocation().clone().add(moveVec);
+                newLoc.setYaw(riderYaw + 180); // EnderDragon model is rotated 180 degrees relative to standard yaw
+                newLoc.setPitch(0);
+                dragon.teleport(newLoc);
+            }
+            if (distanceMoved > 0.05) {
+                MountUtils.accumulateSpeedXp(mountId, distanceMoved);
+            }
+            return;
+        } else if (mount instanceof HappyGhast) {
             // Full 3D directional flight following the rider's look direction
             Vector lookDir = rider.getEyeLocation().getDirection();
-            // Horizontal-only strafe vector (90° clockwise from yaw in XZ)
+            // Horizontal-only strafe vector (90 degrees clockwise from yaw in XZ)
             Vector strafeDir = new Vector(Math.cos(yaw), 0, Math.sin(yaw));
 
             Vector moveVec = lookDir.clone().multiply(forward)
@@ -757,13 +778,11 @@ public class MountListener implements Listener {
             if (moveLen > 0.001) {
                 moveVec.multiply(speed / moveLen);
             }
-            // Override the XZ values computed above with the full 3D result
             vx = moveVec.getX();
             vz = moveVec.getZ();
             vertY = moveVec.getY(); // 0 when idle as the ghast hovers naturally
         } else {
-            // Use 0 when grounded to avoid fighting Minecraft's gravity simulation (jitter).
-            // The step-up block below overrides this with STEP_UP_VELOCITY when needed.
+            // Use 0 when grounded to avoid fighting Minecraft's gravity simulation (jitter)
             vertY = mount.isOnGround() ? 0.0 : mount.getVelocity().getY();
 
             // Auto step-up over 1-block solid obstacles (not fences/walls)
@@ -887,8 +906,8 @@ public class MountListener implements Listener {
                 }
             }
 
-            // Restore flying speed for the Happy Ghast
-            if (living instanceof HappyGhast && originalFlyingSpeeds.containsKey(id)) {
+            // Restore flying speed for any flying mount (HappyGhast, Fang, etc.)
+            if (originalFlyingSpeeds.containsKey(id)) {
                 var flyAttr = living.getAttribute(Attribute.FLYING_SPEED);
                 if (flyAttr != null) {
                     flyAttr.setBaseValue(originalFlyingSpeeds.remove(id));
@@ -928,6 +947,40 @@ public class MountListener implements Listener {
 
     public void cleanupMountPublic(UUID id) {
         cleanupMount(id);
+    }
+
+    /**
+     * Registers Roku's dragon, Fang, in the movement loop so it receives look-direction flight.
+     */
+    public void registerFang(EnderDragon dragon, Player rider, double initialSpeed) {
+        UUID id = dragon.getUniqueId();
+        activeMounts.put(id, new AranarthMount(rider.getUniqueId(), initialSpeed, null, null));
+
+        // Zero movement attributes to limit how far the AI can drift Fang
+        var speedAttr = dragon.getAttribute(Attribute.MOVEMENT_SPEED);
+        if (speedAttr != null) {
+            originalSpeeds.put(id, speedAttr.getBaseValue());
+            speedAttr.setBaseValue(0.0);
+        }
+        var flyAttr = dragon.getAttribute(Attribute.FLYING_SPEED);
+        if (flyAttr != null) {
+            originalFlyingSpeeds.put(id, flyAttr.getBaseValue());
+            flyAttr.setBaseValue(0.0);
+        }
+
+        // Disable gravity while riding
+        dragon.setGravity(false);
+    }
+
+    /**
+     * Updates Fang's flight speed in the movement loop.
+     * Called every tick by PastLives to apply the speed ramp and direction-change throttle.
+     */
+    public void updateFangSpeed(UUID dragonId, double speed) {
+        AranarthMount aMount = activeMounts.get(dragonId);
+        if (aMount != null) {
+            aMount.setSpeed(speed);
+        }
     }
 
     /**
