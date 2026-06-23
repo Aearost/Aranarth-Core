@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.event.mob.MountListener;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -29,7 +30,9 @@ import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -82,8 +85,38 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     private static final double WAN_DAMAGE_BONUS = 0.25;
 
-    public static final double ROKU_MIN_SPEED = 1.0;   // 20 m/s at 20 TPS
-    private static final double ROKU_MAX_SPEED = 3.75;  // 75 m/s at 20 TPS
+    // Szeto - beneficial effects are eligible for the +1 amplifier boost
+    private static final Set<PotionEffectType> SZETO_POSITIVE_EFFECTS = Set.of(
+            PotionEffectType.SPEED, PotionEffectType.HASTE, PotionEffectType.STRENGTH,
+            PotionEffectType.INSTANT_HEALTH, PotionEffectType.JUMP_BOOST,
+            PotionEffectType.REGENERATION, PotionEffectType.RESISTANCE,
+            PotionEffectType.FIRE_RESISTANCE, PotionEffectType.WATER_BREATHING,
+            PotionEffectType.INVISIBILITY, PotionEffectType.NIGHT_VISION,
+            PotionEffectType.ABSORPTION, PotionEffectType.SATURATION,
+            PotionEffectType.LUCK, PotionEffectType.HERO_OF_THE_VILLAGE,
+            PotionEffectType.SLOW_FALLING, PotionEffectType.CONDUIT_POWER,
+            PotionEffectType.DOLPHINS_GRACE, PotionEffectType.HEALTH_BOOST
+    );
+
+    // Yangchen - negative effects switch to their positive counterparts, unmapped ones are simply cleansed
+    private static final Map<PotionEffectType, PotionEffectType> YANGCHEN_CONVERSIONS = Map.of(
+            PotionEffectType.POISON,   PotionEffectType.REGENERATION,
+            PotionEffectType.SLOWNESS, PotionEffectType.SPEED,
+            PotionEffectType.WEAKNESS, PotionEffectType.STRENGTH,
+            PotionEffectType.BLINDNESS, PotionEffectType.NIGHT_VISION
+    );
+
+    private static final Set<PotionEffectType> YANGCHEN_NEGATIVE_EFFECTS = Set.of(
+            PotionEffectType.POISON, PotionEffectType.SLOWNESS, PotionEffectType.WEAKNESS,
+            PotionEffectType.BLINDNESS, PotionEffectType.MINING_FATIGUE,
+            PotionEffectType.INSTANT_DAMAGE, PotionEffectType.NAUSEA,
+            PotionEffectType.HUNGER, PotionEffectType.WITHER,
+            PotionEffectType.LEVITATION, PotionEffectType.UNLUCK,
+            PotionEffectType.BAD_OMEN, PotionEffectType.DARKNESS
+    );
+
+    public static final double ROKU_MIN_SPEED = 1.0;   // 20 m/s
+    private static final double ROKU_MAX_SPEED = 3.75;  // 75 m/s
     // Over 10 seconds
     private static final double ROKU_RAMP_RATE = (ROKU_MAX_SPEED - ROKU_MIN_SPEED) / 200.0;
     static final long ROKU_DEATH_COOLDOWN_MS = 900_000L; // 15 minutes
@@ -98,6 +131,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private AvatarForm activeForm;
     private final int pastLivesSlot;
     private PotionEffect savedHealthBoostEffect = null; // Kyoshi: original Health Boost to restore on form end
+    private List<PotionEffect> szetoSavedEffects = null; // Szeto: original effects before the +1 boost
 
     // Roku state
     private UUID fangUUID = null;
@@ -233,21 +267,24 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 0.7f);
         player.sendMessage(ChatUtils.chatMessage("&5You have channeled the spirit of &dAvatar " + form.getDisplayName() + "&5!"));
         switch (form) {
-            case WAN    -> activateWan();
-            case KYOSHI -> activateKyoshi();
-            case ROKU   -> activateRoku();
-            case KORRA  -> activateKorra();
-            default     -> {}
+            case WAN     -> activateWan();
+            case SZETO   -> activateSzeto();
+            case YANGCHEN -> activateYangchen();
+            case KYOSHI  -> activateKyoshi();
+            case ROKU    -> activateRoku();
+            case KORRA   -> activateKorra();
+            default      -> {}
         }
     }
 
     private void tickForm() {
         if (activeForm == AvatarForm.WAN) {
             tickWan();
+        } else if (activeForm == AvatarForm.YANGCHEN) {
+            tickYangchen();
         } else if (activeForm == AvatarForm.ROKU) {
             tickRoku();
         }
-        // TODO Per-tick logic for each other active form
     }
 
     public void endAbility(final boolean applyCooldown) {
@@ -289,6 +326,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 }
                 player.removePotionEffect(PotionEffectType.RESISTANCE);
             }
+            case SZETO  -> removeSzetoEffects();
             case ROKU   -> removeRokuEffects();
             case KORRA  -> {
                 player.removePotionEffect(PotionEffectType.STRENGTH);
@@ -301,6 +339,69 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private void activateWan() {
         player.removePotionEffect(PotionEffectType.STRENGTH);
         player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, -1, 2, false, true, true));
+    }
+
+    private void activateSzeto() {
+        szetoSavedEffects = new ArrayList<>();
+        for (PotionEffect effect : player.getActivePotionEffects()) {
+            if (!SZETO_POSITIVE_EFFECTS.contains(effect.getType())) continue;
+            szetoSavedEffects.add(effect);
+            player.removePotionEffect(effect.getType());
+            player.addPotionEffect(new PotionEffect(
+                    effect.getType(),
+                    effect.getDuration(),
+                    effect.getAmplifier() + 1,
+                    effect.isAmbient(),
+                    effect.hasParticles(),
+                    effect.hasIcon()
+            ));
+        }
+    }
+
+    private void removeSzetoEffects() {
+        if (szetoSavedEffects == null) return;
+        for (PotionEffect saved : szetoSavedEffects) {
+            player.removePotionEffect(saved.getType());
+            player.addPotionEffect(saved);
+        }
+        szetoSavedEffects = null;
+    }
+
+    private void activateYangchen() {
+        // Yangchen's conversion runs every tick via tickYangchen
+    }
+
+    private void tickYangchen() {
+        for (PotionEffect effect : new ArrayList<>(player.getActivePotionEffects())) {
+            PotionEffectType type = effect.getType();
+            if (!YANGCHEN_NEGATIVE_EFFECTS.contains(type)) continue;
+            player.removePotionEffect(type);
+            PotionEffectType converted = YANGCHEN_CONVERSIONS.get(type);
+            if (converted != null) {
+                // Stack on top of any existing converted effect already on the player
+                PotionEffect existing = player.getPotionEffect(converted);
+                int newAmplifier;
+                if (existing != null) {
+                    int existingAmp = existing.getAmplifier();
+                    int incomingAmp = effect.getAmplifier();
+                    if (existingAmp == 0 && incomingAmp == 0) newAmplifier = 1;
+                    else if (existingAmp == 0) newAmplifier = incomingAmp + 1;
+                    else if (incomingAmp == 0) newAmplifier = existingAmp + 1;
+                    else newAmplifier = existingAmp + incomingAmp + 1;
+                } else {
+                    newAmplifier = effect.getAmplifier();
+                }
+                newAmplifier = PotionEffectListener.determineEffectAmplifierRestriction(newAmplifier, converted);
+                player.addPotionEffect(new PotionEffect(
+                        converted,
+                        effect.getDuration(),
+                        newAmplifier,
+                        effect.isAmbient(),
+                        effect.hasParticles(),
+                        effect.hasIcon()
+                ));
+            }
+        }
     }
 
     private void activateKyoshi() {
@@ -492,6 +593,10 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
 
     public static PastLives getActiveInstance(final UUID uuid) {
         return activeInstances.get(uuid);
+    }
+
+    public AvatarForm getActiveForm() {
+        return activeForm;
     }
 
     public static PastLives getFangInstance(final UUID fangEntityUUID) {

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
@@ -163,6 +164,7 @@ public class PotionEffectListener implements Listener {
 				}
 				// Adds amplifier restrictions based on the potion's type
 				stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
+				stackedAmplifier = applySzetoBoost(entity, e.getCause(), newEffect.getType(), stackedAmplifier);
 				// This will call the event recursively
 				entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
 			} else {
@@ -199,6 +201,7 @@ public class PotionEffectListener implements Listener {
 					int stackedAmplifier = getStackedAmplifier(oldEffect, newEffect);
 					// Adds amplifier restrictions based on the potion's type
 					stackedAmplifier = determineEffectAmplifierRestriction(stackedAmplifier, newEffect.getType());
+					stackedAmplifier = applySzetoBoost(entity, e.getCause(), newEffect.getType(), stackedAmplifier);
 					// This will call the event recursively
 					entity.addPotionEffect(new PotionEffect(newEffect.getType(), newEffect.getDuration(), stackedAmplifier));
 				}
@@ -227,6 +230,19 @@ public class PotionEffectListener implements Listener {
 			stackedAmplifier = oldAmplifier + newAmplifier + 1;
 		}
 		return stackedAmplifier;
+	}
+
+	/**
+	 * If the player has Szeto active, adds +1 amplifier to beneficial effects from potion sources,
+	 * then re-applies the cap so the result never exceeds the type's limit.
+	 */
+	private int applySzetoBoost(LivingEntity entity, Cause cause, PotionEffectType type, int amplifier) {
+		if (!(entity instanceof Player player)) return amplifier;
+		if (cause != Cause.POTION_DRINK && cause != Cause.POTION_SPLASH && cause != Cause.AREA_EFFECT_CLOUD) return amplifier;
+		if (type.getCategory() != PotionEffectTypeCategory.BENEFICIAL) return amplifier;
+		PastLives pl = PastLives.getActiveInstance(player.getUniqueId());
+		if (pl == null || pl.getActiveForm() != PastLives.AvatarForm.SZETO) return amplifier;
+		return determineEffectAmplifierRestriction(amplifier + 1, type);
 	}
 
 	/**
@@ -288,7 +304,7 @@ public class PotionEffectListener implements Listener {
 	 * @param type The effect type.
 	 * @return The amplifier after it has been capped accordingly.
 	 */
-	private int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
+	public static int determineEffectAmplifierRestriction(int calculatedAmplifier, PotionEffectType type) {
 		 if (type == org.bukkit.potion.PotionEffectType.ABSORPTION) {
 				if (calculatedAmplifier >= 5) {
 					calculatedAmplifier = 4;
