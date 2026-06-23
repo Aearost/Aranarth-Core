@@ -133,6 +133,19 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private PotionEffect savedHealthBoostEffect = null; // Kyoshi: original Health Boost to restore on form end
     private List<PotionEffect> szetoSavedEffects = null; // Szeto: original effects before the +1 boost
 
+    // Kuruk state
+    private UUID kurukCurrentTarget = null;
+    private int kurukHitCount = 0;
+    private long kurukLastHitTime = 0L;
+    private static final long KURUK_STREAK_TIMEOUT_MS = 5_000L;
+    // 50% HP = 10 hearts = 20 half-hearts
+    private static final double KURUK_LOW_HP_FRACTION = 0.5;
+
+    // Aang state — speed level 3–10 (amplifier = level - 1)
+    private int aangSpeedLevel = 3; // Speed III minimum
+    private int aangSecondTimer = 0; // counts ticks toward next 1-second step
+    private static final long AANG_END_COOLDOWN_MS = 10_000L;
+
     // Roku state
     private UUID fangUUID = null;
     private double rokuCurrentSpeed = ROKU_MIN_SPEED;
@@ -179,7 +192,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     private void handleActive() {
         if (bPlayer.isAvatarState()) {
             player.sendMessage(ChatUtils.chatMessage("&cThe Avatar State disrupts your connection to your past lives!"));
-            endAbility(false);
+            endAbility(true);
             return;
         }
         if (System.currentTimeMillis() - getStartTime() >= duration) {
@@ -267,13 +280,14 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
         player.playSound(player.getLocation(), Sound.BLOCK_BEACON_POWER_SELECT, 1.0f, 0.7f);
         player.sendMessage(ChatUtils.chatMessage("&5You have channeled the spirit of &dAvatar " + form.getDisplayName() + "&5!"));
         switch (form) {
-            case WAN     -> activateWan();
-            case SZETO   -> activateSzeto();
+            case WAN      -> activateWan();
+            case SZETO    -> activateSzeto();
             case YANGCHEN -> activateYangchen();
-            case KYOSHI  -> activateKyoshi();
-            case ROKU    -> activateRoku();
-            case KORRA   -> activateKorra();
-            default      -> {}
+            case KURUK    -> activateKuruk();
+            case KYOSHI   -> activateKyoshi();
+            case ROKU     -> activateRoku();
+            case AANG     -> activateAang();
+            case KORRA    -> activateKorra();
         }
     }
 
@@ -282,8 +296,12 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             tickWan();
         } else if (activeForm == AvatarForm.YANGCHEN) {
             tickYangchen();
+        } else if (activeForm == AvatarForm.KURUK) {
+            tickKuruk();
         } else if (activeForm == AvatarForm.ROKU) {
             tickRoku();
+        } else if (activeForm == AvatarForm.AANG) {
+            tickAang();
         }
     }
 
@@ -293,7 +311,12 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
             removeFormEffects();
         }
         if (applyCooldown) {
-            bPlayer.addCooldown(this);
+            // Aang form uses a short cooldown so the player can reactivate quickly
+            if (activeForm == AvatarForm.AANG) {
+                bPlayer.addCooldown(getName(), AANG_END_COOLDOWN_MS);
+            } else {
+                bPlayer.addCooldown(this);
+            }
         }
         remove();
     }
@@ -327,7 +350,12 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 player.removePotionEffect(PotionEffectType.RESISTANCE);
             }
             case SZETO  -> removeSzetoEffects();
+            case KURUK  -> removeKurukEffects();
             case ROKU   -> removeRokuEffects();
+            case AANG   -> {
+                player.removePotionEffect(PotionEffectType.SPEED);
+                player.removePotionEffect(PotionEffectType.JUMP_BOOST);
+            }
             case KORRA  -> {
                 player.removePotionEffect(PotionEffectType.STRENGTH);
                 player.removePotionEffect(PotionEffectType.SPEED);
@@ -401,6 +429,73 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                         effect.hasIcon()
                 ));
             }
+        }
+    }
+
+    private void activateKuruk() {
+        kurukCurrentTarget = null;
+        kurukHitCount = 0;
+        kurukLastHitTime = 0L;
+    }
+
+    private void tickKuruk() {
+        double maxHp = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue();
+        boolean lowHp = player.getHealth() < maxHp * KURUK_LOW_HP_FRACTION;
+
+        if (lowHp) {
+            // Below 50% HP
+            if (player.getPotionEffect(PotionEffectType.SPEED) == null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, 1, false, true, true));
+            }
+            if (player.getPotionEffect(PotionEffectType.REGENERATION) == null) {
+                player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, -1, 1, false, true, true));
+            }
+            // Reset streak while in low-HP phase
+            kurukHitCount = 0;
+            kurukCurrentTarget = null;
+        } else {
+            player.removePotionEffect(PotionEffectType.SPEED);
+            player.removePotionEffect(PotionEffectType.REGENERATION);
+            // Expire streak if 5s without hitting the current target
+            if (kurukHitCount > 0 && System.currentTimeMillis() - kurukLastHitTime > KURUK_STREAK_TIMEOUT_MS) {
+                kurukHitCount = 0;
+                kurukCurrentTarget = null;
+            }
+        }
+    }
+
+    private void removeKurukEffects() {
+        player.removePotionEffect(PotionEffectType.SPEED);
+        player.removePotionEffect(PotionEffectType.REGENERATION);
+        kurukHitCount = 0;
+        kurukCurrentTarget = null;
+    }
+
+    private void activateAang() {
+        aangSpeedLevel = 3;
+        aangSecondTimer = 0;
+        // Jump Boost II for the entire form duration
+        player.addPotionEffect(new PotionEffect(PotionEffectType.JUMP_BOOST, -1, 1, false, true, true));
+        // Start at Speed III immediately
+        player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, 2, false, true, true));
+    }
+
+    private void tickAang() {
+        aangSecondTimer++;
+        if (aangSecondTimer < 20) return; // Only adjust once per second
+        aangSecondTimer = 0;
+
+        if (player.isSprinting()) {
+            aangSpeedLevel = Math.min(10, aangSpeedLevel + 1);
+        } else {
+            aangSpeedLevel = Math.max(3, aangSpeedLevel - 1);
+        }
+
+        int targetAmplifier = aangSpeedLevel - 1;
+        PotionEffect current = player.getPotionEffect(PotionEffectType.SPEED);
+        if (current == null || current.getAmplifier() != targetAmplifier) {
+            player.removePotionEffect(PotionEffectType.SPEED);
+            player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, -1, targetAmplifier, false, true, true));
         }
     }
 
@@ -565,12 +660,36 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     }
 
     public void onPlayerMeleeHit(EntityDamageByEntityEvent e) {
-        if (activeForm != AvatarForm.WAN) return;
-        e.setDamage(e.getDamage() * 1.5);
-        if (e.getEntity() instanceof LivingEntity target) {
-            Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(220, 240, 255), 1.0f);
-            target.getWorld().spawnParticle(Particle.DUST, target.getLocation().add(0, 1, 0), 8, 0.2, 0.4, 0.2, 0, dustOptions);
+        if (activeForm == AvatarForm.WAN) {
+            e.setDamage(e.getDamage() * 1.5);
+            if (e.getEntity() instanceof LivingEntity target) {
+                Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(220, 240, 255), 1.0f);
+                target.getWorld().spawnParticle(Particle.DUST, target.getLocation().add(0, 1, 0), 8, 0.2, 0.4, 0.2, 0, dustOptions);
+            }
+        } else if (activeForm == AvatarForm.KURUK) {
+            onKurukHit(e);
         }
+    }
+
+    private void onKurukHit(EntityDamageByEntityEvent e) {
+        // Only applies above 50% HP
+        double maxHp = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue();
+        if (player.getHealth() < maxHp * KURUK_LOW_HP_FRACTION) return;
+
+        UUID targetId = e.getEntity().getUniqueId();
+
+        // Reset streak if switched target, or 5s elapsed since last hit on the same target
+        if (!targetId.equals(kurukCurrentTarget)
+                || (kurukLastHitTime > 0 && System.currentTimeMillis() - kurukLastHitTime > KURUK_STREAK_TIMEOUT_MS)) {
+            kurukHitCount = 0;
+        }
+
+        kurukCurrentTarget = targetId;
+        kurukHitCount = Math.min(10, kurukHitCount + 1);
+        kurukLastHitTime = System.currentTimeMillis();
+
+        // Extra 0.5 hearts per hit, capped at 10 hits
+        e.setDamage(e.getDamage() + kurukHitCount * 1.0);
     }
 
     @Override

@@ -1949,7 +1949,7 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
-     * Applies Wan's spirit damage bonus when the player in Wan form lands a melee hit.
+     * Applies Wan's spirit damage bonus and Kuruk's hit-stacking when the player lands a melee hit.
      */
     @EventHandler(ignoreCancelled = true)
     public void onWanSpiritDamage(final EntityDamageByEntityEvent e) {
@@ -1964,6 +1964,28 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         pastLives.onPlayerMeleeHit(e);
+    }
+
+    /**
+     * Aang form reduces all incoming ability cooldowns by 30%.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAangCooldownReduce(final PlayerCooldownChangeEvent e) {
+        if (e.getResult() != PlayerCooldownChangeEvent.Result.ADDED) {
+            return;
+        }
+        if (!(e.getPlayer() instanceof Player player)) {
+            return;
+        }
+        PastLives pastLives = PastLives.getActiveInstance(player.getUniqueId());
+        if (pastLives == null || pastLives.getActiveForm() != PastLives.AvatarForm.AANG) {
+            return;
+        }
+        // Ignore PastLives' own cooldown (applied on form end) to avoid interfering with it
+        if ("PastLives".equals(e.getAbility())) {
+            return;
+        }
+        e.setCooldown(e.getCooldown() / 3); // 2/3 reduction — ability runs at 1/3 of normal cooldown
     }
 
 }
