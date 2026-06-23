@@ -11,6 +11,7 @@ import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 
@@ -23,7 +24,7 @@ public class EntityDamageEventListener implements Listener {
     /**
      * Centralizes all logic to be called by an entity being damaged
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent e) {
         if (e.getDamageSource().getDirectEntity() instanceof Firework firework
                 && firework.hasMetadata("newYearFirework")) {

@@ -277,6 +277,7 @@ Minor Features
 [~] Made it so auto-unclaimed chunks automatically remove chest lock protections
 [~] Implemented an AranarthCore-based Lightning ability
 [~] Fixed issue where you could infinitely farm the same pumpkins (duplication glitch)
+[~] Fixed issue where you would get lifesteal from a dominion relation without PvP
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
