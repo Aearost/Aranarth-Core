@@ -1949,10 +1949,26 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
-     * Applies Wan's spirit damage bonus and Kuruk's hit-stacking when the player lands a melee hit.
+     * Wan form: 1.5x multiplier on bending damage only (not melee).
      */
     @EventHandler(ignoreCancelled = true)
-    public void onWanSpiritDamage(final EntityDamageByEntityEvent e) {
+    public void onWanBendingDamage(final AbilityDamageEntityEvent e) {
+        Player attacker = e.getSource();
+        if (attacker == null) {
+            return;
+        }
+        PastLives pastLives = PastLives.getActiveInstance(attacker.getUniqueId());
+        if (pastLives == null || pastLives.getActiveForm() != PastLives.AvatarForm.WAN) {
+            return;
+        }
+        e.setDamage(e.getDamage() * 1.5);
+    }
+
+    /**
+     * Kuruk form: melee hit stacking.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onKurukMeleeHit(final EntityDamageByEntityEvent e) {
         if (e.getCause() != EntityDamageEvent.DamageCause.ENTITY_ATTACK) {
             return;
         }
@@ -1960,7 +1976,7 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         PastLives pastLives = PastLives.getActiveInstance(attacker.getUniqueId());
-        if (pastLives == null) {
+        if (pastLives == null || pastLives.getActiveForm() != PastLives.AvatarForm.KURUK) {
             return;
         }
         pastLives.onPlayerMeleeHit(e);

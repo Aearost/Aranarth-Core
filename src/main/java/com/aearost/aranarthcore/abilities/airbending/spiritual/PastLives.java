@@ -21,7 +21,6 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.persistence.PersistentDataType;
@@ -660,13 +659,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
     }
 
     public void onPlayerMeleeHit(EntityDamageByEntityEvent e) {
-        if (activeForm == AvatarForm.WAN) {
-            e.setDamage(e.getDamage() * 1.5);
-            if (e.getEntity() instanceof LivingEntity target) {
-                Particle.DustOptions dustOptions = new Particle.DustOptions(Color.fromRGB(220, 240, 255), 1.0f);
-                target.getWorld().spawnParticle(Particle.DUST, target.getLocation().add(0, 1, 0), 8, 0.2, 0.4, 0.2, 0, dustOptions);
-            }
-        } else if (activeForm == AvatarForm.KURUK) {
+        if (activeForm == AvatarForm.KURUK) {
             onKurukHit(e);
         }
     }
@@ -791,13 +784,13 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 ChatUtils.translateToColor("&fTo select: Hold Sneak > Select Slot (1-8)\n") +
                 ChatUtils.translateToColor("&fTo exit: Hold Sneak > Select Slot (1-2)\n") +
                 ChatUtils.translateToColor("&fAvatars:\n") +
-                ChatUtils.translateToColor("  &f1. Wan - Channels Raava's spirit, granting strength and dealing bonus damage to those you strike\n") +
-                ChatUtils.translateToColor("  &f2. Szeto - Heightens all of your active beneficial effects, pushing them beyond their normal limits\n") +
-                ChatUtils.translateToColor("  &f3. Yangchen - Purifies all harmful effects on you, turning them into their positive counterparts\n") +
-                ChatUtils.translateToColor("  &f4. Kuruk - Builds power with every consecutive hit, but becomes a blur of speed when close to death\n") +
-                ChatUtils.translateToColor("  &f5. Kyoshi - Fortifies the body with an extra row of hearts that vanish when the form ends\n") +
-                ChatUtils.translateToColor("  &f6. Roku - Calls upon Fang, soaring through the skies at ever-growing speed\n") +
-                ChatUtils.translateToColor("  &f7. Aang - Runs faster the longer you sprint, and reduces the wait on all your other abilities\n") +
-                ChatUtils.translateToColor("  &f8. Korra - Overwhelms enemies with raw strength and blazing speed");
+                ChatUtils.translateToColor("  &f1. Wan - Channels Raava's spirit, granting strength and 1.5x damage to those you strike\n") +
+                ChatUtils.translateToColor("  &f2. Szeto - Increases the level of positive status effects when applied\n") +
+                ChatUtils.translateToColor("  &f3. Yangchen - Convert harmful status effects applied to you into their positive counterparts\n") +
+                ChatUtils.translateToColor("  &f4. Kuruk - Attacking form deals increasing damage with consecutive hits, defensive form provides speed and regeneration\n") +
+                ChatUtils.translateToColor("  &f5. Kyoshi - Adds an extra row of hearts and high resistance\n") +
+                ChatUtils.translateToColor("  &f6. Roku - Summon and ride his dragon, Fang\n") +
+                ChatUtils.translateToColor("  &f7. Aang - Increases speed as you sprint, and 2/3 ability cooldown\n") +
+                ChatUtils.translateToColor("  &f8. Korra - Significant base Strength and Speed");
     }
 }
