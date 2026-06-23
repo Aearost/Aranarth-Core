@@ -1934,7 +1934,10 @@ public class DominionUtils {
 			}
 
 			// 0-2 ghast tears, lower than other biomes
-			items.add(new ItemStack(Material.GHAST_TEAR, random.nextInt(tearOdds)));
+			int ghastTears = random.nextInt(tearOdds + 1);
+			if (ghastTears > 0) {
+				items.add(new ItemStack(Material.GHAST_TEAR, ghastTears));
+			}
 
 			if (random.nextInt(scrapOdds) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
