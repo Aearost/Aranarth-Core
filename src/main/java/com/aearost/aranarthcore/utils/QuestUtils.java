@@ -411,6 +411,14 @@ public class QuestUtils {
     }
 
     /**
+     * Returns a crate key item reward for use when reloading a persisted quest that had an item reward.
+     * Re-rolls the key type since the original type is not persisted.
+     */
+    public static ItemStack resolveKeyReward(int rank, QuestType type) {
+        return type == QuestType.DAILY ? getDailyKeyReward() : getWeeklyKeyReward(rank);
+    }
+
+    /**
      * Returns a crate key for a daily quest
      */
     private static ItemStack getDailyKeyReward() {

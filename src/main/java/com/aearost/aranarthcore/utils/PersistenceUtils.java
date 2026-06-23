@@ -3153,8 +3153,12 @@ public class PersistenceUtils {
                     }
                 }
                 if (found != null) {
-                    double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
-                    resolved.add(found.withReward(reward));
+                    if (rewards[i] == -1) {
+                        resolved.add(found.withItemReward(QuestUtils.resolveKeyReward(rank, type)));
+                    } else {
+                        double reward = rewards[i] > 0 ? rewards[i] : QuestUtils.generateRandomReward(rank, type);
+                        resolved.add(found.withReward(reward));
+                    }
                 }
             } catch (IllegalArgumentException ignored) {
             }
@@ -3226,7 +3230,7 @@ public class PersistenceUtils {
                 StringBuilder row = new StringBuilder(uuid + "|" + rank);
                 for (int i = 0; i < 3; i++) {
                     String task = i < dq.size() ? dq.get(i).getTaskType().name() : "NONE";
-                    int reward = i < dq.size() ? (int) dq.get(i).getReward() : 0;
+                    int reward = i < dq.size() ? (dq.get(i).hasItemReward() ? -1 : (int) dq.get(i).getReward()) : 0;
                     int prog = i < dp.length ? dp[i] : 0;
                     int done = (i < dc.length && dc[i]) ? 1 : 0;
                     int claimed = (i < dClaim.length && dClaim[i]) ? 1 : 0;
@@ -3234,7 +3238,7 @@ public class PersistenceUtils {
                 }
                 for (int i = 0; i < 3; i++) {
                     String task = i < wq.size() ? wq.get(i).getTaskType().name() : "NONE";
-                    int reward = i < wq.size() ? (int) wq.get(i).getReward() : 0;
+                    int reward = i < wq.size() ? (wq.get(i).hasItemReward() ? -1 : (int) wq.get(i).getReward()) : 0;
                     int prog = i < wp.length ? wp[i] : 0;
                     int done = (i < wc.length && wc[i]) ? 1 : 0;
                     int claimed = (i < wClaim.length && wClaim[i]) ? 1 : 0;
