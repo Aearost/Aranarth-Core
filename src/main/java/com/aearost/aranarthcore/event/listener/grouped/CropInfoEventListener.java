@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -30,6 +31,33 @@ public class CropInfoEventListener implements Listener {
 		if (e.getPlayer() instanceof Player player) {
 			CropUtils.refreshInventory(e.getInventory(), e.getPlayer().getWorld());
 			CropUtils.refreshInventory(player.getInventory(), e.getPlayer().getWorld());
+		}
+	}
+
+	/**
+	 * Removes the seed lore when a player closes an inventory, so seeds don't retain display lore outside of an open inventory.
+	 */
+	@EventHandler
+	public void onInventoryClose(InventoryCloseEvent e) {
+		if (e.getPlayer() instanceof Player player) {
+			ItemStack[] contents = e.getInventory().getContents();
+			for (int i = 0; i < contents.length; i++) {
+				ItemStack item = contents[i];
+				if (item != null && CropUtils.isCropSeed(item.getType())) {
+					ItemStack noLore = new ItemStack(item.getType());
+					noLore.setAmount(item.getAmount());
+					e.getInventory().setItem(i, noLore);
+				}
+			}
+			ItemStack[] playerContents = player.getInventory().getContents();
+			for (int i = 0; i < playerContents.length; i++) {
+				ItemStack item = playerContents[i];
+				if (item != null && CropUtils.isCropSeed(item.getType())) {
+					ItemStack noLore = new ItemStack(item.getType());
+					noLore.setAmount(item.getAmount());
+					player.getInventory().setItem(i, noLore);
+				}
+			}
 		}
 	}
 

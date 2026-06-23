@@ -278,6 +278,7 @@ Minor Features
 [~] Implemented an AranarthCore-based Lightning ability
 [~] Fixed issue where you could infinitely farm the same pumpkins (duplication glitch)
 [~] Fixed issue where you would get lifesteal from a dominion relation without PvP
+[~] Made it so crop seeds lose their lose upon inventory close
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
