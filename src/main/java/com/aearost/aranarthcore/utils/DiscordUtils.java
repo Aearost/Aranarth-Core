@@ -666,7 +666,7 @@ public class DiscordUtils {
 
 		// If it was applied by a user
 		if (uuid != null) {
-			String nickname = AranarthUtils.getPlayer(uuid).getNickname();
+			String nickname = ChatUtils.stripColorFormatting(AranarthUtils.getPlayer(uuid).getNickname());
 			if (fromVoteShop) {
 				String notifMessage = nickname + " used vote points to purchase the " + name;
 				voteShopNotification(notifMessage, uuid, color);
