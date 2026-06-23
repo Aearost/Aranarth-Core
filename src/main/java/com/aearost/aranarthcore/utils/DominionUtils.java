@@ -2030,7 +2030,7 @@ public class DominionUtils {
 
 			if (claimableAmount < maxClaimableResourcesAmount) {
 				if (isAllowedToClaimResources(dominion)) {
-					claimableAmount++;
+					claimableAmount = Math.min(claimableAmount + 2, maxClaimableResourcesAmount);
 					dominion.setClaimableResources(claimableAmount);
 					isAmountIncreasing = true;
 				} else {
@@ -2115,9 +2115,10 @@ public class DominionUtils {
 		if (getConquerorOfDominion(dominion) != null) {
 			return 8;
 		}
-		// Base amount of 16, and increase by 8 for each conquered Dominion
+		// Base amount of 16, increase by 8 for each conquered Dominion, and 4 per outpost
 		int total = 16;
 		total += dominion.getConquered().size() * 8;
+		total += OutpostUtils.getDominionOutposts(dominion.getLeader()).size() * 4;
 		return total;
 	}
 
