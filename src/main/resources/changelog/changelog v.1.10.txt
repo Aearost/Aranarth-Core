@@ -276,6 +276,7 @@ Minor Features
 [-] Prevented the summoning of withers in the survival worlds
 [~] Made it so auto-unclaimed chunks automatically remove chest lock protections
 [~] Implemented an AranarthCore-based Lightning ability
+[~] Fixed issue where you could infinitely farm the same pumpkins (duplication glitch)
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

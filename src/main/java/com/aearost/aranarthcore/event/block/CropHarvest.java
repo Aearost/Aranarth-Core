@@ -157,6 +157,11 @@ public class CropHarvest {
 	 * These have no maturity stage and no auto-replant behaviour.
 	 */
 	private void handleNonAgeableCrop(BlockBreakEvent e, Player player, Block block) {
+		// Player-placed blocks are not eligible
+		if (!mcMMO.getChunkManager().isEligible(block)) {
+			return;
+		}
+
 		e.setCancelled(true);
 
 		ArrayList<ItemStack> drops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
@@ -179,15 +184,6 @@ public class CropHarvest {
 			int base = (int) scaled;
 			double frac = scaled - base;
 			drop.setAmount(Math.max(1, base + (ThreadLocalRandom.current().nextDouble() < frac ? 1 : 0)));
-		}
-
-		// Cap melon slice drops at 9 for player-placed melon blocks to prevent compressor duplication exploits
-		if (block.getType() == Material.MELON && !mcMMO.getChunkManager().isEligible(block)) {
-			for (ItemStack drop : drops) {
-				if (drop.getType() == Material.MELON_SLICE && drop.getAmount() > 9) {
-					drop.setAmount(9);
-				}
-			}
 		}
 
 		for (ItemStack drop : drops) {
