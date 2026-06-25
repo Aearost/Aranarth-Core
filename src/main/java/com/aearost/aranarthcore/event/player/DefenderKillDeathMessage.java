@@ -38,6 +38,6 @@ public class DefenderKillDeathMessage {
         }
 
         e.setDeathMessage(ChatUtils.translateToColor(e.getEntity().getName() + " was slain by &e"
-                + dominion.getName() + "&r's &e" + type.getDisplayName() + " defender"));
+                + dominion.getName() + "&e's " + type.getDisplayName() + " defender"));
     }
 }
