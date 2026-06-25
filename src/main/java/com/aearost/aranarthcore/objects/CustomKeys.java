@@ -29,4 +29,6 @@ public class CustomKeys {
     public static final NamespacedKey MOUNT_THIRD_ATTR = new NamespacedKey(AranarthCore.getInstance(), "mount_third_attr");
     public static final NamespacedKey MOUNT_ELEMENT = new NamespacedKey(AranarthCore.getInstance(), "mount_element");
     public static final NamespacedKey FANG_OWNER = new NamespacedKey(AranarthCore.getInstance(), "fang_owner");
+    public static final NamespacedKey DEFENDER_DOMINION_ID = new NamespacedKey(AranarthCore.getInstance(), "defender_dominion_id");
+    public static final NamespacedKey DEFENDER_TYPE = new NamespacedKey(AranarthCore.getInstance(), "defender_type");
 }

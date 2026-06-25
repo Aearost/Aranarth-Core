@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.DefenderTarget;
 import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
@@ -22,6 +23,7 @@ public class EntityTargetEventListener implements Listener {
      */
     @EventHandler
     public void onEntityTarget(EntityTargetEvent e) {
+        new DefenderTarget().execute(e);
         new GuardianTargetPrevent().execute(e);
         new PiglinTargetPrevent().execute(e);
         new PetTargetPrevent().execute(e);

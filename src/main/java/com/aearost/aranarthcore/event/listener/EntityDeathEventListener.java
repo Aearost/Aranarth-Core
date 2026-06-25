@@ -3,7 +3,9 @@ package com.aearost.aranarthcore.event.listener;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.player.DefenderKillDeathMessage;
 import com.aearost.aranarthcore.event.player.DominionDeath;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.event.player.MountKillDeathMessage;
 import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.event.player.PlayerKillDeathStats;
@@ -42,6 +44,7 @@ public class EntityDeathEventListener implements Listener {
             new PlayerKillDeathStats().execute(e);
             new PlayerKillMoneySteal().execute(e);
             new MountKillDeathMessage().execute((PlayerDeathEvent) e);
+            new DefenderKillDeathMessage().execute((PlayerDeathEvent) e);
         }
 
         // If the mob was a sentinel
@@ -62,5 +65,8 @@ public class EntityDeathEventListener implements Listener {
             new ArdentArmorMobDrops().execute(e);
         }
 
+        if (DefenderUtils.isDefender(e.getEntity().getUniqueId())) {
+            new DefenderDeath().execute(e);
+        }
     }
 }

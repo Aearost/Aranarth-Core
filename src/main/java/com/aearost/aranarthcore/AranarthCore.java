@@ -269,6 +269,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadDominionPermissions();
         PersistenceUtils.loadDominionPlayerPermissions();
         PersistenceUtils.loadOutposts();
+        PersistenceUtils.loadDefenders();
         PersistenceUtils.loadWarps();
         PersistenceUtils.loadPunishments();
         PersistenceUtils.loadAvatars();
@@ -291,6 +292,9 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadGates();
         PersistenceUtils.loadMounts();
         PersistenceUtils.loadMail();
+        DefenderUtils.startRegenTask();
+        DefenderUtils.startBoundaryTask();
+        DefenderUtils.startTargetingTask();
     }
 
     /**
@@ -988,6 +992,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveLockedContainers();
         PersistenceUtils.saveDominions();
         PersistenceUtils.saveOutposts();
+        PersistenceUtils.saveDefenders();
         PersistenceUtils.saveDominionPermissions();
         PersistenceUtils.saveDominionPlayerPermissions();
         PersistenceUtils.saveWarps();

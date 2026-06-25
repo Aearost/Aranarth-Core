@@ -24,6 +24,7 @@ public enum DominionPermission {
 
     // Combat
     PVP,
+    DEFENDER_TARGETING,
 
     // Member commands
     HOME,
@@ -40,6 +41,9 @@ public enum DominionPermission {
 
     // Outpost management (create is leader-only, but rename/sethome/claim are configurable)
     MANAGE_OUTPOSTS,
+
+    // Defender management (buy/sell defenders)
+    MANAGE_DEFENDERS,
 
     // Leader-restricted commands (enforced in commands, not configurable per rank)
     WITHDRAW

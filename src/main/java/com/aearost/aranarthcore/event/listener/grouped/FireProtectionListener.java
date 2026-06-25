@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.grouped;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.DefenderFireDamage;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -21,7 +22,8 @@ public class FireProtectionListener implements Listener {
 	}
 
 	/**
-	 * Prevents scorched armour wearers from ever having fire ticks applied.
+	 * Prevents scorched armour wearers from ever having fire ticks applied,
+	 * and prevents Defenders from being ignited by sunlight.
 	 */
 	@EventHandler
 	public void onEntityCombust(EntityCombustEvent e) {
@@ -29,6 +31,7 @@ public class FireProtectionListener implements Listener {
 			e.setCancelled(true);
 			player.setFireTicks(0);
 		}
+		new DefenderFireDamage().execute(e);
 	}
 
 	/**

@@ -45,7 +45,7 @@ public class DominionPermissions {
                 DominionPermission.HOME, DominionPermission.OUTPOST_HOME, DominionPermission.FOOD,
                 DominionPermission.RESOURCES, DominionPermission.INVITE, DominionPermission.REMOVE_MEMBER,
                 DominionPermission.SURRENDER, DominionPermission.REBEL, DominionPermission.RETREAT,
-                DominionPermission.MANAGE_OUTPOSTS
+                DominionPermission.MANAGE_OUTPOSTS, DominionPermission.MANAGE_DEFENDERS
         ));
         perms.put(DominionRank.LIEUTENANT, lieutenantPerms);
 

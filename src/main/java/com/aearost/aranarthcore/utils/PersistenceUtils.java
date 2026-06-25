@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
 import com.aearost.aranarthcore.objects.*;
+import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
 
@@ -13,7 +14,9 @@ import java.util.stream.Collectors;
 
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
@@ -1533,7 +1536,9 @@ public class PersistenceUtils {
                 }
 
                 String[] fields = row.split("\\|", -1);
-                if (fields.length < 2) continue;
+                if (fields.length < 2) {
+                    continue;
+                }
 
                 UUID dominionId;
                 try {
@@ -1543,14 +1548,18 @@ public class PersistenceUtils {
                 }
 
                 Dominion dominion = DominionUtils.getDominionById(dominionId);
-                if (dominion == null) continue;
+                if (dominion == null) {
+                    continue;
+                }
 
                 Map<UUID, Map<DominionPermission, Boolean>> allOverrides = new HashMap<>();
 
                 if (!fields[1].isEmpty()) {
                     for (String playerEntry : fields[1].split(";")) {
                         String[] parts = playerEntry.split(":", 2);
-                        if (parts.length != 2) continue;
+                        if (parts.length != 2) {
+                            continue;
+                        }
 
                         UUID playerUuid;
                         try {
@@ -1563,7 +1572,9 @@ public class PersistenceUtils {
                         if (!parts[1].isEmpty()) {
                             for (String permEntry : parts[1].split(",")) {
                                 String[] kv = permEntry.split("=", 2);
-                                if (kv.length != 2) continue;
+                                if (kv.length != 2) {
+                                    continue;
+                                }
                                 try {
                                     DominionPermission perm = DominionPermission.valueOf(kv[0]);
                                     boolean value = Boolean.parseBoolean(kv[1]);
@@ -1625,14 +1636,20 @@ public class PersistenceUtils {
                 for (Dominion dominion : dominions) {
                     Map<UUID, Map<DominionPermission, Boolean>> allOverrides =
                             dominion.getPlayerPermissionOverrides();
-                    if (allOverrides.isEmpty()) continue;
+                    if (allOverrides.isEmpty()) {
+                        continue;
+                    }
 
                     StringBuilder builder = new StringBuilder();
                     for (Map.Entry<UUID, Map<DominionPermission, Boolean>> playerEntry
                             : allOverrides.entrySet()) {
-                        if (playerEntry.getValue().isEmpty()) continue;
+                        if (playerEntry.getValue().isEmpty()) {
+                            continue;
+                        }
 
-                        if (!builder.isEmpty()) builder.append(";");
+                        if (!builder.isEmpty()) {
+                            builder.append(";");
+                        }
                         builder.append(playerEntry.getKey().toString()).append(":");
 
                         String permStr = playerEntry.getValue().entrySet().stream()
@@ -3683,7 +3700,7 @@ public class PersistenceUtils {
             MailUtils.setAllMail(mailData);
             Bukkit.getLogger().info("Mail has been initialised");
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading mail.txt!");
+            Bukkit.getLogger().info("Something went wrong with loading mail.txt");
         }
     }
 
@@ -3841,7 +3858,9 @@ public class PersistenceUtils {
                 for (com.aearost.aranarthcore.objects.Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                     StringBuilder chunks = new StringBuilder();
                     for (Chunk chunk : outpost.getChunks()) {
-                        if (!chunks.isEmpty()) chunks.append("***");
+                        if (!chunks.isEmpty()) {
+                            chunks.append("***");
+                        }
                         chunks.append(chunk.getX()).append(",").append(chunk.getZ());
                     }
 
@@ -3864,6 +3883,135 @@ public class PersistenceUtils {
             writer.close();
         } catch (IOException e) {
             Bukkit.getLogger().info("There was an error saving outposts!");
+        }
+    }
+
+    /**
+     * Loads defenders from defenders.txt and spawns each one at its saved location.
+     */
+    public static void loadDefenders() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "defenders.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        record DefenderEntry(UUID dominionId, DefenderType type, String worldName, double x, double y, double z) {
+        }
+        List<DefenderEntry> entries = new ArrayList<>();
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#")) {
+                    continue;
+                }
+
+                String[] fields = row.split("\\|", -1);
+                if (fields.length < 6) {
+                    continue;
+                }
+
+                try {
+                    UUID dominionId = UUID.fromString(fields[0]);
+                    DefenderType type = DefenderType.valueOf(fields[1]);
+                    String worldName = fields[2];
+                    double x = Double.parseDouble(fields[3]);
+                    double y = Double.parseDouble(fields[4]);
+                    double z = Double.parseDouble(fields[5]);
+                    entries.add(new DefenderEntry(dominionId, type, worldName, x, y, z));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+            reader.close();
+
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().warning("Something went wrong with loading defenders.txt");
+            return;
+        }
+
+        // Spawn defenders at their saved locations on the next tick.
+        // DefenderChunkLoad will remove any leftover stale entities (old UUIDs) as their chunks load.
+        new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                for (DefenderEntry entry : entries) {
+                    if (DominionUtils.getDominionById(entry.dominionId()) == null) {
+                        continue;
+                    }
+                    org.bukkit.World world = Bukkit.getWorld(entry.worldName());
+                    if (world == null) {
+                        continue;
+                    }
+                    org.bukkit.Location loc = new org.bukkit.Location(world, entry.x(), entry.y(), entry.z());
+                    DefenderUtils.loadAndSpawnAt(entry.dominionId(), entry.type(), loc);
+                }
+            }
+        }.runTaskLater(AranarthCore.getInstance(), 1L);
+    }
+
+    /**
+     * Saves all live defender entities to defenders.txt, one line per entity with location.
+     */
+    public static void saveDefenders() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "defenders.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (!isDirectoryCreated) {
+            return;
+        }
+
+        try {
+            if (file.createNewFile()) {
+                Bukkit.getLogger().info("A new defenders.txt file has been generated");
+            }
+        } catch (IOException e) {
+            Bukkit.getLogger().info("An error occurred creating defenders.txt");
+            return;
+        }
+
+        try {
+            FileWriter writer = new FileWriter(filePath);
+            writer.write("#dominionId|type|world|x|y|z\n");
+
+            for (Map.Entry<UUID, UUID> entry : DefenderUtils.getEntityToDominion().entrySet()) {
+                UUID entityUUID = entry.getKey();
+                UUID dominionId = entry.getValue();
+                DefenderType type = DefenderUtils.getDefenderType(entityUUID);
+                if (type == null) {
+                    continue;
+                }
+                Entity entity = Bukkit.getEntity(entityUUID);
+                if (entity instanceof LivingEntity le && le.isDead()) {
+                    continue;
+                }
+                // Use live location if the chunk is loaded, otherwise fall back to last known cached location
+                org.bukkit.Location loc = (entity != null)
+                        ? entity.getLocation()
+                        : DefenderUtils.getEntityToLastLocation().get(entityUUID);
+                if (loc == null || loc.getWorld() == null) {
+                    continue;
+                }
+                writer.write(dominionId + "|" + type.name() + "|"
+                        + loc.getWorld().getName() + "|"
+                        + loc.getX() + "|" + loc.getY() + "|" + loc.getZ() + "\n");
+            }
+
+            writer.close();
+        } catch (IOException e) {
+            Bukkit.getLogger().info("There was an error saving the defenders");
         }
     }
 

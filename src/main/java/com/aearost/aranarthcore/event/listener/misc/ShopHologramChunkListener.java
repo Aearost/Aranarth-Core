@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.DefenderChunkLoad;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ public class ShopHologramChunkListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onChunkLoad(ChunkLoadEvent e) {
+        new DefenderChunkLoad().execute(e);
         Chunk chunk = e.getChunk();
         for (List<Shop> shopList : ShopUtils.getShops().values()) {
             for (Shop shop : shopList) {

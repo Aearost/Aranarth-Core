@@ -85,6 +85,7 @@ public class GuiDominionPermissions {
         map.put(35, DominionPermission.RETREAT);
         map.put(36, DominionPermission.OUTPOST_HOME);
         map.put(37, DominionPermission.MANAGE_OUTPOSTS);
+        map.put(38, DominionPermission.MANAGE_DEFENDERS);
         return map;
     }
 
@@ -106,6 +107,7 @@ public class GuiDominionPermissions {
         map.put(13, DominionPermission.ITEM_FRAME);
         map.put(14, DominionPermission.VILLAGER);
         map.put(15, DominionPermission.PVP);
+        map.put(16, DominionPermission.DEFENDER_TARGETING);
         map.put(19, DominionPermission.DOOR);
         map.put(20, DominionPermission.TRAPDOOR);
         map.put(21, DominionPermission.FENCE_GATE);
@@ -209,6 +211,7 @@ public class GuiDominionPermissions {
             if (omitPvp && entry.getValue() == DominionPermission.PVP) {
                 continue;
             }
+            // DEFENDER_TARGETING is always shown for all relation ranks
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
         gui.setItem(4, buildRestoreDefaultsButton("&7Resets this relation's permissions to server defaults"));
@@ -250,7 +253,7 @@ public class GuiDominionPermissions {
         gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
 
         // Row 3: navigation and new hub sections
-        gui.setItem(GUARDIANS_SLOT, buildGuardiansItem());
+        gui.setItem(GUARDIANS_SLOT, buildDefendersItem());
         gui.setItem(MEMBERS_SLOT, buildMembersHeadItem(dominion.getLeader()));
         gui.setItem(USER_SEARCH_SLOT, buildUserSearchItem());
         gui.setItem(OUTPOSTS_SLOT, buildOutpostsItem());
@@ -316,13 +319,13 @@ public class GuiDominionPermissions {
     }
 
     /**
-     * Builds the Guardians hub button.
+     * Builds the Defenders hub button.
      */
-    public static ItemStack buildGuardiansItem() {
+    public static ItemStack buildDefendersItem() {
         ItemStack item = new ItemStack(Material.SHIELD);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&c&lGuardians"));
-        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's guardian warriors")));
+        meta.setDisplayName(ChatUtils.translateToColor("&c&lDefenders"));
+        meta.setLore(List.of(ChatUtils.translateToColor("&7Manage your dominion's defenders")));
         item.setItemMeta(meta);
         return item;
     }
@@ -387,7 +390,9 @@ public class GuiDominionPermissions {
             case REBEL -> Material.CROSSBOW;
             case RETREAT -> Material.FEATHER;
             case MANAGE_OUTPOSTS -> Material.OAK_LOG;
+            case MANAGE_DEFENDERS -> Material.SHIELD;
             case WITHDRAW -> Material.GOLD_NUGGET;
+            case DEFENDER_TARGETING -> Material.ZOMBIE_SPAWN_EGG;
         };
     }
 
@@ -424,7 +429,7 @@ public class GuiDominionPermissions {
     public static ItemStack buildUserSearchItem() {
         ItemStack item = new ItemStack(Material.COMPASS);
         ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatUtils.translateToColor("&b&lUser Search"));
+        meta.setDisplayName(ChatUtils.translateToColor("&bUser Search"));
         meta.setLore(List.of(ChatUtils.translateToColor("&7Modify a specific player's permissions")));
         item.setItemMeta(meta);
         return item;

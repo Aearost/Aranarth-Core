@@ -2,8 +2,8 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
+import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
@@ -22,7 +22,7 @@ public class EntityDamageEventListener implements Listener {
     }
 
     /**
-     * Centralizes all logic to be called by an entity being damaged
+     * Centralizes all logic to be called by an entity being damaged.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent e) {

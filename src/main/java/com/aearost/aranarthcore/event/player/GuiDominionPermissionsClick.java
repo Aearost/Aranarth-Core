@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionMembers;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
@@ -50,7 +51,7 @@ public class GuiDominionPermissionsClick {
 
         String title = ChatUtils.stripColorFormatting(e.getView().getTitle());
 
-        // Main hub screen — navigate to sections or toggle settings
+        // Main hub screen, navigate to sections or toggle settings
         if (title.equals(GuiDominionPermissions.HUB_TITLE)) {
             String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
             if (itemName.startsWith("Mob Spawning")) {
@@ -82,7 +83,7 @@ public class GuiDominionPermissionsClick {
                 case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
                 case "Members"     -> GuiDominionMembers.open(player);
                 case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
-                case "Guardians"   -> { /* TODO: open Guardians GUI when implemented */ }
+                case "Defenders"   -> GuiDefenders.open(player);
                 case "Outposts"    -> GuiOutposts.open(player);
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);
