@@ -281,6 +281,7 @@ Minor Features
 [~] Made it so crop seeds lose their lose upon inventory close
 [~] Increased crop harvest requirement for daily and weekly quests
 [~] Increased resource claim per week from 1 to 2
+[~] Added base time for /ac time
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
