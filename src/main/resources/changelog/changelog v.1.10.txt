@@ -13,6 +13,7 @@ Major Features
 [+] Added Blood Bending to Emperors
 [+] Added Flight to Emperors
 [+] Implemented the PastLives ability for the Avatar
+[+] Implemented the LightOfRaava ability for the Avatar
 [+] Implemented the CableSlash metal combo
 [+] Added the Sound sub-element for airbenders, unlockable at Count
 [+] Added SonicBoom ability for soundbenders

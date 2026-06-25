@@ -39,6 +39,7 @@ import com.aearost.aranarthcore.abilities.firebending.lightningbending.Lightning
 import com.aearost.aranarthcore.abilities.firebending.lightningbending.Static;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AngeredSpirits;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.EnergyBurst;
+import com.aearost.aranarthcore.abilities.airbending.spiritual.LightOfRaava;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodFreeze;
 import com.aearost.aranarthcore.abilities.waterbending.bloodbending.BloodGrip;
@@ -511,6 +512,10 @@ public class AranarthCoreBendingListener implements Listener {
                         new PastLives(player);
                     } else {
                         existingPastLives.onSneakPress();
+                    }
+                } else if (abilityName.equalsIgnoreCase("lightofraava")) {
+                    if (!CoreAbility.hasAbility(player, LightOfRaava.class)) {
+                        new LightOfRaava(player);
                     }
                 }
             }

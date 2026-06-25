@@ -743,6 +743,7 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.leafscythe", true);
                     perms.setPermission("bending.ability.rootsnare", true);
                     perms.setPermission("bending.ability.energyburst", true);
+                    perms.setPermission("bending.ability.lightofraava", true);
                     perms.setPermission("bending.ability.magmaglaives", true);
                     perms.setPermission("bending.ability.moltenblast", true);
                     perms.setPermission("bending.ability.eruption", true);
@@ -768,6 +769,8 @@ public class PermissionUtils {
                     perms.setPermission("bending.ability.elementsphere.fire", true);
                     perms.setPermission("bending.ability.elementsphere.water", true);
                     perms.setPermission("bending.ability.elementsphere.stream", true);
+                    perms.setPermission("bending.ability.pastlives", true);
+                    perms.setPermission("bending.ability.lightofraava", true);
                 }
             }
         });
