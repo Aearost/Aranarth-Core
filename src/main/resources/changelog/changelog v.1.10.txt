@@ -284,6 +284,7 @@ Minor Features
 [~] Added base time for /ac time
 [+] Added inventory opening and inventory clicking as AFK cancelations
 [~] Fixed issue causing items to get deleted from the Fletching table inventory
+[~] Fixed issue where plentiful was not working in other dominions despite having the Build permission
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

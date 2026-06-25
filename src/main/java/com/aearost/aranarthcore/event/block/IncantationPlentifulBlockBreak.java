@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Location;
@@ -65,7 +66,9 @@ public class IncantationPlentifulBlockBreak {
 		for (Block block : blocks) {
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(block.getChunk());
 			if (chunkDominion != null) {
-				if (dominion == null || !dominion.isSameDominion(chunkDominion)) {
+				boolean ownsDominion = dominion != null && dominion.isSameDominion(chunkDominion);
+				boolean hasBuildPermission = DominionUtils.hasPermission(player, chunkDominion, DominionPermission.BUILD);
+				if (!ownsDominion && !hasBuildPermission) {
 					// If it is not harvestable, the counter must be manually reduced regardless
 					aranarthPlayer.setPlentifulBlocksToDestroy(aranarthPlayer.getPlentifulBlocksToDestroy() - 1);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
