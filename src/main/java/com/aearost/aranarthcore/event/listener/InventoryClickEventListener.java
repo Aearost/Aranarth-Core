@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiOutposts;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -117,6 +118,9 @@ public class InventoryClickEventListener implements Listener {
         }
 
         // Execute regardless of inventory type
+        if (e.getWhoClicked() instanceof Player player) {
+            new AfkCancelByInteract().execute(player);
+        }
 //        new QuiverSwitchSlots().execute(e);
     }
 }

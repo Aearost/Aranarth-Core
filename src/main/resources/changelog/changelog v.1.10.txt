@@ -282,6 +282,7 @@ Minor Features
 [~] Increased crop harvest requirement for daily and weekly quests
 [~] Increased resource claim per week from 1 to 2
 [~] Added base time for /ac time
+[+] Added inventory opening and inventory clicking as AFK cancelations
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
