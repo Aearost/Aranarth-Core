@@ -30,8 +30,8 @@ public class GuiDominionPermissions {
 
     public static final String HUB_TITLE = "Dominion Hub";
 
-    private static final int MEMBERS_SLOT = 30;
-    private static final int USER_SEARCH_SLOT = 32;
+    private static final int MEMBERS_SLOT = 10;
+    private static final int USER_SEARCH_SLOT = 16;
     private static final int GUARDIANS_SLOT = 28;
     private static final int OUTPOSTS_SLOT = 34;
 
