@@ -41,7 +41,7 @@ public class DominionLevelUtils {
 
     private static final Set<EntityType> FARM_ANIMAL_TYPES = Set.of(
             EntityType.COW, EntityType.CHICKEN, EntityType.SHEEP, EntityType.PIG,
-            EntityType.GOAT, EntityType.RABBIT, EntityType.MOOSHROOM
+            EntityType.GOAT, EntityType.RABBIT, EntityType.MOOSHROOM, EntityType.HOGLIN
     );
 
     private static final Set<EntityType> TAMEABLE_LIVESTOCK_TYPES = Set.of(
@@ -431,7 +431,8 @@ public class DominionLevelUtils {
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
                 for (int y = minY; y < maxY; y++) {
-                    if (snapshot.getBlockType(x, y, z) == Material.FARMLAND) {
+                    Material blockType = snapshot.getBlockType(x, y, z);
+                    if (blockType == Material.FARMLAND || blockType == Material.NETHER_WART) {
                         count++;
                     }
                 }
