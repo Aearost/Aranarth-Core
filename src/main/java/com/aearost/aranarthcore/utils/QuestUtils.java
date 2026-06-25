@@ -411,11 +411,28 @@ public class QuestUtils {
     }
 
     /**
-     * Returns a crate key item reward for use when reloading a persisted quest that had an item reward.
-     * Re-rolls the key type since the original type is not persisted.
+     * Returns a sentinel integer for persisting a crate key reward:
+     * -1 = key_rare, -2 = key_epic, -3 = key_godly.
      */
-    public static ItemStack resolveKeyReward(int rank, QuestType type) {
-        return type == QuestType.DAILY ? getDailyKeyReward() : getWeeklyKeyReward(rank);
+    public static int getItemRewardSentinel(ItemStack item) {
+        if (item == null || !item.hasItemMeta()) return -1;
+        String keyType = item.getItemMeta().getPersistentDataContainer().get(CRATE_KEY, PersistentDataType.STRING);
+        return switch (keyType != null ? keyType : "") {
+            case "key_epic" -> -2;
+            case "key_godly" -> -3;
+            default -> -1;
+        };
+    }
+
+    /**
+     * Returns the ItemStack for a persisted key sentinel (-1=rare, -2=epic, -3=godly).
+     */
+    public static ItemStack resolveKeyFromSentinel(int sentinel) {
+        return switch (sentinel) {
+            case -2 -> new KeyEpic().getItem();
+            case -3 -> new KeyGodly().getItem();
+            default -> new KeyRare().getItem();
+        };
     }
 
     /**
