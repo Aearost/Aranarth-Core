@@ -283,6 +283,7 @@ Minor Features
 [~] Increased resource claim per week from 1 to 2
 [~] Added base time for /ac time
 [+] Added inventory opening and inventory clicking as AFK cancelations
+[~] Fixed issue causing items to get deleted from the Fletching table inventory
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

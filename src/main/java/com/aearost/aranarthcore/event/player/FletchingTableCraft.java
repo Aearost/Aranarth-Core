@@ -96,8 +96,11 @@ public class FletchingTableCraft {
 					// Multiply result amount by craftsPossible
 					result.setAmount(result.getAmount() * craftsPossible);
 
-					// Add to player inventory (handles overflow automatically)
-					player.getInventory().addItem(result);
+					// Only craft if the player's inventory can fit the result
+					HashMap<Integer, ItemStack> overflow = player.getInventory().addItem(result.clone());
+					if (!overflow.isEmpty()) {
+						return;
+					}
 
 					// Consume ingredients
 					for (int i = 0; i < craftsPossible; i++) {
