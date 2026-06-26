@@ -51,6 +51,7 @@ public class Dominion {
 	private int dominionLevel;
 	private int cachedFarmlandCount;
 	private int cachedLivestockCount;
+	private final Map<String, Integer> cachedLivestockByWorld = new HashMap<>();
 	private long foundedTimestamp;     // ms epoch; 0 = "ancient" (pre-feature legacy dominion)
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
 
@@ -736,6 +737,14 @@ public class Dominion {
 	 */
 	public void setCachedLivestockCount(int cachedLivestockCount) {
 		this.cachedLivestockCount = cachedLivestockCount;
+	}
+
+	/**
+	 * Provides the per-world livestock count cache, used to preserve counts for unloaded worlds.
+	 * @return Mutable map of world name → last known livestock count.
+	 */
+	public Map<String, Integer> getCachedLivestockByWorld() {
+		return cachedLivestockByWorld;
 	}
 
 	/**

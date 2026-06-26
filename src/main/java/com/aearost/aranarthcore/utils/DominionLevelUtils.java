@@ -395,24 +395,44 @@ public class DominionLevelUtils {
     }
 
     private static int scanLivestock(Dominion dominion) {
-        int count = 0;
+        // Group all chunks by world name so we can detect unloaded worlds
+        Map<String, List<Chunk>> chunksByWorld = new HashMap<>();
         for (Chunk chunk : dominion.getChunks()) {
-            for (Entity entity : chunk.getEntities()) {
-                if (isCountedLivestock(entity)) {
-                    count++;
-                }
-            }
+            chunksByWorld.computeIfAbsent(chunk.getWorld().getName(), k -> new ArrayList<>()).add(chunk);
         }
         for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
             for (Chunk chunk : outpost.getChunks()) {
-                for (Entity entity : chunk.getEntities()) {
-                    if (isCountedLivestock(entity)) {
-                        count++;
-                    }
-                }
+                chunksByWorld.computeIfAbsent(chunk.getWorld().getName(), k -> new ArrayList<>()).add(chunk);
             }
         }
-        return count;
+
+        Map<String, Integer> cachedByWorld = dominion.getCachedLivestockByWorld();
+        int total = 0;
+
+        for (Map.Entry<String, List<Chunk>> entry : chunksByWorld.entrySet()) {
+            String worldName = entry.getKey();
+            List<Chunk> chunks = entry.getValue();
+
+            // If any chunk in this world is unloaded, entities can't be read accurately
+            boolean allLoaded = chunks.stream().allMatch(Chunk::isLoaded);
+            if (allLoaded) {
+                int worldCount = 0;
+                for (Chunk chunk : chunks) {
+                    for (Entity entity : chunk.getEntities()) {
+                        if (isCountedLivestock(entity)) {
+                            worldCount++;
+                        }
+                    }
+                }
+                cachedByWorld.put(worldName, worldCount);
+                total += worldCount;
+            } else {
+                // Preserve the last known count for this world
+                total += cachedByWorld.getOrDefault(worldName, 0);
+            }
+        }
+
+        return total;
     }
 
     public static boolean isCountedLivestock(Entity entity) {
