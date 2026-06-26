@@ -409,6 +409,10 @@ public class DominionLevelUtils {
         Map<String, Integer> cachedByWorld = dominion.getCachedLivestockByWorld();
         int total = 0;
 
+        // Pre-compute the sum of all per-world counts we currently have cached
+        int knownCacheSum = cachedByWorld.values().stream().mapToInt(Integer::intValue).sum();
+        int unknownRemainder = Math.max(0, dominion.getCachedLivestockCount() - knownCacheSum);
+
         for (Map.Entry<String, List<Chunk>> entry : chunksByWorld.entrySet()) {
             String worldName = entry.getKey();
             List<Chunk> chunks = entry.getValue();
@@ -426,9 +430,13 @@ public class DominionLevelUtils {
                 }
                 cachedByWorld.put(worldName, worldCount);
                 total += worldCount;
+            } else if (cachedByWorld.containsKey(worldName)) {
+                // We have a prior scan result for this world — use it
+                total += cachedByWorld.get(worldName);
             } else {
-                // Preserve the last known count for this world
-                total += cachedByWorld.getOrDefault(worldName, 0);
+                // Use the unknown remainder so the count doesn't collapse to 0
+                total += unknownRemainder;
+                unknownRemainder = 0; // consume it and only apply once to avoid double-counting
             }
         }
 

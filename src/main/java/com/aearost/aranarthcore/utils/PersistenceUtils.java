@@ -1193,6 +1193,7 @@ public class PersistenceUtils {
                 }
                 long levelDropTimestamp = fields.length > 33 ? Long.parseLong(fields[33]) : 0L;
                 int boughtOutpostChunks = fields.length > 34 ? Integer.parseInt(fields[34]) : 0;
+                String cachedLivestockByWorldString = fields.length > 35 ? fields[35] : "";
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1214,6 +1215,16 @@ public class PersistenceUtils {
                 dominion.setFoundedTimestamp(foundedTimestamp);
                 dominion.setLevelDropTimestamp(levelDropTimestamp);
                 dominion.setBoughtOutpostChunks(boughtOutpostChunks);
+                if (!cachedLivestockByWorldString.isEmpty()) {
+                    for (String entry : cachedLivestockByWorldString.split(";")) {
+                        String[] kv = entry.split("=", 2);
+                        if (kv.length == 2) {
+                            try {
+                                dominion.getCachedLivestockByWorld().put(kv[0], Integer.parseInt(kv[1]));
+                            } catch (NumberFormatException ignored) {}
+                        }
+                    }
+                }
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
@@ -1364,7 +1375,10 @@ public class PersistenceUtils {
                                     + "|" + dominion.getCachedLivestockCount()
                                     + "|" + dominion.getFoundedTimestamp()
                                     + "|" + dominion.getLevelDropTimestamp()
-                                    + "|" + dominion.getBoughtOutpostChunks() + "\n";
+                                    + "|" + dominion.getBoughtOutpostChunks()
+                                    + "|" + dominion.getCachedLivestockByWorld().entrySet().stream()
+                                            .map(e -> e.getKey() + "=" + e.getValue())
+                                            .collect(java.util.stream.Collectors.joining(";")) + "\n";
                             writer.write(row);
                         }
                     }
