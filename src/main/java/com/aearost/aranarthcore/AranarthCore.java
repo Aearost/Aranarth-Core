@@ -40,6 +40,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
@@ -785,11 +787,58 @@ public class AranarthCore extends JavaPlugin {
                 newWorld.setGameRule(GameRules.LOCATOR_BAR, false);
                 newWorld.getWorldBorder().setCenter(0, 0);
                 newWorld.getWorldBorder().setSize(5000);
+                preGenerateResourceWorld(newWorld);
             }
         }
 
         Bukkit.broadcastMessage(ChatUtils.chatMessage("&5The resource world has been reset - &dHappy New Year!"));
         launchNewYearFireworks();
+    }
+
+    /**
+     * Asynchronously pre-generates all chunks within the resource world's 5000-block border.
+     * Processes chunks in small batches per tick to avoid server lag.
+     */
+    private static void preGenerateResourceWorld(World world) {
+        int borderHalf = 2500;
+        int chunkMin = -(borderHalf / 16) - 1;
+        int chunkMax = (borderHalf / 16) + 1;
+
+        List<int[]> chunkCoords = new ArrayList<>();
+        for (int cx = chunkMin; cx <= chunkMax; cx++) {
+            for (int cz = chunkMin; cz <= chunkMax; cz++) {
+                chunkCoords.add(new int[]{cx, cz});
+            }
+        }
+
+        final int total = chunkCoords.size();
+        final int batchSize = 8;
+        final int[] index = {0};
+
+        Bukkit.getLogger().info("[AranarthCore] Pre-generating " + total + " chunks for world: " + world.getName());
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (Bukkit.getWorld(world.getName()) == null) {
+                    cancel();
+                    return;
+                }
+                if (index[0] >= total) {
+                    cancel();
+                    Bukkit.getLogger().info("[AranarthCore] Finished pre-generating chunks for world: " + world.getName());
+                    return;
+                }
+                for (int i = 0; i < batchSize && index[0] < total; i++, index[0]++) {
+                    int[] coord = chunkCoords.get(index[0]);
+                    int cx = coord[0];
+                    int cz = coord[1];
+                    world.getChunkAtAsync(cx, cz, true).thenAccept(chunk ->
+                        world.unloadChunkRequest(chunk.getX(), chunk.getZ())
+                    );
+                }
+            }
+        }.runTaskTimer(getInstance(), 40L, 1L);
     }
 
     /**
