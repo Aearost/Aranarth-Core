@@ -62,6 +62,7 @@ public class AranarthUtils {
 	private static int weekday;
 	private static Month month;
 	private static int year;
+	private static long lastResourceWorldResetTime = 0L;
 	private static int stormDuration;
 	private static int stormDelay;
 	private static boolean hasStormedInMonth;
@@ -639,6 +640,14 @@ public class AranarthUtils {
 	 */
 	public static void setYear(int newYear) {
 		year = newYear;
+	}
+
+	public static long getLastResourceWorldResetTime() {
+		return lastResourceWorldResetTime;
+	}
+
+	public static void setLastResourceWorldResetTime(long time) {
+		lastResourceWorldResetTime = time;
 	}
 
 	/**

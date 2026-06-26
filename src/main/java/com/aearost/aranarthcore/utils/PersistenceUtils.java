@@ -855,6 +855,9 @@ public class PersistenceUtils {
                         year = Integer.parseInt(parts[1]);
                         fieldCount++;
                     }
+                    case "lastResourceWorldResetTime" -> {
+                        AranarthUtils.setLastResourceWorldResetTime(Long.parseLong(parts[1]));
+                    }
                 }
 
                 if (fieldCount == 4) {
@@ -902,7 +905,8 @@ public class PersistenceUtils {
                 writer.write("day:" + AranarthUtils.getDay() + "\n");
                 writer.write("weekday:" + AranarthUtils.getWeekday() + "\n");
                 writer.write("month:" + AranarthUtils.getMonth().name() + "\n");
-                writer.write("year:" + AranarthUtils.getYear());
+                writer.write("year:" + AranarthUtils.getYear() + "\n");
+                writer.write("lastResourceWorldResetTime:" + AranarthUtils.getLastResourceWorldResetTime());
 
                 writer.close();
             } catch (IOException e) {

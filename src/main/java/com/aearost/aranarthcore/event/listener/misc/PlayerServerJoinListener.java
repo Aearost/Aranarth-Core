@@ -43,6 +43,14 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
+		// If the player was offline when the resource world was reset, teleport them to spawn
+		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
+		if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
+				&& player.getLastPlayed() < resetTime) {
+			player.teleport(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
+			player.sendMessage(ChatUtils.chatMessage("&7You were in the resource world when it was reset, so you have been sent to &eSpawn&7."));
+		}
+
 		boolean isNewPlayer = false;
 		if (!AranarthUtils.hasPlayedBefore(player)) {
 			AranarthUtils.addPlayer(player.getUniqueId(), new AranarthPlayer(player.getName()));

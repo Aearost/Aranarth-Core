@@ -744,8 +744,12 @@ public class AranarthCore extends JavaPlugin {
 
         Location spawnLocation = new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0);
 
-        Bukkit.broadcastMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(
             "&5A new year has dawned! The resource world is being reset..."));
+
+        // Record the reset time so offline players can be detected on next login
+        AranarthUtils.setLastResourceWorldResetTime(System.currentTimeMillis());
+        PersistenceUtils.saveServerDate();
 
         // Teleport any players in a resource world to Spawn immediately
         for (Player player : Bukkit.getOnlinePlayers()) {
@@ -753,7 +757,7 @@ public class AranarthCore extends JavaPlugin {
             for (String rWorld : worldNames) {
                 if (worldName.equals(rWorld)) {
                     player.teleport(spawnLocation);
-                    player.sendMessage(com.aearost.aranarthcore.utils.ChatUtils.chatMessage(
+                    player.sendMessage(ChatUtils.chatMessage(
                         "&7You have been teleported to &eSpawn &7due to the resource world reset!"));
                     break;
                 }

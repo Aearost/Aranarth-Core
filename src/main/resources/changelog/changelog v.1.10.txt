@@ -287,6 +287,7 @@ Minor Features
 [~] Fixed issue causing items to get deleted from the Fletching table inventory
 [~] Fixed issue where plentiful was not working in other dominions despite having the Build permission
 [+] Added feedback message when using /aranarthium, /calendar, /dominions, or /incantations
+[+] Added forced teleport to spawn if the player logged out in resource world before it was reset
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
