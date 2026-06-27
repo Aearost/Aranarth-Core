@@ -31,13 +31,15 @@ public class GuiDefendersClick {
 
         Player player = (Player) e.getWhoClicked();
         Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
-        if (dominion == null) return;
+        if (dominion == null) {
+            return;
+        }
 
         DominionRank memberRank = dominion.getMemberRank(player.getUniqueId());
         boolean canManage = dominion.getLeader().equals(player.getUniqueId())
                 || (memberRank != null && dominion.getDominionPermissions().hasPermission(memberRank, DominionPermission.MANAGE_DEFENDERS));
         if (!canManage) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to manage defenders!"));
+            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to manage defenders"));
             return;
         }
 
@@ -61,14 +63,16 @@ public class GuiDefendersClick {
                 break;
             }
         }
-        if (clickedType == null) return;
+        if (clickedType == null) {
+            return;
+        }
 
         String result;
         if (e.getClick() == ClickType.RIGHT) {
             result = DefenderUtils.purchaseDefender(dominion, clickedType);
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
         } else if (e.getClick() == ClickType.LEFT) {
-            result = DefenderUtils.sellDefender(dominion, clickedType);
+            result = DefenderUtils.sellDefender(dominion, clickedType, null);
             player.playSound(player, Sound.ENTITY_ITEM_PICKUP, 0.5F, 1F);
         } else {
             return;

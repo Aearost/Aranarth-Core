@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.*;
+import com.aearost.aranarthcore.event.player.DefenderInteract;
 import com.aearost.aranarthcore.event.player.QuestNpcInteract;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
@@ -23,6 +25,10 @@ public class PlayerInteractEntityEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEntityEvent e) {
         if (e.getRightClicked() != null) {
+            if (DefenderUtils.isDefender(e.getRightClicked().getUniqueId())) {
+                new DefenderInteract().execute(e);
+                return;
+            }
             if (e.getRightClicked() instanceof Villager) {
                 // Quest NPC check must come first to prevent trade GUI from opening
                 if (QuestUtils.isQuestNpc(e.getRightClicked())) {

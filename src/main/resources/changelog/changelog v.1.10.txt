@@ -3,6 +3,7 @@ AranarthCore v. 1.10
 Major Features
 [+] Added per-user permissions for Dominions
 [+] Implemented Dominion Outposts
+[+] Implemented Dominion Defenders, allowing Dominions to summon mobs to aid them
 [+] Implemented a Dominion levels system with different categories and thresholds to level up your Dominion
 [~] Replaced /d permissions with the base /d
 [+] Implemented auto replenishment of items, supporting eating, tools breaking, thrown projectiles, dropped items, etc

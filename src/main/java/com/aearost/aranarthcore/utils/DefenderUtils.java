@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.CustomKeys;
+import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
@@ -9,6 +10,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.objects.Outpost;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -25,16 +27,28 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Manages all Defender data, spawning, and entity tracking for Dominions.
+ * Manages all Defender data, spawning, entity tracking, and behaviour modes for Dominions.
  */
 public class DefenderUtils {
 
     private static final int[] DEFENDER_LIMITS = {5, 15, 30, 60, 100};
+
+    // Core tracking
     private static final Map<UUID, Map<DefenderType, Integer>> counts = new HashMap<>();
     private static final Map<UUID, UUID> entityToDominion = new HashMap<>();
     private static final Map<UUID, DefenderType> entityToType = new HashMap<>();
     private static final Map<UUID, List<UUID>> dominionToEntities = new HashMap<>();
-    private static final Map<UUID, org.bukkit.Location> entityToLastLocation = new HashMap<>();
+    private static final Map<UUID, Location> entityToLastLocation = new HashMap<>();
+
+    // Mode tracking
+    private static final Map<UUID, DefenderMode> entityToMode = new HashMap<>();
+    private static final Map<UUID, Location> entityToGuardPosition = new HashMap<>();
+    private static final Map<UUID, UUID> entityToFollowPlayer = new HashMap<>();
+    private static final Map<UUID, List<UUID>> playerToFollowers = new HashMap<>();
+
+    // Stuck detection
+    private static final Map<UUID, Location> entityToStuckCheckLoc = new HashMap<>();
+    private static final Map<UUID, Integer> entityToStuckCount = new HashMap<>();
 
     public static int getDefenderCount(UUID dominionId, DefenderType type) {
         Map<DefenderType, Integer> typeCounts = counts.get(dominionId);
@@ -74,22 +88,164 @@ public class DefenderUtils {
         return entityToType.get(entityUUID);
     }
 
-    public static Map<UUID, Map<DefenderType, Integer>> getAllCounts() {
-        return counts;
+    public static DefenderMode getDefenderMode(UUID entityUUID) {
+        return entityToMode.getOrDefault(entityUUID, DefenderMode.PATROL);
     }
 
+    public static Location getGuardPosition(UUID entityUUID) {
+        return entityToGuardPosition.get(entityUUID);
+    }
+
+    public static UUID getFollowPlayerId(UUID entityUUID) {
+        return entityToFollowPlayer.get(entityUUID);
+    }
+
+    public static List<UUID> getFollowDefenders(UUID playerUUID) {
+        return playerToFollowers.getOrDefault(playerUUID, new ArrayList<>());
+    }
+
+    /**
+     * Returns true if this defender is in FOLLOW mode and the given player is NOT the one
+     * being followed. The dominion leader is always exempt from the lock.
+     */
+    public static boolean isFollowLockedFor(UUID entityUUID, UUID requestingPlayer, UUID dominionLeader) {
+        if (getDefenderMode(entityUUID) != DefenderMode.FOLLOW) {
+            return false;
+        }
+        UUID followPlayer = entityToFollowPlayer.get(entityUUID);
+        if (followPlayer == null) {
+            return false;
+        }
+        return !requestingPlayer.equals(followPlayer) && !requestingPlayer.equals(dominionLeader);
+    }
+
+    // Persistence accessors (used by PersistenceUtils.saveDefenders)
     public static Map<UUID, UUID> getEntityToDominion() {
         return entityToDominion;
     }
 
-    /**
-     * Returns the last known location cache, used as a fallback during save.
-     */
-    public static Map<UUID, org.bukkit.Location> getEntityToLastLocation() {
+    public static Map<UUID, Location> getEntityToLastLocation() {
         return entityToLastLocation;
     }
 
-    public static void loadAndSpawnAt(UUID dominionId, DefenderType type, org.bukkit.Location location) {
+    /**
+     * Sets the behaviour mode for a defender.
+     *
+     * @param entityUUID     The defender entity UUID.
+     * @param mode           The new mode.
+     * @param followPlayerId Player UUID to follow (ignored if not following).
+     * @param guardPosition  Location to guard (ignored if not guarding).
+     */
+    public static void setDefenderMode(UUID entityUUID, DefenderMode mode,
+                                       UUID followPlayerId, Location guardPosition) {
+        // Clean up old follow tracking when leaving follow mode
+        if (mode != DefenderMode.FOLLOW) {
+            UUID oldFollow = entityToFollowPlayer.remove(entityUUID);
+            if (oldFollow != null) {
+                List<UUID> followers = playerToFollowers.get(oldFollow);
+                if (followers != null) {
+                    followers.remove(entityUUID);
+                }
+            }
+        }
+
+        entityToMode.put(entityUUID, mode);
+
+        Entity entity = Bukkit.getEntity(entityUUID);
+        if (entity instanceof Mob mob) {
+            if (mode == DefenderMode.IDLE) {
+                mob.setAI(false);
+                mob.setTarget(null);
+            } else {
+                mob.setAI(true);
+            }
+            entity.getPersistentDataContainer().set(
+                    CustomKeys.DEFENDER_MODE, PersistentDataType.STRING, mode.name());
+        }
+
+        if (mode == DefenderMode.FOLLOW && followPlayerId != null) {
+            // Avoid duplicate registration
+            UUID existing = entityToFollowPlayer.get(entityUUID);
+            if (!followPlayerId.equals(existing)) {
+                if (existing != null) {
+                    List<UUID> old = playerToFollowers.get(existing);
+                    if (old != null) {
+                        old.remove(entityUUID);
+                    }
+                }
+                entityToFollowPlayer.put(entityUUID, followPlayerId);
+                playerToFollowers.computeIfAbsent(followPlayerId, k -> new ArrayList<>()).add(entityUUID);
+            }
+            if (entity != null) {
+                entity.getPersistentDataContainer().set(
+                        CustomKeys.DEFENDER_FOLLOW_PLAYER, PersistentDataType.STRING, followPlayerId.toString());
+            }
+        }
+
+        if (mode == DefenderMode.GUARD && guardPosition != null) {
+            entityToGuardPosition.put(entityUUID, guardPosition);
+        }
+
+        // Reset stuck state whenever mode changes
+        entityToStuckCheckLoc.remove(entityUUID);
+        entityToStuckCount.remove(entityUUID);
+    }
+
+    /**
+     * Returns the most appropriate home location for a defender (outpost home if applicable, otherwise dominion home).
+     */
+    public static Location getDefenderHomeLocation(UUID entityUUID) {
+        UUID dominionId = entityToDominion.get(entityUUID);
+        if (dominionId == null) {
+            return null;
+        }
+        Dominion dominion = DominionUtils.getDominionById(dominionId);
+        if (dominion == null) {
+            return null;
+        }
+
+        Entity entity = Bukkit.getEntity(entityUUID);
+        if (entity != null) {
+            Chunk defChunk = entity.getLocation().getChunk();
+            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
+                if (isWithinOneChebyshev(defChunk, outpost.getChunks())) {
+                    return outpost.getHome();
+                }
+            }
+        }
+        return dominion.getDominionHome();
+    }
+
+    /**
+     * Teleports all follow-mode defenders assigned to the given player to that player's location.
+     */
+    public static void teleportFollowersToPlayer(Player player) {
+        List<UUID> followers = new ArrayList<>(
+                playerToFollowers.getOrDefault(player.getUniqueId(), new ArrayList<>()));
+        for (UUID followerUUID : followers) {
+            if (getDefenderMode(followerUUID) != DefenderMode.FOLLOW) {
+                continue;
+            }
+            Entity entity = Bukkit.getEntity(followerUUID);
+            if (entity instanceof LivingEntity le && !le.isDead()) {
+                entity.teleport(player.getLocation());
+            }
+        }
+    }
+
+    /**
+     * Loads a defender from persistence with default PATROL mode.
+     */
+    public static void loadAndSpawnAt(UUID dominionId, DefenderType type, Location location) {
+        loadAndSpawnAt(dominionId, type, location, DefenderMode.PATROL, null, null);
+    }
+
+    /**
+     * Loads a defender from persistence with an explicit mode.
+     * For follow mode, the location should already be the dominion home (set by PersistenceUtils).
+     */
+    public static void loadAndSpawnAt(UUID dominionId, DefenderType type, Location location,
+                                      DefenderMode mode, UUID followPlayerId, Location guardPos) {
         if (location == null || location.getWorld() == null) {
             return;
         }
@@ -97,10 +253,7 @@ public class DefenderUtils {
         applyDefenderStats(entity, dominionId, type);
         counts.computeIfAbsent(dominionId, k -> new EnumMap<>(DefenderType.class))
                 .merge(type, 1, Integer::sum);
-    }
-
-    public static void spawnAndRegisterNew(Dominion dominion, DefenderType type) {
-        spawnEntity(dominion, type);
+        setDefenderMode(entity.getUniqueId(), mode, followPlayerId, guardPos);
     }
 
     private static void spawnEntity(Dominion dominion, DefenderType type) {
@@ -110,6 +263,8 @@ public class DefenderUtils {
         Entity entity = dominion.getDominionHome().getWorld()
                 .spawnEntity(dominion.getDominionHome(), type.getEntityType());
         applyDefenderStats(entity, dominion.getId(), type);
+        // New purchases default to patrol
+        entityToMode.put(entity.getUniqueId(), DefenderMode.PATROL);
     }
 
     /**
@@ -120,13 +275,11 @@ public class DefenderUtils {
             return;
         }
 
-        // Tag the entity with PersistentDataContainer
         entity.getPersistentDataContainer().set(
                 CustomKeys.DEFENDER_DOMINION_ID, PersistentDataType.STRING, dominionId.toString());
         entity.getPersistentDataContainer().set(
                 CustomKeys.DEFENDER_TYPE, PersistentDataType.STRING, type.name());
 
-        // Custom name
         Dominion nameDominion = DominionUtils.getDominionById(dominionId);
         String defenderName = nameDominion != null
                 ? "&7Defender of &e" + nameDominion.getName()
@@ -134,36 +287,30 @@ public class DefenderUtils {
         living.setCustomName(ChatUtils.translateToColor(defenderName));
         living.setCustomNameVisible(true);
 
-        // Max health and current health
         if (living.getAttribute(Attribute.MAX_HEALTH) != null) {
             living.getAttribute(Attribute.MAX_HEALTH).setBaseValue(type.getMaxHealth());
         }
         living.setHealth(type.getMaxHealth());
 
-        // Permanent potion effects
         for (PotionEffect effect : type.getPermanentEffects()) {
             living.addPotionEffect(effect);
         }
 
-        // Force adult form
         if (living instanceof Ageable ageable) {
             ageable.setAdult();
         }
 
-        // Clear all equipment and prevent item pickup
         if (living instanceof Mob mob) {
             mob.setRemoveWhenFarAway(false);
             mob.setCanPickupItems(false);
             if (mob.getEquipment() != null) {
                 mob.getEquipment().clear();
-                // Skeletons need a bow to function as ranged attackers
                 if (type == DefenderType.SKELETON) {
                     mob.getEquipment().setItemInMainHand(new ItemStack(org.bukkit.Material.BOW));
                 }
             }
         }
 
-        // Track in memory
         UUID entityUUID = entity.getUniqueId();
         entityToDominion.put(entityUUID, dominionId);
         entityToType.put(entityUUID, type);
@@ -172,65 +319,7 @@ public class DefenderUtils {
     }
 
     /**
-     * Re-registers an existing world entity as a defender after a server restart.
-     */
-    public static void reRegisterEntity(Entity entity, UUID dominionId, DefenderType type) {
-        if (!(entity instanceof LivingEntity living)) {
-            return;
-        }
-
-        // Re-tag PDC in case it was somehow lost
-        entity.getPersistentDataContainer().set(
-                CustomKeys.DEFENDER_DOMINION_ID, PersistentDataType.STRING, dominionId.toString());
-        entity.getPersistentDataContainer().set(
-                CustomKeys.DEFENDER_TYPE, PersistentDataType.STRING, type.name());
-
-        // Re-apply name
-        Dominion nameDominion = DominionUtils.getDominionById(dominionId);
-        String defenderName = nameDominion != null ? "Defender of " + nameDominion.getName() : "Defender";
-        living.setCustomName(ChatUtils.translateToColor("&c" + defenderName));
-        living.setCustomNameVisible(true);
-
-        // Re-apply max health attribute (but keep current HP)
-        if (living.getAttribute(Attribute.MAX_HEALTH) != null) {
-            living.getAttribute(Attribute.MAX_HEALTH).setBaseValue(type.getMaxHealth());
-        }
-
-        // Re-apply permanent potion effects
-        for (PotionEffect effect : type.getPermanentEffects()) {
-            living.addPotionEffect(effect);
-        }
-
-        // Force adult
-        if (living instanceof Ageable ageable) {
-            ageable.setAdult();
-        }
-
-        // Mob flags and equipment
-        if (living instanceof Mob mob) {
-            mob.setRemoveWhenFarAway(false);
-            mob.setCanPickupItems(false);
-            if (mob.getEquipment() != null) {
-                mob.getEquipment().clear();
-                if (type == DefenderType.SKELETON) {
-                    mob.getEquipment().setItemInMainHand(new org.bukkit.inventory.ItemStack(org.bukkit.Material.BOW));
-                }
-            }
-        }
-
-        // Restore tracking
-        UUID entityUUID = entity.getUniqueId();
-        entityToDominion.put(entityUUID, dominionId);
-        entityToType.put(entityUUID, type);
-        dominionToEntities.computeIfAbsent(dominionId, k -> new ArrayList<>()).add(entityUUID);
-        counts.computeIfAbsent(dominionId, k -> new EnumMap<>(DefenderType.class))
-                .merge(type, 1, Integer::sum);
-    }
-
-    /**
      * Attempts to purchase one defender of the given type for the dominion.
-     *
-     * @return A chat-formatted result message.
      */
     public static String purchaseDefender(Dominion dominion, DefenderType type) {
         int limit = getDefenderLimit(dominion.getDominionLevel());
@@ -238,7 +327,6 @@ public class DefenderUtils {
         if (current >= limit) {
             return "&cYour dominion cannot purchase any more defenders";
         }
-
         double price = type.getPurchasePrice();
         if (dominion.getBalance() < price) {
             return "&cYour dominion cannot afford this";
@@ -253,45 +341,43 @@ public class DefenderUtils {
     }
 
     /**
-     * Attempts to sell one defender of the given type for the dominion.
+     * Sells a defender and refunds the dominion.
      *
-     * @return A chat-formatted result message.
+     * @param dominion   The owning dominion.
+     * @param type       The defender type to sell.
+     * @param entityUUID The specific entity to sell, or {@code null} to pick an arbitrary one of {@code type}.
      */
-    public static String sellDefender(Dominion dominion, DefenderType type) {
-        int current = getDefenderCount(dominion.getId(), type);
-        if (current <= 0) {
-            return "&7You do not have any &e" + type.getDisplayName() + " &edefenders &7to sell";
-        }
-
-        // Find and remove one entity of this type
-        List<UUID> entities = dominionToEntities.get(dominion.getId());
-        UUID toRemove = null;
-        if (entities != null) {
-            for (UUID eUUID : new ArrayList<>(entities)) {
-                if (type.equals(entityToType.get(eUUID))) {
-                    toRemove = eUUID;
-                    break;
+    public static String sellDefender(Dominion dominion, DefenderType type, UUID entityUUID) {
+        if (entityUUID == null) {
+            // Selling any tracked entity of this type
+            if (getDefenderCount(dominion.getId(), type) <= 0) {
+                return "&cYou do not have any &e" + type.getDisplayName() + " &cdefenders &7to sell";
+            }
+            List<UUID> entities = dominionToEntities.get(dominion.getId());
+            if (entities != null) {
+                for (UUID eUUID : new ArrayList<>(entities)) {
+                    if (type.equals(entityToType.get(eUUID))) {
+                        entityUUID = eUUID;
+                        break;
+                    }
                 }
             }
+        } else {
+            // Selling a specific defender via the manage defender GUI
+            if (!entityToType.containsKey(entityUUID)) {
+                return "&cThis defender could not be found";
+            }
         }
-        if (toRemove != null) {
-            removeEntityFromTracking(toRemove);
-            Entity entity = Bukkit.getEntity(toRemove);
+
+        if (entityUUID != null) {
+            removeEntityFromTracking(entityUUID);
+            Entity entity = Bukkit.getEntity(entityUUID);
             if (entity != null) {
                 entity.remove();
             }
         }
 
-        // Decrement count
-        Map<DefenderType, Integer> typeCounts = counts.get(dominion.getId());
-        if (typeCounts != null) {
-            int newCount = typeCounts.getOrDefault(type, 1) - 1;
-            if (newCount <= 0) {
-                typeCounts.remove(type);
-            } else {
-                typeCounts.put(type, newCount);
-            }
-        }
+        decrementCount(dominion.getId(), type);
 
         double refund = type.getSellPrice();
         dominion.setBalance(dominion.getBalance() + refund);
@@ -300,6 +386,9 @@ public class DefenderUtils {
                 + " defender &7has been sold for &6$" + NumberFormat.getInstance().format((long) refund);
     }
 
+    /**
+     * Removes references of the Defender upon their death.
+     */
     public static void onDefenderDeath(UUID entityUUID) {
         UUID dominionId = entityToDominion.get(entityUUID);
         DefenderType type = entityToType.get(entityUUID);
@@ -308,22 +397,27 @@ public class DefenderUtils {
         }
 
         removeEntityFromTracking(entityUUID);
-
-        Map<DefenderType, Integer> typeCounts = counts.get(dominionId);
-        if (typeCounts != null) {
-            int newCount = typeCounts.getOrDefault(type, 1) - 1;
-            if (newCount <= 0) {
-                typeCounts.remove(type);
-            } else {
-                typeCounts.put(type, newCount);
-            }
-        }
+        decrementCount(dominionId, type);
     }
 
     private static void removeEntityFromTracking(UUID entityUUID) {
         UUID dominionId = entityToDominion.remove(entityUUID);
         entityToType.remove(entityUUID);
         entityToLastLocation.remove(entityUUID);
+
+        // Mode cleanup
+        entityToMode.remove(entityUUID);
+        entityToGuardPosition.remove(entityUUID);
+        UUID followPlayerId = entityToFollowPlayer.remove(entityUUID);
+        if (followPlayerId != null) {
+            List<UUID> followers = playerToFollowers.get(followPlayerId);
+            if (followers != null) {
+                followers.remove(entityUUID);
+            }
+        }
+        entityToStuckCheckLoc.remove(entityUUID);
+        entityToStuckCount.remove(entityUUID);
+
         if (dominionId != null) {
             List<UUID> entities = dominionToEntities.get(dominionId);
             if (entities != null) {
@@ -333,7 +427,7 @@ public class DefenderUtils {
     }
 
     /**
-     * Determines whether a defender should target the given player, respecting the PvP permission rules.
+     * Determines whether a defender should target the given player, respecting PvP rules.
      */
     public static boolean shouldDefenderTarget(UUID defenderDominionId, Player target) {
         Dominion defenderDominion = DominionUtils.getDominionById(defenderDominionId);
@@ -343,46 +437,36 @@ public class DefenderUtils {
 
         Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
 
-        // Same dominion members — only target if member PvP is enabled
         if (targetDominion != null && targetDominion.isSameDominion(defenderDominion)) {
             return defenderDominion.isMemberPvpEnabled();
         }
 
-        // Get relation from defenderDominion's perspective toward targetDominion
         DominionRank relation = (targetDominion == null)
                 ? DominionRank.WANDERER
                 : DominionUtils.getRelationKey(defenderDominion, targetDominion);
 
-        // Forces targeting for this relation
-        if (defenderDominion.getDominionPermissions().hasPermission(relation, DominionPermission.DEFENDER_TARGETING)) {
+        if (defenderDominion.getDominionPermissions()
+                .hasPermission(relation, DominionPermission.DEFENDER_TARGETING)) {
             return true;
         }
 
-        // Mirror handlePvP logic (defender dominion is attacker, target player is target)
         if (targetDominion != null) {
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                // Both sides must have PVP enabled
                 boolean defenderPvp = defenderDominion.getDominionPermissions()
                         .hasPermission(relation, DominionPermission.PVP);
                 boolean targetPvp = targetDominion.getDominionPermissions()
                         .hasPermission(relation, DominionPermission.PVP);
                 return defenderPvp && targetPvp;
             }
-            if (relation == DominionRank.NEUTRAL) {
-                // Neutral players in the defender's own land are attackable
-                return true;
-            }
-            if (relation == DominionRank.ENEMIED) {
+            if (relation == DominionRank.NEUTRAL || relation == DominionRank.ENEMIED) {
                 return true;
             }
         }
-
-        // Target is a wanderer (no dominion), attackable by any dominion member
         return true;
     }
 
     /**
-     * Starts a repeating task that walks defenders back toward their dominion's land.
+     * Implements boundary enforcement for patrolling defenders, handling stuck defenders by teleporting them home.
      */
     public static void startBoundaryTask() {
         new BukkitRunnable() {
@@ -394,6 +478,15 @@ public class DefenderUtils {
                         continue;
                     }
 
+                    UUID entityUUID = entry.getKey();
+                    DefenderMode mode = getDefenderMode(entityUUID);
+
+                    // Only patrolling defenders use territory boundary enforcement
+                    if (mode != DefenderMode.PATROL) {
+                        clearStuckState(entityUUID);
+                        continue;
+                    }
+
                     UUID dominionId = entry.getValue();
                     Dominion dominion = DominionUtils.getDominionById(dominionId);
                     if (dominion == null || dominion.getChunks().isEmpty()) {
@@ -401,9 +494,7 @@ public class DefenderUtils {
                     }
 
                     Chunk defenderChunk = entity.getLocation().getChunk();
-
                     boolean withinBounds = isWithinOneChebyshev(defenderChunk, dominion.getChunks());
-
                     if (!withinBounds) {
                         for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
                             if (isWithinOneChebyshev(defenderChunk, outpost.getChunks())) {
@@ -413,20 +504,35 @@ public class DefenderUtils {
                         }
                     }
 
-                    if (!withinBounds && entity instanceof Mob mob) {
-                        // Find the nearest claimed chunk and walk toward its centre
+                    if (withinBounds) {
+                        clearStuckState(entityUUID);
+                        continue;
+                    }
+
+                    // Out of bounds - pathfind back
+                    if (entity instanceof Mob mob) {
+                        // Teleport home if unable to pathfind back within 30 seconds
+                        if (checkStuck(entityUUID, entity, 6)) {
+                            Location home = getDefenderHomeLocation(entityUUID);
+                            if (home != null) {
+                                entity.teleport(home);
+                            }
+                            continue;
+                        }
+
                         Chunk nearest = findNearestChunk(defenderChunk, dominion.getChunks());
                         if (nearest == null) {
                             for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
                                 Chunk candidate = findNearestChunk(defenderChunk, outpost.getChunks());
                                 if (candidate != null && (nearest == null
-                                        || chunkDistance(defenderChunk, candidate) < chunkDistance(defenderChunk, nearest))) {
+                                        || chunkDistance(defenderChunk, candidate)
+                                        < chunkDistance(defenderChunk, nearest))) {
                                     nearest = candidate;
                                 }
                             }
                         }
                         if (nearest != null) {
-                            org.bukkit.Location target = nearest.getWorld().getBlockAt(
+                            Location target = nearest.getWorld().getBlockAt(
                                     (nearest.getX() << 4) + 8,
                                     entity.getLocation().getBlockY(),
                                     (nearest.getZ() << 4) + 8).getLocation();
@@ -438,10 +544,290 @@ public class DefenderUtils {
         }.runTaskTimer(AranarthCore.getInstance(), 100L, 100L);
     }
 
+    public static void startTargetingTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, UUID> entry : new HashMap<>(entityToDominion).entrySet()) {
+                    Entity entity = Bukkit.getEntity(entry.getKey());
+                    if (!(entity instanceof Mob mob) || mob.isDead()) {
+                        continue;
+                    }
+
+                    UUID entityUUID = entry.getKey();
+                    UUID myDominionId = entry.getValue();
+                    DefenderMode mode = getDefenderMode(entityUUID);
+
+                    if (mode == DefenderMode.IDLE) {
+                        continue;
+                    }
+
+                    // Validate and clear the current target
+                    LivingEntity currentTarget = mob.getTarget();
+                    if (currentTarget != null && !currentTarget.isDead()
+                            && currentTarget instanceof Monster) {
+                        UUID tUUID = currentTarget.getUniqueId();
+                        boolean isSameDominionDefender = isDefender(tUUID)
+                                && myDominionId.equals(entityToDominion.get(tUUID));
+                        if (!isSameDominionDefender) {
+                            if (mode == DefenderMode.GUARD) {
+                                // Drop target if it has wandered outside the 30-block guard radius
+                                Location guardPos = entityToGuardPosition.get(entityUUID);
+                                if (guardPos != null && guardPos.getWorld() != null
+                                        && guardPos.getWorld().equals(currentTarget.getLocation().getWorld())
+                                        && guardPos.distanceSquared(currentTarget.getLocation()) > 900) {
+                                    mob.setTarget(null);
+                                } else {
+                                    continue;
+                                }
+                            } else {
+                                // Valid for patrol and follow modes
+                                continue;
+                            }
+                        }
+                    }
+
+                    Dominion dominion = DominionUtils.getDominionById(myDominionId);
+                    LivingEntity priorityTarget = null;
+                    double priorityDistSq = Double.MAX_VALUE;
+                    LivingEntity fallbackTarget = null;
+                    double fallbackDistSq = Double.MAX_VALUE;
+
+                    // Guard mode will filter by 30-block guard distance
+                    double scanRadius = 16;
+                    double maxGuardDistSq = Double.MAX_VALUE;
+                    Location guardPos = null;
+                    if (mode == DefenderMode.GUARD) {
+                        guardPos = entityToGuardPosition.get(entityUUID);
+                        if (guardPos != null) {
+                            scanRadius = 30;
+                            maxGuardDistSq = 900; // 30^2
+                        }
+                    }
+
+                    for (Entity nearby : mob.getNearbyEntities(scanRadius, 8, scanRadius)) {
+                        if (!(nearby instanceof Monster nearbyMonster)) {
+                            continue;
+                        }
+                        UUID nUUID = nearby.getUniqueId();
+                        if (isDefender(nUUID) && myDominionId.equals(entityToDominion.get(nUUID))) {
+                            continue;
+                        }
+
+                        // Guard mode will reject targets outside 30 blocks of guard position
+                        if (mode == DefenderMode.GUARD && guardPos != null
+                                && guardPos.getWorld() != null
+                                && guardPos.getWorld().equals(nearby.getLocation().getWorld())
+                                && guardPos.distanceSquared(nearby.getLocation()) > maxGuardDistSq) {
+                            continue;
+                        }
+
+                        double distSq = nearby.getLocation().distanceSquared(mob.getLocation());
+
+                        if (nearbyMonster instanceof Mob nearbyMob
+                                && nearbyMob.getTarget() instanceof Player targetPlayer) {
+                            boolean isPriority = false;
+                            if (mode == DefenderMode.FOLLOW) {
+                                UUID followId = entityToFollowPlayer.get(entityUUID);
+                                isPriority = followId != null
+                                        && targetPlayer.getUniqueId().equals(followId);
+                            } else if (dominion != null) {
+                                isPriority = dominion.getMembers().contains(targetPlayer.getUniqueId());
+                            }
+                            if (isPriority && distSq < priorityDistSq) {
+                                priorityDistSq = distSq;
+                                priorityTarget = nearbyMonster;
+                            }
+                        }
+
+                        if (distSq < fallbackDistSq) {
+                            fallbackDistSq = distSq;
+                            fallbackTarget = nearbyMonster;
+                        }
+                    }
+
+                    LivingEntity chosen = priorityTarget != null ? priorityTarget : fallbackTarget;
+                    if (chosen != null) {
+                        mob.setTarget(chosen);
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 40L, 40L);
+    }
+
     /**
-     * Returns the chunk in the list closest (by Chebyshev distance) to the defender's chunk,
-     * or null if the list is empty.
+     * Starts the follow task for defenders marked in follow mode.
      */
+    public static void startFollowTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, UUID> entry : new HashMap<>(entityToFollowPlayer).entrySet()) {
+                    UUID entityUUID = entry.getKey();
+                    UUID followPlayerId = entry.getValue();
+
+                    if (getDefenderMode(entityUUID) != DefenderMode.FOLLOW) {
+                        continue;
+                    }
+
+                    Entity entity = Bukkit.getEntity(entityUUID);
+                    if (!(entity instanceof Mob mob) || mob.isDead()) {
+                        continue;
+                    }
+
+                    Player followPlayer = Bukkit.getPlayer(followPlayerId);
+                    if (followPlayer == null || !followPlayer.isOnline()) {
+                        continue;
+                    }
+
+                    if (!followPlayer.getWorld().getName().startsWith("world")) {
+                        continue;
+                    }
+
+                    // Cross-world teleport
+                    if (!entity.getWorld().equals(followPlayer.getWorld())) {
+                        entity.teleport(followPlayer.getLocation());
+                        clearStuckState(entityUUID);
+                        continue;
+                    }
+
+                    double distSq = entity.getLocation().distanceSquared(followPlayer.getLocation());
+
+                    if (distSq > 1024) { // If more than 32 blocks, teleport immediately
+                        entity.teleport(followPlayer.getLocation());
+                        clearStuckState(entityUUID);
+                    } else if (distSq > 25) { // 5–32 blocks, try to pathfind
+                        mob.getPathfinder().moveTo(followPlayer.getLocation(), 1.3);
+                        // Teleport to the player if exceeding 30 seconds
+                        if (checkStuck(entityUUID, entity, 15)) {
+                            entity.teleport(followPlayer.getLocation());
+                        }
+                    } else {
+                        clearStuckState(entityUUID);
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 40L, 40L);
+    }
+
+    /**
+     * Starts the guard-return task for defenders marked in guard mode.
+     */
+    public static void startGuardTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, Location> entry : new HashMap<>(entityToGuardPosition).entrySet()) {
+                    UUID entityUUID = entry.getKey();
+
+                    if (getDefenderMode(entityUUID) != DefenderMode.GUARD) {
+                        continue;
+                    }
+
+                    Entity entity = Bukkit.getEntity(entityUUID);
+                    if (!(entity instanceof Mob mob) || mob.isDead()) {
+                        continue;
+                    }
+
+                    // If still chasing a target, leave it alone
+                    if (mob.getTarget() != null && !mob.getTarget().isDead()) {
+                        continue;
+                    }
+
+                    Location guardPos = entry.getValue();
+                    if (guardPos == null || guardPos.getWorld() == null) {
+                        continue;
+                    }
+                    if (!guardPos.getWorld().equals(entity.getWorld())) {
+                        continue;
+                    }
+
+                    double distSq = entity.getLocation().distanceSquared(guardPos);
+                    if (distSq <= 4) {
+                        clearStuckState(entityUUID);
+                        continue;
+                    }
+
+                    mob.getPathfinder().moveTo(guardPos, 1.2);
+
+                    // Stuck detection, teleport to home if needed
+                    if (checkStuck(entityUUID, entity, 10)) {
+                        Location home = getDefenderHomeLocation(entityUUID);
+                        if (home != null) {
+                            entity.teleport(home);
+                            entityToGuardPosition.put(entityUUID, home);
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 60L, 60L);
+    }
+
+    /**
+     * Starts the slow health-regeneration task for all tracked defenders.
+     */
+    public static void startRegenTask() {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Map.Entry<UUID, DefenderType> entry : new HashMap<>(entityToType).entrySet()) {
+                    Entity entity = Bukkit.getEntity(entry.getKey());
+                    if (entity instanceof LivingEntity living && !living.isDead()) {
+                        entityToLastLocation.put(entry.getKey(), entity.getLocation());
+                        double max = entry.getValue().getMaxHealth();
+                        if (living.getHealth() < max) {
+                            living.setHealth(Math.min(living.getHealth() + 1.0, max));
+                        }
+                    }
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 200L, 200L);
+    }
+
+    /**
+     * Clears the stuck-detection state for an entity.
+     */
+    private static void clearStuckState(UUID entityUUID) {
+        entityToStuckCheckLoc.remove(entityUUID);
+        entityToStuckCount.remove(entityUUID);
+    }
+
+    /**
+     * Checks whether an entity is stuck and increments its stuck counter.
+     */
+    private static boolean checkStuck(UUID entityUUID, Entity entity, int threshold) {
+        Location lastLoc = entityToStuckCheckLoc.get(entityUUID);
+        Location currentLoc = entity.getLocation();
+        if (lastLoc != null && lastLoc.getWorld() != null
+                && lastLoc.getWorld().equals(currentLoc.getWorld())
+                && lastLoc.distanceSquared(currentLoc) < 4.0) {
+            if (entityToStuckCount.merge(entityUUID, 1, Integer::sum) >= threshold) {
+                clearStuckState(entityUUID);
+                return true;
+            }
+        } else {
+            entityToStuckCount.remove(entityUUID);
+        }
+        entityToStuckCheckLoc.put(entityUUID, currentLoc);
+        return false;
+    }
+
+    /**
+     * Decrements the defender type count for a dominion, removing the entry entirely if it reaches zero.
+     */
+    private static void decrementCount(UUID dominionId, DefenderType type) {
+        Map<DefenderType, Integer> typeCounts = counts.get(dominionId);
+        if (typeCounts == null) {
+            return;
+        }
+        int newCount = typeCounts.getOrDefault(type, 1) - 1;
+        if (newCount <= 0) {
+            typeCounts.remove(type);
+        } else {
+            typeCounts.put(type, newCount);
+        }
+    }
+
     private static Chunk findNearestChunk(Chunk from, List<Chunk> candidates) {
         Chunk nearest = null;
         int bestDist = Integer.MAX_VALUE;
@@ -462,10 +848,6 @@ public class DefenderUtils {
         return Math.max(Math.abs(a.getX() - b.getX()), Math.abs(a.getZ() - b.getZ()));
     }
 
-    /**
-     * Returns true if the given chunk is within Chebyshev distance 1 of any chunk in the list.
-     * This allows movement to all 8 surrounding chunks (including diagonals).
-     */
     private static boolean isWithinOneChebyshev(Chunk defenderChunk, List<Chunk> claimedChunks) {
         for (Chunk claimed : claimedChunks) {
             if (!claimed.getWorld().equals(defenderChunk.getWorld())) {
@@ -478,98 +860,5 @@ public class DefenderUtils {
             }
         }
         return false;
-    }
-
-    /**
-     * Forces defenders to acquire the nearest hostile mob target if they don't already have one.
-     */
-    public static void startTargetingTask() {
-        // Runs every 2 seconds
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Map.Entry<UUID, UUID> entry : new HashMap<>(entityToDominion).entrySet()) {
-                    Entity entity = Bukkit.getEntity(entry.getKey());
-                    if (!(entity instanceof Mob mob) || mob.isDead()) {
-                        continue;
-                    }
-
-                    UUID myDominionId = entry.getValue();
-
-                    // If already locked onto a valid hostile, leave it alone
-                    LivingEntity currentTarget = mob.getTarget();
-                    if (currentTarget != null && !currentTarget.isDead()
-                            && currentTarget instanceof Monster) {
-                        UUID tUUID = currentTarget.getUniqueId();
-                        boolean isSameDominionDefender = isDefender(tUUID)
-                                && myDominionId.equals(entityToDominion.get(tUUID));
-                        if (!isSameDominionDefender) {
-                            continue;
-                        }
-                    }
-
-                    // Scan for valid hostiles, prioritizing those actively targeting a member of this dominion
-                    Dominion dominion = DominionUtils.getDominionById(myDominionId);
-                    LivingEntity priorityTarget = null;
-                    double priorityDistSq = Double.MAX_VALUE;
-                    LivingEntity fallbackTarget = null;
-                    double fallbackDistSq = Double.MAX_VALUE;
-
-                    for (Entity nearby : mob.getNearbyEntities(16, 8, 16)) {
-                        if (!(nearby instanceof Monster nearbyMonster)) {
-                            continue;
-                        }
-                        UUID nUUID = nearby.getUniqueId();
-                        if (isDefender(nUUID) && myDominionId.equals(entityToDominion.get(nUUID))) {
-                            continue;
-                        }
-
-                        double distSq = nearby.getLocation().distanceSquared(mob.getLocation());
-
-                        // This mob is targeting a dominion member
-                        if (dominion != null
-                                && nearbyMonster instanceof Mob nearbyMob
-                                && nearbyMob.getTarget() instanceof Player targetPlayer
-                                && dominion.getMembers().contains(targetPlayer.getUniqueId())
-                                && distSq < priorityDistSq) {
-                            priorityDistSq = distSq;
-                            priorityTarget = nearbyMonster;
-                        }
-
-                        if (distSq < fallbackDistSq) {
-                            fallbackDistSq = distSq;
-                            fallbackTarget = nearbyMonster;
-                        }
-                    }
-
-                    LivingEntity chosen = priorityTarget != null ? priorityTarget : fallbackTarget;
-                    if (chosen != null) {
-                        mob.setTarget(chosen);
-                    }
-                }
-            }
-        }.runTaskTimer(AranarthCore.getInstance(), 40L, 40L);
-    }
-
-    /**
-     * Starts the slow health-regeneration task for all tracked defenders.
-     */
-    public static void startRegenTask() {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Map.Entry<UUID, DefenderType> entry : new HashMap<>(entityToType).entrySet()) {
-                    Entity entity = Bukkit.getEntity(entry.getKey());
-                    if (entity instanceof LivingEntity living && !living.isDead()) {
-                        // Cache location while the entity is loaded
-                        entityToLastLocation.put(entry.getKey(), entity.getLocation());
-                        double max = entry.getValue().getMaxHealth();
-                        if (living.getHealth() < max) {
-                            living.setHealth(Math.min(living.getHealth() + 1.0, max));
-                        }
-                    }
-                }
-            }
-        }.runTaskTimer(AranarthCore.getInstance(), 200L, 200L);
     }
 }

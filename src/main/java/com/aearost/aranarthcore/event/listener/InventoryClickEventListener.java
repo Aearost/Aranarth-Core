@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiOutposts;
@@ -76,6 +77,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiDominionPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDefenderManage.TITLE)) {
+                new GuiDefenderManageClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith(GuiDefenders.TITLE_PREFIX)) {
                 new GuiDefendersClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiOutposts.TITLE)) {

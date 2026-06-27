@@ -3917,7 +3917,12 @@ public class PersistenceUtils {
             return;
         }
 
-        record DefenderEntry(UUID dominionId, DefenderType type, String worldName, double x, double y, double z) {
+        record DefenderEntry(
+                UUID dominionId, DefenderType type,
+                String worldName, double x, double y, double z,
+                DefenderMode mode,
+                UUID followPlayerId,
+                String guardWorld, double guardX, double guardY, double guardZ) {
         }
         List<DefenderEntry> entries = new ArrayList<>();
 
@@ -3942,7 +3947,32 @@ public class PersistenceUtils {
                     double x = Double.parseDouble(fields[3]);
                     double y = Double.parseDouble(fields[4]);
                     double z = Double.parseDouble(fields[5]);
-                    entries.add(new DefenderEntry(dominionId, type, worldName, x, y, z));
+
+                    // Optional extended fields (backward compatible)
+                    DefenderMode mode = DefenderMode.PATROL;
+                    UUID followPlayerId = null;
+                    String guardWorld = null;
+                    double guardX = 0, guardY = 0, guardZ = 0;
+
+                    if (fields.length > 6 && !fields[6].isEmpty()) {
+                        try {
+                            mode = DefenderMode.valueOf(fields[6]);
+                        } catch (IllegalArgumentException ignored) { }
+                    }
+                    if (fields.length > 7 && !fields[7].isEmpty()) {
+                        try {
+                            followPlayerId = UUID.fromString(fields[7]);
+                        } catch (IllegalArgumentException ignored) { }
+                    }
+                    if (fields.length > 11 && !fields[8].isEmpty()) {
+                        guardWorld = fields[8];
+                        guardX = Double.parseDouble(fields[9]);
+                        guardY = Double.parseDouble(fields[10]);
+                        guardZ = Double.parseDouble(fields[11]);
+                    }
+
+                    entries.add(new DefenderEntry(dominionId, type, worldName, x, y, z,
+                            mode, followPlayerId, guardWorld, guardX, guardY, guardZ));
                 } catch (IllegalArgumentException ignored) {
                 }
             }
@@ -3953,21 +3983,38 @@ public class PersistenceUtils {
             return;
         }
 
-        // Spawn defenders at their saved locations on the next tick.
-        // DefenderChunkLoad will remove any leftover stale entities (old UUIDs) as their chunks load.
+        // Spawn defenders at their saved locations on the next tick
         new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
                 for (DefenderEntry entry : entries) {
-                    if (DominionUtils.getDominionById(entry.dominionId()) == null) {
+                    Dominion dominion = DominionUtils.getDominionById(entry.dominionId());
+                    if (dominion == null) {
                         continue;
                     }
-                    org.bukkit.World world = Bukkit.getWorld(entry.worldName());
-                    if (world == null) {
-                        continue;
+
+                    // Always spawn at dominion home when in follow mode
+                    Location spawnLoc;
+                    if (entry.mode() == DefenderMode.FOLLOW
+                            && dominion.getDominionHome() != null) {
+                        spawnLoc = dominion.getDominionHome();
+                    } else {
+                        World world = Bukkit.getWorld(entry.worldName());
+                        if (world == null) continue;
+                        spawnLoc = new Location(world, entry.x(), entry.y(), entry.z());
                     }
-                    org.bukkit.Location loc = new org.bukkit.Location(world, entry.x(), entry.y(), entry.z());
-                    DefenderUtils.loadAndSpawnAt(entry.dominionId(), entry.type(), loc);
+
+                    // Resolve guard position
+                    Location guardPos = null;
+                    if (entry.guardWorld() != null) {
+                        World gWorld = Bukkit.getWorld(entry.guardWorld());
+                        if (gWorld != null) {
+                            guardPos = new Location(gWorld, entry.guardX(), entry.guardY(), entry.guardZ());
+                        }
+                    }
+
+                    DefenderUtils.loadAndSpawnAt(entry.dominionId(), entry.type(), spawnLoc,
+                            entry.mode(), entry.followPlayerId(), guardPos);
                 }
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
@@ -4002,7 +4049,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#dominionId|type|world|x|y|z\n");
+            writer.write("#dominionId|type|world|x|y|z|mode|followPlayerId|guardWorld|guardX|guardY|guardZ\n");
 
             for (Map.Entry<UUID, UUID> entry : DefenderUtils.getEntityToDominion().entrySet()) {
                 UUID entityUUID = entry.getKey();
@@ -4022,9 +4069,23 @@ public class PersistenceUtils {
                 if (loc == null || loc.getWorld() == null) {
                     continue;
                 }
+
+                DefenderMode mode = DefenderUtils.getDefenderMode(entityUUID);
+                UUID followPlayerId = DefenderUtils.getFollowPlayerId(entityUUID);
+                Location guardPos = DefenderUtils.getGuardPosition(entityUUID);
+
+                String followStr = followPlayerId != null ? followPlayerId.toString() : "";
+                String guardWorldStr = (guardPos != null && guardPos.getWorld() != null)
+                        ? guardPos.getWorld().getName() : "";
+                String guardX = guardPos != null ? String.valueOf(guardPos.getX()) : "0";
+                String guardY = guardPos != null ? String.valueOf(guardPos.getY()) : "0";
+                String guardZ = guardPos != null ? String.valueOf(guardPos.getZ()) : "0";
+
                 writer.write(dominionId + "|" + type.name() + "|"
                         + loc.getWorld().getName() + "|"
-                        + loc.getX() + "|" + loc.getY() + "|" + loc.getZ() + "\n");
+                        + loc.getX() + "|" + loc.getY() + "|" + loc.getZ() + "|"
+                        + mode.name() + "|" + followStr + "|"
+                        + guardWorldStr + "|" + guardX + "|" + guardY + "|" + guardZ + "\n");
             }
 
             writer.close();

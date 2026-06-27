@@ -297,6 +297,8 @@ public class AranarthCore extends JavaPlugin {
         DefenderUtils.startRegenTask();
         DefenderUtils.startBoundaryTask();
         DefenderUtils.startTargetingTask();
+        DefenderUtils.startFollowTask();
+        DefenderUtils.startGuardTask();
     }
 
     /**
@@ -372,6 +374,7 @@ public class AranarthCore extends JavaPlugin {
         discordChatListener = new DiscordChatListener(this);
         new MobDestroyDoorListener(this);
         new PlayerTeleportBetweenWorldsListener(this);
+        new DefenderFollowTeleportListener(this);
         new ExpGainPreventListener(this);
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
