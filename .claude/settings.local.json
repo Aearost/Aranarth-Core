@@ -230,7 +230,8 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -name *GUI* -o -name *gui*)",
       "Bash(find C:/Users/liamh -type f -name *.java)",
       "Bash(do jar:*)",
-      "Bash(echo \"$jar\")"
+      "Bash(echo \"$jar\")",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -iname *defender* -type f)"
     ]
   }
 }

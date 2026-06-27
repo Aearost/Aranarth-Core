@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
@@ -20,6 +21,12 @@ public class DefenderTarget {
 
         // No target
         if (e.getTarget() == null) {
+            return;
+        }
+
+        // Idle defenders never target anything
+        if (DefenderUtils.getDefenderMode(entityUUID) == DefenderMode.IDLE) {
+            e.setCancelled(true);
             return;
         }
 

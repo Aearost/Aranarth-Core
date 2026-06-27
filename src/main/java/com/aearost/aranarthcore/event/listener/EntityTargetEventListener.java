@@ -1,12 +1,14 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.mob.DefenderIdlePathfindCancel;
 import com.aearost.aranarthcore.event.mob.DefenderTarget;
 import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
 import com.aearost.aranarthcore.event.mob.PiglinTargetPrevent;
 import com.aearost.aranarthcore.event.mob.RavagerTargetPrevent;
+import com.destroystokyo.paper.event.entity.EntityPathfindEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,6 +23,11 @@ public class EntityTargetEventListener implements Listener {
     /**
      * Centralizes all logic to be called by an entity targeting another.
      */
+    @EventHandler
+    public void onEntityPathfind(EntityPathfindEvent e) {
+        new DefenderIdlePathfindCancel().execute(e);
+    }
+
     @EventHandler
     public void onEntityTarget(EntityTargetEvent e) {
         new DefenderTarget().execute(e);

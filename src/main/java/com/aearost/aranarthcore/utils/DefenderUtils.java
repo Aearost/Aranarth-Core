@@ -153,11 +153,9 @@ public class DefenderUtils {
 
         Entity entity = Bukkit.getEntity(entityUUID);
         if (entity instanceof Mob mob) {
+            mob.setAI(true);
             if (mode == DefenderMode.IDLE) {
-                mob.setAI(false);
                 mob.setTarget(null);
-            } else {
-                mob.setAI(true);
             }
             entity.getPersistentDataContainer().set(
                     CustomKeys.DEFENDER_MODE, PersistentDataType.STRING, mode.name());

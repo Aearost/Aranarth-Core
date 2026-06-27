@@ -38,7 +38,9 @@ public class DefenderCombat {
             if (defenderUUID != null) {
                 UUID dominionId = DefenderUtils.getDefenderDominionId(defenderUUID);
                 DefenderType defType = DefenderUtils.getDefenderType(defenderUUID);
-                if (dominionId == null || defType == null) return;
+                if (dominionId == null || defType == null) {
+                    return;
+                }
 
                 if (!DefenderUtils.shouldDefenderTarget(dominionId, target)) {
                     e.setCancelled(true);
@@ -55,7 +57,9 @@ public class DefenderCombat {
         else if (DefenderUtils.isDefender(e.getEntity().getUniqueId())
                 && e.getDamager() instanceof Player attacker) {
             UUID dominionId = DefenderUtils.getDefenderDominionId(e.getEntity().getUniqueId());
-            if (dominionId == null) return;
+            if (dominionId == null) {
+                return;
+            }
             if (!DefenderUtils.shouldDefenderTarget(dominionId, attacker)) {
                 e.setCancelled(true);
             }
