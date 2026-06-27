@@ -123,11 +123,7 @@ public class GuiDefenderManageClick {
                 return;
             }
             defender.teleport(dominion.getDominionHome());
-            // If in guard mode, also move the guard anchor to home so it doesn't immediately walk away
-            if (DefenderUtils.getDefenderMode(defenderUUID) == DefenderMode.GUARD) {
-                DefenderUtils.setDefenderMode(defenderUUID, DefenderMode.GUARD,
-                        null, dominion.getDominionHome());
-            }
+            DefenderUtils.setDefenderMode(defenderUUID, DefenderMode.PATROL, null, null);
             player.sendMessage(ChatUtils.chatMessage(
                     "&7The defender has been teleported to &e" + dominion.getName() + "&7's home"));
             player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 0.5F, 1F);

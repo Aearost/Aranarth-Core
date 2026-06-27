@@ -514,6 +514,7 @@ public class DefenderUtils {
                             Location home = getDefenderHomeLocation(entityUUID);
                             if (home != null) {
                                 entity.teleport(home);
+                                setDefenderMode(entityUUID, DefenderMode.PATROL, null, null);
                             }
                             continue;
                         }
