@@ -748,13 +748,10 @@ public class DefenderUtils {
 
                     mob.getPathfinder().moveTo(guardPos, 1.2);
 
-                    // Stuck detection, teleport to home if needed
+                    // Stuck detection, teleport to guard position if needed
                     if (checkStuck(entityUUID, entity, 10)) {
-                        Location home = getDefenderHomeLocation(entityUUID);
-                        if (home != null) {
-                            entity.teleport(home);
-                            entityToGuardPosition.put(entityUUID, home);
-                        }
+                        entity.teleport(guardPos);
+                        clearStuckState(entityUUID);
                     }
                 }
             }
