@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,6 +47,15 @@ public class ArmorStandSwitchListener implements Listener {
 
 			if (e.getPlayer().isSneaking()) {
 				if (Objects.nonNull(armorStand.getEquipment())) {
+
+					// Block swap if player is wearing any armor with Curse of Binding
+					for (ItemStack piece : player.getInventory().getArmorContents()) {
+						if (piece != null && piece.containsEnchantment(Enchantment.BINDING_CURSE)) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot do this as you have the &eCurse of Binding"));
+							e.setCancelled(true);
+							return;
+						}
+					}
 
 					// Gets the player's current armor
 					ItemStack playerHelmet = player.getInventory().getArmorContents()[3];

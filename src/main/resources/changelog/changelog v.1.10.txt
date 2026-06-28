@@ -292,6 +292,7 @@ Minor Features
 [+] Added forced teleport to spawn if the player logged out in resource world before it was reset
 [~] Fixed issue where combat tag was initiating on allies incorrectly
 [~] Increased money in vote shop from 1,000 to 15,000
+[~] Prevented armor stand switch if the user has curse of binding on them at all
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
