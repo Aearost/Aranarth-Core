@@ -35,11 +35,11 @@ public class CropInfoEventListener implements Listener {
 	}
 
 	/**
-	 * Removes the seed lore when a player closes an inventory, so seeds don't retain display lore outside of an open inventory.
+	 * Removes the seed lore when a player closes a non-player inventory.
 	 */
 	@EventHandler
 	public void onInventoryClose(InventoryCloseEvent e) {
-		if (e.getPlayer() instanceof Player player) {
+		if (e.getPlayer() instanceof Player player && e.getInventory().getType() != InventoryType.PLAYER) {
 			ItemStack[] contents = e.getInventory().getContents();
 			for (int i = 0; i < contents.length; i++) {
 				ItemStack item = contents[i];
@@ -47,15 +47,6 @@ public class CropInfoEventListener implements Listener {
 					ItemStack noLore = new ItemStack(item.getType());
 					noLore.setAmount(item.getAmount());
 					e.getInventory().setItem(i, noLore);
-				}
-			}
-			ItemStack[] playerContents = player.getInventory().getContents();
-			for (int i = 0; i < playerContents.length; i++) {
-				ItemStack item = playerContents[i];
-				if (item != null && CropUtils.isCropSeed(item.getType())) {
-					ItemStack noLore = new ItemStack(item.getType());
-					noLore.setAmount(item.getAmount());
-					player.getInventory().setItem(i, noLore);
 				}
 			}
 		}
