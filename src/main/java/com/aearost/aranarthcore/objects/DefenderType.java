@@ -22,7 +22,8 @@ public enum DefenderType {
             6.0,     // 3 full hearts min damage
             12.0,    // 6 full hearts max damage
             List.of(
-                    new PotionEffect(PotionEffectType.RESISTANCE, Integer.MAX_VALUE, 2, false, false) // Resistance III
+                    new PotionEffect(PotionEffectType.SPEED, Integer.MAX_VALUE, 0, false, false),        // Speed I
+                    new PotionEffect(PotionEffectType.RESISTANCE, Integer.MAX_VALUE, 2, false, false)     // Resistance III
             )
     ),
 
