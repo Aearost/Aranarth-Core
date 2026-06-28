@@ -235,7 +235,7 @@ public class GuiVoteShop {
 
 		ItemStack money = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta moneyMeta = money.getItemMeta();
-		moneyMeta.setDisplayName(ChatUtils.translateToColor("&6&l$1000 of In-Game Currency"));
+		moneyMeta.setDisplayName(ChatUtils.translateToColor("&6&l$15000 of In-Game Currency"));
 		List<String> moneyLore = new ArrayList<>();
 		moneyLore.add(ChatUtils.translateToColor("&e15 vote points"));
 		moneyMeta.setLore(moneyLore);

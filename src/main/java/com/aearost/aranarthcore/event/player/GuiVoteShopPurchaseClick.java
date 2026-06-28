@@ -225,9 +225,9 @@ public class GuiVoteShopPurchaseClick {
                             profile.setSkillXpLevel(type, currentXP); // Must re-apply or XP is lost
                         }
                     }
-                    // $1000 money
+                    // $15000 money
                     else if (clicked.getType() == Material.GOLD_INGOT) {
-                        aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 1000);
+                        aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 15000);
                         AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     }
                     // Acolyte

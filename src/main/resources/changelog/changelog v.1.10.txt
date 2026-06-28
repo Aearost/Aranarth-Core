@@ -291,6 +291,7 @@ Minor Features
 [+] Added feedback message when using /aranarthium, /calendar, /dominions, or /incantations
 [+] Added forced teleport to spawn if the player logged out in resource world before it was reset
 [~] Fixed issue where combat tag was initiating on allies incorrectly
+[~] Increased money in vote shop from 1,000 to 15,000
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
