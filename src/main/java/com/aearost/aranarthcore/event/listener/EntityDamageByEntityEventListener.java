@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.event.mob.BabyZombiePreventVillagerDamage;
 import com.aearost.aranarthcore.event.mob.DefenderCombat;
+import com.aearost.aranarthcore.event.mob.DefenderFollowAssist;
 import com.aearost.aranarthcore.event.player.ArenaPlayerKill;
 import com.aearost.aranarthcore.event.player.CombatLog;
 import com.aearost.aranarthcore.event.player.FaunivorExtraAttackDamage;
@@ -38,6 +39,7 @@ public class EntityDamageByEntityEventListener implements Listener {
         }
 
         new DefenderCombat().execute(e);
+        new DefenderFollowAssist().execute(e);
 
         // Regardless of world
         new CombatLog().execute(e);
