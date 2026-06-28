@@ -3233,7 +3233,7 @@ public class AranarthUtils {
 		if (horn.equals(MusicInstrument.PONDER_GOAT_HORN)) {
 			name = "the Traveller";
 		} else if (horn.equals(MusicInstrument.SING_GOAT_HORN)) {
-			name = "the Forager";
+			name = "the Target";
 		} else if (horn.equals(MusicInstrument.SEEK_GOAT_HORN)) {
 			name = "the Brute";
 		} else if (horn.equals(MusicInstrument.FEEL_GOAT_HORN)) {

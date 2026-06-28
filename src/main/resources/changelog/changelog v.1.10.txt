@@ -107,6 +107,7 @@ Major Features
 [~] Decreased the price of the Boost of the Hunter from 2.99 to 1.99
 [~] Decreased the price of the Boost of Chi from 2.99 to 1.49
 [+] Added +3 additional homes to the vote shop
+[~] Replaced the Horn of the Forager with the Horn of the Target, targeting the area with nearby defenders
 
 Minor Features
 [+] Added dynamic snow layering during the winter months

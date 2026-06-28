@@ -146,6 +146,11 @@ public class DefenderUtils {
         }
     }
 
+    public static List<UUID> getDefendersInDominion(UUID dominionId) {
+        List<UUID> entities = dominionToEntities.get(dominionId);
+        return entities != null ? new ArrayList<>(entities) : new ArrayList<>();
+    }
+
     // Persistence accessors (used by PersistenceUtils.saveDefenders)
     public static Map<UUID, UUID> getEntityToDominion() {
         return entityToDominion;

@@ -1,13 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.enums.Month;
-import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Sentinel;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -15,7 +15,6 @@ import org.bukkit.entity.*;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MusicInstrumentMeta;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -24,7 +23,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.UUID;
 
 /**
  * Handles logic when a player blows a Goat Horn.
@@ -45,7 +44,7 @@ public class GoatHornUse {
                     }
                 } else if (meta.getInstrument() == MusicInstrument.SING_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SING_GOAT_HORN)) {
-                        dropNearbyApples(player);
+                        callNearbyDefenders(player);
                     }
                 } else if (meta.getInstrument() == MusicInstrument.SEEK_GOAT_HORN) {
                     if (AranarthUtils.canUseHornSuccessfully(player, MusicInstrument.SEEK_GOAT_HORN)) {
@@ -136,78 +135,61 @@ public class GoatHornUse {
     }
 
     /**
-     * Shakes nearby trees and drops apples and god apple fragments from them.
-     * @param player The player.
+     * Rallies all nearby defenders of the player's dominion to the targeted location.
+     * @param player The player blowing the horn.
      */
-    private void dropNearbyApples(Player player) {
-        if (player.getWorld().getName().equals("world") || player.getWorld().getName().equals("smp")
-                || player.getWorld().getName().equals("resource")) {
-            Location loc = player.getLocation();
-            Block below = loc.subtract(0, 1, 0).getBlock();
-            if (below.getType() == Material.GRASS_BLOCK || below.getType() == Material.DIRT
-                    || below.getType() == Material.SAND || below.getType() == Material.GRAVEL
-                    || below.getType() == Material.OAK_LOG || below.getType() == Material.BIRCH_LOG) {
-                // Iterate 20 blocks around the player, and 5 blocks above/below for each leaf
-                for (int x = loc.getBlockX() - 10; x < loc.getBlockX() + 10; x++) {
-                    for (int z = loc.getBlockZ() - 10; z < loc.getBlockZ() + 10; z++) {
-                        for (int y = loc.getBlockY() + 5; y > loc.getBlockY() - 5; y--) {
-                            Block block = loc.getWorld().getBlockAt(x, y, z);
-                            if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
-                                Block belowBlock = block.getWorld().getBlockAt(x, y - 1, z);
-                                if (belowBlock.getType() == Material.AIR || belowBlock.getType() == Material.LEAF_LITTER) {
-                                    if (AranarthUtils.getMonth() != Month.SOLARVOR) {
-                                        String worldName = block.getWorld().getName();
-                                        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
-                                            // 2.5% chance of dropping an apple
-                                            if (new Random().nextInt(40) == 0) {
-                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
-                                            }
-                                            // 0.25% chance of dropping a god apple fragment during normal months
-                                            else if (new Random().nextInt(400) == 0) {
-                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
-                                                for (Player nearby : Bukkit.getOnlinePlayers()) {
-                                                    if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
-                                                        continue;
-                                                    }
+    private void callNearbyDefenders(Player player) {
+        Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+        if (playerDominion == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be in a dominion to use this horn"));
+            return;
+        }
 
-                                                    // If the player is within 48 blocks of the spawn location
-                                                    if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
-                                                        nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    // Increased God Apple Fragment drop rates
-                                    else {
-                                        String worldName = block.getWorld().getName();
-                                        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
-                                            // 5% chance of dropping an apple
-                                            if (new Random().nextInt(20) == 0) {
-                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new ItemStack(Material.APPLE));
-                                            }
-                                            // 0.5% chance of dropping a god apple fragment during Solarvor
-                                            else if (new Random().nextInt(20) == 0) {
-                                                belowBlock.getLocation().getWorld().dropItemNaturally(belowBlock.getLocation(), new GodAppleFragment().getItem());
-                                                for (Player nearby : Bukkit.getOnlinePlayers()) {
-                                                    if (!belowBlock.getWorld().getName().equals(nearby.getWorld().getName())) {
-                                                        continue;
-                                                    }
+        // The block the player is aiming at (up to 48 blocks)
+        Block targetBlock = player.getTargetBlockExact(48);
+        Location targetLocation = targetBlock != null
+                ? targetBlock.getLocation().add(0.5, 1, 0.5)
+                : player.getLocation();
 
-                                                    // If the player is within 48 blocks of the spawn location
-                                                    if (belowBlock.getLocation().distance(nearby.getLocation()) <= 48) {
-                                                        nearby.sendMessage(ChatUtils.chatMessage("&7A god apple fragment has dropped nearby"));
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+        List<UUID> defenderIds = DefenderUtils.getDefendersInDominion(playerDominion.getId());
+        int count = 0;
+
+        for (UUID entityUUID : defenderIds) {
+            Entity entity = Bukkit.getEntity(entityUUID);
+            if (!(entity instanceof Mob mob) || mob.isDead()) {
+                continue;
             }
+
+            DefenderMode mode = DefenderUtils.getDefenderMode(entityUUID);
+            if (mode == DefenderMode.IDLE) {
+                continue;
+            }
+
+            // Only rally defenders within 64 blocks of the player
+            if (entity.getLocation().distanceSquared(player.getLocation()) > 4096) {
+                continue;
+            }
+
+            // Don't interrupt a defender already engaged with a hostile
+            if (mob.getTarget() instanceof Monster) {
+                continue;
+            }
+
+            mob.getPathfinder().moveTo(targetLocation, 1.4);
+            count++;
+        }
+
+        // Visual and audio effects at the target location to mark the rally point
+        World world = player.getWorld();
+        world.spawnParticle(Particle.FLAME, targetLocation, 40, 1.5, 1.5, 1.5, 0.03);
+        world.spawnParticle(Particle.SMOKE, targetLocation.clone().add(0, 1, 0), 20, 1, 1, 1, 0.05);
+        world.playSound(targetLocation, Sound.BLOCK_BELL_USE, 1.5F, 0.8F);
+
+        if (count == 0) {
+            player.sendMessage(ChatUtils.chatMessage("&7No nearby defenders responded to the call"));
+        } else {
+            String amountString = (count == 1) ? " defender has" : " defenders have";
+            player.sendMessage(ChatUtils.chatMessage("&e&o" + count + " been sent to the target area"));
         }
     }
 
