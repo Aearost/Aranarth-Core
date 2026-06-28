@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.event.mob.PetHurtPrevent;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.world.FireDamageIncrease;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DefenderUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Firework;
@@ -26,6 +27,12 @@ public class EntityDamageEventListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamage(EntityDamageEvent e) {
+        if (DefenderUtils.isDefender(e.getEntity().getUniqueId())
+                && e.getCause() == EntityDamageEvent.DamageCause.FALL) {
+            e.setCancelled(true);
+            return;
+        }
+
         if (e.getDamageSource().getDirectEntity() instanceof Firework firework
                 && firework.hasMetadata("newYearFirework")) {
             e.setCancelled(true);
