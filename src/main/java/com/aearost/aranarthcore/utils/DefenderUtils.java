@@ -728,32 +728,14 @@ public class DefenderUtils {
                         continue;
                     }
 
-                    // If still chasing a target, leave it alone
+                    // If actively chasing a target, leave it alone
                     if (mob.getTarget() != null && !mob.getTarget().isDead()) {
                         continue;
                     }
 
-                    Location guardPos = entry.getValue();
-                    if (guardPos == null || guardPos.getWorld() == null) {
-                        continue;
-                    }
-                    if (!guardPos.getWorld().equals(entity.getWorld())) {
-                        continue;
-                    }
-
-                    double distSq = entity.getLocation().distanceSquared(guardPos);
-                    if (distSq <= 4) {
-                        clearStuckState(entityUUID);
-                        continue;
-                    }
-
-                    mob.getPathfinder().moveTo(guardPos, 1.2);
-
-                    // Stuck detection, teleport to guard position if needed
-                    if (checkStuck(entityUUID, entity, 10)) {
-                        entity.teleport(guardPos);
-                        clearStuckState(entityUUID);
-                    }
+                    // No target — stop any ongoing pathfinding so the defender stands still
+                    mob.getPathfinder().stopPathfinding();
+                    clearStuckState(entityUUID);
                 }
             }
         }.runTaskTimer(AranarthCore.getInstance(), 60L, 60L);
