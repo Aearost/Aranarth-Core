@@ -1,15 +1,19 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.meta.ItemMeta;
+
+import java.util.UUID;
 
 import java.text.NumberFormat;
 
@@ -17,86 +21,109 @@ import java.text.NumberFormat;
  * Handles toggling the bulk transaction variable.
  */
 public class ShopBulkTransaction {
-	public void execute(PlayerInteractEvent e) {
-		Player player = e.getPlayer();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		Shop shop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
+    public void execute(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        Shop shop = ShopUtils.getShopFromLocation(e.getClickedBlock().getLocation());
 
-		// Skip bulk transaction logic when an admin is modifying a server shop
-		if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
-				&& player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
-			return;
-		}
+        // Skip bulk transaction logic when an admin is modifying a server shop
+        if (shop != null && shop.getUuid() == null && aranarthPlayer.getCouncilRank() == 3
+                && player.isSneaking() && player.getGameMode() == GameMode.CREATIVE) {
+            return;
+        }
 
-		// If they click elsewhere or stop sneaking after enabling/completing a bulk transaction
-		if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !player.isSneaking())) {
-			if (aranarthPlayer.getBulkTransactionNum() == 1) {
-				player.sendMessage(ChatUtils.chatMessage("&7You have disabled the bulk transaction mode"));
-			}
-			aranarthPlayer.setBulkTransactionNum(0);
-		}
-		// If they are enabling the bulk transaction mode
-		else if (aranarthPlayer.getBulkTransactionNum() == 0 && shop != null && player.isSneaking()) {
-			String itemName = "";
-			if (shop.getItem().hasItemMeta()) {
-				ItemMeta meta = shop.getItem().getItemMeta();
-				if (meta.hasDisplayName()) {
-					itemName = meta.getDisplayName();
-				} else {
-					itemName = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
-				}
-			} else {
-				itemName = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
-			}
+        // If they click elsewhere or stop sneaking after enabling/completing a bulk transaction
+        if ((aranarthPlayer.getBulkTransactionNum() == 1 || aranarthPlayer.getBulkTransactionNum() == -1) && (shop == null || !player.isSneaking())) {
+            if (aranarthPlayer.getBulkTransactionNum() == 1) {
+                player.sendMessage(ChatUtils.chatMessage("&7You have disabled the bulk transaction mode"));
+            }
+            aranarthPlayer.setBulkTransactionNum(0);
+        }
+        // If they are enabling the bulk transaction mode
+        else if (aranarthPlayer.getBulkTransactionNum() == 0 && shop != null && player.isSneaking()) {
+            String itemName = "";
+            if (shop.getItem().hasItemMeta()) {
+                ItemMeta meta = shop.getItem().getItemMeta();
+                if (meta.hasDisplayName()) {
+                    itemName = meta.getDisplayName();
+                } else {
+                    itemName = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
+                }
+            } else {
+                itemName = ChatUtils.getFormattedItemName(shop.getItem().getType().name());
+            }
 
-			NumberFormat formatter = NumberFormat.getCurrencyInstance();
-			String saleOrPurchase = "";
-			if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-				if (shop.getBuyPrice() <= 0) {
-					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support buying"));
-					return;
-				}
-				Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
-				if (bulkShop.getQuantity() == shop.getQuantity()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk purchase of this item"));
-					return;
-				}
-				saleOrPurchase = "purchase";
-				player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getBuyPrice()) + "?"));
-			} else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-				if (shop.getSellPrice() <= 0) {
-					player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support selling"));
-					return;
-				}
-				Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
-				if (bulkShop.getQuantity() == shop.getQuantity()) {
-					player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
-					return;
-				}
-				// Apply "leave one per shulker slot" adjustment to displayed quantity/price
-				if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
-					int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
-					if (adjustedQuantity <= 0) {
-						player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
-						return;
-					}
-					if (adjustedQuantity != bulkShop.getQuantity()) {
-						double pricePerUnit = bulkShop.getSellPrice() / bulkShop.getQuantity();
-						bulkShop.setQuantity(adjustedQuantity);
-						bulkShop.setSellPrice(pricePerUnit * adjustedQuantity);
-					}
-				}
-				saleOrPurchase = "sale";
-				player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getSellPrice()) + "?"));
+            NumberFormat formatter = NumberFormat.getCurrencyInstance();
+            String saleOrPurchase = "";
+            if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                if (shop.getBuyPrice() <= 0) {
+                    player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support buying"));
+                    return;
+                }
+                Shop bulkShop = ShopUtils.getBulkShop(shop, player, true);
+                if (bulkShop.getQuantity() == shop.getQuantity()) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk purchase of this item"));
+                    return;
+                }
+                saleOrPurchase = "purchase";
+                player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getBuyPrice()) + "?"));
+            } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+                if (shop.getSellPrice() <= 0) {
+                    player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support selling"));
+                    return;
+                }
+                Shop bulkShop = ShopUtils.getBulkShop(shop, player, false);
+                if (bulkShop.getQuantity() == shop.getQuantity()) {
+                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot make a bulk sale of this item"));
+                    return;
+                }
+                // Apply "leave one per shulker slot" adjustment to displayed quantity/price
+                if (player.hasPermission("aranarth.shulker") && !aranarthPlayer.isBulkSellShulkerEnabled()) {
+                    int adjustedQuantity = ShopUtils.computeLeaveOneAdjustedQuantity(bulkShop, shop.getQuantity(), player);
+                    if (adjustedQuantity <= 0) {
+                        player.sendMessage(ChatUtils.chatMessage("&cYou do not have enough of this item!"));
+                        return;
+                    }
+                    if (adjustedQuantity != bulkShop.getQuantity()) {
+                        double pricePerUnit = bulkShop.getSellPrice() / bulkShop.getQuantity();
+                        bulkShop.setQuantity(adjustedQuantity);
+                        bulkShop.setSellPrice(pricePerUnit * adjustedQuantity);
+                    }
+                }
+                saleOrPurchase = "sale";
+                player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getSellPrice()) + "?"));
+            }
+            player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
+            aranarthPlayer.setBulkTransactionNum(1);
+            aranarthPlayer.setBulkTransactionExpiry(System.currentTimeMillis() + 5000);
+            scheduleBulkTransactionExpiry(player.getUniqueId());
+        }
+        // If they just made a purchase/sale (-1), keep the state until sneaking ends to prevent
+        // spurious "cannot" messages on rapid re-fires of the same click
+        else if (aranarthPlayer.getBulkTransactionNum() != -1) {
+            aranarthPlayer.setBulkTransactionNum(0);
+        }
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+    }
+
+    public static void scheduleBulkTransactionExpiry(UUID uuid) {
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+			if (ap == null) {
+				return;
 			}
-			player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
-			aranarthPlayer.setBulkTransactionNum(1);
-		}
-		// If they just made a purchase/sale (-1), keep the state until sneaking ends to prevent
-		// spurious "cannot" messages on rapid re-fires of the same click
-		else if (aranarthPlayer.getBulkTransactionNum() != -1) {
-			aranarthPlayer.setBulkTransactionNum(0);
-		}
-		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-	}
+			if (System.currentTimeMillis() < ap.getBulkTransactionExpiry()) {
+				return;
+			}
+			if (ap.getBulkTransactionNum() != 1) {
+				return;
+			}
+            ap.setBulkTransactionNum(0);
+            AranarthUtils.setPlayer(uuid, ap);
+            Player online = Bukkit.getPlayer(uuid);
+            if (online != null) {
+                online.sendMessage(ChatUtils.chatMessage("&7Bulk transaction mode has been automatically disabled"));
+            }
+        }, 100L);
+    }
 }

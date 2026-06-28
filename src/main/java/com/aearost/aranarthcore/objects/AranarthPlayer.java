@@ -95,6 +95,7 @@ public class AranarthPlayer {
 	private boolean isBulkSellShulkerEnabled = false;
 	private boolean isDominionMsgCompact = false;
 	private long containerToggleExpiry = 0;
+	private long bulkTransactionExpiry = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1454,5 +1455,13 @@ public class AranarthPlayer {
 
 	public void setContainerToggleExpiry(long containerToggleExpiry) {
 		this.containerToggleExpiry = containerToggleExpiry;
+	}
+
+	public long getBulkTransactionExpiry() {
+		return bulkTransactionExpiry;
+	}
+
+	public void setBulkTransactionExpiry(long bulkTransactionExpiry) {
+		this.bulkTransactionExpiry = bulkTransactionExpiry;
 	}
 }
