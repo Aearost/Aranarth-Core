@@ -463,6 +463,49 @@ public class DefenderUtils {
     }
 
     /**
+     * Clears the outpost assignment for all defenders stationed there and teleports them to the dominion home.
+     */
+    public static void teleportOutpostDefendersToDominion(Dominion dominion, UUID outpostId) {
+        List<UUID> entities = dominionToEntities.get(dominion.getId());
+        if (entities == null) {
+            return;
+        }
+        Location dominionHome = dominion.getDominionHome();
+        for (UUID entityUUID : new ArrayList<>(entities)) {
+            if (outpostId.equals(entityToAssignedOutpost.get(entityUUID))) {
+                setAssignedOutpost(entityUUID, null);
+                Entity entity = Bukkit.getEntity(entityUUID);
+                if (entity != null && dominionHome != null) {
+                    entity.teleport(dominionHome);
+                }
+            }
+        }
+    }
+
+    /**
+     * Sells all defenders belonging to the dominion.
+     */
+    public static void sellAllDominionDefenders(Dominion dominion) {
+        List<UUID> entities = dominionToEntities.get(dominion.getId());
+        if (entities == null) {
+            return;
+        }
+        for (UUID entityUUID : new ArrayList<>(entities)) {
+            DefenderType type = entityToType.get(entityUUID);
+            if (type != null) {
+                dominion.setBalance(dominion.getBalance() + type.getSellPrice());
+            }
+            Entity entity = Bukkit.getEntity(entityUUID);
+            if (entity != null) {
+                entity.remove();
+            }
+            removeEntityFromTracking(entityUUID);
+        }
+        counts.remove(dominion.getId());
+        dominionToEntities.remove(dominion.getId());
+    }
+
+    /**
      * Determines whether a defender should target the given player, respecting PvP rules.
      */
     public static boolean shouldDefenderTarget(UUID defenderDominionId, Player target) {

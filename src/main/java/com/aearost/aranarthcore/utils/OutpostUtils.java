@@ -60,6 +60,7 @@ public class OutpostUtils {
      * Removes an outpost from all lookup maps and notifies online dominion members.
      */
     public static void disbandOutpost(Dominion dominion, Outpost outpost) {
+        DefenderUtils.teleportOutpostDefendersToDominion(dominion, outpost.getId());
         outpostById.remove(outpost.getId());
         chunkKeyToOutpost.entrySet().removeIf(e -> e.getValue().getId().equals(outpost.getId()));
         List<Outpost> list = dominionToOutposts.get(dominion.getId());
