@@ -8,8 +8,10 @@ import com.aearost.aranarthcore.gui.GuiOutposts;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -83,7 +85,20 @@ public class GuiDominionPermissionsClick {
                 case "Wanderers" -> GuiDominionPermissions.openRelationGui(player, DominionRank.WANDERER);
                 case "Members"     -> GuiDominionMembers.open(player);
                 case "User Search" -> GuiDominionPlayerPermissions.initiateSearch(player);
-                case "Defenders"   -> GuiDefenders.open(player);
+                case "Defenders" -> {
+                    Dominion playerDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+                    if (playerDominion != null) {
+                        Dominion chunkDominion = DominionUtils.getDominionOfChunk(player.getLocation().getChunk());
+                        Outpost chunkOutpost = OutpostUtils.getOutpostPlayerIsIn(player);
+                        boolean inMain = chunkDominion != null && chunkDominion.getId().equals(playerDominion.getId());
+                        boolean inOutpost = chunkOutpost != null && chunkOutpost.getDominionId().equals(playerDominion.getId());
+                        if (!inMain && !inOutpost) {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou can only manage defenders while in your Dominion's land'"));
+                            break;
+                        }
+                    }
+                    GuiDefenders.open(player);
+                }
                 case "Outposts"    -> GuiOutposts.open(player);
             }
             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.5F, 1F);

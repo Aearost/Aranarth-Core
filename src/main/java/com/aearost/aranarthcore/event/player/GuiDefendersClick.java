@@ -6,9 +6,11 @@ import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -67,9 +69,23 @@ public class GuiDefendersClick {
             return;
         }
 
+        // Determine which territory the player is currently standing in
+        Outpost outpostPlayerIsIn = OutpostUtils.getOutpostPlayerIsIn(player);
+        boolean inMainDominion = DominionUtils.getDominionOfChunk(player.getLocation().getChunk()) != null
+                && DominionUtils.getDominionOfChunk(player.getLocation().getChunk()).getId().equals(dominion.getId());
+        boolean inOwnOutpost = outpostPlayerIsIn != null && outpostPlayerIsIn.getDominionId().equals(dominion.getId());
+
+        if (!inMainDominion && !inOwnOutpost) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou can only purchase defenders while in your Dominion or one of its outposts"));
+            return;
+        }
+
+        // Outpost to assign the new defender to
+        Outpost assignTo = inOwnOutpost ? outpostPlayerIsIn : null;
+
         String result;
         if (e.getClick() == ClickType.RIGHT) {
-            result = DefenderUtils.purchaseDefender(dominion, clickedType);
+            result = DefenderUtils.purchaseDefender(dominion, clickedType, assignTo);
             player.playSound(player, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.5F, 1F);
         } else if (e.getClick() == ClickType.LEFT) {
             result = DefenderUtils.sellDefender(dominion, clickedType, null);

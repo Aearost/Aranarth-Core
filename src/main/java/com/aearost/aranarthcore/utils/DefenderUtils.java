@@ -296,15 +296,20 @@ public class DefenderUtils {
         }
     }
 
-    private static void spawnEntity(Dominion dominion, DefenderType type) {
-        if (dominion.getDominionHome() == null || dominion.getDominionHome().getWorld() == null) {
+    private static void spawnEntity(Dominion dominion, DefenderType type, Outpost outpost) {
+        Location spawnLoc = (outpost != null && outpost.getHome() != null && outpost.getHome().getWorld() != null)
+                ? outpost.getHome()
+                : dominion.getDominionHome();
+        if (spawnLoc == null || spawnLoc.getWorld() == null) {
             return;
         }
-        Entity entity = dominion.getDominionHome().getWorld()
-                .spawnEntity(dominion.getDominionHome(), type.getEntityType());
+        Entity entity = spawnLoc.getWorld().spawnEntity(spawnLoc, type.getEntityType());
         applyDefenderStats(entity, dominion.getId(), type);
         // New purchases default to patrol
         entityToMode.put(entity.getUniqueId(), DefenderMode.PATROL);
+        if (outpost != null) {
+            setAssignedOutpost(entity.getUniqueId(), outpost.getId());
+        }
     }
 
     /**
@@ -360,8 +365,12 @@ public class DefenderUtils {
 
     /**
      * Attempts to purchase one defender of the given type for the dominion.
+     *
+     * @param dominion The owning dominion.
+     * @param type     The defender type to purchase.
+     * @param outpost  The outpost to assign the defender to, or {@code null} for the main dominion.
      */
-    public static String purchaseDefender(Dominion dominion, DefenderType type) {
+    public static String purchaseDefender(Dominion dominion, DefenderType type, Outpost outpost) {
         int limit = getDefenderLimit(dominion.getDominionLevel());
         int current = getTotalDefenderCount(dominion.getId());
         if (current >= limit) {
@@ -374,7 +383,7 @@ public class DefenderUtils {
         dominion.setBalance(dominion.getBalance() - price);
         counts.computeIfAbsent(dominion.getId(), k -> new EnumMap<>(DefenderType.class))
                 .merge(type, 1, Integer::sum);
-        spawnEntity(dominion, type);
+        spawnEntity(dominion, type, outpost);
         DominionUtils.updateDominion(dominion);
         return "&7A &e" + type.getDisplayName()
                 + " defender &7has been purchased for &6$" + NumberFormat.getInstance().format((long) price);
