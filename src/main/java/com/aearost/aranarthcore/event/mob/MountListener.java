@@ -1009,12 +1009,12 @@ public class MountListener implements Listener {
         double maxHp = maxHpAttr != null ? maxHpAttr.getValue() : mount.getHealth();
         double currentHp = mount.getHealth();
 
-        if (currentHp >= maxHp) {
+        double actualHeal = Math.min(baseHeal, maxHp - currentHp);
+
+        if (actualHeal <= 0) {
             player.sendMessage(ChatUtils.chatMessage("&7Your mount is already at full health!"));
             return;
         }
-
-        double actualHeal = Math.min(baseHeal, maxHp - currentHp);
         mount.setHealth(currentHp + actualHeal);
 
         // Award health XP proportional to HP actually recovered
