@@ -3922,7 +3922,8 @@ public class PersistenceUtils {
                 String worldName, double x, double y, double z,
                 DefenderMode mode,
                 UUID followPlayerId,
-                String guardWorld, double guardX, double guardY, double guardZ) {
+                String guardWorld, double guardX, double guardY, double guardZ,
+                UUID assignedOutpostId) {
         }
         List<DefenderEntry> entries = new ArrayList<>();
 
@@ -3971,8 +3972,15 @@ public class PersistenceUtils {
                         guardZ = Double.parseDouble(fields[11]);
                     }
 
+                    UUID assignedOutpostId = null;
+                    if (fields.length > 12 && !fields[12].isEmpty()) {
+                        try {
+                            assignedOutpostId = UUID.fromString(fields[12]);
+                        } catch (IllegalArgumentException ignored) { }
+                    }
+
                     entries.add(new DefenderEntry(dominionId, type, worldName, x, y, z,
-                            mode, followPlayerId, guardWorld, guardX, guardY, guardZ));
+                            mode, followPlayerId, guardWorld, guardX, guardY, guardZ, assignedOutpostId));
                 } catch (IllegalArgumentException ignored) {
                 }
             }
@@ -4014,7 +4022,7 @@ public class PersistenceUtils {
                     }
 
                     DefenderUtils.loadAndSpawnAt(entry.dominionId(), entry.type(), spawnLoc,
-                            entry.mode(), entry.followPlayerId(), guardPos);
+                            entry.mode(), entry.followPlayerId(), guardPos, entry.assignedOutpostId());
                 }
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
@@ -4049,7 +4057,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#dominionId|type|world|x|y|z|mode|followPlayerId|guardWorld|guardX|guardY|guardZ\n");
+            writer.write("#dominionId|type|world|x|y|z|mode|followPlayerId|guardWorld|guardX|guardY|guardZ|assignedOutpostId\n");
 
             for (Map.Entry<UUID, UUID> entry : DefenderUtils.getEntityToDominion().entrySet()) {
                 UUID entityUUID = entry.getKey();
@@ -4073,6 +4081,7 @@ public class PersistenceUtils {
                 DefenderMode mode = DefenderUtils.getDefenderMode(entityUUID);
                 UUID followPlayerId = DefenderUtils.getFollowPlayerId(entityUUID);
                 Location guardPos = DefenderUtils.getGuardPosition(entityUUID);
+                UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(entityUUID);
 
                 String followStr = followPlayerId != null ? followPlayerId.toString() : "";
                 String guardWorldStr = (guardPos != null && guardPos.getWorld() != null)
@@ -4080,12 +4089,14 @@ public class PersistenceUtils {
                 String guardX = guardPos != null ? String.valueOf(guardPos.getX()) : "0";
                 String guardY = guardPos != null ? String.valueOf(guardPos.getY()) : "0";
                 String guardZ = guardPos != null ? String.valueOf(guardPos.getZ()) : "0";
+                String assignedOutpostStr = assignedOutpostId != null ? assignedOutpostId.toString() : "";
 
                 writer.write(dominionId + "|" + type.name() + "|"
                         + loc.getWorld().getName() + "|"
                         + loc.getX() + "|" + loc.getY() + "|" + loc.getZ() + "|"
                         + mode.name() + "|" + followStr + "|"
-                        + guardWorldStr + "|" + guardX + "|" + guardY + "|" + guardZ + "\n");
+                        + guardWorldStr + "|" + guardX + "|" + guardY + "|" + guardZ + "|"
+                        + assignedOutpostStr + "\n");
             }
 
             writer.close();

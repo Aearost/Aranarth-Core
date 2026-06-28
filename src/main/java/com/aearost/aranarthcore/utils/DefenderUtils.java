@@ -46,6 +46,9 @@ public class DefenderUtils {
     private static final Map<UUID, UUID> entityToFollowPlayer = new HashMap<>();
     private static final Map<UUID, List<UUID>> playerToFollowers = new HashMap<>();
 
+    // Location assignment where non-null is the outpost UUID
+    private static final Map<UUID, UUID> entityToAssignedOutpost = new HashMap<>();
+
     // Stuck detection
     private static final Map<UUID, Location> entityToStuckCheckLoc = new HashMap<>();
     private static final Map<UUID, Integer> entityToStuckCount = new HashMap<>();
@@ -119,6 +122,30 @@ public class DefenderUtils {
         return !requestingPlayer.equals(followPlayer) && !requestingPlayer.equals(dominionLeader);
     }
 
+    public static UUID getAssignedOutpostId(UUID entityUUID) {
+        return entityToAssignedOutpost.get(entityUUID);
+    }
+
+    /**
+     * Assigns a defender to a specific outpost.
+     */
+    public static void setAssignedOutpost(UUID entityUUID, UUID outpostId) {
+        if (outpostId == null) {
+            entityToAssignedOutpost.remove(entityUUID);
+        } else {
+            entityToAssignedOutpost.put(entityUUID, outpostId);
+        }
+        Entity entity = Bukkit.getEntity(entityUUID);
+        if (entity != null) {
+            if (outpostId != null) {
+                entity.getPersistentDataContainer().set(
+                        CustomKeys.DEFENDER_ASSIGNED_OUTPOST, PersistentDataType.STRING, outpostId.toString());
+            } else {
+                entity.getPersistentDataContainer().remove(CustomKeys.DEFENDER_ASSIGNED_OUTPOST);
+            }
+        }
+    }
+
     // Persistence accessors (used by PersistenceUtils.saveDefenders)
     public static Map<UUID, UUID> getEntityToDominion() {
         return entityToDominion;
@@ -126,6 +153,10 @@ public class DefenderUtils {
 
     public static Map<UUID, Location> getEntityToLastLocation() {
         return entityToLastLocation;
+    }
+
+    public static Map<UUID, UUID> getEntityToAssignedOutpost() {
+        return entityToAssignedOutpost;
     }
 
     /**
@@ -190,28 +221,22 @@ public class DefenderUtils {
     }
 
     /**
-     * Returns the most appropriate home location for a defender (outpost home if applicable, otherwise dominion home).
+     * Returns the home location for a defender.
      */
     public static Location getDefenderHomeLocation(UUID entityUUID) {
         UUID dominionId = entityToDominion.get(entityUUID);
         if (dominionId == null) {
             return null;
         }
-        Dominion dominion = DominionUtils.getDominionById(dominionId);
-        if (dominion == null) {
-            return null;
-        }
-
-        Entity entity = Bukkit.getEntity(entityUUID);
-        if (entity != null) {
-            Chunk defChunk = entity.getLocation().getChunk();
-            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
-                if (isWithinOneChebyshev(defChunk, outpost.getChunks())) {
-                    return outpost.getHome();
-                }
+        UUID assignedOutpostId = entityToAssignedOutpost.get(entityUUID);
+        if (assignedOutpostId != null) {
+            Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
+            if (outpost != null) {
+                return outpost.getHome();
             }
         }
-        return dominion.getDominionHome();
+        Dominion dominion = DominionUtils.getDominionById(dominionId);
+        return dominion != null ? dominion.getDominionHome() : null;
     }
 
     /**
@@ -244,6 +269,15 @@ public class DefenderUtils {
      */
     public static void loadAndSpawnAt(UUID dominionId, DefenderType type, Location location,
                                       DefenderMode mode, UUID followPlayerId, Location guardPos) {
+        loadAndSpawnAt(dominionId, type, location, mode, followPlayerId, guardPos, null);
+    }
+
+    /**
+     * Loads a defender from persistence with an explicit mode and territory assignment.
+     */
+    public static void loadAndSpawnAt(UUID dominionId, DefenderType type, Location location,
+                                      DefenderMode mode, UUID followPlayerId, Location guardPos,
+                                      UUID assignedOutpostId) {
         if (location == null || location.getWorld() == null) {
             return;
         }
@@ -252,6 +286,9 @@ public class DefenderUtils {
         counts.computeIfAbsent(dominionId, k -> new EnumMap<>(DefenderType.class))
                 .merge(type, 1, Integer::sum);
         setDefenderMode(entity.getUniqueId(), mode, followPlayerId, guardPos);
+        if (assignedOutpostId != null) {
+            entityToAssignedOutpost.put(entity.getUniqueId(), assignedOutpostId);
+        }
     }
 
     private static void spawnEntity(Dominion dominion, DefenderType type) {
@@ -403,9 +440,10 @@ public class DefenderUtils {
         entityToType.remove(entityUUID);
         entityToLastLocation.remove(entityUUID);
 
-        // Mode cleanup
+        // Mode and location cleanup
         entityToMode.remove(entityUUID);
         entityToGuardPosition.remove(entityUUID);
+        entityToAssignedOutpost.remove(entityUUID);
         UUID followPlayerId = entityToFollowPlayer.remove(entityUUID);
         if (followPlayerId != null) {
             List<UUID> followers = playerToFollowers.get(followPlayerId);
@@ -492,15 +530,16 @@ public class DefenderUtils {
                     }
 
                     Chunk defenderChunk = entity.getLocation().getChunk();
-                    boolean withinBounds = isWithinOneChebyshev(defenderChunk, dominion.getChunks());
-                    if (!withinBounds) {
-                        for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
-                            if (isWithinOneChebyshev(defenderChunk, outpost.getChunks())) {
-                                withinBounds = true;
-                                break;
-                            }
-                        }
+                    UUID assignedOutpostId = getAssignedOutpostId(entityUUID);
+                    List<Chunk> assignedChunks;
+                    if (assignedOutpostId != null) {
+                        Outpost assignedOutpost = OutpostUtils.getOutpostById(assignedOutpostId);
+                        assignedChunks = assignedOutpost != null ? assignedOutpost.getChunks() : dominion.getChunks();
+                    } else {
+                        assignedChunks = dominion.getChunks();
                     }
+
+                    boolean withinBounds = isWithinOneChebyshev(defenderChunk, assignedChunks);
 
                     if (withinBounds) {
                         clearStuckState(entityUUID);
@@ -519,17 +558,7 @@ public class DefenderUtils {
                             continue;
                         }
 
-                        Chunk nearest = findNearestChunk(defenderChunk, dominion.getChunks());
-                        if (nearest == null) {
-                            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominionId)) {
-                                Chunk candidate = findNearestChunk(defenderChunk, outpost.getChunks());
-                                if (candidate != null && (nearest == null
-                                        || chunkDistance(defenderChunk, candidate)
-                                        < chunkDistance(defenderChunk, nearest))) {
-                                    nearest = candidate;
-                                }
-                            }
-                        }
+                        Chunk nearest = findNearestChunk(defenderChunk, assignedChunks);
                         if (nearest != null) {
                             Location target = nearest.getWorld().getBlockAt(
                                     (nearest.getX() << 4) + 8,

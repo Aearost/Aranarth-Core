@@ -3,9 +3,11 @@ package com.aearost.aranarthcore.gui;
 import com.aearost.aranarthcore.objects.DefenderMode;
 import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DefenderUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,6 +34,7 @@ public class GuiDefenderManage {
     public static final String TITLE = "Manage Defender";
     public static final int SLOT_MODE = 10;
     public static final int SLOT_TELEPORT_HOME = 11;
+    public static final int SLOT_LOCATION = 12;
     public static final int SLOT_SELL = 15;
     private static final Map<UUID, UUID> playerToDefender = new HashMap<>();
 
@@ -61,11 +64,13 @@ public class GuiDefenderManage {
         DefenderMode mode = DefenderUtils.getDefenderMode(defenderEntityUUID);
         boolean followLocked = DefenderUtils.isFollowLockedFor(
                 defenderEntityUUID, player.getUniqueId(), dominion.getLeader());
+        UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderEntityUUID);
 
         gui.setItem(SLOT_MODE, followLocked
                 ? buildLockedModeButton(defenderEntityUUID)
                 : buildModeButton(mode, defenderEntityUUID));
-        gui.setItem(SLOT_TELEPORT_HOME, buildTeleportHomeButton(dominion));
+        gui.setItem(SLOT_TELEPORT_HOME, buildTeleportHomeButton(dominion, assignedOutpostId));
+        gui.setItem(SLOT_LOCATION, buildLocationButton(defenderEntityUUID, dominion));
         gui.setItem(13, buildInfoItem(type, defenderEntityUUID, dominion, mode));
         gui.setItem(SLOT_SELL, buildSellButton(type));
 
@@ -143,12 +148,48 @@ public class GuiDefenderManage {
         return item;
     }
 
-    private static ItemStack buildTeleportHomeButton(Dominion dominion) {
+    private static ItemStack buildTeleportHomeButton(Dominion dominion, UUID assignedOutpostId) {
+        String homeName;
+        if (assignedOutpostId != null) {
+            Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
+            homeName = outpost != null ? outpost.getName() : dominion.getName();
+        } else {
+            homeName = dominion.getName();
+        }
         ItemStack item = new ItemStack(Material.ENDER_PEARL);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor("&a&lTeleport to Home"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Teleports this defender to &e" + dominion.getName() + "&e's &7home"));
+        lore.add(ChatUtils.translateToColor("&7Teleports this defender to &e" + homeName + "&7's home"));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    private static ItemStack buildLocationButton(UUID defenderEntityUUID, Dominion dominion) {
+        UUID assignedOutpostId = DefenderUtils.getAssignedOutpostId(defenderEntityUUID);
+        String locationName;
+        String description;
+        if (assignedOutpostId == null) {
+            locationName = dominion.getName() + " &7(Dominion)";
+            description = "&7Patrols the main dominion territory";
+        } else {
+            Outpost outpost = OutpostUtils.getOutpostById(assignedOutpostId);
+            if (outpost != null) {
+                locationName = outpost.getName() + " &7(Outpost " + outpost.getOutpostIndex() + ")";
+                description = "&7Patrols &e" + outpost.getName() + "&7's territory";
+            } else {
+                locationName = dominion.getName() + " &7(Dominion)";
+                description = "&7Patrols the main dominion territory";
+            }
+        }
+        ItemStack item = new ItemStack(Material.FILLED_MAP);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&b&lTerritory: &e" + locationName));
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatUtils.translateToColor(description));
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&eClick &7to cycle territory"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
