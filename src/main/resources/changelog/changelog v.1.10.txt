@@ -290,6 +290,7 @@ Minor Features
 [~] Fixed issue where plentiful was not working in other dominions despite having the Build permission
 [+] Added feedback message when using /aranarthium, /calendar, /dominions, or /incantations
 [+] Added forced teleport to spawn if the player logged out in resource world before it was reset
+[~] Fixed issue where combat tag was initiating on allies incorrectly
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

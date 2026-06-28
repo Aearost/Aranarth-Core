@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
@@ -24,7 +25,7 @@ public class EntityDamageByEntityEventListener implements Listener {
     /**
      * Centralizes all logic to be called by an entity being damaged by another entity.
      */
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onEntityDamageEntity(EntityDamageByEntityEvent e) {
         if (e.getDamager().getWorld().getName().equalsIgnoreCase("arena")) {
             new ArenaPlayerKill().execute(e);
