@@ -295,6 +295,7 @@ Minor Features
 [~] Prevented armor stand switch if the user has curse of binding on them at all
 [~] Made it so bulk transaction mode automatically disables itself after 5 seconds of inactivity
 [~] Fixed issue causing double un-afk message
+[+] Added mcMMO Fishing EXP when a fish is caught using WakeFishing
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
