@@ -3327,6 +3327,9 @@ public class AranarthUtils {
 			}
 			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
 		} else {
+			if (aranarthPlayer.getAfkLocation() == null) {
+				return;
+			}
 			aranarthPlayer.setAfkLocation(null);
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(player.getUniqueId())) {
