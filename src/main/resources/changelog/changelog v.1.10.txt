@@ -313,3 +313,4 @@ Backend Code Changes
 - Dynamically sourced sub-element color codes in /ranks
 - Prevented the first avatar from being auto-selected - it must be manually selected with the command
 - Added pre-loading of chunks in the resource world
+- Revamped and simplified how dominion resource rewards for rare items are calculated

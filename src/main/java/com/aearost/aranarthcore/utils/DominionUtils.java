@@ -914,16 +914,13 @@ public class DominionUtils {
 		List<ItemStack> items = new ArrayList<>();
 		Random random = new Random();
 
-		// Used to adjust the yields of Dominion resources based on the size of the Dominion
-		int dominionSize = 0;
-		// Consume 100 power per day for <=25 chunks
-		if (dominion.getChunks().size() <= 25) {
-			dominionSize = 1;
-		} else if (dominion.getChunks().size() <= 100) {
-			dominionSize = 2;
-		} else {
-			dominionSize = 3;
-		}
+		// Dominion rank level determines drop odds and yield multipliers
+		int rank = dominion.getDominionLevel();
+
+		// Scaled odds per rank (higher the rank, the higher the odds)
+		int[] commonOdds   = {10, 8, 5, 3, 1};  // nautilus, armadillo, netherite scrap, mushroom diamond, nether tear
+		int[] rareOdds     = {20, 15, 10, 5, 2}; // turtle scute, elytra, desert fossil
+		int[] godAppleOdds = {16, 12, 8, 4, 1};  // god apple fragment (divided by 4 during SOLARVOR)
 
 		// Dirts
 		// Stones
@@ -944,14 +941,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.INK_SAC, 8));
 			items.add(new ItemStack(Material.COD, 16));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 		}
@@ -980,14 +970,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.SALMON, 8));
 			items.add(new ItemStack(Material.INK_SAC, 4));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 		}
@@ -1008,14 +991,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.STONE, 32));
 			items.add(new ItemStack(Material.SUGAR_CANE, 8));
 
-			int oddsAmount = 8;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(rareOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.TURTLE_SCUTE, 1));
 			}
 		}
@@ -1030,14 +1006,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.INK_SAC, 8));
 			items.add(new ItemStack(Material.COD, 16));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 
@@ -1096,14 +1065,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.TROPICAL_FISH, 16));
 			items.add(new ItemStack(Material.PUFFERFISH, 2));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 		}
@@ -1118,14 +1080,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.PUFFERFISH, 2));
 			items.add(new ItemStack(Material.COD, 8));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 		}
@@ -1138,14 +1093,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.SALMON, 8));
 			items.add(new ItemStack(Material.INK_SAC, 8));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 		}
@@ -1159,14 +1107,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.COD, 4));
 			items.add(new ItemStack(Material.TROPICAL_FISH, 16));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 
@@ -1188,14 +1129,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.INK_SAC, 8));
 			items.add(new ItemStack(Material.COD, 16));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 
@@ -1216,14 +1150,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.INK_SAC, 8));
 			items.add(new ItemStack(Material.SALMON, 16));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NAUTILUS_SHELL, 1));
 			}
 
@@ -1244,7 +1171,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.COAL, 8));
 			items.add(new ItemStack(Material.RAW_IRON, 4));
 
-			if (random.nextInt(3) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.DIAMOND, 1));
 			}
 		}
@@ -1324,11 +1251,11 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.RAW_IRON, 4));
 			items.add(new ItemStack(Material.APPLE, 4));
 
-			int odds = 16;
+			int godOdds = godAppleOdds[rank - 1];
 			if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-				odds = 4;
+				godOdds = Math.max(1, godOdds / 4);
 			}
-			if (random.nextInt(odds) == 0) {
+			if (random.nextInt(godOdds) == 0) {
 				items.add(new GodAppleFragment().getItem());
 			}
 		}
@@ -1411,11 +1338,11 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.RAW_IRON, 4));
 			items.add(new ItemStack(Material.APPLE, 4));
 
-			int odds = 16;
+			int godOdds = godAppleOdds[rank - 1];
 			if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-				odds = 4;
+				godOdds = Math.max(1, godOdds / 4);
 			}
-			if (random.nextInt(odds) == 0) {
+			if (random.nextInt(godOdds) == 0) {
 				items.add(new GodAppleFragment().getItem());
 			}
 		}
@@ -1489,11 +1416,11 @@ public class DominionUtils {
 
 			items.add(new ItemStack(Material.APPLE, 4));
 
-			int odds = 16;
+			int godOdds = godAppleOdds[rank - 1];
 			if (AranarthUtils.getMonth() == Month.SOLARVOR) {
-				odds = 4;
+				godOdds = Math.max(1, godOdds / 4);
 			}
-			if (random.nextInt(odds) == 0) {
+			if (random.nextInt(godOdds) == 0) {
 				items.add(new GodAppleFragment().getItem());
 			}
 		}
@@ -1625,7 +1552,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.SANDSTONE, 64));
 			items.add(new ItemStack(Material.STONE, 64));
 			// Higher fossil rate in deserts
-			if (random.nextInt(10) == 0) {
+			if (random.nextInt(rareOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.BONE_BLOCK, 32));
 			}
 			items.add(new ItemStack(Material.CACTUS, 8));
@@ -1641,14 +1568,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.COAL, 8));
 			items.add(new ItemStack(Material.RAW_GOLD, 4));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
 			}
 		}
@@ -1674,14 +1594,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.COAL, 8));
 			items.add(new ItemStack(Material.RAW_GOLD, 8));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
 			}
 		}
@@ -1709,14 +1622,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.COAL, 8));
 			items.add(new ItemStack(Material.RAW_GOLD, 8));
 
-			int oddsAmount = 4;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				oddsAmount = oddsAmount - 1;
-			} else if (dominionSize == 3) {
-				oddsAmount = oddsAmount - 2;
-			}
-			if (random.nextInt(oddsAmount) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.ARMADILLO_SCUTE, 1));
 			}
 		}
@@ -1730,21 +1636,10 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.QUARTZ, 64));
 			items.add(new ItemStack(Material.GOLD_NUGGET, 64));
 
-			int tearOdds = 2;
-			int scrapOdds = 10;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				tearOdds = tearOdds - 1;
-				scrapOdds = scrapOdds - 5;
-			} else if (dominionSize == 3) {
-				tearOdds = tearOdds - 2;
-				scrapOdds = scrapOdds - 8;
-			}
-
-			if (random.nextInt(tearOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.GHAST_TEAR, 1));
 			}
-			if (random.nextInt(scrapOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
@@ -1779,21 +1674,10 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
 			items.add(new ItemStack(Material.BONE, 4));
 
-			int tearOdds = 1;
-			int scrapOdds = 10;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				tearOdds = 2;
-				scrapOdds = scrapOdds - 5;
-			} else if (dominionSize == 3) {
-				tearOdds = 3;
-				scrapOdds = scrapOdds - 8;
-			}
+			// 1-5 ghast tears based on rank
+			items.add(new ItemStack(Material.GHAST_TEAR, rank));
 
-			// 1-3 ghast tears
-			items.add(new ItemStack(Material.GHAST_TEAR, random.nextInt(tearOdds) + 1));
-
-			if (random.nextInt(scrapOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
@@ -1833,15 +1717,7 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.GOLD_NUGGET, 32));
 			items.add(new ItemStack(Material.PORKCHOP, 16));
 
-			int scrapOdds = 10;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				scrapOdds = scrapOdds - 5;
-			} else if (dominionSize == 3) {
-				scrapOdds = scrapOdds - 8;
-			}
-
-			if (random.nextInt(scrapOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
@@ -1875,21 +1751,10 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.QUARTZ, 16));
 			items.add(new ItemStack(Material.GOLD_NUGGET, 16));
 
-			int pearlOdds = 1;
-			int scrapOdds = 10;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				pearlOdds = 2;
-				scrapOdds = scrapOdds - 5;
-			} else if (dominionSize == 3) {
-				pearlOdds = 3;
-				scrapOdds = scrapOdds - 8;
-			}
+			// 1-5 ender pearls based on rank
+			items.add(new ItemStack(Material.ENDER_PEARL, rank));
 
-			// 1-3 ender pearls
-			items.add(new ItemStack(Material.ENDER_PEARL, random.nextInt(pearlOdds) + 1));
-
-			if (random.nextInt(scrapOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
@@ -1923,24 +1788,13 @@ public class DominionUtils {
 			items.add(new ItemStack(Material.GOLD_NUGGET, 64));
 			items.add(new ItemStack(Material.MAGMA_CREAM, 4));
 
-			int tearOdds = 1;
-			int scrapOdds = 10;
-			// Increases the odds based on the size
-			if (dominionSize == 2) {
-				tearOdds = 1;
-				scrapOdds = scrapOdds - 5;
-			} else if (dominionSize == 3) {
-				tearOdds = 2;
-				scrapOdds = scrapOdds - 8;
-			}
-
-			// 0-2 ghast tears, lower than other biomes
-			int ghastTears = random.nextInt(tearOdds + 1);
+			// 0 to rank ghast tears, lower than other biomes
+			int ghastTears = random.nextInt(rank + 1);
 			if (ghastTears > 0) {
 				items.add(new ItemStack(Material.GHAST_TEAR, ghastTears));
 			}
 
-			if (random.nextInt(scrapOdds) == 0) {
+			if (random.nextInt(commonOdds[rank - 1]) == 0) {
 				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
 			}
 
@@ -1979,15 +1833,7 @@ public class DominionUtils {
 				items.add(new ItemStack(Material.PURPUR_PILLAR, 64));
 				items.add(new ItemStack(Material.END_ROD, 16));
 
-				int elytraOdds = 8;
-				// Increases the odds based on the size
-				if (dominionSize == 2) {
-					elytraOdds = 6;
-				} else if (dominionSize == 3) {
-					elytraOdds = 3;
-				}
-
-				if (random.nextInt(elytraOdds) == 0) {
+				if (random.nextInt(rareOdds[rank - 1]) == 0) {
 					items.add(new ItemStack(Material.ELYTRA, 1));
 				}
 			}
@@ -1997,7 +1843,7 @@ public class DominionUtils {
 		for (ItemStack item : items) {
 			multiplierItems.add(item);
 
-			// Skip double add for these items
+			// Skip multiplying these rare/special items
 			if (item.getType() == Material.NAUTILUS_SHELL || item.getType() == Material.NETHERITE_SCRAP
 					|| item.getType() == Material.TURTLE_SCUTE || item.getType() == Material.ARMADILLO_SCUTE
 					|| item.getType() == Material.GHAST_TEAR || item.getType() == Material.DIAMOND
@@ -2005,11 +1851,8 @@ public class DominionUtils {
 				continue;
 			}
 
-			// Add additional time depending on the size
-			if (dominionSize == 2) {
-				multiplierItems.add(item);
-			} else if (dominionSize == 3) {
-				multiplierItems.add(item);
+			// Rank 1 = 1×, rank 2 = 2×, rank 3 = 3×, rank 4 = 4×, rank 5 = 5×
+			for (int i = 1; i < rank; i++) {
 				multiplierItems.add(item);
 			}
 		}
