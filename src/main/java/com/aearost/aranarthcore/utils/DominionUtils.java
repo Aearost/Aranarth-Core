@@ -1640,7 +1640,7 @@ public class DominionUtils {
 				items.add(new ItemStack(Material.GHAST_TEAR, 1));
 			}
 			if (random.nextInt(commonOdds[rank - 1]) == 0) {
-				items.add(new ItemStack(Material.NETHERITE_SCRAP, 1));
+				items.add(new ItemStack(Material.NETHERITE_SCRAP, 2));
 			}
 
 			// Simulates a fortress
