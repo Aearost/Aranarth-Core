@@ -22,6 +22,10 @@ public class CompressorItemPickup {
 
 	public void execute(EntityPickupItemEvent e) {
 		if (e.getEntity() instanceof Player player) {
+			if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+				return;
+			}
+
 			if (!player.hasPermission("aranarth.compressor")) {
 				return;
 			}

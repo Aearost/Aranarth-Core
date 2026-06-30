@@ -296,6 +296,7 @@ Minor Features
 [~] Made it so bulk transaction mode automatically disables itself after 5 seconds of inactivity
 [~] Fixed issue causing double un-afk message
 [+] Added mcMMO Fishing EXP when a fish is caught using WakeFishing
+[-] Disabled the compressor functionality in the arena world
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft
