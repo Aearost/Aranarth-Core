@@ -50,7 +50,7 @@ public class CommandCalendar implements CommandExecutor {
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
-			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eThe Calendar&7 book!"));
+			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eThe Calendar&7 book"));
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));

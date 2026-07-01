@@ -44,7 +44,7 @@ public class CommandIncantations implements CommandExecutor {
 
 			book.setItemMeta(meta);
 			player.getInventory().addItem(book);
-			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eIncantations&7 book!"));
+			player.sendMessage(ChatUtils.chatMessage("&7You have received the &eIncantations&7 book"));
 			return true;
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&cYou must be a player to use this command!"));

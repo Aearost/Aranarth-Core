@@ -33,7 +33,7 @@ public class CommandDominions {
 
 		book.setItemMeta(meta);
 		player.getInventory().addItem(book);
-		player.sendMessage(ChatUtils.chatMessage("&7You have received the &eDominions&7 book!"));
+		player.sendMessage(ChatUtils.chatMessage("&7You have received the &eDominions&7 book"));
 	}
 
 	private static String introduction() {
