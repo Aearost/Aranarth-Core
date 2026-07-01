@@ -587,7 +587,7 @@ public class DateUtils {
 			case AESTIVOR -> 1.25;
 			case AQUINVOR, VENTIVOR, FLORIVOR -> 1.00;
 			case IGNIVOR -> 0.60;
-			case UMBRAVOR -> 0.75;
+			case UMBRAVOR -> 1.00;
 			case GLACIVOR -> 0.50;
 			case OBSCURVOR -> 0.40;
 			case FRIGORVOR -> 0.25;
