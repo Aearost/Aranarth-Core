@@ -1654,9 +1654,9 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
 
-        // Owner is collecting their ingot — swap the tagged stack for a clean iron ingot before
-        // the pickup completes so the player never receives the internal instance-ID metadata.
-        e.getItem().setItemStack(new ItemStack(Material.IRON_INGOT, 1));
+        // Owner is collecting their ingot — swap the tagged stack for a clean stack of the
+        // correct metal type so the player never receives the internal instance-ID metadata.
+        e.getItem().setItemStack(new ItemStack(MetalStrips.getStoredMaterial(e.getItem()), 1));
         MetalStrips.removeTrackedItem(e.getItem(), player.getUniqueId());
     }
 
