@@ -298,6 +298,7 @@ Minor Features
 [+] Added mcMMO Fishing EXP when a fish is caught using WakeFishing
 [-] Disabled the compressor functionality in the arena world
 [~] Slightly increased the passive mob spawn rates from 0.75x to 1.0x during Umbravor
+[+] Added sulfur and cinnabar to the list of items that plentiful can harvest
 
 Backend Code Changes
 - Updated AranarthCore to version 26.1.2 of Minecraft

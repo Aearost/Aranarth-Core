@@ -805,6 +805,7 @@ public class AranarthUtils {
 				|| type == Material.BONE_BLOCK || type == Material.OBSIDIAN
 				|| type == Material.CRYING_OBSIDIAN || type == Material.WARPED_NYLIUM
 				|| type == Material.BLACKSTONE || type == Material.GLOWSTONE
+				|| type == Material.SULFUR || type == Material.CINNABAR
 				|| type.name().endsWith("_ORE") || type.name().endsWith("_CORAL_BLOCK");
 	}
 
