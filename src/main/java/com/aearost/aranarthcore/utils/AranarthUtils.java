@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Pronouns;
@@ -1991,16 +1993,12 @@ public class AranarthUtils {
 
 			// If it is an mcMMO potion
 			if (potion.hasItemMeta() && potion.getItemMeta().hasCustomName()) {
-				// customName() is in the following format by default
-				/*
-				TextComponentImpl{content="", style=StyleImpl{obfuscated=not_set, bold=not_set, strikethrough=not_set,
-					underlined=not_set, italic=not_set, color=null, shadowColor=null, clickEvent=null, hoverEvent=null,
-					insertion=null, font=null}, children=[TextComponentImpl{content="Potion Of Haste",
-					style=StyleImpl{obfuscated=false, bold=false, strikethrough=false, underlined=false, italic=false, color=null,
-					shadowColor=null, clickEvent=null, hoverEvent=null, insertion=null, font=null}, children=[]}]}
-				 */
-				String[] componentParts = (potion.getItemMeta().customName().children().get(0) + "").split("\"");
-				potionName = componentParts[1];
+				Component customName = potion.getItemMeta().customName();
+				potionName = PlainTextComponentSerializer.plainText().serialize(customName);
+				if (potionName.isBlank()) {
+					Bukkit.getLogger().warning("Potion could not be serialized correctly - " + customName);
+					continue;
+				}
 			} else {
 				PotionMeta meta = (PotionMeta) potion.getItemMeta();
 				if (meta != null) {
