@@ -209,8 +209,6 @@ public class ChestSort {
         }
     }
 
-    // -------------------------------------------------------------------------
-
     public void execute(PlayerInteractEvent e) {
         if (e.getHand() != EquipmentSlot.HAND) {
             return;

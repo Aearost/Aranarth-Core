@@ -233,7 +233,11 @@
       "Bash(echo \"$jar\")",
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore -iname *defender* -type f)",
       "Bash(find /c/Users/liamh/IdeaProjects -name *Fish* -type f)",
-      "Bash(find /c/Users/liamh/IdeaProjects -path */target -prune -o -type f -name *.java -print)"
+      "Bash(find /c/Users/liamh/IdeaProjects -path */target -prune -o -type f -name *.java -print)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
