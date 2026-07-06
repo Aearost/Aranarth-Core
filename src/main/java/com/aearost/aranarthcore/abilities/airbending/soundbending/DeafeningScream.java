@@ -103,7 +103,9 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
                 // Scale from full damage at point-blank to 50% at max radius
                 double falloff = 1.0 - (0.5 * (dist / radius));
                 DamageHandler.damageEntity(entity, damage * falloff, this);
-                applySoundDebuff(entity);
+                // 2.5x the base sound debuff durations: Slowness I for 7.5s, Darkness for 5s
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 150, 0, false, true));
+                entity.addPotionEffect(new PotionEffect(PotionEffectType.DARKNESS, 100, 0, false, true));
             }
         }
 

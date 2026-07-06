@@ -13,6 +13,7 @@ Minor Features
 [~] Fixed issue where switching between two server shops wouldn't re-prompt the bulk sale
 [~] Fixed issue where the chest locking, unlocking, trusting, and untrusting were not automatically untoggling correctly
 [~] Fixed issue where AstralProjection's charge particles were only displaying to the user
+[~] Increased the duration of the effects of DeafeningScream
 
 Backend Code Changes
 -
