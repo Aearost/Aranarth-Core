@@ -367,6 +367,12 @@ public class QuestUtils {
         }
 
         playerActiveDailyQuests.put(uuid, assigned);
+        Player dailyPlayer = Bukkit.getPlayer(uuid);
+        if (dailyPlayer != null) {
+            for (Quest q : assigned) {
+                dailyPlayer.sendMessage(ChatUtils.chatMessage("&7You have started the daily &e" + q.getDisplayName() + " &7quest"));
+            }
+        }
     }
 
     private static void assignWeeklyQuests(UUID uuid, int rank) {
@@ -391,6 +397,12 @@ public class QuestUtils {
         }
 
         playerActiveWeeklyQuests.put(uuid, assigned);
+        Player weeklyPlayer = Bukkit.getPlayer(uuid);
+        if (weeklyPlayer != null) {
+            for (Quest q : assigned) {
+                weeklyPlayer.sendMessage(ChatUtils.chatMessage("&7You have started the weekly &e" + q.getDisplayName() + " &7quest"));
+            }
+        }
     }
 
     /**

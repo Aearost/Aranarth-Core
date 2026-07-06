@@ -5,6 +5,7 @@ Major Features
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
+[+] Added message when a quest is started
 
 Backend Code Changes
 -
