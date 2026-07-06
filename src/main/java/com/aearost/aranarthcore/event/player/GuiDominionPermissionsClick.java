@@ -93,7 +93,7 @@ public class GuiDominionPermissionsClick {
                         boolean inMain = chunkDominion != null && chunkDominion.getId().equals(playerDominion.getId());
                         boolean inOutpost = chunkOutpost != null && chunkOutpost.getDominionId().equals(playerDominion.getId());
                         if (!inMain && !inOutpost) {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou can only manage defenders while in your Dominion's land'"));
+                            player.sendMessage(ChatUtils.chatMessage("&cYou can only manage defenders while in your Dominion or one of its outposts"));
                             break;
                         }
                     }

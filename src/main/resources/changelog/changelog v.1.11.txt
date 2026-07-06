@@ -6,6 +6,7 @@ Major Features
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
 [+] Added message when a quest is started
+[~] Corrected dominion defender purchase/manage messages
 
 Backend Code Changes
 -
