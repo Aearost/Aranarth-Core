@@ -9,19 +9,33 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Crafter;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
+import io.papermc.paper.event.player.CartographyItemEvent;
 import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.CartographyInventory;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.MapMeta;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.*;
 
 public class CraftingOverridesListener implements Listener {
 
+	private final AranarthCore plugin;
+
 	public CraftingOverridesListener(AranarthCore plugin) {
+		this.plugin = plugin;
 		Bukkit.getPluginManager().registerEvents(this, plugin);
 	}
 
@@ -34,6 +48,9 @@ public class CraftingOverridesListener implements Listener {
 		if (e.getInventory().contains(Material.BAMBOO_BLOCK)) {
 			new CraftingOverridesSugarcaneBlock().preCraft(e);
 		}
+		if (CraftingOverridesMap.isMapCopyRecipe(e.getInventory().getMatrix(), e.getInventory().getResult())) {
+			new CraftingOverridesMap().preCraft(e);
+		}
 	}
 
 	/**
@@ -44,6 +61,24 @@ public class CraftingOverridesListener implements Listener {
 	public void onCraftItem(final CraftItemEvent e) {
 		HumanEntity player = e.getWhoClicked();
 		ItemStack result = e.getRecipe().getResult();
+		if (CraftingOverridesMap.isMapCopyRecipe(e.getInventory().getMatrix(), result)) {
+			CraftingOverridesMap mapHandler = new CraftingOverridesMap();
+			mapHandler.onCraft(e, player);
+			if (!e.isCancelled()) {
+				// Restore the source map on the next tick (Bukkit consumes it as part of the recipe)
+				ItemStack[] matrix = e.getInventory().getMatrix();
+				for (int i = 0; i < matrix.length; i++) {
+					if (matrix[i] != null && matrix[i].getType() == Material.FILLED_MAP) {
+						ItemStack sourceMap = matrix[i].clone();
+						mapHandler.tagAsOriginal(sourceMap);
+						final int inventorySlot = i + 1; // CraftingInventory: slot 0 = result, 1-9 = grid
+						Bukkit.getScheduler().runTask(plugin, () -> e.getInventory().setItem(inventorySlot, sourceMap));
+						break;
+					}
+				}
+			}
+			return;
+		}
 		for (ItemStack ingredient : e.getInventory().getMatrix()) {
 
 			if (ingredient == null) {
@@ -93,6 +128,10 @@ public class CraftingOverridesListener implements Listener {
 	public void onCrafterCraft(final CrafterCraftEvent e) {
 		ItemStack result = e.getResult();
 		Crafter crafter = (Crafter) e.getBlock().getState();
+		if (CraftingOverridesMap.isMapCopyRecipe(crafter.getInventory().getContents(), result)) {
+			e.setCancelled(true);
+			return;
+		}
 		for (ItemStack ingredient : crafter.getInventory().getContents()) {
 			if (ingredient == null) {
 				continue;
@@ -133,6 +172,73 @@ public class CraftingOverridesListener implements Listener {
 				e.setCancelled(true);
 				break;
 			}
+		}
+	}
+
+	/**
+	 * Tags a map as Original when a player right-clicks to activate a blank map.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onMapActivate(final PlayerInteractEvent e) {
+		if (e.getHand() != EquipmentSlot.HAND) {
+			return;
+		}
+		if (e.getItem() == null || e.getItem().getType() != Material.MAP) {
+			return;
+		}
+		if (e.getAction() != Action.RIGHT_CLICK_AIR && e.getAction() != Action.RIGHT_CLICK_BLOCK) {
+			return;
+		}
+		Player player = e.getPlayer();
+		// Snapshot existing filled map IDs so we can identify the newly created one after activation
+		Set<Integer> existingMapIds = new HashSet<>();
+		for (ItemStack item : player.getInventory().getContents()) {
+			if (item != null && item.getType() == Material.FILLED_MAP) {
+				existingMapIds.add(((MapMeta) item.getItemMeta()).getMapId());
+			}
+		}
+		Bukkit.getScheduler().runTaskLater(plugin, () -> {
+			CraftingOverridesMap mapHandler = new CraftingOverridesMap();
+			for (int i = 0; i < player.getInventory().getSize(); i++) {
+				ItemStack item = player.getInventory().getItem(i);
+				if (item == null || item.getType() != Material.FILLED_MAP) continue;
+				if (!existingMapIds.contains(((MapMeta) item.getItemMeta()).getMapId())) {
+					mapHandler.tagAsOriginal(item);
+					player.getInventory().setItem(i, item);
+				}
+			}
+		}, 1L);
+	}
+
+	/**
+	 * Handles the cartography table result preview for map copying.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onPrepareCartographyResult(final PrepareResultEvent e) {
+		if (e.getInventory() instanceof CartographyInventory inv && CraftingOverridesMap.isCartographyMapCopyRecipe(inv)) {
+			new CraftingOverridesMap().preCartographyCraft(e);
+		}
+	}
+
+	/**
+	 * Handles a player taking the result from a cartography table for map copying.
+	 * @param e The event.
+	 */
+	@EventHandler
+	public void onCartographyResultClick(final CartographyItemEvent e) {
+		CartographyInventory inv = e.getInventory();
+		if (!CraftingOverridesMap.isCartographyMapCopyRecipe(inv)) {
+			return;
+		}
+		CraftingOverridesMap mapHandler = new CraftingOverridesMap();
+		mapHandler.onCartographyCraft(e);
+		if (!e.isCancelled()) {
+			// Bukkit consumes slot 0 as part of the recipe — restore it on the next tick
+			ItemStack originalMap = inv.getItem(0).clone();
+			mapHandler.tagAsOriginal(originalMap);
+			Bukkit.getScheduler().runTask(plugin, () -> inv.setItem(0, originalMap));
 		}
 	}
 

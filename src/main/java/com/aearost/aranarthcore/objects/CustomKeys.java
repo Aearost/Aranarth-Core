@@ -34,4 +34,5 @@ public class CustomKeys {
     public static final NamespacedKey DEFENDER_MODE = new NamespacedKey(AranarthCore.getInstance(), "defender_mode");
     public static final NamespacedKey DEFENDER_FOLLOW_PLAYER = new NamespacedKey(AranarthCore.getInstance(), "defender_follow_player");
     public static final NamespacedKey DEFENDER_ASSIGNED_OUTPOST = new NamespacedKey(AranarthCore.getInstance(), "defender_assigned_outpost");
+    public static final NamespacedKey MAP_ORIGINAL = new NamespacedKey(AranarthCore.getInstance(), "map_original");
 }

@@ -238,7 +238,8 @@
       "Bash(git merge:*)",
       "Bash(git push:*)",
       "Bash(git stash:*)",
-      "Bash(find C:UsersliamhIdeaProjectsAranarthCoresrcmainjavacomaearostaranarthcore -type f -name *uest*)"
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCoresrcmainjavacomaearostaranarthcore -type f -name *uest*)",
+      "Bash(find ~/.m2/repository/io/papermc -name *.jar)"
     ]
   }
 }
