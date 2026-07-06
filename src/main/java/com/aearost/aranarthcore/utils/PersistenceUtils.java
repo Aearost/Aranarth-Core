@@ -3179,6 +3179,13 @@ public class PersistenceUtils {
                 continue;
             }
             try {
+                // Parse optional stored required count
+                int storedRequired = 0;
+                if (taskName.contains(":")) {
+                    String[] parts = taskName.split(":", 2);
+                    taskName = parts[0];
+                    storedRequired = Integer.parseInt(parts[1]);
+                }
                 QuestTaskType taskType = QuestTaskType.valueOf(taskName);
                 Quest found = null;
                 for (Quest q : pool) {
@@ -3188,6 +3195,10 @@ public class PersistenceUtils {
                     }
                 }
                 if (found != null) {
+                    // Use stored required count if available
+                    if (storedRequired > 0) {
+                        found = found.withRequired(storedRequired, QuestUtils.generateDisplayName(taskType, storedRequired));
+                    }
                     if (rewards[i] < 0) {
                         resolved.add(found.withItemReward(QuestUtils.resolveKeyFromSentinel((int) rewards[i])));
                     } else {
@@ -3264,7 +3275,7 @@ public class PersistenceUtils {
 
                 StringBuilder row = new StringBuilder(uuid + "|" + rank);
                 for (int i = 0; i < 3; i++) {
-                    String task = i < dq.size() ? dq.get(i).getTaskType().name() : "NONE";
+                    String task = i < dq.size() ? (dq.get(i).getTaskType().name() + ":" + dq.get(i).getRequired()) : "NONE";
                     int reward = i < dq.size() ? (dq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(dq.get(i).getItemReward()) : (int) dq.get(i).getReward()) : 0;
                     int prog = i < dp.length ? dp[i] : 0;
                     int done = (i < dc.length && dc[i]) ? 1 : 0;
@@ -3272,7 +3283,7 @@ public class PersistenceUtils {
                     row.append("|").append(task).append("|").append(reward).append("|").append(prog).append("|").append(done).append("|").append(claimed);
                 }
                 for (int i = 0; i < 3; i++) {
-                    String task = i < wq.size() ? wq.get(i).getTaskType().name() : "NONE";
+                    String task = i < wq.size() ? (wq.get(i).getTaskType().name() + ":" + wq.get(i).getRequired()) : "NONE";
                     int reward = i < wq.size() ? (wq.get(i).hasItemReward() ? QuestUtils.getItemRewardSentinel(wq.get(i).getItemReward()) : (int) wq.get(i).getReward()) : 0;
                     int prog = i < wp.length ? wp[i] : 0;
                     int done = (i < wc.length && wc[i]) ? 1 : 0;

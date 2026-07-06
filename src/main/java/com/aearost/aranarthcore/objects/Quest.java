@@ -71,6 +71,11 @@ public class Quest {
         return new Quest(this.taskType, this.required, newReward, this.questType, this.rank, this.displayName, this.itemReward);
     }
 
+    /** Returns a copy of this quest with the given required count and display name. */
+    public Quest withRequired(int newRequired, String newDisplayName) {
+        return new Quest(this.taskType, newRequired, this.reward, this.questType, this.rank, newDisplayName, this.itemReward);
+    }
+
     /** Returns a copy of this quest with the given item reward (money reward set to 0). */
     public Quest withItemReward(ItemStack newItemReward) {
         return new Quest(this.taskType, this.required, 0.0, this.questType, this.rank, this.displayName, newItemReward);

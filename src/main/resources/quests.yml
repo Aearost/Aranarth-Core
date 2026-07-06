@@ -1,0 +1,123 @@
+# Values are indexed by rank: [Peasant, Esquire, Knight, Baron, Count, Duke, Prince, King, Emperor]
+# A value of 0 means the quest does not appear in that rank's pool
+# Actual required amounts at assignment are programmatically randomised +/- 20% from these base values
+
+daily:
+  - task: BREAK_LOG
+    values: [25, 70, 120, 190, 280, 420, 600, 850, 1100]
+  - task: MINE_STONE
+    values: [50, 128, 256, 350, 0, 0, 0, 0, 0]
+  - task: MINE_COAL_ORE
+    values: [0, 16, 35, 60, 100, 0, 0, 0, 0]
+  - task: MINE_IRON_ORE
+    values: [0, 20, 55, 96, 100, 140, 0, 0, 0]
+  - task: MINE_GOLD_ORE
+    values: [0, 0, 20, 40, 60, 100, 0, 0, 0]
+  - task: MINE_DIAMOND
+    values: [0, 0, 0, 15, 30, 55, 90, 130, 175]
+  - task: MINE_ANCIENT_DEBRIS
+    values: [0, 0, 0, 0, 0, 0, 5, 12, 20]
+  - task: BREAK_SAND
+    values: [32, 64, 100, 0, 0, 0, 0, 0, 0]
+  - task: BREAK_GRAVEL
+    values: [0, 48, 62, 80, 0, 0, 0, 0, 0]
+  - task: BREAK_DIRT
+    values: [32, 0, 0, 0, 0, 0, 0, 0, 0]
+  - task: HARVEST_CROPS
+    values: [100, 250, 450, 750, 1200, 2000, 3200, 5000, 8000]
+  - task: HARVEST_CROPS
+    values: [200, 0, 0, 0, 0, 0, 0, 0, 0]
+  - task: BREED_ANIMALS
+    values: [3, 10, 20, 40, 75, 125, 200, 300, 450]
+  - task: FISH
+    values: [5, 10, 18, 30, 48, 72, 100, 145, 200]
+  - task: KILL_HOSTILE_MOB
+    values: [8, 22, 40, 65, 100, 155, 230, 330, 475]
+  - task: KILL_PASSIVE_MOB
+    values: [5, 15, 28, 45, 70, 110, 165, 240, 340]
+  - task: KILL_WITH_MELEE
+    values: [15, 40, 75, 120, 185, 285, 425, 610, 875]
+  - task: KILL_WITH_RANGED
+    values: [12, 35, 65, 105, 160, 250, 375, 540, 775]
+  - task: KILL_SKELETON
+    values: [0, 4, 7, 10, 15, 22, 30, 43, 63]
+  - task: KILL_ZOMBIE
+    values: [0, 4, 7, 14, 21, 29, 40, 54, 78]
+  - task: KILL_CREEPER
+    values: [0, 0, 2, 5, 8, 12, 17, 23, 34]
+  - task: KILL_ENDERMAN
+    values: [0, 0, 0, 12, 20, 35, 55, 85, 125]
+  - task: KILL_SPIDER
+    values: [0, 0, 0, 0, 0, 10, 16, 23, 34]
+  - task: KILL_WITCH
+    values: [0, 0, 0, 0, 0, 4, 7, 10, 12]
+  - task: KILL_BLAZE
+    values: [0, 0, 0, 0, 0, 0, 6, 13, 21]
+  - task: KILL_GHAST
+    values: [0, 0, 0, 0, 0, 0, 0, 4, 9]
+  - task: KILL_COW
+    values: [5, 10, 18, 28, 40, 60, 85, 120, 170]
+  - task: KILL_PIG
+    values: [5, 10, 18, 28, 40, 60, 85, 120, 170]
+  - task: KILL_CHICKEN
+    values: [6, 12, 20, 30, 45, 65, 90, 130, 185]
+  - task: KILL_SHEEP
+    values: [0, 8, 15, 25, 38, 55, 78, 110, 160]
+  - task: KILL_RABBIT
+    values: [0, 0, 6, 11, 17, 25, 36, 52, 75]
+  - task: TRAVEL_BLOCKS
+    values: [500, 1200, 2500, 5000, 10000, 0, 0, 0, 0]
+
+weekly:
+  - task: BREAK_LOG
+    values: [150, 400, 600, 950, 1400, 2100, 3000, 4250, 5500]
+  - task: HARVEST_CROPS
+    values: [500, 1250, 2250, 3750, 6000, 10000, 16000, 25000, 40000]
+  - task: BREED_ANIMALS
+    values: [15, 50, 100, 200, 375, 625, 1000, 1500, 2250]
+  - task: FISH
+    values: [25, 50, 90, 150, 240, 360, 500, 725, 1000]
+  - task: KILL_HOSTILE_MOB
+    values: [40, 110, 200, 325, 500, 775, 1150, 1650, 2400]
+  - task: KILL_PLAYER
+    values: [2, 3, 5, 8, 10, 12, 15, 18, 20]
+  - task: MINE_COAL_ORE
+    values: [0, 80, 175, 300, 500, 0, 0, 0, 0]
+  - task: MINE_IRON_ORE
+    values: [0, 0, 275, 480, 550, 0, 0, 0, 0]
+  - task: MINE_GOLD_ORE
+    values: [0, 0, 100, 200, 300, 500, 0, 0, 0]
+  - task: MINE_DIAMOND
+    values: [0, 0, 0, 75, 150, 275, 450, 650, 875]
+  - task: MINE_ANCIENT_DEBRIS
+    values: [0, 0, 0, 0, 0, 0, 25, 60, 100]
+  - task: KILL_WITH_MELEE
+    values: [0, 200, 375, 600, 925, 1425, 2125, 3050, 4375]
+  - task: KILL_WITH_RANGED
+    values: [0, 175, 325, 525, 800, 1250, 1875, 2700, 3875]
+  - task: KILL_SKELETON
+    values: [0, 0, 34, 50, 76, 109, 0, 0, 0]
+  - task: KILL_ZOMBIE
+    values: [0, 0, 34, 73, 105, 147, 0, 0, 0]
+  - task: KILL_CREEPER
+    values: [0, 0, 0, 25, 38, 59, 84, 0, 0]
+  - task: KILL_ENDERMAN
+    values: [0, 0, 0, 60, 100, 175, 275, 425, 625]
+  - task: KILL_SPIDER
+    values: [0, 0, 0, 0, 0, 53, 80, 115, 0]
+  - task: KILL_WITCH
+    values: [0, 0, 0, 0, 0, 20, 35, 50, 60]
+  - task: KILL_BLAZE
+    values: [0, 0, 0, 0, 0, 0, 31, 63, 105]
+  - task: KILL_GHAST
+    values: [0, 0, 0, 0, 0, 0, 0, 21, 46]
+  - task: KILL_COW
+    values: [25, 50, 90, 140, 200, 300, 425, 600, 850]
+  - task: KILL_PIG
+    values: [0, 50, 90, 140, 200, 300, 425, 600, 850]
+  - task: KILL_CHICKEN
+    values: [30, 60, 100, 150, 225, 325, 450, 650, 925]
+  - task: KILL_SHEEP
+    values: [0, 40, 75, 125, 190, 275, 390, 550, 800]
+  - task: KILL_RABBIT
+    values: [0, 0, 30, 54, 84, 126, 180, 258, 375]

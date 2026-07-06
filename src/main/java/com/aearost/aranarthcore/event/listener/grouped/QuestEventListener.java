@@ -97,8 +97,9 @@ public class QuestEventListener implements Listener {
             Material.BEETROOTS, Material.NETHER_WART
     );
 
-    // Sword material name suffix
+    // Material name suffixes for melee weapon detection
     private static final String SWORD_SUFFIX = "_SWORD";
+    private static final String AXE_SUFFIX = "_AXE";
 
     // Cooked food materials
     private static final Set<Material> COOKED_FOOD_MATERIALS = Set.of(
@@ -282,16 +283,25 @@ public class QuestEventListener implements Listener {
         // Passive mob kills
         if (entity instanceof Animals) {
             QuestUtils.updateProgress(killer, QuestTaskType.KILL_PASSIVE_MOB, 1);
+            EntityType passiveType = entity.getType();
+            if (passiveType == EntityType.COW || passiveType == EntityType.MOOSHROOM) {
+                QuestUtils.updateProgress(killer, QuestTaskType.KILL_COW, 1);
+            } else if (passiveType == EntityType.PIG) {
+                QuestUtils.updateProgress(killer, QuestTaskType.KILL_PIG, 1);
+            } else if (passiveType == EntityType.CHICKEN) {
+                QuestUtils.updateProgress(killer, QuestTaskType.KILL_CHICKEN, 1);
+            } else if (passiveType == EntityType.SHEEP) {
+                QuestUtils.updateProgress(killer, QuestTaskType.KILL_SHEEP, 1);
+            } else if (passiveType == EntityType.RABBIT) {
+                QuestUtils.updateProgress(killer, QuestTaskType.KILL_RABBIT, 1);
+            }
         }
 
         // Weapon-specific kills
-        boolean isBowKill = isBowKill(entity);
-        boolean isSwordKill = isSwordKill(entity, killer);
-
-        if (isBowKill) {
-            QuestUtils.updateProgress(killer, QuestTaskType.KILL_WITH_BOW, 1);
-        } else if (isSwordKill) {
-            QuestUtils.updateProgress(killer, QuestTaskType.KILL_WITH_SWORD, 1);
+        if (isRangedKill(entity)) {
+            QuestUtils.updateProgress(killer, QuestTaskType.KILL_WITH_RANGED, 1);
+        } else if (isMeleeKill(entity, killer)) {
+            QuestUtils.updateProgress(killer, QuestTaskType.KILL_WITH_MELEE, 1);
         }
     }
 
@@ -495,30 +505,38 @@ public class QuestEventListener implements Listener {
     }
 
     /**
-     * Returns true if the entity's killing blow was delivered by an arrow/bow.
+     * Returns true if the entity's killing blow was delivered by a ranged attack:
+     * bow/crossbow arrow, spectral arrow, thrown trident, or thrown potion.
      */
-    private boolean isBowKill(LivingEntity entity) {
+    private boolean isRangedKill(LivingEntity entity) {
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
             Entity damager = dmgByEntity.getDamager();
-            return damager instanceof Arrow || damager instanceof SpectralArrow;
+            return damager instanceof AbstractArrow
+                    || damager instanceof Trident
+                    || damager instanceof ThrownPotion;
         }
         return false;
     }
 
     /**
-     * Returns true if the entity's killing blow was delivered via a sword by the given player.
+     * Returns true if the entity's killing blow was delivered by a melee weapon:
+     * sword, axe, mace, or trident (used in melee, not thrown).
      */
-    private boolean isSwordKill(LivingEntity entity, Player killer) {
+    private boolean isMeleeKill(LivingEntity entity, Player killer) {
         EntityDamageEvent lastDamage = entity.getLastDamageCause();
         if (lastDamage instanceof EntityDamageByEntityEvent dmgByEntity) {
-            // If the last damage was projectile, it's not a sword kill
-            if (dmgByEntity.getDamager() instanceof Projectile) {
+            Entity damager = dmgByEntity.getDamager();
+            // Thrown trident or any projectile = not melee
+            if (damager instanceof Projectile) {
                 return false;
             }
         }
-        ItemStack mainHand = killer.getInventory().getItemInMainHand();
-        return mainHand.getType().name().endsWith(SWORD_SUFFIX);
+        String matName = killer.getInventory().getItemInMainHand().getType().name();
+        return matName.endsWith(SWORD_SUFFIX)
+                || matName.endsWith(AXE_SUFFIX)
+                || matName.equals("MACE")
+                || matName.equals("TRIDENT");
     }
 
     /**

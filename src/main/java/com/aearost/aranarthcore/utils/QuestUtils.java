@@ -14,12 +14,16 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Villager;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.configuration.file.YamlConfiguration;
+import java.io.File;
 
 import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.Map;
 
 import static com.aearost.aranarthcore.objects.CustomKeys.CRATE_KEY;
 import static com.aearost.aranarthcore.objects.CustomKeys.QUEST_NPC;
@@ -61,276 +65,131 @@ public class QuestUtils {
     }
 
     /**
-     * Initializes all quest pools. Per-player quest assignments are loaded from
-     * persistence or assigned lazily when players first interact with the system.
+     * Initializes all quest pools by loading from quests.yml.
      */
-    public static void initialize() {
-        initializeQuestPools();
+    public static void initialize(Plugin plugin) {
+        loadQuestPools(plugin);
     }
 
-    private static void initializeQuestPools() {
-        // Rewards are all 0.0 — they are randomized per-player at assignment time.
+    /**
+     * Loads quest pools from quests.yml in the plugin data folder.
+     * Creates the file from the bundled default if it does not exist.
+     */
+    private static void loadQuestPools(Plugin plugin) {
+        dailyQuestPool.clear();
+        weeklyQuestPool.clear();
+        for (int i = 0; i <= 8; i++) {
+            dailyQuestPool.put(i, new ArrayList<>());
+            weeklyQuestPool.put(i, new ArrayList<>());
+        }
 
-        // Peasant
-        List<Quest> r0d = new ArrayList<>();
-        r0d.add(new Quest(QuestTaskType.BREAK_LOG, 25, 0.0, QuestType.DAILY, 0, "Break 25 Logs"));
-        r0d.add(new Quest(QuestTaskType.MINE_STONE, 50, 0.0, QuestType.DAILY, 0, "Mine 50 Stone"));
-        r0d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 8, 0.0, QuestType.DAILY, 0, "Kill 8 Hostile Mobs"));
-        r0d.add(new Quest(QuestTaskType.KILL_PASSIVE_MOB, 5, 0.0, QuestType.DAILY, 0, "Kill 5 Passive Mobs"));
-        r0d.add(new Quest(QuestTaskType.CRAFT_PLANKS, 32, 0.0, QuestType.DAILY, 0, "Craft 32 Planks"));
-        r0d.add(new Quest(QuestTaskType.CRAFT_TORCHES, 16, 0.0, QuestType.DAILY, 0, "Craft 16 Torches"));
-        r0d.add(new Quest(QuestTaskType.HARVEST_CROPS, 96, 0.0, QuestType.DAILY, 0, "Harvest 96 Crops"));
-        r0d.add(new Quest(QuestTaskType.HARVEST_CROPS, 192, 0.0, QuestType.DAILY, 0, "Harvest 192 Crops"));
-        r0d.add(new Quest(QuestTaskType.FISH, 5, 0.0, QuestType.DAILY, 0, "Fish 5 Fish"));
-        r0d.add(new Quest(QuestTaskType.COOK_FOOD, 16, 0.0, QuestType.DAILY, 0, "Cook 16 Food"));
-        r0d.add(new Quest(QuestTaskType.BREED_ANIMALS, 3, 0.0, QuestType.DAILY, 0, "Breed 3 Animals"));
-        r0d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 8, 0.0, QuestType.DAILY, 0, "Kill 8 Mobs with a Sword"));
-        r0d.add(new Quest(QuestTaskType.BREAK_SAND, 32, 0.0, QuestType.DAILY, 0, "Break 32 Sand"));
-        r0d.add(new Quest(QuestTaskType.BREAK_DIRT, 32, 0.0, QuestType.DAILY, 0, "Break 32 Dirt"));
-        r0d.add(new Quest(QuestTaskType.TRAVEL_BLOCKS, 500, 0.0, QuestType.DAILY, 0, "Travel 500 Blocks"));
-        r0d.add(new Quest(QuestTaskType.KILL_PLAYER, 1, 0.0, QuestType.DAILY, 0, "Kill 1 Player"));
-        dailyQuestPool.put(0, r0d);
+        File file = new File(plugin.getDataFolder(), "quests.yml");
+        if (!file.exists()) {
+            plugin.saveResource("quests.yml", false);
+        }
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
 
-        List<Quest> r0w = new ArrayList<>();
-        r0w.add(new Quest(QuestTaskType.BREAK_LOG, 250, 0.0, QuestType.WEEKLY, 0, "Break 250 Logs"));
-        r0w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 60, 0.0, QuestType.WEEKLY, 0, "Kill 60 Hostile Mobs"));
-        r0w.add(new Quest(QuestTaskType.HARVEST_CROPS, 300, 0.0, QuestType.WEEKLY, 0, "Harvest 300 Crops"));
-        r0w.add(new Quest(QuestTaskType.FISH, 20, 0.0, QuestType.WEEKLY, 0, "Fish 20 Fish"));
-        r0w.add(new Quest(QuestTaskType.BREED_ANIMALS, 10, 0.0, QuestType.WEEKLY, 0, "Breed 10 Animals"));
-        r0w.add(new Quest(QuestTaskType.KILL_PLAYER, 2, 0.0, QuestType.WEEKLY, 0, "Kill 2 Players"));
-        weeklyQuestPool.put(0, r0w);
+        loadSection(config, "daily", QuestType.DAILY, dailyQuestPool);
+        loadSection(config, "weekly", QuestType.WEEKLY, weeklyQuestPool);
+    }
 
-        // Esquire
-        List<Quest> r1d = new ArrayList<>();
-        r1d.add(new Quest(QuestTaskType.MINE_STONE, 128, 0.0, QuestType.DAILY, 1, "Mine 128 Stone"));
-        r1d.add(new Quest(QuestTaskType.BREAK_LOG, 64, 0.0, QuestType.DAILY, 1, "Break 64 Logs"));
-        r1d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 20, 0.0, QuestType.DAILY, 1, "Kill 20 Hostile Mobs"));
-        r1d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 12, 0.0, QuestType.DAILY, 1, "Kill 12 Mobs with a Sword"));
-        r1d.add(new Quest(QuestTaskType.CRAFT_TORCHES, 64, 0.0, QuestType.DAILY, 1, "Craft 64 Torches"));
-        r1d.add(new Quest(QuestTaskType.HARVEST_CROPS, 192, 0.0, QuestType.DAILY, 1, "Harvest 192 Crops"));
-        r1d.add(new Quest(QuestTaskType.BREED_ANIMALS, 5, 0.0, QuestType.DAILY, 1, "Breed 5 Animals"));
-        r1d.add(new Quest(QuestTaskType.FISH, 8, 0.0, QuestType.DAILY, 1, "Fish 8 Fish"));
-        r1d.add(new Quest(QuestTaskType.COOK_FOOD, 32, 0.0, QuestType.DAILY, 1, "Cook 32 Food"));
-        r1d.add(new Quest(QuestTaskType.BREAK_GRAVEL, 48, 0.0, QuestType.DAILY, 1, "Break 48 Gravel"));
-        r1d.add(new Quest(QuestTaskType.MINE_COAL_ORE, 16, 0.0, QuestType.DAILY, 1, "Mine 16 Coal Ore"));
-        r1d.add(new Quest(QuestTaskType.KILL_SKELETON, 10, 0.0, QuestType.DAILY, 1, "Kill 10 Skeletons"));
-        r1d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 10, 0.0, QuestType.DAILY, 1, "Kill 10 Zombies"));
-        r1d.add(new Quest(QuestTaskType.BREAK_SAND, 64, 0.0, QuestType.DAILY, 1, "Break 64 Sand"));
-        r1d.add(new Quest(QuestTaskType.CRAFT_GLASS, 16, 0.0, QuestType.DAILY, 1, "Craft 16 Glass"));
-        r1d.add(new Quest(QuestTaskType.KILL_PLAYER, 1, 0.0, QuestType.DAILY, 1, "Kill 1 Player"));
-        dailyQuestPool.put(1, r1d);
+    /**
+     * Parses one section (daily or weekly) from the quests.yml config into the given pool map.
+     */
+    private static void loadSection(YamlConfiguration config, String section,
+                                    QuestType questType, HashMap<Integer, List<Quest>> pool) {
+        List<?> entries = config.getList(section);
+        if (entries == null) {
+            Bukkit.getLogger().warning("No '" + section + "' section found in quests.yml");
+            return;
+        }
+        for (Object entry : entries) {
+            if (!(entry instanceof Map<?, ?> map)) continue;
+            String taskName = (String) map.get("task");
+            if (taskName == null) continue;
+            QuestTaskType taskType;
+            try {
+                taskType = QuestTaskType.valueOf(taskName);
+            } catch (IllegalArgumentException e) {
+                Bukkit.getLogger().warning("Unknown quest task type in quests.yml: " + taskName);
+                continue;
+            }
+            List<?> values = (List<?>) map.get("values");
+            if (values == null || values.size() < 9) continue;
+            for (int rank = 0; rank <= 8; rank++) {
+                Object valObj = values.get(rank);
+                int value = valObj instanceof Number ? ((Number) valObj).intValue() : 0;
+                if (value > 0) {
+                    pool.get(rank).add(new Quest(
+                            taskType, value, 0.0, questType, rank,
+                            generateDisplayName(taskType, value)
+                    ));
+                }
+            }
+        }
+    }
 
-        List<Quest> r1w = new ArrayList<>();
-        r1w.add(new Quest(QuestTaskType.MINE_COAL_ORE, 64, 0.0, QuestType.WEEKLY, 1, "Mine 64 Coal Ore"));
-        r1w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 120, 0.0, QuestType.WEEKLY, 1, "Kill 120 Hostile Mobs"));
-        r1w.add(new Quest(QuestTaskType.HARVEST_CROPS, 850, 0.0, QuestType.WEEKLY, 1, "Harvest 850 Crops"));
-        r1w.add(new Quest(QuestTaskType.BREED_ANIMALS, 20, 0.0, QuestType.WEEKLY, 1, "Breed 20 Animals"));
-        r1w.add(new Quest(QuestTaskType.COOK_FOOD, 96, 0.0, QuestType.WEEKLY, 1, "Cook 96 Food"));
-        r1w.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.WEEKLY, 1, "Kill 3 Players"));
-        weeklyQuestPool.put(1, r1w);
+    /**
+     * Generates a human-readable display name for a quest based on its task type and required count.
+     */
+    public static String generateDisplayName(QuestTaskType type, int count) {
+        return switch (type) {
+            case BREAK_LOG -> "Break " + count + " Logs";
+            case MINE_STONE -> "Mine " + count + " Stone";
+            case MINE_COAL_ORE -> "Mine " + count + " Coal Ore";
+            case MINE_IRON_ORE -> "Mine " + count + " Iron Ore";
+            case MINE_GOLD_ORE -> "Mine " + count + " Gold Ore";
+            case MINE_DIAMOND -> "Mine " + count + " Diamond Ore";
+            case MINE_ANCIENT_DEBRIS -> "Mine " + count + " Ancient Debris";
+            case BREAK_SAND -> "Break " + count + " Sand";
+            case BREAK_GRAVEL -> "Break " + count + " Gravel";
+            case BREAK_DIRT -> "Break " + count + " Dirt";
+            case HARVEST_CROPS -> "Harvest " + count + " Crops";
+            case PLANT_CROPS -> "Plant " + count + " Crops";
+            case BREED_ANIMALS -> "Breed " + count + " Animals";
+            case FISH -> "Fish " + count + " Fish";
+            case COOK_FOOD -> "Cook " + count + " Food";
+            case KILL_HOSTILE_MOB -> "Kill " + count + " Hostile Mobs";
+            case KILL_PASSIVE_MOB -> "Kill " + count + " Passive Mobs";
+            case KILL_WITH_MELEE -> "Kill " + count + " Mobs with a Melee Weapon";
+            case KILL_WITH_RANGED -> "Kill " + count + " Mobs with a Ranged Weapon";
+            case KILL_WITH_SWORD -> "Kill " + count + " Mobs with a Sword";
+            case KILL_WITH_BOW -> "Kill " + count + " Mobs with a Bow";
+            case KILL_SKELETON -> "Kill " + count + " Skeletons";
+            case KILL_ZOMBIE -> "Kill " + count + " Zombies";
+            case KILL_CREEPER -> "Kill " + count + " Creepers";
+            case KILL_ENDERMAN -> "Kill " + count + " Endermen";
+            case KILL_SPIDER -> "Kill " + count + " Spiders";
+            case KILL_WITCH -> "Kill " + count + " Witches";
+            case KILL_BLAZE -> "Kill " + count + " Blazes";
+            case KILL_GHAST -> "Kill " + count + " Ghasts";
+            case KILL_COW -> "Kill " + count + " Cows";
+            case KILL_PIG -> "Kill " + count + " Pigs";
+            case KILL_CHICKEN -> "Kill " + count + " Chickens";
+            case KILL_SHEEP -> "Kill " + count + " Sheep";
+            case KILL_RABBIT -> "Kill " + count + " Rabbits";
+            case KILL_PLAYER -> "Kill " + count + " Players";
+            case TRAVEL_BLOCKS -> "Travel " + count + " Blocks";
+            case CRAFT_PLANKS -> "Craft " + count + " Planks";
+            case CRAFT_TORCHES -> "Craft " + count + " Torches";
+            case CRAFT_BREAD -> "Craft " + count + " Bread";
+            case CRAFT_GLASS -> "Craft " + count + " Glass";
+            case CRAFT_IRON_INGOTS -> "Craft " + count + " Iron Ingots";
+            case CRAFT_GOLDEN_APPLE -> "Craft " + count + " Golden Apples";
+        };
+    }
 
-        // Knight
-        List<Quest> r2d = new ArrayList<>();
-        r2d.add(new Quest(QuestTaskType.MINE_STONE, 256, 0.0, QuestType.DAILY, 2, "Mine 256 Stone"));
-        r2d.add(new Quest(QuestTaskType.MINE_COAL_ORE, 32, 0.0, QuestType.DAILY, 2, "Mine 32 Coal Ore"));
-        r2d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 35, 0.0, QuestType.DAILY, 2, "Kill 35 Hostile Mobs"));
-        r2d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 15, 0.0, QuestType.DAILY, 2, "Kill 15 Mobs with a Bow"));
-        r2d.add(new Quest(QuestTaskType.KILL_SKELETON, 12, 0.0, QuestType.DAILY, 2, "Kill 12 Skeletons"));
-        r2d.add(new Quest(QuestTaskType.HARVEST_CROPS, 288, 0.0, QuestType.DAILY, 2, "Harvest 288 Crops"));
-        r2d.add(new Quest(QuestTaskType.BREED_ANIMALS, 8, 0.0, QuestType.DAILY, 2, "Breed 8 Animals"));
-        r2d.add(new Quest(QuestTaskType.FISH, 12, 0.0, QuestType.DAILY, 2, "Fish 12 Fish"));
-        r2d.add(new Quest(QuestTaskType.CRAFT_BREAD, 32, 0.0, QuestType.DAILY, 2, "Craft 32 Bread"));
-        r2d.add(new Quest(QuestTaskType.BREAK_SAND, 96, 0.0, QuestType.DAILY, 2, "Break 96 Sand"));
-        r2d.add(new Quest(QuestTaskType.CRAFT_GLASS, 32, 0.0, QuestType.DAILY, 2, "Craft 32 Glass"));
-        r2d.add(new Quest(QuestTaskType.KILL_CREEPER, 5, 0.0, QuestType.DAILY, 2, "Kill 5 Creepers"));
-        r2d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 16, 0.0, QuestType.DAILY, 2, "Mine 16 Iron Ore"));
-        r2d.add(new Quest(QuestTaskType.COOK_FOOD, 64, 0.0, QuestType.DAILY, 2, "Cook 64 Food"));
-        r2d.add(new Quest(QuestTaskType.BREAK_LOG, 96, 0.0, QuestType.DAILY, 2, "Break 96 Logs"));
-        r2d.add(new Quest(QuestTaskType.KILL_PLAYER, 2, 0.0, QuestType.DAILY, 2, "Kill 2 Players"));
-        dailyQuestPool.put(2, r2d);
-
-        List<Quest> r2w = new ArrayList<>();
-        r2w.add(new Quest(QuestTaskType.MINE_IRON_ORE, 64, 0.0, QuestType.WEEKLY, 2, "Mine 64 Iron Ore"));
-        r2w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 200, 0.0, QuestType.WEEKLY, 2, "Kill 200 Hostile Mobs"));
-        r2w.add(new Quest(QuestTaskType.KILL_WITH_BOW, 50, 0.0, QuestType.WEEKLY, 2, "Kill 50 Mobs with a Bow"));
-        r2w.add(new Quest(QuestTaskType.HARVEST_CROPS, 1400, 0.0, QuestType.WEEKLY, 2, "Harvest 1400 Crops"));
-        r2w.add(new Quest(QuestTaskType.FISH, 50, 0.0, QuestType.WEEKLY, 2, "Fish 50 Fish"));
-        r2w.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.WEEKLY, 2, "Kill 5 Players"));
-        weeklyQuestPool.put(2, r2w);
-
-        // Baron
-        List<Quest> r3d = new ArrayList<>();
-        r3d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 48, 0.0, QuestType.DAILY, 3, "Mine 48 Iron Ore"));
-        r3d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 50, 0.0, QuestType.DAILY, 3, "Kill 50 Hostile Mobs"));
-        r3d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 20, 0.0, QuestType.DAILY, 3, "Kill 20 Mobs with a Bow"));
-        r3d.add(new Quest(QuestTaskType.KILL_CREEPER, 10, 0.0, QuestType.DAILY, 3, "Kill 10 Creepers"));
-        r3d.add(new Quest(QuestTaskType.HARVEST_CROPS, 384, 0.0, QuestType.DAILY, 3, "Harvest 384 Crops"));
-        r3d.add(new Quest(QuestTaskType.BREED_ANIMALS, 10, 0.0, QuestType.DAILY, 3, "Breed 10 Animals"));
-        r3d.add(new Quest(QuestTaskType.FISH, 15, 0.0, QuestType.DAILY, 3, "Fish 15 Fish"));
-        r3d.add(new Quest(QuestTaskType.CRAFT_BREAD, 48, 0.0, QuestType.DAILY, 3, "Craft 48 Bread"));
-        r3d.add(new Quest(QuestTaskType.BREAK_LOG, 128, 0.0, QuestType.DAILY, 3, "Break 128 Logs"));
-        r3d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 16, 0.0, QuestType.DAILY, 3, "Mine 16 Gold Ore"));
-        r3d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 6, 0.0, QuestType.DAILY, 3, "Kill 6 Endermen"));
-        r3d.add(new Quest(QuestTaskType.COOK_FOOD, 96, 0.0, QuestType.DAILY, 3, "Cook 96 Food"));
-        r3d.add(new Quest(QuestTaskType.BREAK_GRAVEL, 64, 0.0, QuestType.DAILY, 3, "Break 64 Gravel"));
-        r3d.add(new Quest(QuestTaskType.CRAFT_IRON_INGOTS, 32, 0.0, QuestType.DAILY, 3, "Craft 32 Iron Ingots"));
-        r3d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 30, 0.0, QuestType.DAILY, 3, "Kill 30 Zombies"));
-        r3d.add(new Quest(QuestTaskType.KILL_PLAYER, 2, 0.0, QuestType.DAILY, 3, "Kill 2 Players"));
-        dailyQuestPool.put(3, r3d);
-
-        List<Quest> r3w = new ArrayList<>();
-        r3w.add(new Quest(QuestTaskType.MINE_IRON_ORE, 128, 0.0, QuestType.WEEKLY, 3, "Mine 128 Iron Ore"));
-        r3w.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 48, 0.0, QuestType.WEEKLY, 3, "Mine 48 Gold Ore"));
-        r3w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 350, 0.0, QuestType.WEEKLY, 3, "Kill 350 Hostile Mobs"));
-        r3w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 20, 0.0, QuestType.WEEKLY, 3, "Kill 20 Endermen"));
-        r3w.add(new Quest(QuestTaskType.HARVEST_CROPS, 2500, 0.0, QuestType.WEEKLY, 3, "Harvest 2500 Crops"));
-        r3w.add(new Quest(QuestTaskType.KILL_PLAYER, 8, 0.0, QuestType.WEEKLY, 3, "Kill 8 Players"));
-        weeklyQuestPool.put(3, r3w);
-
-        // Count
-        List<Quest> r4d = new ArrayList<>();
-        r4d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 96, 0.0, QuestType.DAILY, 4, "Mine 96 Iron Ore"));
-        r4d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 32, 0.0, QuestType.DAILY, 4, "Mine 32 Gold Ore"));
-        r4d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 75, 0.0, QuestType.DAILY, 4, "Kill 75 Hostile Mobs"));
-        r4d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 30, 0.0, QuestType.DAILY, 4, "Kill 30 Mobs with a Sword"));
-        r4d.add(new Quest(QuestTaskType.KILL_CREEPER, 15, 0.0, QuestType.DAILY, 4, "Kill 15 Creepers"));
-        r4d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 10, 0.0, QuestType.DAILY, 4, "Kill 10 Endermen"));
-        r4d.add(new Quest(QuestTaskType.HARVEST_CROPS, 480, 0.0, QuestType.DAILY, 4, "Harvest 480 Crops"));
-        r4d.add(new Quest(QuestTaskType.BREED_ANIMALS, 12, 0.0, QuestType.DAILY, 4, "Breed 12 Animals"));
-        r4d.add(new Quest(QuestTaskType.FISH, 20, 0.0, QuestType.DAILY, 4, "Fish 20 Fish"));
-        r4d.add(new Quest(QuestTaskType.CRAFT_IRON_INGOTS, 64, 0.0, QuestType.DAILY, 4, "Craft 64 Iron Ingots"));
-        r4d.add(new Quest(QuestTaskType.BREAK_LOG, 160, 0.0, QuestType.DAILY, 4, "Break 160 Logs"));
-        r4d.add(new Quest(QuestTaskType.MINE_DIAMOND, 12, 0.0, QuestType.DAILY, 4, "Mine 12 Diamonds"));
-        r4d.add(new Quest(QuestTaskType.COOK_FOOD, 96, 0.0, QuestType.DAILY, 4, "Cook 96 Food"));
-        r4d.add(new Quest(QuestTaskType.KILL_SKELETON, 40, 0.0, QuestType.DAILY, 4, "Kill 40 Skeletons"));
-        r4d.add(new Quest(QuestTaskType.MINE_STONE, 256, 0.0, QuestType.DAILY, 4, "Mine 256 Stone"));
-        r4d.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.DAILY, 4, "Kill 3 Players"));
-        dailyQuestPool.put(4, r4d);
-
-        List<Quest> r4w = new ArrayList<>();
-        r4w.add(new Quest(QuestTaskType.MINE_DIAMOND, 48, 0.0, QuestType.WEEKLY, 4, "Mine 48 Diamonds"));
-        r4w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 450, 0.0, QuestType.WEEKLY, 4, "Kill 450 Hostile Mobs"));
-        r4w.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 100, 0.0, QuestType.WEEKLY, 4, "Kill 100 Mobs with a Sword"));
-        r4w.add(new Quest(QuestTaskType.HARVEST_CROPS, 3500, 0.0, QuestType.WEEKLY, 4, "Harvest 3500 Crops"));
-        r4w.add(new Quest(QuestTaskType.CRAFT_IRON_INGOTS, 128, 0.0, QuestType.WEEKLY, 4, "Craft 128 Iron Ingots"));
-        r4w.add(new Quest(QuestTaskType.KILL_PLAYER, 10, 0.0, QuestType.WEEKLY, 4, "Kill 10 Players"));
-        weeklyQuestPool.put(4, r4w);
-
-        // Duke
-        List<Quest> r5d = new ArrayList<>();
-        r5d.add(new Quest(QuestTaskType.MINE_DIAMOND, 24, 0.0, QuestType.DAILY, 5, "Mine 24 Diamonds"));
-        r5d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 48, 0.0, QuestType.DAILY, 5, "Mine 48 Gold Ore"));
-        r5d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 100, 0.0, QuestType.DAILY, 5, "Kill 100 Hostile Mobs"));
-        r5d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 40, 0.0, QuestType.DAILY, 5, "Kill 40 Mobs with a Bow"));
-        r5d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 20, 0.0, QuestType.DAILY, 5, "Kill 20 Endermen"));
-        r5d.add(new Quest(QuestTaskType.KILL_WITCH, 10, 0.0, QuestType.DAILY, 5, "Kill 10 Witches"));
-        r5d.add(new Quest(QuestTaskType.HARVEST_CROPS, 576, 0.0, QuestType.DAILY, 5, "Harvest 576 Crops"));
-        r5d.add(new Quest(QuestTaskType.BREED_ANIMALS, 14, 0.0, QuestType.DAILY, 5, "Breed 14 Animals"));
-        r5d.add(new Quest(QuestTaskType.FISH, 25, 0.0, QuestType.DAILY, 5, "Fish 25 Fish"));
-        r5d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 24, 0.0, QuestType.DAILY, 5, "Craft 24 Golden Apples"));
-        r5d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 64, 0.0, QuestType.DAILY, 5, "Mine 64 Iron Ore"));
-        r5d.add(new Quest(QuestTaskType.KILL_SPIDER, 20, 0.0, QuestType.DAILY, 5, "Kill 20 Spiders"));
-        r5d.add(new Quest(QuestTaskType.COOK_FOOD, 128, 0.0, QuestType.DAILY, 5, "Cook 128 Food"));
-        r5d.add(new Quest(QuestTaskType.BREAK_LOG, 200, 0.0, QuestType.DAILY, 5, "Break 200 Logs"));
-        r5d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 40, 0.0, QuestType.DAILY, 5, "Kill 40 Zombies"));
-        r5d.add(new Quest(QuestTaskType.KILL_PLAYER, 3, 0.0, QuestType.DAILY, 5, "Kill 3 Players"));
-        dailyQuestPool.put(5, r5d);
-
-        List<Quest> r5w = new ArrayList<>();
-        r5w.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.WEEKLY, 5, "Mine 80 Diamonds"));
-        r5w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 600, 0.0, QuestType.WEEKLY, 5, "Kill 600 Hostile Mobs"));
-        r5w.add(new Quest(QuestTaskType.KILL_WITH_BOW, 150, 0.0, QuestType.WEEKLY, 5, "Kill 150 Mobs with a Bow"));
-        r5w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 40, 0.0, QuestType.WEEKLY, 5, "Kill 40 Endermen"));
-        r5w.add(new Quest(QuestTaskType.HARVEST_CROPS, 5500, 0.0, QuestType.WEEKLY, 5, "Harvest 5500 Crops"));
-        r5w.add(new Quest(QuestTaskType.KILL_PLAYER, 12, 0.0, QuestType.WEEKLY, 5, "Kill 12 Players"));
-        weeklyQuestPool.put(5, r5w);
-
-        // Prince
-        List<Quest> r6d = new ArrayList<>();
-        r6d.add(new Quest(QuestTaskType.MINE_DIAMOND, 40, 0.0, QuestType.DAILY, 6, "Mine 40 Diamonds"));
-        r6d.add(new Quest(QuestTaskType.MINE_GOLD_ORE, 80, 0.0, QuestType.DAILY, 6, "Mine 80 Gold Ore"));
-        r6d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 150, 0.0, QuestType.DAILY, 6, "Kill 150 Hostile Mobs"));
-        r6d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Mobs with a Sword"));
-        r6d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 25, 0.0, QuestType.DAILY, 6, "Kill 25 Endermen"));
-        r6d.add(new Quest(QuestTaskType.KILL_WITCH, 8, 0.0, QuestType.DAILY, 6, "Kill 8 Witches"));
-        r6d.add(new Quest(QuestTaskType.KILL_BLAZE, 10, 0.0, QuestType.DAILY, 6, "Kill 10 Blaze"));
-        r6d.add(new Quest(QuestTaskType.HARVEST_CROPS, 480, 0.0, QuestType.DAILY, 6, "Harvest 480 Crops"));
-        r6d.add(new Quest(QuestTaskType.BREED_ANIMALS, 16, 0.0, QuestType.DAILY, 6, "Breed 16 Animals"));
-        r6d.add(new Quest(QuestTaskType.FISH, 20, 0.0, QuestType.DAILY, 6, "Fish 20 Fish"));
-        r6d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 48, 0.0, QuestType.DAILY, 6, "Craft 48 Golden Apples"));
-        r6d.add(new Quest(QuestTaskType.MINE_IRON_ORE, 96, 0.0, QuestType.DAILY, 6, "Mine 96 Iron Ore"));
-        r6d.add(new Quest(QuestTaskType.KILL_SKELETON, 50, 0.0, QuestType.DAILY, 6, "Kill 50 Skeletons"));
-        r6d.add(new Quest(QuestTaskType.COOK_FOOD, 160, 0.0, QuestType.DAILY, 6, "Cook 160 Food"));
-        r6d.add(new Quest(QuestTaskType.BREAK_LOG, 192, 0.0, QuestType.DAILY, 6, "Break 192 Logs"));
-        r6d.add(new Quest(QuestTaskType.KILL_PLAYER, 4, 0.0, QuestType.DAILY, 6, "Kill 4 Players"));
-        dailyQuestPool.put(6, r6d);
-
-        List<Quest> r6w = new ArrayList<>();
-        r6w.add(new Quest(QuestTaskType.MINE_DIAMOND, 128, 0.0, QuestType.WEEKLY, 6, "Mine 128 Diamonds"));
-        r6w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 800, 0.0, QuestType.WEEKLY, 6, "Kill 800 Hostile Mobs"));
-        r6w.add(new Quest(QuestTaskType.KILL_BLAZE, 40, 0.0, QuestType.WEEKLY, 6, "Kill 40 Blaze"));
-        r6w.add(new Quest(QuestTaskType.KILL_WITCH, 50, 0.0, QuestType.WEEKLY, 6, "Kill 50 Witches"));
-        r6w.add(new Quest(QuestTaskType.HARVEST_CROPS, 8500, 0.0, QuestType.WEEKLY, 6, "Harvest 8500 Crops"));
-        r6w.add(new Quest(QuestTaskType.KILL_PLAYER, 15, 0.0, QuestType.WEEKLY, 6, "Kill 15 Players"));
-        weeklyQuestPool.put(6, r6w);
-
-        // King
-        List<Quest> r7d = new ArrayList<>();
-        r7d.add(new Quest(QuestTaskType.MINE_DIAMOND, 64, 0.0, QuestType.DAILY, 7, "Mine 64 Diamonds"));
-        r7d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 180, 0.0, QuestType.DAILY, 7, "Kill 180 Hostile Mobs"));
-        r7d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 7, "Kill 60 Mobs with a Bow"));
-        r7d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 35, 0.0, QuestType.DAILY, 7, "Kill 35 Endermen"));
-        r7d.add(new Quest(QuestTaskType.KILL_BLAZE, 20, 0.0, QuestType.DAILY, 7, "Kill 20 Blaze"));
-        r7d.add(new Quest(QuestTaskType.KILL_GHAST, 8, 0.0, QuestType.DAILY, 7, "Kill 8 Ghasts"));
-        r7d.add(new Quest(QuestTaskType.HARVEST_CROPS, 864, 0.0, QuestType.DAILY, 7, "Harvest 864 Crops"));
-        r7d.add(new Quest(QuestTaskType.BREED_ANIMALS, 20, 0.0, QuestType.DAILY, 7, "Breed 20 Animals"));
-        r7d.add(new Quest(QuestTaskType.FISH, 35, 0.0, QuestType.DAILY, 7, "Fish 35 Fish"));
-        r7d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 80, 0.0, QuestType.DAILY, 7, "Craft 80 Golden Apples"));
-        r7d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 6, 0.0, QuestType.DAILY, 7, "Mine 6 Ancient Debris"));
-        r7d.add(new Quest(QuestTaskType.KILL_SKELETON, 75, 0.0, QuestType.DAILY, 7, "Kill 75 Skeletons"));
-        r7d.add(new Quest(QuestTaskType.COOK_FOOD, 192, 0.0, QuestType.DAILY, 7, "Cook 192 Food"));
-        r7d.add(new Quest(QuestTaskType.BREAK_LOG, 320, 0.0, QuestType.DAILY, 7, "Break 320 Logs"));
-        r7d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 75, 0.0, QuestType.DAILY, 7, "Kill 75 Zombies"));
-        r7d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 7, "Kill 5 Players"));
-        dailyQuestPool.put(7, r7d);
-
-        List<Quest> r7w = new ArrayList<>();
-        r7w.add(new Quest(QuestTaskType.MINE_DIAMOND, 200, 0.0, QuestType.WEEKLY, 7, "Mine 200 Diamonds"));
-        r7w.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 24, 0.0, QuestType.WEEKLY, 7, "Mine 24 Ancient Debris"));
-        r7w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 1100, 0.0, QuestType.WEEKLY, 7, "Kill 1100 Hostile Mobs"));
-        r7w.add(new Quest(QuestTaskType.KILL_BLAZE, 50, 0.0, QuestType.WEEKLY, 7, "Kill 50 Blaze"));
-        r7w.add(new Quest(QuestTaskType.HARVEST_CROPS, 11500, 0.0, QuestType.WEEKLY, 7, "Harvest 11500 Crops"));
-        r7w.add(new Quest(QuestTaskType.KILL_PLAYER, 18, 0.0, QuestType.WEEKLY, 7, "Kill 18 Players"));
-        weeklyQuestPool.put(7, r7w);
-
-        // Emperor
-        List<Quest> r8d = new ArrayList<>();
-        r8d.add(new Quest(QuestTaskType.MINE_DIAMOND, 80, 0.0, QuestType.DAILY, 8, "Mine 80 Diamonds"));
-        r8d.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 10, 0.0, QuestType.DAILY, 8, "Mine 10 Ancient Debris"));
-        r8d.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 250, 0.0, QuestType.DAILY, 8, "Kill 250 Hostile Mobs"));
-        r8d.add(new Quest(QuestTaskType.KILL_WITH_SWORD, 75, 0.0, QuestType.DAILY, 8, "Kill 75 Mobs with a Sword"));
-        r8d.add(new Quest(QuestTaskType.KILL_WITH_BOW, 60, 0.0, QuestType.DAILY, 8, "Kill 60 Mobs with a Bow"));
-        r8d.add(new Quest(QuestTaskType.KILL_ENDERMAN, 50, 0.0, QuestType.DAILY, 8, "Kill 50 Endermen"));
-        r8d.add(new Quest(QuestTaskType.KILL_BLAZE, 30, 0.0, QuestType.DAILY, 8, "Kill 30 Blaze"));
-        r8d.add(new Quest(QuestTaskType.KILL_GHAST, 15, 0.0, QuestType.DAILY, 8, "Kill 15 Ghasts"));
-        r8d.add(new Quest(QuestTaskType.HARVEST_CROPS, 1056, 0.0, QuestType.DAILY, 8, "Harvest 1056 Crops"));
-        r8d.add(new Quest(QuestTaskType.BREED_ANIMALS, 25, 0.0, QuestType.DAILY, 8, "Breed 25 Animals"));
-        r8d.add(new Quest(QuestTaskType.FISH, 45, 0.0, QuestType.DAILY, 8, "Fish 45 Fish"));
-        r8d.add(new Quest(QuestTaskType.CRAFT_GOLDEN_APPLE, 128, 0.0, QuestType.DAILY, 8, "Craft 128 Golden Apples"));
-        r8d.add(new Quest(QuestTaskType.KILL_SKELETON, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Skeletons"));
-        r8d.add(new Quest(QuestTaskType.COOK_FOOD, 256, 0.0, QuestType.DAILY, 8, "Cook 256 Food"));
-        r8d.add(new Quest(QuestTaskType.KILL_ZOMBIE, 100, 0.0, QuestType.DAILY, 8, "Kill 100 Zombies"));
-        r8d.add(new Quest(QuestTaskType.KILL_PLAYER, 5, 0.0, QuestType.DAILY, 8, "Kill 5 Players"));
-        dailyQuestPool.put(8, r8d);
-
-        List<Quest> r8w = new ArrayList<>();
-        r8w.add(new Quest(QuestTaskType.MINE_DIAMOND, 300, 0.0, QuestType.WEEKLY, 8, "Mine 300 Diamonds"));
-        r8w.add(new Quest(QuestTaskType.MINE_ANCIENT_DEBRIS, 48, 0.0, QuestType.WEEKLY, 8, "Mine 48 Ancient Debris"));
-        r8w.add(new Quest(QuestTaskType.KILL_HOSTILE_MOB, 1600, 0.0, QuestType.WEEKLY, 8, "Kill 1600 Hostile Mobs"));
-        r8w.add(new Quest(QuestTaskType.KILL_ENDERMAN, 100, 0.0, QuestType.WEEKLY, 8, "Kill 100 Endermen"));
-        r8w.add(new Quest(QuestTaskType.HARVEST_CROPS, 16000, 0.0, QuestType.WEEKLY, 8, "Harvest 16000 Crops"));
-        r8w.add(new Quest(QuestTaskType.KILL_PLAYER, 20, 0.0, QuestType.WEEKLY, 8, "Kill 20 Players"));
-        weeklyQuestPool.put(8, r8w);
+    /**
+     * Returns a copy of the given quest with its required count randomised +/- 20%.
+     * The display name is updated to reflect the new count.
+     */
+    private static Quest randomizeRequired(Quest q) {
+        double factor = 0.8 + RANDOM.nextDouble() * 0.4; // uniform [0.8, 1.2]
+        int randomized = Math.max(1, (int) Math.round(q.getRequired() * factor));
+        return new Quest(
+                q.getTaskType(), randomized, q.getReward(), q.getQuestType(), q.getRank(),
+                generateDisplayName(q.getTaskType(), randomized), q.getItemReward()
+        );
     }
 
     /**
@@ -356,7 +215,8 @@ public class QuestUtils {
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
-            assigned.add(q.withReward(generateRandomReward(rank, QuestType.DAILY, q.getTaskType())));
+            Quest randomized = randomizeRequired(q);
+            assigned.add(randomized.withReward(generateRandomReward(rank, QuestType.DAILY, q.getTaskType())));
         }
 
         // Rank-scaled chance that exactly one daily quest rewards a crate key instead of money
@@ -385,7 +245,8 @@ public class QuestUtils {
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
-            assigned.add(q.withReward(generateRandomReward(rank, QuestType.WEEKLY, q.getTaskType())));
+            Quest randomized = randomizeRequired(q);
+            assigned.add(randomized.withReward(generateRandomReward(rank, QuestType.WEEKLY, q.getTaskType())));
         }
 
         // Rank-scaled chance that exactly one weekly quest rewards an epic or godly crate key
@@ -547,11 +408,12 @@ public class QuestUtils {
             case HARVEST_CROPS, PLANT_CROPS, BREED_ANIMALS, COOK_FOOD,
                  CRAFT_PLANKS, CRAFT_TORCHES, CRAFT_GLASS, CRAFT_BREAD, CRAFT_IRON_INGOTS,
                  BREAK_LOG, BREAK_SAND, BREAK_DIRT, BREAK_GRAVEL,
-                 TRAVEL_BLOCKS, KILL_PASSIVE_MOB -> 0.5;
+                 TRAVEL_BLOCKS, KILL_PASSIVE_MOB,
+                 KILL_COW, KILL_PIG, KILL_CHICKEN, KILL_SHEEP, KILL_RABBIT -> 0.5;
             // Medium
             case MINE_STONE, MINE_COAL_ORE, MINE_IRON_ORE,
                  KILL_HOSTILE_MOB, KILL_ZOMBIE, KILL_SKELETON, KILL_SPIDER, KILL_CREEPER,
-                 KILL_WITH_SWORD, KILL_WITH_BOW -> 1.0;
+                 KILL_WITH_SWORD, KILL_WITH_BOW, KILL_WITH_MELEE, KILL_WITH_RANGED -> 1.0;
             // Hard
             case FISH, MINE_GOLD_ORE, MINE_DIAMOND, MINE_ANCIENT_DEBRIS,
                  KILL_ENDERMAN, KILL_WITCH, KILL_BLAZE, KILL_GHAST,

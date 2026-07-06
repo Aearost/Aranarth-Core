@@ -60,6 +60,7 @@ public class AranarthPlayer {
 	private long conquestDisbandCooldownEnd = 0;
 	private boolean isCompressingItems = true;
 	private int bulkTransactionNum = 0;
+	private Location bulkTransactionShopLocation = null;
 	private boolean isOpeningCrateWithCyclingItem = false;
 	private CrateType crateTypeBeingOpened = null;
 	private boolean isAutoClaimEnabled = false;
@@ -1463,5 +1464,13 @@ public class AranarthPlayer {
 
 	public void setBulkTransactionExpiry(long bulkTransactionExpiry) {
 		this.bulkTransactionExpiry = bulkTransactionExpiry;
+	}
+
+	public Location getBulkTransactionShopLocation() {
+		return bulkTransactionShopLocation;
+	}
+
+	public void setBulkTransactionShopLocation(Location bulkTransactionShopLocation) {
+		this.bulkTransactionShopLocation = bulkTransactionShopLocation;
 	}
 }

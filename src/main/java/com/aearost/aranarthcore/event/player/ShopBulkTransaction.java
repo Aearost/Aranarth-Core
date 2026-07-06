@@ -95,6 +95,7 @@ public class ShopBulkTransaction {
             }
             player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
             aranarthPlayer.setBulkTransactionNum(1);
+            aranarthPlayer.setBulkTransactionShopLocation(shop.getLocation());
             aranarthPlayer.setBulkTransactionExpiry(System.currentTimeMillis() + 5000);
             scheduleBulkTransactionExpiry(player.getUniqueId());
         }

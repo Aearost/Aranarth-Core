@@ -51,6 +51,12 @@ public class ShopInteract {
 
                         // Enables bulk mode for the purchase
                         if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                            // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
+                            if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
+                                clickUser.setBulkTransactionNum(0);
+                                AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+                                return;
+                            }
                             shop = ShopUtils.getBulkShop(shop, player, true);
                         }
                         // The user is just toggling the bulk purchase mode
@@ -66,13 +72,21 @@ public class ShopInteract {
                             return;
                         }
 
-                        // Just completed a bulk transaction - skip while sneaking to avoid re-triggering
+                        // Bulk transaction was just completed - reset and skip to re-enable bulk mode for next shop
                         if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                            clickUser.setBulkTransactionNum(0);
+                            AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                             return;
                         }
 
                         // Enables bulk mode for the sale
                         if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                            // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
+                            if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
+                                clickUser.setBulkTransactionNum(0);
+                                AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+                                return;
+                            }
                             shop = ShopUtils.getBulkShop(shop, player, false);
                         }
                         // The user is just toggling the bulk sale mode
@@ -109,6 +123,12 @@ public class ShopInteract {
 
                             // Enables bulk mode for the purchase
                             if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                                // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
+                                if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
+                                    clickUser.setBulkTransactionNum(0);
+                                    AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+                                    return;
+                                }
                                 shop = ShopUtils.getBulkShop(shop, player, true);
                             }
                             // The user is just toggling the bulk purchase mode
@@ -118,13 +138,21 @@ public class ShopInteract {
 
                             handleBuyLogic(player, clickUser, null, shop, null);
                         } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-                            // Just completed a bulk transaction - skip while sneaking to avoid re-triggering
+                            // Bulk transaction was just completed - reset and skip to re-enable bulk mode for next shop
                             if (clickUser.getBulkTransactionNum() == -1 && player.isSneaking()) {
+                                clickUser.setBulkTransactionNum(0);
+                                AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                 return;
                             }
 
                             // Enables bulk mode for the sale
                             if (clickUser.getBulkTransactionNum() == 1 && player.isSneaking()) {
+                                // If bulk mode was enabled at a different shop, reset and let ShopBulkTransaction prompt for this one
+                                if (!shop.getLocation().equals(clickUser.getBulkTransactionShopLocation())) {
+                                    clickUser.setBulkTransactionNum(0);
+                                    AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
+                                    return;
+                                }
                                 shop = ShopUtils.getBulkShop(shop, player, false);
                             }
                             // The user is just toggling the bulk sale mode

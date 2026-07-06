@@ -1,13 +1,15 @@
 AranarthCore v. 1.11
 
 Major Features
-[]
+[~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
 [+] Added message when a quest is started
 [~] Corrected dominion defender purchase/manage messages
 [+] Implemented /blacklist clear
+[~] Fixed issue where you could not bulk sell at two different shops in a row
+[~] Fixed issue where switching between two server shops wouldn't re-prompt the bulk sale
 
 Backend Code Changes
 -

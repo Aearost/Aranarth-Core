@@ -288,7 +288,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadToggledFeatures();
         PersistenceUtils.loadKillDeathCount();
         PersistenceUtils.loadQuestState();
-        QuestUtils.initialize();
+        QuestUtils.initialize(this);
         PersistenceUtils.loadQuestProgress();
         PersistenceUtils.loadLoginStreaks();
         PersistenceUtils.loadGates();
