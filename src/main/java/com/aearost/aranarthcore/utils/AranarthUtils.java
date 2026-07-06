@@ -347,11 +347,6 @@ public class AranarthUtils {
 					return;
 				}
 				player.getInventory().clear();
-				player.getInventory().setArmorContents(new ItemStack[] {
-						new ItemStack(Material.IRON_BOOTS, 1),
-						new ItemStack(Material.IRON_LEGGINGS, 1),
-						new ItemStack(Material.IRON_CHESTPLATE, 1),
-						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
@@ -415,11 +410,6 @@ public class AranarthUtils {
 					return;
 				}
 				player.getInventory().clear();
-				player.getInventory().setArmorContents(new ItemStack[] {
-						new ItemStack(Material.IRON_BOOTS, 1),
-						new ItemStack(Material.IRON_LEGGINGS, 1),
-						new ItemStack(Material.IRON_CHESTPLATE, 1),
-						new ItemStack(Material.IRON_HELMET, 1)});
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, true);
 				PermissionUtils.updateSubElements(player);
