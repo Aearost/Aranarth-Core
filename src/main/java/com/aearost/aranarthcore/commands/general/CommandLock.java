@@ -53,7 +53,11 @@ public class CommandLock implements CommandExecutor {
         Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
             AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
             if (ap == null) return;
-            if (System.currentTimeMillis() < ap.getContainerToggleExpiry()) return;
+            long remaining = ap.getContainerToggleExpiry() - System.currentTimeMillis();
+            if (remaining > 0) {
+                scheduleToggleExpiry(uuid);
+                return;
+            }
             boolean wasActive = ap.isLockingContainer() || ap.isUnlockingContainer()
                     || ap.getTrustedPlayerUUID() != null || ap.getUntrustedPlayerUUID() != null;
             if (!wasActive) return;
