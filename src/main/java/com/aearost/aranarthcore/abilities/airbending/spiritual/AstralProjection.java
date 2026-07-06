@@ -94,7 +94,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
             } else {
                 if (player.isSneaking()) {
                     Location eyeLoc = player.getEyeLocation();
-                    player.spawnParticle(Particle.ENCHANT, eyeLoc, 4, 0.25, 0.25, 0.25, 0.05);
+                    player.getWorld().spawnParticle(Particle.ENCHANT, eyeLoc, 4, 0.25, 0.25, 0.25, 0.05);
                 } else {
                     launchAstralForm();
                 }
