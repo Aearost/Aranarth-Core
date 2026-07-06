@@ -57,9 +57,10 @@ public class CommandPerks {
 			}
 		}
 
-		if (args.length < 4) {
+		boolean isHomesIncrement = args.length >= 3 && args[2].equals("homes") && (args.length == 3 || (args.length == 4 && args[3].equalsIgnoreCase("silent")));
+		if (args.length < 4 || isHomesIncrement) {
 			// To increase the amount of homes by 3
-			if (args.length == 3) {
+			if (args.length == 3 || isHomesIncrement) {
 				if (args[2].equals("homes")) {
 					UUID uuid = AranarthUtils.getUUIDFromUsername(args[1]);
 					if (AranarthUtils.getPlayer(uuid) != null) {
@@ -77,9 +78,12 @@ public class CommandPerks {
 									PermissionUtils.evaluatePlayerPermissions(player);
 								}
 
+								boolean isSilent = args.length == 4 && args[3].equalsIgnoreCase("silent");
 								String message = "&e" + aranarthPlayer.getNickname() + " &7has purchased the &4&lAdditional 3 Homes &7perk!";
 								Bukkit.broadcastMessage(ChatUtils.chatMessage(message));
-								DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+								if (!isSilent) {
+									DiscordUtils.donationNotification(message, uuid, Color.CYAN);
+								}
 
 								return true;
 							} else {
