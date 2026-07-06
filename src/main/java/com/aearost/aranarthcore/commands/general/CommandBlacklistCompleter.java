@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  */
 public class CommandBlacklistCompleter implements TabCompleter {
 
-	private static final List<String> OPTIONS = List.of("ignore", "off", "trash");
+	private static final List<String> OPTIONS = List.of("clear", "ignore", "off", "trash");
 
 	/**
 	 * @param sender The user that entered the command.

@@ -30,6 +30,11 @@ public class CommandBlacklist implements CommandExecutor {
 			}
 
             if (args.length == 0) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				if (aranarthPlayer.getBlacklist() == null || aranarthPlayer.getBlacklist().isEmpty()) {
+					player.sendMessage(ChatUtils.chatMessage("&7You have no items blacklisted"));
+					return true;
+				}
 				GuiBlacklist gui = new GuiBlacklist(player);
 				gui.openGui();
 				return true;
@@ -44,6 +49,9 @@ public class CommandBlacklist implements CommandExecutor {
 				} else if (args[0].equals("off")) {
 					aranarthPlayer.setBlacklistingMethod(-1);
 					player.sendMessage(ChatUtils.chatMessage("&7Your blacklist is now disabled"));
+				} else if (args[0].equals("clear")) {
+					aranarthPlayer.setBlacklist(null);
+					player.sendMessage(ChatUtils.chatMessage("&7Your blacklist has been cleared"));
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&cPlease enter a valid toggle option!"));
 					return false;
