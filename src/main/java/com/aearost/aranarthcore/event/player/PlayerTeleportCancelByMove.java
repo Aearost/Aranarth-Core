@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitTask;
@@ -13,42 +14,45 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class PlayerTeleportCancelByMove {
 
-	public void execute(PlayerMoveEvent e) {
-		// If they did not move to a different coordinate and only their mouse
-		if (e.getTo() == null) {
-			return;
-		}
+    public void execute(PlayerMoveEvent e) {
+        // If they did not move to a different coordinate and only their mouse
+        if (e.getTo() == null) {
+            return;
+        }
 
-		Player player = e.getPlayer();
-		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-		BukkitTask task = AranarthUtils.getTeleportTask(player.getUniqueId());
-		// If they're actively trying to teleport
-		if (task != null) {
-			if (!AranarthUtils.locationsMatch(e.getFrom(), e.getTo())) {
-				task.cancel();
-				AranarthUtils.removeTeleportTask(player.getUniqueId());
-				player.sendMessage(ChatUtils.chatMessage("&cYou cannot move when trying to teleport!"));
+        Player player = e.getPlayer();
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        BukkitTask task = AranarthUtils.getTeleportTask(player.getUniqueId());
+        // If they're actively trying to teleport
+        if (task != null) {
+            Location from = e.getFrom();
+            Location to = e.getTo();
+            boolean positionChanged = from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ();
+            if (positionChanged) {
+                task.cancel();
+                AranarthUtils.removeTeleportTask(player.getUniqueId());
+                player.sendMessage(ChatUtils.chatMessage("&cYou cannot move when trying to teleport!"));
 
-				// /ac tphere was sent
-				if (aranarthPlayer.getTeleportToUuid() != null) {
-					Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
-					if (target != null) {
-						target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
-					}
-				}
-				// /ac tp was sent
-				else {
-					for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-						AranarthPlayer aranarthPlayerOnline = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-						if (aranarthPlayerOnline.getTeleportFromUuid() != null) {
-							if (aranarthPlayerOnline.getTeleportFromUuid().equals(player.getUniqueId())) {
-								onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
-								return;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+                // /ac tphere was sent
+                if (aranarthPlayer.getTeleportToUuid() != null) {
+                    Player target = Bukkit.getPlayer(aranarthPlayer.getTeleportToUuid());
+                    if (target != null) {
+                        target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
+                    }
+                }
+                // /ac tp was sent
+                else {
+                    for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                        AranarthPlayer aranarthPlayerOnline = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+                        if (aranarthPlayerOnline.getTeleportFromUuid() != null) {
+                            if (aranarthPlayerOnline.getTeleportFromUuid().equals(player.getUniqueId())) {
+                                onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cmoved and canceled the request"));
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

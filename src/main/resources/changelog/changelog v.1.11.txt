@@ -4,7 +4,7 @@ Major Features
 []
 
 Minor Features
-[]
+[~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
 
 Backend Code Changes
 -
