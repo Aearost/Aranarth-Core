@@ -76,6 +76,8 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
     private long lastDamageTime;
     private int slownessLevel;
     private boolean decayStarted;
+    private boolean blindnessApplied;
+    private boolean rootApplied;
 
     public CorruptingHelix(final Player player) {
         super(player);
@@ -106,6 +108,8 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         this.lastDamageTime = System.currentTimeMillis();
         this.slownessLevel = 0;
         this.decayStarted = false;
+        this.blindnessApplied = false;
+        this.rootApplied = false;
 
         ACTIVE_INSTANCES.put(player.getUniqueId(), this);
         start();
@@ -153,7 +157,18 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
             target.getWorld().playSound(target.getLocation(), Sound.BLOCK_WATER_AMBIENT, 0.2f, 0.7f);
         }
 
-        if (slownessLevel < MAX_WATER_SLOWNESS
+        if (!blindnessApplied && elapsed >= 1000L) {
+            target.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS, 160, 0, false, true, true), true);
+            blindnessApplied = true;
+        }
+
+        if (!rootApplied && elapsed >= 2000L) {
+            target.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 80, 127, false, true, true), true);
+            slownessLevel = MAX_WATER_SLOWNESS;
+            rootApplied = true;
+        }
+
+        if (!rootApplied && slownessLevel < MAX_WATER_SLOWNESS
                 && System.currentTimeMillis() - lastSlownessTime >= SLOWNESS_INTERVAL_MS) {
             applySlownessTick();
             lastSlownessTime = System.currentTimeMillis();
@@ -230,6 +245,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
             return;
         }
 
+        target.removePotionEffect(PotionEffectType.BLINDNESS);
         int startLevel;
         if (phase == Phase.PURPLE) {
             target.removePotionEffect(PotionEffectType.SLOWNESS);

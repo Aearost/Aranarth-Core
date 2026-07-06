@@ -14,6 +14,7 @@ Minor Features
 [~] Fixed issue where the chest locking, unlocking, trusting, and untrusting were not automatically untoggling correctly
 [~] Fixed issue where AstralProjection's charge particles were only displaying to the user
 [~] Increased the duration of the effects of DeafeningScream
+[~] Made it so CorruptingHelix applies blindness and properly roots targets
 
 Backend Code Changes
 -
