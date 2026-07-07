@@ -264,13 +264,13 @@ public class GuiCrate {
 		beheading.setItemMeta(beheadingMeta);
 		gui.setItem(20, beheading);
 
-		ItemStack lifesteal = new IncantationLifesteal().getItem();
-		ItemMeta lifestealMeta = lifesteal.getItemMeta();
-		List<String> lifestealLore = new ArrayList<>();
-		lifestealLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		lifestealMeta.setLore(lifestealLore);
-		lifesteal.setItemMeta(lifestealMeta);
-		gui.setItem(21, lifesteal);
+		ItemStack magnetism = new IncantationMagnetism().getItem();
+		ItemMeta magnetismMeta = magnetism.getItemMeta();
+		List<String> magnetismLore = new ArrayList<>();
+		magnetismLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		magnetismMeta.setLore(magnetismLore);
+		magnetism.setItemMeta(magnetismMeta);
+		gui.setItem(21, magnetism);
 
 		ItemStack epicKey = new KeyEpic().getItem();
 		ItemMeta epicKeyMeta = epicKey.getItemMeta();
@@ -627,7 +627,7 @@ public class GuiCrate {
 		initializedGui.setItem(15, cluster);
 
 		// Cycle through the incantations
-		ItemStack incantation = incantationIndex == 1 ? new IncantationMagnetism().getItem() : new IncantationPlentiful().getItem();
+		ItemStack incantation = incantationIndex == 1 ? new IncantationLifesteal().getItem() : new IncantationPlentiful().getItem();
 		ItemMeta cycledIncantationMeta = incantation.getItemMeta();
 		List<String> cycledIncantationLore = new ArrayList<>();
 		cycledIncantationLore.add(ChatUtils.translateToColor("&c5% Chance"));

@@ -536,7 +536,7 @@ public class CrateOpen {
                     reward = new IncantationBeheading().getItem();
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 90) {
-                    reward = new IncantationLifesteal().getItem();
+                    reward = new IncantationMagnetism().getItem();
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 95) {
                     reward = getCycledCluster(new Random().nextInt(8));
@@ -694,11 +694,11 @@ public class CrateOpen {
                     reward.setItemMeta(rewardMeta);
                     name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
-                    // 50/50 between Plentiful and Magnetism
+                    // 50/50 between Plentiful and Lifesteal
                     if (new Random().nextInt(2) == 0) {
                         reward = new IncantationPlentiful().getItem();
                     } else {
-                        reward = new IncantationMagnetism().getItem();
+                        reward = new IncantationLifesteal().getItem();
                     }
                     name = reward.getItemMeta().getDisplayName();
                 } else {
