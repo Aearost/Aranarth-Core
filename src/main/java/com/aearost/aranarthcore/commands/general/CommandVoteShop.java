@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.gui.GuiVoteShop;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -23,8 +24,7 @@ public class CommandVoteShop implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		if (sender instanceof Player player) {
 			String worldName = player.getWorld().getName();
-			if (worldName.startsWith("spawn") || worldName.startsWith("world")
-					|| worldName.startsWith("smp") || worldName.startsWith("resource")){
+			if (AranarthUtils.isSurvivalWorld(worldName)){
 				GuiVoteShop gui = new GuiVoteShop(player);
 				gui.openGui();
 				return true;

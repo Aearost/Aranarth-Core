@@ -82,7 +82,7 @@ public class QuiverArrowPickup {
             amountToPickup -= toAdd;
         }
 
-        // Nothing was added to the quiver — let vanilla handle it
+        // Nothing was added to the quiver
         if (amountToPickup == originalAmount) {
             return;
         }

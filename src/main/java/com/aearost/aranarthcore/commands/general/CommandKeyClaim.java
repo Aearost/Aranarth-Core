@@ -29,8 +29,7 @@ public class CommandKeyClaim implements CommandExecutor {
         }
 
         String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("world") && !worldName.startsWith("smp")
-                && !worldName.startsWith("resource") && !worldName.startsWith("spawn")) {
+        if (!AranarthUtils.isSurvivalWorld(worldName)) {
             player.sendMessage(ChatUtils.chatMessage("&cYou can only claim crate keys in survival worlds!"));
             return true;
         }

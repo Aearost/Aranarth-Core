@@ -48,7 +48,9 @@ public class CommandOverrides {
             Plugin[] plugins = Bukkit.getPluginManager().getPlugins();
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < plugins.length; i++) {
-                if (i > 0) sb.append("&r, ");
+                if (i > 0) {
+                    sb.append("&r, ");
+                }
                 sb.append(plugins[i].isEnabled() ? "&7" : "&c");
                 sb.append(plugins[i].getName());
             }
@@ -65,10 +67,8 @@ public class CommandOverrides {
             }
         }
 
-        boolean isSurvivalWorld = player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
-                || player.getWorld().getName().startsWith("resource");
         // Prevent the command entirely
-        if (parts[0].equals("/time") && isSurvivalWorld) {
+        if (parts[0].equals("/time") && AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
             if (aranarthPlayer.getCouncilRank() < 2) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to execute this command!"));
             } else {
@@ -94,7 +94,7 @@ public class CommandOverrides {
                         if (!player.getWorld().getName().equalsIgnoreCase("arena")) {
                             PermissionUtils.evaluatePlayerPermissions(player);
                         }
-                        // Dismiss any active mount — the new element may have a different mount
+                        // Dismiss any active mount as the new element may have a different mount
                         dismissActiveMountIfPresent(player);
                         // Strip any LifeRip health bonus
                         LifeRip.resetCasterGain(player);
@@ -106,7 +106,9 @@ public class CommandOverrides {
 
     private void dismissActiveMountIfPresent(Player player) {
         UUID mountId = MountUtils.getActiveMountEntityUUID(player.getUniqueId());
-        if (mountId == null) return;
+        if (mountId == null) {
+            return;
+        }
 
         String[] info = MountUtils.getActiveMountInfo(mountId);
         Entity entity = Bukkit.getEntity(mountId);
@@ -114,10 +116,14 @@ public class CommandOverrides {
         if (entity instanceof LivingEntity mount) {
             if (info != null) {
                 Mount mountData = MountUtils.get(player.getUniqueId(), info[1]);
-                if (mountData != null) mountData.setCurrentHealth(mount.getHealth());
+                if (mountData != null) {
+                    mountData.setCurrentHealth(mount.getHealth());
+                }
             }
             MountListener ml = MountListener.getInstance();
-            if (ml != null) ml.cleanupMountPublic(mountId);
+            if (ml != null) {
+                ml.cleanupMountPublic(mountId);
+            }
             mount.eject();
             mount.remove();
         } else {

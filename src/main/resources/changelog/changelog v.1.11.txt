@@ -27,4 +27,4 @@ Minor Features
 [+] Added logic to automatically add items to a quiver before the player's inventory if the stack is incomplete
 
 Backend Code Changes
--
+- Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

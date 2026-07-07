@@ -31,10 +31,9 @@ public class CommandSethome implements CommandExecutor {
 				Location loc = AranarthUtils.getSafeTeleportLocation(player.getLocation());
 				String worldName = loc == null ? null : loc.getWorld().getName();
 				boolean isOG = AranarthUtils.isOriginalPlayer(player.getUniqueId());
-				if (loc == null
+				if (worldName == null
 						|| worldName.equals("arena")
 						|| worldName.startsWith("resource")
-						|| worldName.startsWith("spawn")
 						|| (!isOG && worldName.equals("creative"))
 						|| (!isOG && worldName.startsWith("smp"))) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
