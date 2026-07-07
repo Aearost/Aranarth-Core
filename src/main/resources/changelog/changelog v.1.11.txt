@@ -24,6 +24,7 @@ Minor Features
 [~] Decreased the duration of JetFumes to 4 seconds
 [~] Corrected the warp names in the server tips
 [~] Switched Incantation of Magnetism and Lifesteal in crates
+[+] Added logic to automatically add items to a quiver before the player's inventory if the stack is incomplete
 
 Backend Code Changes
 -

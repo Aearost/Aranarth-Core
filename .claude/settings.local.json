@@ -239,7 +239,8 @@
       "Bash(git push:*)",
       "Bash(git stash:*)",
       "Bash(find C:UsersliamhIdeaProjectsAranarthCoresrcmainjavacomaearostaranarthcore -type f -name *uest*)",
-      "Bash(find ~/.m2/repository/io/papermc -name *.jar)"
+      "Bash(find ~/.m2/repository/io/papermc -name *.jar)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java -name *Pickup* -o -name *pickup*)"
     ]
   }
 }
