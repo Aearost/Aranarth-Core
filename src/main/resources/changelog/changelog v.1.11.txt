@@ -25,6 +25,7 @@ Minor Features
 [~] Corrected the warp names in the server tips
 [~] Switched Incantation of Magnetism and Lifesteal in crates
 [+] Added logic to automatically add items to a quiver before the player's inventory if the stack is incomplete
+[~] Increased the Horn of the Target usage to up to every 5 seconds instead of every minute
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
