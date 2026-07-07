@@ -64,7 +64,7 @@ public class GuiVoteShopPurchase {
 		ItemMeta meta = randomKey.getItemMeta();
 		meta.setDisplayName(ChatUtils.translateToColor("&a&lPurchase &4&lRandom Crate Key"));
 		List<String> lore = new ArrayList<>();
-		lore.add(ChatUtils.translateToColor("&e15 vote points"));
+		lore.add(ChatUtils.translateToColor("&e10 vote points"));
 		lore.add(ChatUtils.translateToColor("&a&oVote &7&o- 65%"));
 		lore.add(ChatUtils.translateToColor("&6&oRare &7&o- 25%"));
 		lore.add(ChatUtils.translateToColor("&3&oEpic &7&o- 7%"));

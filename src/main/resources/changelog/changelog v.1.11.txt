@@ -18,6 +18,7 @@ Minor Features
 [~] Fixed issue with CorruptingHelix not allowing a second target with the ability
 [~] Updated the resource pack version to 88
 [~] Capped arena potion effect stacking to vanilla values
+[~] Fixed incorrect label of the percentage for the random crate key in the vote shop
 
 Backend Code Changes
 -
