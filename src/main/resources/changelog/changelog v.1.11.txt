@@ -17,6 +17,7 @@ Minor Features
 [~] Made it so CorruptingHelix applies blindness and properly roots targets
 [~] Fixed issue with CorruptingHelix not allowing a second target with the ability
 [~] Updated the resource pack version to 88
+[~] Capped arena potion effect stacking to vanilla values
 
 Backend Code Changes
 -

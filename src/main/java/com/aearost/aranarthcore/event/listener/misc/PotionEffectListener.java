@@ -111,6 +111,11 @@ public class PotionEffectListener implements Listener {
 		}
 
 		if (e.getEntity() instanceof LivingEntity entity) {
+			// Do not apply stacking in the arena world
+			if (entity.getWorld().getName().startsWith("arena")) {
+				return;
+			}
+
 			if (e.getCause() == Cause.PLUGIN && DateUtils.isWinterMonth(AranarthUtils.getMonth())) {
 				if (e.getEntity() instanceof Player player) {
 					if (AranarthUtils.isWearingArmorType(player, "scorched")) {
