@@ -201,13 +201,25 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
 
     private void dragTarget() {
         Location victimLocation = target.getLocation();
-        Location loc = GeneralMethods.getTargetedLocation(player, (int) player.getLocation().distance(victimLocation));
-        double gap = loc.distance(victimLocation);
-        Vector v = GeneralMethods.getDirection(victimLocation, GeneralMethods.getTargetedLocation(player, 10));
+        Location aimTarget = GeneralMethods.getTargetedLocation(player, 10);
+        double gap = aimTarget.distance(victimLocation);
         if (gap > DRAG_DEAD_ZONE) {
-            target.setVelocity(v.normalize().multiply(computeDragSpeed(target)));
+            double speed = computeDragSpeed(target);
+            if (target instanceof Mob) {
+                // Mobs with AI disabled ignore setVelocity, so teleport them smoothly instead
+                Vector toTarget = aimTarget.toVector().subtract(victimLocation.toVector()).normalize();
+                Location newLoc = victimLocation.clone().add(toTarget.multiply(Math.min(speed, gap)));
+                newLoc.setYaw(victimLocation.getYaw());
+                newLoc.setPitch(victimLocation.getPitch());
+                target.teleport(newLoc);
+            } else {
+                Vector v = GeneralMethods.getDirection(victimLocation, aimTarget);
+                target.setVelocity(v.normalize().multiply(speed));
+            }
         } else {
-            target.setVelocity(new Vector(0, 0, 0));
+            if (!(target instanceof Mob)) {
+                target.setVelocity(new Vector(0, 0, 0));
+            }
         }
         target.setFallDistance(0.0F);
     }
