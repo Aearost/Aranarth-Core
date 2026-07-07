@@ -20,6 +20,7 @@ Minor Features
 [~] Capped arena potion effect stacking to vanilla values
 [~] Fixed incorrect label of the percentage for the random crate key in the vote shop
 [~] Fixed issue where BloodGrip was not working on mobs
+[~] Fixed issue where the actual rankup price was lower than it should be
 
 Backend Code Changes
 -
