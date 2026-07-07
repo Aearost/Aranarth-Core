@@ -259,24 +259,7 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         }
 
         decayStarted = true;
-        final int[] level = {startLevel};
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                level[0]--;
-                if (level[0] <= 0 || !target.isValid()) {
-                    target.removePotionEffect(PotionEffectType.SLOWNESS);
-                    cancel();
-                    return;
-                }
-                target.removePotionEffect(PotionEffectType.SLOWNESS);
-                target.addPotionEffect(new PotionEffect(
-                        PotionEffectType.SLOWNESS,
-                        level[0] * 20,
-                        level[0] - 1,
-                        false, true, true));
-            }
-        }.runTaskTimer(AranarthCore.getInstance(), 20L, 20L);
+        new SlownessDecayRunnable(target, startLevel).runTaskTimer(AranarthCore.getInstance(), 20L, 20L);
     }
 
     /**
@@ -598,6 +581,32 @@ public class CorruptingHelix extends HealingAbility implements AddonAbility {
         return "Channel a dark form of spiritual waterbending, and corrupt the soul of a target, " +
                 "applying an increasing slow to a full stop, and draining the target's health.\n" +
                 ChatUtils.translateToColor("&fUsage: Left-click (water source) > Sneak (Hold at target)");
+    }
+
+    private static final class SlownessDecayRunnable extends BukkitRunnable {
+        private final LivingEntity target;
+        private int level;
+
+        private SlownessDecayRunnable(final LivingEntity target, final int startLevel) {
+            this.target = target;
+            this.level = startLevel;
+        }
+
+        @Override
+        public void run() {
+            level--;
+            if (level <= 0 || !target.isValid()) {
+                target.removePotionEffect(PotionEffectType.SLOWNESS);
+                cancel();
+                return;
+            }
+            target.removePotionEffect(PotionEffectType.SLOWNESS);
+            target.addPotionEffect(new PotionEffect(
+                    PotionEffectType.SLOWNESS,
+                    level * 20,
+                    level - 1,
+                    false, true, true));
+        }
     }
 
 }

@@ -15,6 +15,8 @@ Minor Features
 [~] Fixed issue where AstralProjection's charge particles were only displaying to the user
 [~] Increased the duration of the effects of DeafeningScream
 [~] Made it so CorruptingHelix applies blindness and properly roots targets
+[~] Fixed issue with CorruptingHelix not allowing a second target with the ability
+[~] Updated the resource pack version to 88
 
 Backend Code Changes
 -
