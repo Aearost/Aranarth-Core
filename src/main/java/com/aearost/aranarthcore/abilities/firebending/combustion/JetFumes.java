@@ -90,7 +90,7 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
             return;
         }
 
-        duration = 5000L;
+        duration = 4000L;
         flightSpeed = 1.6;
         puffRadius = 3.0;
 
