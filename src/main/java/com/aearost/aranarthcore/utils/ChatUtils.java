@@ -643,7 +643,13 @@ public class ChatUtils {
 			}
 
 			String url = matcher.group();
-			Component urlComponent = LegacyComponentSerializer.legacySection().deserialize(url);
+			String beforeUrl = legacyMessage.substring(0, matcher.start());
+			String colorPrefix = "";
+			int lastCode = beforeUrl.lastIndexOf('\u00A7');
+			if (lastCode != -1 && lastCode + 1 < beforeUrl.length()) {
+				colorPrefix = beforeUrl.substring(lastCode, lastCode + 2);
+			}
+			Component urlComponent = LegacyComponentSerializer.legacySection().deserialize(colorPrefix + url);
 			result = result.append(clickableUrl(urlComponent, hoverText, url));
 			lastEnd = matcher.end();
 		}
