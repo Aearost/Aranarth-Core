@@ -31,10 +31,6 @@ public class CommandBlacklist implements CommandExecutor {
 
             if (args.length == 0) {
 				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-				if (aranarthPlayer.getBlacklist() == null || aranarthPlayer.getBlacklist().isEmpty()) {
-					player.sendMessage(ChatUtils.chatMessage("&7You have no items blacklisted"));
-					return true;
-				}
 				GuiBlacklist gui = new GuiBlacklist(player);
 				gui.openGui();
 				return true;
