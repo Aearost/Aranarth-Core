@@ -45,7 +45,9 @@ public class CompressorItemPickup {
 			boolean isIncludingShulkers = (player.hasPermission("aranarth.shulker"));
 			// Identifies all contents of compressible items in the player's inventory
 			HashMap<Material, List<ItemStack>> compressibleItems = new HashMap<>();
-			for (ItemStack inventoryItem : player.getInventory().getContents()) {
+			ItemStack[] allContents = player.getInventory().getContents();
+			for (int ii = 0; ii < allContents.length; ii++) {
+				ItemStack inventoryItem = allContents[ii];
 				// Ignore if it is empty
 				if (inventoryItem == null || inventoryItem.getType() == Material.AIR) {
 					continue;
@@ -117,12 +119,12 @@ public class CompressorItemPickup {
 						if (compressibleItems.containsKey(type)) {
 							List<ItemStack> stacksOfItems = compressibleItems.get(type);
 							stacksOfItems.add(inventoryItem.clone());
-							inventoryItem.setAmount(0);
+							player.getInventory().setItem(ii, null);
 							compressibleItems.put(type, stacksOfItems);
 						} else {
 							List<ItemStack> stacksOfItems = new ArrayList<>();
 							stacksOfItems.add(inventoryItem.clone());
-							inventoryItem.setAmount(0);
+							player.getInventory().setItem(ii, null);
 							compressibleItems.put(type, stacksOfItems);
 						}
 					}
@@ -162,6 +164,7 @@ public class CompressorItemPickup {
 			// Fallback method to pick up normally if it's a non-compressible item that's picked up
 			else {
 				player.getInventory().addItem(pickupClone);
+				player.updateInventory();
 				return;
 			}
 
@@ -199,6 +202,7 @@ public class CompressorItemPickup {
 					case Material.BAMBOO -> calculateCompressedAmounts(player, compressibleItems.get(type), 9);
 				}
 			}
+			player.updateInventory();
 		}
 	}
 

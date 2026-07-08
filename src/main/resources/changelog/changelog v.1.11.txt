@@ -34,6 +34,7 @@ Minor Features
 [~] Fixed issue where teleportation was canceled when trying to teleport after moving
 [+] Added missing quest progress save on player log off
 [~] Made it so Magnetism no longer requires Aranarthium and Lifesteal does
+[~] Mitigations to duplication glitch caused by compressor
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
