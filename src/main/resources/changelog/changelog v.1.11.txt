@@ -4,6 +4,7 @@ Major Features
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
 [+] Prevented copied maps from being copied further
 [+] Increased the number of pages of the dominion food reserves based on the rank of the dominion
+[+] Implemented the /map command to display the interactive world map
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed

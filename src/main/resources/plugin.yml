@@ -117,6 +117,9 @@ commands:
   loom:
     description: Opens a loom GUI
     permission: aranarth.tables
+  map:
+    description: Sends the player a clickable link to the Aranarth live map
+    permission: aranarth.map
   message:
     description: Messages the input player the provided message
     aliases: [msg, tell]

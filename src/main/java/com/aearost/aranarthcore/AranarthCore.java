@@ -596,6 +596,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mctop").setTabCompleter(new CommandMctopCompleter());
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
+        getCommand("map").setExecutor(new CommandMap());
     }
 
     /**
