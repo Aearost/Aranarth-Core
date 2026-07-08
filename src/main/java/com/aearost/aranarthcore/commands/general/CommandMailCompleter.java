@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.utils.MailUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -41,6 +42,13 @@ public class CommandMailCompleter implements TabCompleter {
                 }
                 return input.isEmpty() ? pages : pages.stream()
                         .filter(p -> p.startsWith(input))
+                        .collect(Collectors.toList());
+            }
+
+            if (sub.equals("send")) {
+                return Bukkit.getOnlinePlayers().stream()
+                        .map(Player::getName)
+                        .filter(name -> name.toLowerCase().startsWith(input.toLowerCase()))
                         .collect(Collectors.toList());
             }
 

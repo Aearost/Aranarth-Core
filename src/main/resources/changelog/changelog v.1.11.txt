@@ -36,6 +36,9 @@ Minor Features
 [~] Made it so Magnetism no longer requires Aranarthium and Lifesteal does
 [~] Mitigations to duplication glitch caused by compressor
 [~] Corrected the descriptions of the incantations book to match the new functionality
+[~] Made /mail send auto-fill online players in the parameters
+[~] Showed a preview of a mail message sent after doing /mail send
+[~] Made /mail (no parameters) show all sub-commands
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

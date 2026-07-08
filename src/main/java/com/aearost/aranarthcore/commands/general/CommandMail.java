@@ -36,7 +36,7 @@ public class CommandMail implements CommandExecutor {
         }
 
         if (args.length == 0) {
-            player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail send <player> <message> &cor &e/mail read [page]"));
+            player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail <send|read|clear|clearall>"));
             return true;
         }
 
@@ -73,7 +73,7 @@ public class CommandMail implements CommandExecutor {
                 }
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
-                player.sendMessage(ChatUtils.chatMessage("&7Mail has been sent to &e" + targetAranarthPlayer.getNickname()));
+                player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: " + processedMessage));
             }
             case "read" -> {
                 List<Mail> mailList = new ArrayList<>(MailUtils.getMail(player.getUniqueId()));
@@ -156,7 +156,7 @@ public class CommandMail implements CommandExecutor {
                 MailUtils.clearMail(player.getUniqueId());
                 player.sendMessage(ChatUtils.chatMessage("&7All mail has been deleted"));
             }
-            default -> player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail send <player> <message> &cor &e/mail read [page]"));
+            default -> player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail <send|read|clear|clearall>"));
         }
 
         return true;
