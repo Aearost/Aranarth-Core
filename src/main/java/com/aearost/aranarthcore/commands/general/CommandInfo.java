@@ -122,6 +122,10 @@ public class CommandInfo implements CommandExecutor {
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
 				+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
 
+		String firstJoinDate = aranarthPlayer.getFirstJoinDate();
+		boolean isOG = AranarthUtils.isOriginalPlayer(uuid);
+		sender.sendMessage(ChatUtils.translateToColor("&6First Joined: &e" + (isOG || firstJoinDate.isEmpty() ? "Unknown" : firstJoinDate)));
+
 		Dominion dominion = DominionUtils.getPlayerDominion(uuid);
 		String dominionName = "None";
 		if (dominion != null) {

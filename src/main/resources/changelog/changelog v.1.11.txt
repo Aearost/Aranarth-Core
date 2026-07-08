@@ -28,6 +28,7 @@ Minor Features
 [+] Added logic to automatically add items to a quiver before the player's inventory if the stack is incomplete
 [~] Increased the Horn of the Target usage to up to every 5 seconds instead of every minute
 [~] Fixed issue where you couldn't use /blacklist with an empty list
+[+] Added the First Join Date to the top of /info
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
