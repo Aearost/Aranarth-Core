@@ -309,10 +309,10 @@ public class DominionProtectionListener implements Listener {
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(target.getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                // BOTH dominions must have PvP enabled for this relation
+                // Either dominion having PvP enabled for this relation allows the attack
                 boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
                 boolean targetPvp = targetDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
-                if (!(attackerPvp && targetPvp)) {
+                if (!attackerPvp && !targetPvp) {
                     e.setCancelled(true);
                     attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthTarget.getNickname()
                             + " &7as you are " + DominionUtils.getFormattedRankName(relation)));
@@ -440,9 +440,10 @@ public class DominionProtectionListener implements Listener {
             Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getEntity().getLocation().getChunk());
 
             if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+                // Either dominion having PvP enabled for this relation allows the attack
                 boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
                 boolean ownerPvp = ownerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
-                if (!(attackerPvp && ownerPvp)) {
+                if (!attackerPvp && !ownerPvp) {
                     e.setCancelled(true);
                     attacker.sendMessage(ChatUtils.chatMessage("&7You cannot harm &e" + aranarthOwner.getNickname()
                             + "'s &e" + mountTypeName + " &7as you are " + DominionUtils.getFormattedRankName(relation)));
