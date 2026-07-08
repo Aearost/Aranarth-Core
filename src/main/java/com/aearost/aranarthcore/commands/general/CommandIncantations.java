@@ -56,16 +56,17 @@ public class CommandIncantations implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				"&lIncantations&r are Aranarth's own enchanting system, granting powerful " +
 						"bonuses to weapons and tools beyond what the standard enchantments offer.\n\n" +
-						"They are obtained exclusively from the crates found at &6/warp crates&r."
+						"They are obtained exclusively from the crates found at &6/crates&r."
 		);
 	}
 
 	private static String introduction2() {
 		return ChatUtils.translateToColor(
-				"There are three different Incantations that are currently found on Aranarth:\n"
-					+ "- " + new IncantationBeheading().getColor() + "&lIncantation of Beheading&r\n"
-					+ "- " + new IncantationLifesteal().getColor() + "&lIncantation of Lifesteal&r\n"
-					+ "- " + new IncantationPlentiful().getColor() + "&lIncantation of Plentiful&r\n\n"
+				"There are four different Incantations that are currently found on Aranarth:\n"
+					+ "- " + new IncantationBeheading().getColor() + "&lBeheading&r\n"
+					+ "- " + new IncantationLifesteal().getColor() + "&lLifesteal&r\n"
+					+ "- " + new IncantationPlentiful().getColor() + "&lPlentiful&r\n"
+					+ "- " + new IncantationMagnetism().getColor() + "&lMagnetism&r\n\n"
 					+ "Note that only &oone incantation&r may be applied per item."
 		);
 	}
@@ -81,7 +82,7 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String beheading() {
 		return ChatUtils.translateToColor(
-				new IncantationBeheading().getColor() + "&lThe Incantation\nof Beheading&r\n\n" +
+				new IncantationBeheading().getColor() + "&lBeheading&r\n\n" +
 						"&oIncreases the drop rates of player heads\n\n" +
 						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
 						"- 25% chance at I\n" +
@@ -92,9 +93,11 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String lifesteal() {
 		return ChatUtils.translateToColor(
-				new IncantationLifesteal().getColor() + "&lThe Incantation\nof Lifesteal&r\n\n" +
+				new IncantationLifesteal().getColor() + "&lLifesteal&r\n\n" +
 						"&oHeal off of your dealt damage\n\n" +
 						"&rApplies to: swords, axes, maces, tridents, spears\n\n" +
+						"You must drop an " + new AranarthiumIngot().getName() +
+						" &ringot onto the weapon, as well as the incantation.\n\n" +
 						"- 15% heal at I\n" +
 						"- 30% heal at II\n" +
 						"- 50% heal at III\n"
@@ -103,21 +106,20 @@ public class CommandIncantations implements CommandExecutor {
 
 	private static String plentiful() {
 		return ChatUtils.translateToColor(
-				new IncantationPlentiful().getColor() + "&lThe Incantation\nof Plentiful&r\n" +
+				new IncantationPlentiful().getColor() + "&lPlentiful&r\n" +
 						"&oIncreased block harvest size\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
 						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, followed by the incantation. There is only one level of Plentiful."
+						" &ringot onto the tool, as well as the incantation. There is only one level of Plentiful."
 		);
 	}
 
 	private static String magnetism() {
 		return ChatUtils.translateToColor(
-				new IncantationMagnetism().getColor() + "&lThe Incantation\nof Magnetism&r\n" +
+				new IncantationMagnetism().getColor() + "&lMagnetism&r\n" +
 						"&oPulls harvested items to you\n\n" +
 						"&rApplies to: pickaxes, axes, shovels, hoes\n\n" +
-						"You must drop an " + new AranarthiumIngot().getName() +
-						" &ringot onto the tool, followed by the incantation. There is only one level of Magnetism."
+						"Drop the incantation onto the tool to apply it. There is only one level of Magnetism."
 		);
 	}
 
