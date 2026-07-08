@@ -133,6 +133,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveCompressible();
                 PersistenceUtils.saveShopLocations();
                 PersistenceUtils.saveShopIslandCounter();
+                PersistenceUtils.saveShopCollaborators();
                 PersistenceUtils.saveKillDeathCount();
                 PersistenceUtils.saveQuestState();
                 PersistenceUtils.saveQuestProgress();
@@ -279,6 +280,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadCompressible();
         PersistenceUtils.loadShopLocations();
         PersistenceUtils.loadShopIslandCounter();
+        PersistenceUtils.loadShopCollaborators();
         PersistenceUtils.loadSentinels();
         PersistenceUtils.loadVotes();
         PersistenceUtils.loadVoteKeys();
@@ -1060,6 +1062,7 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveCompressible();
         PersistenceUtils.saveShopLocations();
         PersistenceUtils.saveShopIslandCounter();
+        PersistenceUtils.saveShopCollaborators();
         PersistenceUtils.saveQuestState();
         PersistenceUtils.saveQuestProgress();
         PersistenceUtils.saveLoginStreaks();

@@ -2401,6 +2401,87 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads shop collaborators from shop_collaborators.txt.
+     */
+    public static void loadShopCollaborators() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "shop_collaborators.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            Bukkit.getLogger().info("Attempting to read the shop collaborators file...");
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine().trim();
+                if (row.isEmpty() || row.startsWith("#")) {
+                    continue;
+                }
+                String[] parts = row.split(":");
+                if (parts.length < 2) {
+                    continue;
+                }
+                UUID ownerUuid = UUID.fromString(parts[0]);
+                for (String collab : parts[1].split(",")) {
+                    collab = collab.trim();
+                    if (!collab.isEmpty()) {
+                        AranarthUtils.addShopCollaborator(ownerUuid, UUID.fromString(collab));
+                    }
+                }
+            }
+            reader.close();
+            Bukkit.getLogger().info("Shop collaborators have been initialized");
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("Something went wrong with loading shop collaborators");
+        }
+    }
+
+    /**
+     * Saves shop collaborators to shop_collaborators.txt.
+     */
+    public static void saveShopCollaborators() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "shop_collaborators.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (isDirectoryCreated) {
+            try {
+                if (file.createNewFile()) {
+                    Bukkit.getLogger().info("A new shop_collaborators.txt file has been generated");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("An error occurred in the creation of shop_collaborators.txt");
+            }
+
+            try {
+                FileWriter writer = new FileWriter(filePath);
+                for (Map.Entry<UUID, Set<UUID>> entry : AranarthUtils.getShopCollaborators().entrySet()) {
+                    if (entry.getValue().isEmpty()) {
+                        continue;
+                    }
+                    StringBuilder sb = new StringBuilder(entry.getKey().toString()).append(":");
+                    sb.append(String.join(",", entry.getValue().stream().map(UUID::toString).toArray(String[]::new)));
+                    writer.write(sb + "\n");
+                }
+                writer.close();
+            } catch (IOException e) {
+                Bukkit.getLogger().info("There was an error in saving shop collaborators");
+            }
+        }
+    }
+
+    /**
      * Loads the votes on the contents of votes.txt.
      */
     public static void loadVotes() {

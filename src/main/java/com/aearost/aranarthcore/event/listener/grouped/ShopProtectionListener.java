@@ -42,6 +42,7 @@ public class ShopProtectionListener implements Listener {
 
     /**
      * Returns true if the player is allowed to modify blocks at the given location.
+     * Admins, the island owner, and invited collaborators may all modify.
      */
     private boolean canModify(Player player, Location location) {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -49,7 +50,11 @@ public class ShopProtectionListener implements Listener {
             return true;
         }
         UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
-        return player.getUniqueId().equals(owner);
+        if (owner == null) {
+            return false;
+        }
+        return player.getUniqueId().equals(owner)
+                || AranarthUtils.isShopCollaborator(owner, player.getUniqueId());
     }
 
     /**
@@ -70,14 +75,18 @@ public class ShopProtectionListener implements Listener {
     }
 
     /**
-     * Returns true if the player is a non-owner visitor at the given shops-world location.
+     * Returns true if the player is a non-owner, non-collaborator visitor at the given shops-world location.
      */
     private boolean isNonOwnerInShopsWorld(Player player, Location location) {
         if (location.getWorld() == null || !location.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
             return false;
         }
         UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
-        return !player.getUniqueId().equals(owner);
+        if (owner == null) {
+            return true;
+        }
+        return !player.getUniqueId().equals(owner)
+                && !AranarthUtils.isShopCollaborator(owner, player.getUniqueId());
     }
 
     /**

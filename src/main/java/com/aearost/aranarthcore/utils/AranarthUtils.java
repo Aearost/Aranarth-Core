@@ -84,6 +84,9 @@ public class AranarthUtils {
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
 	private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
+	private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
+	private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
+	private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
 	private static int shopIslandCounter = 0;
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
@@ -2788,6 +2791,101 @@ public class AranarthUtils {
 	 */
 	public static int claimNextShopIslandIndex() {
 		return shopIslandCounter++;
+	}
+
+	/**
+	 * Returns the full collaborator map.
+	 */
+	public static HashMap<UUID, Set<UUID>> getShopCollaborators() {
+		return shopCollaborators;
+	}
+
+	/**
+	 * Returns the set of collaborator UUIDs for the given shop owner.
+	 */
+	public static Set<UUID> getCollaboratorsForOwner(UUID ownerUuid) {
+		return shopCollaborators.getOrDefault(ownerUuid, new HashSet<>());
+	}
+
+	/**
+	 * Adds a collaborator to the given owner's shop and updates the reverse lookup.
+	 */
+	public static void addShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
+		shopCollaborators.computeIfAbsent(ownerUuid, k -> new HashSet<>()).add(collaboratorUuid);
+		collaboratorShop.put(collaboratorUuid, ownerUuid);
+	}
+
+	/**
+	 * Removes a collaborator from the given owner's shop and clears the reverse lookup.
+	 */
+	public static boolean removeShopCollaborator(UUID ownerUuid, UUID collaboratorUuid) {
+		Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
+		if (collaborators == null) {
+			return false;
+		}
+		boolean removed = collaborators.remove(collaboratorUuid);
+		if (removed) {
+			collaboratorShop.remove(collaboratorUuid);
+		}
+		if (collaborators.isEmpty()) {
+			shopCollaborators.remove(ownerUuid);
+		}
+		return removed;
+	}
+
+	/**
+	 * Returns whether the given player UUID is a collaborator on the given owner's shop.
+	 */
+	public static boolean isShopCollaborator(UUID ownerUuid, UUID playerUuid) {
+		Set<UUID> collaborators = shopCollaborators.get(ownerUuid);
+		return collaborators != null && collaborators.contains(playerUuid);
+	}
+
+	/**
+	 * Returns the owner UUID of the shop the given player is a collaborator on, or null if none.
+	 */
+	public static UUID getCollaboratorShopOwner(UUID playerUuid) {
+		return collaboratorShop.get(playerUuid);
+	}
+
+	/**
+	 * Returns whether the given player is a collaborator on any shop.
+	 */
+	public static boolean isCollaboratorOnAnyShop(UUID playerUuid) {
+		return collaboratorShop.containsKey(playerUuid);
+	}
+
+	/**
+	 * Removes all collaborator entries for the given owner and clears their reverse lookups.
+	 */
+	public static void removeAllShopCollaborators(UUID ownerUuid) {
+		Set<UUID> collaborators = shopCollaborators.remove(ownerUuid);
+		if (collaborators != null) {
+			for (UUID collab : collaborators) {
+				collaboratorShop.remove(collab);
+			}
+		}
+	}
+
+	/**
+	 * Returns the owner UUID that has a pending invite for the given invitee, or null if none.
+	 */
+	public static UUID getPendingShopInvite(UUID inviteeUuid) {
+		return pendingShopInvites.get(inviteeUuid);
+	}
+
+	/**
+	 * Records a pending shop invite from the given owner to the given invitee.
+	 */
+	public static void setPendingShopInvite(UUID inviteeUuid, UUID ownerUuid) {
+		pendingShopInvites.put(inviteeUuid, ownerUuid);
+	}
+
+	/**
+	 * Removes the pending shop invite for the given invitee.
+	 */
+	public static void removePendingShopInvite(UUID inviteeUuid) {
+		pendingShopInvites.remove(inviteeUuid);
 	}
 
 	/**

@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.general;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Registry;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -10,6 +11,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class CommandShopCompleter implements TabCompleter {
 
-	private static final List<String> SUBCOMMANDS = List.of("create", "home", "sethome", "delete", "tp", "biome");
+	private static final List<String> SUBCOMMANDS = List.of("create", "home", "sethome", "delete", "tp", "biome", "invite", "remove", "accept", "decline", "leave");
 
 	private static final List<String> BIOME_NAMES = Registry.BIOME.stream()
 			.map(b -> b.getKey().getKey())
@@ -48,6 +50,14 @@ public class CommandShopCompleter implements TabCompleter {
 			if (args[0].equalsIgnoreCase("biome") && (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.isInAdminMode())) {
 				return filter(BIOME_NAMES, args[1]);
 			}
+			// /shop invite <username> - shop owner only
+			if (args[0].equalsIgnoreCase("invite") && AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
+				return filterPlayers(args[1]);
+			}
+			// /shop remove <username> - shop owner only, show current collaborators
+			if (args[0].equalsIgnoreCase("remove") && AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
+				return filterCollaborators(player.getUniqueId(), args[1]);
+			}
 		}
 
 		return List.of();
@@ -62,6 +72,16 @@ public class CommandShopCompleter implements TabCompleter {
 	private static List<String> filterPlayers(String input) {
 		return Bukkit.getOnlinePlayers().stream()
 			.map(Player::getName)
+			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
+			.collect(Collectors.toList());
+	}
+
+	private static List<String> filterCollaborators(UUID ownerUuid, String input) {
+		return AranarthUtils.getCollaboratorsForOwner(ownerUuid).stream()
+			.map(uuid -> {
+				OfflinePlayer op = Bukkit.getOfflinePlayer(uuid);
+				return op.getName() != null ? op.getName() : uuid.toString();
+			})
 			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
 			.collect(Collectors.toList());
 	}
