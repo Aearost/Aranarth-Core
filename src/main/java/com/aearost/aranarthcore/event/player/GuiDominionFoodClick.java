@@ -1,6 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.gui.GuiDominionFood;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
@@ -11,6 +18,46 @@ import org.bukkit.inventory.ItemStack;
  */
 public class GuiDominionFoodClick {
 	public void execute(InventoryClickEvent e) {
+		Player player = (Player) e.getWhoClicked();
+		Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+
+		// Handle navigation row for multi-page food GUIs (ranks 3-5)
+		if (dominion != null && dominion.getDominionLevel() >= 3
+				&& e.getClickedInventory() != null
+				&& e.getClickedInventory().getType() != InventoryType.PLAYER) {
+			int slot = e.getSlot();
+			if (slot >= GuiDominionFood.FOOD_SLOTS_PER_PAGE) {
+				e.setCancelled(true);
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				int currentPage = aranarthPlayer.getCurrentGuiPageNum();
+				int totalPages = GuiDominionFood.getTotalPages(dominion.getDominionLevel());
+
+				if (slot == 45) { // Previous
+					int newPage = (currentPage - 1 + totalPages) % totalPages;
+					// Mark as navigating so the close event skips compact/unlock
+					DominionUtils.markFoodNavigating(player.getUniqueId());
+					new GuiDominionFood(player, newPage).openGui();
+					DominionUtils.clearFoodNavigating(player.getUniqueId());
+					aranarthPlayer.setCurrentGuiPageNum(newPage);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+				} else if (slot == 49) { // Exit
+					player.closeInventory();
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+				} else if (slot == 53) { // Next
+					int newPage = (currentPage + 1) % totalPages;
+					// Mark as navigating so the close event skips compact/unlock
+					DominionUtils.markFoodNavigating(player.getUniqueId());
+					new GuiDominionFood(player, newPage).openGui();
+					DominionUtils.clearFoodNavigating(player.getUniqueId());
+					aranarthPlayer.setCurrentGuiPageNum(newPage);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+					player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
+				}
+				return;
+			}
+		}
+
 		if (e.getClickedInventory() != null) {
 			if (e.getClickedInventory().getType() == InventoryType.PLAYER) {
 				if (e.getCurrentItem() != null && !isEligibleFoodItem(e.getCurrentItem().getType())) {

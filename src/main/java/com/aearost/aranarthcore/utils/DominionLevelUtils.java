@@ -490,6 +490,7 @@ public class DominionLevelUtils {
                     dominion.setLevelDropTimestamp(System.currentTimeMillis());
                 }
                 dominion.setDominionLevel(newLevel);
+                DominionUtils.resizeFoodArray(dominion);
                 notifyMembers(dominion, "&7Your dominion &e" + dominion.getName()
                         + " &7has &cdropped to &6Level " + newLevel + "&7!"
                         + " &cRegain 4/6 criteria within 1 in-game month to avoid penalties!");
@@ -501,6 +502,7 @@ public class DominionLevelUtils {
                             + " &7has recovered - penalties have been lifted!");
                 }
                 dominion.setDominionLevel(newLevel);
+                DominionUtils.resizeFoodArray(dominion);
                 notifyMembersLevelUp(dominion, newLevel);
             }
             // Level unchanged: do not modify levelDropTimestamp
@@ -519,6 +521,7 @@ public class DominionLevelUtils {
                 dominion.setLevelDropTimestamp(System.currentTimeMillis());
             }
             dominion.setDominionLevel(newLevel);
+            DominionUtils.resizeFoodArray(dominion);
             notifyMembers(dominion, "&cYour dominion &e" + dominion.getName()
                     + " &chas dropped to &6Level " + newLevel + "&7!"
                     + " &cRegain 4/6 criteria within 1 in-game month to avoid penalties!");
@@ -528,6 +531,7 @@ public class DominionLevelUtils {
                 notifyMembers(dominion, "&7Your dominion is no longer subject to penalties");
             }
             dominion.setDominionLevel(newLevel);
+            DominionUtils.resizeFoodArray(dominion);
             notifyMembersLevelUp(dominion, newLevel);
         }
     }

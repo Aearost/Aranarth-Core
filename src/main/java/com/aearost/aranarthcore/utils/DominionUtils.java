@@ -21,6 +21,8 @@ public class DominionUtils {
 	private static final Map<UUID, Dominion> dominionById = new HashMap<>();
 	private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
 	private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
+	private static final Map<UUID, UUID> foodInventoryLocks = new HashMap<>();
+	private static final Set<UUID> foodNavigating = new HashSet<>();
 	public static final long CONQUEST_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
 	public static final long CONQUER_COOLDOWN_MS = 3L * 24 * 60 * 60 * 1000; // 3 days
 	public static final long REBEL_DEADLINE_MS = 7L * 24 * 60 * 60 * 1000; // 1 week
@@ -590,7 +592,8 @@ public class DominionUtils {
 	public static void reEvaluateFoodInventory() {
 		// Close all inventories before evaluating
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-			if (ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle()).endsWith("Food")) {
+			String foodTitle = ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle());
+			if (foodTitle.endsWith(" Food") || foodTitle.matches(".+'s Food \\(\\d+/\\d+\\)")) {
 				onlinePlayer.closeInventory();
 			}
 		}
@@ -729,17 +732,22 @@ public class DominionUtils {
 	}
 
 	/**
-	 * Returns the correct food array size for a dominion based on its chunk count.
-	 * ≤25 chunks = 18 slots, ≤100 chunks = 36 slots, >100 chunks = 54 slots.
+	 * Returns the correct food array size for a dominion based on its rank level.
+	 * Level 1 = 18 slots (2 rows), Level 2 = 45 slots (5 rows),
+	 * Level 3 = 90 slots (2 pages), Level 4 = 135 slots (3 pages), Level 5 = 225 slots (5 pages).
 	 */
 	public static int getFoodArraySize(Dominion dominion) {
-		int chunkCount = dominion.getChunks().size();
-		if (chunkCount <= 25) {
+		int level = dominion.getDominionLevel();
+		if (level <= 1) {
 			return 18;
-		} else if (chunkCount <= 100) {
-			return 36;
+		} else if (level == 2) {
+			return 45;
+		} else if (level == 3) {
+			return 90;
+		} else if (level == 4) {
+			return 135;
 		} else {
-			return 54;
+			return 225;
 		}
 	}
 
@@ -773,6 +781,74 @@ public class DominionUtils {
 		ItemStack[] resized = new ItemStack[targetSize];
         System.arraycopy(current, 0, resized, 0, Math.min(current.length, targetSize));
 		dominion.setFood(resized);
+	}
+
+	/** Locks the food inventory of a dominion to a specific player. */
+	public static void lockFoodInventory(UUID dominionId, UUID playerUUID) {
+		foodInventoryLocks.put(dominionId, playerUUID);
+	}
+
+	/** Unlocks the food inventory of a dominion. */
+	public static void unlockFoodInventory(UUID dominionId) {
+		foodInventoryLocks.remove(dominionId);
+	}
+
+	/**
+	 * Returns true if the food inventory is locked by a player other than the given one.
+	 */
+	public static boolean isFoodInventoryLockedByOther(UUID dominionId, UUID playerUUID) {
+		UUID holder = foodInventoryLocks.get(dominionId);
+		return holder != null && !holder.equals(playerUUID);
+	}
+
+	/** Marks a player as mid-page-flip so the close event is treated as navigation, not a real close. */
+	public static void markFoodNavigating(UUID playerUUID) {
+		foodNavigating.add(playerUUID);
+	}
+
+	/** Clears the navigation flag for a player. */
+	public static void clearFoodNavigating(UUID playerUUID) {
+		foodNavigating.remove(playerUUID);
+	}
+
+	/** Returns true if the player is currently mid-page-flip in the food GUI. */
+	public static boolean isFoodNavigating(UUID playerUUID) {
+		return foodNavigating.contains(playerUUID);
+	}
+
+	/**
+	 * Compacts the food array by merging identical items and shifting everything to the front.
+	 * Respects each item's max stack size.
+	 */
+	public static ItemStack[] compactFoodArray(ItemStack[] food) {
+		List<ItemStack> merged = new ArrayList<>();
+		for (ItemStack item : food) {
+			if (item == null || item.getType() == Material.AIR) {
+				continue;
+			}
+			ItemStack copy = item.clone();
+			boolean stacked = false;
+			for (ItemStack existing : merged) {
+				if (existing.isSimilar(copy) && existing.getAmount() < existing.getMaxStackSize()) {
+					int space = existing.getMaxStackSize() - existing.getAmount();
+					int toAdd = Math.min(space, copy.getAmount());
+					existing.setAmount(existing.getAmount() + toAdd);
+					copy.setAmount(copy.getAmount() - toAdd);
+					if (copy.getAmount() <= 0) {
+						stacked = true;
+						break;
+					}
+				}
+			}
+			if (!stacked) {
+				merged.add(copy);
+			}
+		}
+		ItemStack[] result = new ItemStack[food.length];
+		for (int i = 0; i < merged.size() && i < result.length; i++) {
+			result[i] = merged.get(i);
+		}
+		return result;
 	}
 
 	/**

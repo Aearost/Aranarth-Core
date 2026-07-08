@@ -2034,7 +2034,15 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to access the food storage!"));
             return;
         }
-        GuiDominionFood gui = new GuiDominionFood(player);
+        if (DominionUtils.isFoodInventoryLockedByOther(playerDominion.getId(), player.getUniqueId())) {
+            player.sendMessage(ChatUtils.chatMessage("&cAnother member is currently using the food storage"));
+            return;
+        }
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        aranarthPlayer.setCurrentGuiPageNum(0);
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+        DominionUtils.lockFoodInventory(playerDominion.getId(), player.getUniqueId());
+        GuiDominionFood gui = new GuiDominionFood(player, 0);
         gui.openGui();
         player.playSound(player, Sound.BLOCK_CHEST_OPEN, 1F, 1F);
     }

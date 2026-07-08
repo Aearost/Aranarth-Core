@@ -67,7 +67,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
                 new GuiShopLocationClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food")) {
+            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
@@ -125,5 +125,9 @@ public class InventoryClickEventListener implements Listener {
             new AfkCancelByInteract().execute(player);
         }
 //        new QuiverSwitchSlots().execute(e);
+    }
+
+    private static boolean isDominionFoodTitle(String title) {
+        return title.endsWith(" Food") || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

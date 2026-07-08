@@ -29,7 +29,7 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiShulkerClose().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Crate - ")) {
                 new GuiCrateClose().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food")) {
+            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
@@ -41,5 +41,9 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiFletchingTableClose().execute(e);
             }
         }
+    }
+
+    private static boolean isDominionFoodTitle(String title) {
+        return title.endsWith(" Food") || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

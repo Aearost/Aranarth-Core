@@ -3,6 +3,7 @@ AranarthCore v. 1.11
 Major Features
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
 [+] Prevented copied maps from being copied further
+[+] Increased the number of pages of the dominion food reserves based on the rank of the dominion
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
