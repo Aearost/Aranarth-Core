@@ -27,7 +27,11 @@ public class PlayerTeleportCancelByMove {
         if (task != null) {
             Location from = e.getFrom();
             Location to = e.getTo();
-            boolean positionChanged = from.getX() != to.getX() || from.getY() != to.getY() || from.getZ() != to.getZ();
+            // Use a threshold to avoid false cancels from residual in-flight movement packets
+            double threshold = 0.05;
+            boolean positionChanged = Math.abs(from.getX() - to.getX()) > threshold
+                    || Math.abs(from.getY() - to.getY()) > threshold
+                    || Math.abs(from.getZ() - to.getZ()) > threshold;
             if (positionChanged) {
                 task.cancel();
                 AranarthUtils.removeTeleportTask(player.getUniqueId());
