@@ -33,6 +33,7 @@ Minor Features
 [+] Added the First Join Date to the top of /info
 [~] Fixed issue where teleportation was canceled when trying to teleport after moving
 [+] Added missing quest progress save on player log off
+[~] Made it so Magnetism no longer requires Aranarthium and Lifesteal does
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

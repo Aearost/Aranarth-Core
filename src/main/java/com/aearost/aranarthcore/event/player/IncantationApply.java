@@ -122,36 +122,21 @@ public class IncantationApply {
 							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
-					} else if (incantationType.equals("incantation_lifesteal")) {
-						if (isMeleeWeapon(item) && !isExceedingLevel(item)) {
-							Incantation incantation = new IncantationLifesteal();
-							int level = 1;
-							// Increase the existing level
-							if (itemMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
-								level = itemMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
-								level++;
-							}
-							// Applying as a new incantation
-							else {
-								itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
-							}
-							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
+					} else if (incantationType.equals("incantation_magnetism")) {
+						if (isTool(item)) {
+							Incantation incantation = new IncantationMagnetism();
+							String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
 
-							String fullIncantationName = ChatUtils.translateToColor(
-									incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
-							// Dynamically apply the incantation description on the item
 							List<String> lore = itemMeta.getLore();
 							if (lore == null) {
 								lore = new ArrayList<>();
 								lore.add(fullIncantationName);
 							} else {
-								for (int i = 0; i < lore.size(); i++) {
-									if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
-										lore.set(i, fullIncantationName);
-										break;
-									}
-								}
+								lore.add(fullIncantationName);
 							}
+							itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_magnetism");
+							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+							itemMeta.getPersistentDataContainer().set(MAGNETISM_TOOL_ID, PersistentDataType.STRING, UUID.randomUUID().toString());
 							itemMeta.setLore(lore);
 							item.setItemMeta(itemMeta);
 							incantationFloorItem.remove();
@@ -166,10 +151,10 @@ public class IncantationApply {
 
 					Item toolItem = null;
 					Item aranarthiumItem = null;
-					if (isTool(first.getItemStack()) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
+					if ((isTool(first.getItemStack()) || isMeleeWeapon(first.getItemStack())) && second.getItemStack().isSimilar(new AranarthiumIngot().getItem())) {
 						toolItem = first;
 						aranarthiumItem = second;
-					} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && isTool(second.getItemStack())) {
+					} else if (first.getItemStack().isSimilar(new AranarthiumIngot().getItem()) && (isTool(second.getItemStack()) || isMeleeWeapon(second.getItemStack()))) {
 						aranarthiumItem = first;
 						toolItem = second;
 					}
@@ -178,10 +163,13 @@ public class IncantationApply {
 						return;
 					}
 
-					// Do not allow any incantation to be applied to an item that already has one
+					// Do not allow 2 different incantations to be applied to the same item
 					if (toolItem.getItemStack().getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
-						player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
-						return;
+						String incantationTypeOnItem = toolItem.getItemStack().getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);
+						if (!incantationTypeOnItem.equals(incantationType)) {
+							player.sendMessage(ChatUtils.chatMessage("&cOnly one incantation can be applied to an item!"));
+							return;
+						}
 					}
 
 					if (incantationType.equals("incantation_plentiful")) {
@@ -206,30 +194,45 @@ public class IncantationApply {
 						incantationFloorItem.remove();
 						player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
 						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
-					} else if (incantationType.equals("incantation_magnetism")) {
-						Incantation incantation = new IncantationMagnetism();
-						String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+					} else if (incantationType.equals("incantation_lifesteal")) {
+						if (isMeleeWeapon(toolItem.getItemStack()) && !isExceedingLevel(toolItem.getItemStack())) {
+							Incantation incantation = new IncantationLifesteal();
+							ItemStack tool = toolItem.getItemStack();
+							ItemMeta toolMeta = tool.getItemMeta();
+							int level = 1;
+							// Increase the existing level
+							if (toolMeta.getPersistentDataContainer().has(INCANTATION_LEVEL)) {
+								level = toolMeta.getPersistentDataContainer().get(INCANTATION_LEVEL, PersistentDataType.INTEGER);
+								level++;
+							}
+							// Applying as a new incantation
+							else {
+								toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_lifesteal");
+							}
+							toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, level);
 
-						List<String> lore = incantationMeta.getLore();
-						if (lore == null) {
-							lore = new ArrayList<>();
-							lore.add(fullIncantationName);
+							String fullIncantationName = ChatUtils.translateToColor(
+									incantation.getColor() + incantation.getIncantationName() + " " + AranarthUtils.getIncantationLevelInNumerals(level));
+							List<String> lore = toolMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+								lore.add(fullIncantationName);
+							} else {
+								for (int i = 0; i < lore.size(); i++) {
+									if (ChatUtils.stripColorFormatting(lore.get(i)).startsWith(incantation.getIncantationName())) {
+										lore.set(i, fullIncantationName);
+										break;
+									}
+								}
+							}
+							toolMeta.setLore(lore);
+							tool.setItemMeta(toolMeta);
+							toolItem.setItemStack(tool);
+							aranarthiumItem.remove();
+							incantationFloorItem.remove();
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
-
-						ItemStack tool = toolItem.getItemStack();
-						ItemMeta toolMeta = tool.getItemMeta();
-						toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_magnetism");
-						toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
-						
-						// Assign a unique ID to this tool instance so its drops can be identified later
-						toolMeta.getPersistentDataContainer().set(MAGNETISM_TOOL_ID, PersistentDataType.STRING, UUID.randomUUID().toString());
-						toolMeta.setLore(lore);
-						tool.setItemMeta(toolMeta);
-						toolItem.setItemStack(tool);
-						aranarthiumItem.remove();
-						incantationFloorItem.remove();
-						player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-						player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 					}
 				}
 			}
