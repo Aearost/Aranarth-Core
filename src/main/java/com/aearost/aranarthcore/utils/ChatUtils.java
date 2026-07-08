@@ -658,6 +658,88 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Builds a gradient-colored chat message Component directly from the raw message, applying
+	 * per-character gradient colors while making any URLs fully clickable with their own gradient
+	 * colors integrated into the gradient flow of the surrounding text.
+	 *
+	 * @param gradientColors Comma-separated hex color string.
+	 * @param msg The raw (unformatted) message.
+	 * @param isBold Whether to apply bold formatting.
+	 * @return A Component with gradient coloring and embedded clickable URLs, or null if the
+	 *         gradient colors are invalid.
+	 */
+	public static Component buildGradientMessageWithUrls(String gradientColors, String msg, boolean isBold) {
+		String[] colors = gradientColors.split(",");
+		int numColors = colors.length;
+
+		for (String color : colors) {
+			if (!color.startsWith("#") || color.length() != 7 || !color.substring(1).matches("[0-9A-Fa-f]+")) {
+				return null;
+			}
+		}
+
+		int msgLength = msg.length();
+		if (msgLength == 0) return Component.empty();
+
+		Matcher urlMatcher = URL_PATTERN.matcher(msg);
+		List<int[]> urlRanges = new ArrayList<>();
+		List<String> urlStrings = new ArrayList<>();
+		while (urlMatcher.find()) {
+			urlRanges.add(new int[]{urlMatcher.start(), urlMatcher.end()});
+			urlStrings.add(urlMatcher.group());
+		}
+
+		String hoverText = translateToColor("&7Open the link in your browser");
+		Component hoverComponent = LegacyComponentSerializer.legacySection().deserialize(hoverText);
+
+		Component result = Component.empty();
+		int urlIdx = 0;
+		int i = 0;
+
+		while (i < msgLength) {
+			if (urlIdx < urlRanges.size() && i == urlRanges.get(urlIdx)[0]) {
+				int urlEnd = urlRanges.get(urlIdx)[1];
+				Component urlComp = Component.empty();
+				for (int j = i; j < urlEnd; j++) {
+					Component charComp = Component.text(String.valueOf(msg.charAt(j)))
+							.color(getGradientTextColor(colors, numColors, msgLength, j));
+					if (isBold) charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
+					urlComp = urlComp.append(charComp);
+				}
+				urlComp = urlComp
+						.hoverEvent(HoverEvent.showText(hoverComponent))
+						.clickEvent(ClickEvent.openUrl(urlStrings.get(urlIdx)));
+				result = result.append(urlComp);
+				i = urlEnd;
+				urlIdx++;
+			} else {
+				Component charComp = Component.text(String.valueOf(msg.charAt(i)))
+						.color(getGradientTextColor(colors, numColors, msgLength, i));
+				if (isBold) charComp = charComp.decorate(net.kyori.adventure.text.format.TextDecoration.BOLD);
+				result = result.append(charComp);
+				i++;
+			}
+		}
+
+		return result;
+	}
+
+	private static net.kyori.adventure.text.format.TextColor getGradientTextColor(String[] colors, int numColors, int msgLength, int charIndex) {
+		String hex;
+		if (numColors < 2 || msgLength < numColors) {
+			hex = colors[0];
+		} else {
+			int sectionSize = msgLength / (numColors - 1);
+			int colorIndex = Math.min(charIndex / sectionSize, numColors - 2);
+			int startOfSection = colorIndex * sectionSize;
+			int endOfSection = (colorIndex + 1) * sectionSize;
+			double x = Math.min(1.0, (charIndex - startOfSection) / (double) (endOfSection - startOfSection));
+			hex = interpolateColor(colors[colorIndex], colors[colorIndex + 1], x);
+		}
+		return net.kyori.adventure.text.format.TextColor.fromHexString(hex);
+	}
+
+	/**
 	 * Helper method to evaluate a dominion chat message.
 	 * Handles toggling dominion chat, setting the chat type, and sending messages.
 	 * @param player The player sending the message.

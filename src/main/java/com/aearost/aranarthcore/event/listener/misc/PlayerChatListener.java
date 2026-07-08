@@ -142,11 +142,22 @@ public class PlayerChatListener implements Listener {
         Component prefixComponent = LegacyComponentSerializer.legacySection().deserialize(prefix);
         prefixComponent = ChatUtils.clickableCommand(prefixComponent, hoverMsg, "/info " + player.getName(), true);
 
+        // Build the message component. For gradient chat, build directly from the raw message so
+        // that URL characters receive their own per-character gradient colors rather than a flat color.
+        Component messageComponent = null;
+        if (aranarthPlayer.isGradientChatEnabled() && !aranarthPlayer.getGradientChatColors().isEmpty()) {
+            messageComponent = ChatUtils.buildGradientMessageWithUrls(
+                    aranarthPlayer.getGradientChatColors(), message, aranarthPlayer.isGradientChatBold());
+        }
+        if (messageComponent == null) {
+            messageComponent = ChatUtils.buildMessageWithUrls(chatMessage);
+        }
+
         // Use Component.empty() as root so chatMessage is a sibling of prefixComponent, not a child.
         // Children inherit hover/click from their parent, siblings do not.
         Component fullMessage = Component.empty()
                 .append(prefixComponent)
-                .append(ChatUtils.buildMessageWithUrls(chatMessage));
+                .append(messageComponent);
 
         if (aranarthPlayer.isInCouncilChat()) {
             // Council chat toggle is on — route to council chat once (evaluateCouncilMessage sends to all council members)
