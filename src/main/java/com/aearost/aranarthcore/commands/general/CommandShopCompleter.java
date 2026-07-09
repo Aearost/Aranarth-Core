@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  */
 public class CommandShopCompleter implements TabCompleter {
 
-	private static final List<String> SUBCOMMANDS = List.of("create", "home", "sethome", "delete", "tp", "biome", "invite", "remove", "accept", "decline", "leave");
+	private static final List<String> SUBCOMMANDS = List.of("create", "home", "sethome", "delete", "rename", "biome", "invite", "remove", "accept", "decline", "leave");
 
 	private static final List<String> BIOME_NAMES = Registry.BIOME.stream()
 			.map(b -> b.getKey().getKey())
@@ -38,10 +38,6 @@ public class CommandShopCompleter implements TabCompleter {
 		}
 
 		if (args.length == 2) {
-			// /shop tp <username> — any player
-			if (args[0].equalsIgnoreCase("tp")) {
-				return filterPlayers(args[1]);
-			}
 			// /shop delete <username> — admin mode only
 			if (args[0].equalsIgnoreCase("delete") && aranarthPlayer.isInAdminMode()) {
 				return filterPlayers(args[1]);

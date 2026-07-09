@@ -126,7 +126,9 @@ public class GuiShopLocation {
                 shopItemMeta.setPlayerProfile(profile);
             }
 
-            shopItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + shopLocationPlayer.getNickname() + "&e's Shop"));
+            String defaultName = shopLocationPlayer.getNickname() + "'s Shop";
+            String shopDisplayName = AranarthUtils.getShopName(uuid, defaultName);
+            shopItemMeta.setDisplayName(ChatUtils.translateToColor("&e" + shopDisplayName));
             shopItem.setItemMeta(shopItemMeta);
             gui.setItem(i, shopItem);
         }

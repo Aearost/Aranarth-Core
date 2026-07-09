@@ -53,6 +53,8 @@ Minor Features
 [~] Increased the stun duration of JetBolt
 [+] Added damage prevention based on the dominion pvp permissions for all abilities with lingering effects (electrocution or potion effects)
 [~] Fixed bug with bulk purchases causing items in the shop to disappear
+[+] Added /shop rename to allow a custom name of a shop
+[-] Removed /shop tp to fully favour the GUI
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

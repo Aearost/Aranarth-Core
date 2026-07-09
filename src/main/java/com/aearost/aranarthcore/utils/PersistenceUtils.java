@@ -2308,6 +2308,13 @@ public class PersistenceUtils {
                 if (row.startsWith("#")) {
                     continue;
                 }
+                // Split off optional custom name (appended after '|')
+                String customName = null;
+                int pipeIdx = row.indexOf('|');
+                if (pipeIdx >= 0) {
+                    customName = row.substring(pipeIdx + 1);
+                    row = row.substring(0, pipeIdx);
+                }
                 String[] parts = row.split("_");
                 UUID uuid = UUID.fromString(parts[0]);
                 String world = parts[1];
@@ -2324,6 +2331,10 @@ public class PersistenceUtils {
                     int centerX = Integer.parseInt(parts[7]);
                     int centerZ = Integer.parseInt(parts[8]);
                     AranarthUtils.addShopIslandCenter(uuid, centerX, centerZ);
+                }
+
+                if (customName != null && !customName.isEmpty()) {
+                    AranarthUtils.setShopName(uuid, customName);
                 }
             }
             Bukkit.getLogger().info("The shop locations have been initialized");
@@ -2375,6 +2386,11 @@ public class PersistenceUtils {
                     int[] center = shopIslandCenters.get(uuid);
                     if (center != null) {
                         shopLocation += "_" + center[0] + "_" + center[1];
+                    }
+                    // Append custom shop name if set
+                    String customName = AranarthUtils.getShopNames().get(uuid);
+                    if (customName != null && !customName.isEmpty()) {
+                        shopLocation += "|" + customName;
                     }
                     writer.write(shopLocation + "\n");
                 }

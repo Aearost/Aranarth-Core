@@ -19,7 +19,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -123,6 +123,29 @@ public class CommandShop implements CommandExecutor {
             return true;
         }
 
+        if (args[0].equalsIgnoreCase("rename")) {
+            if (!AranarthUtils.getShopLocations().containsKey(player.getUniqueId())) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop"));
+                return true;
+            }
+            if (args.length < 2) {
+                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop rename <name>"));
+                return true;
+            }
+            String newName = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
+            if (newName.length() > 32) {
+                player.sendMessage(ChatUtils.chatMessage("&cShop names cannot be longer than 32 characters"));
+                return true;
+            }
+            if (ChatUtils.stripColorFormatting(newName).contains("|")) {
+                player.sendMessage(ChatUtils.chatMessage("&cShop names cannot contain the '|' character"));
+                return true;
+            }
+            AranarthUtils.setShopName(player.getUniqueId(), newName);
+            player.sendMessage(ChatUtils.chatMessage("&7Your shop name has been set to &e" + newName));
+            return true;
+        }
+
         if (args[0].equalsIgnoreCase("delete")) {
             UUID targetUuid;
             String targetName;
@@ -151,37 +174,7 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
-            deleteShop(targetUuid, player);
-            return true;
-        }
-
-        if (args[0].equalsIgnoreCase("tp")) {
-            if (args.length < 2) {
-                player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/shop tp <username>"));
-                return true;
-            }
-            HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-            boolean wasShopFound = false;
-            for (UUID uuid : shopLocations.keySet()) {
-                String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(uuid));
-                if (args[1].equalsIgnoreCase(username)) {
-                    AranarthPlayer shopOwner = AranarthUtils.getPlayer(uuid);
-                    if (shopLocations.get(uuid) != null) {
-                        wasShopFound = true;
-                        AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), aranarthPlayer.isInAdminMode(), success -> {
-                            if (success) {
-                                player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopOwner.getNickname() + "'s &7shop"));
-                            } else {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopOwner.getNickname() + "'s &cshop"));
-                            }
-                        });
-                    }
-                    break;
-                }
-            }
-            if (!wasShopFound) {
-                player.sendMessage(ChatUtils.chatMessage("&cThis player does not have a shop"));
-            }
+            CommandShop.deleteShop(targetUuid, player);
             return true;
         }
 
@@ -383,9 +376,9 @@ public class CommandShop implements CommandExecutor {
      * Deletes the shop island, all associated shop signs, holograms, and location data for the given UUID.
      *
      * @param targetUuid The UUID of the shop owner whose island is being deleted.
-     * @param player     The player who ran the delete command (used for feedback messages).
+     * @param executor   The player who ran the delete command (used for feedback messages), or null for automated deletion.
      */
-    private void deleteShop(UUID targetUuid, Player player) {
+    public static void deleteShop(UUID targetUuid, Player executor) {
         AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
         String targetName = targetAranarthPlayer != null ? targetAranarthPlayer.getNickname() : targetUuid.toString();
 
@@ -394,7 +387,7 @@ public class CommandShop implements CommandExecutor {
 
         // Teleport all players on this island off it
         int[] center = AranarthUtils.getShopIslandCenters().get(targetUuid);
-        boolean playerWasOnIsland = false;
+        boolean executorWasOnIsland = false;
         for (Player online : Bukkit.getOnlinePlayers()) {
             if (!online.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
                 continue;
@@ -402,8 +395,8 @@ public class CommandShop implements CommandExecutor {
             if (center == null || !ShopIslandUtils.isWithinPlotBoundary(online.getLocation(), center[0], center[1])) {
                 continue;
             }
-            if (online.getUniqueId().equals(player.getUniqueId())) {
-                playerWasOnIsland = true;
+            if (executor != null && online.getUniqueId().equals(executor.getUniqueId())) {
+                executorWasOnIsland = true;
             }
             online.teleport(safeSpot);
             online.playSound(online, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
@@ -429,17 +422,18 @@ public class CommandShop implements CommandExecutor {
             ShopIslandUtils.deleteShopIsland(shopsWorld, center[0], center[1]);
         }
 
-        // Remove location data and collaborators
+        // Remove location data, collaborators, and custom name
         AranarthUtils.deleteShopLocation(targetUuid);
         AranarthUtils.removeShopIslandCenter(targetUuid);
         AranarthUtils.removeAllShopCollaborators(targetUuid);
+        AranarthUtils.removeShopName(targetUuid);
 
-        // Only notify the player if they weren't already messaged by the loop above
-        if (!playerWasOnIsland) {
-            if (player.getUniqueId().equals(targetUuid)) {
-                player.sendMessage(ChatUtils.chatMessage("&7Your shop has been deleted"));
+        // Only notify the executor if they weren't already messaged by the loop above
+        if (executor != null && !executorWasOnIsland) {
+            if (executor.getUniqueId().equals(targetUuid)) {
+                executor.sendMessage(ChatUtils.chatMessage("&7Your shop has been deleted"));
             } else {
-                player.sendMessage(ChatUtils.chatMessage("&e" + targetName + "'s &7shop has been deleted"));
+                executor.sendMessage(ChatUtils.chatMessage("&e" + targetName + "'s &7shop has been deleted"));
             }
         }
     }

@@ -87,6 +87,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
 	private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
 	private static final HashMap<UUID, UUID> pendingShopInvites = new HashMap<>(); // invitee UUID → owner UUID
+	private static final HashMap<UUID, String> shopNames = new HashMap<>();
 	private static int shopIslandCounter = 0;
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
@@ -2767,6 +2768,34 @@ public class AranarthUtils {
 	 */
 	public static void removeShopIslandCenter(UUID uuid) {
 		shopIslandCenters.remove(uuid);
+	}
+
+	/**
+	 * Returns the full shop names map.
+	 */
+	public static HashMap<UUID, String> getShopNames() {
+		return shopNames;
+	}
+
+	/**
+	 * Returns the custom name for the given shop owner, or the provided default if none is set.
+	 */
+	public static String getShopName(UUID uuid, String defaultName) {
+		return shopNames.getOrDefault(uuid, defaultName);
+	}
+
+	/**
+	 * Sets a custom display name for the given player's shop.
+	 */
+	public static void setShopName(UUID uuid, String name) {
+		shopNames.put(uuid, name);
+	}
+
+	/**
+	 * Removes the custom shop name for the given player.
+	 */
+	public static void removeShopName(UUID uuid) {
+		shopNames.remove(uuid);
 	}
 
 	/**
