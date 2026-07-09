@@ -6,6 +6,7 @@ Major Features
 [+] Prevented copied maps from being copied further
 [+] Increased the number of pages of the dominion food reserves based on the rank of the dominion
 [+] Implemented the /map command to display the interactive world map
+[~] Made it so bed and respawn anchors will work with priority to the spawn location default
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed

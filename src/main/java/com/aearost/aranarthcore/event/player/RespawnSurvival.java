@@ -29,11 +29,13 @@ public class RespawnSurvival {
             return;
         }
 
-        String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
-        if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
-            e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
-        } else if (deathWorld.startsWith("smp")) {
-            e.setRespawnLocation(new Location(Bukkit.getWorld("smp"), 0.5, 120, 3.5, 180, 0));
+        if (!e.isBedSpawn() && !e.isAnchorSpawn()) {
+            String deathWorld = e.getPlayer().getLastDeathLocation().getWorld().getName();
+            if (deathWorld.startsWith("world") || deathWorld.startsWith("resource")) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("spawn"), 0.5, 101, 0.5, 180, 0));
+            } else if (deathWorld.startsWith("smp")) {
+                e.setRespawnLocation(new Location(Bukkit.getWorld("smp"), 0.5, 120, 3.5, 180, 0));
+            }
         }
 
         if (AranarthUtils.isWearingArmorType(player, "soulbound")) {
