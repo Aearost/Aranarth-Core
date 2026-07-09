@@ -107,7 +107,6 @@ public class GuiDominionPermissions {
         map.put(13, DominionPermission.ITEM_FRAME);
         map.put(14, DominionPermission.VILLAGER);
         map.put(15, DominionPermission.PVP);
-        map.put(16, DominionPermission.DEFENDER_TARGETING);
         map.put(19, DominionPermission.DOOR);
         map.put(20, DominionPermission.TRAPDOOR);
         map.put(21, DominionPermission.FENCE_GATE);
@@ -211,7 +210,6 @@ public class GuiDominionPermissions {
             if (omitPvp && entry.getValue() == DominionPermission.PVP) {
                 continue;
             }
-            // DEFENDER_TARGETING is always shown for all relation ranks
             gui.setItem(entry.getKey(), buildPermissionItem(entry.getValue(), enabled.contains(entry.getValue())));
         }
         gui.setItem(4, buildRestoreDefaultsButton("&7Resets this relation's permissions to server defaults"));
@@ -408,7 +406,6 @@ public class GuiDominionPermissions {
             case MANAGE_OUTPOSTS -> Material.OAK_LOG;
             case MANAGE_DEFENDERS -> Material.SHIELD;
             case WITHDRAW -> Material.GOLD_NUGGET;
-            case DEFENDER_TARGETING -> Material.ZOMBIE_SPAWN_EGG;
         };
     }
 

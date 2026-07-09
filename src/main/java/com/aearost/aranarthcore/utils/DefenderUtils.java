@@ -538,22 +538,13 @@ public class DefenderUtils {
                 ? DominionRank.WANDERER
                 : DominionUtils.getRelationKey(defenderDominion, targetDominion);
 
-        if (defenderDominion.getDominionPermissions()
-                .hasPermission(relation, DominionPermission.DEFENDER_TARGETING)) {
-            return true;
-        }
-
-        if (targetDominion != null) {
-            if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                boolean defenderPvp = defenderDominion.getDominionPermissions()
-                        .hasPermission(relation, DominionPermission.PVP);
-                boolean targetPvp = targetDominion.getDominionPermissions()
-                        .hasPermission(relation, DominionPermission.PVP);
-                return defenderPvp && targetPvp;
-            }
-            if (relation == DominionRank.NEUTRAL || relation == DominionRank.ENEMIED) {
-                return true;
-            }
+        if (targetDominion != null
+                && (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED)) {
+            boolean defenderPvp = defenderDominion.getDominionPermissions()
+                    .hasPermission(relation, DominionPermission.PVP);
+            boolean targetPvp = targetDominion.getDominionPermissions()
+                    .hasPermission(relation, DominionPermission.PVP);
+            return defenderPvp && targetPvp;
         }
         return true;
     }

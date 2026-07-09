@@ -46,6 +46,7 @@ Minor Features
 [~] Made it so dominion maintenance cost (if no food) is scaled by dominion ranks and not chunk amount
 [+] Added missing fallback for a new day which a dominion's food reserves don't get consumed
 [+] Made bed/respawn anchors appear first in the /home GUI
+[-] Removed the defender target permission as it will simply follow the PvP permission
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

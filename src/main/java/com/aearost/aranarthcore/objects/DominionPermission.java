@@ -24,7 +24,6 @@ public enum DominionPermission {
 
     // Combat
     PVP,
-    DEFENDER_TARGETING,
 
     // Member commands
     HOME,
