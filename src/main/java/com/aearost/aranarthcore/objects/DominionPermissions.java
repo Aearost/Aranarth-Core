@@ -68,16 +68,16 @@ public class DominionPermissions {
         alliedPerms.add(DominionPermission.OUTPOST_HOME);
         perms.put(DominionRank.ALLIED, alliedPerms);
 
-        // TRUCED dominions — no access by default
+        // Truced - no access by default
         perms.put(DominionRank.TRUCED, new HashSet<>());
 
-        // NEUTRAL dominions — no access by default
+        // Neutral - no access by default
         perms.put(DominionRank.NEUTRAL, new HashSet<>());
 
-        // WANDERER (no dominion) — no access by default
+        // Wanderer - no access by default
         perms.put(DominionRank.WANDERER, new HashSet<>());
 
-        // ENEMIED dominions — no access by default (PvP is hardcoded, not permission-based)
+        // Enemied - no access by default (PvP is hardcoded, not permission-based)
         perms.put(DominionRank.ENEMIED, new HashSet<>());
 
         return new DominionPermissions(perms);

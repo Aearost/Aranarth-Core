@@ -3,6 +3,7 @@ AranarthCore v. 1.11
 Major Features
 [+] Implemented shop collaboration through /shop invite, restricted to owning or collaborating on an island
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
+[+] Implemented a bending permission flag in Dominions, automatically toggling bending by relations or globally in a Dominion's lands
 [+] Prevented copied maps from being copied further
 [+] Increased the number of pages of the dominion food reserves based on the rank of the dominion
 [+] Implemented the /map command to display the interactive world map
@@ -48,3 +49,4 @@ Minor Features
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
+- Cleaned up AranarthBendingUtils documentation

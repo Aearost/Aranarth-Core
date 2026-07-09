@@ -56,6 +56,15 @@ public class GuiDominionPermissionsClick {
         // Main hub screen, navigate to sections or toggle settings
         if (title.equals(GuiDominionPermissions.HUB_TITLE)) {
             String itemName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName());
+            if (itemName.startsWith("Bending")) {
+                boolean newState = !dominion.isBendingEnabled();
+                dominion.setBendingEnabled(newState);
+                DominionUtils.updateDominion(dominion);
+                e.getClickedInventory().setItem(e.getSlot(), GuiDominionPermissions.buildBendingToggleItem(newState));
+                player.updateInventory();
+                player.playSound(player, Sound.BLOCK_NOTE_BLOCK_XYLOPHONE, 0.5F, 1.5F);
+                return;
+            }
             if (itemName.startsWith("Mob Spawning")) {
                 boolean newState = !dominion.isMobSpawningEnabled();
                 dominion.setMobSpawningEnabled(newState);

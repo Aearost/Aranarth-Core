@@ -1198,6 +1198,7 @@ public class PersistenceUtils {
                 long levelDropTimestamp = fields.length > 33 ? Long.parseLong(fields[33]) : 0L;
                 int boughtOutpostChunks = fields.length > 34 ? Integer.parseInt(fields[34]) : 0;
                 String cachedLivestockByWorldString = fields.length > 35 ? fields[35] : "";
+                boolean bendingEnabled = fields.length <= 36 || !fields[36].equals("0");
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1219,6 +1220,7 @@ public class PersistenceUtils {
                 dominion.setFoundedTimestamp(foundedTimestamp);
                 dominion.setLevelDropTimestamp(levelDropTimestamp);
                 dominion.setBoughtOutpostChunks(boughtOutpostChunks);
+                dominion.setBendingEnabled(bendingEnabled);
                 if (!cachedLivestockByWorldString.isEmpty()) {
                     for (String entry : cachedLivestockByWorldString.split(";")) {
                         String[] kv = entry.split("=", 2);
@@ -1271,7 +1273,7 @@ public class PersistenceUtils {
                 List<Dominion> dominions = DominionUtils.getDominions();
                 try {
                     FileWriter writer = new FileWriter(filePath);
-                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks\n");
+                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
@@ -1382,7 +1384,8 @@ public class PersistenceUtils {
                                     + "|" + dominion.getBoughtOutpostChunks()
                                     + "|" + dominion.getCachedLivestockByWorld().entrySet().stream()
                                             .map(e -> e.getKey() + "=" + e.getValue())
-                                            .collect(java.util.stream.Collectors.joining(";")) + "\n";
+                                            .collect(java.util.stream.Collectors.joining(";"))
+                                    + "|" + (dominion.isBendingEnabled() ? "1" : "0") + "\n";
                             writer.write(row);
                         }
                     }

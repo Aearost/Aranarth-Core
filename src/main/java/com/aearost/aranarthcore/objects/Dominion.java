@@ -45,6 +45,7 @@ public class Dominion {
 
 	private boolean memberPvpEnabled;
 	private boolean mobSpawningEnabled;
+	private boolean bendingEnabled;
 	private int boughtChunks;
 
 	// Dominion level system (1–5), updated automatically every 30 minutes.
@@ -421,6 +422,21 @@ public class Dominion {
 	 */
 	public void setMobSpawningEnabled(boolean mobSpawningEnabled) {
 		this.mobSpawningEnabled = mobSpawningEnabled;
+	}
+
+	/**
+	 * Returns whether bending is enabled in this dominion.
+	 */
+	public boolean isBendingEnabled() {
+		return bendingEnabled;
+	}
+
+	/**
+	 * Sets whether bending is globally enabled in this dominion.
+	 * @param bendingEnabled True to allow bending (defers to per-relation permissions), false to block everyone.
+	 */
+	public void setBendingEnabled(boolean bendingEnabled) {
+		this.bendingEnabled = bendingEnabled;
 	}
 
 	/**

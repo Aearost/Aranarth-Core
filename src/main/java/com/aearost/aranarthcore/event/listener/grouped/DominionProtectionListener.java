@@ -204,6 +204,22 @@ public class DominionProtectionListener implements Listener {
     }
 
     /**
+     * Cancels fall damage for players in any dominion's claimed chunks.
+     */
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFallDamage(EntityDamageEvent e) {
+        if (e.getCause() != EntityDamageEvent.DamageCause.FALL) {
+            return;
+        }
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        if (DominionUtils.getDominionOfChunk(player.getLocation().getChunk()) != null) {
+            e.setCancelled(true);
+        }
+    }
+
+    /**
      * Handles entity damage in Dominion land.
      * Armor stand attacks are treated as BUILD (destruction). PvP is controlled by the PVP permission.
      */

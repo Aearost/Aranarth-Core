@@ -248,6 +248,9 @@ public class GuiDominionPermissions {
         gui.setItem(23, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", "&7Click to manage permissions"));
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", "&7Click to manage permissions"));
 
+        // Row 1 toggle
+        gui.setItem(9, buildBendingToggleItem(dominion.isBendingEnabled()));
+
         // Row 2 toggles
         gui.setItem(18, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
         gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
@@ -300,6 +303,19 @@ public class GuiDominionPermissions {
         String statusText = enabled ? "Enabled" : "Disabled";
         meta.setDisplayName(ChatUtils.translateToColor("&6&lMob Spawning &7&l- " + statusColor + "&l" + statusText));
         meta.setLore(List.of(ChatUtils.translateToColor("&7Allows monsters to spawn in dominion chunks")));
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Builds the Bending toggle item for the main screen.
+     */
+    public static ItemStack buildBendingToggleItem(boolean enabled) {
+        ItemStack item = new ItemStack(Material.BLAZE_POWDER);
+        ItemMeta meta = item.getItemMeta();
+        String statusColor = enabled ? "&a" : "&c";
+        String statusText = enabled ? "Enabled" : "Disabled";
+        meta.setDisplayName(ChatUtils.translateToColor("&6&lBending &7&l- " + statusColor + "&l" + statusText));
         item.setItemMeta(meta);
         return item;
     }

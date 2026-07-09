@@ -10,6 +10,7 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.entity.*;
@@ -29,8 +30,7 @@ import java.util.UUID;
 public class AranarthBendingUtils {
 
     /**
-     * Ordered block progression used by lava warm-up abilities (MagmaGlaives, Eruption).
-     * Index 0 = first transition (Stone), index 3 = fully charged (Magma Block).
+     * Ordered block progression used by lava warm-up abilities.
      */
     public static final Material[] LAVA_WARMUP_SEQUENCE = {
             Material.STONE,
@@ -39,22 +39,19 @@ public class AranarthBendingUtils {
             Material.MAGMA_BLOCK,
     };
 
-    // -------------------------------------------------------------------------
-    // Spiritual energy palette — shared across spiritual abilities
-    // -------------------------------------------------------------------------
-
     /**
-     * The four spirit colours used by AngeredSpirits and EnergyBurst, in index order:
-     * 0 = Red (Weakness), 1 = Blue (Slowness), 2 = Purple (Blindness), 3 = Yellow (Nausea).
+     * The four spirit colours used by spirit abilities.
      */
     public static final Color[] SPIRIT_COLORS = {
-            Color.fromRGB(220, 30,  30),   // Red    → Weakness
-            Color.fromRGB(30,  100, 220),  // Blue   → Slowness
-            Color.fromRGB(140, 30,  200),  // Purple → Blindness
-            Color.fromRGB(220, 200, 30),   // Yellow → Nausea
+            Color.fromRGB(220, 30, 30),   // Red - Weakness
+            Color.fromRGB(30, 100, 220),  // Blue - Slowness
+            Color.fromRGB(140, 30, 200),  // Purple - Blindness
+            Color.fromRGB(220, 200, 30),   // Yellow - Nausea
     };
 
-    /** Matching potion effects for each entry in {@link #SPIRIT_COLORS}. */
+    /**
+     * Matching potion effects for each entry in the spirit colors.
+     */
     public static final PotionEffectType[] SPIRIT_EFFECT_TYPES = {
             PotionEffectType.WEAKNESS,
             PotionEffectType.SLOWNESS,
@@ -62,43 +59,131 @@ public class AranarthBendingUtils {
             PotionEffectType.NAUSEA,
     };
 
-    /** Duration (ticks) applied by all spiritual-ability curse effects. */
-    public static final int SPIRIT_EFFECT_DURATION  = 100;
-    /** Amplifier used for all spiritual-ability curse effects (0 = level I). */
+    public static final int SPIRIT_EFFECT_DURATION = 100;
     public static final int SPIRIT_EFFECT_AMPLIFIER = 0;
 
-    // -------------------------------------------------------------------------
-    // Bloodbending dust palette — shared across all bloodbending abilities
-    // -------------------------------------------------------------------------
+    /**
+     * Turquoise colour used by soundbending abilities.
+     */
+    public static final Color SOUND_COLOR_TURQUOISE = Color.fromRGB(72, 209, 204);
+    /**
+     * Dark teal colour used by soundbending abilities.
+     */
+    public static final Color SOUND_COLOR_TEAL = Color.fromRGB(0, 128, 128);
+    /**
+     * Sky-blue colour used by soundbending abilities.
+     */
+    public static final Color SOUND_COLOR_PULSE = Color.fromRGB(100, 210, 255);
 
-    /** Dark crimson dust used for sustained bloodbending particle effects. */
+    /**
+     * Hex colour used for the action bar electrocution message, matching LIGHTNING_DUST.
+     */
+    private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");
+
+    /**
+     * Dark crimson dust used for bloodbending particle effects.
+     */
     public static final Particle.DustOptions BLOOD_DUST =
             new Particle.DustOptions(Color.fromRGB(170, 8, 8), 1.3f);
-    /** Bright red dust used for bursts and impacts in bloodbending abilities. */
+    /**
+     * Bright red dust used for bursts and impacts in bloodbending abilities.
+     */
     public static final Particle.DustOptions BLOOD_DUST_BRIGHT =
             new Particle.DustOptions(Color.fromRGB(230, 35, 35), 0.9f);
 
-    /** Bright blue water dust shared by healing waterbending abilities during their water phase. */
+    /**
+     * Bright blue water dust shared by healing waterbending abilities during their water phase.
+     */
     public static final Particle.DustOptions WATER_DUST =
             new Particle.DustOptions(Color.fromRGB(40, 120, 255), 1.0f);
-    /** Darker blue water dust shared by healing waterbending abilities during their water phase. */
+    /**
+     * Darker blue water dust shared by healing waterbending abilities during their water phase.
+     */
     public static final Particle.DustOptions WATER_DUST_DARK =
             new Particle.DustOptions(Color.fromRGB(20, 75, 225), 0.8f);
 
-    /** Warm yellow dust used for the Jolt orbital ready state and shot trail. */
+    /**
+     * Warm yellow dust used for lightning abilities.
+     */
     public static final Particle.DustOptions LIGHTNING_DUST =
             new Particle.DustOptions(Color.fromRGB(255, 240, 80), 0.8f);
-    /** Pale yellow-white dust used for alternating orbital particles and trail bursts in Jolt. */
+    /**
+     * Pale yellow-white dust used for lightning abilities.
+     */
     public static final Particle.DustOptions LIGHTNING_DUST_BRIGHT =
             new Particle.DustOptions(Color.fromRGB(255, 255, 180), 1.0f);
-    /** Light blue dust used for the Discharge bolt path. */
+    /**
+     * Light blue dust used for the lightning abilities.
+     */
     public static final Particle.DustOptions LIGHTNING_DUST_BLUE =
             new Particle.DustOptions(Color.fromRGB(100, 200, 255), 1.0f);
 
+    public static final Particle.DustOptions SOUND_RING_DUST = new Particle.DustOptions(SOUND_COLOR_TURQUOISE, 0.8f);
+    public static final Particle.DustOptions SOUND_CHARGE_DUST = new Particle.DustOptions(SOUND_COLOR_TEAL, 0.5f);
+    public static final Particle.DustOptions SOUND_PULSE_DUST = new Particle.DustOptions(SOUND_COLOR_PULSE, 1.1f);
+
+    private static final Particle.DustOptions[] YELLOW_SAND_PALETTE = {
+            new Particle.DustOptions(Color.fromRGB(0xC2, 0xB2, 0x80), 1.2f),
+            new Particle.DustOptions(Color.fromRGB(0xD2, 0xB4, 0x8C), 1.0f),
+            new Particle.DustOptions(Color.fromRGB(0xE8, 0xD5, 0xA0), 0.8f),
+            new Particle.DustOptions(Color.fromRGB(0xC1, 0x9A, 0x6B), 1.1f),
+            new Particle.DustOptions(Color.fromRGB(0xA8, 0x96, 0x60), 0.9f),
+    };
+    private static final Particle.DustOptions[] RED_SAND_PALETTE = {
+            new Particle.DustOptions(Color.fromRGB(0xC8, 0x5A, 0x32), 1.2f),
+            new Particle.DustOptions(Color.fromRGB(0xD4, 0x6A, 0x3E), 1.0f),
+            new Particle.DustOptions(Color.fromRGB(0xB8, 0x4A, 0x28), 1.1f),
+            new Particle.DustOptions(Color.fromRGB(0xDC, 0x7A, 0x50), 0.9f),
+            new Particle.DustOptions(Color.fromRGB(0xA0, 0x3C, 0x1E), 0.8f),
+    };
+    private static final Particle.DustOptions[] SOUL_SAND_PALETTE = {
+            new Particle.DustOptions(Color.fromRGB(0x6B, 0x4A, 0x2E), 1.2f),
+            new Particle.DustOptions(Color.fromRGB(0x7A, 0x56, 0x38), 1.0f),
+            new Particle.DustOptions(Color.fromRGB(0x5C, 0x3E, 0x28), 1.1f),
+            new Particle.DustOptions(Color.fromRGB(0x8A, 0x64, 0x46), 0.9f),
+            new Particle.DustOptions(Color.fromRGB(0x4A, 0x32, 0x1E), 0.8f),
+    };
+    private static final Particle.DustOptions[] GRAVEL_PALETTE = {
+            new Particle.DustOptions(Color.fromRGB(0x80, 0x80, 0x80), 1.2f),
+            new Particle.DustOptions(Color.fromRGB(0x6E, 0x6E, 0x6E), 1.0f),
+            new Particle.DustOptions(Color.fromRGB(0x96, 0x90, 0x8A), 1.1f),
+            new Particle.DustOptions(Color.fromRGB(0x5A, 0x56, 0x52), 0.9f),
+            new Particle.DustOptions(Color.fromRGB(0xAA, 0xA4, 0x9C), 0.8f),
+    };
+
     private static final Map<UUID, Long> ELECTROCUTED_ENTITIES = new HashMap<>();
 
-    /** Hex colour used for the action bar electrocution message, matching LIGHTNING_DUST. */
-    private static final TextColor ELECTROCUTION_COLOR = TextColor.fromHexString("#FFF050");
+    private static final Set<Material> METAL_ARMOR_PIECES = EnumSet.of(
+            Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
+            Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
+            Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
+            Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS
+    );
+
+    private static final Set<Material> METAL_INGOTS = EnumSet.of(
+            Material.IRON_INGOT, Material.COPPER_INGOT, Material.GOLD_INGOT, Material.NETHERITE_INGOT
+    );
+
+    /**
+     * Returns the appropriate sand dust particle palette for the given block material.
+     */
+    public static Particle.DustOptions[] pickSandDustPalette(Material material) {
+        return switch (material) {
+            case RED_SAND,
+                 RED_SANDSTONE, RED_SANDSTONE_SLAB, RED_SANDSTONE_STAIRS, RED_SANDSTONE_WALL,
+                 CHISELED_RED_SANDSTONE, CUT_RED_SANDSTONE, CUT_RED_SANDSTONE_SLAB,
+                 SMOOTH_RED_SANDSTONE, SMOOTH_RED_SANDSTONE_STAIRS, SMOOTH_RED_SANDSTONE_SLAB -> RED_SAND_PALETTE;
+            case SOUL_SAND, SOUL_SOIL -> SOUL_SAND_PALETTE;
+            case GRAVEL, SUSPICIOUS_GRAVEL,
+                 WHITE_CONCRETE_POWDER, ORANGE_CONCRETE_POWDER, MAGENTA_CONCRETE_POWDER,
+                 LIGHT_BLUE_CONCRETE_POWDER, YELLOW_CONCRETE_POWDER, LIME_CONCRETE_POWDER,
+                 PINK_CONCRETE_POWDER, GRAY_CONCRETE_POWDER, LIGHT_GRAY_CONCRETE_POWDER,
+                 CYAN_CONCRETE_POWDER, PURPLE_CONCRETE_POWDER, BLUE_CONCRETE_POWDER,
+                 BROWN_CONCRETE_POWDER, GREEN_CONCRETE_POWDER, RED_CONCRETE_POWDER,
+                 BLACK_CONCRETE_POWDER -> GRAVEL_PALETTE;
+            default -> YELLOW_SAND_PALETTE;
+        };
+    }
 
     /**
      * Applies electrocution effects to a living entity.
@@ -164,7 +249,9 @@ public class AranarthBendingUtils {
      */
     public static boolean isElectrocuted(UUID uuid) {
         Long expiry = ELECTROCUTED_ENTITIES.get(uuid);
-        if (expiry == null) return false;
+        if (expiry == null) {
+            return false;
+        }
         if (System.currentTimeMillis() >= expiry) {
             ELECTROCUTED_ENTITIES.remove(uuid);
             return false;
@@ -187,81 +274,82 @@ public class AranarthBendingUtils {
                 false, true, true));
     }
 
-    // -------------------------------------------------------------------------
-    // Sound-bending dust palette — shared across all sound abilities
-    // -------------------------------------------------------------------------
-
-    /** Turquoise ring colour used by DeafeningScream and Amplification. */
-    public static final Color SOUND_COLOR_TURQUOISE = Color.fromRGB(72, 209, 204);
-    /** Dark teal colour used by SonicBoom's charge particles. */
-    public static final Color SOUND_COLOR_TEAL      = Color.fromRGB(0, 128, 128);
-    /** Sky-blue colour used by SonicPulse's travelling rings. */
-    public static final Color SOUND_COLOR_PULSE     = Color.fromRGB(100, 210, 255);
-
-    public static final Particle.DustOptions SOUND_RING_DUST   = new Particle.DustOptions(SOUND_COLOR_TURQUOISE, 0.8f);
-    public static final Particle.DustOptions SOUND_CHARGE_DUST = new Particle.DustOptions(SOUND_COLOR_TEAL,      0.5f);
-    public static final Particle.DustOptions SOUND_PULSE_DUST  = new Particle.DustOptions(SOUND_COLOR_PULSE,     1.1f);
-
-    // -------------------------------------------------------------------------
-    // Sandbending dust palettes — shared across sand abilities
-    // -------------------------------------------------------------------------
-
-    private static final Particle.DustOptions[] YELLOW_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0xC2, 0xB2, 0x80), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0xD2, 0xB4, 0x8C), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0xE8, 0xD5, 0xA0), 0.8f),
-            new Particle.DustOptions(Color.fromRGB(0xC1, 0x9A, 0x6B), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0xA8, 0x96, 0x60), 0.9f),
-    };
-    private static final Particle.DustOptions[] RED_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0xC8, 0x5A, 0x32), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0xD4, 0x6A, 0x3E), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0xB8, 0x4A, 0x28), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0xDC, 0x7A, 0x50), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0xA0, 0x3C, 0x1E), 0.8f),
-    };
-    private static final Particle.DustOptions[] SOUL_SAND_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0x6B, 0x4A, 0x2E), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0x7A, 0x56, 0x38), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0x5C, 0x3E, 0x28), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0x8A, 0x64, 0x46), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0x4A, 0x32, 0x1E), 0.8f),
-    };
-    private static final Particle.DustOptions[] GRAVEL_PALETTE = {
-            new Particle.DustOptions(Color.fromRGB(0x80, 0x80, 0x80), 1.2f),
-            new Particle.DustOptions(Color.fromRGB(0x6E, 0x6E, 0x6E), 1.0f),
-            new Particle.DustOptions(Color.fromRGB(0x96, 0x90, 0x8A), 1.1f),
-            new Particle.DustOptions(Color.fromRGB(0x5A, 0x56, 0x52), 0.9f),
-            new Particle.DustOptions(Color.fromRGB(0xAA, 0xA4, 0x9C), 0.8f),
-    };
+    /**
+     * Returns true if bending should be blocked for the player at the given location.
+     *
+     * @param player   The player to check.
+     * @param location The location whose chunk is checked.
+     * @return Whether bending should be blocked at that location.
+     */
+    public static boolean isBendingBlockedAtLocation(Player player, Location location) {
+        Dominion dominion = DominionUtils.getDominionOfChunk(location.getChunk());
+        if (dominion == null) {
+            return false;
+        }
+        return !dominion.isBendingEnabled();
+    }
 
     /**
-     * Returns the appropriate sand dust particle palette for the given block material.
-     * Used by sandbending abilities (Sandstorm, SandWave) to colour particles by source type.
+     * Dynamically toggles a player's bending.
+     *
+     * @param player The player.
+     * @param from   The location the player is moving from.
+     * @param to     The location the player is moving to or teleporting to.
      */
-    public static Particle.DustOptions[] pickSandDustPalette(Material material) {
-        return switch (material) {
-            case RED_SAND,
-                 RED_SANDSTONE, RED_SANDSTONE_SLAB, RED_SANDSTONE_STAIRS, RED_SANDSTONE_WALL,
-                 CHISELED_RED_SANDSTONE, CUT_RED_SANDSTONE, CUT_RED_SANDSTONE_SLAB,
-                 SMOOTH_RED_SANDSTONE, SMOOTH_RED_SANDSTONE_STAIRS, SMOOTH_RED_SANDSTONE_SLAB -> RED_SAND_PALETTE;
-            case SOUL_SAND, SOUL_SOIL -> SOUL_SAND_PALETTE;
-            case GRAVEL, SUSPICIOUS_GRAVEL,
-                 WHITE_CONCRETE_POWDER, ORANGE_CONCRETE_POWDER, MAGENTA_CONCRETE_POWDER,
-                 LIGHT_BLUE_CONCRETE_POWDER, YELLOW_CONCRETE_POWDER, LIME_CONCRETE_POWDER,
-                 PINK_CONCRETE_POWDER, GRAY_CONCRETE_POWDER, LIGHT_GRAY_CONCRETE_POWDER,
-                 CYAN_CONCRETE_POWDER, PURPLE_CONCRETE_POWDER, BLUE_CONCRETE_POWDER,
-                 BROWN_CONCRETE_POWDER, GREEN_CONCRETE_POWDER, RED_CONCRETE_POWDER,
-                 BLACK_CONCRETE_POWDER -> GRAVEL_PALETTE;
-            default -> YELLOW_SAND_PALETTE;
-        };
+    public static void applyDominionBendingToggle(Player player, Location from, Location to) {
+        BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bPlayer == null) {
+            return;
+        }
+        // Don't interfere with bending management in worlds that have their own restriction systems
+        String toWorld = to.getWorld().getName();
+        if (toWorld.equals("spawn") || toWorld.equals("arena") || toWorld.equals("shops")) {
+            return;
+        }
+        boolean wasBlocked = isBendingBlockedAtLocation(player, from);
+        boolean shouldBlock = isBendingBlockedAtLocation(player, to);
+        if (shouldBlock && bPlayer.isToggled()) {
+            bPlayer.toggleBending();
+        } else if (!shouldBlock && wasBlocked && !bPlayer.isToggled()) {
+            // Only re-enable when transitioning out of a blocked dominion
+            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+                if (player.isOnline()) {
+                    bPlayer.toggleBending();
+                }
+            }, 1L);
+        }
+    }
+
+    /**
+     * Applies the correct dominion bending state when a player joins the server.
+     *
+     * @param player The player who joined.
+     */
+    public static void applyDominionBendingToggleOnJoin(Player player) {
+        BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
+        if (bPlayer == null) {
+            return;
+        }
+        Location loc = player.getLocation();
+        String worldName = loc.getWorld().getName();
+        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.equals("shops")) {
+            return;
+        }
+        boolean shouldBlock = isBendingBlockedAtLocation(player, loc);
+        if (shouldBlock && bPlayer.isToggled()) {
+            bPlayer.toggleBending();
+        } else if (!shouldBlock && !bPlayer.isToggled()) {
+            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
+                if (player.isOnline()) {
+                    bPlayer.toggleBending();
+                }
+            }, 1L);
+        }
     }
 
     /**
      * Returns true if the player's ability should be prevented near a Dominion where they
-     * do not have the Build permission. Checks the 3x3 chunk grid centered on the player's
-     * current chunk. The Build permission accounts for the player's effective rank in the
-     * dominion (member rank or inter-dominion relation rank).
+     * do not have the Build permission.
      *
      * @param player The player using the ability.
      * @return Whether the ability should be cancelled.
@@ -286,13 +374,16 @@ public class AranarthBendingUtils {
 
     /**
      * Removes an ability instance that fires as part of a combo's input sequence.
-     * @param bPlayer The BendingPlayer whose cooldown should be cleared.
-     * @param player The Player whose active ability instances are searched.
+     *
+     * @param bPlayer     The BendingPlayer whose cooldown should be cleared.
+     * @param player      The Player whose active ability instances are searched.
      * @param abilityName The exact ability name to remove (case-sensitive).
      */
     public static void suppressComboTrigger(BendingPlayer bPlayer, Player player, String abilityName) {
         final CoreAbility prototype = CoreAbility.getAbility(abilityName);
-        if (prototype == null) return;
+        if (prototype == null) {
+            return;
+        }
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
             for (final CoreAbility ability : new ArrayList<>(CoreAbility.getAbilities(prototype.getClass()))) {
                 if (ability.getPlayer().equals(player)) {
@@ -303,19 +394,9 @@ public class AranarthBendingUtils {
         });
     }
 
-    private static final Set<Material> METAL_ARMOR_PIECES = EnumSet.of(
-            Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS,
-            Material.GOLDEN_HELMET, Material.GOLDEN_CHESTPLATE, Material.GOLDEN_LEGGINGS, Material.GOLDEN_BOOTS,
-            Material.CHAINMAIL_HELMET, Material.CHAINMAIL_CHESTPLATE, Material.CHAINMAIL_LEGGINGS, Material.CHAINMAIL_BOOTS,
-            Material.NETHERITE_HELMET, Material.NETHERITE_CHESTPLATE, Material.NETHERITE_LEGGINGS, Material.NETHERITE_BOOTS
-    );
-
-    private static final Set<Material> METAL_INGOTS = EnumSet.of(
-            Material.IRON_INGOT, Material.COPPER_INGOT, Material.GOLD_INGOT, Material.NETHERITE_INGOT
-    );
-
     /**
      * Determines if the player is wearing at least 1 piece of metal armor.
+     *
      * @param player The player.
      * @return Whether the player is wearing at least 1 piece of metal armor.
      */
@@ -332,6 +413,7 @@ public class AranarthBendingUtils {
     /**
      * Determines if the player has at least 1 metal ingot in their inventory.
      * Accepted ingots: iron, copper, gold, netherite.
+     *
      * @param player The player.
      * @return Whether the player has at least 1 metal ingot.
      */
@@ -346,6 +428,7 @@ public class AranarthBendingUtils {
 
     /**
      * Determines if the player meets the metal requirement: wearing metal armor or carrying a metal ingot.
+     *
      * @param player The player.
      * @return Whether the player has metal armor or a metal ingot.
      */

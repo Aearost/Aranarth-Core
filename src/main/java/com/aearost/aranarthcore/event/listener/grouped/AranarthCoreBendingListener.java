@@ -221,6 +221,60 @@ public class AranarthCoreBendingListener implements Listener {
         }
     }
 
+    /**
+     * Prevents players from manually re-enabling their bending where bending is blocked for them.
+     */
+    @EventHandler
+    public void onToggleBendingCommand(final PlayerCommandPreprocessEvent e) {
+        String[] parts = e.getMessage().split(" ");
+        if (parts.length < 2) {
+            return;
+        }
+        if (!parts[0].startsWith("/b") && !parts[0].startsWith("/bending")) {
+            return;
+        }
+        if (!parts[1].equals("t") && !parts[1].equals("toggle")) {
+            return;
+        }
+        Player player = e.getPlayer();
+        if (AranarthBendingUtils.isBendingBlockedAtLocation(player, player.getLocation())) {
+            e.setCancelled(true);
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending in this Dominion!"));
+        }
+    }
+
+    /**
+     * Toggles bending on/off when a player moves into or out of a bending-disabled dominion chunk.
+     */
+    @EventHandler
+    public void onMoveDominionBending(final PlayerMoveEvent e) {
+        Location from = e.getFrom();
+        Location to = e.getTo();
+        if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) {
+            return;
+        }
+        AranarthBendingUtils.applyDominionBendingToggle(e.getPlayer(), from, to);
+    }
+
+    /**
+     * Applies the dominion bending toggle on teleport, covering cases like /home and /tp.
+     */
+    @EventHandler
+    public void onTeleportDominionBending(final PlayerTeleportEvent e) {
+        AranarthBendingUtils.applyDominionBendingToggle(e.getPlayer(), e.getFrom(), e.getTo());
+    }
+
+    /**
+     * Applies the dominion bending toggle when a player joins, restoring correct state
+     * if they logged out inside a bending-disabled dominion.
+     */
+    @EventHandler
+    public void onJoinDominionBending(final PlayerJoinEvent e) {
+        Player player = e.getPlayer();
+        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(),
+                () -> AranarthBendingUtils.applyDominionBendingToggleOnJoin(player), 5L);
+    }
+
     @EventHandler
     public void onPlayerSneak(final PlayerToggleSneakEvent e) {
         Player player = e.getPlayer();
@@ -283,7 +337,6 @@ public class AranarthCoreBendingListener implements Listener {
             if (!bendingPlayer.canCurrentlyBendWithWeapons()) {
                 return;
             }
-
             // Airbending
             if (ability instanceof AirAbility && bendingPlayer.isElementToggled(Element.AIR)) {
                 if (ability instanceof SpiritualAbility) {
@@ -1907,7 +1960,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (e.getRightClicked() instanceof EnderDragon d) {
             dragon = d;
         } else if (e.getRightClicked() instanceof org.bukkit.entity.ComplexEntityPart part
-                   && part.getParent() instanceof EnderDragon d) {
+                && part.getParent() instanceof EnderDragon d) {
             dragon = d;
         } else {
             return;
@@ -1985,6 +2038,21 @@ public class AranarthCoreBendingListener implements Listener {
             return;
         }
         pastLives.onPlayerMeleeHit(e);
+    }
+
+    /**
+     * Cancels ability damage that lands in a dominion where bending is disabled.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAbilityDamageInBendingDisabledDominion(final AbilityDamageEntityEvent e) {
+        Player caster = e.getAbility().getPlayer();
+        if (caster == null) {
+            return;
+        }
+        Location targetLocation = e.getEntity().getLocation();
+        if (AranarthBendingUtils.isBendingBlockedAtLocation(caster, targetLocation)) {
+            e.setCancelled(true);
+        }
     }
 
     /**
