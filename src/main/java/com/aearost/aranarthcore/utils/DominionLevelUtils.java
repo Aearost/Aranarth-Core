@@ -70,6 +70,21 @@ public class DominionLevelUtils {
      */
     private static final int[] PENALTY_FOOD_POWER = {200, 500, 1_000, 2_000};
 
+    /**
+     * Daily balance cost (in dollars) consumed when a dominion lacks sufficient food,
+     * indexed by dominion level (index 0 = Level 1, ..., index 4 = Level 5).
+     */
+    private static final double[] DAILY_BALANCE_COST = {150, 500, 2_000, 7_500, 25_000};
+
+    /**
+     * Returns the daily balance cost for a dominion based on its current level.
+     * Used as a fallback when the dominion does not have enough food in its reserves.
+     */
+    public static double getDailyBalanceCost(int dominionLevel) {
+        int i = Math.max(0, Math.min(dominionLevel - 1, DAILY_BALANCE_COST.length - 1));
+        return DAILY_BALANCE_COST[i];
+    }
+
     private static int idx(int targetLevel) {
         return targetLevel - 2;
     }

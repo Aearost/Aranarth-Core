@@ -623,7 +623,8 @@ public class DominionUtils {
 					onlineLeader.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + "'s &7daily food rations have been consumed"));
 				}
 			} else {
-				int result = consumeMoneyOrLand(dominion, 250);
+				double dailyCost = DominionLevelUtils.getDailyBalanceCost(dominion.getDominionLevel());
+				int result = consumeMoneyOrLand(dominion, dailyCost);
 				if (result == -1) {
 					updateDominionLeader(dominion, null, true);
 				} else {
@@ -633,7 +634,7 @@ public class DominionUtils {
 							member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7did not have enough food in its reserves"));
 							// Money was consumed
 							if (result == 1) {
-								member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$250 &7was consumed &7was sold to pay for the tax"));
+								member.sendMessage(ChatUtils.chatMessage("&7Instead, &6$" + (int) dailyCost + " &7was consumed to pay for the tax"));
 							}
 							// Land was consumed
 							else {
@@ -913,7 +914,7 @@ public class DominionUtils {
 	 * @param moneyToConsume The amount of money to be consumed.
 	 * @return 1 if consuming money, 0 if consuming a chunk, -1 if disbanding the Dominion.
 	 */
-	public static int consumeMoneyOrLand(Dominion dominion, int moneyToConsume) {
+	public static int consumeMoneyOrLand(Dominion dominion, double moneyToConsume) {
 		if (dominion.getBalance() >= moneyToConsume) {
 			dominion.setBalance(dominion.getBalance() - moneyToConsume);
 			updateDominion(dominion);
