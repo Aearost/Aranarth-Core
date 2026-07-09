@@ -105,6 +105,61 @@ public class DominionUtils {
 	}
 
 	/**
+	 * Returns true if the attacker is permitted to apply harmful PvP effects to the target
+	 * under the current dominion relation rules. Mirrors the logic in DominionProtectionListener
+	 * so that abilities bypassing EntityDamageEvent (potion effects, stuns, etc.) are still gated.
+	 *
+	 * @param attacker The player using the ability.
+	 * @param target   The player being targeted.
+	 * @return Whether the attacker may harm the target.
+	 */
+	public static boolean canAttackPlayer(Player attacker, Player target) {
+		Dominion attackerDominion = getPlayerDominion(attacker.getUniqueId());
+		Dominion targetDominion = getPlayerDominion(target.getUniqueId());
+
+		// Same dominion — respect the member PvP flag
+		if (attackerDominion != null && targetDominion != null
+				&& attackerDominion.isSameDominion(targetDominion)) {
+			return attackerDominion.isMemberPvpEnabled();
+		}
+
+		// Both players belong to different dominions
+		if (attackerDominion != null && targetDominion != null) {
+			DominionRank relation = getRelationKey(attackerDominion, targetDominion);
+			Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
+
+			if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
+				boolean attackerPvp = attackerDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+				boolean targetPvp = targetDominion.getDominionPermissions().hasPermission(relation, DominionPermission.PVP);
+				return attackerPvp || targetPvp;
+			}
+
+			if (relation == DominionRank.NEUTRAL) {
+				// Blocked only when the target is in their own dominion's land
+				return chunkDominion == null || !chunkDominion.isSameDominion(targetDominion);
+			}
+
+			// ENEMIED — always allowed
+			return true;
+		}
+
+		// Attacker has a dominion, target is a wanderer — always allowed
+		if (attackerDominion != null) {
+			return true;
+		}
+
+		// Attacker is a wanderer, target has a dominion — blocked in target's own land
+		if (targetDominion != null) {
+			Dominion chunkDominion = getDominionOfChunk(target.getLocation().getChunk());
+			if (chunkDominion != null && chunkDominion.isSameDominion(targetDominion)) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Determines the relation rank between two dominions for the purposes of permission lookups.
 	 * @param playerDominion The dominion of the acting player (may be null).
 	 * @param targetDominion The dominion being acted upon.

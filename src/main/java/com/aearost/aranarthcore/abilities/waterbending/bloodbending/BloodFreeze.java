@@ -1,8 +1,6 @@
 package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
 import com.aearost.aranarthcore.AranarthCore;
-import com.aearost.aranarthcore.objects.Dominion;
-import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -301,7 +299,6 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
     private LivingEntity findTarget() {
         Location eye = player.getEyeLocation();
         Vector direction = eye.getDirection().normalize();
-        Dominion casterDominion = DominionUtils.getPlayerDominion(player.getUniqueId());
         LivingEntity closest = null;
         double closestDist = Double.MAX_VALUE;
 
@@ -321,17 +318,8 @@ public class BloodFreeze extends BloodAbility implements AddonAbility {
             if (entity instanceof Player targetPlayer && FROZEN_PLAYERS.contains(targetPlayer.getUniqueId())) {
                 continue;
             }
-            if (entity instanceof Player targetPlayer) {
-                Dominion targetDominion = DominionUtils.getPlayerDominion(targetPlayer.getUniqueId());
-                if (casterDominion != null && targetDominion != null) {
-                    if (casterDominion.isSameDominion(targetDominion)) {
-                        continue;
-                    }
-                    DominionRank relation = DominionUtils.getRelationKey(casterDominion, targetDominion);
-                    if (relation == DominionRank.ALLIED || relation == DominionRank.TRUCED) {
-                        continue;
-                    }
-                }
+            if (entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
+                continue;
             }
 
             double dist = entity.getLocation().distance(eye);

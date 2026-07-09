@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ComboAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
@@ -253,6 +254,9 @@ public class JetFumes extends CombustionAbility implements AddonAbility, ComboAb
                 }
                 // Caster is immune to a cloud only for its first second
                 if (entity.getUniqueId().equals(player.getUniqueId()) && puff.getAge() < 1000L) {
+                    continue;
+                }
+                if (living instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
                     continue;
                 }
 

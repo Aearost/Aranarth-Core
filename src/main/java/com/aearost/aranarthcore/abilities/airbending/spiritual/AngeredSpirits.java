@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.airbending.spiritual;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.GeneralMethods;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
@@ -433,6 +434,9 @@ public class AngeredSpirits extends SpiritualAbility implements AddonAbility {
         }
 
         private void applyHitEffects(final LivingEntity entity) {
+            if (entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
+                return;
+            }
             entity.addPotionEffect(new PotionEffect(shotType.effectType(), AranarthBendingUtils.SPIRIT_EFFECT_DURATION, shotType.amplifier(), false, true, true));
             double actualDamage = Math.random() < 0.5 ? 2.0 : 3.0;
             DamageHandler.damageEntity(entity, actualDamage, AngeredSpirits.this);

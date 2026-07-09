@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import com.projectkorra.projectkorra.util.DamageHandler;
@@ -98,6 +99,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
 
         for (LivingEntity entity : origin.getWorld().getLivingEntities()) {
             if (entity.equals(player)) continue;
+            if (entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) continue;
             double dist = entity.getLocation().distance(origin);
             if (dist <= radius) {
                 // Scale from full damage at point-blank to 50% at max radius

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.firebending.combustion;
 
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
@@ -429,6 +430,10 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             for (Entity entity : puff.center.getWorld().getNearbyEntities(puff.center, radius, radius, radius)) {
                 if (!(entity instanceof LivingEntity living)) continue;
                 if (entity.getLocation().distanceSquared(puff.center) > radiusSq) continue;
+
+                if (living instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
+                    continue;
+                }
 
                 UUID id = entity.getUniqueId();
                 inFumes.add(id);

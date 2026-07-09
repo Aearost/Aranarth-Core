@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.firebending.lightningbending;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.ComboAbility;
 import com.projectkorra.projectkorra.ability.CoreAbility;
@@ -336,6 +337,9 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             }
 
             entityLastStrikeTime.put(id, now);
+            if (living instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
+                continue;
+            }
             DamageHandler.damageEntity(living, damage, this);
             AranarthBendingUtils.applyElectrocution(living, ELECTROCUTION_DURATION_MS, 0.75);
 

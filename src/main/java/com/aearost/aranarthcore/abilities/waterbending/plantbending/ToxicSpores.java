@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.plantbending;
 
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
@@ -377,6 +378,10 @@ public class ToxicSpores extends PlantAbility implements AddonAbility {
                     continue;
                 }
                 if (entity.getLocation().distanceSquared(puff.center) > radiusSq) {
+                    continue;
+                }
+
+                if (living instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
                     continue;
                 }
 

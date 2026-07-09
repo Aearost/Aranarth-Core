@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.abilities.waterbending.bloodbending;
 
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.GeneralMethods;
@@ -371,6 +372,9 @@ public class BloodGrip extends BloodAbility implements AddonAbility {
                 continue;
             }
             if (entity instanceof Player targetPlayer && CONTROLLED_PLAYERS.contains(targetPlayer.getUniqueId())) {
+                continue;
+            }
+            if (entity instanceof Player targetPlayer && !DominionUtils.canAttackPlayer(player, targetPlayer)) {
                 continue;
             }
 
