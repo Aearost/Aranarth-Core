@@ -757,9 +757,6 @@ public class CrateOpen {
                         name = "#a0f0ed&lDiamond Block x32";
                     } else {
                         reward = new ItemStack(Material.SHULKER_SHELL, 16);
-                        ItemMeta shulkerRewardMeta = reward.getItemMeta();
-                        shulkerRewardMeta.setDisplayName(ChatUtils.translateToColor("#946794&lShulker Shells"));
-                        reward.setItemMeta(shulkerRewardMeta);
                         name = "#946794&lShulker Shells x16";
                     }
                 } else if (chance <= 32) {
