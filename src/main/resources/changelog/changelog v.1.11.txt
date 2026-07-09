@@ -39,6 +39,7 @@ Minor Features
 [~] Made /mail send auto-fill online players in the parameters
 [~] Showed a preview of a mail message sent after doing /mail send
 [~] Made /mail (no parameters) show all sub-commands
+[~] Fixed incorrect percentages in godly crate
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

@@ -762,13 +762,13 @@ public class CrateOpen {
                         reward.setItemMeta(shulkerRewardMeta);
                         name = "#946794&lShulker Shells x16";
                     }
-                } else if (chance <= 36) {
+                } else if (chance <= 32) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
                     name = reward.getItemMeta().getDisplayName() + " x1";
-                } else if (chance <= 48) {
+                } else if (chance <= 44) {
                     reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
                     name = "#3a383a&lNetherite Block x1";
-                } else if (chance <= 56) {
+                } else if (chance <= 52) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
                     PlayerProfile profile = mcMMOPlayer.getProfile();
@@ -789,7 +789,7 @@ public class CrateOpen {
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e30 Levels"));
                     return;
-                } else if (chance <= 64) {
+                } else if (chance <= 60) {
                     reward = new AranarthiumIngot().getItem();
                     name = reward.getItemMeta().getDisplayName() + " &f&lx1";
                 } else if (chance <= 72) {

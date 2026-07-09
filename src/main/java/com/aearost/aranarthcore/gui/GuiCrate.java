@@ -445,7 +445,7 @@ public class GuiCrate {
 		ItemMeta netherStarMeta = netherStar.getItemMeta();
 		netherStarMeta.setDisplayName(ChatUtils.translateToColor("#d8d6fb&lNether Star"));
 		List<String> netherStarLore = new ArrayList<>();
-		netherStarLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		netherStarLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		netherStarMeta.setLore(netherStarLore);
 		netherStar.setItemMeta(netherStarMeta);
 		gui.setItem(6, netherStar);
@@ -654,7 +654,7 @@ public class GuiCrate {
 		}
 		ItemMeta cycledIngotMeta = ingot.getItemMeta();
 		List<String> cycledIngotLore = new ArrayList<>();
-		cycledIngotLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		cycledIngotLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		cycledIngotMeta.setLore(cycledIngotLore);
 		ingot.setItemMeta(cycledIngotMeta);
 		initializedGui.setItem(10, ingot);
