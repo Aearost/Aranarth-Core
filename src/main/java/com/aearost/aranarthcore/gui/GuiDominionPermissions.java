@@ -30,10 +30,10 @@ public class GuiDominionPermissions {
 
     public static final String HUB_TITLE = "Dominion Hub";
 
-    private static final int MEMBERS_SLOT = 10;
-    private static final int USER_SEARCH_SLOT = 16;
-    private static final int GUARDIANS_SLOT = 28;
-    private static final int OUTPOSTS_SLOT = 34;
+    private static final int MEMBERS_SLOT = 9;
+    private static final int USER_SEARCH_SLOT = 10;
+    private static final int GUARDIANS_SLOT = 34;
+    private static final int OUTPOSTS_SLOT = 28;
 
     private final Player player;
     private final Inventory initializedGui;
@@ -246,12 +246,12 @@ public class GuiDominionPermissions {
         gui.setItem(23, buildGroupItem(Material.RED_BANNER, DominionUtils.getFormattedRankName(DominionRank.ENEMIED) + " &rDominions", "&7Click to manage permissions"));
         gui.setItem(24, buildGroupItem(Material.LIGHT_GRAY_BANNER, DominionUtils.getFormattedRankName(DominionRank.WANDERER) + "s", "&7Click to manage permissions"));
 
-        // Row 1 toggle
-        gui.setItem(9, buildBendingToggleItem(dominion.isBendingEnabled()));
+        // Row 1 toggles
+        gui.setItem(16, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
+        gui.setItem(17, buildBendingToggleItem(dominion.isBendingEnabled()));
 
-        // Row 2 toggles
-        gui.setItem(18, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
-        gui.setItem(26, buildMemberPvpToggleItem(dominion.isMemberPvpEnabled()));
+        // Row 4 toggle
+        gui.setItem(31, buildMobSpawningToggleItem(dominion.isMobSpawningEnabled()));
 
         // Row 3: navigation and new hub sections
         gui.setItem(GUARDIANS_SLOT, buildDefendersItem());

@@ -7,7 +7,7 @@ Major Features
 [+] Prevented copied maps from being copied further
 [+] Increased the number of pages of the dominion food reserves based on the rank of the dominion
 [+] Implemented the /map command to display the interactive world map
-[~] Made it so bed and respawn anchors will work with priority to the spawn location default
+[+] Made it so bed and respawn anchors will work with priority to the spawn location default
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed
@@ -47,6 +47,7 @@ Minor Features
 [+] Added missing fallback for a new day which a dominion's food reserves don't get consumed
 [+] Made bed/respawn anchors appear first in the /home GUI
 [-] Removed the defender target permission as it will simply follow the PvP permission
+[~] Re-arranged the dominion GUI options
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
