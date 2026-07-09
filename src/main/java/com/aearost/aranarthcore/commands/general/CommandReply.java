@@ -45,6 +45,12 @@ public class CommandReply implements CommandExecutor {
 					return false;
 				}
 
+				AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(lastMessaged);
+				if (targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+					player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &cis currently not receiving messages"));
+					return true;
+				}
+
 				ChatUtils.sendPrivateMessage(player, offlinePlayer.getPlayer(), args, true);
 				return true;
 			}

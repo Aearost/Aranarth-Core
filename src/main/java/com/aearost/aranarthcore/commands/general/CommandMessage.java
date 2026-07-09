@@ -36,7 +36,7 @@ public class CommandMessage implements CommandExecutor {
 					Player target = Bukkit.getPlayer(targetUuid);
 					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(targetUuid);
-					if (targetAranarthPlayer.isTogglingMessages()) {
+					if (targetAranarthPlayer.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
 						player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &cis currently not receiving messages"));
 						return true;
 					}
