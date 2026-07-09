@@ -42,6 +42,7 @@ Minor Features
 [~] Fixed incorrect percentages in godly crate
 [~] Fixed the shulker shells rewarded from the godly crate giving the item with the custom display name
 [~] Made it so dominion maintenance cost (if no food) is scaled by dominion ranks and not chunk amount
+[+] Added missing fallback for a new day which a dominion's food reserves don't get consumed
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

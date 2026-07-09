@@ -18,6 +18,9 @@ public class DominionUtils {
 
 	private static final List<Dominion> dominions = new ArrayList<>();
 
+	/** Tracks the last in-game date on which the daily food/tax cycle ran, to prevent double-firing. */
+	private static String lastFoodEvalDate = null;
+
 	private static final Map<UUID, Dominion> dominionById = new HashMap<>();
 	private static final Map<String, Dominion> chunkKeyToDominion = new HashMap<>();
 	private static final Map<UUID, Dominion> playerToDominion = new HashMap<>();
@@ -590,6 +593,12 @@ public class DominionUtils {
 	 * Consumes contents of a Dominion's designated food inventory.
 	 */
 	public static void reEvaluateFoodInventory() {
+		String today = AranarthUtils.getYear() + "-" + AranarthUtils.getMonth() + "-" + AranarthUtils.getDay();
+		if (today.equals(lastFoodEvalDate)) {
+			return;
+		}
+		lastFoodEvalDate = today;
+
 		// Close all inventories before evaluating
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			String foodTitle = ChatUtils.stripColorFormatting(onlinePlayer.getOpenInventory().getTitle());
