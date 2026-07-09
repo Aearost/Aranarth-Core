@@ -32,7 +32,7 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
 
     private static final long COOLDOWN_MS = 12000L;
     private static final long STRIKE_INTERVAL_MS = 500L;
-    private static final long ELECTROCUTION_DURATION_MS = 1000L;
+    private static final long ELECTROCUTION_DURATION_MS = 2000L;
     private static final long SOUND_INTERVAL_MS = 50L;
     private static final double FLIGHT_SPEED = 2.5;
     private static final int BOLTS_PER_TICK = 15;
@@ -83,7 +83,7 @@ public class JetBolt extends LightningAbility implements AddonAbility, ComboAbil
             return;
         }
 
-        damage = 4.0;
+        damage = 1.0;
         cooldown = COOLDOWN_MS;
         range = 10.0;
         duration = 4000L;

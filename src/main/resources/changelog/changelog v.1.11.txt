@@ -49,6 +49,8 @@ Minor Features
 [-] Removed the defender target permission as it will simply follow the PvP permission
 [~] Re-arranged the dominion GUI options
 [~] Fixed /r not obeying the message toggle
+[~] Decreased the damage of JetBolt
+[~] Increased the stun duration of JetBolt
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
