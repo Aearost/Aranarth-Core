@@ -57,7 +57,8 @@ public class ShopInteract {
                                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                 return;
                             }
-                            shop = ShopUtils.getBulkShop(shop, player, true);
+                            shop = new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(),
+                                    clickUser.getBulkTransactionQuantity(), clickUser.getBulkTransactionPrice(), 0);
                         }
                         // The user is just toggling the bulk purchase mode
                         else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
@@ -87,7 +88,8 @@ public class ShopInteract {
                                 AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                 return;
                             }
-                            shop = ShopUtils.getBulkShop(shop, player, false);
+                            shop = new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(),
+                                    clickUser.getBulkTransactionQuantity(), 0, clickUser.getBulkTransactionPrice());
                         }
                         // The user is just toggling the bulk sale mode
                         else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
@@ -129,7 +131,8 @@ public class ShopInteract {
                                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                     return;
                                 }
-                                shop = ShopUtils.getBulkShop(shop, player, true);
+                                shop = new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(),
+                                        clickUser.getBulkTransactionQuantity(), clickUser.getBulkTransactionPrice(), 0);
                             }
                             // The user is just toggling the bulk purchase mode
                             else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {
@@ -153,7 +156,8 @@ public class ShopInteract {
                                     AranarthUtils.setPlayer(player.getUniqueId(), clickUser);
                                     return;
                                 }
-                                shop = ShopUtils.getBulkShop(shop, player, false);
+                                shop = new Shop(shop.getUuid(), shop.getLocation(), shop.getItem().clone(),
+                                        clickUser.getBulkTransactionQuantity(), 0, clickUser.getBulkTransactionPrice());
                             }
                             // The user is just toggling the bulk sale mode
                             else if (clickUser.getBulkTransactionNum() == 0 && player.isSneaking()) {

@@ -97,6 +97,8 @@ public class AranarthPlayer {
 	private boolean isDominionMsgCompact = false;
 	private long containerToggleExpiry = 0;
 	private long bulkTransactionExpiry = 0;
+	private int bulkTransactionQuantity = 0;
+	private double bulkTransactionPrice = 0;
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1472,5 +1474,21 @@ public class AranarthPlayer {
 
 	public void setBulkTransactionShopLocation(Location bulkTransactionShopLocation) {
 		this.bulkTransactionShopLocation = bulkTransactionShopLocation;
+	}
+
+	public int getBulkTransactionQuantity() {
+		return bulkTransactionQuantity;
+	}
+
+	public void setBulkTransactionQuantity(int bulkTransactionQuantity) {
+		this.bulkTransactionQuantity = bulkTransactionQuantity;
+	}
+
+	public double getBulkTransactionPrice() {
+		return bulkTransactionPrice;
+	}
+
+	public void setBulkTransactionPrice(double bulkTransactionPrice) {
+		this.bulkTransactionPrice = bulkTransactionPrice;
 	}
 }

@@ -67,6 +67,8 @@ public class ShopBulkTransaction {
                 }
                 saleOrPurchase = "purchase";
                 player.sendMessage(ChatUtils.chatMessage("&7Would you like to purchase &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getBuyPrice()) + "?"));
+                aranarthPlayer.setBulkTransactionQuantity(bulkShop.getQuantity());
+                aranarthPlayer.setBulkTransactionPrice(bulkShop.getBuyPrice());
             } else if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
                 if (shop.getSellPrice() <= 0) {
                     player.sendMessage(ChatUtils.chatMessage("&cThis shop does not support selling"));
@@ -92,6 +94,8 @@ public class ShopBulkTransaction {
                 }
                 saleOrPurchase = "sale";
                 player.sendMessage(ChatUtils.chatMessage("&7Would you like to sell &e" + bulkShop.getQuantity() + " " + itemName + " &7for &6" + formatter.format(bulkShop.getSellPrice()) + "?"));
+                aranarthPlayer.setBulkTransactionQuantity(bulkShop.getQuantity());
+                aranarthPlayer.setBulkTransactionPrice(bulkShop.getSellPrice());
             }
             player.sendMessage(ChatUtils.chatMessage("&eClick again &7to &econfirm &7your bulk " + saleOrPurchase));
             aranarthPlayer.setBulkTransactionNum(1);
