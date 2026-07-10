@@ -50,6 +50,10 @@ public class BabyMobSpawn {
 	private void copyAppearance(Animals source, Animals target) {
 		if (source instanceof Sheep sheepSource && target instanceof Sheep sheepTarget) {
 			sheepTarget.setColor(sheepSource.getColor());
+		} else if (source instanceof Cow cowSource && target instanceof Cow cowTarget) {
+			cowTarget.setVariant(cowSource.getVariant());
+		} else if (source instanceof Pig pigSource && target instanceof Pig pigTarget) {
+			pigTarget.setVariant(pigSource.getVariant());
 		} else if (source instanceof Chicken chickenSource && target instanceof Chicken chickenTarget) {
 			chickenTarget.setVariant(chickenSource.getVariant());
 		} else if (source instanceof Cat catSource && target instanceof Cat catTarget) {

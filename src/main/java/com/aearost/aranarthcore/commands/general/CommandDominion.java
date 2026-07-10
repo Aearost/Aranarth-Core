@@ -236,7 +236,17 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("guide")) {
                     CommandDominions.giveBook(player);
                 } else if (args[0].equalsIgnoreCase("rank")) {
-                    showDominionLevel(player, dominion);
+                    if (args.length >= 2 && args[1].equalsIgnoreCase("scan")) {
+                        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                        if (aranarthPlayer.getCouncilRank() == 3) {
+                            DominionLevelUtils.runPeriodicScan();
+                            player.sendMessage(ChatUtils.chatMessage("&7Dominion scan triggered."));
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command."));
+                        }
+                    } else {
+                        showDominionLevel(player, dominion);
+                    }
                 } else if (args[0].equalsIgnoreCase("setrank")) {
                     setMemberRank(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("buychunks")) {

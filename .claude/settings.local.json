@@ -245,7 +245,9 @@
       "Read(//c/resources/**)",
       "Read(//c/Users/liamh/IdeaProjects/AranarthCore/%appdata%/**)",
       "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$APPDATA/**)",
-      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$APPDATA/.minecraft/downloads/**)"
+      "Read(//c/Users/liamh/IdeaProjects/AranarthCore/$APPDATA/.minecraft/downloads/**)",
+      "Bash(find ~/.m2/repository/io/papermc/paper/paper-api -name *.jar)",
+      "Bash(sort -t- -k6 -r)"
     ]
   }
 }

@@ -56,6 +56,7 @@ Minor Features
 [+] Added /shop rename to allow a custom name of a shop
 [-] Removed /shop tp to fully favour the GUI
 [~] Fixed keys being consumed but not rewarded if a player disconnects mid-cast
+[+] Added /d rank scan to manually re-evaluate a dominion's rank for admins
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

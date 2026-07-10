@@ -131,7 +131,15 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "rank" -> List.of(); // /dominion rank shows level info — no arguments
+			case "rank" -> {
+				if (args.length == 2 && sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer != null && aranarthPlayer.getCouncilRank() == 3) {
+						yield filter(List.of("scan"), args[1]);
+					}
+				}
+				yield List.of();
+			}
 			case "setrank" -> {
 				if (args.length == 2) {
 					if (sender instanceof Player player) {
