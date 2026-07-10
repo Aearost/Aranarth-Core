@@ -63,7 +63,7 @@ public class DiscordUtils {
 		return error -> {
 			String msg = error.getMessage();
 			if (msg != null && (msg.contains("10007") || msg.contains("Unknown Member"))) {
-				Bukkit.getLogger().info("[DiscordUtils] Unlinking " + Bukkit.getOfflinePlayer(uuid).getName()
+				Bukkit.getLogger().info("[AC] [DiscordUtils] Unlinking " + Bukkit.getOfflinePlayer(uuid).getName()
 						+ " as they are no longer in the Discord server");
 				DiscordSRV.getPlugin().getAccountLinkManager().unlink(uuid);
 			} else {
@@ -166,7 +166,7 @@ public class DiscordUtils {
 		}
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 		}
 
 		Guild guild = getGuild();
@@ -236,7 +236,7 @@ public class DiscordUtils {
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 		}
 
 		boolean isSaint = false;
@@ -288,7 +288,7 @@ public class DiscordUtils {
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 			return;
 		}
 
@@ -333,7 +333,7 @@ public class DiscordUtils {
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 			return;
 		}
 
@@ -430,7 +430,7 @@ public class DiscordUtils {
 		Guild guild = getGuild();
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord role could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord role could not be updated as they have not linked their Discord");
 			return;
 		}
 
@@ -449,7 +449,7 @@ public class DiscordUtils {
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		Guild guild = getGuild();
 		if (playerDiscordId == null || guild.getMemberById(playerDiscordId) == null) {
-			Bukkit.getLogger().info(player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
 			return;
 		}
 
@@ -600,7 +600,7 @@ public class DiscordUtils {
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(avatar.getUuid());
 		String username = AranarthUtils.getUsername(Bukkit.getOfflinePlayer(avatar.getUuid()));
 		if (playerDiscordId == null) {
-			Bukkit.getLogger().info(username + "'s Discord roles could not be updated as they have not linked their Discord");
+			Bukkit.getLogger().info("[AC] " + username + "'s Discord roles could not be updated as they have not linked their Discord");
 		}
 
 		Guild guild = getGuild();
@@ -885,7 +885,7 @@ public class DiscordUtils {
 		Role mutedRole = guild.getRoleById(discordRole("muted"));
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(uuid);
 		if (playerDiscordId == null) {
-			Bukkit.getLogger().info("The Muted role could not be applied to " + Bukkit.getOfflinePlayer(uuid).getName() + " as they are not linked to Discord");
+			Bukkit.getLogger().info("[AC] The Muted role could not be applied to " + Bukkit.getOfflinePlayer(uuid).getName() + " as they are not linked to Discord");
 		} else {
 			if (isApplyingMute) {
 				guild.addRoleToMember(playerDiscordId, mutedRole).queue(null, unlinkIfUnknownMember(uuid));

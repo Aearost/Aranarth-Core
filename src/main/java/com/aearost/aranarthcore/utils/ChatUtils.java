@@ -422,7 +422,7 @@ public class ChatUtils {
 			int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
 			definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
 		} catch (NumberFormatException e) {
-			Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+			Bukkit.getLogger().info("[AC] Something went wrong with parsing the player's mute date...");
 			return null;
 		}
 		return definedMuteDate;
@@ -917,6 +917,6 @@ public class ChatUtils {
 			}
 		}
 		// Send message to logs
-		Bukkit.getLogger().info(ChatUtils.stripColorFormatting(prefixReceive + assembledMsg));
+		Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(prefixReceive + assembledMsg));
 	}
 }

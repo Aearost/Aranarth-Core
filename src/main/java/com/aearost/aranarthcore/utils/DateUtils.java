@@ -195,13 +195,13 @@ public class DateUtils {
 
 			String monthName = provideMonthName(month);
 			if (monthName == null) {
-				Bukkit.getLogger().info("Something went wrong with calculating the month name!");
+				Bukkit.getLogger().info("[AC] Something went wrong with calculating the month name!");
 				return;
 			}
 
 			String weekdayName = provideWeekdayName(weekdayNum);
 			if (weekdayName == null) {
-				Bukkit.getLogger().info("Something went wrong with calculating the weekday name!");
+				Bukkit.getLogger().info("[AC] Something went wrong with calculating the weekday name!");
 				return;
 			}
 
@@ -228,9 +228,9 @@ public class DateUtils {
 				}
 			}
 
-			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[0]));
-			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[1]));
-			Bukkit.getLogger().info(ChatUtils.stripColorFormatting(messages[2]));
+			Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[0]));
+			Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[1]));
+			Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(messages[2]));
 
 			String description = "";
 			if (isNewMonth) {
@@ -555,7 +555,7 @@ public class DateUtils {
 			case Month.GLACIVOR -> applyGlacivorEffects();
 			case Month.FRIGORVOR -> applyFrigorvorEffects();
 			case Month.OBSCURVOR -> applyObscurvorEffects();
-            default -> Bukkit.getLogger().info("Something went wrong with applying the " + AranarthUtils.getMonth() + "'s effects!");
+            default -> Bukkit.getLogger().info("[AC] Something went wrong with applying the " + AranarthUtils.getMonth() + "'s effects!");
         }
 	}
 
@@ -2036,7 +2036,7 @@ public class DateUtils {
 				}
 				message = ChatUtils.chatMessage("&7&oIt has started to snow...");
 			} else {
-				Bukkit.getLogger().info("Something went wrong with starting the storm...");
+				Bukkit.getLogger().info("[AC] Something went wrong with starting the storm...");
 				AranarthUtils.setWeather(Weather.CLEAR);
 				return;
 			}

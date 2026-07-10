@@ -100,7 +100,7 @@ public class VotifierListener implements Listener {
 				}
 			}
 		} else {
-			Bukkit.getLogger().info("Player " + username + " voted but has never joined the server before");
+			Bukkit.getLogger().info("[AC] Player " + username + " voted but has never joined the server before");
 		}
 	}
 }

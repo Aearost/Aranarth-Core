@@ -261,7 +261,7 @@ public class IncantationApply {
 				instance = unknownClass.getDeclaredConstructor().newInstance();
 			} catch (ClassNotFoundException | InvocationTargetException | InstantiationException
 					 | IllegalAccessException | NoSuchMethodException e) {
-				Bukkit.getLogger().info("Formatting error with the incantation type: " + type);
+				Bukkit.getLogger().info("[AC] Formatting error with the incantation type: " + type);
 				return true;
 			}
 

@@ -507,7 +507,7 @@ public class QuestUtils {
         playerDailyProgress.clear();
         playerDailyCompleted.clear();
         playerDailyClaimed.clear();
-        Bukkit.getLogger().info("[AranarthCore] Daily quests have been reset.");
+        Bukkit.getLogger().info("[AC] [AranarthCore] Daily quests have been reset.");
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.sendMessage(ChatUtils.chatMessage("&6Daily quests have reset! Visit the Quest Master for new quests."));
         }
@@ -519,7 +519,7 @@ public class QuestUtils {
         playerWeeklyProgress.clear();
         playerWeeklyCompleted.clear();
         playerWeeklyClaimed.clear();
-        Bukkit.getLogger().info("[AranarthCore] Weekly quests have been reset.");
+        Bukkit.getLogger().info("[AC] [AranarthCore] Weekly quests have been reset.");
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
         }

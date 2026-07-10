@@ -42,7 +42,7 @@ public class SleepMessageBlocker implements Listener {
 
 				// Look for sleeping messages
 				if (text.contains("sleep") || text.contains("Sleeping")) {
-					Bukkit.getLogger().info("Canceling message");
+					Bukkit.getLogger().info("[AC] Canceling message");
 					event.setCancelled(true);
 				}
 			}

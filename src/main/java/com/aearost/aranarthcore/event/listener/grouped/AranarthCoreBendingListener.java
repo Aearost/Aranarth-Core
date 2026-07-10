@@ -162,7 +162,7 @@ public class AranarthCoreBendingListener implements Listener {
             @Override
             public void run() {
                 CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
-                Bukkit.getLogger().info("AranarthCore Bending Reloaded");
+                Bukkit.getLogger().info("[AC] AranarthCore Bending Reloaded");
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
     }

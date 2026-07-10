@@ -136,7 +136,7 @@ public class GuiHomepadClick {
 								mount.teleport(destination);
 								player.teleport(destination);
 								player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-								Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
+								Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
 								player.sendMessage(ChatUtils.chatMessage("&5&oYou have been wooshed to &d" + home.getName() + "&5!"));
 								try {
 									AranarthUtils.switchInventory(player, fromWorld, destination.getWorld().getName());
@@ -153,7 +153,7 @@ public class GuiHomepadClick {
 						} else {
 							String fromWorld = player.getLocation().getWorld().getName();
 							aranarthPlayer.setLastKnownTeleportLocation(player.getLocation().clone());
-							Bukkit.getLogger().info(player.getName() + " has teleported to " + home.getName() + " via homepad");
+							Bukkit.getLogger().info("[AC] " + player.getName() + " has teleported to " + home.getName() + " via homepad");
 							player.teleport(home.getLocation());
 							player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
 							player.sendMessage(ChatUtils

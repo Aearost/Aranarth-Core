@@ -291,7 +291,7 @@ public class AvatarUtils {
 	 */
 	private static void respawnAvatarMannequins() {
 		if (avatars.isEmpty()) {
-			Bukkit.getLogger().info("There are no avatars");
+			Bukkit.getLogger().info("[AC] There are no avatars");
 			return;
 		}
 

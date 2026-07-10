@@ -46,6 +46,8 @@ import java.util.Random;
 
 public class AranarthCore extends JavaPlugin {
 
+    public static final String LOG_PREFIX = "[AC] ";
+
     private static AranarthCore plugin;
     private DiscordChatListener discordChatListener;
     private ListenerAdapter discordMemberJoinListener;
@@ -90,7 +92,7 @@ public class AranarthCore extends JavaPlugin {
             Bukkit.getLogger().warning("Failed to set Sound sub-element color: " + e.getMessage());
         }
         CoreAbility.registerPluginAbilities(AranarthCore.getInstance(), "com.aearost.aranarthcore.abilities");
-        Bukkit.getLogger().info("AranarthCore Bending has been loaded");
+        Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
         runRepeatingTasks();
 
@@ -143,7 +145,7 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveMounts();
                 PersistenceUtils.saveMail();
                 DiscordUtils.updateAllDiscordRoles();
-                Bukkit.getLogger().info("Aranarth data has been saved");
+                Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
                 // Resets the two bending arenas
                 Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
@@ -825,7 +827,7 @@ public class AranarthCore extends JavaPlugin {
         final int batchSize = 8;
         final int[] index = {0};
 
-        Bukkit.getLogger().info("[AranarthCore] Pre-generating " + total + " chunks for world: " + world.getName());
+        Bukkit.getLogger().info(LOG_PREFIX + "Pre-generating " + total + " chunks for world: " + world.getName());
 
         new BukkitRunnable() {
             @Override
@@ -836,7 +838,7 @@ public class AranarthCore extends JavaPlugin {
                 }
                 if (index[0] >= total) {
                     cancel();
-                    Bukkit.getLogger().info("[AranarthCore] Finished pre-generating chunks for world: " + world.getName());
+                    Bukkit.getLogger().info(LOG_PREFIX + "Finished pre-generating chunks for world: " + world.getName());
                     return;
                 }
                 for (int i = 0; i < batchSize && index[0] < total; i++, index[0]++) {
@@ -1070,7 +1072,7 @@ public class AranarthCore extends JavaPlugin {
         MountUtils.syncAllActiveHealthToData();
         PersistenceUtils.saveMounts();
         PersistenceUtils.saveMail();
-        Bukkit.getLogger().info("Aranarth data has been saved (shutdown)");
+        Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved (shutdown)");
     }
 
 }

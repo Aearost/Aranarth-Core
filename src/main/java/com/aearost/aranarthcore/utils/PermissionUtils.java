@@ -95,7 +95,7 @@ public class PermissionUtils {
         updateSubElements(player);
         AranarthUtils.updateTab();
         player.updateCommands();
-        Bukkit.getLogger().info(player.getName() + "'s permissions have been evaluated");
+        Bukkit.getLogger().info("[AC] " + player.getName() + "'s permissions have been evaluated");
     }
 
 

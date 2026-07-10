@@ -94,7 +94,7 @@ public class GuiVoteShopPurchaseClick {
                             }
                         } else {
                             String type = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).split(" ")[1].toLowerCase();
-                            Bukkit.getLogger().info(type);
+                            Bukkit.getLogger().info("[AC] " + type);
                             if (type.equals("vote")) {
                                 addOrDropItem(player, new KeyVote().getItem());
                             } else if (type.equals("rare")) {

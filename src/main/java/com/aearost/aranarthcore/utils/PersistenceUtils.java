@@ -55,7 +55,7 @@ public class PersistenceUtils {
             String fieldName;
             String fieldValue;
 
-            Bukkit.getLogger().info("Attempting to read the homepads file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the homepads file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -87,10 +87,10 @@ public class PersistenceUtils {
                 }
             }
 
-            Bukkit.getLogger().info("All homepads have been initialized");
+            Bukkit.getLogger().info("[AC] All homepads have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the homepads!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the homepads!");
         }
     }
 
@@ -115,10 +115,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new homepads.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new homepads.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of homepads.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of homepads.txt");
                 }
 
                 try {
@@ -141,7 +141,7 @@ public class PersistenceUtils {
                     }
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the homepads");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the homepads");
                 }
             }
         }
@@ -164,7 +164,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the aranarth_players file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the aranarth_players file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -193,7 +193,7 @@ public class PersistenceUtils {
                         try {
                             potionType = ItemUtils.itemStackArrayFromBase64(parts[0]);
                         } catch (IOException e) {
-                            Bukkit.getLogger().info("There was an issue loading the player's potions!");
+                            Bukkit.getLogger().info("[AC] There was an issue loading the player's potions!");
                             reader.close();
                             return;
                         }
@@ -208,7 +208,7 @@ public class PersistenceUtils {
                     try {
                         arrowsAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[6]);
                     } catch (IOException e) {
-                        Bukkit.getLogger().info("There was an issue loading the player's arrows!");
+                        Bukkit.getLogger().info("[AC] There was an issue loading the player's arrows!");
                         reader.close();
                         return;
                     }
@@ -221,7 +221,7 @@ public class PersistenceUtils {
                     try {
                         blacklistAsItemStackArray = ItemUtils.itemStackArrayFromBase64(fields[7]);
                     } catch (IOException e) {
-                        Bukkit.getLogger().info("There was an issue loading the player's blacklist!");
+                        Bukkit.getLogger().info("[AC] There was an issue loading the player's blacklist!");
                         reader.close();
                         return;
                     }
@@ -299,10 +299,10 @@ public class PersistenceUtils {
                 long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
                 AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
             }
-            Bukkit.getLogger().info("All aranarth players have been initialized");
+            Bukkit.getLogger().info("[AC] All aranarth players have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the aranarth players!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the aranarth players!");
         }
     }
 
@@ -327,10 +327,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new aranarth_players.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new aranarth_players.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of aranarth_players.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of aranarth_players.txt");
                 }
 
                 try {
@@ -466,7 +466,7 @@ public class PersistenceUtils {
                     }
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the aranarth players!");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the aranarth players!");
                 }
             }
         }
@@ -490,7 +490,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the toggled file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the toggled file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -614,10 +614,10 @@ public class PersistenceUtils {
 
                 AranarthUtils.setPlayer(uuid, aranarthPlayer);
             }
-            Bukkit.getLogger().info("All toggled features have been initialized");
+            Bukkit.getLogger().info("[AC] All toggled features have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the toggled features!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the toggled features!");
         }
     }
 
@@ -642,10 +642,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new toggled.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new toggled.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of toggled.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of toggled.txt");
                 }
 
                 try {
@@ -682,7 +682,7 @@ public class PersistenceUtils {
                     }
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the toggled features!");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the toggled features!");
                 }
             }
         }
@@ -706,7 +706,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the shops file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the shops file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -730,7 +730,7 @@ public class PersistenceUtils {
                 try {
                     item = ItemUtils.itemStackArrayFromBase64(fields[5])[0];
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an issue initializing a shop item!");
+                    Bukkit.getLogger().info("[AC] There was an issue initializing a shop item!");
                     item = new ItemStack(Material.AIR, 1);
                 }
                 int quantity = Integer.parseInt(fields[6]);
@@ -741,10 +741,10 @@ public class PersistenceUtils {
                 Shop playerShop = new Shop(uuid, location, item, quantity, buyPrice, sellPrice);
                 ShopUtils.addShop(uuid, playerShop);
             }
-            Bukkit.getLogger().info("All shops have been initialized");
+            Bukkit.getLogger().info("[AC] All shops have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the shops!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the shops!");
         }
     }
 
@@ -769,10 +769,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new shops.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new shops.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of shops.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of shops.txt");
                 }
 
                 try {
@@ -803,7 +803,7 @@ public class PersistenceUtils {
 
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the shops");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the shops");
                 }
             }
         }
@@ -832,7 +832,7 @@ public class PersistenceUtils {
             Month month = null;
             int year = 0;
 
-            Bukkit.getLogger().info("Attempting to read the serverdate file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the serverdate file...");
 
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
@@ -867,10 +867,10 @@ public class PersistenceUtils {
                     AranarthUtils.setYear(year);
                 }
             }
-            Bukkit.getLogger().info("The server date has been initialized");
+            Bukkit.getLogger().info("[AC] The server date has been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the server date!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the server date!");
         }
     }
 
@@ -893,10 +893,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new serverdate.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new serverdate.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of serverdate.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of serverdate.txt");
             }
 
             try {
@@ -910,7 +910,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the serverdate");
+                Bukkit.getLogger().info("[AC] There was an error in saving the serverdate");
             }
         }
     }
@@ -933,7 +933,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the lockedcontainers file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the lockedcontainers file...");
 
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
@@ -977,10 +977,10 @@ public class PersistenceUtils {
                 LockedContainer lockedContainer = new LockedContainer(owner, trusted, new Location[]{loc1, loc2});
                 AranarthUtils.addLockedContainer(lockedContainer);
             }
-            Bukkit.getLogger().info("All lockedcontainers have been initialized");
+            Bukkit.getLogger().info("[AC] All lockedcontainers have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the lockedcontainers!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the lockedcontainers!");
         }
     }
 
@@ -1004,10 +1004,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new lockedcontainers.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new lockedcontainers.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of lockedcontainers.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of lockedcontainers.txt");
             }
 
             List<LockedContainer> lockedContainers = AranarthUtils.getLockedContainers();
@@ -1048,7 +1048,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the lockedcontainers");
+                Bukkit.getLogger().info("[AC] There was an error in saving the lockedcontainers");
             }
         }
     }
@@ -1071,7 +1071,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the dominions file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the dominions file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -1234,12 +1234,12 @@ public class PersistenceUtils {
                 DominionUtils.resizeFoodArray(dominion);
                 DominionUtils.createDominion(dominion);
             }
-            Bukkit.getLogger().info("All dominions have been initialized");
+            Bukkit.getLogger().info("[AC] All dominions have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the dominions!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the dominions!");
         } catch (IOException e) {
-            Bukkit.getLogger().info("Something went wrong with instantiating a dominion's food");
+            Bukkit.getLogger().info("[AC] Something went wrong with instantiating a dominion's food");
         }
     }
 
@@ -1264,10 +1264,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new dominions.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new dominions.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of dominions.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of dominions.txt");
                 }
 
                 List<Dominion> dominions = DominionUtils.getDominions();
@@ -1391,7 +1391,7 @@ public class PersistenceUtils {
                     }
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the dominions!");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the dominions!");
                 }
             }
         }
@@ -1414,7 +1414,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the dominions_permissions file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the dominions_permissions file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -1463,10 +1463,10 @@ public class PersistenceUtils {
                 allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
                 dominion.setDominionPermissions(new DominionPermissions(allPerms));
             }
-            Bukkit.getLogger().info("All dominion permissions have been initialized");
+            Bukkit.getLogger().info("[AC] All dominion permissions have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading dominion permissions!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading dominion permissions!");
         }
     }
 
@@ -1493,10 +1493,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new dominions_permissions.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new dominions_permissions.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred creating dominions_permissions.txt");
+                Bukkit.getLogger().info("[AC] An error occurred creating dominions_permissions.txt");
                 return;
             }
 
@@ -1527,7 +1527,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error saving dominion permissions!");
+                Bukkit.getLogger().info("[AC] There was an error saving dominion permissions!");
             }
         }
     }
@@ -1548,7 +1548,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the dominions_player_permissions file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the dominions_player_permissions file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -1613,10 +1613,10 @@ public class PersistenceUtils {
                 dominion.setPlayerPermissionOverrides(allOverrides);
             }
 
-            Bukkit.getLogger().info("All dominion player permissions have been initialized");
+            Bukkit.getLogger().info("[AC] All dominion player permissions have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading dominion player permissions!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading dominion player permissions!");
         }
     }
 
@@ -1642,10 +1642,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new dominions_player_permissions.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new dominions_player_permissions.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred creating dominions_player_permissions.txt");
+                Bukkit.getLogger().info("[AC] An error occurred creating dominions_player_permissions.txt");
                 return;
             }
 
@@ -1685,7 +1685,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error saving dominion player permissions!");
+                Bukkit.getLogger().info("[AC] There was an error saving dominion player permissions!");
             }
         }
     }
@@ -1708,7 +1708,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the warps file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the warps file...");
             List<Home> warps = new ArrayList<>();
 
             while (reader.hasNextLine()) {
@@ -1736,10 +1736,10 @@ public class PersistenceUtils {
                 warps.add(warp);
             }
             AranarthUtils.setWarps(warps);
-            Bukkit.getLogger().info("All warps have been initialized");
+            Bukkit.getLogger().info("[AC] All warps have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the warps!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the warps!");
         }
     }
 
@@ -1764,10 +1764,10 @@ public class PersistenceUtils {
                 try {
                     // If the file isn't already there
                     if (file.createNewFile()) {
-                        Bukkit.getLogger().info("A new warps.txt file has been generated");
+                        Bukkit.getLogger().info("[AC] A new warps.txt file has been generated");
                     }
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("An error occurred in the creation of warps.txt");
+                    Bukkit.getLogger().info("[AC] An error occurred in the creation of warps.txt");
                 }
 
                 try {
@@ -1791,7 +1791,7 @@ public class PersistenceUtils {
 
                     writer.close();
                 } catch (IOException e) {
-                    Bukkit.getLogger().info("There was an error in saving the warps");
+                    Bukkit.getLogger().info("[AC] There was an error in saving the warps");
                 }
             }
         }
@@ -1815,7 +1815,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the punishments file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the punishments file...");
             HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 
             while (reader.hasNextLine()) {
@@ -1840,10 +1840,10 @@ public class PersistenceUtils {
                 Punishment punishment = new Punishment(uuid, date, type, reason, appliedBy);
                 AranarthUtils.addPunishment(uuid, punishment, true);
             }
-            Bukkit.getLogger().info("All punishments have been initialized");
+            Bukkit.getLogger().info("[AC] All punishments have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the punishments!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the punishments!");
         }
     }
 
@@ -1866,10 +1866,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new punishments.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new punishments.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of punishments.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of punishments.txt");
             }
 
             try {
@@ -1897,7 +1897,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the punishments");
+                Bukkit.getLogger().info("[AC] There was an error in saving the punishments");
             }
         }
     }
@@ -1920,7 +1920,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the avatars file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the avatars file...");
             HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 
             while (reader.hasNextLine()) {
@@ -1962,10 +1962,10 @@ public class PersistenceUtils {
                 Avatar avatar = new Avatar(uuid, startInGame, endInGame, startInRealLife, endInRealLife, element);
                 AvatarUtils.addAvatar(avatar);
             }
-            Bukkit.getLogger().info("All avatars have been initialized");
+            Bukkit.getLogger().info("[AC] All avatars have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the avatars!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the avatars!");
         }
     }
 
@@ -1988,10 +1988,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new avatars.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new avatars.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of avatars.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of avatars.txt");
             }
 
             try {
@@ -2027,7 +2027,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the avatars");
+                Bukkit.getLogger().info("[AC] There was an error in saving the avatars");
             }
         }
     }
@@ -2050,7 +2050,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the avatar_binds file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the avatar_binds file...");
             HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 
             while (reader.hasNextLine()) {
@@ -2066,10 +2066,10 @@ public class PersistenceUtils {
                     }
                 }
             }
-            Bukkit.getLogger().info("The avatar's binds have been initialized");
+            Bukkit.getLogger().info("[AC] The avatar's binds have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the avatar's binds!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the avatar's binds!");
         }
     }
 
@@ -2092,10 +2092,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new avatar_binds.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new avatar_binds.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of avatar_binds.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of avatar_binds.txt");
             }
 
             try {
@@ -2113,7 +2113,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the avatar binds");
+                Bukkit.getLogger().info("[AC] There was an error in saving the avatar binds");
             }
         }
     }
@@ -2136,7 +2136,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the server boosts file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the server boosts file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2146,10 +2146,10 @@ public class PersistenceUtils {
                 LocalDateTime end = LocalDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(parts[1])), ZoneId.systemDefault());
                 AranarthUtils.addServerBoost(boost, end, null, false);
             }
-            Bukkit.getLogger().info("The server boosts have been initialized");
+            Bukkit.getLogger().info("[AC] The server boosts have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the server boosts");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the server boosts");
         }
     }
 
@@ -2172,10 +2172,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new boosts.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new boosts.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of boosts.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of boosts.txt");
             }
 
             try {
@@ -2190,7 +2190,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the server boosts");
+                Bukkit.getLogger().info("[AC] There was an error in saving the server boosts");
             }
         }
     }
@@ -2213,7 +2213,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the compressible items lists file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the compressible items lists file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2224,10 +2224,10 @@ public class PersistenceUtils {
                     AranarthUtils.addCompressibleItem(uuid, material);
                 }
             }
-            Bukkit.getLogger().info("The compressible items lists have been initialized");
+            Bukkit.getLogger().info("[AC] The compressible items lists have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the compressible items lists");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the compressible items lists");
         }
     }
 
@@ -2250,10 +2250,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new compressible.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new compressible.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of compressible.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of compressible.txt");
             }
 
             try {
@@ -2278,7 +2278,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the compressible items lists");
+                Bukkit.getLogger().info("[AC] There was an error in saving the compressible items lists");
             }
         }
     }
@@ -2301,7 +2301,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the shop locations file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the shop locations file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2337,10 +2337,10 @@ public class PersistenceUtils {
                     AranarthUtils.setShopName(uuid, customName);
                 }
             }
-            Bukkit.getLogger().info("The shop locations have been initialized");
+            Bukkit.getLogger().info("[AC] The shop locations have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the shop locations");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the shop locations");
         }
     }
 
@@ -2363,10 +2363,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new shop_locations.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new shop_locations.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of shop_locations.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of shop_locations.txt");
             }
 
             try {
@@ -2397,7 +2397,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the shop locations");
+                Bukkit.getLogger().info("[AC] There was an error in saving the shop locations");
             }
         }
     }
@@ -2408,7 +2408,7 @@ public class PersistenceUtils {
     public static void loadShopIslandCounter() {
         int counter = AranarthCore.getInstance().getConfig().getInt("shop.island-counter", 0);
         AranarthUtils.setShopIslandCounter(counter);
-        Bukkit.getLogger().info("Shop island counter loaded: " + counter);
+        Bukkit.getLogger().info("[AC] Shop island counter loaded: " + counter);
     }
 
     /**
@@ -2435,7 +2435,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the shop collaborators file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the shop collaborators file...");
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
                 if (row.isEmpty() || row.startsWith("#")) {
@@ -2454,9 +2454,9 @@ public class PersistenceUtils {
                 }
             }
             reader.close();
-            Bukkit.getLogger().info("Shop collaborators have been initialized");
+            Bukkit.getLogger().info("[AC] Shop collaborators have been initialized");
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading shop collaborators");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading shop collaborators");
         }
     }
 
@@ -2477,10 +2477,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new shop_collaborators.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new shop_collaborators.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of shop_collaborators.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of shop_collaborators.txt");
             }
 
             try {
@@ -2495,7 +2495,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving shop collaborators");
+                Bukkit.getLogger().info("[AC] There was an error in saving shop collaborators");
             }
         }
     }
@@ -2518,7 +2518,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the votes file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the votes file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2533,10 +2533,10 @@ public class PersistenceUtils {
                 long timestamp = Long.parseLong(parts[2]);
                 AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
             }
-            Bukkit.getLogger().info("The votes have been initialized");
+            Bukkit.getLogger().info("[AC] The votes have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the votes");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the votes");
         }
     }
 
@@ -2559,10 +2559,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new votes.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new votes.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of votes.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of votes.txt");
             }
 
             try {
@@ -2577,7 +2577,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the votes");
+                Bukkit.getLogger().info("[AC] There was an error in saving the votes");
             }
         }
     }
@@ -2600,7 +2600,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the sentinels file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the sentinels file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2661,10 +2661,10 @@ public class PersistenceUtils {
                 aranarthPlayer.setSentinels(sentinels);
                 AranarthUtils.setPlayer(playerUuid, aranarthPlayer);
             }
-            Bukkit.getLogger().info("The sentinels have been initialized");
+            Bukkit.getLogger().info("[AC] The sentinels have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the sentinels");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the sentinels");
         }
     }
 
@@ -2687,10 +2687,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new sentinels.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new sentinels.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of sentinels.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of sentinels.txt");
             }
 
             try {
@@ -2753,7 +2753,7 @@ public class PersistenceUtils {
 
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the sentinels");
+                Bukkit.getLogger().info("[AC] There was an error in saving the sentinels");
             }
         }
     }
@@ -2776,7 +2776,7 @@ public class PersistenceUtils {
         try {
             reader = new Scanner(file);
 
-            Bukkit.getLogger().info("Attempting to read the kills and deaths file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the kills and deaths file...");
             HashMap<UUID, List<Punishment>> punishments = new HashMap<>();
 
             while (reader.hasNextLine()) {
@@ -2798,10 +2798,10 @@ public class PersistenceUtils {
                 PlayerKillDeathScore pkds = new PlayerKillDeathScore(uuid, worldPrefix, kills, deaths);
                 AranarthUtils.addPlayerKillDeathScore(pkds);
             }
-            Bukkit.getLogger().info("All kills and deaths have been initialized");
+            Bukkit.getLogger().info("[AC] All kills and deaths have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the kills and deaths!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the kills and deaths!");
         }
     }
 
@@ -2824,10 +2824,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new kills_and_deaths.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new kills_and_deaths.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of kills_and_deaths.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of kills_and_deaths.txt");
             }
 
             try {
@@ -2846,7 +2846,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the kills and deaths");
+                Bukkit.getLogger().info("[AC] There was an error in saving the kills and deaths");
             }
         }
     }
@@ -2868,7 +2868,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the vote keys file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the vote keys file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -2881,10 +2881,10 @@ public class PersistenceUtils {
                 int amount = Integer.parseInt(parts[1]);
                 AranarthUtils.setPendingVoteKeys(uuid, amount);
             }
-            Bukkit.getLogger().info("All pending vote keys have been initialized");
+            Bukkit.getLogger().info("[AC] All pending vote keys have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the vote keys!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the vote keys!");
         }
     }
 
@@ -2907,10 +2907,10 @@ public class PersistenceUtils {
             try {
                 // If the file isn't already there
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new vote_keys.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new vote_keys.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of vote_keys.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of vote_keys.txt");
             }
 
             try {
@@ -2921,7 +2921,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the vote keys");
+                Bukkit.getLogger().info("[AC] There was an error in saving the vote keys");
             }
         }
     }
@@ -2946,7 +2946,7 @@ public class PersistenceUtils {
             }
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the rare keys!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the rare keys!");
         }
     }
 
@@ -2960,10 +2960,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new rare_keys.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new rare_keys.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of rare_keys.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of rare_keys.txt");
             }
             try {
                 FileWriter writer = new FileWriter(filePath);
@@ -2973,7 +2973,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the rare keys");
+                Bukkit.getLogger().info("[AC] There was an error in saving the rare keys");
             }
         }
     }
@@ -2998,7 +2998,7 @@ public class PersistenceUtils {
             }
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the epic keys!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the epic keys!");
         }
     }
 
@@ -3012,10 +3012,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new epic_keys.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new epic_keys.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of epic_keys.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of epic_keys.txt");
             }
             try {
                 FileWriter writer = new FileWriter(filePath);
@@ -3025,7 +3025,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the epic keys");
+                Bukkit.getLogger().info("[AC] There was an error in saving the epic keys");
             }
         }
     }
@@ -3050,7 +3050,7 @@ public class PersistenceUtils {
             }
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the godly keys!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the godly keys!");
         }
     }
 
@@ -3064,10 +3064,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new godly_keys.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new godly_keys.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of godly_keys.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of godly_keys.txt");
             }
             try {
                 FileWriter writer = new FileWriter(filePath);
@@ -3077,7 +3077,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the godly keys");
+                Bukkit.getLogger().info("[AC] There was an error in saving the godly keys");
             }
         }
     }
@@ -3102,7 +3102,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the quest_state file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the quest_state file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
@@ -3117,10 +3117,10 @@ public class PersistenceUtils {
                 }
             }
 
-            Bukkit.getLogger().info("Quest state has been initialized");
+            Bukkit.getLogger().info("[AC] Quest state has been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the quest state!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the quest state!");
         }
     }
 
@@ -3145,10 +3145,10 @@ public class PersistenceUtils {
         try {
             // If the file isn't already there
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new quest_state.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new quest_state.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred in the creation of quest_state.txt");
+            Bukkit.getLogger().info("[AC] An error occurred in the creation of quest_state.txt");
         }
 
         try {
@@ -3158,7 +3158,7 @@ public class PersistenceUtils {
             writer.write("lastWeeklyReset|" + QuestUtils.getLastWeeklyReset() + "\n");
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error in saving the quest state");
+            Bukkit.getLogger().info("[AC] There was an error in saving the quest state");
         }
     }
 
@@ -3184,7 +3184,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the quest_progress file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the quest_progress file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
@@ -3258,10 +3258,10 @@ public class PersistenceUtils {
                 QuestUtils.getPlayerQuestRank().put(uuid, rank);
             }
 
-            Bukkit.getLogger().info("Quest progress has been initialized");
+            Bukkit.getLogger().info("[AC] Quest progress has been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading quest progress!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading quest progress!");
         }
     }
 
@@ -3344,10 +3344,10 @@ public class PersistenceUtils {
         try {
             // If the file isn't already there
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new quest_progress.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new quest_progress.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred in the creation of quest_progress.txt");
+            Bukkit.getLogger().info("[AC] An error occurred in the creation of quest_progress.txt");
         }
 
         try {
@@ -3395,7 +3395,7 @@ public class PersistenceUtils {
 
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error in saving quest progress");
+            Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
         }
     }
 
@@ -3420,7 +3420,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the login_streaks file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the login_streaks file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
@@ -3441,10 +3441,10 @@ public class PersistenceUtils {
                 LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
             }
 
-            Bukkit.getLogger().info("Login streaks have been initialized");
+            Bukkit.getLogger().info("[AC] Login streaks have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading login streaks!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading login streaks!");
         }
     }
 
@@ -3469,10 +3469,10 @@ public class PersistenceUtils {
 
         try {
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new login_streaks.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new login_streaks.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred in the creation of login_streaks.txt");
+            Bukkit.getLogger().info("[AC] An error occurred in the creation of login_streaks.txt");
         }
 
         try {
@@ -3497,7 +3497,7 @@ public class PersistenceUtils {
 
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error in saving login streaks");
+            Bukkit.getLogger().info("[AC] There was an error in saving login streaks");
         }
     }
 
@@ -3521,7 +3521,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the gates file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the gates file...");
 
             while (reader.hasNextLine()) {
                 String line = reader.nextLine();
@@ -3596,10 +3596,10 @@ public class PersistenceUtils {
                 GateUtils.addGate(gate);
             }
 
-            Bukkit.getLogger().info("All gates have been initialized");
+            Bukkit.getLogger().info("[AC] All gates have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading the gates!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the gates!");
         }
     }
 
@@ -3621,10 +3621,10 @@ public class PersistenceUtils {
         if (isDirectoryCreated) {
             try {
                 if (file.createNewFile()) {
-                    Bukkit.getLogger().info("A new gates.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new gates.txt file has been generated");
                 }
             } catch (IOException e) {
-                Bukkit.getLogger().info("An error occurred in the creation of gates.txt");
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of gates.txt");
             }
 
             try {
@@ -3662,7 +3662,7 @@ public class PersistenceUtils {
                 }
                 writer.close();
             } catch (IOException e) {
-                Bukkit.getLogger().info("There was an error in saving the gates");
+                Bukkit.getLogger().info("[AC] There was an error in saving the gates");
             }
         }
     }
@@ -3691,7 +3691,7 @@ public class PersistenceUtils {
 
         try {
             Scanner reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the petprogress file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the petprogress file...");
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
                 if (row.startsWith("#") || row.isEmpty()) {
@@ -3730,9 +3730,9 @@ public class PersistenceUtils {
                 }
             }
             reader.close();
-            Bukkit.getLogger().info("Mount progress has been initialised");
+            Bukkit.getLogger().info("[AC] Mount progress has been initialised");
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading petprogress.txt!");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading petprogress.txt!");
         }
     }
 
@@ -3755,10 +3755,10 @@ public class PersistenceUtils {
 
         try {
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new petprogress.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new petprogress.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred in the creation of petprogress.txt");
+            Bukkit.getLogger().info("[AC] An error occurred in the creation of petprogress.txt");
         }
 
         try {
@@ -3785,7 +3785,7 @@ public class PersistenceUtils {
             }
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error in saving mount progress");
+            Bukkit.getLogger().info("[AC] There was an error in saving mount progress");
         }
     }
 
@@ -3804,7 +3804,7 @@ public class PersistenceUtils {
 
         try {
             Scanner reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the mail file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the mail file...");
             HashMap<UUID, List<com.aearost.aranarthcore.objects.Mail>> mailData = new HashMap<>();
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
@@ -3827,9 +3827,9 @@ public class PersistenceUtils {
             }
             reader.close();
             MailUtils.setAllMail(mailData);
-            Bukkit.getLogger().info("Mail has been initialised");
+            Bukkit.getLogger().info("[AC] Mail has been initialised");
         } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("Something went wrong with loading mail.txt");
+            Bukkit.getLogger().info("[AC] Something went wrong with loading mail.txt");
         }
     }
 
@@ -3855,10 +3855,10 @@ public class PersistenceUtils {
 
         try {
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new mail.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new mail.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred in the creation of mail.txt");
+            Bukkit.getLogger().info("[AC] An error occurred in the creation of mail.txt");
         }
 
         try {
@@ -3873,7 +3873,7 @@ public class PersistenceUtils {
             }
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error in saving mail data");
+            Bukkit.getLogger().info("[AC] There was an error in saving mail data");
         }
     }
 
@@ -3894,7 +3894,7 @@ public class PersistenceUtils {
         Scanner reader;
         try {
             reader = new Scanner(file);
-            Bukkit.getLogger().info("Attempting to read the outposts file...");
+            Bukkit.getLogger().info("[AC] Attempting to read the outposts file...");
 
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -3945,7 +3945,7 @@ public class PersistenceUtils {
                 OutpostUtils.registerOutpost(outpost);
             }
 
-            Bukkit.getLogger().info("All outposts have been initialized");
+            Bukkit.getLogger().info("[AC] All outposts have been initialized");
             reader.close();
         } catch (FileNotFoundException e) {
             Bukkit.getLogger().warning("outposts.txt not found — skipping outpost load.");
@@ -3972,10 +3972,10 @@ public class PersistenceUtils {
 
         try {
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new outposts.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new outposts.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred creating outposts.txt");
+            Bukkit.getLogger().info("[AC] An error occurred creating outposts.txt");
             return;
         }
 
@@ -4011,7 +4011,7 @@ public class PersistenceUtils {
             }
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error saving outposts!");
+            Bukkit.getLogger().info("[AC] There was an error saving outposts!");
         }
     }
 
@@ -4159,10 +4159,10 @@ public class PersistenceUtils {
 
         try {
             if (file.createNewFile()) {
-                Bukkit.getLogger().info("A new defenders.txt file has been generated");
+                Bukkit.getLogger().info("[AC] A new defenders.txt file has been generated");
             }
         } catch (IOException e) {
-            Bukkit.getLogger().info("An error occurred creating defenders.txt");
+            Bukkit.getLogger().info("[AC] An error occurred creating defenders.txt");
             return;
         }
 
@@ -4212,7 +4212,7 @@ public class PersistenceUtils {
 
             writer.close();
         } catch (IOException e) {
-            Bukkit.getLogger().info("There was an error saving the defenders");
+            Bukkit.getLogger().info("[AC] There was an error saving the defenders");
         }
     }
 

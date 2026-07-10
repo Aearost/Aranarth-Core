@@ -64,7 +64,7 @@ public class CraftingOverridesSugarcaneBlock {
                 // preCraft does not actually update it to sugarcane in the backend
                 if (result.getType() != Material.BAMBOO) {
                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a Block of Sugarcane to craft this!"));
-                    Bukkit.getLogger().info(result.getType().name());
+                    Bukkit.getLogger().info("[AC] " + result.getType().name());
                     e.setCancelled(true);
                 }
             }

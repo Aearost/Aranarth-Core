@@ -424,7 +424,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else {
-			Bukkit.getLogger().info("Something went wrong with the current world name \"" + currentWorld + "\"!");
+			Bukkit.getLogger().info("[AC] Something went wrong with the current world name \"" + currentWorld + "\"!");
 			return;
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -1247,7 +1247,7 @@ public class AranarthUtils {
 							}
 						}
 						// One of them is not a Special arrow but has meta somehow
-						Bukkit.getLogger().info("Something went wrong with identifying the arrows...");
+						Bukkit.getLogger().info("[AC] Something went wrong with identifying the arrows...");
 						return null;
 					} else {
 						return null;
@@ -1502,7 +1502,7 @@ public class AranarthUtils {
 						int minute = Integer.parseInt(trimZero(muteEndDate.substring(8, 10)));
 						definedMuteDate = LocalDateTime.of(year, month, day, hour, minute);
 					} catch (NumberFormatException e) {
-						Bukkit.getLogger().info("Something went wrong with parsing the player's mute date...");
+						Bukkit.getLogger().info("[AC] Something went wrong with parsing the player's mute date...");
 						return;
 					}
 				} else {
@@ -3441,7 +3441,7 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is now AFK"));
 				}
 			}
-			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
+			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
 		} else {
 			if (aranarthPlayer.getAfkLocation() == null) {
 				return;
@@ -3454,7 +3454,7 @@ public class AranarthUtils {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is no longer AFK"));
 				}
 			}
-			Bukkit.getLogger().info(ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
+			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}
