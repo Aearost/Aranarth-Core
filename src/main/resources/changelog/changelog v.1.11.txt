@@ -57,6 +57,13 @@ Minor Features
 [-] Removed /shop tp to fully favour the GUI
 [~] Fixed keys being consumed but not rewarded if a player disconnects mid-cast
 [+] Added /d rank scan to manually re-evaluate a dominion's rank for admins
+[-] Removed the 10% store coupon from epic crates
+[+] Added 3 rare crate keys in the epic crate
+[-] Added Honey Glazed Ham to the epic crate
+[~] Replaced the Trident in rare crate with a cycling trident, elytra, sniffer egg, conduit, and 8 shulker shells
+[~] Increased rare crate money to 5000, epic to 25000, and godly to 75000
+[~] Increased godly diamond blocks to 64
+[~] Rearranged items in the epic crate
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

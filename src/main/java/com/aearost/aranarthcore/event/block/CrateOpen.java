@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiCrate;
 import com.aearost.aranarthcore.items.GodAppleFragment;
+import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
@@ -171,21 +172,23 @@ public class CrateOpen {
                                 AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                                 List<Integer> indexes = new ArrayList<>();
                                 // Sets default value to display at first
-                                indexes.add(0);
-                                indexes.add(0);
-                                indexes.add(0);
+                                indexes.add(0); // egg index
+                                indexes.add(0); // cluster index
+                                indexes.add(0); // incantation index
+                                indexes.add(0); // weapon index
                                 GuiCrate gui = new GuiCrate(player, CrateType.EPIC, indexes);
                                 gui.openGui();
                                 // Updates to next slot so task can update it accordingly
                                 indexes.set(0, 1);
                                 indexes.set(1, 1);
                                 indexes.set(2, 1);
+                                indexes.set(3, 1);
 
                                 scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
                                     @Override
                                     public void run() {
                                         if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
-                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+                                            gui.updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
 
                                             // Cycle through the next spawn egg iteration
                                             if (indexes.get(0) < 3) {
@@ -206,6 +209,13 @@ public class CrateOpen {
                                                 indexes.set(2, indexes.get(2) + 1);
                                             } else {
                                                 indexes.set(2, 0);
+                                            }
+
+                                            // Cycle through the next weapon iteration
+                                            if (indexes.get(3) < 4) {
+                                                indexes.set(3, indexes.get(3) + 1);
+                                            } else {
+                                                indexes.set(3, 0);
                                             }
                                         } else {
                                             Bukkit.getScheduler().cancelTask(scheduledSkipTask);
@@ -507,11 +517,11 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 3000);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 5000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$3,000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.ENCHANTED_BOOK, 1);
@@ -607,13 +617,32 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 12500);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 25000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$12,500 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
+                    reward = new HoneyGlazedHam().getItem();
+                    reward.setAmount(64);
+                    name = "&6&lHoney Glazed Ham x64";
+                } else if (chance <= 36) {
+                    reward = new ItemStack(Material.NETHERITE_INGOT, 2);
+                    name = "#3a383a&lNetherite Ingot x2";
+                } else if (chance <= 48) {
+                    reward = new ItemStack(Material.DIAMOND, 64);
+                    name = "#a0f0ed&lDiamond x64";
+                } else if (chance <= 56) {
+                    int weaponRoll = new Random().nextInt(5);
+                    switch (weaponRoll) {
+                        case 0 -> { reward = new ItemStack(Material.TRIDENT, 1); name = "#579b8c&lTrident x1"; }
+                        case 1 -> { reward = new ItemStack(Material.ELYTRA, 1); name = "#7d7d96&lElytra x1"; }
+                        case 2 -> { reward = new ItemStack(Material.SNIFFER_EGG, 1); name = "#6ab567&lSniffer Egg x1"; }
+                        case 3 -> { reward = new ItemStack(Material.CONDUIT, 1); name = "#4dcfcf&lConduit x1"; }
+                        default -> { reward = new ItemStack(Material.SHULKER_SHELL, 8); name = "#946794&lShulker Shell x8"; }
+                    }
+                } else if (chance <= 64) {
                     reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
                     if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
                         name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
@@ -624,18 +653,6 @@ public class CrateOpen {
                     } else {
                         name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
                     }
-                } else if (chance <= 36) {
-                    reward = new ItemStack(Material.NETHERITE_INGOT, 2);
-                    name = "#3a383a&lNetherite Ingot x2";
-                } else if (chance <= 48) {
-                    reward = new ItemStack(Material.DIAMOND, 64);
-                    name = "#a0f0ed&lDiamond x64";
-                } else if (chance <= 56) {
-                    reward = new ItemStack(Material.TRIDENT, 1);
-                    name = "#579b8c&lTrident x1";
-                } else if (chance <= 64) {
-                    reward = new ItemStack(Material.ELYTRA, 1);
-                    name = "#7d7d96&lElytra x1";
                 } else if (chance <= 72) {
                     ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
                     ItemStack cluster2 = getCycledCluster(new Random().nextInt(8));
@@ -698,22 +715,13 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e10 Levels"));
                     return;
                 } else if (chance <= 85) {
+                    reward = new KeyRare().getItem();
+                    reward.setAmount(3);
+                    name = "&6&lRare Crate Key x3";
+                } else if (chance <= 90) {
                     reward = new KeyEpic().getItem();
                     reward.setAmount(2);
                     name = "&3&lEpic Crate Key x2";
-                } else if (chance <= 90) {
-                    DiscordUtils.createNotification(player.getName() + " has earned a 10% Store Coupon", player.getUniqueId());
-                    reward = new ItemStack(Material.PAPER);
-                    ItemMeta rewardMeta = reward.getItemMeta();
-                    rewardMeta.setMaxStackSize(1);
-                    rewardMeta.setDisplayName(ChatUtils.translateToColor("&6&l10% Store Coupon"));
-                    List<String> rewardLore = new ArrayList<>();
-                    rewardLore.add(ChatUtils.translateToColor("&eContact a Council member to obtain this reward!"));
-                    String dayCouponWasAcquired = getCurrentTime();
-                    rewardLore.add(ChatUtils.translateToColor("&7Acquired on " + dayCouponWasAcquired));
-                    rewardMeta.setLore(rewardLore);
-                    reward.setItemMeta(rewardMeta);
-                    name = rewardMeta.getDisplayName() + " x1";
                 } else if (chance <= 95) {
                     // 50/50 between Plentiful and Lifesteal
                     if (new Random().nextInt(2) == 0) {
@@ -773,16 +781,16 @@ public class CrateOpen {
 
                 if (chance <= 12) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
-                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 60000);
+                    aranarthPlayer.setBalance(aranarthPlayer.getBalance() + 75000);
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$60,000 of In-Game Currency"));
+                    player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$75,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
                     if (new Random().nextBoolean()) {
-                        reward = new ItemStack(Material.DIAMOND_BLOCK, 32);
-                        name = "#a0f0ed&lDiamond Block x32";
+                        reward = new ItemStack(Material.DIAMOND_BLOCK, 64);
+                        name = "#a0f0ed&lDiamond Block x64";
                     } else {
                         reward = new ItemStack(Material.SHULKER_SHELL, 16);
                         name = "#946794&lShulker Shells x16";

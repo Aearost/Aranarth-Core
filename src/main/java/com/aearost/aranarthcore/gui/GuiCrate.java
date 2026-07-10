@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.items.GodAppleFragment;
+import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
@@ -38,8 +39,8 @@ public class GuiCrate {
 			updateRareCrateItems(indexes.get(0), indexes.get(1));
 		} else if (type == CrateType.EPIC) {
 			this.initializedGui = initializeEpicCrate(player);
-			// Updating the spawn eggs, clusters, and incantation here to allow for dynamic updates
-			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
+			// Updating the weapons, spawn eggs, clusters, and incantation here to allow for dynamic updates
+			updateEpicCrateItems(indexes.get(0), indexes.get(1), indexes.get(2), indexes.get(3));
 		} else if (type == CrateType.GODLY) {
 			this.initializedGui = initializeGodlyCrate(player);
 			// Updating the enhanced aranarthium and spawn eggs to allow for dynamic updates
@@ -194,7 +195,7 @@ public class GuiCrate {
 
 		ItemStack money1000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money1000Meta = money1000.getItemMeta();
-		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$3,000 of In-Game Currency"));
+		money1000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$5,000 of In-Game Currency"));
 		List<String> money1000Lore = new ArrayList<>();
 		money1000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money1000Meta.setLore(money1000Lore);
@@ -304,12 +305,21 @@ public class GuiCrate {
 
 		ItemStack money5000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money5000Meta = money5000.getItemMeta();
-		money5000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$12,500 of In-Game Currency"));
+		money5000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$25,000 of In-Game Currency"));
 		List<String> money5000Lore = new ArrayList<>();
 		money5000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money5000Meta.setLore(money5000Lore);
 		money5000.setItemMeta(money5000Meta);
 		gui.setItem(2, money5000);
+
+		ItemStack honeyGlazedHam = new HoneyGlazedHam().getItem();
+		honeyGlazedHam.setAmount(64);
+		ItemMeta honeyGlazedHamMeta = honeyGlazedHam.getItemMeta();
+		List<String> honeyGlazedHamLore = new ArrayList<>();
+		honeyGlazedHamLore.add(ChatUtils.translateToColor("&a12% Chance"));
+		honeyGlazedHamMeta.setLore(honeyGlazedHamLore);
+		honeyGlazedHam.setItemMeta(honeyGlazedHamMeta);
+		gui.setItem(3, honeyGlazedHam);
 
 		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 2);
 		ItemMeta netheriteMeta = netherite.getItemMeta();
@@ -329,24 +339,6 @@ public class GuiCrate {
 		diamond.setItemMeta(diamondMeta);
 		gui.setItem(6, diamond);
 
-		ItemStack trident = new ItemStack(Material.TRIDENT, 1);
-		ItemMeta tridentMeta = trident.getItemMeta();
-		tridentMeta.setDisplayName(ChatUtils.translateToColor("#579b8c&lTrident"));
-		List<String> tridentLore = new ArrayList<>();
-		tridentLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		tridentMeta.setLore(tridentLore);
-		trident.setItemMeta(tridentMeta);
-		gui.setItem(10, trident);
-
-		ItemStack elytra = new ItemStack(Material.ELYTRA, 1);
-		ItemMeta elytraMeta = elytra.getItemMeta();
-		elytraMeta.setDisplayName(ChatUtils.translateToColor("#7d7d96&lElytra"));
-		List<String> elytraLore = new ArrayList<>();
-		elytraLore.add(ChatUtils.translateToColor("&e8% Chance"));
-		elytraMeta.setLore(elytraLore);
-		elytra.setItemMeta(elytraMeta);
-		gui.setItem(11, elytra);
-
 		ItemStack mcmmo10 = new ItemStack(Material.PAPER, 1);
 		ItemMeta mcmmo10Meta = mcmmo10.getItemMeta();
 		mcmmo10Meta.setDisplayName(ChatUtils.translateToColor("&6&lmcMMO All Skills +10"));
@@ -356,24 +348,25 @@ public class GuiCrate {
 		mcmmo10.setItemMeta(mcmmo10Meta);
 		gui.setItem(16, mcmmo10);
 
-		ItemStack epicKey = new KeyEpic().getItem();
-		epicKey.setAmount(2);
-		ItemMeta epicKeyMeta = epicKey.getItemMeta();
-		epicKeyMeta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key"));
-		List<String> epicKeyLore = new ArrayList<>();
-		epicKeyLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		epicKeyMeta.setLore(epicKeyLore);
-		epicKey.setItemMeta(epicKeyMeta);
-		gui.setItem(20, epicKey);
+		ItemStack rareKey3 = new KeyRare().getItem();
+		rareKey3.setAmount(3);
+		ItemMeta rareKey3Meta = rareKey3.getItemMeta();
+		rareKey3Meta.setDisplayName(ChatUtils.translateToColor("&6&lRare Crate Key"));
+		List<String> rareKey3Lore = new ArrayList<>();
+		rareKey3Lore.add(ChatUtils.translateToColor("&c5% Chance"));
+		rareKey3Meta.setLore(rareKey3Lore);
+		rareKey3.setItemMeta(rareKey3Meta);
+		gui.setItem(20, rareKey3);
 
-		ItemStack discount10 = new ItemStack(Material.PAPER, 1);
-		ItemMeta discount10Meta = discount10.getItemMeta();
-		discount10Meta.setDisplayName(ChatUtils.translateToColor("&6&l10% Server Store Coupon"));
-		List<String> discount10Lore = new ArrayList<>();
-		discount10Lore.add(ChatUtils.translateToColor("&c5% Chance"));
-		discount10Meta.setLore(discount10Lore);
-		discount10.setItemMeta(discount10Meta);
-		gui.setItem(21, discount10);
+		ItemStack epicKey2 = new KeyEpic().getItem();
+		epicKey2.setAmount(2);
+		ItemMeta epicKey2Meta = epicKey2.getItemMeta();
+		epicKey2Meta.setDisplayName(ChatUtils.translateToColor("&3&lEpic Crate Key"));
+		List<String> epicKey2Lore = new ArrayList<>();
+		epicKey2Lore.add(ChatUtils.translateToColor("&c5% Chance"));
+		epicKey2Meta.setLore(epicKey2Lore);
+		epicKey2.setItemMeta(epicKey2Meta);
+		gui.setItem(21, epicKey2);
 
 		ItemStack godlyKey = new KeyGodly().getItem();
 		ItemMeta godlyKeyMeta = godlyKey.getItemMeta();
@@ -407,14 +400,14 @@ public class GuiCrate {
 
 		ItemStack money25000 = new ItemStack(Material.GOLD_INGOT);
 		ItemMeta money25000Meta = money25000.getItemMeta();
-		money25000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$60,000 of In-Game Currency"));
+		money25000Meta.setDisplayName(ChatUtils.translateToColor("&6&l$75,000 of In-Game Currency"));
 		List<String> money25000Lore = new ArrayList<>();
 		money25000Lore.add(ChatUtils.translateToColor("&a12% Chance"));
 		money25000Meta.setLore(money25000Lore);
 		money25000.setItemMeta(money25000Meta);
 		gui.setItem(2, money25000);
 
-		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 32);
+		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 64);
 		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();
 		diamondBlockMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
 		List<String> diamondBlockLore = new ArrayList<>();
@@ -574,12 +567,31 @@ public class GuiCrate {
 	}
 
 	/**
-	 * Provides the spawn egg, cluster, and incantation that are associated to the input indexes for an Epic Crate.
+	 * Provides the weapon, spawn egg, cluster, and incantation that are associated to the input indexes for an Epic Crate.
 	 * @param eggIndex The index of the spawn egg.
 	 * @param clusterIndex The index of the cluster.
 	 * @param incantationIndex The index of the incantation.
+	 * @param weaponIndex The index of the cycling weapon.
 	 */
-	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex) {
+	public void updateEpicCrateItems(int eggIndex, int clusterIndex, int incantationIndex, int weaponIndex) {
+		// Cycle through weapons (trident, elytra, sniffer egg, conduit, shulker shells)
+		ItemStack weapon = null;
+		String weaponName = "";
+		switch (weaponIndex) {
+			case 1 -> { weapon = new ItemStack(Material.ELYTRA, 1); weaponName = "#7d7d96&lElytra"; }
+			case 2 -> { weapon = new ItemStack(Material.SNIFFER_EGG, 1); weaponName = "#6ab567&lSniffer Egg"; }
+			case 3 -> { weapon = new ItemStack(Material.CONDUIT, 1); weaponName = "#4dcfcf&lConduit"; }
+			case 4 -> { weapon = new ItemStack(Material.SHULKER_SHELL, 8); weaponName = "#946794&lShulker Shell"; }
+			default -> { weapon = new ItemStack(Material.TRIDENT, 1); weaponName = "#579b8c&lTrident"; }
+		}
+		ItemMeta cycledWeaponMeta = weapon.getItemMeta();
+		cycledWeaponMeta.setDisplayName(ChatUtils.translateToColor(weaponName));
+		List<String> cycledWeaponLore = new ArrayList<>();
+		cycledWeaponLore.add(ChatUtils.translateToColor("&e8% Chance"));
+		cycledWeaponMeta.setLore(cycledWeaponLore);
+		weapon.setItemMeta(cycledWeaponMeta);
+		initializedGui.setItem(10, weapon);
+
 		// Cycle through the spawn eggs
 		ItemStack egg = null;
 		switch (eggIndex) {
@@ -603,7 +615,7 @@ public class GuiCrate {
 		cycledEggLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		cycledEggMeta.setLore(cycledEggLore);
 		egg.setItemMeta(cycledEggMeta);
-		initializedGui.setItem(3, egg);
+		initializedGui.setItem(11, egg);
 
 		// Cycle through the Clusters
 		ItemStack cluster = null;
@@ -688,7 +700,7 @@ public class GuiCrate {
 			shulkerMeta.setLore(shulkerLore);
 			diamondShulker.setItemMeta(shulkerMeta);
 		} else {
-			diamondShulker = new ItemStack(Material.DIAMOND_BLOCK, 32);
+			diamondShulker = new ItemStack(Material.DIAMOND_BLOCK, 64);
 			ItemMeta diamondMeta = diamondShulker.getItemMeta();
 			diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
 			List<String> diamondLore = new ArrayList<>();
