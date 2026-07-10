@@ -37,7 +37,7 @@ public class CommandSMP implements CommandExecutor {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			Location smpSpawn = new Location(Bukkit.getWorld("smp"), 0.5, 120, 3, 180, 0);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), "&e&lSMP", "&7You have teleported to the SMP", success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the &eSMP"));
 				} else {

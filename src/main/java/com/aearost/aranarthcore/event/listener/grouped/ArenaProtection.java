@@ -304,7 +304,7 @@ public class ArenaProtection implements Listener {
 				if (loc.getBlockX() == -1 && loc.getBlockY() == 106 && loc.getBlockZ() == -3) {
 					e.setCancelled(true);
 					Location arenaLoc = new Location(Bukkit.getWorld("arena"), 1000, 101, 1000);
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lSmall Arena", "&7You have teleported to the Small Arena", success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eSmall Arena"));
 						} else {
@@ -328,7 +328,7 @@ public class ArenaProtection implements Listener {
 					} else if (locationNum == 4) {
 						arenaLoc = new Location(Bukkit.getWorld("arena"), -940, 104, -947, 135, 0);
 					}
-					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), arenaLoc, true, "&e&lLarge Arena", "&7You have teleported to the Large Arena", success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the &eLarge Arena"));
 						} else {

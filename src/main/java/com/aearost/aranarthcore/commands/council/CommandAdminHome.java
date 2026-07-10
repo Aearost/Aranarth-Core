@@ -55,7 +55,7 @@ public class CommandAdminHome {
 
 		for (Home home : targetAranarthPlayer.getHomes()) {
 			if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), true, success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), true, home.getName(), "&7You have teleported to " + targetAranarthPlayer.getNickname() + "&7's home", success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e"
 								+ targetAranarthPlayer.getNickname() + "&7's home &e" + home.getName()));

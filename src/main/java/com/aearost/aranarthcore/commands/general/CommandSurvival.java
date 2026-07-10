@@ -59,7 +59,7 @@ public class CommandSurvival implements CommandExecutor {
 				}
 			}
 
-			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), selectedLocation, aranarthPlayer.isInAdminMode(), "&e&lSurvival", "&7You have teleported to Survival", success -> {
 				if (success) {
 					aranarthPlayer.setLastWorldCommandUse(System.currentTimeMillis());
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);

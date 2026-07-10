@@ -30,7 +30,7 @@ public class CommandBack implements CommandExecutor {
 
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			if (aranarthPlayer.getLastKnownTeleportLocation() != null) {
-				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), aranarthPlayer.getLastKnownTeleportLocation(), aranarthPlayer.isInAdminMode(), "&e&lPrevious Location", "&7You have returned to your previous location", success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have returned to your previous location"));
 					} else {

@@ -1696,11 +1696,16 @@ public class AranarthUtils {
 	 * @param from The location that the player is teleporting from.
 	 * @param to The location that the player is teleporting to.
 	 * @param isImmediateTeleport Whether the teleportation should be immediate or not.
+	 * @param teleportTitle The main title text shown on success, e.g. the destination name.
+	 * @param teleportSubtitle The smaller subtitle text shown on success.
 	 * @param resultCallback Confirmation whether the teleportation was successful or not.
 	 */
-	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, Consumer<Boolean> resultCallback) {
+	public static void teleportPlayer(Player player, Location from, Location to, boolean isImmediateTeleport, String teleportTitle, String teleportSubtitle, Consumer<Boolean> resultCallback) {
 		if (isImmediateTeleport) {
 			boolean result = handleTeleportLogic(player, from, to);
+			if (result) {
+				sendTeleportTitle(player, teleportTitle, teleportSubtitle);
+			}
 			resultCallback.accept(result);
 		} else {
 			AranarthPlayer aranarthPlayerCheck = getPlayer(player.getUniqueId());
@@ -1712,6 +1717,9 @@ public class AranarthUtils {
 			player.sendMessage(ChatUtils.chatMessage("&7You will be teleported in &e3 seconds!"));
 			initiateTeleport(player, () -> {
 				boolean result = handleTeleportLogic(player, from, to);
+				if (result) {
+					sendTeleportTitle(player, teleportTitle, teleportSubtitle);
+				}
 				resultCallback.accept(result);
 			});
 		}
@@ -1832,6 +1840,16 @@ public class AranarthUtils {
 	 */
 	public static void removeTeleportTask(UUID uuid) {
 		teleportingPlayers.remove(uuid);
+	}
+
+	/**
+	 * Displays a teleport confirmation popup to the player.
+	 * @param player The player.
+	 * @param title The main (large) title text, e.g. the destination name (supports color codes).
+	 * @param subtitle The smaller subtitle text, e.g. "You have teleported to your home" (supports color codes).
+	 */
+	private static void sendTeleportTitle(Player player, String title, String subtitle) {
+		player.sendTitle(ChatUtils.translateToColor("&e" + title), ChatUtils.translateToColor(subtitle));
 	}
 
 	/**

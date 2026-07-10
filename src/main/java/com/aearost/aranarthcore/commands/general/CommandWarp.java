@@ -47,7 +47,7 @@ public class CommandWarp implements CommandExecutor {
 					for (Home warp : AranarthUtils.getWarps()) {
 						if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(args[0])) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), "&7You have teleported to " + warp.getName(), success -> {
 								if (success) {
 									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));
 								} else {

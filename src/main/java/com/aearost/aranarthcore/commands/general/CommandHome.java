@@ -38,7 +38,7 @@ public class CommandHome implements CommandExecutor {
 				String homeName = homeNameBuilder.toString();
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
-						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
+						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), "&7You have teleported to your home", success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));
 							} else {

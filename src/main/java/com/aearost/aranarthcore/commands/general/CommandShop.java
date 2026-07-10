@@ -76,7 +76,7 @@ public class CommandShop implements CommandExecutor {
             AranarthUtils.addShopIslandCenter(player.getUniqueId(), centerX, centerZ);
 
             // Teleport the player immediately
-            AranarthUtils.teleportPlayer(player, player.getLocation(), homeLocation, true, success -> {
+            AranarthUtils.teleportPlayer(player, player.getLocation(), homeLocation, true, "&e&lYour Shop", "&7Your shop island has been created", success -> {
                 if (success) {
                     player.sendMessage(ChatUtils.chatMessage("&7Your shop island has been created"));
                     player.sendMessage(ChatUtils.chatMessage("&7Use &e/shop sethome &7to update the shop's home location"));
@@ -93,7 +93,7 @@ public class CommandShop implements CommandExecutor {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop. Create one with &e/shop create"));
                 return true;
             }
-            AranarthUtils.teleportPlayer(player, player.getLocation(), shopHome, aranarthPlayer.isInAdminMode(), success -> {
+            AranarthUtils.teleportPlayer(player, player.getLocation(), shopHome, aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7You have teleported to your shop", success -> {
                 if (success) {
                     player.sendMessage(ChatUtils.chatMessage("&7You have teleported to your shop"));
                 } else {

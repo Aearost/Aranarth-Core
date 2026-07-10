@@ -159,7 +159,7 @@ public class CommandAdminTeleport {
 				Player target = Bukkit.getPlayer(args[1]);
 				if (target != null) {
 					AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
-                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), true, success -> {
+                    AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), true, targetAranarthPlayer.getNickname(), "&7You have teleported to " + targetAranarthPlayer.getNickname(), success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetAranarthPlayer.getNickname()));
 						} else {
@@ -180,7 +180,7 @@ public class CommandAdminTeleport {
 					AranarthPlayer target1AranarthPlayer = AranarthUtils.getPlayer(target1.getUniqueId());
 					AranarthPlayer target2AranarthPlayer = AranarthUtils.getPlayer(target2.getUniqueId());
 
-					AranarthUtils.teleportPlayer(target1, target1.getLocation(), target2.getLocation(), true, success -> {
+					AranarthUtils.teleportPlayer(target1, target1.getLocation(), target2.getLocation(), true, target2AranarthPlayer.getNickname(), "&7You have teleported to " + target2AranarthPlayer.getNickname(), success -> {
 						if (success) {
 							if (!isSenderPlayer
 									|| (!player.getUniqueId().equals(target1.getUniqueId())
@@ -226,7 +226,7 @@ public class CommandAdminTeleport {
 				Location loc = args.length == 5
 						? new Location(target.getWorld(), x, y, z)
 						: new Location(target.getWorld(), x, y, z, yaw, pitch);
-				AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, success -> {
+				AranarthUtils.teleportPlayer(target, target.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
 					if (success) {
 						sender.sendMessage(ChatUtils.chatMessage("&7You have teleported &e" + targetAranarthPlayer.getNickname() + " &7to the input coordinates"));
 						target.sendMessage(ChatUtils.chatMessage("&7You have been teleported to the input coordinates"));
@@ -263,7 +263,7 @@ public class CommandAdminTeleport {
 				Location loc = args.length == 4
 						? new Location(player.getWorld(), x, y, z)
 						: new Location(player.getWorld(), x, y, z, yaw, pitch);
-				AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, success -> {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), loc, true, "&e&lCoordinates", "&7You have teleported to the input coordinates", success -> {
 					if (success) {
 						player.sendMessage(ChatUtils.chatMessage("&7You have teleported to the input coordinates"));
 					} else {

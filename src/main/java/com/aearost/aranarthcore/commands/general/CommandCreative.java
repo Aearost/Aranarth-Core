@@ -39,7 +39,7 @@ public class CommandCreative implements CommandExecutor {
 			}
 
 			Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);
-			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), success -> {
+			AranarthUtils.teleportPlayer(player, player.getLocation(), creativeSpawn, aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7You have teleported to Creative", success -> {
 				if (success) {
 					player.sendMessage(ChatUtils.chatMessage("&7You have been teleported to &eCreative"));
 				} else {

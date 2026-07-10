@@ -93,7 +93,7 @@ public class GuiOutpostsClick {
         }
 
         com.aearost.aranarthcore.objects.AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), success -> {
+        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), "&7You have teleported to your outpost", success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage("&7Teleported to the outpost &e" + outpost.getName()));
             } else {

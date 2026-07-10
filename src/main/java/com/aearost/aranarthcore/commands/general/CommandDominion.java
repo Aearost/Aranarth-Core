@@ -240,9 +240,9 @@ public class CommandDominion implements CommandExecutor {
                         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                         if (aranarthPlayer.getCouncilRank() == 3) {
                             DominionLevelUtils.runPeriodicScan();
-                            player.sendMessage(ChatUtils.chatMessage("&7Dominion scan triggered."));
+                            player.sendMessage(ChatUtils.chatMessage("&7Dominion scan triggered"));
                         } else {
-                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command."));
+                            player.sendMessage(ChatUtils.chatMessage("&cYou do not have permission to run this command"));
                         }
                     } else {
                         showDominionLevel(player, dominion);
@@ -275,7 +275,7 @@ public class CommandDominion implements CommandExecutor {
         if (dominion != null) {
             if (player.hasPermission("aranarth.dominion.home")) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), success -> {
+                AranarthUtils.teleportPlayer(player, player.getLocation(), dominion.getDominionHome(), aranarthPlayer.isInAdminMode(), dominion.getName(), "&7You have teleported to your dominion", success -> {
                     if (success) {
                         player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + dominion.getName()));
                     } else {
@@ -324,7 +324,7 @@ public class CommandDominion implements CommandExecutor {
             }
         }
 
-        AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), isAdmin, success -> {
+        AranarthUtils.teleportPlayer(player, player.getLocation(), target.getDominionHome(), isAdmin, target.getName(), "&7You have teleported to " + target.getName(), success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + target.getName()));
             } else {
@@ -365,7 +365,7 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), isAdmin, success -> {
+        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), isAdmin, outpost.getName(), "&7You have teleported to " + target.getName() + "&7's outpost", success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + target.getName() + "&7's outpost, &e" + outpost.getName()));
             } else {
@@ -1377,7 +1377,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), success -> {
+        AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), "&7You have teleported to your outpost", success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage("&7Teleported to the outpost &e" + outpost.getName()));
             } else {

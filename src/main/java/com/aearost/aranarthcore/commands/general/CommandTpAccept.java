@@ -43,7 +43,7 @@ public class CommandTpAccept implements CommandExecutor {
 					}
 
 					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has accepted your teleport request"));
-					AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), success -> {
+					AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(), aranarthPlayer.isInAdminMode(), targetNickname, "&7You have teleported to " + targetNickname, success -> {
 						if (success) {
 							player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + targetNickname));
 							target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has teleported to you"));
@@ -79,7 +79,7 @@ public class CommandTpAccept implements CommandExecutor {
 
 					player.sendMessage(ChatUtils.chatMessage("&7You have accepted &e" + targetPlayer.getNickname() + "&7's teleport request"));
 					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has accepted your teleport request"));
-					AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), success -> {
+					AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), "&7You have teleported to " + aranarthPlayer.getNickname(), success -> {
 						if (success) {
 							target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));
 							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &7has teleported to you"));
