@@ -55,6 +55,7 @@ Minor Features
 [~] Fixed bug with bulk purchases causing items in the shop to disappear
 [+] Added /shop rename to allow a custom name of a shop
 [-] Removed /shop tp to fully favour the GUI
+[~] Fixed keys being consumed but not rewarded if a player disconnects mid-cast
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

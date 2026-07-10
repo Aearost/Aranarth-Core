@@ -396,10 +396,17 @@ public class CrateOpen {
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.VOTE);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-            ItemStack heldItem = player.getInventory().getItemInMainHand();
-            heldItem.setAmount(heldItem.getAmount() - 1);
-
+            int voteKeySlot = player.getInventory().getHeldItemSlot();
             playCrateOpenSound(player, CrateType.VOTE, () -> {
+                if (!player.isOnline()) {
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.VOTE);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    return;
+                }
+                ItemStack heldItem = player.getInventory().getItem(voteKeySlot);
+                heldItem.setAmount(heldItem.getAmount() - 1);
+
                 ItemStack reward = null;
                 String name = "";
                 int chance = new Random().nextInt(100) + 1;
@@ -483,10 +490,17 @@ public class CrateOpen {
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.RARE);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-            ItemStack heldItem = player.getInventory().getItemInMainHand();
-            heldItem.setAmount(heldItem.getAmount() - 1);
-
+            int rareKeySlot = player.getInventory().getHeldItemSlot();
             playCrateOpenSound(player, CrateType.RARE, () -> {
+                if (!player.isOnline()) {
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.RARE);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    return;
+                }
+                ItemStack heldItem = player.getInventory().getItem(rareKeySlot);
+                heldItem.setAmount(heldItem.getAmount() - 1);
+
                 ItemStack reward = null;
                 String name = "";
                 int chance = new Random().nextInt(100) + 1;
@@ -576,10 +590,17 @@ public class CrateOpen {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening an &3&lEpic Crate"));
 
-            ItemStack heldItem = player.getInventory().getItemInMainHand();
-            heldItem.setAmount(heldItem.getAmount() - 1);
-
+            int epicKeySlot = player.getInventory().getHeldItemSlot();
             playCrateOpenSound(player, CrateType.EPIC, () -> {
+                if (!player.isOnline()) {
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.EPIC);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    return;
+                }
+                ItemStack heldItem = player.getInventory().getItem(epicKeySlot);
+                heldItem.setAmount(heldItem.getAmount() - 1);
+
                 ItemStack reward = null;
                 String name = "";
                 int chance = new Random().nextInt(100) + 1;
@@ -735,10 +756,17 @@ public class CrateOpen {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening a &5&lGodly Crate"));
 
-            ItemStack heldItem = player.getInventory().getItemInMainHand();
-            heldItem.setAmount(heldItem.getAmount() - 1);
-
+            int godlyKeySlot = player.getInventory().getHeldItemSlot();
             playCrateOpenSound(player, CrateType.GODLY, () -> {
+                if (!player.isOnline()) {
+                    aranarthPlayer.setCrateTypeBeingOpened(null);
+                    AranarthUtils.removeCrateFromUse(CrateType.GODLY);
+                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    return;
+                }
+                ItemStack heldItem = player.getInventory().getItem(godlyKeySlot);
+                heldItem.setAmount(heldItem.getAmount() - 1);
+
                 ItemStack reward = null;
                 String name = "";
                 int chance = new Random().nextInt(100) + 1;
