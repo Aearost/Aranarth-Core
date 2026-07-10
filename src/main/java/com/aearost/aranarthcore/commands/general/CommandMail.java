@@ -73,7 +73,7 @@ public class CommandMail implements CommandExecutor {
                 }
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
-                player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: " + processedMessage));
+                player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: &e" + processedMessage));
             }
             case "read" -> {
                 List<Mail> mailList = new ArrayList<>(MailUtils.getMail(player.getUniqueId()));
