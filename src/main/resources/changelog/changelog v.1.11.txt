@@ -66,6 +66,7 @@ Minor Features
 [~] Increased godly diamond blocks to 64
 [~] Rearranged items in the epic crate
 [+] Added message to players receiving mail while they are online
+[~] Corrected messages when a player is warned, muted, or banned
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
