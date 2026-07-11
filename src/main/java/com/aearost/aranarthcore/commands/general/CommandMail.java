@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Mail;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.MailUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -74,6 +75,12 @@ public class CommandMail implements CommandExecutor {
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
                 player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: &e" + processedMessage));
+                if (Bukkit.getOfflinePlayer(targetUUID).isOnline()) {
+                    Player target = Bukkit.getPlayer(targetUUID);
+                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+                    target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + aranarthPlayer.getNickname()));
+                    target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
+                }
             }
             case "read" -> {
                 List<Mail> mailList = new ArrayList<>(MailUtils.getMail(player.getUniqueId()));

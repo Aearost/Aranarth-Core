@@ -65,6 +65,7 @@ Minor Features
 [~] Increased rare crate money to 5000, epic to 25000, and godly to 75000
 [~] Increased godly diamond blocks to 64
 [~] Rearranged items in the epic crate
+[+] Added message to players receiving mail while they are online
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
