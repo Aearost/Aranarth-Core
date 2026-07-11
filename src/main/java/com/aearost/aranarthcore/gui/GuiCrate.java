@@ -689,10 +689,10 @@ public class GuiCrate {
 		egg.setItemMeta(cycledEggMeta);
 		initializedGui.setItem(23, egg);
 
-		// Cycle through Diamond Block x32 and Shulker Shells x16
+		// Cycle through Diamond Block x32 and Shulker Shells x32
 		ItemStack diamondShulker = null;
 		if (diamondShulkerIndex == 1) {
-			diamondShulker = new ItemStack(Material.SHULKER_SHELL, 16);
+			diamondShulker = new ItemStack(Material.SHULKER_SHELL, 32);
 			ItemMeta shulkerMeta = diamondShulker.getItemMeta();
 			shulkerMeta.setDisplayName(ChatUtils.translateToColor("#946794&lShulker Shells"));
 			List<String> shulkerLore = new ArrayList<>();

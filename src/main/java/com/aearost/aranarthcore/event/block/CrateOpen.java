@@ -792,8 +792,8 @@ public class CrateOpen {
                         reward = new ItemStack(Material.DIAMOND_BLOCK, 64);
                         name = "#a0f0ed&lDiamond Block x64";
                     } else {
-                        reward = new ItemStack(Material.SHULKER_SHELL, 16);
-                        name = "#946794&lShulker Shells x16";
+                        reward = new ItemStack(Material.SHULKER_SHELL, 32);
+                        name = "#946794&lShulker Shells x32";
                     }
                 } else if (chance <= 32) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
