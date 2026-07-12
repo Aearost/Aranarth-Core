@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -28,9 +30,11 @@ public class CommandTeleport implements CommandExecutor {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
 				return true;
 			} else {
-				if (AranarthUtils.getUUIDFromUsernameOrNickname(args[0]) != null) {
-					Player target = Bukkit.getPlayer(AranarthUtils.getUUIDFromUsernameOrNickname(args[0]));
+				java.util.UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				if (targetUUID != null) {
+					Player target = Bukkit.getPlayer(targetUUID);
 					if (target != null) {
+						// Same-server teleport request
 						if (player.getUniqueId().equals(target.getUniqueId())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
 							return true;
@@ -50,6 +54,25 @@ public class CommandTeleport implements CommandExecutor {
 						target.sendMessage(ChatUtils.chatMessage("&7Use &e/tpaccept &7or &e/tpdeny"));
 						AranarthUtils.playTeleportSound(player);
 						AranarthUtils.playTeleportSound(target);
+					} else if (NetworkManager.isActive()) {
+						// Target is on another server
+						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(targetUUID);
+						if (remoteTarget == null) {
+							player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
+							return true;
+						}
+						if (player.getUniqueId().equals(targetUUID)) {
+							player.sendMessage(ChatUtils.chatMessage("&cYou cannot teleport to yourself!"));
+							return true;
+						}
+						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						player.sendMessage(ChatUtils.chatMessage("&7You have requested to teleport to &e" + remoteTarget.getNickname()));
+						NetworkManager.getInstance().publishTpRequest(
+								player.getUniqueId(),
+								senderPlayer.getNickname().isEmpty() ? player.getName() : senderPlayer.getNickname(),
+								targetUUID,
+								false);
+						AranarthUtils.playTeleportSound(player);
 					} else {
 						player.sendMessage(ChatUtils.chatMessage("&cThat player is not online!"));
 					}

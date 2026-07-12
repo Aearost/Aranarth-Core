@@ -60,7 +60,7 @@ public class SleepSkipListener implements Listener {
 		int onlinePlayersInSurvivalWorlds = 0;
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			String worldName = player.getLocation().getWorld().getName();
-			if (worldName.equals("world") || worldName.equals("smp") || worldName.equals("resource")) {
+			if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
 				onlinePlayersInSurvivalWorlds++;
 			}
 		}
@@ -78,7 +78,7 @@ public class SleepSkipListener implements Listener {
 			// Displays the bar to all players in the survival worlds
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				String worldName = player.getLocation().getWorld().getName();
-				if (worldName.equals("world") || worldName.equals("smp") || worldName.equals("resource")) {
+				if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
 					long time = player.getLocation().getWorld().getTime();
 					if (time > 12500 && time <= 23980) {
 						player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
@@ -114,7 +114,7 @@ public class SleepSkipListener implements Listener {
 
 			// Skip the night
 			World world = Bukkit.getWorld("world");
-			World smp = Bukkit.getWorld("smp");
+			World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
 			World resource = Bukkit.getWorld("resource");
 			world.setTime(23980);
 			smp.setTime(23980);

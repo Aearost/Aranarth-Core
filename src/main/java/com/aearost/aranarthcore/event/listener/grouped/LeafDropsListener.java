@@ -93,7 +93,7 @@ public class LeafDropsListener implements Listener {
 		// During the month of Solarvor
 		if (AranarthUtils.getMonth() == Month.SOLARVOR) {
 			String worldName = block.getWorld().getName();
-			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+			if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
 				if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
 					double multiplier = AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST) ? 0.75 : 1;
 					// 5% chance of dropping an apple instead of 0.5%
@@ -155,7 +155,7 @@ public class LeafDropsListener implements Listener {
 		// Applies to all months other than Solarvor
 		if (new Random().nextInt((int) (2000 * multiplier)) == 0) {
 			String worldName = block.getWorld().getName();
-			if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+			if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
 				if (block.getType() == Material.OAK_LEAVES || block.getType() == Material.DARK_OAK_LEAVES) {
 					block.getLocation().getWorld().dropItemNaturally(block.getLocation(), new GodAppleFragment().getItem());
 					for (Player player : Bukkit.getOnlinePlayers()) {

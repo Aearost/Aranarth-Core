@@ -30,7 +30,7 @@ public class OreClusterDrops {
 		}
 
 		// Only apply in the survival worlds
-		if (loc.getWorld().getName().startsWith("world") || loc.getWorld().getName().startsWith("smp") || loc.getWorld().getName().startsWith("resource")) {
+		if (loc.getWorld().getName().startsWith("world") || AranarthUtils.isSmpWorld(loc.getWorld().getName()) || loc.getWorld().getName().startsWith("resource")) {
 			Dominion dominion = DominionUtils.getPlayerDominion(e.getPlayer().getUniqueId());
 			Dominion chunkDominion = DominionUtils.getDominionOfChunk(e.getBlock().getChunk());
 			if (chunkDominion != null) {

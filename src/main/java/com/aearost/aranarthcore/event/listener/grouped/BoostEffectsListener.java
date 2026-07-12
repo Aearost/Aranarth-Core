@@ -42,7 +42,7 @@ public class BoostEffectsListener implements Listener {
 	@EventHandler
 	public void onExpGain(McMMOPlayerXpGainEvent e) {
 		String name = e.getPlayer().getLocation().getWorld().getName();
-		if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+		if (name.startsWith("world") || AranarthUtils.isSmpWorld(name) || name.startsWith("resource")) {
 			if (AranarthUtils.getServerBoosts().containsKey(Boost.MINER)) {
 				if (e.getSkill() == PrimarySkillType.MINING) {
 					e.setRawXpGained((float) (e.getRawXpGained() * 1.5));
@@ -80,7 +80,7 @@ public class BoostEffectsListener implements Listener {
 		}
 
 		String name = e.getBlock().getLocation().getWorld().getName();
-		if (name.startsWith("world") || name.startsWith("smp") || name.startsWith("resource")) {
+		if (name.startsWith("world") || AranarthUtils.isSmpWorld(name) || name.startsWith("resource")) {
 			boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
 			if (isEligible) {
 				if (AranarthUtils.getServerBoosts().containsKey(Boost.HARVEST)) {

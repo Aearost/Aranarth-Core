@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -69,6 +72,49 @@ public class GuiHomesClick {
 						player.closeInventory();
 						return;
 					} else {
+						boolean networkActive = NetworkManager.isActive();
+						// Survival → SMP home
+						if (networkActive && home.isSmpHome() && !AranarthCore.isSmpServer()) {
+							String smpWorldPart = home.getWorldName().substring(4);
+							double hx = home.getLocation().getX();
+							double hy = home.getLocation().getY();
+							double hz = home.getLocation().getZ();
+							float hyaw = home.getLocation().getYaw();
+							float hpitch = home.getLocation().getPitch();
+							String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+							player.closeInventory();
+							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+								if (success) {
+									NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+											new PendingTeleport(smpWorldPart, hx, hy, hz, hyaw, hpitch,
+													home.getName(), "&7You have teleported to your home"));
+									NetworkManager.getInstance().transferPlayer(player, smpServer);
+								}
+							});
+							return;
+						}
+						// SMP → Survival home
+						if (networkActive && !home.isSmpHome() && AranarthCore.isSmpServer()) {
+							double hx = home.getLocation().getX();
+							double hy = home.getLocation().getY();
+							double hz = home.getLocation().getZ();
+							float hyaw = home.getLocation().getYaw();
+							float hpitch = home.getLocation().getPitch();
+							String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
+							player.closeInventory();
+							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
+								if (success) {
+									NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+											new PendingTeleport(home.getWorldName(), hx, hy, hz, hyaw, hpitch,
+													home.getName(), "&7You have teleported to your home"));
+									NetworkManager.getInstance().transferPlayer(player, survivalServer);
+								}
+							});
+							return;
+						}
+						// Same-server home
 						AranarthUtils.teleportPlayer(player, player.getLocation(), home.getLocation(), aranarthPlayer.isInAdminMode(), home.getName(), "&7You have teleported to your home", success -> {
 							if (success) {
 								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + home.getName()));

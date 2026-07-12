@@ -31,7 +31,7 @@ import java.util.UUID;
 public class GoatHornUse {
     public void execute(PlayerInteractEvent e) {
         Player player = e.getPlayer();
-        if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
+        if (player.getWorld().getName().startsWith("world") || AranarthUtils.isSmpWorld(player.getWorld().getName())) {
             if (e.getHand() == EquipmentSlot.HAND && (e.getAction() == Action.RIGHT_CLICK_BLOCK || e.getAction() == Action.RIGHT_CLICK_AIR)) {
                 AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 MusicInstrumentMeta meta = (MusicInstrumentMeta) e.getItem().getItemMeta();

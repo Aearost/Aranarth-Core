@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -21,7 +22,7 @@ public class LeavesPreventBurnListener implements Listener {
 	 */
 	@EventHandler
 	public void onLeavesBurn(BlockIgniteEvent e) {
-		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world") || e.getBlock().getWorld().getName().equalsIgnoreCase("smp")) {
+		if (e.getBlock().getWorld().getName().equalsIgnoreCase("world") || AranarthUtils.isSmpWorld(e.getBlock().getWorld().getName())) {
 			for (BlockFace face : BlockFace.values()) {
 				Block relative = e.getBlock().getRelative(face);
 				if (relative.getBlockData() instanceof Leaves leaves) {

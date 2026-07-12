@@ -18,7 +18,7 @@ public class HomepadPlace {
 			ItemMeta meta = e.getItemInHand().getItemMeta();
 			if (meta.getPersistentDataContainer().has(HOMEPAD)) {
 				Location location = e.getBlockPlaced().getLocation();
-				if (!location.getWorld().getName().startsWith("smp")) {
+				if (!AranarthUtils.isSmpWorld(location.getWorld().getName())) {
 					e.getPlayer().sendMessage(ChatUtils.chatMessage("&cYou can only place this in the SMP" +
 							"!"));
 					e.setCancelled(true);

@@ -2,6 +2,9 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkTabManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.Quiver;
 import com.aearost.aranarthcore.items.arrow.ArrowIron;
@@ -100,6 +103,15 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
+		// Announce this player to the network and check for a pending cross-server teleport.
+		// Done early so the pending TP can fire after the player is fully initialised.
+		if (NetworkManager.isActive()) {
+			// evaluatePlayerPermissions hasn't run yet but AranarthPlayer data is loaded,
+			// so publish what we know now; the roster entry will be accurate enough for tab/chat.
+			AranarthPlayer apForNetwork = AranarthUtils.getPlayer(player.getUniqueId());
+			NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
+		}
+
 		// Permissions must be applied before nickname check is done
 		PermissionUtils.evaluatePlayerPermissions(player);
 
@@ -142,6 +154,67 @@ public class PlayerServerJoinListener implements Listener {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
+				// Inject existing remote-server players into this player's tab list.
+				NetworkTabManager.syncAllToPlayer(player);
+
+				// Execute any pending cross-server teleport (e.g. player transferred here from SMP
+				// to complete a /tp or /tpaccept, or returning from SMP via /survival).
+				boolean hadPendingTp = false;
+				if (NetworkManager.isActive()) {
+					PendingTeleport pending = NetworkManager.getInstance().getPendingTeleport(player.getUniqueId());
+					if (pending != null) {
+						hadPendingTp = true;
+						NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
+						if ("player".equals(pending.getType())) {
+							// TP to wherever the named player currently is
+							Player target = Bukkit.getPlayer(java.util.UUID.fromString(pending.getTargetUuid()));
+							if (target != null) {
+								AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(),
+										true, pending.getTitleMain(), pending.getTitleSub(), success -> {});
+							}
+						} else if ("command".equals(pending.getType())) {
+							// Dispatch a command as if the player ran it on this server.
+							// Force admin mode so the command skips its own countdown
+							// (the countdown already happened on the source server).
+							AranarthPlayer apCmd = AranarthUtils.getPlayer(player.getUniqueId());
+							boolean wasAdmin = apCmd.isInAdminMode();
+							apCmd.setInAdminMode(true);
+							AranarthUtils.setPlayer(player.getUniqueId(), apCmd);
+							Bukkit.dispatchCommand(player, pending.getCommand());
+							AranarthPlayer apCmdAfter = AranarthUtils.getPlayer(player.getUniqueId());
+							apCmdAfter.setInAdminMode(wasAdmin);
+							AranarthUtils.setPlayer(player.getUniqueId(), apCmdAfter);
+						} else {
+							// TP to the stored coordinates
+							org.bukkit.World w = Bukkit.getWorld(pending.getWorld());
+							if (w != null) {
+								org.bukkit.Location dest = new org.bukkit.Location(w,
+										pending.getX(), pending.getY(), pending.getZ(),
+										pending.getYaw(), pending.getPitch());
+								AranarthUtils.teleportPlayer(player, player.getLocation(), dest,
+										true, pending.getTitleMain(), pending.getTitleSub(), success -> {});
+							}
+						}
+					}
+				}
+
+				// When arriving via cross-server transfer, force other clients to reload this
+				// player's skin and tab entry by briefly hiding then re-showing them.
+				if (hadPendingTp) {
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							if (!player.isOnline()) return;
+							for (Player other : Bukkit.getOnlinePlayers()) {
+								if (!other.getUniqueId().equals(player.getUniqueId())) {
+									other.hidePlayer(AranarthCore.getInstance(), player);
+									other.showPlayer(AranarthCore.getInstance(), player);
+								}
+							}
+						}
+					}.runTaskLater(AranarthCore.getInstance(), 20L);
+				}
+
 				// Displays a welcome message after the join message
 				if (finalIsNewPlayer) {
 					Bukkit.broadcastMessage("");

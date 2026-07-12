@@ -226,7 +226,7 @@ public class DominionProtectionListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void onAttackEntity(EntityDamageEvent e) {
         String name = e.getEntity().getLocation().getWorld().getName();
-        if (!name.startsWith("world") && !name.startsWith("smp") && !name.startsWith("resource")) {
+        if (!name.startsWith("world") && !AranarthUtils.isSmpWorld(name) && !name.startsWith("resource")) {
             return;
         }
         if (e.getEntity() == null) {

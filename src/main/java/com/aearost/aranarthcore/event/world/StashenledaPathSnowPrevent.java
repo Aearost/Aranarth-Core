@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.world;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.block.BlockFormEvent;
@@ -12,7 +13,7 @@ public class StashenledaPathSnowPrevent {
 		Material material = e.getBlock().getType();
 		if (material == Material.SNOW || material == Material.SNOW_BLOCK) {
 			Location loc = e.getBlock().getLocation();
-			if (loc.getWorld().getName().equals("smp")) {
+			if (AranarthUtils.isSmpWorld(loc.getWorld().getName())) {
 				int x = loc.getBlockX();
 				int y = loc.getBlockY();
 				int z = loc.getBlockZ();

@@ -2,6 +2,8 @@ package com.aearost.aranarthcore;
 
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
@@ -64,6 +66,19 @@ public class AranarthCore extends JavaPlugin {
         plugin = this;
         saveDefaultConfig();
         initializeWorlds();
+
+        // Initialize MySQL before loading data so DB-primary loads can activate.
+        // Only on the public server; test server skips this entirely.
+        if (isPublicServer()) {
+            String host       = getConfig().getString("network.mysql.host", "127.0.0.1");
+            int    port       = getConfig().getInt("network.mysql.port", 3306);
+            String database   = getConfig().getString("network.mysql.database", "");
+            String username   = getConfig().getString("network.mysql.username", "");
+            String password   = getConfig().getString("network.mysql.password", "");
+
+            com.aearost.aranarthcore.database.DatabaseManager.initialize(host, port, database, username, password);
+        }
+
         initializeUtils();
         initializeEvents();
         initializeRecipes();
@@ -95,6 +110,20 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
         runRepeatingTasks();
+
+        // Start cross-server networking (NetworkManager) now that the DB is already connected.
+        // Only on the public server.
+        if (isPublicServer() && com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            String serverName = getConfig().getString("network.this-server", "survival");
+            NetworkManager.initialize(serverName);
+            if (NetworkManager.isActive()) {
+                // Re-populate remote roster in case the other server was already running
+                NetworkManager.getInstance().syncRosterFromDatabase();
+                // Register BungeeCord plugin messaging channel for player transfers
+                getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+                Bukkit.getLogger().info(LOG_PREFIX + "Cross-server networking enabled via MySQL");
+            }
+        }
 
         // Fallback shutdown hook for restarters (i.e UltimateAutoRestart) that may
         // terminate the JVM via System.exit() without triggering onDisable()
@@ -261,12 +290,43 @@ public class AranarthCore extends JavaPlugin {
     }
 
     /**
+     * Returns true when this jar is running as the SMP server instance.
+     * Always false on the test server (is-public-server: false).
+     */
+    public static boolean isSmpServer() {
+        if (!isPublicServer()) return false;
+        String thisServer = plugin.getConfig().getString("network.this-server", "survival");
+        String smpServer  = plugin.getConfig().getString("network.servers.smp", "smp");
+        return thisServer.equals(smpServer);
+    }
+
+    /** The Bukkit world name for the SMP overworld on whichever server is currently running. */
+    public static String getSmpMainWorldName() {
+        return isSmpServer() ? "world" : "smp";
+    }
+
+    /** The Bukkit world name for the SMP nether on whichever server is currently running. */
+    public static String getSmpNetherWorldName() {
+        return isSmpServer() ? "world_nether" : "smp_nether";
+    }
+
+    /** The Bukkit world name for the SMP end on whichever server is currently running. */
+    public static String getSmpEndWorldName() {
+        return isSmpServer() ? "world_the_end" : "smp_the_end";
+    }
+
+    /**
      * Initializes necessary Utilities functionality needed on server startup.
      */
     private void initializeUtils() {
         PersistenceUtils.loadServerDate();
         PersistenceUtils.loadHomepads();
-        PersistenceUtils.loadAranarthPlayers();
+        // DB-primary loads
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadAranarthPlayersFromDatabase();
+        } else {
+            PersistenceUtils.loadAranarthPlayers();
+        }
         PersistenceUtils.loadShops();
         ShopUtils.initializeAllHolograms();
         PersistenceUtils.loadLockedContainers();
@@ -276,28 +336,64 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.loadOutposts();
         PersistenceUtils.loadDefenders();
         PersistenceUtils.loadWarps();
-        PersistenceUtils.loadPunishments();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadPunishmentsFromDatabase();
+        } else {
+            PersistenceUtils.loadPunishments();
+        }
         PersistenceUtils.loadAvatars();
-        PersistenceUtils.loadBoosts();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadBoostsFromDatabase();
+        } else {
+            PersistenceUtils.loadBoosts();
+        }
         PersistenceUtils.loadCompressible();
         PersistenceUtils.loadShopLocations();
         PersistenceUtils.loadShopIslandCounter();
         PersistenceUtils.loadShopCollaborators();
         PersistenceUtils.loadSentinels();
-        PersistenceUtils.loadVotes();
-        PersistenceUtils.loadVoteKeys();
-        PersistenceUtils.loadRareKeys();
-        PersistenceUtils.loadEpicKeys();
-        PersistenceUtils.loadGodlyKeys();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadVotesFromDatabase();
+        } else {
+            PersistenceUtils.loadVotes();
+            PersistenceUtils.loadVoteKeys();
+            PersistenceUtils.loadRareKeys();
+            PersistenceUtils.loadEpicKeys();
+            PersistenceUtils.loadGodlyKeys();
+        }
         PersistenceUtils.loadToggledFeatures();
-        PersistenceUtils.loadKillDeathCount();
-        PersistenceUtils.loadQuestState();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadKillDeathCountFromDatabase();
+        } else {
+            PersistenceUtils.loadKillDeathCount();
+        }
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadQuestStateFromDatabase();
+        } else {
+            PersistenceUtils.loadQuestState();
+        }
         QuestUtils.initialize(this);
-        PersistenceUtils.loadQuestProgress();
-        PersistenceUtils.loadLoginStreaks();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadQuestProgressFromDatabase();
+        } else {
+            PersistenceUtils.loadQuestProgress();
+        }
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadLoginStreaksFromDatabase();
+        } else {
+            PersistenceUtils.loadLoginStreaks();
+        }
         PersistenceUtils.loadGates();
-        PersistenceUtils.loadMounts();
-        PersistenceUtils.loadMail();
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadMountsFromDatabase();
+        } else {
+            PersistenceUtils.loadMounts();
+        }
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            PersistenceUtils.loadMailFromDatabase();
+        } else {
+            PersistenceUtils.loadMail();
+        }
         DefenderUtils.startRegenTask();
         DefenderUtils.startBoundaryTask();
         DefenderUtils.startTargetingTask();
@@ -389,7 +485,9 @@ public class AranarthCore extends JavaPlugin {
         new SnowballHitListener(this);
         new ArmorStandSwitchListener(this);
         new AnimalBreedingListener(this);
-        new VotifierListener(this);
+        if (Bukkit.getPluginManager().isPluginEnabled("VotifierPlus")) {
+            new VotifierListener(this);
+        }
         new ArmorStandInteractListener(this);
         new PlayerFishEventListener(this);
         new InvseeListener(this);
@@ -607,21 +705,51 @@ public class AranarthCore extends JavaPlugin {
      * Initializes the AranarthCore worlds.
      */
     private void initializeWorlds() {
-        // Loads the world if it isn't yet loaded
+        if (isSmpServer()) {
+            // SMP server: only load its three worlds; all other worlds live on the survival server.
+            // The SMP server uses the default Minecraft world names (world/world_nether/world_the_end).
+            if (Bukkit.getWorld("world") == null) {
+                WorldCreator wc = new WorldCreator("world");
+                wc.environment(World.Environment.NORMAL);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
+            if (Bukkit.getWorld("world_nether") == null) {
+                WorldCreator wc = new WorldCreator("world_nether");
+                wc.environment(World.Environment.NETHER);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
+            if (Bukkit.getWorld("world_the_end") == null) {
+                WorldCreator wc = new WorldCreator("world_the_end");
+                wc.environment(World.Environment.THE_END);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
+
+            // Disable advancement announcements and locator bar in SMP worlds
+            for (World w : Bukkit.getWorlds()) {
+                w.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+                w.setGameRule(GameRules.LOCATOR_BAR, false);
+            }
+            return;
+        }
+
+        // Survival server (public or test) — load all survival-side worlds.
+
+        // Main survival worlds
         if (Bukkit.getWorld("world") == null) {
             WorldCreator wc = new WorldCreator("world");
             wc.environment(World.Environment.NORMAL);
             wc.type(WorldType.NORMAL);
             wc.createWorld();
         }
-
         if (Bukkit.getWorld("world_nether") == null) {
             WorldCreator wc = new WorldCreator("world_nether");
             wc.environment(World.Environment.NETHER);
             wc.type(WorldType.NORMAL);
             wc.createWorld();
         }
-
         if (Bukkit.getWorld("world_the_end") == null) {
             WorldCreator wc = new WorldCreator("world_the_end");
             wc.environment(World.Environment.THE_END);
@@ -629,41 +757,42 @@ public class AranarthCore extends JavaPlugin {
             wc.createWorld();
         }
 
-        if (Bukkit.getWorld("smp") == null) {
-            WorldCreator wc = new WorldCreator("smp");
-            wc.environment(World.Environment.NORMAL);
-            wc.type(WorldType.NORMAL);
-            wc.createWorld();
+        // SMP worlds — only on the test server (single-server setup).
+        // On the public survival server the SMP worlds live on the separate SMP server.
+        if (!isPublicServer()) {
+            if (Bukkit.getWorld("smp") == null) {
+                WorldCreator wc = new WorldCreator("smp");
+                wc.environment(World.Environment.NORMAL);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
+            if (Bukkit.getWorld("smp_nether") == null) {
+                WorldCreator wc = new WorldCreator("smp_nether");
+                wc.environment(World.Environment.NETHER);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
+            if (Bukkit.getWorld("smp_the_end") == null) {
+                WorldCreator wc = new WorldCreator("smp_the_end");
+                wc.environment(World.Environment.THE_END);
+                wc.type(WorldType.NORMAL);
+                wc.createWorld();
+            }
         }
 
-        if (Bukkit.getWorld("smp_nether") == null) {
-            WorldCreator wc = new WorldCreator("smp_nether");
-            wc.environment(World.Environment.NETHER);
-            wc.type(WorldType.NORMAL);
-            wc.createWorld();
-        }
-
-        if (Bukkit.getWorld("smp_the_end") == null) {
-            WorldCreator wc = new WorldCreator("smp_the_end");
-            wc.environment(World.Environment.THE_END);
-            wc.type(WorldType.NORMAL);
-            wc.createWorld();
-        }
-
+        // Resource worlds
         if (Bukkit.getWorld("resource") == null) {
             WorldCreator wc = new WorldCreator("resource");
             wc.environment(World.Environment.NORMAL);
             wc.type(WorldType.NORMAL);
             wc.createWorld();
         }
-
         if (Bukkit.getWorld("resource_nether") == null) {
             WorldCreator wc = new WorldCreator("resource_nether");
             wc.environment(World.Environment.NETHER);
             wc.type(WorldType.NORMAL);
             wc.createWorld();
         }
-
         if (Bukkit.getWorld("resource_the_end") == null) {
             WorldCreator wc = new WorldCreator("resource_the_end");
             wc.environment(World.Environment.THE_END);
@@ -671,13 +800,13 @@ public class AranarthCore extends JavaPlugin {
             wc.createWorld();
         }
 
+        // Arena and creative
         if (Bukkit.getWorld("arena") == null) {
             WorldCreator wc = new WorldCreator("arena");
             wc.environment(World.Environment.NORMAL);
             wc.type(WorldType.FLAT);
             wc.createWorld();
         }
-
         if (Bukkit.getWorld("creative") == null) {
             WorldCreator wc = new WorldCreator("creative");
             wc.environment(World.Environment.NORMAL);
@@ -685,6 +814,7 @@ public class AranarthCore extends JavaPlugin {
             wc.createWorld();
         }
 
+        // Spawn (void world)
         if (Bukkit.getWorld("spawn") == null) {
             WorldCreator wc = new WorldCreator("spawn");
             wc.environment(World.Environment.NORMAL);
@@ -699,13 +829,13 @@ public class AranarthCore extends JavaPlugin {
             block.setType(Material.BEDROCK);
         }
 
+        // Shops (void world)
         if (Bukkit.getWorld("shops") == null) {
             WorldCreator wc = new WorldCreator("shops");
             wc.environment(World.Environment.NORMAL);
             wc.generator(new VoidChunkGenerator());
             wc.createWorld();
         }
-
         World shops = Bukkit.getWorld("shops");
         if (shops != null) {
             shops.setGameRule(GameRules.ADVANCE_TIME, false);
@@ -1014,8 +1144,11 @@ public class AranarthCore extends JavaPlugin {
         savedOnDisable = true;
         saveAll();
 
+        NetworkManager.shutdown();
+        com.aearost.aranarthcore.database.DatabaseManager.shutdown();
+
         Bukkit.resetRecipes();
-        discordChatListener.unsubscribe();
+        if (discordChatListener != null) discordChatListener.unsubscribe();
 
         JDA jda = DiscordSRV.getPlugin().getJda();
         if (jda != null) {

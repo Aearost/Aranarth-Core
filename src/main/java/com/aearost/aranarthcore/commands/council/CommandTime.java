@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -85,7 +86,7 @@ public class CommandTime {
 	 */
 	private static void updateTime(long time) {
 		World survival = Bukkit.getWorld("world");
-		World smp = Bukkit.getWorld("smp");
+		World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
 		World resource = Bukkit.getWorld("resource");
 
 		survival.setTime(time);

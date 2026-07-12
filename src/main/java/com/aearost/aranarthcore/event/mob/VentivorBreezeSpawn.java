@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.mob;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.entity.EntitySpawnEvent;
@@ -29,7 +30,7 @@ public class VentivorBreezeSpawn {
 	private boolean isMobForBreezeReplacement(EntitySpawnEvent e) {
 		EntityType entityType = e.getEntityType();
 		String name = e.getLocation().getWorld().getName();
-		if (!name.equals("world") && !name.equals("smp") && !name.equals("resource")) {
+		if (!name.equals("world") && !AranarthUtils.isSmpWorld(name) && !name.equals("resource")) {
 			return false;
 		}
 

@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.CrossServerTpContext;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -55,6 +57,24 @@ public class CommandTpDeny implements CommandExecutor {
 				aranarthPlayer.setTeleportToUuid(null);
 				aranarthPlayer.setTeleportFromUuid(null);
 				AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+				return true;
+			} else if (NetworkManager.isActive()) {
+				// Check for a cross-server request
+				CrossServerTpContext ctx = NetworkManager.getInstance().getCrossServerTpContext(player.getUniqueId());
+				if (ctx != null) {
+					NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+					String localNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+					aranarthPlayer.setTeleportFromUuid(null);
+					aranarthPlayer.setTeleportToUuid(null);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+					player.sendMessage(ChatUtils.chatMessage("&7You have denied &e" + ctx.remotePlayerNickname() + "&7's teleport request"));
+					NetworkManager.getInstance().publishTpDenied(
+							player.getUniqueId(), localNickname,
+							ctx.remotePlayerUuid());
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
+				}
 				return true;
 			} else {
 				player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));

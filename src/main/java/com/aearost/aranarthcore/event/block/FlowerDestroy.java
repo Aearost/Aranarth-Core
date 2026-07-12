@@ -25,7 +25,7 @@ public class FlowerDestroy {
 			boolean isEligible = mcMMO.getChunkManager().isEligible(e.getBlock());
 			if (isEligible) {
 				String worldName = e.getBlock().getLocation().getWorld().getName();
-				if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+				if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
 					Location loc = e.getBlock().getLocation();
 
 					// 50% chance of flowers doubling

@@ -12,11 +12,13 @@ public class Sentinel {
 	private UUID uuid;
 	private EntityType type;
 	private Location location;
+	private String worldName;
 
 	public Sentinel(UUID uuid, EntityType type, Location location) {
 		this.uuid = uuid;
 		this.type = type;
 		this.location = location;
+		this.worldName = location != null && location.getWorld() != null ? location.getWorld().getName() : "";
 	}
 
 	/**
@@ -65,5 +67,11 @@ public class Sentinel {
 	 */
 	public void setLocation(Location location) {
 		this.location = location;
+		if (location != null && location.getWorld() != null) {
+			this.worldName = location.getWorld().getName();
+		}
 	}
+
+	public String getWorldName() { return worldName; }
+	public void setWorldName(String worldName) { this.worldName = worldName; }
 }

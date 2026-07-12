@@ -290,7 +290,7 @@ public class PotionEffectListener implements Listener {
 		}
 
 		String worldName = e.getEntity().getWorld().getName();
-		if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+		if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
 			long worldTime = e.getEntity().getWorld().getTime();
 			boolean isDaytime = worldTime < 13000;
 			PotionEffectTypeCategory category = e.getNewEffect().getType().getCategory();

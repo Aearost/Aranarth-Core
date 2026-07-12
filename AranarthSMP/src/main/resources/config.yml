@@ -1,0 +1,12 @@
+# AranarthSMP configuration
+# Redis must match the settings in AranarthCore's config.yml on the survival server.
+network:
+  redis:
+    host: "127.0.0.1"
+    port: 6379
+    # Leave blank if Redis has no password
+    password: ""
+  # Server names must match the names defined in your Velocity config.yml
+  servers:
+    survival: "survival"
+    smp: "smp"

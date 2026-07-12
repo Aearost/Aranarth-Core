@@ -19,7 +19,7 @@ public class PlayerHeadDrop {
 
     public void execute(EntityDeathEvent e) {
         Player player = (Player) e.getEntity();
-        if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")) {
+        if (player.getWorld().getName().startsWith("world") || AranarthUtils.isSmpWorld(player.getWorld().getName())) {
             if (e.getDamageSource().getCausingEntity() != null
                     && e.getDamageSource().getCausingEntity().getType() == EntityType.PLAYER) {
                 if (e.getDamageSource().getCausingEntity() != null) {

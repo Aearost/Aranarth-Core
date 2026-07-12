@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,7 +22,7 @@ public class PlayerMoveEventListener implements Listener {
         if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
             new DominionChunkChange().execute(e);
             new SpawnChangeLocation().execute(e);
-        } else if (e.getPlayer().getLocation().getWorld().getName().startsWith("smp")) {
+        } else if (AranarthUtils.isSmpWorld(e.getPlayer().getLocation().getWorld().getName())) {
             new HomepadStep().execute(e);
         }
 

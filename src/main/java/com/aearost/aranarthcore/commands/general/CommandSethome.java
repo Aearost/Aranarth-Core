@@ -35,7 +35,7 @@ public class CommandSethome implements CommandExecutor {
 						|| worldName.equals("arena")
 						|| worldName.startsWith("resource")
 						|| (!isOG && worldName.equals("creative"))
-						|| (!isOG && worldName.startsWith("smp"))) {
+						|| (!isOG && AranarthUtils.isSmpWorld(worldName))) {
 					player.sendMessage(ChatUtils.chatMessage("&cYou cannot set a home here!"));
 					return true;
 				}

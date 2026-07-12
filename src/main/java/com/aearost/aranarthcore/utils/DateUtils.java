@@ -153,7 +153,9 @@ public class DateUtils {
 	 * Identifies and re-evaluates the current server date and applies effects based on the given month.
 	 */
 	public void calculateServerDate() {
-		int time = (int) (Bukkit.getWorld("world").getTime() / 20);
+		World _mainWorld = Bukkit.getWorld("world");
+		if (_mainWorld == null) return;
+		int time = (int) (_mainWorld.getTime() / 20);
 
 		// Gets current server year
 		int dayNum = AranarthUtils.getDay();
@@ -616,7 +618,7 @@ public class DateUtils {
 		animalTicks = Math.min(animalTicks, 1200); // Max of 60 seconds
 		monsterTicks = Math.min(monsterTicks, 400); // Max of 20 seconds
 
-		for (String worldName : new String[]{"world", "smp", "resource"}) {
+		for (String worldName : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
 			World world = Bukkit.getWorld(worldName);
 			if (world == null) continue;
 
@@ -963,7 +965,7 @@ public class DateUtils {
 	 */
 	private void applyWeatherEffectsToAllPlayers(List<PotionEffect> effects) {
 		for (Player player : Bukkit.getOnlinePlayers()) {
-			if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
+			if (player.getWorld().getName().startsWith("world") || AranarthUtils.isSmpWorld(player.getWorld().getName())
 					|| player.getWorld().getName().startsWith("resource")) {
 				PotionEffect slownessEffect = null;
 
@@ -1154,7 +1156,7 @@ public class DateUtils {
 						// Handles applying the snow functionality
 						if (AranarthUtils.getWeather() == Weather.SNOW) {
 							// Only apply logic in the survival world
-							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")
+							if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
 									&& !loc.getWorld().getName().equals("resource") && !loc.getWorld().getName().equals("spawn")) {
 								continue;
 							}
@@ -1176,7 +1178,7 @@ public class DateUtils {
 
 						// Generate ice every second regardless of if it is snowing
 						if (runs % 5 == 0) {
-							if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")
+							if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())
 									&& !loc.getWorld().getName().equals("resource")) {
 								continue;
 							}
@@ -1227,7 +1229,7 @@ public class DateUtils {
 	 */
 	private void generateSnow(Player player, Location loc, final int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
+		if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName()) && !loc.getWorld().getName().equals("resource")) {
 			return;
 		}
 
@@ -1383,7 +1385,7 @@ public class DateUtils {
 	 */
 	private void generateIce(Location loc, final int bigFlakeDensity) {
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp")) {
+		if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName())) {
 			return;
 		}
 
@@ -1497,7 +1499,7 @@ public class DateUtils {
 					for (Player p : Bukkit.getOnlinePlayers()) {
 						Location pLoc = p.getLocation();
 						String worldName = pLoc.getWorld().getName();
-						if (worldName.equals("world") || worldName.equals("smp") || worldName.equals("resource")) {
+						if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
 							players.add(p);
 							locs.add(pLoc);
 						}
@@ -1572,9 +1574,10 @@ public class DateUtils {
 													int z = (int) ((Math.random() - 0.5) * 64);
 													Location spawnLoc = player.getEyeLocation().clone().add(x, y, z);
 
-													Bukkit.getWorld("world").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
-													Bukkit.getWorld("smp").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
-													Bukkit.getWorld("resource").spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+													for (String _wn : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
+														World _pw = Bukkit.getWorld(_wn);
+														if (_pw != null) _pw.spawnParticle(Particle.CHERRY_LEAVES, spawnLoc, 1);
+													}
 												}
 											}
 										} else {
@@ -1883,9 +1886,10 @@ public class DateUtils {
 		// If it is not storming
 		else {
 			World world = Bukkit.getWorld("world");
+			if (world == null) return;
 			// Raining from previous server restart
 			if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDuration() == 0) {
-				AranarthUtils.setStormDuration(Bukkit.getWorld("world").getWeatherDuration());
+				AranarthUtils.setStormDuration(world.getWeatherDuration());
 				AranarthUtils.setStormDelay(0);
 				if (world.isThundering()) {
 					AranarthUtils.setWeather(Weather.THUNDER);
@@ -1953,29 +1957,29 @@ public class DateUtils {
 	 */
 	private void updateStorm(Weather type, int duration) {
 		String message = null;
-		World world = Bukkit.getWorld("world");
-		World smp = Bukkit.getWorld("smp");
-		World resource = Bukkit.getWorld("resource");
+		World mainWorld = Bukkit.getWorld("world");
+		if (mainWorld == null) return; // survival main world must always exist
 
-		int time = (int) (world.getTime() / 20);
+		// Collect all weather-affected worlds that are actually loaded on this server
+		List<World> weatherWorlds = new ArrayList<>();
+		for (String name : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
+			World w = Bukkit.getWorld(name);
+			if (w != null) weatherWorlds.add(w);
+		}
+
+		int time = (int) (mainWorld.getTime() / 20);
 		boolean isNewDay = time >= 0 && time < 5;
 
 		// Start of a new weather
 		if (type != Weather.CLEAR) {
 			AranarthUtils.setWeather(type);
 			if (type == Weather.RAIN) {
-				world.setClearWeatherDuration(0);
-				world.setStorm(true);
-				world.setThundering(false);
-				world.setWeatherDuration(duration);
-				smp.setClearWeatherDuration(0);
-				smp.setStorm(true);
-				smp.setThundering(false);
-				smp.setWeatherDuration(duration);
-				resource.setClearWeatherDuration(0);
-				resource.setStorm(true);
-				resource.setThundering(false);
-				resource.setWeatherDuration(duration);
+				for (World w : weatherWorlds) {
+					w.setClearWeatherDuration(0);
+					w.setStorm(true);
+					w.setThundering(false);
+					w.setWeatherDuration(duration);
+				}
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						String playerWorld = player.getWorld().getName();
@@ -1986,21 +1990,13 @@ public class DateUtils {
 				}
 				message = ChatUtils.chatMessage("&7&oIt has started to rain...");
 			} else if (type == Weather.THUNDER) {
-				world.setClearWeatherDuration(0);
-				world.setStorm(true);
-				world.setThundering(true);
-				world.setWeatherDuration(duration);
-				world.setThunderDuration(duration);
-				smp.setClearWeatherDuration(0);
-				smp.setStorm(true);
-				smp.setThundering(true);
-				smp.setWeatherDuration(duration);
-				smp.setThunderDuration(duration);
-				resource.setClearWeatherDuration(0);
-				resource.setStorm(true);
-				resource.setThundering(true);
-				resource.setWeatherDuration(duration);
-				resource.setThunderDuration(duration);
+				for (World w : weatherWorlds) {
+					w.setClearWeatherDuration(0);
+					w.setStorm(true);
+					w.setThundering(true);
+					w.setWeatherDuration(duration);
+					w.setThunderDuration(duration);
+				}
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						String playerWorld = player.getWorld().getName();
@@ -2011,21 +2007,13 @@ public class DateUtils {
 				}
 				message = ChatUtils.chatMessage("&7&oA thunderstorm has started...");
 			} else if (type == Weather.SNOW) {
-				world.setThunderDuration(0);
-				world.setWeatherDuration(0);
-				world.setThundering(false);
-				world.setStorm(false);
-				world.setClearWeatherDuration(duration);
-				smp.setThunderDuration(0);
-				smp.setWeatherDuration(0);
-				smp.setThundering(false);
-				smp.setStorm(false);
-				smp.setClearWeatherDuration(duration);
-				resource.setThunderDuration(0);
-				resource.setWeatherDuration(0);
-				resource.setThundering(false);
-				resource.setStorm(false);
-				resource.setClearWeatherDuration(duration);
+				for (World w : weatherWorlds) {
+					w.setThunderDuration(0);
+					w.setWeatherDuration(0);
+					w.setThundering(false);
+					w.setStorm(false);
+					w.setClearWeatherDuration(duration);
+				}
 				if (!isNewDay) {
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						String playerWorld = player.getWorld().getName();
@@ -2041,21 +2029,13 @@ public class DateUtils {
 				return;
 			}
 		} else {
-			world.setThunderDuration(0);
-			world.setWeatherDuration(0);
-			world.setThundering(false);
-			world.setStorm(false);
-			world.setClearWeatherDuration(duration);
-			smp.setThunderDuration(0);
-			smp.setWeatherDuration(0);
-			smp.setThundering(false);
-			smp.setStorm(false);
-			smp.setClearWeatherDuration(duration);
-			resource.setThunderDuration(0);
-			resource.setWeatherDuration(0);
-			resource.setThundering(false);
-			resource.setStorm(false);
-			resource.setClearWeatherDuration(duration);
+			for (World w : weatherWorlds) {
+				w.setThunderDuration(0);
+				w.setWeatherDuration(0);
+				w.setThundering(false);
+				w.setStorm(false);
+				w.setClearWeatherDuration(duration);
+			}
 			AranarthUtils.setWeather(type);
 			if (!isNewDay) {
 				for (Player player : Bukkit.getOnlinePlayers()) {
@@ -2083,7 +2063,7 @@ public class DateUtils {
 	private void playWindEffect(int runs, Player player) {
 		Location loc = player.getLocation();
 		// Only apply logic in the survival world
-		if (!loc.getWorld().getName().equals("world") && !loc.getWorld().getName().equals("smp") && !loc.getWorld().getName().equals("resource")) {
+		if (!loc.getWorld().getName().equals("world") && !AranarthUtils.isSmpWorld(loc.getWorld().getName()) && !loc.getWorld().getName().equals("resource")) {
 			return;
 		}
 
@@ -2223,7 +2203,7 @@ public class DateUtils {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			Location loc = player.getLocation();
 			String name = loc.getWorld().getName();
-			if (name.equals("world") || name.equals("smp") || name.equals("resource")) {
+			if (name.equals("world") || AranarthUtils.isSmpWorld(name) || name.equals("resource")) {
 				// Skip if the player is below sea level
 				if (loc.getBlockY() < loc.getWorld().getSeaLevel()) {
 					continue;

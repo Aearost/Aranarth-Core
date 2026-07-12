@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
@@ -27,6 +28,9 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId());
+		}
 		PersistenceUtils.saveQuestProgress();
 		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());

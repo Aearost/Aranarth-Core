@@ -28,6 +28,7 @@ public class Dominion {
 	private List<UUID> neutralRequests;
 	private List<Chunk> chunks;
 	private Location dominionHome;
+	private String dominionHomeWorldName;
 	private ItemStack[] food;
 	private int foodPowerBeingConsumed;
 	private int claimableResources;
@@ -88,6 +89,7 @@ public class Dominion {
 		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
 		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+		this.dominionHomeWorldName = worldName;
 		this.food = food;
 		this.claimableResources = claimableResources;
 		this.biomeResourcesBeingClaimed = null;
@@ -388,8 +390,13 @@ public class Dominion {
 	 * Updates the Location of the dominion's home.
 	 * @param dominionHome The new Location of the dominion's home.
 	 */
+	public String getDominionHomeWorldName() { return dominionHomeWorldName; }
+
 	public void setDominionHome(Location dominionHome) {
 		this.dominionHome = dominionHome;
+		if (dominionHome != null && dominionHome.getWorld() != null) {
+			this.dominionHomeWorldName = dominionHome.getWorld().getName();
+		}
 	}
 
 	/**

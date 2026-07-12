@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.CrossServerTpContext;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -33,7 +35,7 @@ public class CommandTpAccept implements CommandExecutor {
 				// If both players are still online
 				if (target != null) {
 					String destinationWorld = target.getLocation().getWorld().getName();
-					if (destinationWorld.startsWith("smp") || destinationWorld.equals("creative")) {
+					if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
 						if (!AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
 							player.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
 							target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
@@ -68,7 +70,7 @@ public class CommandTpAccept implements CommandExecutor {
 				if (target != null) {
 					AranarthPlayer targetPlayer = AranarthUtils.getPlayer(target.getUniqueId());
 					String destinationWorld = player.getLocation().getWorld().getName();
-					if (destinationWorld.startsWith("smp") || destinationWorld.equals("creative")) {
+					if (AranarthUtils.isSmpWorld(destinationWorld) || destinationWorld.equals("creative")) {
 						if (!AranarthUtils.isOriginalPlayer(target.getUniqueId())) {
 							target.sendMessage(ChatUtils.chatMessage("&cYou are not permitted to enter the SMP!"));
 							player.sendMessage(ChatUtils.chatMessage("&e" + targetPlayer.getNickname() + " &cis not permitted to enter the SMP!"));
@@ -93,6 +95,25 @@ public class CommandTpAccept implements CommandExecutor {
 				} else {
 					player.sendMessage(ChatUtils.chatMessage("&e" + targetNickname + " &cis no longer online"));
 					aranarthPlayer.setTeleportFromUuid(null);
+				}
+				return true;
+			} else if (NetworkManager.isActive()) {
+				// Check for a cross-server request received from another server
+				CrossServerTpContext ctx = NetworkManager.getInstance().getCrossServerTpContext(player.getUniqueId());
+				if (ctx != null) {
+					NetworkManager.getInstance().clearCrossServerTpContext(player.getUniqueId());
+					String localNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+					// Clear the mirrored UUID so /tpaccept can't double-fire
+					aranarthPlayer.setTeleportFromUuid(null);
+					aranarthPlayer.setTeleportToUuid(null);
+					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+
+					player.sendMessage(ChatUtils.chatMessage("&7You have accepted &e" + ctx.remotePlayerNickname() + "&7's teleport request"));
+					NetworkManager.getInstance().publishTpAccepted(
+							player.getUniqueId(), localNickname,
+							ctx.remotePlayerUuid(), ctx.isTpHere());
+				} else {
+					player.sendMessage(ChatUtils.chatMessage("&cYou do not have any pending teleport requests!"));
 				}
 				return true;
 			} else {

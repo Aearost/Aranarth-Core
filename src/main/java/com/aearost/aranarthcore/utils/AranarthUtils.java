@@ -4,6 +4,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
@@ -158,6 +160,30 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Returns the names/nicknames of all players currently online across the entire network
+	 * (both this server and any remote servers), filtered by the given prefix.
+	 * Falls back to local-only when the network layer is not active (test server).
+	 */
+	public static List<String> getNetworkPlayerNames(String prefix) {
+		List<String> names = new ArrayList<>();
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			String display = getNickname(p);
+			if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
+				names.add(display);
+			}
+		}
+		if (NetworkManager.isActive()) {
+			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+				String display = np.getNickname();
+				if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
+					names.add(display);
+				}
+			}
+		}
+		return names;
+	}
+
+	/**
 	 * Determines if the player is one of the original players of Aranarth.
 	 * @param uuid The player's UUID.
 	 * @return Confirmation whether the player is one of the original players of Aranarth.
@@ -305,10 +331,10 @@ public class AranarthUtils {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
 		// Include any world that should share the inventory of Survival
-		if (currentWorld.startsWith("smp") || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
+		if (isSmpWorld(currentWorld) || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
 			currentWorld = "world";
 		}
-		if (destinationWorld.startsWith("smp") || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn") || destinationWorld.equals("shops")) {
+		if (isSmpWorld(destinationWorld) || destinationWorld.startsWith("resource") || destinationWorld.startsWith("spawn") || destinationWorld.equals("shops")) {
 			destinationWorld = "world";
 		}
 
@@ -1354,6 +1380,19 @@ public class AranarthUtils {
 			}
 		}
 
+		// Fall back to the network roster for players on other servers
+		if (NetworkManager.isActive()) {
+			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+				if (np.getNickname().equalsIgnoreCase(input)) {
+					return np.getUuid();
+				}
+				// Also check if input matches the stored nickname stripped of colour codes
+				if (ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(input)) {
+					return np.getUuid();
+				}
+			}
+		}
+
 		return null;
 	}
 
@@ -1779,10 +1818,10 @@ public class AranarthUtils {
 					if (mob.getLeashHolder() instanceof Player holder) {
 						if (holder.getUniqueId().equals(player.getUniqueId())) {
 							boolean isFromSurvivalWorld = from.getWorld().getName().startsWith("world")
-									|| from.getWorld().getName().startsWith("smp")
+									|| isSmpWorld(from.getWorld().getName())
 									|| from.getWorld().getName().startsWith("resource");
 							boolean isToSurvivalWorld = to.getWorld().getName().startsWith("world")
-									|| to.getWorld().getName().startsWith("smp")
+									|| isSmpWorld(to.getWorld().getName())
 									|| to.getWorld().getName().startsWith("resource");
 							if (isFromSurvivalWorld && isToSurvivalWorld) {
 								leashedEntities.add(mob);
@@ -2700,7 +2739,8 @@ public class AranarthUtils {
 					continue;
 				}
 
-				Home updatedHome = new Home(homeName, direction, icon);
+				// Preserve the existing worldName so cross-server homes are not reset to "world"
+				Home updatedHome = new Home(homeName, direction, icon, homes.get(i).getWorldName());
 				homes.set(i, updatedHome);
 				aranarthPlayer.setHomes(homes);
 				setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -2983,6 +3023,13 @@ public class AranarthUtils {
 				})
 				.count();
 
+		// Include non-vanished players on other servers in the displayed count
+		if (NetworkManager.isActive()) {
+			onlineNum += (int) NetworkManager.getInstance().getRemoteRoster().values().stream()
+					.filter(np -> !np.isVanished())
+					.count();
+		}
+
 		int day = AranarthUtils.getDay();
 		String weekday = DateUtils.provideWeekdayName(AranarthUtils.getWeekday());
 		String month = DateUtils.provideMonthName(AranarthUtils.getMonth());
@@ -3035,7 +3082,7 @@ public class AranarthUtils {
 			return Integer.compare(first, second);
 		});
 
-		// Apply display and order
+		// Apply display and order for local players
 		int order = 0;
 		for (Player player : onlinePlayers) {
 			UUID uuid = player.getUniqueId();
@@ -3059,6 +3106,7 @@ public class AranarthUtils {
 			player.setPlayerListOrder(order);
 			order++;
 		}
+
 	}
 
 	/**
@@ -3397,6 +3445,7 @@ public class AranarthUtils {
 					Sentinel sentinel = sentinels.get(type).get(i);
 
 					// Must manually load the chunk to allow the entity to teleport
+					if (sentinel.getLocation().getWorld() == null) continue;
 					Chunk chunk = sentinel.getLocation().getChunk();
 					if (chunk.isLoaded()) {
 						Entity entity = Bukkit.getEntity(sentinel.getUuid());
@@ -3872,11 +3921,23 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Returns true if the world is one of the SMP worlds on whichever server is currently running.
+	 * On the test server or survival server: "smp", "smp_nether", "smp_the_end".
+	 * On the SMP server: "overworld", "the_nether", "the_end".
+	 */
+	public static boolean isSmpWorld(String worldName) {
+		if (AranarthCore.isSmpServer()) {
+			return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end");
+		}
+		return worldName.startsWith("smp");
+	}
+
+	/**
 	 * Returns true if the world is a valid survival world for quest progress.
 	 */
 	public static boolean isSurvivalWorld(String worldName) {
 		return worldName.equals("world") || worldName.equals("world_nether") || worldName.equals("world_the_end")
-				|| worldName.equals("smp") || worldName.equals("smp_nether") || worldName.equals("smp_the_end")
+				|| isSmpWorld(worldName)
 				|| worldName.equals("resource") || worldName.equals("resource_nether") || worldName.equals("resource_the_end")
 				|| worldName.equals("spawn") || worldName.equals("shops");
 	}

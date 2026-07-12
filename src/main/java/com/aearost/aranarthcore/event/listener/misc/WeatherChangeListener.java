@@ -71,7 +71,7 @@ public class WeatherChangeListener implements Listener {
 					AranarthUtils.setStormDuration(0);
 
 					World world = Bukkit.getWorld("world");
-					World smp = Bukkit.getWorld("smp");
+					World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
 					World resource = Bukkit.getWorld("resource");
 
 					world.setThunderDuration(0);

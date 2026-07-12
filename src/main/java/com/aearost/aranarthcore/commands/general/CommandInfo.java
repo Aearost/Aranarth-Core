@@ -90,7 +90,7 @@ public class CommandInfo implements CommandExecutor {
 			case "resource", "resource_nether", "resource_the_end" -> {
 				return "in the &eResource World";
 			}
-			case "smp", "smp_nether", "smp_the_end" -> {
+			case "smp", "smp_nether", "smp_the_end", "overworld", "the_nether", "the_end" -> {
 				return "in the &eSMP";
 			}
 			case "arena" -> {

@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -179,6 +180,10 @@ public class PlayerChatListener implements Listener {
 
         if (!aranarthPlayer.isInCouncilChat() && !aranarthPlayer.isInDominionChat()) {
             DiscordUtils.sendChatMessage(prefix + chatMessage);
+            // Relay to SMP server so its players see public chat
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishChat(prefix, chatMessage);
+            }
         }
     }
 

@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.gui.GuiDominionFood;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionResources;
@@ -107,6 +109,24 @@ public class CommandDominion implements CommandExecutor {
                         player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
                     }
                 } else if (args[0].equalsIgnoreCase("home")) {
+                    // On SMP: countdown here first, then transfer to Survival and replay home on arrival.
+                    if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+                        AranarthPlayer apSmp = AranarthUtils.getPlayer(player.getUniqueId());
+                        String cmd = args.length >= 2
+                                ? "dominion home " + String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                                : "dominion home";
+                        AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                                apSmp.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
+                            if (success) {
+                                NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+                                        PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
+                                String survivalServer = AranarthCore.getInstance().getConfig()
+                                        .getString("network.servers.survival", "survival");
+                                NetworkManager.getInstance().transferPlayer(player, survivalServer);
+                            }
+                        });
+                        return true;
+                    }
                     if (!player.hasPermission("aranarth.dominion.home")) {
                         player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
                         return true;

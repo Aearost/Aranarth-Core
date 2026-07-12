@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
@@ -29,7 +30,7 @@ public class DominionDeath {
 
     public void execute(EntityDeathEvent e) {
         Player player = (Player) e.getEntity();
-        if (player.getWorld().getName().startsWith("world") || player.getWorld().getName().startsWith("smp")
+        if (player.getWorld().getName().startsWith("world") || AranarthUtils.isSmpWorld(player.getWorld().getName())
                 || player.getWorld().getName().startsWith("resource")) {
             Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
             if (dominion != null) {

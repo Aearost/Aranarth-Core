@@ -1,13 +1,11 @@
 package com.aearost.aranarthcore.commands.general;
 
-import org.bukkit.Bukkit;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Handles the auto complete functionality while using the /trust command.
@@ -31,9 +29,6 @@ public class CommandTrustCompleter implements TabCompleter {
 	}
 
 	private static List<String> filterPlayers(String input) {
-		return Bukkit.getOnlinePlayers().stream()
-			.map(Player::getName)
-			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
-			.collect(Collectors.toList());
+		return AranarthUtils.getNetworkPlayerNames(input);
 	}
 }

@@ -27,7 +27,7 @@ public class ShopHologramChunkListener implements Listener {
         for (List<Shop> shopList : ShopUtils.getShops().values()) {
             for (Shop shop : shopList) {
                 Location loc = shop.getLocation();
-                if (loc.getWorld().equals(chunk.getWorld())
+                if (loc.getWorld() != null && loc.getWorld().equals(chunk.getWorld())
                         && (loc.getBlockX() >> 4) == chunk.getX()
                         && (loc.getBlockZ() >> 4) == chunk.getZ()) {
                     ShopUtils.initializeShopHologram(shop);

@@ -309,6 +309,8 @@ public class ShopUtils {
         for (UUID uuid : shops.keySet()) {
             for (Shop shop : shops.get(uuid)) {
                 Location loc = shop.getLocation();
+                // Skip shops whose world isn't loaded on this server instance
+                if (loc.getWorld() == null) continue;
                 // Only initialize holograms for loaded chunks — ChunkLoadEvent handles the rest
                 if (loc.getWorld().isChunkLoaded(loc.getBlockX() >> 4, loc.getBlockZ() >> 4)) {
                     initializeShopHologram(shop);

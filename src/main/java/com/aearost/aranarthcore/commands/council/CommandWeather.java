@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -35,7 +36,7 @@ public class CommandWeather {
 		if (args.length >= 2) {
 			Month month = AranarthUtils.getMonth();
 			World world = Bukkit.getWorld("world");
-			World smp = Bukkit.getWorld("smp");
+			World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
 			World resource = Bukkit.getWorld("resource");
 			Random random = new Random();
 

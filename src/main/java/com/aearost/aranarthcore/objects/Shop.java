@@ -12,6 +12,7 @@ public class Shop {
 
     private UUID uuid;
     private Location location;
+    private String worldName;
     private ItemStack item;
     private int quantity;
     private double buyPrice;
@@ -20,6 +21,7 @@ public class Shop {
     public Shop(UUID uuid, Location location, ItemStack item, int quantity, double buyPrice, double sellPrice) {
         this.uuid = uuid;
         this.location = location;
+        this.worldName = location != null && location.getWorld() != null ? location.getWorld().getName() : "";
         this.item = item;
         this.quantity = quantity;
         this.buyPrice = buyPrice;
@@ -56,7 +58,13 @@ public class Shop {
      */
     public void setLocation(Location location) {
         this.location = location;
+        if (location != null && location.getWorld() != null) {
+            this.worldName = location.getWorld().getName();
+        }
     }
+
+    public String getWorldName() { return worldName; }
+    public void setWorldName(String worldName) { this.worldName = worldName; }
 
     /**
      * Provides the shop's item.

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.crafting;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.entity.HumanEntity;
@@ -16,7 +17,7 @@ import static com.aearost.aranarthcore.objects.CustomKeys.HOMEPAD;
 public class CraftingOverridesHomepad {
 
     public void onCrafterCraft(CrafterCraftEvent e, ItemStack is) {
-        if (!e.getBlock().getWorld().getName().startsWith("smp")) {
+        if (!AranarthUtils.isSmpWorld(e.getBlock().getWorld().getName())) {
             e.setCancelled(true);
             return;
         }
@@ -29,7 +30,7 @@ public class CraftingOverridesHomepad {
     }
 
     public void onCraft(CraftItemEvent e, ItemStack is, HumanEntity player) {
-        if (!player.getLocation().getWorld().getName().startsWith("smp")) {
+        if (!AranarthUtils.isSmpWorld(player.getLocation().getWorld().getName())) {
             e.setCancelled(true);
             player.sendMessage(ChatUtils.chatMessage("&cYou cannot craft a homepad in this world!"));
             return;

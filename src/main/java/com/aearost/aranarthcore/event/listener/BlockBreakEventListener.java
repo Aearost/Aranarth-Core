@@ -83,7 +83,7 @@ public class BlockBreakEventListener implements Listener {
      */
     private void handlePlentifulBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
-        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+        if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             UUID uuid = e.getPlayer().getUniqueId();
             AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
@@ -121,7 +121,7 @@ public class BlockBreakEventListener implements Listener {
      */
     private void handleMagnetismBreak(BlockBreakEvent e) {
         String worldName = e.getBlock().getWorld().getName();
-        if (worldName.startsWith("world") || worldName.startsWith("smp") || worldName.startsWith("resource")) {
+        if (worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("resource")) {
             ItemStack heldItem = e.getPlayer().getInventory().getItemInMainHand();
             if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(INCANTATION_TYPE)) {
                 String type = heldItem.getItemMeta().getPersistentDataContainer().get(INCANTATION_TYPE, PersistentDataType.STRING);

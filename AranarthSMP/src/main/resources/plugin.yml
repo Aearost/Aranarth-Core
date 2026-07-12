@@ -1,0 +1,33 @@
+name: AranarthSMP
+version: 1.0
+authors: [Aearost]
+main: com.aearost.aranarthsmp.AranarthSMP
+api-version: 26.2
+description: Thin companion plugin for the Aranarth SMP server, handling cross-server chat, tab, and teleports.
+
+messaging-channels:
+  - BungeeCord
+
+commands:
+  survival:
+    description: Returns the player to the Survival server
+    permission: aranarth.survival
+  smp:
+    description: Confirms the player is already on the SMP (no-op with message)
+    permission: aranarth.smp
+  teleport:
+    description: Sends a teleport request to the input player
+    aliases: [tp]
+    permission: aranarth.teleport
+  tpaccept:
+    description: Accepts a pending teleport request
+    aliases: [tpa]
+    permission: aranarth.tpaccept
+  tpdeny:
+    description: Denies a pending teleport request
+    aliases: [tpd]
+    permission: aranarth.tpdeny
+  tphere:
+    description: Requests another player teleport to you
+    aliases: [tph]
+    permission: aranarth.tphere

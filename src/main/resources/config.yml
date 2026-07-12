@@ -72,3 +72,20 @@ mcmmo:
 players:
   # Number of seconds without movement before a player is marked AFK automatically.
   afk-timeout-seconds: 300
+
+# Cross-server network settings. Only used when is-public-server: true.
+# On the test server these are ignored entirely.
+network:
+  # Which server this jar is running on. Must match one of the names under 'servers' below.
+  # Set to "survival" on the survival server and "smp" on the SMP server.
+  this-server: "survival"
+  mysql:
+    host: "127.0.0.1"
+    port: 3306
+    database: ""
+    username: ""
+    password: ""
+  # Names must match the server names defined in your Velocity config.yml
+  servers:
+    survival: "survival"
+    smp: "smp"

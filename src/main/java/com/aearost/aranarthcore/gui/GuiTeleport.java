@@ -98,9 +98,7 @@ public class GuiTeleport {
 			ItemMeta homeMeta = homePad.getItemMeta();
 
 			List<String> lore = new ArrayList<>();
-			if (Objects.nonNull(home.getLocation().getWorld())) {
-				lore.add(ChatUtils.translateToColor("&6world: &7" + home.getLocation().getWorld().getName()));
-			}
+			lore.add(ChatUtils.translateToColor("&6world: &7" + home.getWorldName()));
 
 			lore.add(ChatUtils.translateToColor("&6x: &7" + home.getLocation().getBlockX()));
 			lore.add(ChatUtils.translateToColor("&6y: &7" + home.getLocation().getBlockY()));

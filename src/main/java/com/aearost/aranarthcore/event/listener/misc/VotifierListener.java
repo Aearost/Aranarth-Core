@@ -84,7 +84,7 @@ public class VotifierListener implements Listener {
 				Player player = Bukkit.getPlayer(uuid);
 				// Give the key if the player is online and in a valid world, otherwise store it as pending
 				String worldName = player.getWorld().getName();
-				boolean validWorld = worldName.startsWith("world") || worldName.startsWith("smp")
+				boolean validWorld = worldName.startsWith("world") || AranarthUtils.isSmpWorld(worldName)
 						|| worldName.startsWith("resource") || worldName.startsWith("spawn");
 				if (offlinePlayer.isOnline() && validWorld) {
 					HashMap<Integer, ItemStack> remainder = player.getInventory().addItem(key);
