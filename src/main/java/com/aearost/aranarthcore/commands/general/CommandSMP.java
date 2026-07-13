@@ -32,9 +32,19 @@ public class CommandSMP implements CommandExecutor {
 				return true;
 			}
 
-			// If already on the SMP server, there is nowhere to go
+			// If already on the SMP server, teleport to SMP spawn
 			if (AranarthCore.isSmpServer()) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou are already on the SMP!"));
+				if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
+					player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
+					return true;
+				}
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+				Location smpSpawn = new Location(Bukkit.getWorld(AranarthCore.getSmpMainWorldName()), 0.5, 120, 3, 180, 0);
+				AranarthUtils.teleportPlayer(player, player.getLocation(), smpSpawn, aranarthPlayer.isInAdminMode(), "&e&lSMP", "&7You have teleported to SMP Spawn", success -> {
+					if (!success) {
+						player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to SMP Spawn!"));
+					}
+				});
 				return true;
 			}
 

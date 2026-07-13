@@ -923,11 +923,14 @@ public class AranarthCore extends JavaPlugin {
         }
 
         // Apply world borders (always set so they survive world resets)
-        for (String worldName : new String[]{"world", "world_nether", "world_the_end"}) {
-            World w = Bukkit.getWorld(worldName);
-            if (w != null) {
-                w.getWorldBorder().setCenter(0, 0);
-                w.getWorldBorder().setSize(25250);
+        // Skip on SMP server — "world", "world_nether", "world_the_end" are SMP worlds there and have no border
+        if (!isSmpServer()) {
+            for (String worldName : new String[]{"world", "world_nether", "world_the_end"}) {
+                World w = Bukkit.getWorld(worldName);
+                if (w != null) {
+                    w.getWorldBorder().setCenter(0, 0);
+                    w.getWorldBorder().setSize(25250);
+                }
             }
         }
         for (String worldName : new String[]{"resource", "resource_nether", "resource_the_end"}) {
