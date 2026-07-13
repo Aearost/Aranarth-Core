@@ -1,9 +1,13 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiShopLocation;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -103,13 +107,32 @@ public class GuiShopLocationClick {
 						AranarthPlayer shopOwnerPlayer = AranarthUtils.getPlayer(uuid);
 						String defaultName = shopOwnerPlayer.getNickname() + "'s Shop";
 						String shopName = AranarthUtils.getShopName(uuid, defaultName);
-						AranarthUtils.teleportPlayer(player, player.getLocation(), shopLocations.get(uuid), aranarthPlayer.isInAdminMode(), shopName, "&7You have teleported to " + shopName, success -> {
-							if (success) {
-								player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopName + "&7!"));
-							} else {
-								player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopName + "&c!"));
-							}
-						});
+						Location shopLoc = shopLocations.get(uuid);
+						if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopLoc.getWorld() == null) {
+							// The shops world doesn't exist on SMP — do the countdown here then
+							// transfer to the survival server where the shop world lives.
+                            AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+									aranarthPlayer.isInAdminMode(), shopName, "&7Transferring to shop...", success -> {
+								if (success) {
+									PendingTeleport pt = new PendingTeleport(
+											ShopIslandUtils.SHOPS_WORLD,
+											shopLoc.getX(), shopLoc.getY(), shopLoc.getZ(),
+											shopLoc.getYaw(), shopLoc.getPitch(),
+											"&e&l" + shopName, "&7You have teleported to " + shopName);
+									String survivalServerName = AranarthCore.getInstance().getConfig()
+											.getString("network.servers.survival", "survival");
+									NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+								}
+							});
+						} else {
+							AranarthUtils.teleportPlayer(player, player.getLocation(), shopLoc, aranarthPlayer.isInAdminMode(), shopName, "&7You have teleported to " + shopName, success -> {
+								if (success) {
+									player.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + shopName + "&7!"));
+								} else {
+									player.sendMessage(ChatUtils.chatMessage("&cYou could not teleport to &e" + shopName + "&c!"));
+								}
+							});
+						}
 						player.closeInventory();
 					}
 				}
