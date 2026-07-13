@@ -184,6 +184,7 @@ public class PlayerServerJoinListener implements Listener {
 						// and apply the stored survival inventory.
 						if (pending.isApplyInventory()) {
 							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
 							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
 							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
 								try {

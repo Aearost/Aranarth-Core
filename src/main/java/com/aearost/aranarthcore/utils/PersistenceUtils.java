@@ -43,6 +43,17 @@ public class PersistenceUtils {
     private static final Gson GSON = new Gson();
 
     /**
+     * Converts a stored homepad worldName (e.g. "smp:world") to the actual Bukkit world name
+     * used on the current server (e.g. "world" on the SMP server).
+     */
+    private static String toBukkitWorldName(String storedWorldName) {
+        if (AranarthCore.isSmpServer() && storedWorldName.startsWith("smp:")) {
+            return storedWorldName.substring(4);
+        }
+        return storedWorldName;
+    }
+
+    /**
      * Runs a database sync task. If the plugin is still enabled, runs it asynchronously.
      * During shutdown (plugin disabled), runs it on the current thread to avoid the
      * "Plugin attempted to register task while disabled" error.
@@ -98,7 +109,7 @@ public class PersistenceUtils {
                 float pitch = Float.parseFloat(fields[6]);
                 Material icon = Material.valueOf(fields[7]);
 
-                Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+                Location location = new Location(Bukkit.getWorld(toBukkitWorldName(worldName)), x, y, z, yaw, pitch);
                 AranarthUtils.addNewHomepad(location);
 
                 if (Objects.nonNull(homeName)) {
@@ -4856,6 +4867,7 @@ public class PersistenceUtils {
             obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
             obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
             obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
+            obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
             try {
                 db.savePlayerToggles(uuid, GSON.toJson(obj));
             } catch (Exception e) {
@@ -5799,7 +5811,7 @@ public class PersistenceUtils {
                 float yaw = h.get("yaw").getAsFloat();
                 float pitch = h.get("pitch").getAsFloat();
                 Material icon = Material.valueOf(h.get("icon").getAsString());
-                Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+                Location location = new Location(Bukkit.getWorld(toBukkitWorldName(worldName)), x, y, z, yaw, pitch);
                 AranarthUtils.addNewHomepad(location);
                 if (homeName != null && !homeName.equals("NEW")) {
                     AranarthUtils.updateHomepad(homeName, location, icon);
@@ -5843,12 +5855,76 @@ public class PersistenceUtils {
                 if (obj.has("dayMessageDisabled")) ap.setDayMessageDisabled(obj.get("dayMessageDisabled").getAsBoolean());
                 if (obj.has("weatherMessageDisabled")) ap.setWeatherMessageDisabled(obj.get("weatherMessageDisabled").getAsBoolean());
                 if (obj.has("dominionMsgCompact")) ap.setDominionMsgCompact(obj.get("dominionMsgCompact").getAsBoolean());
+                if (obj.has("bulkSellShulker")) ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
                 AranarthUtils.setPlayer(uuid, ap);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse toggles for " + uuid + ": " + e.getMessage());
             }
         }
         Bukkit.getLogger().info("[AC] Toggled features initialized from MySQL");
+    }
+
+    /**
+     * Builds the toggle JSON string for the given player from their current in-memory state.
+     * Safe to call on the main thread; the returned string can be written to MySQL on an async thread.
+     */
+    public static String buildPlayerToggleJson(UUID uuid) {
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return null;
+        com.google.gson.JsonObject obj = new com.google.gson.JsonObject();
+        obj.addProperty("chat", ap.isTogglingChat());
+        obj.addProperty("messages", ap.isTogglingMessages());
+        obj.addProperty("teleport", ap.isTogglingTp());
+        obj.addProperty("spawnBoost", ap.isUsingSpawnBoost());
+        obj.addProperty("changeClaim", ap.isTogglingChangeClaim());
+        obj.addProperty("inventory", ap.isTogglingInventoryAssist());
+        obj.addProperty("shulker", ap.isAddingToShulker());
+        obj.addProperty("blacklistMethod", ap.getBlacklistingMethod());
+        obj.addProperty("compressing", ap.isCompressingItems());
+        obj.addProperty("chestLock", ap.isAutoLockingChests());
+        obj.addProperty("blueFireDisabled", ap.hasBlueFireDisabled());
+        obj.addProperty("gradientChatEnabled", ap.isGradientChatEnabled());
+        obj.addProperty("gradientChatColors", ap.getGradientChatColors());
+        obj.addProperty("dayMessageDisabled", ap.isDayMessageDisabled());
+        obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
+        obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
+        obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+        return GSON.toJson(obj);
+    }
+
+    /**
+     * Loads a single player's toggle settings from MySQL and applies them to their in-memory AranarthPlayer.
+     * Must be called on the main thread (brief synchronous DB read).
+     */
+    public static void loadPlayerTogglesFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return;
+        try {
+            String json = DatabaseManager.getInstance().loadPlayerToggles(uuid);
+            if (json == null || json.isEmpty()) return;
+            com.google.gson.JsonObject obj = GSON.fromJson(json, com.google.gson.JsonObject.class);
+            if (obj.has("chat")) ap.setTogglingChat(obj.get("chat").getAsBoolean());
+            if (obj.has("messages")) ap.setTogglingMessages(obj.get("messages").getAsBoolean());
+            if (obj.has("teleport")) ap.setTogglingTp(obj.get("teleport").getAsBoolean());
+            if (obj.has("spawnBoost")) ap.setUsingSpawnBoost(obj.get("spawnBoost").getAsBoolean());
+            if (obj.has("changeClaim")) ap.setTogglingChangeClaim(obj.get("changeClaim").getAsBoolean());
+            if (obj.has("inventory")) ap.setTogglingInventoryAssist(obj.get("inventory").getAsBoolean());
+            if (obj.has("shulker")) ap.setAddingToShulker(obj.get("shulker").getAsBoolean());
+            if (obj.has("blacklistMethod")) ap.setBlacklistingMethod(obj.get("blacklistMethod").getAsInt());
+            if (obj.has("compressing")) ap.setCompressingItems(obj.get("compressing").getAsBoolean());
+            if (obj.has("chestLock")) ap.setAutoLockingChests(obj.get("chestLock").getAsBoolean());
+            if (obj.has("blueFireDisabled")) ap.setBlueFireDisabled(obj.get("blueFireDisabled").getAsBoolean());
+            if (obj.has("gradientChatEnabled")) ap.setGradientChatEnabled(obj.get("gradientChatEnabled").getAsBoolean());
+            if (obj.has("gradientChatColors")) ap.setGradientChatColors(obj.get("gradientChatColors").getAsString());
+            if (obj.has("dayMessageDisabled")) ap.setDayMessageDisabled(obj.get("dayMessageDisabled").getAsBoolean());
+            if (obj.has("weatherMessageDisabled")) ap.setWeatherMessageDisabled(obj.get("weatherMessageDisabled").getAsBoolean());
+            if (obj.has("dominionMsgCompact")) ap.setDominionMsgCompact(obj.get("dominionMsgCompact").getAsBoolean());
+            if (obj.has("bulkSellShulker")) ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
+            AranarthUtils.setPlayer(uuid, ap);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load toggles for " + uuid + ": " + e.getMessage());
+        }
     }
 
     /** Loads shop data from MySQL. Falls back to file if empty. */

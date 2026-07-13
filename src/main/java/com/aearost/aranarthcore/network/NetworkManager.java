@@ -424,6 +424,7 @@ public class NetworkManager {
 
         // Build the serialized forms now, on the main thread, so the async task only does I/O.
         final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(uuid);
+        final String toggleJson = PersistenceUtils.buildPlayerToggleJson(uuid);
         final String pendingJson = gson.toJson(pending);
 
         transferringPlayers.add(uuid);
@@ -432,6 +433,9 @@ public class NetworkManager {
             try {
                 if (rawRow != null && DatabaseManager.isActive()) {
                     DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, rawRow);
+                }
+                if (toggleJson != null && DatabaseManager.isActive()) {
+                    DatabaseManager.getInstance().savePlayerToggles(uuid, toggleJson);
                 }
                 db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
             } catch (Exception e) {

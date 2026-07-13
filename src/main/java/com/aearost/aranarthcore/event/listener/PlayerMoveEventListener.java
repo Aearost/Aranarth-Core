@@ -19,11 +19,12 @@ public class PlayerMoveEventListener implements Listener {
 
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
-        if (e.getPlayer().getLocation().getWorld().getName().startsWith("world")) {
+        String worldName = e.getPlayer().getLocation().getWorld().getName();
+        if (AranarthUtils.isSmpWorld(worldName)) {
+            new HomepadStep().execute(e);
+        } else if (worldName.startsWith("world")) {
             new DominionChunkChange().execute(e);
             new SpawnChangeLocation().execute(e);
-        } else if (AranarthUtils.isSmpWorld(e.getPlayer().getLocation().getWorld().getName())) {
-            new HomepadStep().execute(e);
         }
 
         new AfkCancelByMove().execute(e);

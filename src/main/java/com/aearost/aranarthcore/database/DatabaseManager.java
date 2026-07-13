@@ -1452,6 +1452,19 @@ public class DatabaseManager {
         return result;
     }
 
+    public String loadPlayerToggles(UUID uuid) {
+        String sql = "SELECT data_json FROM player_toggles WHERE uuid=?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player toggles for " + uuid + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     // -------------------------------------------------------------------------
     // player_compressible  (per-player JSON)
     // -------------------------------------------------------------------------
