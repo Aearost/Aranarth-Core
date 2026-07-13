@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -31,6 +32,19 @@ public class PlayerServerQuitListener implements Listener {
 
 		boolean isCrossServerTransfer = NetworkManager.isActive()
 				&& NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
+
+		// Persist the player's logout location so they are returned here on next login.
+		// Skipped for cross-server transfers; the receiving server will track their location.
+		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+			final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
+			final org.bukkit.Location loc = player.getLocation();
+			final String world = loc.getWorld().getName();
+			final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
+			final float yaw = loc.getYaw(), pitch = loc.getPitch();
+			Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+				DatabaseManager.getInstance().saveLastLocation(player.getUniqueId(), server, world, x, y, z, yaw, pitch)
+			);
+		}
 
 		if (NetworkManager.isActive()) {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId());

@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -75,6 +77,17 @@ public class CommandInfo implements CommandExecutor {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Returns the display string for a player on a remote server (e.g. "in the &eSMP").
+	 */
+	private static String getRemoteServerDisplay(String server) {
+		return switch (server.toLowerCase()) {
+			case "smp" -> "in the &eSMP";
+			case "survival" -> "in &eSurvival";
+			default -> "on &e" + server;
+		};
 	}
 
 	/**
@@ -233,6 +246,21 @@ public class CommandInfo implements CommandExecutor {
 					} else {
 						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
 					}
+				} else if (NetworkManager.isActive()) {
+					NetworkPlayer networkPlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
+					if (networkPlayer != null) {
+						sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getRemoteServerDisplay(networkPlayer.getServer())));
+					} else {
+						AranarthUtils.getPlayerTimezone(player, zoneId -> {
+							String result = CommandSeen.calculateDisplayDate(
+									offlinePlayer,
+									aranarthPlayer,
+									zoneId,
+									sender
+							);
+							sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
+						});
+					}
 				} else {
 					AranarthUtils.getPlayerTimezone(player, zoneId -> {
 						String result = CommandSeen.calculateDisplayDate(
@@ -254,6 +282,14 @@ public class CommandInfo implements CommandExecutor {
 					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently AFK " + getWorldName(onlinePlayer.getWorld().getName())));
 				} else {
 					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getWorldName(onlinePlayer.getWorld().getName())));
+				}
+			} else if (NetworkManager.isActive()) {
+				NetworkPlayer networkPlayer = NetworkManager.getInstance().getRemotePlayer(uuid);
+				if (networkPlayer != null) {
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &aCurrently online " + getRemoteServerDisplay(networkPlayer.getServer())));
+				} else {
+					String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);
+					sender.sendMessage(ChatUtils.translateToColor("&6Last Online: &e" + result));
 				}
 			} else {
 				String result = CommandSeen.calculateDisplayDate(offlinePlayer, aranarthPlayer, ZoneId.systemDefault(), sender);

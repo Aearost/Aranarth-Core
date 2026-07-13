@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkTabManager;
@@ -49,11 +50,27 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
-		// Detect cross-server transfers: check for a pending TP before any join noise fires.
-		// getPendingTeleport() does a synchronous DB lookup but is already called on the main
-		// thread 1 tick later; doing it here keeps things consistent and avoids a race.
-		boolean isCrossServerTransfer = NetworkManager.isActive()
-				&& NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
+		// Clear any stale BendingPlayer data PK may have cached from a previous session on
+		// this server. Without this, players who switch to SMP, change element, then return
+		// here would still see their old element because PK skips the DB load when the player
+		// is already present in its cache. Clearing here forces PK's own join listener (which
+		// fires at NORMAL priority, after this) to do a fresh MySQL read.
+		BendingPlayer.getPlayers().remove(player.getUniqueId());
+		BendingPlayer.getOfflinePlayers().remove(player.getUniqueId());
+
+		// Load the player's last logout location for login routing and position restoration.
+		// Done synchronously here (matching the getPendingTeleport pattern below) so the result
+		// is available immediately and can be captured by the delayed-task lambda.
+		final DatabaseManager.LastLocation lastLoc = DatabaseManager.isActive()
+				? DatabaseManager.getInstance().loadLastLocation(player.getUniqueId())
+				: null;
+
+		// Detect cross-server transfers: either a pending TP from a normal cross-server action,
+		// or the player logged off on a different server and needs to be routed there on login.
+		String thisServerName = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : null;
+		boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
+		boolean isCrossServerTransfer = needsServerRouting || (NetworkManager.isActive()
+				&& NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null);
 
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
@@ -262,6 +279,32 @@ public class PlayerServerJoinListener implements Listener {
 							}
 						}
 					}.runTaskLater(AranarthCore.getInstance(), 20L);
+				}
+
+				// Restore the player to where they last logged out.
+				// If they logged off on this server: teleport them to the saved position.
+				// If they logged off on another server: route them there via a pending teleport,
+				// which the receiving server will execute on arrival.
+				if (!hadPendingTp && lastLoc != null && NetworkManager.isActive()) {
+					if (lastLoc.server.equals(NetworkManager.getInstance().getThisServer())) {
+						org.bukkit.World w = Bukkit.getWorld(lastLoc.world);
+						if (w != null) {
+							org.bukkit.Location dest = new org.bukkit.Location(
+									w, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch);
+							new BukkitRunnable() {
+								@Override
+								public void run() {
+									if (player.isOnline()) player.teleport(dest);
+								}
+							}.runTaskLater(AranarthCore.getInstance(), 2L);
+						}
+					} else {
+						PendingTeleport pt = new PendingTeleport(
+								lastLoc.world, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch, "", "");
+						String velocityTarget = AranarthCore.getInstance().getConfig()
+								.getString("network.servers." + lastLoc.server, lastLoc.server);
+						NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+					}
 				}
 
 				// Displays a welcome message after the join message

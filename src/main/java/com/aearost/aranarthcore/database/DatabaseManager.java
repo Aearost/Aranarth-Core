@@ -68,6 +68,24 @@ public class DatabaseManager {
     }
 
     // -------------------------------------------------------------------------
+    // Last location record
+    // -------------------------------------------------------------------------
+
+    public static class LastLocation {
+        public final String server;
+        public final String world;
+        public final double x, y, z;
+        public final float yaw, pitch;
+
+        public LastLocation(String server, String world, double x, double y, double z, float yaw, float pitch) {
+            this.server = server;
+            this.world = world;
+            this.x = x; this.y = y; this.z = z;
+            this.yaw = yaw; this.pitch = pitch;
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // State
     // -------------------------------------------------------------------------
 
@@ -353,6 +371,19 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS player_shop_collaborators (
                 uuid VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_last_location (
+                uuid      VARCHAR(36) PRIMARY KEY,
+                server    VARCHAR(64) NOT NULL,
+                world     VARCHAR(64) NOT NULL,
+                x         DOUBLE      NOT NULL,
+                y         DOUBLE      NOT NULL,
+                z         DOUBLE      NOT NULL,
+                yaw       FLOAT       NOT NULL,
+                pitch     FLOAT       NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
@@ -1631,5 +1662,58 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop collaborators: " + e.getMessage());
         }
         return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_last_location
+    // -------------------------------------------------------------------------
+
+    public void saveLastLocation(UUID uuid, String server, String world,
+                                 double x, double y, double z, float yaw, float pitch) {
+        String sql = """
+            INSERT INTO player_last_location (uuid, server, world, x, y, z, yaw, pitch)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE server=VALUES(server), world=VALUES(world),
+            x=VALUES(x), y=VALUES(y), z=VALUES(z), yaw=VALUES(yaw), pitch=VALUES(pitch)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, server);
+            ps.setString(3, world);
+            ps.setDouble(4, x);
+            ps.setDouble(5, y);
+            ps.setDouble(6, z);
+            ps.setFloat(7, yaw);
+            ps.setFloat(8, pitch);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save last location for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /** Returns the player's last logout location, or null if none recorded yet. */
+    public LastLocation loadLastLocation(UUID uuid) {
+        String sql = "SELECT server, world, x, y, z, yaw, pitch FROM player_last_location WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return new LastLocation(
+                            rs.getString("server"),
+                            rs.getString("world"),
+                            rs.getDouble("x"),
+                            rs.getDouble("y"),
+                            rs.getDouble("z"),
+                            rs.getFloat("yaw"),
+                            rs.getFloat("pitch")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load last location for " + uuid + ": " + e.getMessage());
+        }
+        return null;
     }
 }

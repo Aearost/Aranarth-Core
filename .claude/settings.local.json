@@ -250,7 +250,9 @@
       "Bash(sort -t- -k6 -r)",
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore -name config.yml -o -name *.yml -o -name *.yaml)",
       "Bash(python:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(gh api:*)",
+      "Bash(gh repo:*)"
     ]
   }
 }

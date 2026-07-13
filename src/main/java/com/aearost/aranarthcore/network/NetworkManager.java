@@ -464,6 +464,43 @@ public class NetworkManager {
     }
 
     /**
+     * Saves a pending teleport to MySQL then transfers the player to the target server.
+     * The BungeeCord Connect message is sent only after the DB write confirms, preventing
+     * a race where the player arrives before their pending teleport is readable.
+     */
+    public void setPendingAndTransfer(Player player, String targetServer, PendingTeleport pending) {
+        UUID uuid = player.getUniqueId();
+        final String pendingJson = gson.toJson(pending);
+        transferringPlayers.add(uuid);
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "DB write before transfer failed for " + player.getName() + ": " + e.getMessage());
+            }
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                if (!player.isOnline()) {
+                    transferringPlayers.remove(uuid);
+                    return;
+                }
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DataOutputStream dos = new DataOutputStream(bos);
+                    dos.writeUTF("Connect");
+                    dos.writeUTF(targetServer);
+                    player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                            + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
+                    transferringPlayers.remove(uuid);
+                }
+            });
+        });
+    }
+
+    /**
      * Instructs the proxy to move {@code player} to {@code targetServer}.
      */
     public void transferPlayer(Player player, String targetServer) {

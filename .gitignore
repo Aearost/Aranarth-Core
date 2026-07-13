@@ -40,3 +40,4 @@ build/
 ### Mac OS ###
 .DS_Store
 /src/main/resources/pack/
+/tools/migrate_projectkorra.py
