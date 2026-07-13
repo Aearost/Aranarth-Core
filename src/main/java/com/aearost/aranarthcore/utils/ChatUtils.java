@@ -186,6 +186,9 @@ public class ChatUtils {
 	 * @return The message without the formatting.
 	 */
 	public static String stripColorFormatting(String msg) {
+		if (msg == null) {
+			return "";
+		}
 		// Removes basic color codes
 		String colorStripped = ChatColor.stripColor(msg);
 		if (colorStripped.contains("&")) {
