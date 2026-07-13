@@ -406,16 +406,15 @@ public class CrateOpen {
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.VOTE);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-            int voteKeySlot = player.getInventory().getHeldItemSlot();
+            player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             playCrateOpenSound(player, CrateType.VOTE, () -> {
                 if (!player.isOnline()) {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    AranarthUtils.addPendingVoteKeys(player.getUniqueId(), 1);
                     return;
                 }
-                ItemStack heldItem = player.getInventory().getItem(voteKeySlot);
-                heldItem.setAmount(heldItem.getAmount() - 1);
 
                 ItemStack reward = null;
                 String name = "";
@@ -500,16 +499,15 @@ public class CrateOpen {
             aranarthPlayer.setCrateTypeBeingOpened(CrateType.RARE);
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-            int rareKeySlot = player.getInventory().getHeldItemSlot();
+            player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             playCrateOpenSound(player, CrateType.RARE, () -> {
                 if (!player.isOnline()) {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    AranarthUtils.addPendingRareKeys(player.getUniqueId(), 1);
                     return;
                 }
-                ItemStack heldItem = player.getInventory().getItem(rareKeySlot);
-                heldItem.setAmount(heldItem.getAmount() - 1);
 
                 ItemStack reward = null;
                 String name = "";
@@ -600,16 +598,15 @@ public class CrateOpen {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening an &3&lEpic Crate"));
 
-            int epicKeySlot = player.getInventory().getHeldItemSlot();
+            player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             playCrateOpenSound(player, CrateType.EPIC, () -> {
                 if (!player.isOnline()) {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    AranarthUtils.addPendingEpicKeys(player.getUniqueId(), 1);
                     return;
                 }
-                ItemStack heldItem = player.getInventory().getItem(epicKeySlot);
-                heldItem.setAmount(heldItem.getAmount() - 1);
 
                 ItemStack reward = null;
                 String name = "";
@@ -764,16 +761,15 @@ public class CrateOpen {
             AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
             Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7is opening a &5&lGodly Crate"));
 
-            int godlyKeySlot = player.getInventory().getHeldItemSlot();
+            player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
             playCrateOpenSound(player, CrateType.GODLY, () -> {
                 if (!player.isOnline()) {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    AranarthUtils.addPendingGodlyKeys(player.getUniqueId(), 1);
                     return;
                 }
-                ItemStack heldItem = player.getInventory().getItem(godlyKeySlot);
-                heldItem.setAmount(heldItem.getAmount() - 1);
 
                 ItemStack reward = null;
                 String name = "";

@@ -67,6 +67,7 @@ Minor Features
 [~] Rearranged items in the epic crate
 [+] Added message to players receiving mail while they are online
 [~] Corrected messages when a player is warned, muted, or banned
+[~] Made it so if a key is lost mid-use, the key is refunded and is claimable with /keyclaim
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
