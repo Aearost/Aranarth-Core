@@ -28,6 +28,10 @@ public class PlayerServerQuitListener implements Listener {
 	@EventHandler
 	public void onPlayerQuit(final PlayerQuitEvent e) {
 		Player player = e.getPlayer();
+
+		boolean isCrossServerTransfer = NetworkManager.isActive()
+				&& NetworkManager.getInstance().consumeTransferring(player.getUniqueId());
+
 		if (NetworkManager.isActive()) {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId());
 		}
@@ -49,23 +53,28 @@ public class PlayerServerQuitListener implements Listener {
 			}
 		}
 
-		DateUtils dateUtils = new DateUtils();
-		String nameToDisplay;
-		nameToDisplay = "&7" + AranarthUtils.getNickname(player);
-		
-		if (dateUtils.isValentinesDay()) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
-		} else if (dateUtils.isEaster()) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
-		} else if (dateUtils.isHalloween()) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
-		} else if (dateUtils.isChristmas()) {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+		if (isCrossServerTransfer) {
+			e.setQuitMessage(null);
 		} else {
-			e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
+			DateUtils dateUtils = new DateUtils();
+			String nameToDisplay;
+			nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+
+			if (dateUtils.isValentinesDay()) {
+				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES)));
+			} else if (dateUtils.isEaster()) {
+				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER)));
+			} else if (dateUtils.isHalloween()) {
+				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+			} else if (dateUtils.isChristmas()) {
+				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+			} else {
+				e.setQuitMessage(ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay));
+			}
+
+			playQuitSound();
 		}
 
-		playQuitSound();
 		AranarthUtils.updateTab();
 	}
 

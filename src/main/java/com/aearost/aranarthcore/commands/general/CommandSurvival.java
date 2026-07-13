@@ -6,8 +6,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
-import com.aearost.aranarthcore.utils.ItemUtils;
-import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,19 +44,12 @@ public class CommandSurvival implements CommandExecutor {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 						aranarthPlayer.isInAdminMode(), "&e&lSurvival", "&7Transferring to Survival...", success -> {
 					if (success) {
-						AranarthPlayer apTransfer = AranarthUtils.getPlayer(player.getUniqueId());
-                        apTransfer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
-                        AranarthUtils.setPlayer(player.getUniqueId(), apTransfer);
-						PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
-						player.getInventory().clear();
 						com.aearost.aranarthcore.network.PendingTeleport survivalPt =
 								com.aearost.aranarthcore.network.PendingTeleport.forCommand(
 										"survival", "&e&lSurvival", "&7You have teleported to Survival");
-						survivalPt.setApplyInventory(true);
-						NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(), survivalPt);
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
-						NetworkManager.getInstance().transferPlayer(player, survivalServerName);
+						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, survivalPt);
 					}
 				});
 				return true;

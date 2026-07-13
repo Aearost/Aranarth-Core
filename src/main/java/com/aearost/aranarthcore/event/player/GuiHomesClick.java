@@ -86,10 +86,9 @@ public class GuiHomesClick {
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
 								if (success) {
-									NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+									NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServer,
 											new PendingTeleport(smpWorldPart, hx, hy, hz, hyaw, hpitch,
 													home.getName(), "&7You have teleported to your home"));
-									NetworkManager.getInstance().transferPlayer(player, smpServer);
 								}
 							});
 							return;
@@ -106,10 +105,9 @@ public class GuiHomesClick {
 							AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 									aranarthPlayer.isInAdminMode(), home.getName(), "&7Transferring to your home...", success -> {
 								if (success) {
-									NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+									NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
 											new PendingTeleport(home.getWorldName(), hx, hy, hz, hyaw, hpitch,
 													home.getName(), "&7You have teleported to your home"));
-									NetworkManager.getInstance().transferPlayer(player, survivalServer);
 								}
 							});
 							return;

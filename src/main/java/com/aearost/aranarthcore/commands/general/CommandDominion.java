@@ -118,11 +118,10 @@ public class CommandDominion implements CommandExecutor {
                         AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
                                 apSmp.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
                             if (success) {
-                                NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
-                                        PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
                                 String survivalServer = AranarthCore.getInstance().getConfig()
                                         .getString("network.servers.survival", "survival");
-                                NetworkManager.getInstance().transferPlayer(player, survivalServer);
+                                NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
+                                        PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
                             }
                         });
                         return true;

@@ -68,6 +68,7 @@ Minor Features
 [+] Added message to players receiving mail while they are online
 [~] Corrected messages when a player is warned, muted, or banned
 [~] Made it so if a key is lost mid-use, the key is refunded and is claimable with /keyclaim
+[+] Added /keyclaim reminder to the MOTD
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

@@ -354,7 +354,19 @@ public class PersistenceUtils {
                         firstJoinDate,
                         pronouns)); // Keep pronouns at the end
                 long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
+                String survivalEnderChest = fields.length > 25 ? fields[24] : "";
+                double survivalHealth     = fields.length > 26 ? Double.parseDouble(fields[25]) : 20.0;
+                int survivalFoodLevel     = fields.length > 27 ? Integer.parseInt(fields[26])   : 20;
+                float survivalSaturation  = fields.length > 28 ? Float.parseFloat(fields[27])   : 5.0f;
+                int survivalExpLevel      = fields.length > 29 ? Integer.parseInt(fields[28])   : 0;
+                float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29])   : 0.0f;
                 AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
+                AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
+                AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
+                AranarthUtils.getPlayer(uuid).setSurvivalFoodLevel(survivalFoodLevel);
+                AranarthUtils.getPlayer(uuid).setSurvivalSaturation(survivalSaturation);
+                AranarthUtils.getPlayer(uuid).setSurvivalExpLevel(survivalExpLevel);
+                AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
             }
             Bukkit.getLogger().info("[AC] All aranarth players have been initialized");
             reader.close();
@@ -367,7 +379,7 @@ public class PersistenceUtils {
      * Builds the pipe-delimited row string for a single AranarthPlayer (without trailing newline).
      * Extracted from saveAranarthPlayers() so it can be reused by syncAranarthPlayersToDatabase().
      */
-    private static String buildAranarthPlayerRow(UUID uuid, AranarthPlayer aranarthPlayer) {
+    public static String buildAranarthPlayerRow(UUID uuid, AranarthPlayer aranarthPlayer) {
         String uuidStr = uuid.toString();
         String nickname = aranarthPlayer.getNickname();
         if (nickname == null) {
@@ -464,14 +476,35 @@ public class PersistenceUtils {
         }
 
         long conquestDisbandCooldownEnd = aranarthPlayer.getConquestDisbandCooldownEnd();
+        String survivalEnderChest = aranarthPlayer.getSurvivalEnderChest();
+        double survivalHealth = aranarthPlayer.getSurvivalHealth();
+        int survivalFoodLevel = aranarthPlayer.getSurvivalFoodLevel();
+        float survivalSaturation = aranarthPlayer.getSurvivalSaturation();
+        int survivalExpLevel = aranarthPlayer.getSurvivalExpLevel();
+        float survivalExpProgress = aranarthPlayer.getSurvivalExpProgress();
         return uuidStr + "|" + nickname + "|" + survivalInventory + "|" + arenaInventory + "|"
                 + creativeInventory + "|" + potions + "|" + arrows + "|" + blacklist + "|" + blacklistingMethod
                 + "|" + balance + "|" + rank + "|" + saint + "|" + council + "|" + architect + "|"
                 + allHomes + "|" + muteEndDate + "|" + particles + "|" + perks + "|" + saintExpireDate
                 + "|" + isCompressingItems + "|" + votePointsSpent + "|" + spawnBoostValue + "|"
-                + firstJoinDate + "|" + conquestDisbandCooldownEnd + "|"
+                + firstJoinDate + "|" + conquestDisbandCooldownEnd + "|" + survivalEnderChest + "|"
+                + survivalHealth + "|" + survivalFoodLevel + "|" + survivalSaturation + "|"
+                + survivalExpLevel + "|" + survivalExpProgress + "|"
                 // Keep pronouns at the end and add before this
                 + pronouns;
+    }
+
+    /**
+     * Builds and returns the raw pipe-delimited DB row for the given player using their current
+     * in-memory AranarthPlayer data. Safe to call on the main thread; the returned String can
+     * then be written to the database on an async thread.
+     *
+     * @return The serialized row, or {@code null} if the player is not loaded in memory.
+     */
+    public static String buildPlayerRowForTransfer(UUID uuid) {
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return null;
+        return buildAranarthPlayerRow(uuid, ap);
     }
 
     /**
@@ -5478,7 +5511,19 @@ public class PersistenceUtils {
                 firstJoinDate,
                 pronouns));
         long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
+        String survivalEnderChest = fields.length > 25 ? fields[24] : "";
+        double survivalHealth     = fields.length > 26 ? Double.parseDouble(fields[25]) : 20.0;
+        int survivalFoodLevel     = fields.length > 27 ? Integer.parseInt(fields[26])   : 20;
+        float survivalSaturation  = fields.length > 28 ? Float.parseFloat(fields[27])   : 5.0f;
+        int survivalExpLevel      = fields.length > 29 ? Integer.parseInt(fields[28])   : 0;
+        float survivalExpProgress = fields.length > 30 ? Float.parseFloat(fields[29])   : 0.0f;
         AranarthUtils.getPlayer(uuid).setConquestDisbandCooldownEnd(conquestDisbandCooldownEnd);
+        AranarthUtils.getPlayer(uuid).setSurvivalEnderChest(survivalEnderChest);
+        AranarthUtils.getPlayer(uuid).setSurvivalHealth(survivalHealth);
+        AranarthUtils.getPlayer(uuid).setSurvivalFoodLevel(survivalFoodLevel);
+        AranarthUtils.getPlayer(uuid).setSurvivalSaturation(survivalSaturation);
+        AranarthUtils.getPlayer(uuid).setSurvivalExpLevel(survivalExpLevel);
+        AranarthUtils.getPlayer(uuid).setSurvivalExpProgress(survivalExpProgress);
     }
 
     /** Loads aranarth players from MySQL raw_data. Falls back gracefully if empty. */

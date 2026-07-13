@@ -39,12 +39,11 @@ public class CommandSpawn implements CommandExecutor {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 						aranarthPlayer.isInAdminMode(), "&e&lSpawn", "&7Transferring to Spawn...", success -> {
 					if (success) {
-						NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
-								new PendingTeleport("spawn", 0.5, 101.0, 0.5, 180.0f, 0.0f,
-										"&e&lSpawn", "&7You have teleported to Spawn"));
 						String survivalServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.survival", "survival");
-						NetworkManager.getInstance().transferPlayer(player, survivalServerName);
+						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName,
+								new PendingTeleport("spawn", 0.5, 101.0, 0.5, 180.0f, 0.0f,
+										"&e&lSpawn", "&7You have teleported to Spawn"));
 					}
 				});
 				return true;

@@ -22,6 +22,12 @@ public class AranarthPlayer {
 	private int currentGuiPageNum;
 	private String nickname;
 	private String survivalInventory;
+	private String survivalEnderChest;
+	private double survivalHealth;
+	private int survivalFoodLevel;
+	private float survivalSaturation;
+	private int survivalExpLevel;
+	private float survivalExpProgress;
 	private String arenaInventory;
 	private String creativeInventory;
 	private int blacklistingMethod;
@@ -106,6 +112,12 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 0;
 		this.nickname = "";
 		this.survivalInventory = "";
+		this.survivalEnderChest = "";
+		this.survivalHealth = 20.0;
+		this.survivalFoodLevel = 20;
+		this.survivalSaturation = 5.0f;
+		this.survivalExpLevel = 0;
+		this.survivalExpProgress = 0.0f;
 		this.arenaInventory = "";
 		this.creativeInventory = "";
 		this.potions = null;
@@ -180,6 +192,12 @@ public class AranarthPlayer {
 		this.currentGuiPageNum = 0;
 		this.nickname = nickname;
 		this.survivalInventory = survivalInventory;
+		this.survivalEnderChest = "";
+		this.survivalHealth = 20.0;
+		this.survivalFoodLevel = 20;
+		this.survivalSaturation = 5.0f;
+		this.survivalExpLevel = 0;
+		this.survivalExpProgress = 0.0f;
 		this.arenaInventory = arenaInventory;
 		this.creativeInventory = creativeInventory;
 		this.potions = potions;
@@ -324,6 +342,37 @@ public class AranarthPlayer {
 	public void setSurvivalInventory(String survivalInventory) {
 		this.survivalInventory = survivalInventory;
 	}
+
+	/**
+	 * Provides the player's Survival ender chest contents.
+	 * @return The Base64-serialized ender chest, or empty string if not yet saved.
+	 */
+	public String getSurvivalEnderChest() {
+		return survivalEnderChest == null ? "" : survivalEnderChest;
+	}
+
+	/**
+	 * Updates the player's Survival ender chest contents.
+	 * @param survivalEnderChest The Base64-serialized ender chest.
+	 */
+	public void setSurvivalEnderChest(String survivalEnderChest) {
+		this.survivalEnderChest = survivalEnderChest;
+	}
+
+	public double getSurvivalHealth() { return survivalHealth; }
+	public void setSurvivalHealth(double survivalHealth) { this.survivalHealth = survivalHealth; }
+
+	public int getSurvivalFoodLevel() { return survivalFoodLevel; }
+	public void setSurvivalFoodLevel(int survivalFoodLevel) { this.survivalFoodLevel = survivalFoodLevel; }
+
+	public float getSurvivalSaturation() { return survivalSaturation; }
+	public void setSurvivalSaturation(float survivalSaturation) { this.survivalSaturation = survivalSaturation; }
+
+	public int getSurvivalExpLevel() { return survivalExpLevel; }
+	public void setSurvivalExpLevel(int survivalExpLevel) { this.survivalExpLevel = survivalExpLevel; }
+
+	public float getSurvivalExpProgress() { return survivalExpProgress; }
+	public void setSurvivalExpProgress(float survivalExpProgress) { this.survivalExpProgress = survivalExpProgress; }
 
 	/**
 	 * Provides the player's current Arena inventory.

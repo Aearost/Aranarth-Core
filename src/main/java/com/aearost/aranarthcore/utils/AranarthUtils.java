@@ -1844,6 +1844,28 @@ public class AranarthUtils {
 		// Saves the player's last location for /ac back
 		AranarthPlayer aranarthPlayer = getPlayer(player.getUniqueId());
 		aranarthPlayer.setLastKnownTeleportLocation(from);
+
+		// Keep survival stats in sync on every teleport so the data is always current in memory
+		// (and therefore in the next periodic DB write). For cross-server transfers this snapshot
+		// is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
+		if (isSurvivalWorld(from.getWorld().getName())) {
+			try {
+				aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+			} catch (Exception e) {
+				Bukkit.getLogger().warning("[AC] Failed to serialize inventory for " + player.getName());
+			}
+			try {
+				aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
+			} catch (Exception e) {
+				Bukkit.getLogger().warning("[AC] Failed to serialize ender chest for " + player.getName());
+			}
+			aranarthPlayer.setSurvivalHealth(player.getHealth());
+			aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
+			aranarthPlayer.setSurvivalSaturation(player.getSaturation());
+			aranarthPlayer.setSurvivalExpLevel(player.getLevel());
+			aranarthPlayer.setSurvivalExpProgress(player.getExp());
+		}
+
 		setPlayer(player.getUniqueId(), aranarthPlayer);
 
 		try {

@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -89,6 +91,12 @@ public class NetworkManager {
 
     /** Players currently online on OTHER servers. */
     private final Map<UUID, NetworkPlayer> remoteRoster = new ConcurrentHashMap<>();
+
+    /**
+     * Players that are currently mid-transfer to another server.
+     * Used to suppress the quit message/sound on the outgoing server.
+     */
+    private final Set<UUID> transferringPlayers = ConcurrentHashMap.newKeySet();
 
     /** Pending cross-server TP requests received from another server. */
     private final Map<UUID, CrossServerTpContext> pendingCrossServerRequests = new ConcurrentHashMap<>();
@@ -360,9 +368,102 @@ public class NetworkManager {
     // -------------------------------------------------------------------------
 
     /**
+     * Marks a player as being transferred to another server so the quit listener
+     * can suppress the goodbye message and sound.
+     */
+    public void markTransferring(UUID uuid) {
+        transferringPlayers.add(uuid);
+    }
+
+    /**
+     * Returns true and removes the flag if the player was mid-transfer, false otherwise.
+     */
+    public boolean consumeTransferring(UUID uuid) {
+        return transferringPlayers.remove(uuid);
+    }
+
+    /**
+     * Saves the player's survival inventory and ender chest to their AranarthPlayer, persists
+     * both the player data and the pending teleport to MySQL, then transfers the player to the
+     * target server only once both writes have completed.
+     *
+     * <p>This eliminates the race condition where the BungeeCord transfer message was sent before
+     * the async MySQL writes finished, causing stale inventory data to be loaded on arrival.</p>
+     *
+     * <p>{@code pending.setApplyInventory(true)} is set automatically.</p>
+     */
+    public void saveInventoryAndTransfer(Player player, String targetServer, PendingTeleport pending) {
+        UUID uuid = player.getUniqueId();
+
+        // Serialize inventory and ender chest into AranarthPlayer. handleTeleportLogic() already
+        // does this for teleports that go through the normal countdown, but callers like
+        // handleTransfer/handleTpAccept bypass that path, so we always do it here as a fallback.
+        if (AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap != null) {
+                try {
+                    ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to serialize inventory for " + player.getName() + ": " + e.getMessage());
+                }
+                try {
+                    ap.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents()));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to serialize ender chest for " + player.getName() + ": " + e.getMessage());
+                }
+                ap.setSurvivalHealth(player.getHealth());
+                ap.setSurvivalFoodLevel(player.getFoodLevel());
+                ap.setSurvivalSaturation(player.getSaturation());
+                ap.setSurvivalExpLevel(player.getLevel());
+                ap.setSurvivalExpProgress(player.getExp());
+                AranarthUtils.setPlayer(uuid, ap);
+            }
+        }
+
+        pending.setApplyInventory(true);
+
+        // Build the serialized forms now, on the main thread, so the async task only does I/O.
+        final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(uuid);
+        final String pendingJson = gson.toJson(pending);
+
+        transferringPlayers.add(uuid);
+
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                if (rawRow != null && DatabaseManager.isActive()) {
+                    DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, rawRow);
+                }
+                db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                        + "DB write before transfer failed for " + player.getName() + ": " + e.getMessage());
+            }
+            // Send the BungeeCord Connect message on the main thread after both writes complete.
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                if (!player.isOnline()) {
+                    transferringPlayers.remove(uuid);
+                    return;
+                }
+                try {
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DataOutputStream dos = new DataOutputStream(bos);
+                    dos.writeUTF("Connect");
+                    dos.writeUTF(targetServer);
+                    player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+                            + "Failed to transfer " + player.getName() + " to " + targetServer + ": " + e.getMessage());
+                    transferringPlayers.remove(uuid);
+                }
+            });
+        });
+    }
+
+    /**
      * Instructs the proxy to move {@code player} to {@code targetServer}.
      */
     public void transferPlayer(Player player, String targetServer) {
+        transferringPlayers.add(player.getUniqueId());
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(bos);
@@ -535,15 +636,14 @@ public class NetworkManager {
                 requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
             }
         } else {
-            setPendingTeleport(requesterUuid,
-                    new PendingTeleport(accepterUuid.toString(), "&e&l" + accepterServer.toUpperCase(),
-                            "&7You have teleported to " + accepterNick));
             Player requester = Bukkit.getPlayer(requesterUuid);
             if (requester != null) {
                 requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
                 String targetServer = AranarthCore.getInstance().getConfig()
                         .getString("network.servers." + accepterServer, accepterServer);
-                transferPlayer(requester, targetServer);
+                PendingTeleport ptForRequester = new PendingTeleport(accepterUuid.toString(),
+                        "&e&l" + accepterServer.toUpperCase(), "&7You have teleported to " + accepterNick);
+                saveInventoryAndTransfer(requester, targetServer, ptForRequester);
             }
         }
     }
@@ -569,7 +669,15 @@ public class NetworkManager {
 
         String velocityName = AranarthCore.getInstance().getConfig()
                 .getString("network.servers." + toServer, toServer);
-        transferPlayer(player, velocityName);
+
+        // Read the pending TP that was set on the requester's server so we can embed this
+        // player's inventory into it before the DB write + transfer sequence fires.
+        PendingTeleport existing = getPendingTeleport(uuid);
+        if (existing != null) {
+            saveInventoryAndTransfer(player, velocityName, existing);
+        } else {
+            transferPlayer(player, velocityName);
+        }
     }
 
     // -------------------------------------------------------------------------

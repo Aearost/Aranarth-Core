@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -47,6 +48,12 @@ public class PlayerServerJoinListener implements Listener {
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
+
+		// Detect cross-server transfers: check for a pending TP before any join noise fires.
+		// getPendingTeleport() does a synchronous DB lookup but is already called on the main
+		// thread 1 tick later; doing it here keeps things consistent and avoids a race.
+		boolean isCrossServerTransfer = NetworkManager.isActive()
+				&& NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
 
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
@@ -131,25 +138,29 @@ public class PlayerServerJoinListener implements Listener {
 			displayMotd(player);
 		}
 
-		DateUtils dateUtils = new DateUtils();
-		String nameToDisplay;
-		
-		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+		if (isCrossServerTransfer) {
+			e.setJoinMessage(null);
 		} else {
-			nameToDisplay = "&7" + AranarthUtils.getUsername(player);
-		}
-		
-		if (dateUtils.isValentinesDay()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES)));
-		} else if (dateUtils.isEaster()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER)));
-		} else if (dateUtils.isHalloween()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
-		} else if (dateUtils.isChristmas()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
-		} else {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
+			DateUtils dateUtils = new DateUtils();
+			String nameToDisplay;
+
+			if (!AranarthUtils.getNickname(player).isEmpty()) {
+				nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+			} else {
+				nameToDisplay = "&7" + AranarthUtils.getUsername(player);
+			}
+
+			if (dateUtils.isValentinesDay()) {
+				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES)));
+			} else if (dateUtils.isEaster()) {
+				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER)));
+			} else if (dateUtils.isHalloween()) {
+				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+			} else if (dateUtils.isChristmas()) {
+				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+			} else {
+				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
+			}
 		}
 
 		boolean finalIsNewPlayer = isNewPlayer;
@@ -184,6 +195,22 @@ public class PlayerServerJoinListener implements Listener {
 							} else {
 								player.getInventory().clear();
 							}
+							if (apInv != null && !apInv.getSurvivalEnderChest().isEmpty()) {
+								try {
+									player.getEnderChest().setContents(
+											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalEnderChest()));
+								} catch (Exception ignored) {
+									player.getEnderChest().clear();
+								}
+							}
+							if (apInv != null) {
+								player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()));
+								player.setFoodLevel(apInv.getSurvivalFoodLevel());
+								player.setSaturation(apInv.getSurvivalSaturation());
+								player.setLevel(apInv.getSurvivalExpLevel());
+								player.setExp(apInv.getSurvivalExpProgress());
+							}
+							player.setGameMode(GameMode.SURVIVAL);
 						}
 
 						if ("player".equals(pending.getType())) {
@@ -276,7 +303,7 @@ public class PlayerServerJoinListener implements Listener {
 			for (Player online : Bukkit.getOnlinePlayers()) {
 				online.playSound(online, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 			}
-		} else {
+		} else if (!isCrossServerTransfer) {
 			playJoinSound();
 		}
 		AranarthUtils.updateTab();
@@ -419,6 +446,22 @@ public class PlayerServerJoinListener implements Listener {
 			player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));
 		} else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
 			player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
+		}
+
+		// Pending crate key notification
+		UUID uuid = player.getUniqueId();
+		int pendingKeys = 0;
+		Integer pv = AranarthUtils.getPendingVoteKeys().get(uuid);
+		Integer pr = AranarthUtils.getPendingRareKeys().get(uuid);
+		Integer pe = AranarthUtils.getPendingEpicKeys().get(uuid);
+		Integer pg = AranarthUtils.getPendingGodlyKeys().get(uuid);
+		if (pv != null) pendingKeys += pv;
+		if (pr != null) pendingKeys += pr;
+		if (pe != null) pendingKeys += pe;
+		if (pg != null) pendingKeys += pg;
+		if (pendingKeys > 0) {
+			String keyWord = pendingKeys == 1 ? "key" : "keys";
+			player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + pendingKeys + " pending crate " + keyWord + " &7- use &e/keyclaim &7to collect!"));
 		}
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));
