@@ -140,7 +140,7 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS network_roster (
                 uuid VARCHAR(36) PRIMARY KEY,
                 username VARCHAR(64) NOT NULL,
-                nickname VARCHAR(512) DEFAULT '',
+                nickname TEXT DEFAULT '',
                 server VARCHAR(64) NOT NULL,
                 rank INT DEFAULT 0,
                 council_rank INT DEFAULT 0,
@@ -229,6 +229,132 @@ public class DatabaseManager {
                 expires_at TIMESTAMP NOT NULL,
                 INDEX idx_expires (expires_at)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_date (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_homepads (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_warps (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_locked_containers (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json LONGTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_gates (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json LONGTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_avatars (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_dominions (
+                id VARCHAR(36) PRIMARY KEY,
+                raw_data LONGTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_dominion_permissions (
+                dominion_id VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_dominion_player_perms (
+                dominion_id VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_outposts (
+                id VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_defenders (
+                dominion_id VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_toggles (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_compressible (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_sentinels (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_shops (
+                id INT DEFAULT 1 PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_shops (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_shop_locations (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_shop_collaborators (
+                uuid VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -250,7 +376,8 @@ public class DatabaseManager {
     private void migrateSchema() {
         String[] migrations = {
             "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
-            "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT"
+            "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
+            "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -293,6 +420,21 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save raw player data for " + uuid + ": " + e.getMessage());
         }
+    }
+
+    /** Returns the raw pipe-delimited row for the given uuid, or null if not found. */
+    public String loadAranarthPlayerRaw(UUID uuid) {
+        String sql = "SELECT raw_data FROM aranarth_players WHERE uuid = ? AND raw_data IS NOT NULL AND raw_data != ''";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("raw_data");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load raw player data for " + uuid + ": " + e.getMessage());
+        }
+        return null;
     }
 
     /** Returns uuid -> {worldPrefix -> int[]{kills, deaths}} for all players. */
@@ -526,7 +668,7 @@ public class DatabaseManager {
             ps.setString(1, uuid.toString());
             ps.setString(2, username);
             String safeNick = nickname != null ? nickname : "";
-            if (safeNick.length() > 512) safeNick = safeNick.substring(0, 512);
+            if (safeNick.length() > 750) safeNick = safeNick.substring(0, 750);
             ps.setString(3, safeNick);
             ps.setString(4, server);
             ps.setInt(5, rank);
@@ -563,6 +705,7 @@ public class DatabaseManager {
                     UUID uuid = UUID.fromString(rs.getString("uuid"));
                     roster.put(uuid, new NetworkPlayer(
                             uuid,
+                            rs.getString("username"),
                             rs.getString("nickname"),
                             rs.getString("server"),
                             rs.getInt("rank"),
@@ -983,5 +1126,497 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to cleanup temp data: " + e.getMessage());
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // server_date  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveServerDate(String dataJson) {
+        String sql = "INSERT INTO server_date (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server_date: " + e.getMessage());
+        }
+    }
+
+    public String loadServerDate() {
+        String sql = "SELECT data_json FROM server_date WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load server_date: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_homepads  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveHomepads(String dataJson) {
+        String sql = "INSERT INTO server_homepads (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save homepads: " + e.getMessage());
+        }
+    }
+
+    public String loadHomepads() {
+        String sql = "SELECT data_json FROM server_homepads WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load homepads: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_warps  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveWarps(String dataJson) {
+        String sql = "INSERT INTO server_warps (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save warps: " + e.getMessage());
+        }
+    }
+
+    public String loadWarps() {
+        String sql = "SELECT data_json FROM server_warps WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load warps: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_locked_containers  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveLockedContainers(String dataJson) {
+        String sql = "INSERT INTO server_locked_containers (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save locked containers: " + e.getMessage());
+        }
+    }
+
+    public String loadLockedContainers() {
+        String sql = "SELECT data_json FROM server_locked_containers WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load locked containers: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_gates  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveGates(String dataJson) {
+        String sql = "INSERT INTO server_gates (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save gates: " + e.getMessage());
+        }
+    }
+
+    public String loadGates() {
+        String sql = "SELECT data_json FROM server_gates WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load gates: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_avatars  (singleton row, id=1)
+    // -------------------------------------------------------------------------
+
+    public void saveAvatars(String dataJson) {
+        String sql = "INSERT INTO server_avatars (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save avatars: " + e.getMessage());
+        }
+    }
+
+    public String loadAvatars() {
+        String sql = "SELECT data_json FROM server_avatars WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load avatars: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_dominions  (per-dominion raw pipe-delimited rows)
+    // -------------------------------------------------------------------------
+
+    public void saveDominion(UUID id, String rawData) {
+        String sql = "INSERT INTO server_dominions (id, raw_data) VALUES (?, ?) ON DUPLICATE KEY UPDATE raw_data=VALUES(raw_data)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id.toString()); ps.setString(2, rawData); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion " + id + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllDominions() {
+        String sql = "SELECT id, raw_data FROM server_dominions";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("id")), rs.getString("raw_data"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominions: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void deleteDominion(UUID id) {
+        String sql = "DELETE FROM server_dominions WHERE id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion " + id + ": " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // server_dominion_permissions  (per-dominion JSON)
+    // -------------------------------------------------------------------------
+
+    public void saveDominionPermissions(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_dominion_permissions (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion permissions for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllDominionPermissions() {
+        String sql = "SELECT dominion_id, data_json FROM server_dominion_permissions";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion permissions: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_dominion_player_perms  (per-dominion JSON)
+    // -------------------------------------------------------------------------
+
+    public void saveDominionPlayerPerms(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_dominion_player_perms (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion player perms for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllDominionPlayerPerms() {
+        String sql = "SELECT dominion_id, data_json FROM server_dominion_player_perms";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion player perms: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_outposts  (per-outpost JSON)
+    // -------------------------------------------------------------------------
+
+    public void saveOutpost(UUID id, String dataJson) {
+        String sql = "INSERT INTO server_outposts (id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save outpost " + id + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllOutposts() {
+        String sql = "SELECT id, data_json FROM server_outposts";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("id")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all outposts: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void deleteOutpost(UUID id) {
+        String sql = "DELETE FROM server_outposts WHERE id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete outpost " + id + ": " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // server_defenders  (per-dominion JSON array)
+    // -------------------------------------------------------------------------
+
+    public void saveDefendersForDominion(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_defenders (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save defenders for dominion " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllDefenders() {
+        String sql = "SELECT dominion_id, data_json FROM server_defenders";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all defenders: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_toggles  (per-player JSON)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerToggles(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_toggles (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player toggles for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerToggles() {
+        String sql = "SELECT uuid, data_json FROM player_toggles";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player toggles: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_compressible  (per-player JSON)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerCompressible(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_compressible (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player compressible for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerCompressible() {
+        String sql = "SELECT uuid, data_json FROM player_compressible";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player compressible: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_sentinels  (per-player JSON)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerSentinels(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_sentinels (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player sentinels for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerSentinels() {
+        String sql = "SELECT uuid, data_json FROM player_sentinels";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player sentinels: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // server_shops  (singleton row, id=1 — stores all null-UUID server shops)
+    // -------------------------------------------------------------------------
+
+    public void saveServerShops(String dataJson) {
+        String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save server shops: " + e.getMessage());
+        }
+    }
+
+    public String loadServerShops() {
+        String sql = "SELECT data_json FROM server_shops WHERE id = 1";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getString("data_json");
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load server shops: " + e.getMessage());
+        }
+        return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_shops  (per-player JSON array of shops)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerShops(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shops for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerShops() {
+        String sql = "SELECT uuid, data_json FROM player_shops";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shops: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_shop_locations  (per-player JSON)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerShopLocation(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_shop_locations (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shop location for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public void deletePlayerShopLocation(UUID uuid) {
+        String sql = "DELETE FROM player_shop_locations WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete player shop location for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerShopLocations() {
+        String sql = "SELECT uuid, data_json FROM player_shop_locations";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop locations: " + e.getMessage());
+        }
+        return result;
+    }
+
+    // -------------------------------------------------------------------------
+    // player_shop_collaborators  (per-player JSON)
+    // -------------------------------------------------------------------------
+
+    public void savePlayerShopCollaborators(UUID uuid, String dataJson) {
+        String sql = "INSERT INTO player_shop_collaborators (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save player shop collaborators for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public Map<UUID, String> loadAllPlayerShopCollaborators() {
+        String sql = "SELECT uuid, data_json FROM player_shop_collaborators";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all player shop collaborators: " + e.getMessage());
+        }
+        return result;
     }
 }

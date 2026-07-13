@@ -32,7 +32,7 @@ public class ShopIslandUtils {
     private static final int MAX_ISLAND_DEPTH = 16;
 
     // Large number of columns per row before wrapping (effectively unlimited for any normal use)
-    private static final int GRID_ROW_WIDTH = 1000;
+    static final int GRID_ROW_WIDTH = 1000;
 
     // -----------------------------------------------------------------------
     // Grid positioning

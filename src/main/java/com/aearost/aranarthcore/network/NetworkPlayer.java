@@ -8,6 +8,7 @@ import java.util.UUID;
 public class NetworkPlayer {
 
     private final UUID uuid;
+    private final String username;
     private String nickname;
     private final String server;
     private final int rank;
@@ -16,9 +17,10 @@ public class NetworkPlayer {
     private final int architectRank;
     private final boolean vanished;
 
-    public NetworkPlayer(UUID uuid, String nickname, String server,
+    public NetworkPlayer(UUID uuid, String username, String nickname, String server,
                          int rank, int councilRank, int saintRank, int architectRank, boolean vanished) {
         this.uuid = uuid;
+        this.username = username != null ? username : "";
         this.nickname = nickname;
         this.server = server;
         this.rank = rank;
@@ -29,6 +31,7 @@ public class NetworkPlayer {
     }
 
     public UUID getUuid() { return uuid; }
+    public String getUsername() { return username; }
     public String getNickname() { return nickname; }
     public void setNickname(String nickname) { this.nickname = nickname; }
     public String getServer() { return server; }

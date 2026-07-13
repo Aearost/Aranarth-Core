@@ -12,6 +12,8 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
 import org.bukkit.*;
@@ -165,6 +167,25 @@ public class PlayerServerJoinListener implements Listener {
 					if (pending != null) {
 						hadPendingTp = true;
 						NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
+
+						// If this transfer requires an inventory swap, reload player data from
+						// the source server (which saved it to MySQL just before transferring)
+						// and apply the stored survival inventory.
+						if (pending.isApplyInventory()) {
+							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
+							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
+								try {
+									player.getInventory().setContents(
+											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
+								} catch (Exception ignored) {
+									player.getInventory().clear();
+								}
+							} else {
+								player.getInventory().clear();
+							}
+						}
+
 						if ("player".equals(pending.getType())) {
 							// TP to wherever the named player currently is
 							Player target = Bukkit.getPlayer(java.util.UUID.fromString(pending.getTargetUuid()));

@@ -3,7 +3,6 @@ package com.aearost.aranarthcore;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.AstralProjection;
 import com.aearost.aranarthcore.abilities.airbending.spiritual.PastLives;
 import com.aearost.aranarthcore.network.NetworkManager;
-import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.event.block.IncantationMagnetismBlockBreak;
 import com.aearost.aranarthcore.abilities.airbending.soundbending.SoundAbility;
 import com.aearost.aranarthcore.commands.council.CommandAC;
@@ -319,40 +318,104 @@ public class AranarthCore extends JavaPlugin {
      * Initializes necessary Utilities functionality needed on server startup.
      */
     private void initializeUtils() {
-        PersistenceUtils.loadServerDate();
-        PersistenceUtils.loadHomepads();
-        // DB-primary loads
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        boolean db = com.aearost.aranarthcore.database.DatabaseManager.isActive();
+
+        if (db) {
+            PersistenceUtils.loadServerDateFromDatabase();
+        } else {
+            PersistenceUtils.loadServerDate();
+        }
+        if (db) {
+            PersistenceUtils.loadHomepadsFromDatabase();
+        } else {
+            PersistenceUtils.loadHomepads();
+        }
+        if (db) {
             PersistenceUtils.loadAranarthPlayersFromDatabase();
         } else {
             PersistenceUtils.loadAranarthPlayers();
         }
-        PersistenceUtils.loadShops();
+        if (db) {
+            PersistenceUtils.loadShopsFromDatabase();
+            PersistenceUtils.loadServerShopsFromDatabase();
+        } else {
+            PersistenceUtils.loadShops();
+        }
         ShopUtils.initializeAllHolograms();
-        PersistenceUtils.loadLockedContainers();
-        PersistenceUtils.loadDominions();
-        PersistenceUtils.loadDominionPermissions();
-        PersistenceUtils.loadDominionPlayerPermissions();
-        PersistenceUtils.loadOutposts();
-        PersistenceUtils.loadDefenders();
-        PersistenceUtils.loadWarps();
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
+            PersistenceUtils.loadLockedContainersFromDatabase();
+        } else {
+            PersistenceUtils.loadLockedContainers();
+        }
+        // Dominions must load before permissions, outposts, and defenders
+        if (db) {
+            PersistenceUtils.loadDominionsFromDatabase();
+        } else {
+            PersistenceUtils.loadDominions();
+        }
+        if (db) {
+            PersistenceUtils.loadDominionPermissionsFromDatabase();
+        } else {
+            PersistenceUtils.loadDominionPermissions();
+        }
+        if (db) {
+            PersistenceUtils.loadDominionPlayerPermissionsFromDatabase();
+        } else {
+            PersistenceUtils.loadDominionPlayerPermissions();
+        }
+        if (db) {
+            PersistenceUtils.loadOutpostsFromDatabase();
+        } else {
+            PersistenceUtils.loadOutposts();
+        }
+        if (db) {
+            PersistenceUtils.loadDefendersFromDatabase();
+        } else {
+            PersistenceUtils.loadDefenders();
+        }
+        if (db) {
+            PersistenceUtils.loadWarpsFromDatabase();
+        } else {
+            PersistenceUtils.loadWarps();
+        }
+        if (db) {
             PersistenceUtils.loadPunishmentsFromDatabase();
         } else {
             PersistenceUtils.loadPunishments();
         }
-        PersistenceUtils.loadAvatars();
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
+            PersistenceUtils.loadAvatarsFromDatabase();
+        } else {
+            PersistenceUtils.loadAvatars();
+        }
+        if (db) {
             PersistenceUtils.loadBoostsFromDatabase();
         } else {
             PersistenceUtils.loadBoosts();
         }
-        PersistenceUtils.loadCompressible();
-        PersistenceUtils.loadShopLocations();
+        if (db) {
+            PersistenceUtils.loadCompressibleFromDatabase();
+        } else {
+            PersistenceUtils.loadCompressible();
+        }
+        if (db) {
+            PersistenceUtils.loadShopLocationsFromDatabase();
+        } else {
+            PersistenceUtils.loadShopLocations();
+        }
         PersistenceUtils.loadShopIslandCounter();
-        PersistenceUtils.loadShopCollaborators();
-        PersistenceUtils.loadSentinels();
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
+            PersistenceUtils.loadShopCollaboratorsFromDatabase();
+        } else {
+            PersistenceUtils.loadShopCollaborators();
+        }
+        // Sentinels and toggles must load after aranarth players
+        if (db) {
+            PersistenceUtils.loadSentinelsFromDatabase();
+        } else {
+            PersistenceUtils.loadSentinels();
+        }
+        if (db) {
             PersistenceUtils.loadVotesFromDatabase();
         } else {
             PersistenceUtils.loadVotes();
@@ -361,35 +424,43 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadEpicKeys();
             PersistenceUtils.loadGodlyKeys();
         }
-        PersistenceUtils.loadToggledFeatures();
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
+            PersistenceUtils.loadToggledFeaturesFromDatabase();
+        } else {
+            PersistenceUtils.loadToggledFeatures();
+        }
+        if (db) {
             PersistenceUtils.loadKillDeathCountFromDatabase();
         } else {
             PersistenceUtils.loadKillDeathCount();
         }
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
             PersistenceUtils.loadQuestStateFromDatabase();
         } else {
             PersistenceUtils.loadQuestState();
         }
         QuestUtils.initialize(this);
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
             PersistenceUtils.loadQuestProgressFromDatabase();
         } else {
             PersistenceUtils.loadQuestProgress();
         }
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
             PersistenceUtils.loadLoginStreaksFromDatabase();
         } else {
             PersistenceUtils.loadLoginStreaks();
         }
-        PersistenceUtils.loadGates();
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
+            PersistenceUtils.loadGatesFromDatabase();
+        } else {
+            PersistenceUtils.loadGates();
+        }
+        if (db) {
             PersistenceUtils.loadMountsFromDatabase();
         } else {
             PersistenceUtils.loadMounts();
         }
-        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (db) {
             PersistenceUtils.loadMailFromDatabase();
         } else {
             PersistenceUtils.loadMail();

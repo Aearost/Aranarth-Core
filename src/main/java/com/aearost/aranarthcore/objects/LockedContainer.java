@@ -14,6 +14,7 @@ public class LockedContainer {
 	private UUID owner;
 	private List<UUID> trusted;
 	private Location[] locations;
+	private String worldName;
 
 	public LockedContainer(UUID owner, List<UUID> trusted, Location[] locations) {
 		this.owner = owner;
@@ -67,6 +68,26 @@ public class LockedContainer {
 	 */
 	public void setLocations(Location[] locations) {
 		this.locations = locations;
+	}
+
+	/**
+	 * Returns the world name for this container. Falls back to the live world reference
+	 * if no explicit name was stored (e.g. containers created at runtime on the local server).
+	 */
+	public String getWorldName() {
+		if (worldName != null) return worldName;
+		if (locations != null && locations[0] != null && locations[0].getWorld() != null) {
+			return locations[0].getWorld().getName();
+		}
+		return null;
+	}
+
+	/**
+	 * Explicitly stores the world name. Used at load time so that containers from
+	 * worlds not loaded on this server can still be serialized correctly.
+	 */
+	public void setWorldName(String worldName) {
+		this.worldName = worldName;
 	}
 
 	@Override

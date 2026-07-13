@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -50,10 +52,17 @@ public class CommandSMP implements CommandExecutor {
 				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
 						aranarthPlayer.isInAdminMode(), "&e&lSMP", "&7Transferring to the SMP...", success -> {
 					if (success) {
-						NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(),
+						AranarthPlayer apTransfer = AranarthUtils.getPlayer(player.getUniqueId());
+                        apTransfer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+                        AranarthUtils.setPlayer(player.getUniqueId(), apTransfer);
+						PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
+						player.getInventory().clear();
+						com.aearost.aranarthcore.network.PendingTeleport smpPt =
 								new com.aearost.aranarthcore.network.PendingTeleport(
 										"world", 0.5, 120.0, 3.0, 180.0f, 0.0f,
-										"&e&lSMP", "&7Welcome to the SMP"));
+										"&e&lSMP", "&7Welcome to the SMP");
+						smpPt.setApplyInventory(true);
+						NetworkManager.getInstance().setPendingTeleport(player.getUniqueId(), smpPt);
 						String smpServerName = AranarthCore.getInstance().getConfig()
 								.getString("network.servers.smp", "smp");
 						NetworkManager.getInstance().transferPlayer(player, smpServerName);

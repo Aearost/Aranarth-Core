@@ -449,8 +449,10 @@ public class NetworkManager {
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         boolean vanished = json.get("vanished").getAsBoolean();
+        String username = json.has("username") ? json.get("username").getAsString() : "";
         NetworkPlayer np = new NetworkPlayer(
                 uuid,
+                username,
                 json.get("nickname").getAsString(),
                 server,
                 json.get("rank").getAsInt(),

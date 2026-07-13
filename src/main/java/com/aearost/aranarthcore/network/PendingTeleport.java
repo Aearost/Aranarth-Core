@@ -28,6 +28,7 @@ public class PendingTeleport {
 
     private String titleMain;
     private String titleSub;
+    private boolean applyInventory = false;
 
     public PendingTeleport() {}
 
@@ -74,4 +75,6 @@ public class PendingTeleport {
     public String getCommand() { return command; }
     public String getTitleMain() { return titleMain; }
     public String getTitleSub() { return titleSub; }
+    public boolean isApplyInventory() { return applyInventory; }
+    public void setApplyInventory(boolean applyInventory) { this.applyInventory = applyInventory; }
 }

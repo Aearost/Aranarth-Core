@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.gui.GuiShopLocation;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
@@ -424,6 +425,7 @@ public class CommandShop implements CommandExecutor {
 
         // Remove location data, collaborators, and custom name
         AranarthUtils.deleteShopLocation(targetUuid);
+        PersistenceUtils.deleteShopLocationFromDatabase(targetUuid);
         AranarthUtils.removeShopIslandCenter(targetUuid);
         AranarthUtils.removeAllShopCollaborators(targetUuid);
         AranarthUtils.removeShopName(targetUuid);

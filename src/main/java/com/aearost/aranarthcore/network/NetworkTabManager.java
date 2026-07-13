@@ -50,7 +50,7 @@ public class NetworkTabManager {
                 chatSessionDataClass = null; // not present in all versions
             }
 
-            //noinspection unchecked
+            //noinspection unchecked,rawtypes
             survivalGameType = Enum.valueOf((Class<Enum>) gameTypeClass, "SURVIVAL");
 
             available = true;
@@ -73,10 +73,11 @@ public class NetworkTabManager {
         ensureInitialised();
         if (!available || viewers.isEmpty()) return;
         try {
-            Object gameProfile  = createGameProfile(np.getUuid(), np.getNickname().isEmpty() ? "Unknown" : np.getNickname());
+            String profileName  = !np.getUsername().isEmpty() ? np.getUsername() : "Unknown";
+            Object gameProfile  = createGameProfile(np.getUuid(), profileName);
             Object displayName  = toNmsComponent(buildDisplayName(np)); // null on failure → falls back to profile name
             Object entry        = createEntry(np.getUuid(), gameProfile, displayName);
-            Object actionsSet   = createActionEnumSet();
+            EnumSet<?> actionsSet = createActionEnumSet();
             Object packet       = updatePacketClass
                     .getDeclaredConstructor(EnumSet.class, List.class)
                     .newInstance(actionsSet, List.of(entry));
@@ -138,7 +139,6 @@ public class NetworkTabManager {
      *  Uses the first declared constructor and fills arguments by type so that
      *  changes to the record's field list (e.g. showHat added in 1.21.4) are
      *  handled automatically without needing to update this code. */
-    @SuppressWarnings("unchecked")
     private static Object createEntry(UUID uuid, Object gameProfile, Object nmsComponent) throws Exception {
         Constructor<?> ctor = entryClass.getDeclaredConstructors()[0];
         ctor.setAccessible(true);
@@ -169,8 +169,8 @@ public class NetworkTabManager {
 
     /** Creates an EnumSet<Action> with ADD_PLAYER | UPDATE_LISTED | UPDATE_DISPLAY_NAME. */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static Object createActionEnumSet() throws Exception {
-        Set set = (Set) EnumSet.class.getMethod("noneOf", Class.class).invoke(null, actionClass);
+    private static EnumSet<?> createActionEnumSet() throws Exception {
+        EnumSet set = (EnumSet) EnumSet.class.getMethod("noneOf", Class.class).invoke(null, actionClass);
         set.add(Enum.valueOf((Class<Enum>) actionClass, "ADD_PLAYER"));
         set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LISTED"));
         set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_DISPLAY_NAME"));

@@ -3,9 +3,15 @@ version: 1.11
 authors: [Aearost]
 main: com.aearost.aranarthcore.AranarthCore
 api-version: 26.2
-depend: [mcMMO, ProjectKorra, DiscordSRV, VotifierPlus]
+depend: [mcMMO, ProjectKorra, DiscordSRV]
+softdepend: [VotifierPlus]
 description: A core plugin to incorporate any features we desire into our Minecraft world
 loadbefore: [mcMMO]
+# BungeeCord plugin messaging channel used to transfer players between servers via Velocity.
+# Only active when is-public-server: true.
+messaging-channels:
+  - BungeeCord
+
 commands:
   ac:
     description: All underlying commands regarding the plugin
