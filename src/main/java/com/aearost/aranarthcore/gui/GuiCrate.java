@@ -674,14 +674,17 @@ public class GuiCrate {
 		ItemStack egg = null;
 		switch (eggIndex) {
 			case 1 -> egg = new ItemStack(Material.BLAZE_SPAWN_EGG);
+			case 2 -> egg = new ItemStack(Material.SLIME_SPAWN_EGG);
 			default -> egg = new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG);
 		}
 
 		ItemMeta cycledEggMeta = egg.getItemMeta();
 		if (egg.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
 			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg"));
-		} else {
+		} else if (egg.getType() == Material.BLAZE_SPAWN_EGG) {
 			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg"));
+		} else {
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#51A03E&lSlime Spawn Egg"));
 		}
 		List<String> cycledEggLore = new ArrayList<>();
 		cycledEggLore.add(ChatUtils.translateToColor("&c5% Chance"));

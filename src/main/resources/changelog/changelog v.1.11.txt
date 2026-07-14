@@ -70,6 +70,7 @@ Minor Features
 [~] Made it so if a key is lost mid-use, the key is refunded and is claimable with /keyclaim
 [+] Added /keyclaim reminder to the MOTD
 [~] Fixed error caused by null string sent to ChatUtils.stripColorFormatting()
+[+] Added slime spawn eggs to the Godly crate rotating spawn eggs
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

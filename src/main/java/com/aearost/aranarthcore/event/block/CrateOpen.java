@@ -279,7 +279,7 @@ public class CrateOpen {
                                             }
 
                                             // Cycle through the next spawn egg iteration
-                                            if (indexes.get(1) < 1) {
+                                            if (indexes.get(1) < 2) {
                                                 indexes.set(1, indexes.get(1) + 1);
                                             } else {
                                                 indexes.set(1, 0);
@@ -849,11 +849,13 @@ public class CrateOpen {
                     reward.setAmount(3);
                     name = "&3&lEpic Crate Key x3";
                 } else {
-                    reward = getCycledGodlySpawnEgg(new Random().nextInt(2));
+                    reward = getCycledGodlySpawnEgg(new Random().nextInt(3));
                     if (reward.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
                         name = ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg");
-                    } else {
+                    } else if (reward.getType() == Material.BLAZE_SPAWN_EGG) {
                         name = ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg");
+                    } else {
+                        name = ChatUtils.translateToColor("#51A03E&lSlime Spawn Egg");
                     }
                 }
 
@@ -1000,6 +1002,7 @@ public class CrateOpen {
         ItemStack egg = null;
         switch (index) {
             case 1 -> egg = new ItemStack(Material.BLAZE_SPAWN_EGG);
+            case 2 -> egg = new ItemStack(Material.SLIME_SPAWN_EGG);
             default -> egg = new ItemStack(Material.MAGMA_CUBE_SPAWN_EGG);
         }
         return egg;
