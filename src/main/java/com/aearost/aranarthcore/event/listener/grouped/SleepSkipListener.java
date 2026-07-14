@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -113,16 +114,17 @@ public class SleepSkipListener implements Listener {
 			}
 
 			// Skip the night
-			World world = Bukkit.getWorld("world");
-			World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
-			World resource = Bukkit.getWorld("resource");
-			world.setTime(23980);
-			smp.setTime(23980);
-			resource.setTime(23980);
+			for (World w : AranarthUtils.getSyncWorlds()) {
+				w.setTime(23980);
+			}
 
 			// Immediately end any storm, will be picked up by DateUtils logic within 5 seconds
 			if (AranarthUtils.getWeather() != Weather.CLEAR) {
 				AranarthUtils.setStormDuration(0);
+			}
+
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSyncTime(23980);
 			}
 
 			scheduledSkipTask = -1;

@@ -2,9 +2,11 @@ package com.aearost.aranarthcore.network;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.ItemUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.google.gson.Gson;
@@ -66,13 +68,15 @@ public class NetworkManager {
     // Channel names  (kept identical for compatibility)
     // -------------------------------------------------------------------------
 
-    public static final String CH_CHAT       = "aranarth:chat";
-    public static final String CH_JOIN       = "aranarth:join";
-    public static final String CH_QUIT       = "aranarth:quit";
-    public static final String CH_TP_REQUEST = "aranarth:tp_request";
-    public static final String CH_TP_ACCEPT  = "aranarth:tp_accept";
-    public static final String CH_TP_DENY    = "aranarth:tp_deny";
-    public static final String CH_TRANSFER   = "aranarth:transfer";
+    public static final String CH_CHAT        = "aranarth:chat";
+    public static final String CH_JOIN        = "aranarth:join";
+    public static final String CH_QUIT        = "aranarth:quit";
+    public static final String CH_TP_REQUEST  = "aranarth:tp_request";
+    public static final String CH_TP_ACCEPT   = "aranarth:tp_accept";
+    public static final String CH_TP_DENY     = "aranarth:tp_deny";
+    public static final String CH_TRANSFER    = "aranarth:transfer";
+    public static final String CH_SYNC_TIME    = "aranarth:sync_time";
+    public static final String CH_SYNC_WEATHER = "aranarth:sync_weather";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -180,13 +184,15 @@ public class NetworkManager {
 
     private void dispatch(String channel, JsonObject json) {
         switch (channel) {
-            case CH_CHAT       -> handleChat(json);
-            case CH_JOIN       -> handleJoin(json);
-            case CH_QUIT       -> handleQuit(json);
-            case CH_TP_REQUEST -> handleTpRequest(json);
-            case CH_TP_ACCEPT  -> handleTpAccept(json);
-            case CH_TP_DENY    -> handleTpDeny(json);
-            case CH_TRANSFER   -> handleTransfer(json);
+            case CH_CHAT         -> handleChat(json);
+            case CH_JOIN         -> handleJoin(json);
+            case CH_QUIT         -> handleQuit(json);
+            case CH_TP_REQUEST   -> handleTpRequest(json);
+            case CH_TP_ACCEPT    -> handleTpAccept(json);
+            case CH_TP_DENY      -> handleTpDeny(json);
+            case CH_TRANSFER     -> handleTransfer(json);
+            case CH_SYNC_TIME    -> handleSyncTime(json);
+            case CH_SYNC_WEATHER -> handleSyncWeather(json);
         }
     }
 
@@ -276,6 +282,36 @@ public class NetworkManager {
         json.addProperty("denierNickname", denierNickname);
         json.addProperty("requesterUuid", requesterUuid.toString());
         publish(CH_TP_DENY, json);
+    }
+
+    /**
+     * Broadcasts a time change to all other servers so their sync worlds stay in lockstep.
+     * @param time The new world time in ticks.
+     */
+    public void publishSyncTime(long time) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("time", time);
+        publish(CH_SYNC_TIME, json);
+    }
+
+    /**
+     * Broadcasts a weather change to all other servers so their sync worlds stay in lockstep.
+     * @param weatherType  One of "CLEAR", "RAIN", "THUNDER", or "SNOW".
+     * @param duration     The world duration ticks (clearWeatherDuration for CLEAR/SNOW, weatherDuration for RAIN/THUNDER).
+     * @param isThunder    True only for THUNDER.
+     * @param stormDuration The value to pass to AranarthUtils.setStormDuration() after world state is applied.
+     * @param stormDelay    The value to pass to AranarthUtils.setStormDelay() after world state is applied.
+     */
+    public void publishSyncWeather(String weatherType, int duration, boolean isThunder, int stormDuration, int stormDelay) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("weatherType", weatherType);
+        json.addProperty("duration", duration);
+        json.addProperty("isThunder", isThunder);
+        json.addProperty("stormDuration", stormDuration);
+        json.addProperty("stormDelay", stormDelay);
+        publish(CH_SYNC_WEATHER, json);
     }
 
     // -------------------------------------------------------------------------
@@ -718,6 +754,106 @@ public class NetworkManager {
             saveInventoryAndTransfer(player, velocityName, existing);
         } else {
             transferPlayer(player, velocityName);
+        }
+    }
+
+    private void handleSyncTime(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        long time = json.get("time").getAsLong();
+        List<World> syncWorlds = AranarthUtils.getSyncWorlds();
+        for (World w : syncWorlds) {
+            w.setTime(time);
+        }
+        if (AranarthUtils.getWeather() != Weather.CLEAR) {
+            AranarthUtils.setStormDuration(0);
+            for (World w : syncWorlds) {
+                w.setThunderDuration(0);
+                w.setWeatherDuration(0);
+            }
+        }
+    }
+
+    private void handleSyncWeather(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String weatherType = json.get("weatherType").getAsString();
+        int duration       = json.get("duration").getAsInt();
+        boolean isThunder  = json.get("isThunder").getAsBoolean();
+        int stormDuration  = json.get("stormDuration").getAsInt();
+        int stormDelay     = json.get("stormDelay").getAsInt();
+
+        List<World> syncWorlds = AranarthUtils.getSyncWorlds();
+
+        switch (weatherType) {
+            case "CLEAR" -> {
+                AranarthUtils.setStormDuration(0);
+                AranarthUtils.setWeather(Weather.CLEAR);
+                for (World w : syncWorlds) {
+                    w.setThunderDuration(0);
+                    w.setWeatherDuration(0);
+                    w.setThundering(false);
+                    w.setStorm(false);
+                    w.setClearWeatherDuration(duration);
+                }
+                AranarthUtils.setStormDelay(stormDelay);
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    String pWorld = p.getWorld().getName();
+                    if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+                    if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+                    p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
+                    DateUtils.playClearSound(p);
+                }
+            }
+            case "RAIN", "THUNDER" -> {
+                Weather type = isThunder ? Weather.THUNDER : Weather.RAIN;
+                AranarthUtils.setWeather(type);
+                AranarthUtils.setStormDelay(0);
+                for (World w : syncWorlds) {
+                    w.setClearWeatherDuration(0);
+                    w.setStorm(true);
+                    w.setThundering(isThunder);
+                    w.setWeatherDuration(duration);
+                    if (isThunder) {
+                        w.setThunderDuration(duration);
+                    }
+                }
+                AranarthUtils.setStormDuration(stormDuration);
+                String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    String pWorld = p.getWorld().getName();
+                    if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+                    if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+                    p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
+                    if (isThunder) {
+                        DateUtils.playThunderStartSound(p);
+                    } else {
+                        DateUtils.playRainStartSound(p);
+                    }
+                }
+            }
+            case "SNOW" -> {
+                AranarthUtils.setWeather(Weather.SNOW);
+                AranarthUtils.setStormDuration(0);
+                AranarthUtils.setStormDelay(0);
+                for (World w : syncWorlds) {
+                    w.setThunderDuration(0);
+                    w.setWeatherDuration(0);
+                    w.setThundering(false);
+                    w.setStorm(false);
+                    w.setClearWeatherDuration(duration);
+                }
+                AranarthUtils.setStormDuration(stormDuration);
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    String pWorld = p.getWorld().getName();
+                    if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
+                    if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
+                    p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
+                    DateUtils.playSnowStartSound(p);
+                }
+            }
         }
     }
 

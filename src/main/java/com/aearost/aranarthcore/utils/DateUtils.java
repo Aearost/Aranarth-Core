@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.enums.Weather;
@@ -1051,99 +1052,111 @@ public class DateUtils {
 			public void run() {
 				// 20 executions * 5 ticks is 100 ticks, which is 5 seconds
 				if (runs == 20) {
-					// If it is currently storming
-					if (AranarthUtils.getWeather() != Weather.CLEAR) {
-						// Determines if the storm ended
-						if (AranarthUtils.getStormDuration() <= 0) {
-							Random random = new Random();
-							int delay = 0;
-							Month month = AranarthUtils.getMonth();
-							// Updates the delay until the next storm
-							switch (month) {
-								case Month.UMBRAVOR ->
-									// At least 0.75 days, no more than 5 days
-									delay = random.nextInt(102000) + 18000;
-								case Month.GLACIVOR ->
-									// At least 0.5 days, no more than 2 days
-									delay = random.nextInt(48000) + 12000;
-								case Month.FRIGORVOR ->
-									// At least 0.25 days, no more than 1 day
-									delay = random.nextInt(18000) + 6000;
-								case Month.OBSCURVOR ->
-									// At least 0.5 days, no more than 1.5 days
-									delay = random.nextInt(36000) + 12000;
-								case Month.IGNIVOR ->
-									// At least 2 days, no more than 10 days
-									delay = random.nextInt(240000) + 48000;
-							}
-							updateStorm(Weather.CLEAR, delay);
-							// Must be at the end or it interferes with WeatherChangeEventListener
-							// Real weather ticks but Aranarth duration only updates after conditions
-							// Because of this, a difference of 100 occurs, so it must be reduced
-							AranarthUtils.setStormDelay(delay - 100);
-						} else {
-							// 100 ticks per execution
-							AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
-						}
-					}
-					// If it is not storming
-					else {
-						// If it is time for the next storm
-						if (AranarthUtils.getStormDelay() <= 0) {
-							Random random = new Random();
-							int duration = 0;
-							Month month = AranarthUtils.getMonth();
-							// Updates the duration of the storm
-                            switch (month) {
-								case Month.UMBRAVOR ->
-                                    // At least 0.125 days, no more than 0.75 days
-									duration = random.nextInt(15000) + 3000;
-								case Month.GLACIVOR ->
-                                    // At least 0.5 days, no more than 1.5 days
-									duration = random.nextInt(24000) + 12000;
-								case Month.FRIGORVOR ->
-                                    // At least 0.75 days, no more than 2 days
-										duration = random.nextInt(30000) + 18000;
-								case Month.OBSCURVOR ->
-									// At least 0.25 days, no more than 1 day
-									duration = random.nextInt(18000) + 6000;
-								case Month.IGNIVOR ->
-									// At least 0.5 days, no more than 1.25 day
-									duration = random.nextInt(24000) + 6000;
-                            }
-
-							// Ignivor can either snow or rain, higher chance of snow
-							if (month == Month.IGNIVOR) {
-								int chance = random.nextInt(100);
-								if (chance >= 98) {
-									updateStorm(Weather.THUNDER, duration);
-								} else if (chance >= 55) {
-									updateStorm(Weather.RAIN, duration);
-								} else {
-									updateStorm(Weather.SNOW, duration);
+					if (!AranarthCore.isSmpServer()) {
+						// If it is currently storming
+						if (AranarthUtils.getWeather() != Weather.CLEAR) {
+							// Determines if the storm ended
+							if (AranarthUtils.getStormDuration() <= 0) {
+								Random random = new Random();
+								int delay = 0;
+								Month month = AranarthUtils.getMonth();
+								// Updates the delay until the next storm
+								switch (month) {
+									case Month.UMBRAVOR ->
+										// At least 0.75 days, no more than 5 days
+										delay = random.nextInt(102000) + 18000;
+									case Month.GLACIVOR ->
+										// At least 0.5 days, no more than 2 days
+										delay = random.nextInt(48000) + 12000;
+									case Month.FRIGORVOR ->
+										// At least 0.25 days, no more than 1 day
+										delay = random.nextInt(18000) + 6000;
+									case Month.OBSCURVOR ->
+										// At least 0.5 days, no more than 1.5 days
+										delay = random.nextInt(36000) + 12000;
+									case Month.IGNIVOR ->
+										// At least 2 days, no more than 10 days
+										delay = random.nextInt(240000) + 48000;
 								}
-							}
-							// Umbravor can either snow or rain, higher chance of rain
-							else if (month == Month.UMBRAVOR) {
-								int chance = random.nextInt(100);
-								if (chance >= 96) {
-									updateStorm(Weather.THUNDER, duration);
-								} else if (chance >= 40) {
-									updateStorm(Weather.RAIN, duration);
-								} else {
-									updateStorm(Weather.SNOW, duration);
+								updateStorm(Weather.CLEAR, delay);
+								// Must be at the end or it interferes with WeatherChangeEventListener
+								// Real weather ticks but Aranarth duration only updates after conditions
+								// Because of this, a difference of 100 occurs, so it must be reduced
+								AranarthUtils.setStormDelay(delay - 100);
+								if (NetworkManager.isActive()) {
+									NetworkManager.getInstance().publishSyncWeather("CLEAR", delay, false, 0, delay - 100);
 								}
 							} else {
-								updateStorm(Weather.SNOW, duration);
+								// 100 ticks per execution
+								AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
 							}
-							// Must be at the end or it interferes with WeatherChangeEventListener
-							// Real weather ticks but Aranarth duration only updates after conditions
-							// Because of this, a difference of 100 occurs, so it must be reduced
-							AranarthUtils.setStormDuration(duration - 100);
-						} else {
-							// 100 ticks per execution
-							AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
 						}
+						// If it is not storming
+						else {
+							// If it is time for the next storm
+							if (AranarthUtils.getStormDelay() <= 0) {
+								Random random = new Random();
+								int duration = 0;
+								Month month = AranarthUtils.getMonth();
+								// Updates the duration of the storm
+	                            switch (month) {
+									case Month.UMBRAVOR ->
+	                                    // At least 0.125 days, no more than 0.75 days
+										duration = random.nextInt(15000) + 3000;
+									case Month.GLACIVOR ->
+	                                    // At least 0.5 days, no more than 1.5 days
+										duration = random.nextInt(24000) + 12000;
+									case Month.FRIGORVOR ->
+	                                    // At least 0.75 days, no more than 2 days
+											duration = random.nextInt(30000) + 18000;
+									case Month.OBSCURVOR ->
+										// At least 0.25 days, no more than 1 day
+										duration = random.nextInt(18000) + 6000;
+									case Month.IGNIVOR ->
+										// At least 0.5 days, no more than 1.25 day
+										duration = random.nextInt(24000) + 6000;
+	                            }
+	
+								// Ignivor can either snow or rain, higher chance of snow
+								if (month == Month.IGNIVOR) {
+									int chance = random.nextInt(100);
+									if (chance >= 98) {
+										updateStorm(Weather.THUNDER, duration);
+									} else if (chance >= 55) {
+										updateStorm(Weather.RAIN, duration);
+									} else {
+										updateStorm(Weather.SNOW, duration);
+									}
+								}
+								// Umbravor can either snow or rain, higher chance of rain
+								else if (month == Month.UMBRAVOR) {
+									int chance = random.nextInt(100);
+									if (chance >= 96) {
+										updateStorm(Weather.THUNDER, duration);
+									} else if (chance >= 40) {
+										updateStorm(Weather.RAIN, duration);
+									} else {
+										updateStorm(Weather.SNOW, duration);
+									}
+								} else {
+									updateStorm(Weather.SNOW, duration);
+								}
+								// Must be at the end or it interferes with WeatherChangeEventListener
+								// Real weather ticks but Aranarth duration only updates after conditions
+								// Because of this, a difference of 100 occurs, so it must be reduced
+								AranarthUtils.setStormDuration(duration - 100);
+								if (NetworkManager.isActive()) {
+									Weather w = AranarthUtils.getWeather();
+									NetworkManager.getInstance().publishSyncWeather(
+											w.name(), duration, w == Weather.THUNDER, duration - 100, 0);
+								}
+							} else {
+								// 100 ticks per execution
+								AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
+							}
+						}
+						this.cancel();
+						return;
 					}
 					this.cancel();
 					return;
@@ -1859,8 +1872,11 @@ public class DateUtils {
 
 	/**
 	 * Applies rain manually based on the given month.
+	 * Only runs on the Survival server — the SMP server receives weather changes via network sync.
 	 */
 	private void applyRain() {
+		if (AranarthCore.isSmpServer()) return;
+
 		// If it is currently storming
 		if (AranarthUtils.getWeather() != Weather.CLEAR) {
 			// Check if the duration has ended
@@ -1878,6 +1894,9 @@ public class DateUtils {
 				// Real weather ticks but Aranarth duration only updates after conditions
 				// Because of this, a difference of 100 occurs, so it must be reduced
                 AranarthUtils.setStormDelay(delay - 100);
+				if (NetworkManager.isActive()) {
+					NetworkManager.getInstance().publishSyncWeather("CLEAR", delay, false, 0, delay - 100);
+				}
 			} else {
 				// 100 ticks per execution
 				AranarthUtils.setStormDuration(AranarthUtils.getStormDuration() - 100);
@@ -1889,12 +1908,21 @@ public class DateUtils {
 			if (world == null) return;
 			// Raining from previous server restart
 			if (world.hasStorm() && AranarthUtils.getWeather() == Weather.CLEAR && AranarthUtils.getStormDuration() == 0) {
-				AranarthUtils.setStormDuration(world.getWeatherDuration());
+				int weatherDuration = world.getWeatherDuration();
+				AranarthUtils.setStormDuration(weatherDuration);
 				AranarthUtils.setStormDelay(0);
 				if (world.isThundering()) {
 					AranarthUtils.setWeather(Weather.THUNDER);
 				} else {
 					AranarthUtils.setWeather(Weather.RAIN);
+				}
+				// Notify the SMP server of the recovered weather state so its AranarthUtils
+				// and world state stay in sync after a Survival server restart.
+				if (NetworkManager.isActive()) {
+					Weather recoveredWeather = AranarthUtils.getWeather();
+					NetworkManager.getInstance().publishSyncWeather(
+							recoveredWeather.name(), weatherDuration,
+							recoveredWeather == Weather.THUNDER, weatherDuration, 0);
 				}
 			} else {
 				// If it is time for the next storm
@@ -1942,6 +1970,11 @@ public class DateUtils {
 					// Real weather ticks but Aranarth duration only updates after conditions
 					// Because of this, a difference of 100 occurs, so it must be reduced
 					AranarthUtils.setStormDuration(duration - 100);
+					if (NetworkManager.isActive()) {
+						Weather w = AranarthUtils.getWeather();
+						NetworkManager.getInstance().publishSyncWeather(
+								w.name(), duration, w == Weather.THUNDER, duration - 100, 0);
+					}
 				} else {
 					// 100 ticks per execution
 					AranarthUtils.setStormDelay(AranarthUtils.getStormDelay() - 100);
@@ -1960,12 +1993,7 @@ public class DateUtils {
 		World mainWorld = Bukkit.getWorld("world");
 		if (mainWorld == null) return; // survival main world must always exist
 
-		// Collect all weather-affected worlds that are actually loaded on this server
-		List<World> weatherWorlds = new ArrayList<>();
-		for (String name : new String[]{"world", AranarthCore.getSmpMainWorldName(), "resource"}) {
-			World w = Bukkit.getWorld(name);
-			if (w != null) weatherWorlds.add(w);
-		}
+		List<World> weatherWorlds = AranarthUtils.getSyncWorlds();
 
 		int time = (int) (mainWorld.getTime() / 20);
 		boolean isNewDay = time >= 0 && time < 5;

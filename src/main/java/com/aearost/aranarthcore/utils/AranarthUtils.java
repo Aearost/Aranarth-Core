@@ -3943,6 +3943,23 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Returns the subset of the three time/weather-synced worlds ("world", SMP main, "resource")
+	 * that actually exist on this server. Worlds that are hosted on a different server in the
+	 * network return null from Bukkit.getWorld() and are silently skipped.
+	 */
+	public static List<World> getSyncWorlds() {
+		// Use a set to deduplicate: on the SMP server getSmpMainWorldName() returns "world",
+		// which is the same as the survival main world name.
+		Set<String> names = new LinkedHashSet<>(Arrays.asList("world", AranarthCore.getSmpMainWorldName(), "resource"));
+		List<World> worlds = new ArrayList<>();
+		for (String name : names) {
+			World w = Bukkit.getWorld(name);
+			if (w != null) worlds.add(w);
+		}
+		return worlds;
+	}
+
+	/**
 	 * Returns true if the world is one of the SMP worlds on whichever server is currently running.
 	 * On the test server or survival server: "smp", "smp_nether", "smp_the_end".
 	 * On the SMP server: "overworld", "the_nether", "the_end".

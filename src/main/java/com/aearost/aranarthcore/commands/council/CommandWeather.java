@@ -1,8 +1,8 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -35,9 +36,7 @@ public class CommandWeather {
 
 		if (args.length >= 2) {
 			Month month = AranarthUtils.getMonth();
-			World world = Bukkit.getWorld("world");
-			World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
-			World resource = Bukkit.getWorld("resource");
+			List<World> syncWorlds = AranarthUtils.getSyncWorlds();
 			Random random = new Random();
 
 			if (args[1].equalsIgnoreCase("CLEAR")) {
@@ -48,26 +47,20 @@ public class CommandWeather {
 				AranarthUtils.setStormDuration(0);
 				AranarthUtils.setWeather(Weather.CLEAR);
 
-				world.setThunderDuration(0);
-				world.setWeatherDuration(0);
-				world.setThundering(false);
-				world.setStorm(false);
-				world.setClearWeatherDuration(delay);
-
-				smp.setThunderDuration(0);
-				smp.setWeatherDuration(0);
-				smp.setThundering(false);
-				smp.setStorm(false);
-				smp.setClearWeatherDuration(delay);
-
-				resource.setThunderDuration(0);
-				resource.setWeatherDuration(0);
-				resource.setThundering(false);
-				resource.setStorm(false);
-				resource.setClearWeatherDuration(delay);
+				for (World w : syncWorlds) {
+					w.setThunderDuration(0);
+					w.setWeatherDuration(0);
+					w.setThundering(false);
+					w.setStorm(false);
+					w.setClearWeatherDuration(delay);
+				}
 
 				// Must match the -100 offset used throughout DateUtils to stay in sync
 				AranarthUtils.setStormDelay(delay - 100);
+
+				if (NetworkManager.isActive()) {
+					NetworkManager.getInstance().publishSyncWeather("CLEAR", delay, false, 0, delay - 100);
+				}
 
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					String pWorld = p.getWorld().getName();
@@ -86,7 +79,7 @@ public class CommandWeather {
 
 				if (isPureWinterMonth) {
 					int duration = computeSnowDuration(month, random);
-					setSnow(world, smp, resource, duration);
+					setSnow(syncWorlds, duration);
 				} else {
 					// Ignivor, Umbravor, and all non-winter months: honour the requested type
 					Weather type = isThunder ? Weather.THUNDER : Weather.RAIN;
@@ -98,33 +91,24 @@ public class CommandWeather {
 					AranarthUtils.setWeather(type);
 					AranarthUtils.setStormDelay(0);
 
-					world.setClearWeatherDuration(0);
-					world.setStorm(true);
-					world.setThundering(isThunder);
-					world.setWeatherDuration(duration);
-					if (isThunder) {
-						world.setThunderDuration(duration);
-					}
-
-					smp.setClearWeatherDuration(0);
-					smp.setStorm(true);
-					smp.setThundering(isThunder);
-					smp.setWeatherDuration(duration);
-					if (isThunder) {
-						smp.setThunderDuration(duration);
-					}
-
-					resource.setClearWeatherDuration(0);
-					resource.setStorm(true);
-					resource.setThundering(isThunder);
-					resource.setWeatherDuration(duration);
-					if (isThunder) {
-						resource.setThunderDuration(duration);
+					for (World w : syncWorlds) {
+						w.setClearWeatherDuration(0);
+						w.setStorm(true);
+						w.setThundering(isThunder);
+						w.setWeatherDuration(duration);
+						if (isThunder) {
+							w.setThunderDuration(duration);
+						}
 					}
 
 					// Must be set after world state changes to avoid interfering with the
 					// WeatherChangeListener (matches DateUtils convention)
 					AranarthUtils.setStormDuration(duration - 100);
+
+					if (NetworkManager.isActive()) {
+						NetworkManager.getInstance().publishSyncWeather(
+								isThunder ? "THUNDER" : "RAIN", duration, isThunder, duration - 100, 0);
+					}
 
 					String broadcastMsg = isThunder ? "&7&oA thunderstorm has started..." : "&7&oIt has started to rain...";
 					for (Player p : Bukkit.getOnlinePlayers()) {
@@ -173,39 +157,31 @@ public class CommandWeather {
 	 * Forces snow across all survival worlds, keeping AranarthUtils state in sync with DateUtils.
 	 * Sets stormDuration to 0 before touching world state to prevent the WeatherChangeListener's
 	 * storm-ending check from interfering, then restores the correct tracking value afterwards.
-	 * @param world The main survival world.
-	 * @param smp The SMP world.
-	 * @param resource The resource world.
+	 * @param syncWorlds The worlds to apply snow to.
 	 * @param duration The duration in ticks.
 	 */
-	private static void setSnow(World world, World smp, World resource, int duration) {
+	private static void setSnow(List<World> syncWorlds, int duration) {
 		// Set weather type before world changes; zero duration first to block the
 		// WeatherChangeListener's storm-ending override when setStorm(false) fires
 		AranarthUtils.setWeather(Weather.SNOW);
 		AranarthUtils.setStormDuration(0);
 		AranarthUtils.setStormDelay(0);
 
-		world.setThunderDuration(0);
-		world.setWeatherDuration(0);
-		world.setThundering(false);
-		world.setStorm(false);
-		world.setClearWeatherDuration(duration);
-
-		smp.setThunderDuration(0);
-		smp.setWeatherDuration(0);
-		smp.setThundering(false);
-		smp.setStorm(false);
-		smp.setClearWeatherDuration(duration);
-
-		resource.setThunderDuration(0);
-		resource.setWeatherDuration(0);
-		resource.setThundering(false);
-		resource.setStorm(false);
-		resource.setClearWeatherDuration(duration);
+		for (World w : syncWorlds) {
+			w.setThunderDuration(0);
+			w.setWeatherDuration(0);
+			w.setThundering(false);
+			w.setStorm(false);
+			w.setClearWeatherDuration(duration);
+		}
 
 		// Must be set after world state changes to avoid interfering with the
 		// WeatherChangeListener (matches DateUtils convention)
 		AranarthUtils.setStormDuration(duration - 100);
+
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishSyncWeather("SNOW", duration, false, duration - 100, 0);
+		}
 
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			String pWorld = p.getWorld().getName();

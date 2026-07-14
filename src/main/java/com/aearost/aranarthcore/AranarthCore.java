@@ -251,6 +251,17 @@ public class AranarthCore extends JavaPlugin {
             }
         }, 0, 100);
 
+        // Periodically broadcast world time from the Survival server so the SMP server
+        // stays in lockstep even after restarts. Runs every 5 minutes (6000 ticks).
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            if (!AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+                World timeWorld = Bukkit.getWorld("world");
+                if (timeWorld != null) {
+                    NetworkManager.getInstance().publishSyncTime(timeWorld.getTime());
+                }
+            }
+        }, 6000, 6000);
+
         // Remind players every hour if their chat is toggled off
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override

@@ -252,7 +252,8 @@
       "Bash(python:*)",
       "Bash(node:*)",
       "Bash(gh api:*)",
-      "Bash(gh repo:*)"
+      "Bash(gh repo:*)",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCore -name warps.txt -o -name *warp* -type f)"
     ]
   }
 }

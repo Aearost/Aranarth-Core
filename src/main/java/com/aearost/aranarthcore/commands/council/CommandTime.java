@@ -1,13 +1,15 @@
 package com.aearost.aranarthcore.commands.council;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Weather;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import java.util.List;
 
 /**
  * Updates the time across all survival worlds.
@@ -85,23 +87,22 @@ public class CommandTime {
 	 * @param time The new time.
 	 */
 	private static void updateTime(long time) {
-		World survival = Bukkit.getWorld("world");
-		World smp = Bukkit.getWorld(AranarthCore.getSmpMainWorldName());
-		World resource = Bukkit.getWorld("resource");
-
-		survival.setTime(time);
-		smp.setTime(time);
-		resource.setTime(time);
+		List<World> syncWorlds = AranarthUtils.getSyncWorlds();
+		for (World w : syncWorlds) {
+			w.setTime(time);
+		}
 
 		// Immediately end any storm, will be picked up by DateUtils logic within 5 seconds
 		if (AranarthUtils.getWeather() != Weather.CLEAR) {
 			AranarthUtils.setStormDuration(0);
-			survival.setThunderDuration(0);
-			survival.setWeatherDuration(0);
-			smp.setThunderDuration(0);
-			smp.setWeatherDuration(0);
-			resource.setThunderDuration(0);
-			resource.setWeatherDuration(0);
+			for (World w : syncWorlds) {
+				w.setThunderDuration(0);
+				w.setWeatherDuration(0);
+			}
+		}
+
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().publishSyncTime(time);
 		}
 	}
 }

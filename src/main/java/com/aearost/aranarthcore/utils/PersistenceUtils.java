@@ -1882,7 +1882,7 @@ public class PersistenceUtils {
                 Material icon = Material.valueOf(fields[7]);
 
                 Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
-                Home warp = new Home(warpName, location, icon);
+                Home warp = new Home(warpName, location, icon, worldName);
                 warps.add(warp);
             }
             AranarthUtils.setWarps(warps);
@@ -6310,7 +6310,7 @@ public class PersistenceUtils {
                 float pitch = w.get("pitch").getAsFloat();
                 Material icon = Material.valueOf(w.get("icon").getAsString());
                 Location location = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
-                warps.add(new Home(warpName, location, icon));
+                warps.add(new Home(warpName, location, icon, worldName));
             }
             AranarthUtils.setWarps(warps);
             Bukkit.getLogger().info("[AC] Warps initialized from MySQL");
