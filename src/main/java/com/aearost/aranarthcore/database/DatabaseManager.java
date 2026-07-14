@@ -724,6 +724,18 @@ public class DatabaseManager {
         }
     }
 
+    /** Removes all roster entries for the given server. Used on startup/shutdown to prevent stale entries. */
+    public void clearRosterForServer(String server) {
+        try (java.sql.Connection conn = dataSource.getConnection();
+             java.sql.PreparedStatement stmt = conn.prepareStatement(
+                     "DELETE FROM network_roster WHERE server = ?")) {
+            stmt.setString(1, server);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[AC] Failed to clear roster for server " + server + ": " + e.getMessage());
+        }
+    }
+
     /** Loads all roster entries NOT from thisServer. */
     public Map<UUID, NetworkPlayer> loadRemoteRoster(String thisServer) {
         String sql = "SELECT uuid, username, nickname, server, rank, council_rank, saint_rank, architect_rank, vanished FROM network_roster WHERE server != ?";

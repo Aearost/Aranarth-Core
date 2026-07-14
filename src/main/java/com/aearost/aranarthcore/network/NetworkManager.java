@@ -77,6 +77,7 @@ public class NetworkManager {
     public static final String CH_TRANSFER    = "aranarth:transfer";
     public static final String CH_SYNC_TIME    = "aranarth:sync_time";
     public static final String CH_SYNC_WEATHER = "aranarth:sync_weather";
+    public static final String CH_DM           = "aranarth:dm";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -175,6 +176,12 @@ public class NetworkManager {
             cleanupTask.cancel();
             cleanupTask = null;
         }
+        // Clear this server's roster entries from the DB so stale entries don't appear on other servers
+        try {
+            db.clearRosterForServer(thisServer);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to clear roster on shutdown: " + e.getMessage());
+        }
         Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "NetworkManager shut down");
     }
 
@@ -193,6 +200,7 @@ public class NetworkManager {
             case CH_TRANSFER     -> handleTransfer(json);
             case CH_SYNC_TIME    -> handleSyncTime(json);
             case CH_SYNC_WEATHER -> handleSyncWeather(json);
+            case CH_DM            -> handleDirectMessage(json);
         }
     }
 
@@ -296,13 +304,18 @@ public class NetworkManager {
     }
 
     /**
-     * Broadcasts a weather change to all other servers so their sync worlds stay in lockstep.
-     * @param weatherType  One of "CLEAR", "RAIN", "THUNDER", or "SNOW".
-     * @param duration     The world duration ticks (clearWeatherDuration for CLEAR/SNOW, weatherDuration for RAIN/THUNDER).
-     * @param isThunder    True only for THUNDER.
-     * @param stormDuration The value to pass to AranarthUtils.setStormDuration() after world state is applied.
-     * @param stormDelay    The value to pass to AranarthUtils.setStormDelay() after world state is applied.
+     * Sends a private message from a player on this server to a player on another server.
      */
+    public void publishDirectMessage(UUID fromUuid, String fromNickname, UUID toUuid, String message) {
+        JsonObject json = new JsonObject();
+        json.addProperty("fromUuid", fromUuid.toString());
+        json.addProperty("fromNickname", fromNickname);
+        json.addProperty("fromServer", thisServer);
+        json.addProperty("toUuid", toUuid.toString());
+        json.addProperty("message", message);
+        publish(CH_DM, json);
+    }
+
     public void publishSyncWeather(String weatherType, int duration, boolean isThunder, int stormDuration, int stormDelay) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
@@ -591,6 +604,8 @@ public class NetworkManager {
      */
     public void syncRosterFromDatabase() {
         try {
+            // Clear any stale entries this server may have left in a previous crash
+            db.clearRosterForServer(thisServer);
             Map<UUID, NetworkPlayer> loaded = db.loadRemoteRoster(thisServer);
             remoteRoster.putAll(loaded);
             if (!remoteRoster.isEmpty()) {
@@ -854,6 +869,32 @@ public class NetworkManager {
                     DateUtils.playSnowStartSound(p);
                 }
             }
+        }
+    }
+
+    private void handleDirectMessage(JsonObject json) {
+        String fromServer = json.get("fromServer").getAsString();
+        if (fromServer.equals(thisServer)) return;
+
+        UUID toUuid = UUID.fromString(json.get("toUuid").getAsString());
+        Player target = Bukkit.getPlayer(toUuid);
+        if (target == null) return;
+
+        String fromNickname = json.get("fromNickname").getAsString();
+        UUID fromUuid = UUID.fromString(json.get("fromUuid").getAsString());
+        String message = json.get("message").getAsString();
+
+        String prefixStart = "§7⊰§r";
+        String prefixEnd = "§7⊱§r";
+        String targetPrefix = prefixStart + "§7§l§oFrom: §r§e" + fromNickname + prefixEnd + " §7§o>> §e§o" + message;
+        target.sendMessage(targetPrefix);
+        target.playSound(target, org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+
+        // Store the sender UUID for /reply (uses last received message UUID)
+        AranarthPlayer targetAp = AranarthUtils.getPlayer(toUuid);
+        if (targetAp != null) {
+            targetAp.setLastReceivedMessage(fromUuid);
+            AranarthUtils.setPlayer(toUuid, targetAp);
         }
     }
 

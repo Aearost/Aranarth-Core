@@ -28,13 +28,16 @@ import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Enforces Dominion block and entity protection rules with configurable per-rank/relation permissions.
@@ -44,6 +47,9 @@ public class DominionProtectionListener implements Listener {
     private static final Logger log = LoggerFactory.getLogger(DominionProtectionListener.class);
     private static final long DENY_MESSAGE_COOLDOWN_MS = 1000L;
     private final Map<UUID, Long> lastDenyMessageTime = new HashMap<>();
+
+    /** Players who have been standing on the ground inside a dominion since last entering one. */
+    private static final Set<UUID> dominionGroundedPlayers = ConcurrentHashMap.newKeySet();
 
     public DominionProtectionListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
@@ -204,7 +210,8 @@ public class DominionProtectionListener implements Listener {
     }
 
     /**
-     * Cancels fall damage for players in any dominion's claimed chunks.
+     * Prevents fall damage only when a player falls FROM OUTSIDE into dominion land mid-air.
+     * If the player jumps from within the dominion, fall damage applies normally.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFallDamage(EntityDamageEvent e) {
@@ -214,8 +221,36 @@ public class DominionProtectionListener implements Listener {
         if (!(e.getEntity() instanceof Player player)) {
             return;
         }
+        UUID uuid = player.getUniqueId();
         if (DominionUtils.getDominionOfChunk(player.getLocation().getChunk()) != null) {
-            e.setCancelled(true);
+            if (!dominionGroundedPlayers.contains(uuid)) {
+                // Player entered from outside mid-air — cancel damage
+                e.setCancelled(true);
+            }
+            // Mark as grounded since they just landed
+            dominionGroundedPlayers.add(uuid);
+        }
+    }
+
+    /**
+     * Tracks when a player enters or exits dominion land while on the ground.
+     */
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent e) {
+        if (e.getFrom().getBlockX() == e.getTo().getBlockX()
+                && e.getFrom().getBlockZ() == e.getTo().getBlockZ()
+                && e.getFrom().getBlockY() == e.getTo().getBlockY()) {
+            return; // only process actual positional changes
+        }
+        Player player = e.getPlayer();
+        UUID uuid = player.getUniqueId();
+        boolean inDominion = DominionUtils.getDominionOfChunk(e.getTo().getChunk()) != null;
+        if (inDominion) {
+            if (player.isOnGround()) {
+                dominionGroundedPlayers.add(uuid);
+            }
+        } else {
+            dominionGroundedPlayers.remove(uuid);
         }
     }
 

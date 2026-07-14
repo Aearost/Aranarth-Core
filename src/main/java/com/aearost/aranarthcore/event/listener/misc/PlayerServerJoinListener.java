@@ -151,13 +151,12 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
-		if (!isNewPlayer) {
-			displayMotd(player);
-		}
-
 		if (isCrossServerTransfer) {
 			e.setJoinMessage(null);
 		} else {
+			if (!isNewPlayer) {
+				displayMotd(player);
+			}
 			DateUtils dateUtils = new DateUtils();
 			String nameToDisplay;
 
@@ -277,6 +276,8 @@ public class PlayerServerJoinListener implements Listener {
 									other.showPlayer(AranarthCore.getInstance(), player);
 								}
 							}
+							// Also force a tab update for the joining player to see themselves
+							AranarthUtils.updateTab();
 						}
 					}.runTaskLater(AranarthCore.getInstance(), 20L);
 				}
@@ -315,6 +316,13 @@ public class PlayerServerJoinListener implements Listener {
 							+ "\n                    &7to the &6&lRealm of Aranarth!"));
 					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
 					Bukkit.broadcastMessage("");
+					// Broadcast welcome to other servers in the network
+					if (NetworkManager.isActive()) {
+						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
+						NetworkManager.getInstance().publishChat("", "                     &7Welcome, &e" + player.getName() + "," +
+								"\n                    &7to the &6&lRealm of Aranarth!");
+						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
+					}
 
 					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
 

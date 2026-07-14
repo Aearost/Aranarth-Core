@@ -167,14 +167,14 @@ public class AranarthUtils {
 	public static List<String> getNetworkPlayerNames(String prefix) {
 		List<String> names = new ArrayList<>();
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			String display = getNickname(p);
+			String display = p.getName();
 			if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
 				names.add(display);
 			}
 		}
 		if (NetworkManager.isActive()) {
 			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-				String display = np.getNickname();
+				String display = np.getUsername().isEmpty() ? np.getNickname() : np.getUsername();
 				if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
 					names.add(display);
 				}
@@ -1477,6 +1477,7 @@ public class AranarthUtils {
 	 */
 	public static Location getSafeTeleportLocation(Location loc) {
 		World world = loc.getWorld();
+		if (world == null) return null;
 
 		// Start from the player's current Y position and go downward
 		int x = loc.getBlockX();
@@ -1834,6 +1835,12 @@ public class AranarthUtils {
 			}
 		}
 
+		// Capture the player's actual current world before teleporting; the `from` parameter
+		// may be stale (captured at /tpaccept time) if the player changed worlds during the delay.
+		String actualFromWorld = player.getLocation().getWorld() != null
+				? player.getLocation().getWorld().getName()
+				: from.getWorld().getName();
+
 		player.teleport(locToTeleportTo);
 		for (Entity leashed : leashedEntities) {
 			leashed.teleport(locToTeleportTo);
@@ -1848,7 +1855,7 @@ public class AranarthUtils {
 		// Keep survival stats in sync on every teleport so the data is always current in memory
 		// (and therefore in the next periodic DB write). For cross-server transfers this snapshot
 		// is what saveInventoryAndTransfer() will flush to MySQL before the BungeeCord handoff.
-		if (isSurvivalWorld(from.getWorld().getName())) {
+		if (isSurvivalWorld(actualFromWorld)) {
 			try {
 				aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
 			} catch (Exception e) {
@@ -1869,9 +1876,9 @@ public class AranarthUtils {
 		setPlayer(player.getUniqueId(), aranarthPlayer);
 
 		try {
-			AranarthUtils.switchInventory(player, from.getWorld().getName(), to.getWorld().getName());
+			AranarthUtils.switchInventory(player, actualFromWorld, to.getWorld().getName());
 			// Toggles off the bending if it should be toggled off
-			if (isToggled && (!from.getWorld().getName().equals("spawn") && to.getWorld().getName().equals("spawn"))) {
+			if (isToggled && (!actualFromWorld.equals("spawn") && to.getWorld().getName().equals("spawn"))) {
 				bendingPlayer.toggleBending();
 			}
 

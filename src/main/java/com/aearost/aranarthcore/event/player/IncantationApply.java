@@ -122,28 +122,6 @@ public class IncantationApply {
 							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
 							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
 						}
-					} else if (incantationType.equals("incantation_magnetism")) {
-						if (isTool(item)) {
-							Incantation incantation = new IncantationMagnetism();
-							String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
-
-							List<String> lore = itemMeta.getLore();
-							if (lore == null) {
-								lore = new ArrayList<>();
-								lore.add(fullIncantationName);
-							} else {
-								lore.add(fullIncantationName);
-							}
-							itemMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_magnetism");
-							itemMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
-							itemMeta.getPersistentDataContainer().set(MAGNETISM_TOOL_ID, PersistentDataType.STRING, UUID.randomUUID().toString());
-							itemMeta.setLore(lore);
-							item.setItemMeta(itemMeta);
-							incantationFloorItem.remove();
-							floorItem.setItemStack(item);
-							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
-							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
-						}
 					}
 				} else if (targets.size() == 2) {
 					Item first = targets.get(0);
@@ -225,6 +203,31 @@ public class IncantationApply {
 									}
 								}
 							}
+							toolMeta.setLore(lore);
+							tool.setItemMeta(toolMeta);
+							toolItem.setItemStack(tool);
+							aranarthiumItem.remove();
+							incantationFloorItem.remove();
+							player.sendMessage(ChatUtils.chatMessage("&5You have applied the " + incantation.getItem().getItemMeta().getDisplayName()));
+							player.playSound(player, Sound.BLOCK_BEACON_POWER_SELECT, 1F, 1.5F);
+						}
+					} else if (incantationType.equals("incantation_magnetism")) {
+						if (isTool(toolItem.getItemStack())) {
+							Incantation incantation = new IncantationMagnetism();
+							ItemStack tool = toolItem.getItemStack();
+							ItemMeta toolMeta = tool.getItemMeta();
+							String fullIncantationName = ChatUtils.translateToColor(incantation.getColor() + incantation.getIncantationName());
+
+							List<String> lore = toolMeta.getLore();
+							if (lore == null) {
+								lore = new ArrayList<>();
+								lore.add(fullIncantationName);
+							} else {
+								lore.add(fullIncantationName);
+							}
+							toolMeta.getPersistentDataContainer().set(INCANTATION_TYPE, PersistentDataType.STRING, "incantation_magnetism");
+							toolMeta.getPersistentDataContainer().set(INCANTATION_LEVEL, PersistentDataType.INTEGER, 1);
+							toolMeta.getPersistentDataContainer().set(MAGNETISM_TOOL_ID, PersistentDataType.STRING, UUID.randomUUID().toString());
 							toolMeta.setLore(lore);
 							tool.setItemMeta(toolMeta);
 							toolItem.setItemStack(tool);

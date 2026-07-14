@@ -96,15 +96,15 @@ public class CommandInfo implements CommandExecutor {
 	 * @return The formatted name of the world the player is in.
 	 */
 	private static String getWorldName(String name) {
+		if (AranarthUtils.isSmpWorld(name)) {
+			return "in the &eSMP";
+		}
 		switch (name) {
 			case "world", "world_nether", "world_the_end" -> {
 				return "in &eSurvival";
 			}
 			case "resource", "resource_nether", "resource_the_end" -> {
 				return "in the &eResource World";
-			}
-			case "smp", "smp_nether", "smp_the_end", "overworld", "the_nether", "the_end" -> {
-				return "in the &eSMP";
 			}
 			case "arena" -> {
 				return "in the &eArena";
@@ -118,7 +118,7 @@ public class CommandInfo implements CommandExecutor {
 			default -> {
 				return "at &eSpawn";
 			}
-        }
+		}
 	}
 
 	/**

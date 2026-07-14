@@ -211,7 +211,10 @@ public class QuestUtils {
             return;
         }
         List<Quest> shuffled = new ArrayList<>(pool);
-        Collections.shuffle(shuffled, RANDOM);
+        // Use deterministic seed so both servers assign the same quests
+        long dailySeed = uuid.getLeastSignificantBits() ^ lastDailyReset;
+        Random dailyRandom = new Random(dailySeed);
+        Collections.shuffle(shuffled, dailyRandom);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -235,7 +238,9 @@ public class QuestUtils {
             return;
         }
         List<Quest> shuffled = new ArrayList<>(pool);
-        Collections.shuffle(shuffled, RANDOM);
+        long weeklySeed = uuid.getLeastSignificantBits() ^ lastWeeklyReset;
+        Random weeklyRandom = new Random(weeklySeed);
+        Collections.shuffle(shuffled, weeklyRandom);
         List<Quest> selected = shuffled.subList(0, Math.min(3, shuffled.size()));
         List<Quest> assigned = new ArrayList<>();
         for (Quest q : selected) {
@@ -508,6 +513,16 @@ public class QuestUtils {
         playerDailyCompleted.clear();
         playerDailyClaimed.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Daily quests have been reset.");
+        // Persist reset timestamp to shared DB so both servers agree
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            final long stamp = lastDailyReset;
+            Bukkit.getScheduler().runTaskAsynchronously(com.aearost.aranarthcore.AranarthCore.getInstance(), () -> {
+                try {
+                    com.aearost.aranarthcore.database.DatabaseManager.getInstance().saveTempData(
+                            "quest:lastDailyReset", String.valueOf(stamp), 2592000);
+                } catch (Exception ignored) {}
+            });
+        }
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.sendMessage(ChatUtils.chatMessage("&6Daily quests have reset! Visit the Quest Master for new quests."));
         }
@@ -520,6 +535,16 @@ public class QuestUtils {
         playerWeeklyCompleted.clear();
         playerWeeklyClaimed.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Weekly quests have been reset.");
+        // Persist reset timestamp to shared DB so both servers agree
+        if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+            final long stamp = lastWeeklyReset;
+            Bukkit.getScheduler().runTaskAsynchronously(com.aearost.aranarthcore.AranarthCore.getInstance(), () -> {
+                try {
+                    com.aearost.aranarthcore.database.DatabaseManager.getInstance().saveTempData(
+                            "quest:lastWeeklyReset", String.valueOf(stamp), 2592000);
+                } catch (Exception ignored) {}
+            });
+        }
         for (Player online : Bukkit.getOnlinePlayers()) {
             online.sendMessage(ChatUtils.chatMessage("&bWeekly quests have reset! Visit the Quest Master for new quests."));
         }

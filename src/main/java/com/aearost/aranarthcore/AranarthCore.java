@@ -129,6 +129,8 @@ public class AranarthCore extends JavaPlugin {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if (!savedOnDisable) {
                 saveAll();
+                NetworkManager.shutdown();
+                com.aearost.aranarthcore.database.DatabaseManager.shutdown();
             }
         }, "AranarthCore-ShutdownHook"));
     }
@@ -161,9 +163,11 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveAvatars();
                 PersistenceUtils.saveBoosts();
                 PersistenceUtils.saveCompressible();
-                PersistenceUtils.saveShopLocations();
-                PersistenceUtils.saveShopIslandCounter();
-                PersistenceUtils.saveShopCollaborators();
+                if (!isSmpServer()) {
+                    PersistenceUtils.saveShopLocations();
+                    PersistenceUtils.saveShopIslandCounter();
+                    PersistenceUtils.saveShopCollaborators();
+                }
                 PersistenceUtils.saveKillDeathCount();
                 PersistenceUtils.saveQuestState();
                 PersistenceUtils.saveQuestProgress();
@@ -409,16 +413,18 @@ public class AranarthCore extends JavaPlugin {
         } else {
             PersistenceUtils.loadCompressible();
         }
-        if (db) {
-            PersistenceUtils.loadShopLocationsFromDatabase();
-        } else {
-            PersistenceUtils.loadShopLocations();
-        }
-        PersistenceUtils.loadShopIslandCounter();
-        if (db) {
-            PersistenceUtils.loadShopCollaboratorsFromDatabase();
-        } else {
-            PersistenceUtils.loadShopCollaborators();
+        if (!isSmpServer()) {
+            if (db) {
+                PersistenceUtils.loadShopLocationsFromDatabase();
+            } else {
+                PersistenceUtils.loadShopLocations();
+            }
+            PersistenceUtils.loadShopIslandCounter();
+            if (db) {
+                PersistenceUtils.loadShopCollaboratorsFromDatabase();
+            } else {
+                PersistenceUtils.loadShopCollaborators();
+            }
         }
         // Sentinels and toggles must load after aranarth players
         if (db) {
@@ -451,6 +457,17 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadQuestState();
         }
         QuestUtils.initialize(this);
+        // Load shared quest reset timestamps from DB so both servers stay synchronized
+        if (db) {
+            try {
+                String lastDaily = com.aearost.aranarthcore.database.DatabaseManager.getInstance().loadTempData("quest:lastDailyReset");
+                if (lastDaily != null) QuestUtils.setLastDailyReset(Long.parseLong(lastDaily));
+                String lastWeekly = com.aearost.aranarthcore.database.DatabaseManager.getInstance().loadTempData("quest:lastWeeklyReset");
+                if (lastWeekly != null) QuestUtils.setLastWeeklyReset(Long.parseLong(lastWeekly));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(LOG_PREFIX + "Failed to load quest reset timestamps: " + e.getMessage());
+            }
+        }
         if (db) {
             PersistenceUtils.loadQuestProgressFromDatabase();
         } else {
@@ -1280,9 +1297,11 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveAvatars();
         PersistenceUtils.saveBoosts();
         PersistenceUtils.saveCompressible();
-        PersistenceUtils.saveShopLocations();
-        PersistenceUtils.saveShopIslandCounter();
-        PersistenceUtils.saveShopCollaborators();
+        if (!isSmpServer()) {
+            PersistenceUtils.saveShopLocations();
+            PersistenceUtils.saveShopIslandCounter();
+            PersistenceUtils.saveShopCollaborators();
+        }
         PersistenceUtils.saveQuestState();
         PersistenceUtils.saveQuestProgress();
         PersistenceUtils.saveLoginStreaks();

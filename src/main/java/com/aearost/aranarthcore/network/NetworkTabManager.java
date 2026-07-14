@@ -264,7 +264,7 @@ public class NetworkTabManager {
         };
 
         String name = np.getNickname().isEmpty() ? "Unknown" : np.getNickname();
-        display += name + "&r &8[&7SMP&8]";
+        display += name;
 
         return ChatUtils.translateToColor(display);
     }

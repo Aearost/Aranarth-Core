@@ -50,6 +50,7 @@ public class PlayerServerQuitListener implements Listener {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId());
 		}
 		PersistenceUtils.saveQuestProgress();
+		PersistenceUtils.saveLoginStreaks();
 		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 		aranarthPlayer.setAfkLocation(null);
