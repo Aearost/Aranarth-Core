@@ -9,6 +9,7 @@ Major Features
 [+] Implemented the /map command to display the interactive world map
 [+] Made it so bed and respawn anchors will work with priority to the spawn location default
 [+] Added on-screen teleport messages
+[+] Implemented the /countdown command
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed

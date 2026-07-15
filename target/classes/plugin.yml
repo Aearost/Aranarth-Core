@@ -60,6 +60,9 @@ commands:
     description: Opens the compressor GUI to toggle compressible items
     aliases: [comp, compress]
     permission: aranarth.compressor
+  countdown:
+    description: Starts a mutual countdown with another player
+    permission: aranarth.countdown
   craft:
     description: Opens a crafting table GUI
     aliases: [workbench, wb, ct]
