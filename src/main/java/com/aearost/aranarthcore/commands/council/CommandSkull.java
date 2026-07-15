@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import java.util.UUID;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -32,13 +33,15 @@ public class CommandSkull {
 				return true;
 			}
 
-			OfflinePlayer skullPlayer = Bukkit.getOfflinePlayer(args[1]);
-			if (skullPlayer != null) {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullPlayer.getUniqueId());
+			UUID skullUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
+			if (skullUuid != null) {
+				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(skullUuid);
+				OfflinePlayer skullPlayer = Bukkit.getOfflinePlayer(skullUuid);
 				ItemStack skull = new ItemStack(Material.PLAYER_HEAD);
 				SkullMeta meta = (SkullMeta) skull.getItemMeta();
 				meta.setOwningPlayer(skullPlayer);
-				meta.setDisplayName(ChatUtils.translateToColor("&e" + aranarthPlayer.getNickname() + "&e's Skull"));
+				String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : skullPlayer.getName();
+				meta.setDisplayName(ChatUtils.translateToColor("&e" + displayName + "&e's Skull"));
 				skull.setItemMeta(meta);
 				player.sendMessage(ChatUtils.chatMessage("&7You have given yourself &e" + skullPlayer.getName() + "'s &7skull"));
 				player.getInventory().addItem(skull);
