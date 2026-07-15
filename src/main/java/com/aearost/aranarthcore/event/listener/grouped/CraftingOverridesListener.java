@@ -91,6 +91,8 @@ public class CraftingOverridesListener implements Listener {
 
 			if (hasKey(CHORUS_DIAMOND, e, ingredient) || hasKey(HOMEPAD, e, ingredient)) {
 				new CraftingOverridesChorusDiamond().onCraft(e, ingredient, player);
+			}
+			if (hasKey(HOMEPAD, e, ingredient)) {
 				new CraftingOverridesHomepad().onCraft(e, ingredient, player);
 			}
 
@@ -149,6 +151,8 @@ public class CraftingOverridesListener implements Listener {
 
 			if (hasKey(CHORUS_DIAMOND, result, ingredient) || hasKey(HOMEPAD, result, ingredient)) {
 				new CraftingOverridesChorusDiamond().onCrafterCraft(e, ingredient);
+			}
+			if (hasKey(HOMEPAD, result, ingredient)) {
 				new CraftingOverridesHomepad().onCrafterCraft(e, ingredient);
 			}
 
