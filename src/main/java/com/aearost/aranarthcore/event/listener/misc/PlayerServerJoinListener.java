@@ -385,12 +385,14 @@ public class PlayerServerJoinListener implements Listener {
 
 				// Displays a welcome message after the join message
 				if (finalIsNewPlayer) {
-					Bukkit.broadcastMessage("");
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","
-							+ "\n                    &7to the &6&lRealm of Aranarth!"));
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-					Bukkit.broadcastMessage("");
+					for (Player online : Bukkit.getOnlinePlayers()) {
+						online.sendMessage("");
+						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+						online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","
+								+ "\n                    &7to the &6&lRealm of Aranarth!"));
+						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+						online.sendMessage("");
+					}
 					// Broadcast welcome to other servers in the network
 					if (NetworkManager.isActive()) {
 						NetworkManager.getInstance().publishChat("", "");

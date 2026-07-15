@@ -83,6 +83,7 @@ public class NetworkManager {
     public static final String CH_DM           = "aranarth:dm";
     public static final String CH_SLEEP        = "aranarth:sleep";
     public static final String CH_AFK          = "aranarth:afk";
+    public static final String CH_BROADCAST    = "aranarth:broadcast";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -262,6 +263,7 @@ public class NetworkManager {
             case CH_DM            -> handleDirectMessage(json);
             case CH_SLEEP         -> handleSleepMessage(json);
             case CH_AFK           -> handleAfkStatus(json);
+            case CH_BROADCAST     -> handleBroadcast(json);
         }
     }
 
@@ -440,6 +442,17 @@ public class NetworkManager {
         json.addProperty("stormDuration", stormDuration);
         json.addProperty("stormDelay", stormDelay);
         publish(CH_SYNC_WEATHER, json);
+    }
+
+    /**
+     * Relays a server-wide broadcast (from Bukkit.broadcastMessage) to all other servers.
+     * The message should already contain translated § color codes.
+     */
+    public void publishBroadcast(String rawMessage) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("message", rawMessage);
+        publish(CH_BROADCAST, json);
     }
 
     /**
@@ -1237,6 +1250,16 @@ public class NetworkManager {
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(message);
         }
+    }
+
+    private void handleBroadcast(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        String message = json.get("message").getAsString();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(message);
+        }
+        Bukkit.getConsoleSender().sendMessage(message);
     }
 
     private void handleSleepMessage(JsonObject json) {
