@@ -74,6 +74,7 @@ Minor Features
 [+] Added slime spawn eggs to the Godly crate rotating spawn eggs
 [~] Fixed 100% short grass growth rate when snow melts
 [~] Fixed issue where you can't craft chorus diamonds
+[+] Added particle trails to scorched and aquatic aranarthium when in their advantageous areas (nether and water/rain/thunder)
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
