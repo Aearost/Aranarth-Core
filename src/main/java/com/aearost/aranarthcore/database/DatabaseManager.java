@@ -755,7 +755,8 @@ public class DatabaseManager {
                             rs.getInt("council_rank"),
                             rs.getInt("saint_rank"),
                             rs.getInt("architect_rank"),
-                            rs.getBoolean("vanished")
+                            rs.getBoolean("vanished"),
+                            "", "" // textures not stored in DB roster; populated via CH_JOIN
                     ));
                 }
             }

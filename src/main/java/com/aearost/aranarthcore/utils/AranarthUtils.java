@@ -166,17 +166,44 @@ public class AranarthUtils {
 	 */
 	public static List<String> getNetworkPlayerNames(String prefix) {
 		List<String> names = new ArrayList<>();
+		String lowerPrefix = prefix.toLowerCase();
+
 		for (Player p : Bukkit.getOnlinePlayers()) {
-			String display = p.getName();
-			if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
-				names.add(display);
+			String username = p.getName();
+			if (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix)) {
+				names.add(username);
+			}
+			// Also offer the stripped nickname as a completion so players can tab by nick
+			AranarthPlayer ap = getPlayer(p.getUniqueId());
+			if (ap != null && !ap.getNickname().isEmpty()) {
+				String nick = ChatUtils.stripColorFormatting(ap.getNickname());
+				if (!nick.equalsIgnoreCase(username)
+						&& (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix))) {
+					names.add(nick);
+				}
 			}
 		}
 		if (NetworkManager.isActive()) {
 			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
-				String display = np.getUsername().isEmpty() ? np.getNickname() : np.getUsername();
-				if (prefix.isEmpty() || display.toLowerCase().startsWith(prefix.toLowerCase())) {
-					names.add(display);
+				String username = np.getUsername();
+				if (!username.isEmpty()
+						&& (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix))) {
+					names.add(username);
+				}
+				// Also offer the stripped nickname for remote players
+				if (!np.getNickname().isEmpty()) {
+					String nick = ChatUtils.stripColorFormatting(np.getNickname());
+					if (!nick.equalsIgnoreCase(username)
+							&& (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix))) {
+						names.add(nick);
+					}
+				}
+				// If no username at all, fall back to nickname
+				if (username.isEmpty() && !np.getNickname().isEmpty()) {
+					String nick = ChatUtils.stripColorFormatting(np.getNickname());
+					if (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix)) {
+						names.add(nick);
+					}
 				}
 			}
 		}
@@ -1383,6 +1410,9 @@ public class AranarthUtils {
 		// Fall back to the network roster for players on other servers
 		if (NetworkManager.isActive()) {
 			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+				if (np.getUsername().equalsIgnoreCase(input)) {
+					return np.getUuid();
+				}
 				if (np.getNickname().equalsIgnoreCase(input)) {
 					return np.getUuid();
 				}
@@ -1497,12 +1527,13 @@ public class AranarthUtils {
 			}
 		}
 
-		// If a solid block was found, place the player just above it
+		// If a solid block was found, place the player just above it.
+		// Preserve the original X,Z so admin-set locations (warps, homes) land exactly
+		// where they were placed rather than being snapped to block centres.
 		Location surfaceLoc = null;
 		if (solidBlock != null) {
-			surfaceLoc = solidBlock.getLocation().add(0.5, 1, 0.5); // Center and place feet above
-			surfaceLoc.setYaw(loc.getYaw());
-			surfaceLoc.setPitch(loc.getPitch());
+			surfaceLoc = new Location(world, loc.getX(), solidBlock.getY() + 1, loc.getZ(),
+					loc.getYaw(), loc.getPitch());
 		} else {
 			return null;
 		}
@@ -3104,169 +3135,152 @@ public class AranarthUtils {
 			return data.isVanished();
 		});
 
-		// Sort by rank priority (highest first)
-		onlinePlayers.sort((a, b) -> {
-			int first = getRankPriority(getPlayer(a.getUniqueId()));
-			int second = getRankPriority(getPlayer(b.getUniqueId()));
-			return Integer.compare(first, second);
-		});
-
-		// Apply display and order for local players
-		int order = 0;
-		for (Player player : onlinePlayers) {
-			UUID uuid = player.getUniqueId();
-			String display = ChatUtils.providePrefixAndName(uuid);
-			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-			// If the player is AFK
-			if (aranarthPlayer.getAfkLocation() != null && aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
-				display += " &7[AFK]";
+		// Collect non-vanished remote players for the combined sort
+		List<com.aearost.aranarthcore.network.NetworkPlayer> remotePlayers = new ArrayList<>();
+		if (NetworkManager.isActive()) {
+			for (com.aearost.aranarthcore.network.NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+				if (!np.isVanished()) {
+					remotePlayers.add(np);
+				}
 			}
+		}
 
-			int ping = player.getPing();
-			if (ping <= 150) {
-				display += " &8[&a" + ping + "ms&8]";
-			} else if (ping <= 250) {
-				display += " &8[&e" + ping + "ms&8]";
+		// Build a unified sorted list so that both local and remote players share
+		// a single rank-ordered sequence. We represent each entry with a priority
+		// value and a marker for whether it belongs to a local Player or a remote
+		// NetworkPlayer, then derive absolute positions from the combined ordering.
+		record SortEntry(int priority, Player localPlayer, com.aearost.aranarthcore.network.NetworkPlayer remotePlayer) {}
+
+		List<SortEntry> combined = new ArrayList<>();
+		for (Player p : onlinePlayers) {
+			AranarthPlayer ap = getPlayer(p.getUniqueId());
+			if (ap != null) combined.add(new SortEntry(getRankPriority(ap), p, null));
+		}
+		for (com.aearost.aranarthcore.network.NetworkPlayer np : remotePlayers) {
+			combined.add(new SortEntry(getRankPriority(np), null, np));
+		}
+
+		// Sort highest priority first (matches the previous local-only sort direction)
+		combined.sort((a, b) -> Integer.compare(b.priority(), a.priority()));
+
+		// Apply display names and list order.  Local players can be ordered directly;
+		// remote players get an NMS list-order packet via NetworkTabManager.
+		for (int i = 0; i < combined.size(); i++) {
+			SortEntry entry = combined.get(i);
+			if (entry.localPlayer() != null) {
+				Player player = entry.localPlayer();
+				UUID uuid = player.getUniqueId();
+				String display = ChatUtils.providePrefixAndName(uuid);
+				AranarthPlayer aranarthPlayer = getPlayer(uuid);
+				if (aranarthPlayer.getAfkLocation() != null
+						&& aranarthPlayer.getAfkLocation().getSeconds() >= AranarthUtils.getAfkSecondsAmount()) {
+					display += " &7[AFK]";
+				}
+				int ping = player.getPing();
+				if (ping <= 150) {
+					display += " &8[&a" + ping + "ms&8]";
+				} else if (ping <= 250) {
+					display += " &8[&e" + ping + "ms&8]";
+				} else {
+					display += " &8[&c" + ping + "ms&8]";
+				}
+				player.setPlayerListName(ChatUtils.translateToColor(display));
+				player.setPlayerListOrder(i);
 			} else {
-				display += " &8[&c" + ping + "ms&8]";
+				// Send a list-order packet for the remote fake entry so it slots in at
+				// the correct combined position instead of floating at the bottom.
+				com.aearost.aranarthcore.network.NetworkTabManager.sendListOrder(
+						entry.remotePlayer().getUuid(), i, onlinePlayers);
 			}
-
-			player.setPlayerListName(ChatUtils.translateToColor(display));
-			player.setPlayerListOrder(order);
-			order++;
 		}
 
 	}
 
-	/**
-	 * Returns the total priority of the player's rank.
-	 * The higher the value, the higher up top on the tab list.
-	 */
+    /** Rank priority using raw field values — shared by both overloads below. */
+	private static int computeRankPriority(int councilRank, int saintRank, int architectRank, int rank) {
+		if (councilRank == 3) return 48;
+		if (councilRank == 2) {
+			if (saintRank == 3) return 47;
+			if (saintRank == 2) return 46;
+			if (saintRank == 1) return 45;
+			return 44;
+		}
+		if (councilRank == 1) {
+			if (saintRank == 3) return 43;
+			if (saintRank == 2) return 42;
+			if (saintRank == 1) return 41;
+			return 40;
+		}
+		if (architectRank == 1) {
+			if (saintRank == 3) return 39;
+			if (saintRank == 2) return 38;
+			if (saintRank == 1) return 37;
+			return 36;
+		}
+		if (rank == 8) {
+			if (saintRank == 3) return 35;
+			if (saintRank == 2) return 34;
+			if (saintRank == 1) return 33;
+			return 32;
+		}
+		if (rank == 7) {
+			if (saintRank == 3) return 31;
+			if (saintRank == 2) return 30;
+			if (saintRank == 1) return 29;
+			return 28;
+		}
+		if (rank == 6) {
+			if (saintRank == 3) return 27;
+			if (saintRank == 2) return 26;
+			if (saintRank == 1) return 25;
+			return 24;
+		}
+		if (rank == 5) {
+			if (saintRank == 3) return 23;
+			if (saintRank == 2) return 22;
+			if (saintRank == 1) return 21;
+			return 20;
+		}
+		if (rank == 4) {
+			if (saintRank == 3) return 19;
+			if (saintRank == 2) return 18;
+			if (saintRank == 1) return 17;
+			return 16;
+		}
+		if (rank == 3) {
+			if (saintRank == 3) return 15;
+			if (saintRank == 2) return 14;
+			if (saintRank == 1) return 13;
+			return 12;
+		}
+		if (rank == 2) {
+			if (saintRank == 3) return 11;
+			if (saintRank == 2) return 10;
+			if (saintRank == 1) return 9;
+			return 8;
+		}
+		if (rank == 1) {
+			if (saintRank == 3) return 7;
+			if (saintRank == 2) return 6;
+			if (saintRank == 1) return 5;
+			return 4;
+		}
+		if (saintRank == 3) return 3;
+		if (saintRank == 2) return 2;
+		if (saintRank == 1) return 1;
+		return 0;
+	}
+
 	private static int getRankPriority(AranarthPlayer aranarthPlayer) {
-		if (aranarthPlayer.getCouncilRank() == 3) {
-			return 48;
-		} else if (aranarthPlayer.getCouncilRank() == 2) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 47;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 46;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 45;
-			} else {
-				return 44;
-			}
-		} else if (aranarthPlayer.getCouncilRank() == 1) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 43;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 42;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 41;
-			} else {
-				return 40;
-			}
-		} else if (aranarthPlayer.getArchitectRank() == 1) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 39;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 38;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 37;
-			} else {
-				return 36;
-			}
-		} else if (aranarthPlayer.getRank() == 8) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 35;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 34;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 33;
-			} else {
-				return 32;
-			}
-		} else if (aranarthPlayer.getRank() == 7) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 31;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 30;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 29;
-			} else {
-				return 28;
-			}
-		} else if (aranarthPlayer.getRank() == 6) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 27;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 26;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 25;
-			} else {
-				return 24;
-			}
-		} else if (aranarthPlayer.getRank() == 5) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 23;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 22;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 21;
-			} else {
-				return 20;
-			}
-		} else if (aranarthPlayer.getRank() == 4) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 19;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 18;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 17;
-			} else {
-				return 16;
-			}
-		} else if (aranarthPlayer.getRank() == 3) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 15;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 14;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 13;
-			} else {
-				return 12;
-			}
-		} else if (aranarthPlayer.getRank() == 2) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 11;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 10;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 9;
-			} else {
-				return 8;
-			}
-		} else if (aranarthPlayer.getRank() == 1) {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 7;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 6;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 5;
-			} else {
-				return 4;
-			}
-		} else {
-			if (aranarthPlayer.getSaintRank() == 3) {
-				return 3;
-			} else if (aranarthPlayer.getSaintRank() == 2) {
-				return 2;
-			} else if (aranarthPlayer.getSaintRank() == 1) {
-				return 1;
-			} else {
-				return 0;
-			}
-		}
+		return computeRankPriority(aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(),
+				aranarthPlayer.getArchitectRank(), aranarthPlayer.getRank());
 	}
+
+	private static int getRankPriority(NetworkPlayer np) {
+		return computeRankPriority(np.getCouncilRank(), np.getSaintRank(),
+				np.getArchitectRank(), np.getRank());
+	}
+
 
 	/**
 	 * Provides the roman numeral equivalent of the input level.
@@ -3538,6 +3552,9 @@ public class AranarthUtils {
 				}
 			}
 			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is now AFK"));
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), true);
+			}
 		} else {
 			if (aranarthPlayer.getAfkLocation() == null) {
 				return;
@@ -3551,6 +3568,9 @@ public class AranarthUtils {
 				}
 			}
 			Bukkit.getLogger().info("[AC] " + ChatUtils.translateToColor(ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " is no longer AFK"));
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishAfkStatus(uuid, aranarthPlayer.getNickname(), false);
+			}
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 	}

@@ -1,5 +1,8 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -36,6 +39,21 @@ public class CommandCreative implements CommandExecutor {
 			if (AranarthUtils.getTeleportTask(player.getUniqueId()) != null) {
 				player.sendMessage(ChatUtils.chatMessage("&cYou are already teleporting somewhere!"));
 				return false;
+			}
+
+			// On the SMP server: creative world lives on Survival — count down then transfer.
+			if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+				AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+						aranarthPlayer.isInAdminMode(), "&e&lCreative", "&7Transferring to Creative...", success -> {
+					if (success) {
+						PendingTeleport pt = PendingTeleport.forCommand(
+								"creative", "&e&lCreative", "&7You have teleported to Creative");
+						String survivalServerName = AranarthCore.getInstance().getConfig()
+								.getString("network.servers.survival", "survival");
+						NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+					}
+				});
+				return true;
 			}
 
 			Location creativeSpawn = new Location(Bukkit.getWorld("creative"), 0, -60, 0, 0, 2);

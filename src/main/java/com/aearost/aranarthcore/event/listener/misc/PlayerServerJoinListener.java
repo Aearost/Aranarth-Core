@@ -69,8 +69,11 @@ public class PlayerServerJoinListener implements Listener {
 		// or the player logged off on a different server and needs to be routed there on login.
 		String thisServerName = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : null;
 		boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
-		boolean isCrossServerTransfer = needsServerRouting || (NetworkManager.isActive()
-				&& NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null);
+		boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
+		boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
+		if (isCrossServerTransfer) {
+			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] " + player.getName() + " joining as cross-server transfer (needsRouting=" + needsServerRouting + ", hasPendingTp=" + hasPendingTp + ")");
+		}
 
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
@@ -129,15 +132,6 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
-		// Announce this player to the network and check for a pending cross-server teleport.
-		// Done early so the pending TP can fire after the player is fully initialised.
-		if (NetworkManager.isActive()) {
-			// evaluatePlayerPermissions hasn't run yet but AranarthPlayer data is loaded,
-			// so publish what we know now; the roster entry will be accurate enough for tab/chat.
-			AranarthPlayer apForNetwork = AranarthUtils.getPlayer(player.getUniqueId());
-			NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
-		}
-
 		// Permissions must be applied before nickname check is done
 		PermissionUtils.evaluatePlayerPermissions(player);
 
@@ -151,8 +145,18 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
+		// Announce this player to the network now that permissions and nickname are finalised.
+		if (NetworkManager.isActive()) {
+			AranarthPlayer apForNetwork = AranarthUtils.getPlayer(player.getUniqueId());
+			NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
+		}
+
 		if (isCrossServerTransfer) {
 			e.setJoinMessage(null);
+			// Suppress DiscordSRV join announcement for server-switch arrivals
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
+			}
 		} else {
 			if (!isNewPlayer) {
 				displayMotd(player);
@@ -166,16 +170,26 @@ public class PlayerServerJoinListener implements Listener {
 				nameToDisplay = "&7" + AranarthUtils.getUsername(player);
 			}
 
+			String joinMsgStr;
 			if (dateUtils.isValentinesDay()) {
-				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES)));
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES));
 			} else if (dateUtils.isEaster()) {
-				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER)));
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER));
 			} else if (dateUtils.isHalloween()) {
-				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN));
 			} else if (dateUtils.isChristmas()) {
-				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS));
 			} else {
-				e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay);
+			}
+			e.setJoinMessage(joinMsgStr);
+
+			// Notify other servers to display the join message and play the join sound
+			if (NetworkManager.isActive()) {
+				AranarthPlayer apVanishCheck = AranarthUtils.getPlayer(player.getUniqueId());
+				if (apVanishCheck == null || !apVanishCheck.isVanished()) {
+					NetworkManager.getInstance().publishJoinMsg(joinMsgStr);
+				}
 			}
 		}
 
@@ -203,20 +217,32 @@ public class PlayerServerJoinListener implements Listener {
 							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
 							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
 							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Applying survival inventory for " + player.getName() + " on arrival");
 								try {
 									player.getInventory().setContents(
 											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
-								} catch (Exception ignored) {
+								} catch (Exception e) {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply survival inventory for " + player.getName() + ": " + e.getMessage());
 									player.getInventory().clear();
 								}
 							} else {
-								player.getInventory().clear();
+								// survivaInventory is an empty string, meaning it was never
+								// serialized (default value) or the DB write failed before the
+								// transfer completed (e.g. the player crashed mid-transfer).
+								// Do NOT clear the inventory — doing so would wipe the player's
+								// items (Bukkit's clear() leaves armor slots, producing the
+								// "only armor remained" symptom). Leave Minecraft's native
+								// player data intact and log a warning for diagnosis.
+								Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+										+ "[Inv] survivaInventory is empty for " + player.getName()
+										+ " on isApplyInventory arrival — skipping clear to protect items (stale pending teleport?)");
 							}
 							if (apInv != null && !apInv.getSurvivalEnderChest().isEmpty()) {
 								try {
 									player.getEnderChest().setContents(
 											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalEnderChest()));
-								} catch (Exception ignored) {
+								} catch (Exception e) {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply ender chest for " + player.getName() + ": " + e.getMessage());
 									player.getEnderChest().clear();
 								}
 							}
@@ -228,6 +254,45 @@ public class PlayerServerJoinListener implements Listener {
 								player.setExp(apInv.getSurvivalExpProgress());
 							}
 							player.setGameMode(GameMode.SURVIVAL);
+							// Re-publish with fresh data so remote servers see the correct nickname/rank
+							if (NetworkManager.isActive()) {
+								AranarthPlayer freshAp = AranarthUtils.getPlayer(player.getUniqueId());
+								if (freshAp != null) {
+									NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), freshAp);
+								}
+							}
+						} else if (hadPendingTp) {
+							// Login routing: player arrived at their final destination via cross-server
+							// routing on login (e.g. last logged off on SMP, routed here from Survival).
+							// No inventory apply needed (Minecraft restores state from player data), but
+							// we DO need to publish a join announcement since the routing server suppressed it.
+							AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
+							if (apJoin != null && !apJoin.isVanished()) {
+								String routedName = "&7" + AranarthUtils.getNickname(player);
+								DateUtils routedDateUtils = new DateUtils();
+								String routedJoinMsg;
+								if (routedDateUtils.isValentinesDay()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+								} else if (routedDateUtils.isEaster()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+								} else if (routedDateUtils.isHalloween()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+								} else if (routedDateUtils.isChristmas()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+								} else {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
+								}
+								for (Player online : Bukkit.getOnlinePlayers()) {
+									if (!online.getUniqueId().equals(player.getUniqueId())) {
+										online.sendMessage(routedJoinMsg);
+									}
+								}
+								if (NetworkManager.isActive()) {
+									NetworkManager.getInstance().publishJoinMsg(routedJoinMsg);
+								}
+								PlayerServerJoinListener.this.playJoinSound();
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] Published login-routing join announcement for " + player.getName());
+							}
 						}
 
 						if ("player".equals(pending.getType())) {
@@ -261,6 +326,16 @@ public class PlayerServerJoinListener implements Listener {
 							}
 						}
 					}
+				}
+
+				// Reload quest progress from DB so assignments and progress match the source server.
+				if (hadPendingTp && DatabaseManager.isActive()) {
+					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
+				}
+
+				// Apply the /back location saved by the source server before transfer.
+				if (hadPendingTp && NetworkManager.isActive()) {
+					NetworkManager.getInstance().loadAndApplyCrossServerBack(player.getUniqueId());
 				}
 
 				// When arriving via cross-server transfer, force other clients to reload this
@@ -318,10 +393,12 @@ public class PlayerServerJoinListener implements Listener {
 					Bukkit.broadcastMessage("");
 					// Broadcast welcome to other servers in the network
 					if (NetworkManager.isActive()) {
+						NetworkManager.getInstance().publishChat("", "");
 						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
 						NetworkManager.getInstance().publishChat("", "                     &7Welcome, &e" + player.getName() + "," +
 								"\n                    &7to the &6&lRealm of Aranarth!");
 						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
+						NetworkManager.getInstance().publishChat("", "");
 					}
 
 					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));

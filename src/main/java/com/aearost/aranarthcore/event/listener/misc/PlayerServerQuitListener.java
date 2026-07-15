@@ -47,7 +47,27 @@ public class PlayerServerQuitListener implements Listener {
 		}
 
 		if (NetworkManager.isActive()) {
-			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId());
+			// Pass the formatted quit message so the other server can display it.
+			// Cross-server transfers suppress the message (null → empty string in the JSON).
+			AranarthPlayer apForQuit = AranarthUtils.getPlayer(player.getUniqueId());
+			boolean isVanished = apForQuit != null && apForQuit.isVanished();
+			String crossServerQuitMsg = null;
+			if (!isCrossServerTransfer && !isVanished) {
+				DateUtils dateUtils = new DateUtils();
+				String nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+				if (dateUtils.isValentinesDay()) {
+					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.VALENTINES));
+				} else if (dateUtils.isEaster()) {
+					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.EASTER));
+				} else if (dateUtils.isHalloween()) {
+					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+				} else if (dateUtils.isChristmas()) {
+					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + ChatUtils.getSpecialQuitMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+				} else {
+					crossServerQuitMsg = ChatUtils.translateToColor("&8[&c-&8] &7" + nameToDisplay);
+				}
+			}
+			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
 		}
 		PersistenceUtils.saveQuestProgress();
 		PersistenceUtils.saveLoginStreaks();
@@ -70,6 +90,10 @@ public class PlayerServerQuitListener implements Listener {
 
 		if (isCrossServerTransfer) {
 			e.setQuitMessage(null);
+			// Suppress DiscordSRV leave announcement for server-switch departures
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().markCrossServerQuit(player.getUniqueId());
+			}
 		} else {
 			DateUtils dateUtils = new DateUtils();
 			String nameToDisplay;

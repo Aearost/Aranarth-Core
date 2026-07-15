@@ -56,4 +56,6 @@ public class DiscordChatListener {
         }
         Bukkit.getConsoleSender().sendMessage(LegacyComponentSerializer.legacySection().deserialize(formatted));
     }
+
+
 }

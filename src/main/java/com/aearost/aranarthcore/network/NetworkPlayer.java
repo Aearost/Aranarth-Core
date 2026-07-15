@@ -16,9 +16,13 @@ public class NetworkPlayer {
     private final int saintRank;
     private final int architectRank;
     private final boolean vanished;
+    private final String textureValue;
+    private final String textureSignature;
+    private boolean afk;
 
     public NetworkPlayer(UUID uuid, String username, String nickname, String server,
-                         int rank, int councilRank, int saintRank, int architectRank, boolean vanished) {
+                         int rank, int councilRank, int saintRank, int architectRank, boolean vanished,
+                         String textureValue, String textureSignature) {
         this.uuid = uuid;
         this.username = username != null ? username : "";
         this.nickname = nickname;
@@ -28,6 +32,8 @@ public class NetworkPlayer {
         this.saintRank = saintRank;
         this.architectRank = architectRank;
         this.vanished = vanished;
+        this.textureValue = textureValue != null ? textureValue : "";
+        this.textureSignature = textureSignature != null ? textureSignature : "";
     }
 
     public UUID getUuid() { return uuid; }
@@ -40,4 +46,8 @@ public class NetworkPlayer {
     public int getSaintRank() { return saintRank; }
     public int getArchitectRank() { return architectRank; }
     public boolean isVanished() { return vanished; }
+    public String getTextureValue() { return textureValue; }
+    public String getTextureSignature() { return textureSignature; }
+    public boolean isAfk() { return afk; }
+    public void setAfk(boolean afk) { this.afk = afk; }
 }

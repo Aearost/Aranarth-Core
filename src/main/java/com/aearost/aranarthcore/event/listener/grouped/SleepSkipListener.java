@@ -65,6 +65,10 @@ public class SleepSkipListener implements Listener {
 				onlinePlayersInSurvivalWorlds++;
 			}
 		}
+		// Include remote players so the sleep threshold accounts for the whole network
+		if (NetworkManager.isActive()) {
+			onlinePlayersInSurvivalWorlds += NetworkManager.getInstance().getRemoteSleepEligibleCount();
+		}
 
 		double percentRequiredToSkip = 0.333333333;
 		// Increased amount needed during Obscurvor
@@ -85,6 +89,10 @@ public class SleepSkipListener implements Listener {
 						player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
 					}
 				}
+			}
+			// Publish to the other server so their players also see the sleep count
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishSleepMessage(message, sleepingPlayerNum, amountRequiredToSkip);
 			}
 		}, 1L);
 

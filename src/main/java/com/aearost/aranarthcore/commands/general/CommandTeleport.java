@@ -47,6 +47,8 @@ public class CommandTeleport implements CommandExecutor {
 						}
 
 						AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+						// Clear any stale /tph request so CommandTpAccept takes the correct branch
+						targetPlayer.setTeleportToUuid(null);
 						targetPlayer.setTeleportFromUuid(player.getUniqueId());
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have requested to teleport to &e" + targetPlayer.getNickname()));

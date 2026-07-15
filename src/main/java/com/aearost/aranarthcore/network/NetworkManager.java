@@ -12,6 +12,8 @@ import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -70,6 +72,7 @@ public class NetworkManager {
 
     public static final String CH_CHAT        = "aranarth:chat";
     public static final String CH_JOIN        = "aranarth:join";
+    public static final String CH_JOIN_MSG    = "aranarth:join_msg";
     public static final String CH_QUIT        = "aranarth:quit";
     public static final String CH_TP_REQUEST  = "aranarth:tp_request";
     public static final String CH_TP_ACCEPT   = "aranarth:tp_accept";
@@ -78,6 +81,8 @@ public class NetworkManager {
     public static final String CH_SYNC_TIME    = "aranarth:sync_time";
     public static final String CH_SYNC_WEATHER = "aranarth:sync_weather";
     public static final String CH_DM           = "aranarth:dm";
+    public static final String CH_SLEEP        = "aranarth:sleep";
+    public static final String CH_AFK          = "aranarth:afk";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -103,8 +108,27 @@ public class NetworkManager {
      */
     private final Set<UUID> transferringPlayers = ConcurrentHashMap.newKeySet();
 
+    /**
+     * Players whose cross-server quit should suppress DiscordSRV's leave announcement.
+     * Populated in PlayerServerQuitListener, consumed in DiscordChatListener.
+     */
+    private final Set<UUID> crossServerQuitPlayers = ConcurrentHashMap.newKeySet();
+
+    /**
+     * Players whose cross-server join should suppress DiscordSRV's join announcement.
+     * Populated in PlayerServerJoinListener, consumed in DiscordChatListener.
+     */
+    private final Set<UUID> crossServerJoinPlayers = ConcurrentHashMap.newKeySet();
+
     /** Pending cross-server TP requests received from another server. */
     private final Map<UUID, CrossServerTpContext> pendingCrossServerRequests = new ConcurrentHashMap<>();
+
+    /**
+     * Cross-server /back locations for players who arrived from another server.
+     * Format: "serverKey|world|x|y|z|yaw|pitch"
+     * Populated by loadAndApplyCrossServerBack(); consumed by CommandBack.
+     */
+    private final Map<UUID, String> crossServerBackLocations = new ConcurrentHashMap<>();
 
     // -------------------------------------------------------------------------
     // Constructor / lifecycle
@@ -132,16 +156,50 @@ public class NetworkManager {
     }
 
     private void startCleanup() {
-        // Cleanup old messages every 5 minutes (6000 ticks)
+        // Cleanup old messages every 5 minutes (6000 ticks) and reconcile the remote roster to
+        // remove stale entries left by a crashed remote server (no CH_QUIT was ever sent).
         cleanupTask = Bukkit.getScheduler().runTaskTimerAsynchronously(
                 AranarthCore.getInstance(),
                 () -> {
                     db.cleanupMessages();
                     db.cleanupTempData();
+                    reconcileRemoteRoster();
                 },
                 6000L,
                 6000L
         );
+    }
+
+    /**
+     * Re-reads the DB roster and removes any in-memory remote-roster entries that are no longer
+     * present in the database. This corrects stale entries caused by a remote server crashing
+     * (which prevented CH_QUIT messages from being published).
+     * Must be called from an async thread.
+     */
+    private void reconcileRemoteRoster() {
+        try {
+            Map<UUID, NetworkPlayer> dbRoster = db.loadRemoteRoster(thisServer);
+            List<UUID> stale = new ArrayList<>();
+            for (UUID uuid : remoteRoster.keySet()) {
+                if (!dbRoster.containsKey(uuid)) {
+                    stale.add(uuid);
+                }
+            }
+            if (!stale.isEmpty()) {
+                Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                    for (UUID uuid : stale) {
+                        remoteRoster.remove(uuid);
+                        NetworkTabManager.removeFromTab(uuid);
+                    }
+                    AranarthUtils.updateTab();
+                    Bukkit.getLogger().info(AranarthCore.LOG_PREFIX
+                            + "Reconciled " + stale.size() + " stale remote roster entr"
+                            + (stale.size() == 1 ? "y" : "ies"));
+                });
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Roster reconciliation failed: " + e.getMessage());
+        }
     }
 
     private void pollAndDispatch() {
@@ -193,6 +251,7 @@ public class NetworkManager {
         switch (channel) {
             case CH_CHAT         -> handleChat(json);
             case CH_JOIN         -> handleJoin(json);
+            case CH_JOIN_MSG     -> handleJoinMsg(json);
             case CH_QUIT         -> handleQuit(json);
             case CH_TP_REQUEST   -> handleTpRequest(json);
             case CH_TP_ACCEPT    -> handleTpAccept(json);
@@ -201,6 +260,8 @@ public class NetworkManager {
             case CH_SYNC_TIME    -> handleSyncTime(json);
             case CH_SYNC_WEATHER -> handleSyncWeather(json);
             case CH_DM            -> handleDirectMessage(json);
+            case CH_SLEEP         -> handleSleepMessage(json);
+            case CH_AFK           -> handleAfkStatus(json);
         }
     }
 
@@ -227,6 +288,18 @@ public class NetworkManager {
                     ap.getRank(), ap.getCouncilRank(), ap.getSaintRank(), ap.getArchitectRank(), ap.isVanished())
         );
 
+        // Extract skin texture so other servers can render this player's head in the tab list
+        String textureValue = "", textureSignature = "";
+        Player onlinePlayer = Bukkit.getPlayer(uuid);
+        if (onlinePlayer != null) {
+            String[] tex = NetworkTabManager.extractPlayerTexture(onlinePlayer);
+            textureValue = tex[0];
+            textureSignature = tex[1];
+            if (textureValue.isEmpty()) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Net] publishPlayerJoin: texture extraction returned empty for " + ap.getUsername() + " — remote tab may show default skin");
+            }
+        }
+
         // Publish event
         JsonObject json = new JsonObject();
         json.addProperty("uuid", uuid.toString());
@@ -238,11 +311,30 @@ public class NetworkManager {
         json.addProperty("saintRank", ap.getSaintRank());
         json.addProperty("architectRank", ap.getArchitectRank());
         json.addProperty("vanished", ap.isVanished());
+        json.addProperty("textureValue", textureValue);
+        json.addProperty("textureSignature", textureSignature);
         publish(CH_JOIN, json);
     }
 
-    /** Called from PlayerServerQuitListener. */
-    public void publishPlayerQuit(UUID uuid) {
+    /**
+     * Called after the join message is determined (non-transfer joins only).
+     * Notifies other servers to display the join message and play the join sound.
+     */
+    public void publishJoinMsg(String joinMessage) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("joinMessage", joinMessage != null ? joinMessage : "");
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] publishJoinMsg: publishing from " + thisServer + ": " + joinMessage);
+        publish(CH_JOIN_MSG, json);
+    }
+
+    /**
+     * Called from PlayerServerQuitListener.
+     * @param uuid          The UUID of the player who disconnected.
+     * @param quitMessage   The formatted quit message to broadcast, or null for cross-server transfers.
+     * @param isVanished    Whether the player was vanished (suppresses the public message).
+     */
+    public void publishPlayerQuit(UUID uuid, String quitMessage, boolean isVanished) {
         // Remove from roster in DB
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
             db.removeRosterEntry(uuid)
@@ -251,6 +343,8 @@ public class NetworkManager {
         JsonObject json = new JsonObject();
         json.addProperty("uuid", uuid.toString());
         json.addProperty("server", thisServer);
+        json.addProperty("quitMessage", quitMessage != null ? quitMessage : "");
+        json.addProperty("vanished", isVanished);
         publish(CH_QUIT, json);
     }
 
@@ -316,6 +410,27 @@ public class NetworkManager {
         publish(CH_DM, json);
     }
 
+    /**
+     * Publishes the current sleep status action-bar message to all other servers.
+     * @param message  The formatted message, e.g. "Players sleeping: 1/2".
+     * @param sleeping Number of players currently sleeping.
+     * @param required Number required to skip the night.
+     */
+    public void publishSleepMessage(String message, int sleeping, int required) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("message", message);
+        json.addProperty("sleeping", sleeping);
+        json.addProperty("required", required);
+        publish(CH_SLEEP, json);
+    }
+
+    /** Returns the number of remote players that should count toward the sleep threshold. */
+    public int getRemoteSleepEligibleCount() {
+        // All remote players count — they are on survival/SMP gameplay servers
+        return remoteRoster.size();
+    }
+
     public void publishSyncWeather(String weatherType, int duration, boolean isThunder, int stormDuration, int stormDelay) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
@@ -325,6 +440,18 @@ public class NetworkManager {
         json.addProperty("stormDuration", stormDuration);
         json.addProperty("stormDelay", stormDelay);
         publish(CH_SYNC_WEATHER, json);
+    }
+
+    /**
+     * Broadcasts an AFK status change for a local player to all other servers.
+     */
+    public void publishAfkStatus(UUID uuid, String nickname, boolean isAfk) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("nickname", nickname);
+        json.addProperty("afk", isAfk);
+        publish(CH_AFK, json);
     }
 
     // -------------------------------------------------------------------------
@@ -412,6 +539,72 @@ public class NetworkManager {
         }
     }
 
+    /**
+     * Serializes the player's current location (with server-key prefix) for /back storage.
+     * Returns null if location or world is unavailable.
+     */
+    private String buildBackLocationJson(Location loc) {
+        if (loc == null || loc.getWorld() == null) return null;
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("world", loc.getWorld().getName());
+        json.addProperty("x", loc.getX());
+        json.addProperty("y", loc.getY());
+        json.addProperty("z", loc.getZ());
+        json.addProperty("yaw", (double) loc.getYaw());
+        json.addProperty("pitch", (double) loc.getPitch());
+        return json.toString();
+    }
+
+    /**
+     * Called on cross-server arrival (main thread). Reads the stored /back location from the DB,
+     * then either:
+     * - Sets it as the player's lastKnownTeleportLocation (same-server world), or
+     * - Stores it in crossServerBackLocations (different server) for CommandBack to use.
+     */
+    public void loadAndApplyCrossServerBack(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        try {
+            String data = db.loadTempData(KEY_RETURN_LOC + uuid);
+            if (data == null) return;
+            db.deleteTempData(KEY_RETURN_LOC + uuid);
+            JsonObject json = JsonParser.parseString(data).getAsJsonObject();
+            String server = json.has("server") ? json.get("server").getAsString() : thisServer;
+            String worldName = json.get("world").getAsString();
+            double x = json.get("x").getAsDouble();
+            double y = json.get("y").getAsDouble();
+            double z = json.get("z").getAsDouble();
+            float yaw = (float) json.get("yaw").getAsDouble();
+            float pitch = (float) json.get("pitch").getAsDouble();
+
+            if (server.equals(thisServer)) {
+                // Back location is on this server
+                World w = Bukkit.getWorld(worldName);
+                if (w != null) {
+                    AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                    if (ap != null) ap.setLastKnownTeleportLocation(new Location(w, x, y, z, yaw, pitch));
+                }
+            } else {
+                // Back location is on a different server — store for CommandBack to route cross-server.
+                // Also clear the local lastKnownTeleportLocation (set by the pending-TP spawn teleport)
+                // so /back falls through to the cross-server routing instead of going to the spawn point.
+                crossServerBackLocations.put(uuid, server + "|" + worldName + "|" + x + "|" + y + "|" + z + "|" + yaw + "|" + pitch);
+                AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+                if (ap != null) ap.setLastKnownTeleportLocation(null);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to apply back location for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Returns and removes the stored cross-server /back location for the player, or null if none.
+     * Format: "serverKey|world|x|y|z|yaw|pitch"
+     */
+    public String consumeCrossServerBack(UUID uuid) {
+        return crossServerBackLocations.remove(uuid);
+    }
+
     // -------------------------------------------------------------------------
     // Server transfer (BungeeCord plugin messaging)
     // -------------------------------------------------------------------------
@@ -431,6 +624,26 @@ public class NetworkManager {
         return transferringPlayers.remove(uuid);
     }
 
+    /** Marks this player's quit as a cross-server transfer for DiscordSRV suppression. */
+    public void markCrossServerQuit(UUID uuid) {
+        crossServerQuitPlayers.add(uuid);
+    }
+
+    /** Returns true and removes if the player's quit was a cross-server transfer. */
+    public boolean consumeCrossServerQuit(UUID uuid) {
+        return crossServerQuitPlayers.remove(uuid);
+    }
+
+    /** Marks this player's join as a cross-server transfer arrival for DiscordSRV suppression. */
+    public void markCrossServerJoin(UUID uuid) {
+        crossServerJoinPlayers.add(uuid);
+    }
+
+    /** Returns true and removes if the player's join was a cross-server transfer arrival. */
+    public boolean consumeCrossServerJoin(UUID uuid) {
+        return crossServerJoinPlayers.remove(uuid);
+    }
+
     /**
      * Saves the player's survival inventory and ender chest to their AranarthPlayer, persists
      * both the player data and the pending teleport to MySQL, then transfers the player to the
@@ -447,9 +660,10 @@ public class NetworkManager {
         // Serialize inventory and ender chest into AranarthPlayer. handleTeleportLogic() already
         // does this for teleports that go through the normal countdown, but callers like
         // handleTransfer/handleTpAccept bypass that path, so we always do it here as a fallback.
-        if (AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
-            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
-            if (ap != null) {
+        String transferFromWorld = player.getWorld() != null ? player.getWorld().getName() : "";
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap != null) {
+            if (AranarthUtils.isSurvivalWorld(transferFromWorld)) {
                 try {
                     ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
                 } catch (Exception e) {
@@ -465,8 +679,22 @@ public class NetworkManager {
                 ap.setSurvivalSaturation(player.getSaturation());
                 ap.setSurvivalExpLevel(player.getLevel());
                 ap.setSurvivalExpProgress(player.getExp());
-                AranarthUtils.setPlayer(uuid, ap);
+            } else if (transferFromWorld.startsWith("creative")) {
+                // Save creative inventory so it persists across servers
+                try {
+                    ap.setCreativeInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to serialize creative inventory for " + player.getName() + ": " + e.getMessage());
+                }
+            } else if (transferFromWorld.startsWith("arena")) {
+                // Save arena inventory so it persists across servers
+                try {
+                    ap.setArenaInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents()));
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to serialize arena inventory for " + player.getName() + ": " + e.getMessage());
+                }
             }
+            AranarthUtils.setPlayer(uuid, ap);
         }
 
         pending.setApplyInventory(true);
@@ -476,7 +704,13 @@ public class NetworkManager {
         final String toggleJson = PersistenceUtils.buildPlayerToggleJson(uuid);
         final String pendingJson = gson.toJson(pending);
 
-        transferringPlayers.add(uuid);
+        // Capture the player's current location as the /back destination on the destination server.
+        final Location backLoc = player.getLocation();
+        final String backJson = buildBackLocationJson(backLoc);
+
+        // NOTE: transferringPlayers is NOT set here. It is set only just before sendPluginMessage
+        // so that a crash or disconnect during the async DB write does NOT suppress the quit
+        // message — the server still needs to broadcast the player's departure in that case.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
@@ -487,6 +721,9 @@ public class NetworkManager {
                     DatabaseManager.getInstance().savePlayerToggles(uuid, toggleJson);
                 }
                 db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
+                if (backJson != null) {
+                    db.saveTempData(KEY_RETURN_LOC + uuid, backJson, 3600);
+                }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                         + "DB write before transfer failed for " + player.getName() + ": " + e.getMessage());
@@ -494,7 +731,8 @@ public class NetworkManager {
             // Send the BungeeCord Connect message on the main thread after both writes complete.
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
-                    transferringPlayers.remove(uuid);
+                    // Player disconnected during the async write — quit message was not suppressed
+                    // (flag was never set), so no cleanup needed here.
                     return;
                 }
                 try {
@@ -502,6 +740,9 @@ public class NetworkManager {
                     DataOutputStream dos = new DataOutputStream(bos);
                     dos.writeUTF("Connect");
                     dos.writeUTF(targetServer);
+                    // Mark as transferring immediately before sending so that the imminent
+                    // Velocity-triggered quit is treated as a server switch, not a real disconnect.
+                    transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
@@ -520,7 +761,7 @@ public class NetworkManager {
     public void setPendingAndTransfer(Player player, String targetServer, PendingTeleport pending) {
         UUID uuid = player.getUniqueId();
         final String pendingJson = gson.toJson(pending);
-        transferringPlayers.add(uuid);
+        // NOTE: transferringPlayers is NOT set here — see saveInventoryAndTransfer for rationale.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
@@ -531,7 +772,6 @@ public class NetworkManager {
             }
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
-                    transferringPlayers.remove(uuid);
                     return;
                 }
                 try {
@@ -539,6 +779,7 @@ public class NetworkManager {
                     DataOutputStream dos = new DataOutputStream(bos);
                     dos.writeUTF("Connect");
                     dos.writeUTF(targetServer);
+                    transferringPlayers.add(uuid);
                     player.sendPluginMessage(AranarthCore.getInstance(), "BungeeCord", bos.toByteArray());
                 } catch (Exception e) {
                     Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
@@ -643,6 +884,8 @@ public class NetworkManager {
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         boolean vanished = json.get("vanished").getAsBoolean();
         String username = json.has("username") ? json.get("username").getAsString() : "";
+        String textureValue = json.has("textureValue") ? json.get("textureValue").getAsString() : "";
+        String textureSignature = json.has("textureSignature") ? json.get("textureSignature").getAsString() : "";
         NetworkPlayer np = new NetworkPlayer(
                 uuid,
                 username,
@@ -652,7 +895,9 @@ public class NetworkManager {
                 json.get("councilRank").getAsInt(),
                 json.get("saintRank").getAsInt(),
                 json.get("architectRank").getAsInt(),
-                vanished
+                vanished,
+                textureValue,
+                textureSignature
         );
         remoteRoster.put(uuid, np);
         if (!vanished) {
@@ -661,14 +906,79 @@ public class NetworkManager {
         AranarthUtils.updateTab();
     }
 
+    private void handleJoinMsg(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String joinMessage = json.has("joinMessage") ? json.get("joinMessage").getAsString() : "";
+        if (joinMessage.isEmpty()) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] handleJoinMsg: received empty join message from " + originServer + ", skipping");
+            return;
+        }
+
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] handleJoinMsg: broadcasting join from " + originServer + ": " + joinMessage);
+        Bukkit.getConsoleSender().sendMessage(joinMessage);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(joinMessage);
+        }
+        // Play the ascending note-block join sound
+        new org.bukkit.scheduler.BukkitRunnable() {
+            int runs = 0;
+            @Override
+            public void run() {
+                if (runs == 0) {
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1F);
+                    runs++;
+                } else if (runs == 1) {
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+                    runs++;
+                } else {
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+                    cancel();
+                }
+            }
+        }.runTaskTimer(AranarthCore.getInstance(), 0, 5);
+    }
+
     private void handleQuit(JsonObject json) {
         String server = json.get("server").getAsString();
         if (server.equals(thisServer)) return;
 
         UUID uuid = UUID.fromString(json.get("uuid").getAsString());
         remoteRoster.remove(uuid);
-        NetworkTabManager.removeFromTab(uuid);
+        // Guard: if the player just transferred to THIS server, their vanilla tab entry is
+        // already present — removing it would blank their skin and hide them from their own tab.
+        if (Bukkit.getPlayer(uuid) == null) {
+            NetworkTabManager.removeFromTab(uuid);
+        }
         AranarthUtils.updateTab();
+
+        // Broadcast quit message and play sound if this was a real disconnect (not a server transfer)
+        String quitMessage = json.has("quitMessage") ? json.get("quitMessage").getAsString() : "";
+        boolean vanished = json.has("vanished") && json.get("vanished").getAsBoolean();
+        if (!quitMessage.isEmpty() && !vanished) {
+            Bukkit.getConsoleSender().sendMessage(quitMessage);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(quitMessage);
+            }
+            // Play the descending note-block quit sound
+            new org.bukkit.scheduler.BukkitRunnable() {
+                int runs = 0;
+                @Override
+                public void run() {
+                    if (runs == 0) {
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+                        runs++;
+                    } else if (runs == 1) {
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+                        runs++;
+                    } else {
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
+                        cancel();
+                    }
+                }
+            }.runTaskTimer(AranarthCore.getInstance(), 0, 5);
+        }
     }
 
     private void handleTpRequest(JsonObject json) {
@@ -691,12 +1001,12 @@ public class NetworkManager {
 
         storeCrossServerTpContext(toUuid, new CrossServerTpContext(fromUuid, fromNickname, fromServer, isTpHere));
 
-        if (isTpHere) {
-            targetAp.setTeleportToUuid(fromUuid);
-        } else {
-            targetAp.setTeleportFromUuid(fromUuid);
-        }
-        AranarthUtils.setPlayer(toUuid, targetAp);
+        // Do NOT set teleportToUuid/teleportFromUuid here — those fields resolve the UUID via
+        // Bukkit.getPlayer(), which only works for locally-online players. The remote requester is
+        // on a different server, so that lookup returns null and /tpaccept would falsely report
+        // "player is no longer online". The CrossServerTpContext above is the sole routing
+        // mechanism; /tpaccept falls through to the NetworkManager block when neither local field
+        // is populated.
 
         if (isTpHere) {
             target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested you teleport to them"));
@@ -717,13 +1027,19 @@ public class NetworkManager {
         if (accepterServer.equals(thisServer)) return;
 
         if (isTpHere) {
+            // The accepter (remote player) is coming TO the requester (local player).
+            // The subtitle must name the requester, not the accepter — otherwise the
+            // accepter sees "You have teleported to [yourself]".
+            Player requester = Bukkit.getPlayer(requesterUuid);
+            String requesterNick = requester != null
+                    ? com.aearost.aranarthcore.utils.AranarthUtils.getNickname(requester)
+                    : accepterNick; // fallback to accepter nick if requester somehow offline
             setPendingTeleport(accepterUuid,
-                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + accepterNick));
+                    new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick));
             JsonObject transfer = new JsonObject();
             transfer.addProperty("uuid", accepterUuid.toString());
             transfer.addProperty("targetServer", thisServer);
             publish(CH_TRANSFER, transfer);
-            Player requester = Bukkit.getPlayer(requesterUuid);
             if (requester != null) {
                 requester.sendMessage(ChatUtils.chatMessage("&e" + accepterNick + " &7has accepted your teleport request"));
             }
@@ -895,6 +1211,48 @@ public class NetworkManager {
         if (targetAp != null) {
             targetAp.setLastReceivedMessage(fromUuid);
             AranarthUtils.setPlayer(toUuid, targetAp);
+        }
+    }
+
+    private void handleAfkStatus(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String nickname = json.get("nickname").getAsString();
+        boolean isAfk = json.get("afk").getAsBoolean();
+
+        // Update the in-memory roster entry and refresh that player's tab display name
+        NetworkPlayer np = remoteRoster.get(uuid);
+        if (np != null) {
+            np.setAfk(isAfk);
+            NetworkTabManager.addToTab(np);
+        }
+
+        // Broadcast the AFK message to locally online players
+        String translatedNickname = com.aearost.aranarthcore.utils.ChatUtils.translateToColor(nickname);
+        String message = isAfk
+                ? "§e" + translatedNickname + " §7is now AFK"
+                : "§e" + translatedNickname + " §7is no longer AFK";
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(message);
+        }
+    }
+
+    private void handleSleepMessage(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String message = json.get("message").getAsString();
+        // Show the sleep action bar to all locally-online players in survival-type worlds
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            String worldName = player.getLocation().getWorld().getName();
+            if (worldName.equals("world") || AranarthUtils.isSmpWorld(worldName) || worldName.equals("resource")) {
+                long time = player.getLocation().getWorld().getTime();
+                if (time > 12500 && time <= 23980) {
+                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
+                }
+            }
         }
     }
 

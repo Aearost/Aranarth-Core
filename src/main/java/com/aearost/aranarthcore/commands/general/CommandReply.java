@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -39,6 +41,48 @@ public class CommandReply implements CommandExecutor {
 			} else {
 				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(lastMessaged);
 				if (!offlinePlayer.isOnline()) {
+					// Check if the target is on another server before giving up
+					if (NetworkManager.isActive()) {
+						NetworkPlayer remoteTarget = NetworkManager.getInstance().getRemotePlayer(lastMessaged);
+						if (remoteTarget != null) {
+							AranarthPlayer targetAp = AranarthUtils.getPlayer(lastMessaged);
+							if (targetAp != null && targetAp.isTogglingMessages() && aranarthPlayer.getCouncilRank() == 0) {
+								String targetNick = targetAp.getNickname().isEmpty()
+										? remoteTarget.getUsername()
+										: ChatUtils.stripColorFormatting(targetAp.getNickname());
+								player.sendMessage(ChatUtils.chatMessage("&e" + targetNick + " &cis currently not receiving messages"));
+								return true;
+							}
+							StringBuilder msg = new StringBuilder();
+							for (int i = 0; i < args.length; i++) {
+								msg.append(args[i]);
+								if (i < args.length - 1) msg.append(" ");
+							}
+							String assembledMsg = msg.toString();
+							String formattedMsg;
+							if (player.hasPermission("aranarth.chat.hex")) {
+								formattedMsg = ChatUtils.translateToColor(assembledMsg);
+							} else if (player.hasPermission("aranarth.chat.color")) {
+								formattedMsg = ChatUtils.playerColorChat(assembledMsg);
+							} else {
+								formattedMsg = assembledMsg;
+							}
+							String senderNickname = aranarthPlayer.getNickname().isEmpty()
+									? player.getName()
+									: ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+							String targetNickname = remoteTarget.getNickname().isEmpty()
+									? remoteTarget.getUsername()
+									: ChatUtils.stripColorFormatting(remoteTarget.getNickname());
+							String prefixStart = "&7⊰&r";
+							String prefixEnd = "&7⊱&r";
+							String senderMsg = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o") + formattedMsg;
+							player.sendMessage(senderMsg);
+							aranarthPlayer.setLastReceivedMessage(lastMessaged);
+							AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+							NetworkManager.getInstance().publishDirectMessage(player.getUniqueId(), senderNickname, lastMessaged, formattedMsg);
+							return true;
+						}
+					}
 					aranarthPlayer.setLastReceivedMessage(null);
 					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					player.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online!"));

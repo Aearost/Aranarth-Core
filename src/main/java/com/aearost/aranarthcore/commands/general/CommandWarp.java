@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiWarps;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Home;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -47,6 +50,58 @@ public class CommandWarp implements CommandExecutor {
 					for (Home warp : AranarthUtils.getWarps()) {
 						if (ChatUtils.stripColorFormatting(warp.getName()).equalsIgnoreCase(args[0])) {
 							AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+							// Cross-server warp: player on SMP trying to use a Survival warp
+							if (NetworkManager.isActive() && !warp.isSmpHome() && AranarthCore.isSmpServer()) {
+								double wx = warp.getLocation().getX();
+								double wy = warp.getLocation().getY();
+								double wz = warp.getLocation().getZ();
+								float wyaw = warp.getLocation().getYaw();
+								float wpitch = warp.getLocation().getPitch();
+								String survivalServer = AranarthCore.getInstance().getConfig()
+										.getString("network.servers.survival", "survival");
+								AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+										aranarthPlayer.isInAdminMode(), warp.getName(), "&7Transferring to " + warp.getName() + "...", success -> {
+									if (success) {
+										NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
+												new PendingTeleport(warp.getWorldName(), wx, wy, wz, wyaw, wpitch,
+														warp.getName(), "&7You have warped to " + warp.getName()));
+									}
+								});
+								return true;
+							}
+
+							// Cross-server warp: player on Survival trying to use an SMP warp
+							if (NetworkManager.isActive() && warp.isSmpHome() && !AranarthCore.isSmpServer()) {
+								String smpWorldPart = warp.getWorldName().substring(4); // strip "smp:"
+								double wx = warp.getLocation().getX();
+								double wy = warp.getLocation().getY();
+								double wz = warp.getLocation().getZ();
+								float wyaw = warp.getLocation().getYaw();
+								float wpitch = warp.getLocation().getPitch();
+								String smpServer = AranarthCore.getInstance().getConfig()
+										.getString("network.servers.smp", "smp");
+								AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+										aranarthPlayer.isInAdminMode(), warp.getName(), "&7Transferring to " + warp.getName() + "...", success -> {
+									if (success) {
+										NetworkManager.getInstance().saveInventoryAndTransfer(player, smpServer,
+												new PendingTeleport(smpWorldPart, wx, wy, wz, wyaw, wpitch,
+														warp.getName(), "&7You have warped to " + warp.getName()));
+									}
+								});
+								return true;
+							}
+
+							// Guard: warp belongs to the other server but cross-server routing isn't
+							// available (NetworkManager inactive or warp has a null world). Refuse
+							// gracefully instead of trying a teleport that will fail as "unsafe".
+							boolean warpIsForOtherServer = (warp.isSmpHome() != AranarthCore.isSmpServer());
+							if (warpIsForOtherServer || warp.getLocation().getWorld() == null) {
+								player.sendMessage(ChatUtils.chatMessage("&cThis warp is not available on this server"));
+								return true;
+							}
+
+							// Same-server warp
 							AranarthUtils.teleportPlayer(player, player.getLocation(), warp.getLocation(), aranarthPlayer.isInAdminMode(), warp.getName(), "&7You have teleported to " + warp.getName(), success -> {
 								if (success) {
 									player.sendMessage(ChatUtils.chatMessage("&7You have warped to &e" + warp.getName()));

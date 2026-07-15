@@ -319,8 +319,8 @@ public class PotionEffectListener implements Listener {
 				calculatedAmplifier = 4;
 			}
 		} else if (type == org.bukkit.potion.PotionEffectType.LEVITATION) {
-			if (calculatedAmplifier >= 3) {
-				calculatedAmplifier = 2;
+			if (calculatedAmplifier >= 5) {
+				calculatedAmplifier = 4;
 			}
 		} else if (type == org.bukkit.potion.PotionEffectType.REGENERATION) {
 			if (calculatedAmplifier >= 3) {

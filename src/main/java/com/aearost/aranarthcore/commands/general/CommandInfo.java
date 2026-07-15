@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -8,6 +9,7 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.AvatarUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
@@ -69,7 +71,23 @@ public class CommandInfo implements CommandExecutor {
 				}
 			}
 
+			// Cycles through remote-server players third (players who have never joined this server)
+			if (uuid == null && NetworkManager.isActive()) {
+				for (java.util.Map.Entry<UUID, NetworkPlayer> entry : NetworkManager.getInstance().getRemoteRoster().entrySet()) {
+					NetworkPlayer np = entry.getValue();
+					if (np.getUsername().equalsIgnoreCase(args[0]) ||
+							ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(args[0])) {
+						uuid = entry.getKey();
+						break;
+					}
+				}
+			}
+
 			if (uuid != null) {
+				// Ensure AranarthPlayer is loaded; remote players may not be in local memory
+				if (AranarthUtils.getPlayer(uuid) == null && DatabaseManager.isActive()) {
+					PersistenceUtils.reloadPlayerFromDatabase(uuid);
+				}
 				sendInfo(uuid, sender);
 				return true;
 			} else {
@@ -130,8 +148,24 @@ public class CommandInfo implements CommandExecutor {
 		OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 
-		boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(offlinePlayer.getName());
-		String username = !isNicknameSameAsUsername ? " &e(" + offlinePlayer.getName() + "&e)" : "";
+		if (aranarthPlayer == null) {
+			sender.sendMessage(ChatUtils.chatMessage("&cPlayer data could not be loaded."));
+			return;
+		}
+
+		// Players who only joined the other server may not be in this server's user cache
+		String offlineName = offlinePlayer.getName();
+		if (offlineName == null) {
+			offlineName = aranarthPlayer.getUsername();
+			if (offlineName == null || offlineName.isEmpty()) {
+				NetworkPlayer np = NetworkManager.isActive() ? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
+				offlineName = np != null ? np.getUsername() : "Unknown";
+			}
+		}
+		final String resolvedName = offlineName;
+
+		boolean isNicknameSameAsUsername = ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()).equalsIgnoreCase(resolvedName);
+		String username = !isNicknameSameAsUsername ? " &e(" + resolvedName + "&e)" : "";
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &e"
 				+ ChatUtils.providePrefixAndName(uuid) + username + " &8- - -"));
 
@@ -153,7 +187,7 @@ public class CommandInfo implements CommandExecutor {
 		if (AvatarUtils.getCurrentAvatar() != null && AvatarUtils.getCurrentAvatar().getUuid().equals(uuid)) {
 			elementString = "&c火 &7気 &b水 &a土 &5The Current Avatar &a土 &b水 &7気 &c火";
 		} else {
-			OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(offlinePlayer.getName());
+			OfflineBendingPlayer offlineBendingPlayer = BendingPlayer.getOfflineBendingPlayer(resolvedName);
 			if (offlineBendingPlayer == null || offlineBendingPlayer.getElements().isEmpty()) {
 				elementString = "&eNone";
 			} else {

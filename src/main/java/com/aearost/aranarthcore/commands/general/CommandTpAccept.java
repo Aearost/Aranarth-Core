@@ -81,6 +81,14 @@ public class CommandTpAccept implements CommandExecutor {
 
 					player.sendMessage(ChatUtils.chatMessage("&7You have accepted &e" + targetPlayer.getNickname() + "&7's teleport request"));
 					target.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has accepted your teleport request"));
+					// Cancel any stale teleport task the acceptor (Player B) might have so that
+					// their movement does not falsely trigger a "cannot move" cancel on the
+					// requester's (Player A's) countdown that is about to start.
+					org.bukkit.scheduler.BukkitTask staleTask = AranarthUtils.getTeleportTask(player.getUniqueId());
+					if (staleTask != null) {
+						staleTask.cancel();
+						AranarthUtils.removeTeleportTask(player.getUniqueId());
+					}
 					AranarthUtils.teleportPlayer(target, target.getLocation(), player.getLocation(), targetPlayer.isInAdminMode(), aranarthPlayer.getNickname(), "&7You have teleported to " + aranarthPlayer.getNickname(), success -> {
 						if (success) {
 							target.sendMessage(ChatUtils.chatMessage("&7You have teleported to &e" + aranarthPlayer.getNickname()));

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.DominionRank;
+import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -210,8 +211,9 @@ public class DominionProtectionListener implements Listener {
     }
 
     /**
-     * Prevents fall damage only when a player falls FROM OUTSIDE into dominion land mid-air.
-     * If the player jumps from within the dominion, fall damage applies normally.
+     * Prevents fall damage only when a player falls FROM OUTSIDE into dominion land mid-air,
+     * and only when that dominion has bending disabled.
+     * If bending is allowed in the dominion, or the player jumped from within it, fall damage applies normally.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFallDamage(EntityDamageEvent e) {
@@ -220,6 +222,9 @@ public class DominionProtectionListener implements Listener {
         }
         if (!(e.getEntity() instanceof Player player)) {
             return;
+        }
+        if (!AranarthBendingUtils.isBendingBlockedAtLocation(player, player.getLocation())) {
+            return; // only apply special fall logic in bending-disabled dominions
         }
         UUID uuid = player.getUniqueId();
         if (DominionUtils.getDominionOfChunk(player.getLocation().getChunk()) != null) {
@@ -233,7 +238,7 @@ public class DominionProtectionListener implements Listener {
     }
 
     /**
-     * Tracks when a player enters or exits dominion land while on the ground.
+     * Tracks when a player enters or exits a bending-disabled dominion while on the ground.
      */
     @EventHandler
     public void onPlayerMove(PlayerMoveEvent e) {
@@ -244,8 +249,8 @@ public class DominionProtectionListener implements Listener {
         }
         Player player = e.getPlayer();
         UUID uuid = player.getUniqueId();
-        boolean inDominion = DominionUtils.getDominionOfChunk(e.getTo().getChunk()) != null;
-        if (inDominion) {
+        boolean inBendingDisabledDominion = AranarthBendingUtils.isBendingBlockedAtLocation(player, e.getTo());
+        if (inBendingDisabledDominion) {
             if (player.isOnGround()) {
                 dominionGroundedPlayers.add(uuid);
             }

@@ -185,8 +185,10 @@ public class DateUtils {
 
 			if (weekdayNum == 7) {
 				weekdayNum = 0;
-				// Additionally sends messages to inform the leader
-				DominionUtils.provideDominionRewards();
+				// Additionally sends messages to inform the leader (Survival server only)
+				if (!AranarthCore.isSmpServer()) {
+					DominionUtils.provideDominionRewards();
+				}
 			} else {
 				weekdayNum++;
 			}
@@ -303,7 +305,12 @@ public class DateUtils {
 				}
 			}
 
-			DominionUtils.reEvaluateFoodInventory();
+			// Dominion food/tax cycles must only run on the Survival server.
+			// The SMP server loads dominion data at startup and keeps a stale in-memory copy;
+			// running consumption on SMP overwrites valid food data in MySQL with that stale copy.
+			if (!AranarthCore.isSmpServer()) {
+				DominionUtils.reEvaluateFoodInventory();
+			}
 		}
 		determineMonthEffects();
 	}

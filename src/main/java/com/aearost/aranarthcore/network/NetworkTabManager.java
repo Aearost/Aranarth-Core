@@ -23,6 +23,7 @@ public class NetworkTabManager {
     private static boolean available   = false;
 
     private static Class<?> gameProfileClass;
+    private static Class<?> propertyClass;
     private static Class<?> updatePacketClass;
     private static Class<?> removePacketClass;
     private static Class<?> actionClass;
@@ -49,6 +50,11 @@ public class NetworkTabManager {
             } catch (ClassNotFoundException ignored) {
                 chatSessionDataClass = null; // not present in all versions
             }
+            try {
+                propertyClass = Class.forName("com.mojang.authlib.properties.Property");
+            } catch (ClassNotFoundException ignored) {
+                propertyClass = null;
+            }
 
             //noinspection unchecked,rawtypes
             survivalGameType = Enum.valueOf((Class<Enum>) gameTypeClass, "SURVIVAL");
@@ -74,9 +80,10 @@ public class NetworkTabManager {
         if (!available || viewers.isEmpty()) return;
         try {
             String profileName  = !np.getUsername().isEmpty() ? np.getUsername() : "Unknown";
-            Object gameProfile  = createGameProfile(np.getUuid(), profileName);
+            Object gameProfile  = createGameProfile(np.getUuid(), profileName,
+                    np.getTextureValue(), np.getTextureSignature());
             Object displayName  = toNmsComponent(buildDisplayName(np)); // null on failure → falls back to profile name
-            Object entry        = createEntry(np.getUuid(), gameProfile, displayName);
+            Object entry        = createEntry(np.getUuid(), gameProfile, displayName, 0);
             EnumSet<?> actionsSet = createActionEnumSet();
             Object packet       = updatePacketClass
                     .getDeclaredConstructor(EnumSet.class, List.class)
@@ -111,6 +118,43 @@ public class NetworkTabManager {
     }
 
     /**
+     * Sends an UPDATE_LIST_ORDER packet for a remote player's fake tab entry so it
+     * appears at the correct position in the combined cross-server sort.
+     * This uses a Paper-specific action; silently does nothing if the action is not
+     * present in the running server version.
+     */
+    public static void sendListOrder(UUID uuid, int listOrder) {
+        sendListOrder(uuid, listOrder, Bukkit.getOnlinePlayers());
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static void sendListOrder(UUID uuid, int listOrder, Collection<? extends Player> viewers) {
+        ensureInitialised();
+        if (!available || viewers.isEmpty()) return;
+        try {
+            Enum updateOrderAction;
+            try {
+                updateOrderAction = Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LIST_ORDER");
+            } catch (IllegalArgumentException ignored) {
+                return; // Action not present in this server version — skip silently
+            }
+            // For UPDATE_LIST_ORDER only the UUID and listOrder fields are read by the codec;
+            // all other Entry fields can be null / default.
+            Object entry = createEntry(uuid, null, null, listOrder);
+            EnumSet set = (EnumSet) EnumSet.class.getMethod("of", Enum.class)
+                    .invoke(null, updateOrderAction);
+            Object packet = updatePacketClass
+                    .getDeclaredConstructor(EnumSet.class, List.class)
+                    .newInstance(set, List.of(entry));
+            for (Player viewer : viewers) {
+                sendPacket(viewer, packet);
+            }
+        } catch (Exception ex) {
+            Bukkit.getLogger().log(Level.FINE, "[AC] sendListOrder failed for " + uuid, ex);
+        }
+    }
+
+    /**
      * Sends all currently tracked remote players to a player who just joined
      * so their tab is populated immediately.
      */
@@ -130,22 +174,54 @@ public class NetworkTabManager {
     // Reflection helpers
     // -------------------------------------------------------------------------
 
-    /** Creates a com.mojang.authlib.GameProfile via reflection. */
-    private static Object createGameProfile(UUID uuid, String name) throws Exception {
-        return gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
+    /**
+     * Creates a com.mojang.authlib.GameProfile via reflection, optionally adding the skin
+     * texture property so the client renders the correct player head in the tab list.
+     */
+    private static Object createGameProfile(UUID uuid, String name,
+                                            String textureValue, String textureSignature) throws Exception {
+        Object gp = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
+        if (propertyClass != null && textureValue != null && !textureValue.isEmpty()) {
+            try {
+                // Build a Property("textures", value, signature)
+                Object property;
+                try {
+                    property = propertyClass.getConstructor(String.class, String.class, String.class)
+                            .newInstance("textures", textureValue,
+                                    (textureSignature != null && !textureSignature.isEmpty()) ? textureSignature : null);
+                } catch (NoSuchMethodException e2) {
+                    // Some authlib versions have a 2-arg constructor without signature
+                    property = propertyClass.getConstructor(String.class, String.class)
+                            .newInstance("textures", textureValue);
+                }
+                // getProperties() returns a PropertyMap (Guava Multimap)
+                Object propMap = gameProfileClass.getMethod("getProperties").invoke(gp);
+                propMap.getClass().getMethod("put", Object.class, Object.class).invoke(propMap, "textures", property);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[AC] NetworkTabManager: texture injection failed for UUID " + uuid + ": " + e.getMessage());
+            }
+        }
+        return gp;
     }
 
     /** Creates a ClientboundPlayerInfoUpdatePacket.Entry record via reflection.
-     *  Uses the first declared constructor and fills arguments by type so that
-     *  changes to the record's field list (e.g. showHat added in 1.21.4) are
-     *  handled automatically without needing to update this code. */
-    private static Object createEntry(UUID uuid, Object gameProfile, Object nmsComponent) throws Exception {
+     *  Uses record-component names (Java 16+) to distinguish int fields so that
+     *  {@code listOrder} is set correctly alongside {@code latency}, even as the
+     *  NMS record gains or loses fields across Paper versions. */
+    private static Object createEntry(UUID uuid, Object gameProfile, Object nmsComponent,
+                                      int listOrder) throws Exception {
         Constructor<?> ctor = entryClass.getDeclaredConstructors()[0];
         ctor.setAccessible(true);
         Class<?>[] params = ctor.getParameterTypes();
         Object[] args = new Object[params.length];
+
+        // Resolve record-component names once so we can identify int fields precisely.
+        java.lang.reflect.RecordComponent[] components = null;
+        try { components = entryClass.getRecordComponents(); } catch (Exception ignored) {}
+
         for (int i = 0; i < params.length; i++) {
             Class<?> p = params[i];
+            String name = (components != null && i < components.length) ? components[i].getName() : "";
             if (p == UUID.class) {
                 args[i] = uuid;
             } else if (p == gameProfileClass) {
@@ -153,7 +229,8 @@ public class NetworkTabManager {
             } else if (p == boolean.class) {
                 args[i] = true; // listed=true; showHat=true (1.21.4+)
             } else if (p == int.class) {
-                args[i] = 0; // latency
+                // Use the component name to differentiate latency from listOrder.
+                args[i] = name.equals("listOrder") ? listOrder : 0;
             } else if (p == gameTypeClass) {
                 args[i] = survivalGameType;
             } else if (nmsComponentClass != null && p == nmsComponentClass) {
@@ -167,14 +244,58 @@ public class NetworkTabManager {
         return ctor.newInstance(args);
     }
 
-    /** Creates an EnumSet<Action> with ADD_PLAYER | UPDATE_LISTED | UPDATE_DISPLAY_NAME. */
+    /** Creates an EnumSet<Action> with ADD_PLAYER | UPDATE_LISTED | UPDATE_DISPLAY_NAME | UPDATE_LATENCY. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static EnumSet<?> createActionEnumSet() throws Exception {
         EnumSet set = (EnumSet) EnumSet.class.getMethod("noneOf", Class.class).invoke(null, actionClass);
         set.add(Enum.valueOf((Class<Enum>) actionClass, "ADD_PLAYER"));
         set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LISTED"));
         set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_DISPLAY_NAME"));
+        try {
+            set.add(Enum.valueOf((Class<Enum>) actionClass, "UPDATE_LATENCY"));
+        } catch (IllegalArgumentException ignored) {
+            // Not present in all versions
+        }
         return set;
+    }
+
+    /**
+     * Extracts the skin texture value and signature from a locally-online player via NMS reflection.
+     * Returns a two-element array {value, signature}; both are empty strings if unavailable.
+     */
+    static String[] extractPlayerTexture(Player player) {
+        try {
+            Method getHandle = player.getClass().getMethod("getHandle");
+            Object serverPlayer = getHandle.invoke(player);
+            // Find getGameProfile() on ServerPlayer (may be obfuscated in some mappings)
+            Method getGP = null;
+            for (Method m : serverPlayer.getClass().getMethods()) {
+                if (m.getName().equals("getGameProfile") && m.getParameterCount() == 0) {
+                    getGP = m;
+                    break;
+                }
+            }
+            if (getGP == null) return new String[]{"", ""};
+            Object gp = getGP.invoke(serverPlayer);
+            Object propMap = gp.getClass().getMethod("getProperties").invoke(gp);
+            // PropertyMap.get(Object) → Collection<Property>
+            java.util.Collection<?> props = (java.util.Collection<?>) propMap.getClass()
+                    .getMethod("get", Object.class).invoke(propMap, "textures");
+            if (props == null || props.isEmpty()) return new String[]{"", ""};
+            Object prop = props.iterator().next();
+            Method getValue = prop.getClass().getMethod("getValue");
+            String value = (String) getValue.invoke(prop);
+            String signature = "";
+            try {
+                Method getSig = prop.getClass().getMethod("getSignature");
+                Object s = getSig.invoke(prop);
+                if (s instanceof String str) signature = str;
+            } catch (Exception ignored) {}
+            return new String[]{value != null ? value : "", signature};
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture failed for " + player.getName() + ": " + e.getMessage());
+            return new String[]{"", ""};
+        }
     }
 
     /**
@@ -265,6 +386,8 @@ public class NetworkTabManager {
 
         String name = np.getNickname().isEmpty() ? "Unknown" : np.getNickname();
         display += name;
+
+        if (np.isAfk()) display += " &7[AFK]";
 
         return ChatUtils.translateToColor(display);
     }

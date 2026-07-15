@@ -154,10 +154,16 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveShops();
                 ShopUtils.removeAllHolograms();
                 ShopUtils.initializeAllHolograms();
-                PersistenceUtils.saveDominions();
-                PersistenceUtils.saveDominionPermissions();
-                PersistenceUtils.saveDominionPlayerPermissions();
-                DominionUtils.checkAndProcessConquestDeadlines();
+                // Dominion saves must only happen on the Survival server. The SMP server
+                // keeps a stale in-memory copy (loaded at startup, not updated by Survival-side
+                // changes); saving from SMP would overwrite MySQL with that stale data, wiping
+                // food reserves and other changes made on the Survival server since last restart.
+                if (!isSmpServer()) {
+                    PersistenceUtils.saveDominions();
+                    PersistenceUtils.saveDominionPermissions();
+                    PersistenceUtils.saveDominionPlayerPermissions();
+                    DominionUtils.checkAndProcessConquestDeadlines();
+                }
                 PersistenceUtils.saveWarps();
                 PersistenceUtils.savePunishments();
                 PersistenceUtils.saveAvatars();
@@ -179,9 +185,11 @@ public class AranarthCore extends JavaPlugin {
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved");
 
-                // Resets the two bending arenas
-                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
-                Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
+                // Resets the two bending arenas (Survival server only — arena world doesn't exist on SMP)
+                if (!isSmpServer()) {
+                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena1");
+                    Bukkit.dispatchCommand(Bukkit.getServer().getConsoleSender(), "arenas reset arena2");
+                }
 
                 AranarthUtils.removeInactiveLockedContainers();
             }
@@ -218,7 +226,11 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     PermissionUtils.reEvaluateMonthlySaints(player);
                 }
-                DominionLevelUtils.runPeriodicScan();
+                // Dominion level scans include penalty application (food/balance drains).
+                // Only the Survival server holds the authoritative in-memory Dominion state.
+                if (!isSmpServer()) {
+                    DominionLevelUtils.runPeriodicScan();
+                }
             }
         }, 12000, 12000);
 
@@ -706,6 +718,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("cartography").setExecutor(new CommandCartography());
         getCommand("compressor").setExecutor(new CommandCompressor());
         getCommand("craft").setExecutor(new CommandCraft());
+        getCommand("countdown").setExecutor(new CommandCountdown());
+        getCommand("countdown").setTabCompleter(new CommandCountdownCompleter());
         getCommand("creative").setExecutor(new CommandCreative());
         getCommand("date").setExecutor(new CommandDate());
         getCommand("deaths").setExecutor(new CommandDeaths());

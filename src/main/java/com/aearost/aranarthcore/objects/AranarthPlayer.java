@@ -332,7 +332,7 @@ public class AranarthPlayer {
 	 * @return The player's current Survival inventory.
 	 */
 	public String getSurvivalInventory() {
-		return survivalInventory;
+		return survivalInventory == null ? "" : survivalInventory;
 	}
 
 	/**
@@ -379,7 +379,7 @@ public class AranarthPlayer {
 	 * @return The player's current Arena inventory.
 	 */
 	public String getArenaInventory() {
-		return arenaInventory;
+		return arenaInventory == null ? "" : arenaInventory;
 	}
 
 	/**
@@ -395,7 +395,7 @@ public class AranarthPlayer {
 	 * @return The player's current Creative inventory.
 	 */
 	public String getCreativeInventory() {
-		return creativeInventory;
+		return creativeInventory == null ? "" : creativeInventory;
 	}
 
 	/**
