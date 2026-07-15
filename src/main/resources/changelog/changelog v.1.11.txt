@@ -72,6 +72,7 @@ Minor Features
 [+] Added /keyclaim reminder to the MOTD
 [~] Fixed error caused by null string sent to ChatUtils.stripColorFormatting()
 [+] Added slime spawn eggs to the Godly crate rotating spawn eggs
+[~] Fixed 100% short grass growth rate when snow melts
 
 Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references

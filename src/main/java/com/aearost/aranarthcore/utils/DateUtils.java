@@ -1636,7 +1636,7 @@ public class DateUtils {
 										}
 
 										double temperature = surfaceBlock.getWorld().getTemperature(surfaceBlock.getX(), surfaceBlock.getY(), surfaceBlock.getZ());
-										int grassReplaceRate = 0;
+										int grassReplaceRate = random.nextInt(100) + 1;
 										String biome = surfaceBlock.getBiome().toString();
 
 										// Hot biomes never have snow
