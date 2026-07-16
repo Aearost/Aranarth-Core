@@ -418,7 +418,7 @@ public class PastLives extends AvatarAbility implements AddonAbility, MultiAbili
                 } else {
                     newAmplifier = effect.getAmplifier();
                 }
-                newAmplifier = PotionEffectListener.determineEffectAmplifierRestriction(newAmplifier, converted);
+                newAmplifier = PotionEffectListener.determineEffectAmplifierRestriction(newAmplifier, converted, player);
                 player.addPotionEffect(new PotionEffect(
                         converted,
                         effect.getDuration(),

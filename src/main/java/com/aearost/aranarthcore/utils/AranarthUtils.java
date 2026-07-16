@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
+import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.objects.*;
 import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
@@ -85,6 +86,13 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<Material>> compressibleTypes = new HashMap<>();
 	private static final List<CrateType> cratesInUse = new ArrayList<>();
 	private static final HashMap<UUID, Location> shopLocations = new LinkedHashMap<>();
+	public static final Map<UUID, Boolean> playerInFaeBiome = new HashMap<>();
+	public static final Map<UUID, Location> playerLastFlowerLocation = new HashMap<>();
+	private static final Set<Material> VALID_TRAIL_SOIL = EnumSet.of(
+			Material.GRASS_BLOCK, Material.DIRT, Material.COARSE_DIRT,
+			Material.PODZOL, Material.ROOTED_DIRT, Material.MUD,
+			Material.MUDDY_MANGROVE_ROOTS, Material.MYCELIUM
+	);
 	private static final HashMap<UUID, int[]> shopIslandCenters = new HashMap<>();
 	private static final HashMap<UUID, Set<UUID>> shopCollaborators = new HashMap<>();
 	private static final HashMap<UUID, UUID> collaboratorShop = new HashMap<>(); // collaborator UUID → owner UUID
@@ -535,6 +543,31 @@ public class AranarthUtils {
 			}
 		} else if (isWearingArmorType(player, "soulbound")) {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+		} else if (isWearingArmorType(player, "fae")) {
+			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 0));
+			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0));
+			org.bukkit.block.Biome biome = player.getLocation().getBlock().getBiome();
+			boolean isNight = player.getWorld().getTime() >= 13000 && player.getWorld().getTime() <= 23000;
+			if (DateUtils.isFaeBiome(biome)) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
+				if (isNight) {
+					org.bukkit.potion.PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
+					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
+					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
+				}
+			} else if (DateUtils.isMushroomFieldsBiome(biome)) {
+				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 4));
+				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
+				if (isNight) {
+					org.bukkit.potion.PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
+					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
+					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
+				}
+			}
 		}
 	}
 
@@ -562,6 +595,15 @@ public class AranarthUtils {
 		}
 		// Ensures that all 4 pieces of armour are Dwarven
         return counter == 4;
+	}
+
+	/**
+	 * Returns true if the given block is a valid spot for the Fae Aranarthium flower trail —
+	 * i.e. the block itself is air and sits on valid soil.
+	 */
+	public static boolean isValidTrailSpot(Block feetBlock) {
+		Block ground = feetBlock.getRelative(BlockFace.DOWN);
+		return VALID_TRAIL_SOIL.contains(ground.getType()) && feetBlock.getType() == Material.AIR;
 	}
 
 	/**

@@ -287,17 +287,17 @@ public class AranarthCore extends JavaPlugin {
                 } else if (AranarthUtils.isWearingArmorType(player, "fae")) {
                     org.bukkit.block.Biome biome = loc.getBlock().getBiome();
                     boolean inFaeBiome = com.aearost.aranarthcore.utils.DateUtils.isFaeBiome(biome) || com.aearost.aranarthcore.utils.DateUtils.isMushroomFieldsBiome(biome);
-                    Boolean wasInFaeBiome = com.aearost.aranarthcore.event.listener.grouped.FaeArmorListener.playerInFaeBiome.get(player.getUniqueId());
+                    Boolean wasInFaeBiome = com.aearost.aranarthcore.utils.AranarthUtils.playerInFaeBiome.get(player.getUniqueId());
 
                     // Biome transition sounds
                     if (wasInFaeBiome == null || wasInFaeBiome != inFaeBiome) {
-                        com.aearost.aranarthcore.event.listener.grouped.FaeArmorListener.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
+                        com.aearost.aranarthcore.utils.AranarthUtils.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
                         if (inFaeBiome) {
                             // Entered Fae biome — magical sound
                             player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.9f, 1.2f);
                         } else if (wasInFaeBiome != null) {
                             // Left Fae biome — dimming sound
-                            player.playSound(loc, Sound.BLOCK_BEACON_DEACTIVATE, 0.6f, 1.5f);
+                            player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITH_ITEM, 0.9f, 0.6f);
                         }
                     }
 
@@ -309,50 +309,33 @@ public class AranarthCore extends JavaPlugin {
                         double dz = -Math.cos(radians) * 0.4;
                         Location trailLoc = loc.clone().add(dx, 0.3, dz);
 
-                        // Randomize between lilac, pink, and cream
-                        int colorChoice = new Random().nextInt(10);
-                        Color particleColor;
-                        if (colorChoice < 4) {
-                            particleColor = Color.fromRGB(0xB5, 0x7F, 0xB3); // lilac
-                        } else if (colorChoice < 8) {
-                            particleColor = Color.fromRGB(0xFB, 0xA0, 0xE3); // pink
-                        } else {
-                            particleColor = Color.fromRGB(0xFF, 0xF5, 0xE6); // cream
+                        // Scale particle size by the player's scale attribute
+                        var scaleAttr = player.getAttribute(org.bukkit.attribute.Attribute.SCALE);
+                        float playerScale = (scaleAttr != null) ? (float) scaleAttr.getValue() : 1.0f;
+                        float particleSize = Math.max(0.1f, Math.min(playerScale, 4.0f));
+
+                        // Spawn several particles per tick with varied colours for density
+                        Random rng = new Random();
+                        for (int i = 0; i < 8; i++) {
+                            int colorChoice = rng.nextInt(10);
+                            Color particleColor;
+                            if (colorChoice < 4) {
+                                particleColor = Color.fromRGB(0xB5, 0x7F, 0xB3); // lilac
+                            } else if (colorChoice < 8) {
+                                particleColor = Color.fromRGB(0xFB, 0xA0, 0xE3); // pink
+                            } else {
+                                particleColor = Color.fromRGB(0xFF, 0xF5, 0xE6); // cream
+                            }
+                            world.spawnParticle(Particle.DUST, trailLoc, 1, 0.15, 0.12, 0.15,
+                                    new Particle.DustOptions(particleColor, particleSize));
                         }
-                        world.spawnParticle(Particle.DUST, trailLoc, 2, 0.08, 0.08, 0.08,
-                                new Particle.DustOptions(particleColor, 0.3f));
                     }
                 }
             }
         }, 0, 3);
 
-        // Flower trail for Fae Aranarthium in Fae biomes
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-            for (Player player : Bukkit.getOnlinePlayers()) {
-                if (!AranarthUtils.isWearingArmorType(player, "fae")) {
-                    continue;
-                }
-                Location loc = player.getLocation();
-                org.bukkit.block.Biome biome = loc.getBlock().getBiome();
-                if (!com.aearost.aranarthcore.utils.DateUtils.isFaeBiome(biome) && !com.aearost.aranarthcore.utils.DateUtils.isMushroomFieldsBiome(biome)) {
-                    continue;
-                }
-                Block feetBlock = loc.getBlock();
-                if (!com.aearost.aranarthcore.event.listener.grouped.FaeArmorListener.isValidTrailSpot(feetBlock)) {
-                    continue;
-                }
-                // Do not overwrite existing TempBlocks
-                if (com.projectkorra.projectkorra.util.TempBlock.isTempBlock(feetBlock)) {
-                    continue;
-                }
-                Material flower = getFaeTrailFlower(biome);
-                if (flower == null) {
-                    continue;
-                }
-                // Place as TempBlock — reverts after 5 seconds (5000ms)
-                new com.projectkorra.projectkorra.util.TempBlock(feetBlock, flower.createBlockData(), 5000L);
-            }
-        }, 0, 10);
+        // Flower trail for Fae Aranarthium in Fae biomes — random 1-10 tick interval, only when moving
+        scheduleFaeFlowerTrail();
 
         // Periodically broadcast world time from the Survival server so the SMP server
         // stays in lockstep even after restarts. Runs every 5 minutes (6000 ticks).
@@ -663,8 +646,6 @@ public class AranarthCore extends JavaPlugin {
         new TamedPetStealPreventListener(this);
         new RootingArrowMovePrevent(this);
         new GateListener(this);
-        new com.aearost.aranarthcore.event.listener.grouped.FaeArmorListener(this);
-
         // Single-purpose and single-event event listeners
         new PlayerCommandSendEventListener(this);
         new PlayerServerJoinListener(this);
@@ -683,6 +664,7 @@ public class AranarthCore extends JavaPlugin {
         new WeatherChangeListener(this);
         new LeavesPreventBurnListener(this);
         new SnowballHitListener(this);
+        new PhantomSpawnPreventListener(this);
         new ArmorStandSwitchListener(this);
         new AnimalBreedingListener(this);
         if (Bukkit.getPluginManager().isPluginEnabled("VotifierPlus")) {
@@ -1414,6 +1396,78 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveMounts();
         PersistenceUtils.saveMail();
         Bukkit.getLogger().info(LOG_PREFIX + "Aranarth data has been saved (shutdown)");
+    }
+
+    private void scheduleFaeFlowerTrail() {
+        int delay = new Random().nextInt(10) + 1; // random 1-10 ticks
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                for (Player player : Bukkit.getOnlinePlayers()) {
+                    if (!AranarthUtils.isWearingArmorType(player, "fae")) {
+                        continue;
+                    }
+                    Location loc = player.getLocation();
+                    // Only scatter flowers if the player has moved since the last check
+                    Location lastLoc = com.aearost.aranarthcore.utils.AranarthUtils.playerLastFlowerLocation.get(player.getUniqueId());
+                    com.aearost.aranarthcore.utils.AranarthUtils.playerLastFlowerLocation.put(player.getUniqueId(), loc.clone());
+                    if (lastLoc != null
+                            && loc.getBlockX() == lastLoc.getBlockX()
+                            && loc.getBlockY() == lastLoc.getBlockY()
+                            && loc.getBlockZ() == lastLoc.getBlockZ()) {
+                        continue; // Hasn't moved to a new block
+                    }
+                    org.bukkit.block.Biome biome = loc.getBlock().getBiome();
+                    if (!com.aearost.aranarthcore.utils.DateUtils.isFaeBiome(biome)
+                            && !com.aearost.aranarthcore.utils.DateUtils.isMushroomFieldsBiome(biome)) {
+                        continue;
+                    }
+                    Material flower = getFaeTrailFlower(biome);
+                    if (flower == null) {
+                        continue;
+                    }
+                    Random rng = new Random();
+                    int originX = loc.getBlockX();
+                    int originY = loc.getBlockY();
+                    int originZ = loc.getBlockZ();
+
+                    double radians = Math.toRadians(loc.getYaw());
+                    double perpX = Math.cos(radians);
+                    double perpZ = Math.sin(radians);
+                    for (int bx = -3; bx <= 3; bx++) {
+                        for (int bz = -3; bz <= 3; bz++) {
+                            if (bx * bx + bz * bz > 9) {
+                                continue;
+                            }
+                            // Perpendicular distance from the player's movement axis
+                            double perpDist = Math.abs(bx * perpX + bz * perpZ);
+                            float spawnChance;
+                            if (perpDist < 0.5) {
+                                spawnChance = 0.25f; // Center
+                            } else if (perpDist < 1.5) {
+                                spawnChance = 0.14f; // 1 block off
+                            } else if (perpDist < 2.5) {
+                                spawnChance = 0.07f; // 2 blocks off
+                            } else {
+                                spawnChance = 0.03f; // 3 blocks off
+                            }
+                            if (rng.nextFloat() >= spawnChance) {
+                                continue;
+                            }
+                            Block candidate = loc.getWorld().getBlockAt(originX + bx, originY, originZ + bz);
+                            if (!com.aearost.aranarthcore.utils.AranarthUtils.isValidTrailSpot(candidate)) {
+                                continue;
+                            }
+                            if (com.projectkorra.projectkorra.util.TempBlock.isTempBlock(candidate)) {
+                                continue;
+                            }
+                            new com.projectkorra.projectkorra.util.TempBlock(candidate, flower.createBlockData(), 5000L);
+                        }
+                    }
+                }
+                scheduleFaeFlowerTrail(); // Reschedule with a new random delay
+            }
+        }.runTaskLater(this, delay);
     }
 
     private static Material getFaeTrailFlower(org.bukkit.block.Biome biome) {

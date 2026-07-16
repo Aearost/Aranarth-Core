@@ -256,7 +256,9 @@
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore -name warps.txt -o -name *warp* -type f)",
       "Bash(xargs basename:*)",
       "Bash(head -20 grep -rn \"dailyDominionFood\\\\|daily.*food\\\\|food.*daily\\\\|DominionUtils\\\\.daily\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" --include=\"*.java\")",
-      "Bash(head -20 grep -rn \"CommandMsg\\\\|class CommandMsg\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" --include=\"*.java\" -l)"
+      "Bash(head -20 grep -rn \"CommandMsg\\\\|class CommandMsg\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" --include=\"*.java\" -l)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/.claude/worktrees/agent-a08fbfaf -name Fae* -o -name *fae*)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/src -name Fae* -o -name *fae*)"
     ]
   }
 }

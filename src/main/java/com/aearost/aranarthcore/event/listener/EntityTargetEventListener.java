@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.event.mob.DefenderTarget;
 import com.aearost.aranarthcore.event.mob.GuardianTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PetTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PhantomSpawnNotify;
+import com.aearost.aranarthcore.event.mob.PhantomTargetPrevent;
 import com.aearost.aranarthcore.event.mob.PiglinTargetPrevent;
 import com.aearost.aranarthcore.event.mob.RavagerTargetPrevent;
 import com.destroystokyo.paper.event.entity.EntityPathfindEvent;
@@ -36,5 +37,6 @@ public class EntityTargetEventListener implements Listener {
         new PetTargetPrevent().execute(e);
         new RavagerTargetPrevent().execute(e);
         new PhantomSpawnNotify().execute(e);
+        new PhantomTargetPrevent().execute(e);
     }
 }

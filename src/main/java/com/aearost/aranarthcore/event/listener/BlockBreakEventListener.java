@@ -7,12 +7,14 @@ import com.aearost.aranarthcore.event.player.HomepadBreak;
 import com.aearost.aranarthcore.event.player.ShopDestroy;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +31,16 @@ public class BlockBreakEventListener implements Listener {
 
     public BlockBreakEventListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    /**
+     * Prevents breaking of TempBlocks placed by the Fae Aranarthium flower trail.
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onFaeTrailBlockBreak(BlockBreakEvent e) {
+        if (TempBlock.isTempBlock(e.getBlock())) {
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler(ignoreCancelled = true)

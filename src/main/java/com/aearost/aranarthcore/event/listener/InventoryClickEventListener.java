@@ -4,17 +4,23 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.event.player.FaeBrewingBonus;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 /**
  * Centralizes all logic to be called by clicking in an inventory.
@@ -23,6 +29,28 @@ public class InventoryClickEventListener implements Listener {
 
     public InventoryClickEventListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    /**
+     * Prevents hoppers from extracting Fae brewing copies before the player can pick them up.
+     */
+    @EventHandler
+    public void onInventoryMove(InventoryMoveItemEvent e) {
+        if (FaeBrewingBonus.activeCopyLocations.isEmpty()) {
+            return;
+        }
+        if (!(e.getSource() instanceof BrewerInventory brewer)) {
+            return;
+        }
+        var loc = brewer.getLocation();
+        if (loc != null && FaeBrewingBonus.activeCopyLocations.contains(loc)) {
+            if (e.getItem().hasItemMeta()) {
+                ItemMeta meta = e.getItem().getItemMeta();
+                if (meta.getPersistentDataContainer().has(CustomKeys.FAE_BREWING_COPY, PersistentDataType.BYTE)) {
+                    e.setCancelled(true);
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -73,7 +101,7 @@ public class InventoryClickEventListener implements Listener {
                 new GuiDominionResourcesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDominionPermissions.HUB_TITLE)
                     || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Permissions")
-                        && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
                 new GuiDominionPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
@@ -116,6 +144,7 @@ public class InventoryClickEventListener implements Listener {
                     new FletchingTableCraft().execute(e);
                 } else if (e.getView().getType() == InventoryType.BREWING) {
                     new OrderChaosPotionBrewingPrevent().execute(e);
+                    new FaeBrewingBonus().execute(e);
                 }
             }
         }

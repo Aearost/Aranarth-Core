@@ -1878,6 +1878,30 @@ public class DateUtils {
 	}
 
 	/**
+	 * Returns whether the given biome is a Fae biome (forest/meadow/cherry — triggers Fae armor bonuses).
+	 * @param biome The biome to check.
+	 * @return True if the biome is a Fae biome.
+	 */
+	public static boolean isFaeBiome(Biome biome) {
+		return biome == Biome.FOREST
+				|| biome == Biome.BIRCH_FOREST
+				|| biome == Biome.OLD_GROWTH_BIRCH_FOREST
+				|| biome == Biome.DARK_FOREST
+				|| biome == Biome.FLOWER_FOREST
+				|| biome == Biome.CHERRY_GROVE
+				|| biome == Biome.MEADOW;
+	}
+
+	/**
+	 * Returns whether the given biome is a Mushroom Fields biome (maximum Fae armor bonuses).
+	 * @param biome The biome to check.
+	 * @return True if the biome is a Mushroom Fields biome.
+	 */
+	public static boolean isMushroomFieldsBiome(Biome biome) {
+		return biome == Biome.MUSHROOM_FIELDS;
+	}
+
+	/**
 	 * Applies rain manually based on the given month.
 	 * Only runs on the Survival server — the SMP server receives weather changes via network sync.
 	 */

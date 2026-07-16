@@ -348,7 +348,7 @@ public class DominionProtectionListener implements Listener {
         Dominion targetDominion = DominionUtils.getPlayerDominion(target.getUniqueId());
         AranarthPlayer aranarthTarget = AranarthUtils.getPlayer(target.getUniqueId());
 
-        // Same dominion — check the single dominion-wide PvP flag
+        // Same dominion, check the single dominion-wide PvP flag
         if (attackerDominion != null && targetDominion != null
                 && attackerDominion.isSameDominion(targetDominion)) {
             if (!attackerDominion.isMemberPvpEnabled()) {

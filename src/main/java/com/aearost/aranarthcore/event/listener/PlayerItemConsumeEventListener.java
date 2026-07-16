@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.event.player.FaeMushroomStewBonus;
 import com.aearost.aranarthcore.event.player.HoneyGlazedHamEat;
 import com.aearost.aranarthcore.event.player.PlayerAutoReplenishSlot;
 import org.bukkit.Bukkit;
@@ -27,5 +28,6 @@ public class PlayerItemConsumeEventListener implements Listener {
             new HoneyGlazedHamEat().execute(e);
         }
         new PlayerAutoReplenishSlot().execute(e, plugin);
+        new FaeMushroomStewBonus().execute(e);
     }
 }

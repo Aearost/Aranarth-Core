@@ -32,6 +32,8 @@ public class PlayerInteractEventListener implements Listener {
     @EventHandler
     public void onPlayerInteract(PlayerInteractEvent e) {
 
+        new FaeMushroomEat().execute(e);
+
         if (e.getItem() != null) {
             if (e.getItem().getType().name().equals("LEATHER")) {
                 new QuiverClick().execute(e);

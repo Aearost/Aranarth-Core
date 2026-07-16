@@ -35,6 +35,7 @@ public class CommandAranarthium implements CommandExecutor {
 			meta.addPage(ardentArmour());
 			meta.addPage(dwarvenArmour());
 			meta.addPage(elvenArmour());
+			meta.addPage(faeArmour());
 			meta.addPage(scorchedArmour());
 			meta.addPage(soulboundArmour());
 
@@ -87,6 +88,13 @@ public class CommandAranarthium implements CommandExecutor {
 		return ChatUtils.translateToColor(
 				"#3F704D&lElven Aranarthium\n\n&r" +
 						"Provides the wearer with the status effects of &oSpeed III, Jump Boost II,&r and an extra row of hearts. Also increases the harvests of crops.\n\nAdditionally yields increased damage using &lBows &rand &lSpears."
+		);
+	}
+
+	private static String faeArmour() {
+		return ChatUtils.translateToColor(
+				"#FBA0E3&lFae Aranarthium\n&r" +
+						"Provides &oSpeed I &rand &oStrength I&r, with boosted & enhanced effects in forests and mushroom islands.\n\n&rPotion effect stacking limits are increased, and mushrooms become edible and provide buffs. Phantoms will no longer target you."
 		);
 	}
 
