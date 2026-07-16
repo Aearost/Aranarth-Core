@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -92,7 +93,7 @@ public class GuiOutpostsClick {
             return;
         }
 
-        com.aearost.aranarthcore.objects.AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
         AranarthUtils.teleportPlayer(player, player.getLocation(), outpost.getHome(), aranarthPlayer.isInAdminMode(), outpost.getName(), "&7You have teleported to your outpost", success -> {
             if (success) {
                 player.sendMessage(ChatUtils.chatMessage("&7Teleported to the outpost &e" + outpost.getName()));

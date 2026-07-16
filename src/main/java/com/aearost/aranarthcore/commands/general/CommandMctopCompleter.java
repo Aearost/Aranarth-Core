@@ -7,7 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class CommandMctopCompleter implements TabCompleter {
@@ -15,13 +17,13 @@ public class CommandMctopCompleter implements TabCompleter {
     // All non-child primary skills plus "overall", loaded from mcMMO's enum at class-load time.
     private static final List<String> SKILLS;
     static {
-        List<String> skills = new java.util.ArrayList<>();
+        List<String> skills = new ArrayList<>();
         skills.add("overall");
         Arrays.stream(PrimarySkillType.values())
                 .filter(skill -> !SkillTools.isChildSkill(skill))
                 .map(PrimarySkillType::name)
                 .forEach(skills::add);
-        SKILLS = java.util.Collections.unmodifiableList(skills);
+        SKILLS = Collections.unmodifiableList(skills);
     }
 
     @Override

@@ -11,6 +11,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.UUID;
+
 /**
  * Sends a request to teleport to the input player.
  */
@@ -30,7 +32,7 @@ public class CommandTeleport implements CommandExecutor {
 				sender.sendMessage(ChatUtils.chatMessage("&cYou must enter a player to teleport to!"));
 				return true;
 			} else {
-				java.util.UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
 				if (targetUUID != null) {
 					Player target = Bukkit.getPlayer(targetUUID);
 					if (target != null) {

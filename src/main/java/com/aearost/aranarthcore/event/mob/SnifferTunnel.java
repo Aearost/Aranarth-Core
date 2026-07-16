@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.utils.MountUtils;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -44,7 +45,7 @@ public class SnifferTunnel extends BukkitRunnable {
     private static final int DIG_XP_BLOCKS_PER_LEVEL = 100;
     private final Map<UUID, SnifferTunnel> activeTunnels;
     private final UUID snifferUUID;
-    private final org.bukkit.Location startLocation;
+    private final Location startLocation;
     private final Vector direction;
     private final int blocksPerTick;
     private double depth;
@@ -80,7 +81,7 @@ public class SnifferTunnel extends BukkitRunnable {
             }
 
             Vector ortho = getOrthogonalVector(direction, angle, radius);
-            org.bukkit.Location blockLoc = startLocation.clone()
+            Location blockLoc = startLocation.clone()
                     .add(direction.clone().multiply(depth))
                     .add(ortho);
             Block block = blockLoc.getBlock();

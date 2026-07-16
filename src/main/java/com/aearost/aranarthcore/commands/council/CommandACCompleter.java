@@ -15,6 +15,7 @@ import java.io.File;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -161,7 +162,7 @@ public class CommandACCompleter implements TabCompleter {
                     if (homeTarget != null) {
                         AranarthPlayer homeTargetAranarthPlayer = AranarthUtils.getPlayer(homeTarget.getUniqueId());
                         if (homeTargetAranarthPlayer != null) {
-                            String query = String.join(" ", java.util.Arrays.copyOfRange(args, 2, args.length));
+                            String query = String.join(" ", Arrays.copyOfRange(args, 2, args.length));
                             yield homeTargetAranarthPlayer.getHomes().stream()
                                     .map(h -> ChatUtils.stripColorFormatting(h.getName()))
                                     .filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))

@@ -15,6 +15,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.attribute.AttributeInstance;
+import static org.bukkit.attribute.Attribute.MAX_HEALTH;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
@@ -144,7 +145,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
 
     private void applyLifeRip() {
         double missingHP = 0.0;
-        AttributeInstance targetAttr = target.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        AttributeInstance targetAttr = target.getAttribute(MAX_HEALTH);
         if (targetAttr != null) {
             missingHP = targetAttr.getValue() - target.getHealth();
             target.setHealth(Math.max(0.0, target.getHealth() - DRAIN_DAMAGE));
@@ -164,7 +165,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             }
         }
 
-        AttributeInstance casterAttr = player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        AttributeInstance casterAttr = player.getAttribute(MAX_HEALTH);
         if (casterAttr != null) {
             casterAttr.setBaseValue(casterAttr.getBaseValue() + CASTER_MAX_HEALTH_GAIN);
             double existingGain = player.getPersistentDataContainer()
@@ -188,7 +189,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             return;
         }
         target.getPersistentDataContainer().remove(TARGET_DRAIN_KEY);
-        AttributeInstance attr = target.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        AttributeInstance attr = target.getAttribute(MAX_HEALTH);
         if (attr != null) {
             attr.setBaseValue(attr.getBaseValue() + drain);
         }
@@ -200,7 +201,7 @@ public class LifeRip extends BloodAbility implements AddonAbility {
             return;
         }
         caster.getPersistentDataContainer().remove(CASTER_GAIN_KEY);
-        AttributeInstance attr = caster.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH);
+        AttributeInstance attr = caster.getAttribute(MAX_HEALTH);
         if (attr != null) {
             // Ensure base health never drops below 1 heart from floating-point imprecision
             attr.setBaseValue(Math.max(2.0, attr.getBaseValue() - gain));

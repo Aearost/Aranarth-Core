@@ -86,6 +86,7 @@ import org.bukkit.FluidCollisionMode;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.*;
@@ -479,7 +480,7 @@ public class AranarthCoreBendingListener implements Listener {
                         }
                     } else if (abilityName.equalsIgnoreCase("sandwave")) {
                         if (!SandWave.hasActiveInstance(player.getUniqueId())) {
-                            org.bukkit.block.Block target = player.getTargetBlock(null, 5);
+                            Block target = player.getTargetBlock(null, 5);
                             if (target != null && EarthAbility.isSandbendable(player, target.getType())) {
                                 SandWave.setPendingSource(player.getUniqueId(), target);
                             }
@@ -825,7 +826,7 @@ public class AranarthCoreBendingListener implements Listener {
             BendingPlayer bp = BendingPlayer.getBendingPlayer(player);
             if (bp != null && bp.getBoundAbilityName().equalsIgnoreCase("sandwave")
                     && !SandWave.hasActiveInstance(player.getUniqueId())) {
-                org.bukkit.block.Block sourceBlock = SandWave.getPendingSource(player.getUniqueId());
+                Block sourceBlock = SandWave.getPendingSource(player.getUniqueId());
                 SandWave.clearPendingSource(player.getUniqueId());
                 new SandWave(player, sourceBlock);
             }
@@ -842,7 +843,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (!HealingHelix.hasActiveInstance(player.getUniqueId())) {
             BendingPlayer bpHelix = BendingPlayer.getBendingPlayer(player);
             if (bpHelix != null && bpHelix.getBoundAbilityName().equalsIgnoreCase("healinghelix")) {
-                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
                 if (sourceBlock != null) {
                     HealingHelix.trySelectSource(player, sourceBlock);
                 }
@@ -853,7 +854,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (!CorruptingHelix.hasActiveInstance(player.getUniqueId())) {
             BendingPlayer bpCorrupting = BendingPlayer.getBendingPlayer(player);
             if (bpCorrupting != null && bpCorrupting.getBoundAbilityName().equalsIgnoreCase("corruptinghelix")) {
-                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
                 if (sourceBlock != null) {
                     CorruptingHelix.trySelectSource(player, sourceBlock);
                 }
@@ -864,7 +865,7 @@ public class AranarthCoreBendingListener implements Listener {
         if (!MendingWaters.hasActiveInstance(player.getUniqueId())) {
             BendingPlayer bpMending = BendingPlayer.getBendingPlayer(player);
             if (bpMending != null && bpMending.getBoundAbilityName().equalsIgnoreCase("mendingwaters")) {
-                org.bukkit.block.Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
+                Block sourceBlock = player.getTargetBlockExact(5, FluidCollisionMode.ALWAYS);
                 if (sourceBlock != null) {
                     MendingWaters.trySelectSource(player, sourceBlock);
                 }
@@ -1959,7 +1960,7 @@ public class AranarthCoreBendingListener implements Listener {
         EnderDragon dragon;
         if (e.getRightClicked() instanceof EnderDragon d) {
             dragon = d;
-        } else if (e.getRightClicked() instanceof org.bukkit.entity.ComplexEntityPart part
+        } else if (e.getRightClicked() instanceof ComplexEntityPart part
                 && part.getParent() instanceof EnderDragon d) {
             dragon = d;
         } else {

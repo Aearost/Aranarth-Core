@@ -6,6 +6,7 @@ import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.CombustionAbility;
 import com.projectkorra.projectkorra.attribute.Attribute;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -492,7 +493,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
         for (int i = 0; i < sourceBlockLocations.size(); i++) {
             Location blockLoc = sourceBlockLocations.get(i);
             Material mat = sourceBlockTypes.get(i);
-            org.bukkit.block.Block block = blockLoc.getBlock();
+            Block block = blockLoc.getBlock();
             if (block.getType() != mat) continue;
 
             if (mat == Material.FIRE || mat == Material.SOUL_FIRE) {
@@ -569,7 +570,7 @@ public class NoxiousFumes extends CombustionAbility implements AddonAbility {
             for (int y = -r; y <= r; y++) {
                 for (int z = -r; z <= r; z++) {
                     if (x * x + y * y + z * z > radiusSq) continue;
-                    org.bukkit.block.Block rel = playerLoc.getBlock().getRelative(x, y, z);
+                    Block rel = playerLoc.getBlock().getRelative(x, y, z);
                     Material mat = rel.getType();
                     if (mat != Material.FIRE && mat != Material.SOUL_FIRE && mat != Material.LAVA) continue;
                     Location topCenter = rel.getLocation().add(0.5, 1.0, 0.5);

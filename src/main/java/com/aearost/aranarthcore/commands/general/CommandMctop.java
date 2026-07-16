@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Opens a GUI showing the top players in a given mcMMO skill.
@@ -72,7 +73,7 @@ public class CommandMctop implements CommandExecutor {
             int minLevel = (skill == null) ? 100 : 25;
             leaderboard = leaderboard.stream()
                     .filter(stat -> stat.value() > minLevel)
-                    .collect(java.util.stream.Collectors.toList());
+                    .collect(Collectors.toList());
 
             // If the requested page is empty and it's not page 0, wrap to the first page
             if (leaderboard.isEmpty() && pageNum > 0) {

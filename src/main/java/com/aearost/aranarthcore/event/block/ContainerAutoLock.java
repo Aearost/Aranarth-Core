@@ -96,10 +96,10 @@ public class ContainerAutoLock {
      */
     private Block getConnectedChest(Block chestBlock, org.bukkit.block.data.type.Chest chestData) {
         // Get the direction the chest is facing
-        org.bukkit.block.BlockFace facing = chestData.getFacing();
+        BlockFace facing = chestData.getFacing();
 
         // Calculate offset based on chest type and facing direction
-        org.bukkit.block.BlockFace offset = null;
+        BlockFace offset = null;
 
         String chestTypeBeingPlaced = chestData.getType().name();
         if (chestTypeBeingPlaced.equals("LEFT")) {
@@ -123,7 +123,7 @@ public class ContainerAutoLock {
      * @param facing The direction that the right block is currently facing.
      * @return The face of the left block.
      */
-    private org.bukkit.block.BlockFace getBlockFaceToLeft(org.bukkit.block.BlockFace facing) {
+    private BlockFace getBlockFaceToLeft(BlockFace facing) {
         return switch (facing) {
             case NORTH -> BlockFace.EAST;
             case EAST -> BlockFace.SOUTH;
@@ -138,7 +138,7 @@ public class ContainerAutoLock {
      * @param facing The direction that the left block is currently facing.
      * @return The face of the right block.
      */
-    private org.bukkit.block.BlockFace getBlockFaceToRight(org.bukkit.block.BlockFace facing) {
+    private BlockFace getBlockFaceToRight(BlockFace facing) {
         return switch (facing) {
             case NORTH -> BlockFace.WEST;
             case WEST -> BlockFace.SOUTH;

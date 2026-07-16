@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.event.player;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiDominionPlayerPermissions;
 import com.aearost.aranarthcore.objects.Dominion;
@@ -127,7 +128,7 @@ public class GuiDominionPlayerPermissionsClick {
                 ? offlineTarget.getName()
                 : AranarthUtils.getNickname(offlineTarget);
 
-        com.aearost.aranarthcore.AranarthCore plugin = com.aearost.aranarthcore.AranarthCore.getInstance();
+        AranarthCore plugin = AranarthCore.getInstance();
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             PlayerProfile profile = Bukkit.createProfile(targetUuid, targetName);
             profile.complete(true);

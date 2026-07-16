@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
@@ -304,7 +305,7 @@ public class PersistenceUtils {
                             // Resolve the Bukkit World for this server.
                             // SMP homes resolve to the local SMP world; survival homes resolve to
                             // null on the SMP server (they live on the other server).
-                            org.bukkit.World bukttiWorld;
+                            World bukttiWorld;
                             if (savedWorldName.startsWith("smp:")) {
                                 String smpPart = savedWorldName.substring(4);
                                 String localName;
@@ -1560,7 +1561,7 @@ public class PersistenceUtils {
                 + "|" + dominion.getBoughtOutpostChunks()
                 + "|" + dominion.getCachedLivestockByWorld().entrySet().stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
-                .collect(java.util.stream.Collectors.joining(";"))
+                .collect(Collectors.joining(";"))
                 + "|" + (dominion.isBendingEnabled() ? "1" : "0");
     }
 
@@ -2573,7 +2574,7 @@ public class PersistenceUtils {
             try {
                 FileWriter writer = new FileWriter(filePath);
                 HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-                java.util.HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
+                HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
                 for (UUID uuid : shopLocations.keySet()) {
                     Location location = shopLocations.get(uuid);
                     if (location.getWorld() == null) {
@@ -3988,8 +3989,8 @@ public class PersistenceUtils {
                     long rechargeEnd = Long.parseLong(f[8]);
                     double curHealth = Double.parseDouble(f[9]);
 
-                    com.aearost.aranarthcore.objects.Mount pm =
-                            new com.aearost.aranarthcore.objects.Mount(
+                    Mount pm =
+                            new Mount(
                                     healthLevel, healthXp,
                                     speedLevel, speedXp,
                                     thirdLevel, thirdXp,
@@ -4000,7 +4001,7 @@ public class PersistenceUtils {
                     if (f.length >= 12 && !f[11].isEmpty()) {
                         pm.setHarnessColor(f[11]);
                     }
-                    com.aearost.aranarthcore.utils.MountUtils.put(uuid, element, pm);
+                    MountUtils.put(uuid, element, pm);
                 } catch (Exception ignored) {
                 }
             }
@@ -4085,7 +4086,7 @@ public class PersistenceUtils {
         try {
             Scanner reader = new Scanner(file);
             Bukkit.getLogger().info("[AC] Attempting to read the mail file...");
-            HashMap<UUID, List<com.aearost.aranarthcore.objects.Mail>> mailData = new HashMap<>();
+            HashMap<UUID, List<Mail>> mailData = new HashMap<>();
             while (reader.hasNextLine()) {
                 String row = reader.nextLine().trim();
                 if (row.startsWith("#") || row.isEmpty()) {
@@ -4101,7 +4102,7 @@ public class PersistenceUtils {
                     long timestamp = Long.parseLong(f[2]);
                     String message = f[3];
                     mailData.computeIfAbsent(recipientUUID, k -> new ArrayList<>())
-                            .add(new com.aearost.aranarthcore.objects.Mail(senderUUID, recipientUUID, timestamp, message));
+                            .add(new Mail(senderUUID, recipientUUID, timestamp, message));
                 } catch (Exception ignored) {
                 }
             }
@@ -4144,9 +4145,9 @@ public class PersistenceUtils {
         try {
             FileWriter writer = new FileWriter(filePath);
             writer.write("#Mail data — do not edit manually\n");
-            for (Map.Entry<UUID, List<com.aearost.aranarthcore.objects.Mail>> entry : MailUtils.getAllMail().entrySet()) {
+            for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
                 UUID recipientUUID = entry.getKey();
-                for (com.aearost.aranarthcore.objects.Mail mail : entry.getValue()) {
+                for (Mail mail : entry.getValue()) {
                     writer.write(recipientUUID + "|" + mail.getSenderUUID() + "|"
                             + mail.getTimestamp() + "|" + mail.getMessage() + "\n");
                 }
@@ -4204,7 +4205,7 @@ public class PersistenceUtils {
                 float homeYaw = Float.parseFloat(fields[8]);
                 float homePitch = Float.parseFloat(fields[9]);
 
-                org.bukkit.World world = Bukkit.getWorld(worldName);
+                World world = Bukkit.getWorld(worldName);
                 if (world == null) {
                     Bukkit.getLogger().warning("Outpost " + name + " references unknown world: " + worldName + " — skipping.");
                     continue;
@@ -4222,7 +4223,7 @@ public class PersistenceUtils {
 
                 long createdTimestamp = Long.parseLong(fields[11]);
 
-                com.aearost.aranarthcore.objects.Outpost outpost = new com.aearost.aranarthcore.objects.Outpost(
+                Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
                         chunks, createdTimestamp
@@ -4268,8 +4269,8 @@ public class PersistenceUtils {
             FileWriter writer = new FileWriter(filePath);
             writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp\n");
 
-            for (com.aearost.aranarthcore.objects.Dominion dominion : DominionUtils.getDominions()) {
-                for (com.aearost.aranarthcore.objects.Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+            for (Dominion dominion : DominionUtils.getDominions()) {
+                for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                     StringBuilder chunks = new StringBuilder();
                     for (Chunk chunk : outpost.getChunks()) {
                         if (!chunks.isEmpty()) {
@@ -4278,7 +4279,7 @@ public class PersistenceUtils {
                         chunks.append(chunk.getX()).append(",").append(chunk.getZ());
                     }
 
-                    org.bukkit.Location home = outpost.getHome();
+                    Location home = outpost.getHome();
                     if (home.getWorld() == null) {
                         Bukkit.getLogger().warning("[AC] Skipping outpost save for " + outpost.getId() + ": null world (shutdown race)");
                         continue;
@@ -4399,7 +4400,7 @@ public class PersistenceUtils {
         }
 
         // Spawn defenders at their saved locations on the next tick
-        new org.bukkit.scheduler.BukkitRunnable() {
+        new BukkitRunnable() {
             @Override
             public void run() {
                 for (DefenderEntry entry : entries) {
@@ -4480,7 +4481,7 @@ public class PersistenceUtils {
                     continue;
                 }
                 // Use live location if the chunk is loaded, otherwise fall back to last known cached location
-                org.bukkit.Location loc = (entity != null)
+                Location loc = (entity != null)
                         ? entity.getLocation()
                         : DefenderUtils.getEntityToLastLocation().get(entityUUID);
                 if (loc == null || loc.getWorld() == null) {
@@ -4854,10 +4855,10 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        for (Map.Entry<UUID, List<com.aearost.aranarthcore.objects.Mail>> entry : MailUtils.getAllMail().entrySet()) {
+        for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
             UUID recipientUuid = entry.getKey();
             JsonArray arr = new JsonArray();
-            for (com.aearost.aranarthcore.objects.Mail mail : entry.getValue()) {
+            for (Mail mail : entry.getValue()) {
                 JsonObject m = new JsonObject();
                 m.addProperty("sender", mail.getSenderUUID().toString());
                 m.addProperty("recipient", recipientUuid.toString());
@@ -5357,8 +5358,8 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        java.util.HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
-        java.util.HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
+        HashMap<UUID, Location> shopLocations = AranarthUtils.getShopLocations();
+        HashMap<UUID, int[]> shopIslandCenters = AranarthUtils.getShopIslandCenters();
         for (Map.Entry<UUID, Location> entry : shopLocations.entrySet()) {
             UUID uuid = entry.getKey();
             if (uuid == null) {
@@ -5521,8 +5522,8 @@ public class PersistenceUtils {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        for (com.aearost.aranarthcore.objects.Dominion dominion : DominionUtils.getDominions()) {
-            for (com.aearost.aranarthcore.objects.Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+        for (Dominion dominion : DominionUtils.getDominions()) {
+            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
                 Location home = outpost.getHome();
                 if (home.getWorld() == null) {
                     continue;
@@ -5698,7 +5699,7 @@ public class PersistenceUtils {
                     savedWorldName = fileWorldName;
                 }
 
-                org.bukkit.World bukttiWorld;
+                World bukttiWorld;
                 if (savedWorldName.startsWith("smp:")) {
                     String smpPart = savedWorldName.substring(4);
                     String localName;
@@ -5993,18 +5994,18 @@ public class PersistenceUtils {
             return;
         }
         Bukkit.getLogger().info("[AC] Loading mail from MySQL...");
-        HashMap<UUID, List<com.aearost.aranarthcore.objects.Mail>> mailData = new HashMap<>();
+        HashMap<UUID, List<Mail>> mailData = new HashMap<>();
         for (Map.Entry<UUID, String> entry : all.entrySet()) {
             UUID recipientUuid = entry.getKey();
             try {
                 JsonArray arr = GSON.fromJson(entry.getValue(), JsonArray.class);
-                List<com.aearost.aranarthcore.objects.Mail> list = new ArrayList<>();
+                List<Mail> list = new ArrayList<>();
                 for (com.google.gson.JsonElement el : arr) {
                     JsonObject m = el.getAsJsonObject();
                     UUID sender = UUID.fromString(m.get("sender").getAsString());
                     long timestamp = m.get("timestamp").getAsLong();
                     String message = m.get("message").getAsString();
-                    list.add(new com.aearost.aranarthcore.objects.Mail(sender, recipientUuid, timestamp, message));
+                    list.add(new Mail(sender, recipientUuid, timestamp, message));
                 }
                 mailData.put(recipientUuid, list);
             } catch (Exception e) {
@@ -6033,7 +6034,7 @@ public class PersistenceUtils {
                 for (Map.Entry<String, com.google.gson.JsonElement> me : playerMounts.entrySet()) {
                     String element = me.getKey();
                     JsonObject m = me.getValue().getAsJsonObject();
-                    com.aearost.aranarthcore.objects.Mount pm = new com.aearost.aranarthcore.objects.Mount(
+                    Mount pm = new Mount(
                             m.get("healthLevel").getAsInt(), m.get("healthXp").getAsLong(),
                             m.get("speedLevel").getAsInt(), m.get("speedXp").getAsLong(),
                             m.get("thirdLevel").getAsInt(), m.get("thirdXp").getAsLong(),
@@ -6836,7 +6837,7 @@ public class PersistenceUtils {
             Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
             if (currentAvatar != null && root.has("binds")) {
                 JsonArray bindsArr = root.getAsJsonArray("binds");
-                com.projectkorra.projectkorra.OfflineBendingPlayer bendingPlayer =
+                OfflineBendingPlayer bendingPlayer =
                         BendingPlayer.getOfflineBendingPlayer(Bukkit.getOfflinePlayer(currentAvatar.getUuid()).getName());
                 if (bendingPlayer != null) {
                     for (com.google.gson.JsonElement bindEl : bindsArr) {
@@ -7097,7 +7098,7 @@ public class PersistenceUtils {
                     JsonObject c = cEl.getAsJsonObject();
                     chunks.add(world.getChunkAt(c.get("x").getAsInt(), c.get("z").getAsInt()));
                 }
-                com.aearost.aranarthcore.objects.Outpost outpost = new com.aearost.aranarthcore.objects.Outpost(
+                Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
                         chunks, createdTimestamp
@@ -7177,7 +7178,7 @@ public class PersistenceUtils {
             }
         }
 
-        new org.bukkit.scheduler.BukkitRunnable() {
+        new BukkitRunnable() {
             @Override
             public void run() {
                 for (DefenderEntry entry : entries) {

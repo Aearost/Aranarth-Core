@@ -33,7 +33,7 @@ import java.util.UUID;
 public class ShopProtectionListener implements Listener {
 
     public ShopProtectionListener(AranarthCore plugin) {
-        org.bukkit.Bukkit.getPluginManager().registerEvents(this, plugin);
+        Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     private boolean isShopsWorld(Location location) {

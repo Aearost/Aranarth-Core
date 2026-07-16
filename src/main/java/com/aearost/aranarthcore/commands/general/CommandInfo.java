@@ -24,6 +24,7 @@ import java.text.NumberFormat;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -73,7 +74,7 @@ public class CommandInfo implements CommandExecutor {
 
 			// Cycles through remote-server players third (players who have never joined this server)
 			if (uuid == null && NetworkManager.isActive()) {
-				for (java.util.Map.Entry<UUID, NetworkPlayer> entry : NetworkManager.getInstance().getRemoteRoster().entrySet()) {
+				for (Map.Entry<UUID, NetworkPlayer> entry : NetworkManager.getInstance().getRemoteRoster().entrySet()) {
 					NetworkPlayer np = entry.getValue();
 					if (np.getUsername().equalsIgnoreCase(args[0]) ||
 							ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(args[0])) {

@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.objects.Outpost;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
+import org.bukkit.Material;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.*;
@@ -351,7 +352,7 @@ public class DefenderUtils {
             if (mob.getEquipment() != null) {
                 mob.getEquipment().clear();
                 if (type == DefenderType.SKELETON) {
-                    mob.getEquipment().setItemInMainHand(new ItemStack(org.bukkit.Material.BOW));
+                    mob.getEquipment().setItemInMainHand(new ItemStack(Material.BOW));
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -84,7 +85,7 @@ public class CommandTpAccept implements CommandExecutor {
 					// Cancel any stale teleport task the acceptor (Player B) might have so that
 					// their movement does not falsely trigger a "cannot move" cancel on the
 					// requester's (Player A's) countdown that is about to start.
-					org.bukkit.scheduler.BukkitTask staleTask = AranarthUtils.getTeleportTask(player.getUniqueId());
+					BukkitTask staleTask = AranarthUtils.getTeleportTask(player.getUniqueId());
 					if (staleTask != null) {
 						staleTask.cancel();
 						AranarthUtils.removeTeleportTask(player.getUniqueId());

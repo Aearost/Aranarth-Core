@@ -81,3 +81,4 @@ Backend Code Changes
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
 - Cleaned up AranarthBendingUtils documentation
 - Added [AC] prefix to all AranarthCore log statements
+- Removed redundant absolute paths of objects across the repository

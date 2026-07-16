@@ -18,6 +18,7 @@ import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -247,7 +248,7 @@ public class PlayerServerJoinListener implements Listener {
 								}
 							}
 							if (apInv != null) {
-								player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(org.bukkit.attribute.Attribute.MAX_HEALTH).getValue()));
+								player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
 								player.setFoodLevel(apInv.getSurvivalFoodLevel());
 								player.setSaturation(apInv.getSurvivalSaturation());
 								player.setLevel(apInv.getSurvivalExpLevel());
@@ -297,7 +298,7 @@ public class PlayerServerJoinListener implements Listener {
 
 						if ("player".equals(pending.getType())) {
 							// TP to wherever the named player currently is
-							Player target = Bukkit.getPlayer(java.util.UUID.fromString(pending.getTargetUuid()));
+							Player target = Bukkit.getPlayer(UUID.fromString(pending.getTargetUuid()));
 							if (target != null) {
 								AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(),
 										true, pending.getTitleMain(), pending.getTitleSub(), success -> {});
@@ -316,9 +317,9 @@ public class PlayerServerJoinListener implements Listener {
 							AranarthUtils.setPlayer(player.getUniqueId(), apCmdAfter);
 						} else {
 							// TP to the stored coordinates
-							org.bukkit.World w = Bukkit.getWorld(pending.getWorld());
+							World w = Bukkit.getWorld(pending.getWorld());
 							if (w != null) {
-								org.bukkit.Location dest = new org.bukkit.Location(w,
+								Location dest = new Location(w,
 										pending.getX(), pending.getY(), pending.getZ(),
 										pending.getYaw(), pending.getPitch());
 								AranarthUtils.teleportPlayer(player, player.getLocation(), dest,
@@ -363,9 +364,9 @@ public class PlayerServerJoinListener implements Listener {
 				// which the receiving server will execute on arrival.
 				if (!hadPendingTp && lastLoc != null && NetworkManager.isActive()) {
 					if (lastLoc.server.equals(NetworkManager.getInstance().getThisServer())) {
-						org.bukkit.World w = Bukkit.getWorld(lastLoc.world);
+						World w = Bukkit.getWorld(lastLoc.world);
 						if (w != null) {
-							org.bukkit.Location dest = new org.bukkit.Location(
+							Location dest = new Location(
 									w, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch);
 							new BukkitRunnable() {
 								@Override

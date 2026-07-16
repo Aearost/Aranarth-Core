@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.*;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,7 +38,7 @@ public class PlayerServerQuitListener implements Listener {
 		// Skipped for cross-server transfers; the receiving server will track their location.
 		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
 			final String server = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : "survival";
-			final org.bukkit.Location loc = player.getLocation();
+			final Location loc = player.getLocation();
 			final String world = loc.getWorld().getName();
 			final double x = loc.getX(), y = loc.getY(), z = loc.getZ();
 			final float yaw = loc.getYaw(), pitch = loc.getPitch();

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.abilities.airbending.soundbending;
 
 import com.projectkorra.projectkorra.Element;
+import com.projectkorra.projectkorra.ability.Ability;
 import com.projectkorra.projectkorra.ability.AirAbility;
 import com.projectkorra.projectkorra.ability.SubAbility;
 import org.bukkit.Material;
@@ -20,7 +21,7 @@ public abstract class SoundAbility extends AirAbility implements SubAbility {
 	}
 
 	@Override
-	public Class<? extends com.projectkorra.projectkorra.ability.Ability> getParentAbility() {
+	public Class<? extends Ability> getParentAbility() {
 		return AirAbility.class;
 	}
 

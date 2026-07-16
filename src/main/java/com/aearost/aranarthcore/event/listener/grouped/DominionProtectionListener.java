@@ -306,7 +306,7 @@ public class DominionProtectionListener implements Listener {
             } else if (causingEntity != null && MountUtils.isActiveMount(causingEntity.getUniqueId())) {
                 String[] info = MountUtils.getActiveMountInfo(causingEntity.getUniqueId());
                 if (info != null) {
-                    Entity rider = Bukkit.getEntity(java.util.UUID.fromString(info[0]));
+                    Entity rider = Bukkit.getEntity(UUID.fromString(info[0]));
                     if (rider instanceof Player p) {
                         attacker = p;
                     }
@@ -327,7 +327,7 @@ public class DominionProtectionListener implements Listener {
             if (e.getDamageSource().getCausingEntity() instanceof Player attacker) {
                 String[] info = MountUtils.getActiveMountInfo(e.getEntity().getUniqueId());
                 if (info != null) {
-                    Entity rider = Bukkit.getEntity(java.util.UUID.fromString(info[0]));
+                    Entity rider = Bukkit.getEntity(UUID.fromString(info[0]));
                     if (rider instanceof Player owner) {
                         handleMountDamage(attacker, owner, e);
                     }

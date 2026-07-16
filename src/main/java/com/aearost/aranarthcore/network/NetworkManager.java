@@ -16,8 +16,10 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.ByteArrayOutputStream;
@@ -935,18 +937,18 @@ public class NetworkManager {
             p.sendMessage(joinMessage);
         }
         // Play the ascending note-block join sound
-        new org.bukkit.scheduler.BukkitRunnable() {
+        new BukkitRunnable() {
             int runs = 0;
             @Override
             public void run() {
                 if (runs == 0) {
-                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1F);
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1F);
                     runs++;
                 } else if (runs == 1) {
-                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
                     runs++;
                 } else {
-                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+                    for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
                     cancel();
                 }
             }
@@ -975,18 +977,18 @@ public class NetworkManager {
                 p.sendMessage(quitMessage);
             }
             // Play the descending note-block quit sound
-            new org.bukkit.scheduler.BukkitRunnable() {
+            new BukkitRunnable() {
                 int runs = 0;
                 @Override
                 public void run() {
                     if (runs == 0) {
-                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.6F);
                         runs++;
                     } else if (runs == 1) {
-                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 1.2F);
                         runs++;
                     } else {
-                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, org.bukkit.Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
+                        for (Player p : Bukkit.getOnlinePlayers()) p.playSound(p, Sound.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE, 1F, 0.8F);
                         cancel();
                     }
                 }
@@ -1045,7 +1047,7 @@ public class NetworkManager {
             // accepter sees "You have teleported to [yourself]".
             Player requester = Bukkit.getPlayer(requesterUuid);
             String requesterNick = requester != null
-                    ? com.aearost.aranarthcore.utils.AranarthUtils.getNickname(requester)
+                    ? AranarthUtils.getNickname(requester)
                     : accepterNick; // fallback to accepter nick if requester somehow offline
             setPendingTeleport(accepterUuid,
                     new PendingTeleport(requesterUuid.toString(), accepterNick, "&7You have teleported to " + requesterNick));
@@ -1217,7 +1219,7 @@ public class NetworkManager {
         String prefixEnd = "§7⊱§r";
         String targetPrefix = prefixStart + "§7§l§oFrom: §r§e" + fromNickname + prefixEnd + " §7§o>> §e§o" + message;
         target.sendMessage(targetPrefix);
-        target.playSound(target, org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
+        target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
 
         // Store the sender UUID for /reply (uses last received message UUID)
         AranarthPlayer targetAp = AranarthUtils.getPlayer(toUuid);
@@ -1243,7 +1245,7 @@ public class NetworkManager {
         }
 
         // Broadcast the AFK message to locally online players
-        String translatedNickname = com.aearost.aranarthcore.utils.ChatUtils.translateToColor(nickname);
+        String translatedNickname = ChatUtils.translateToColor(nickname);
         String message = isAfk
                 ? "§e" + translatedNickname + " §7is now AFK"
                 : "§e" + translatedNickname + " §7is no longer AFK";

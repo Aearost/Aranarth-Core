@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -21,7 +22,7 @@ public class CommandMigrate {
         sender.sendMessage(ChatUtils.chatMessage("&7Starting data migration to MySQL... this may take a moment."));
 
         Bukkit.getScheduler().runTaskAsynchronously(
-                com.aearost.aranarthcore.AranarthCore.getInstance(), () -> {
+                AranarthCore.getInstance(), () -> {
             try {
                 PersistenceUtils.syncAranarthPlayersToDatabase();
                 PersistenceUtils.syncKillDeathToDatabase();
@@ -34,13 +35,13 @@ public class CommandMigrate {
                 PersistenceUtils.syncBoostsToDatabase();
 
                 Bukkit.getScheduler().runTask(
-                        com.aearost.aranarthcore.AranarthCore.getInstance(),
+                        AranarthCore.getInstance(),
                         () -> sender.sendMessage(ChatUtils.chatMessage("&aData migration complete!")));
             } catch (Exception e) {
                 Bukkit.getScheduler().runTask(
-                        com.aearost.aranarthcore.AranarthCore.getInstance(),
+                        AranarthCore.getInstance(),
                         () -> sender.sendMessage(ChatUtils.chatMessage("&cMigration failed — check console for details.")));
-                com.aearost.aranarthcore.AranarthCore.getInstance().getLogger().severe("Migration error: " + e.getMessage());
+                AranarthCore.getInstance().getLogger().severe("Migration error: " + e.getMessage());
             }
         });
 

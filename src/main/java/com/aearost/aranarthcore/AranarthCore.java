@@ -20,10 +20,14 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.VoidChunkGenerator;
 import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
+import com.projectkorra.projectkorra.util.TempBlock;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.block.Biome;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.api.JDA;
 import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMemberJoinEvent;
@@ -75,7 +79,7 @@ public class AranarthCore extends JavaPlugin {
             String username   = getConfig().getString("network.mysql.username", "");
             String password   = getConfig().getString("network.mysql.password", "");
 
-            com.aearost.aranarthcore.database.DatabaseManager.initialize(host, port, database, username, password);
+            DatabaseManager.initialize(host, port, database, username, password);
         }
 
         initializeUtils();
@@ -112,7 +116,7 @@ public class AranarthCore extends JavaPlugin {
 
         // Start cross-server networking (NetworkManager) now that the DB is already connected.
         // Only on the public server.
-        if (isPublicServer() && com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+        if (isPublicServer() && DatabaseManager.isActive()) {
             String serverName = getConfig().getString("network.this-server", "survival");
             NetworkManager.initialize(serverName);
             if (NetworkManager.isActive()) {
@@ -130,7 +134,7 @@ public class AranarthCore extends JavaPlugin {
             if (!savedOnDisable) {
                 saveAll();
                 NetworkManager.shutdown();
-                com.aearost.aranarthcore.database.DatabaseManager.shutdown();
+                DatabaseManager.shutdown();
             }
         }, "AranarthCore-ShutdownHook"));
     }
@@ -285,13 +289,13 @@ public class AranarthCore extends JavaPlugin {
                         world.spawnParticle(Particle.RAIN, above, 3, 0.3, 0.2, 0.3, 0);
                     }
                 } else if (AranarthUtils.isWearingArmorType(player, "fae")) {
-                    org.bukkit.block.Biome biome = loc.getBlock().getBiome();
-                    boolean inFaeBiome = com.aearost.aranarthcore.utils.DateUtils.isFaeBiome(biome) || com.aearost.aranarthcore.utils.DateUtils.isMushroomFieldsBiome(biome);
-                    Boolean wasInFaeBiome = com.aearost.aranarthcore.utils.AranarthUtils.playerInFaeBiome.get(player.getUniqueId());
+                    Biome biome = loc.getBlock().getBiome();
+                    boolean inFaeBiome = DateUtils.isFaeBiome(biome) || DateUtils.isMushroomFieldsBiome(biome);
+                    Boolean wasInFaeBiome = AranarthUtils.playerInFaeBiome.get(player.getUniqueId());
 
                     // Biome transition sounds
                     if (wasInFaeBiome == null || wasInFaeBiome != inFaeBiome) {
-                        com.aearost.aranarthcore.utils.AranarthUtils.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
+                        AranarthUtils.playerInFaeBiome.put(player.getUniqueId(), inFaeBiome);
                         if (inFaeBiome) {
                             // Entered Fae biome — magical sound
                             player.playSound(loc, Sound.ENTITY_ALLAY_AMBIENT_WITHOUT_ITEM, 0.9f, 1.2f);
@@ -310,7 +314,7 @@ public class AranarthCore extends JavaPlugin {
                         Location trailLoc = loc.clone().add(dx, 0.3, dz);
 
                         // Scale particle size by the player's scale attribute
-                        var scaleAttr = player.getAttribute(org.bukkit.attribute.Attribute.SCALE);
+                        var scaleAttr = player.getAttribute(Attribute.SCALE);
                         float playerScale = (scaleAttr != null) ? (float) scaleAttr.getValue() : 1.0f;
                         float particleSize = Math.max(0.1f, Math.min(playerScale, 4.0f));
 
@@ -415,7 +419,7 @@ public class AranarthCore extends JavaPlugin {
      * Initializes necessary Utilities functionality needed on server startup.
      */
     private void initializeUtils() {
-        boolean db = com.aearost.aranarthcore.database.DatabaseManager.isActive();
+        boolean db = DatabaseManager.isActive();
 
         if (db) {
             PersistenceUtils.loadServerDateFromDatabase();
@@ -542,9 +546,9 @@ public class AranarthCore extends JavaPlugin {
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {
-                String lastDaily = com.aearost.aranarthcore.database.DatabaseManager.getInstance().loadTempData("quest:lastDailyReset");
+                String lastDaily = DatabaseManager.getInstance().loadTempData("quest:lastDailyReset");
                 if (lastDaily != null) QuestUtils.setLastDailyReset(Long.parseLong(lastDaily));
-                String lastWeekly = com.aearost.aranarthcore.database.DatabaseManager.getInstance().loadTempData("quest:lastWeeklyReset");
+                String lastWeekly = DatabaseManager.getInstance().loadTempData("quest:lastWeeklyReset");
                 if (lastWeekly != null) QuestUtils.setLastWeeklyReset(Long.parseLong(lastWeekly));
             } catch (Exception e) {
                 Bukkit.getLogger().warning(LOG_PREFIX + "Failed to load quest reset timestamps: " + e.getMessage());
@@ -1333,7 +1337,7 @@ public class AranarthCore extends JavaPlugin {
         saveAll();
 
         NetworkManager.shutdown();
-        com.aearost.aranarthcore.database.DatabaseManager.shutdown();
+        DatabaseManager.shutdown();
 
         Bukkit.resetRecipes();
         if (discordChatListener != null) discordChatListener.unsubscribe();
@@ -1409,17 +1413,17 @@ public class AranarthCore extends JavaPlugin {
                     }
                     Location loc = player.getLocation();
                     // Only scatter flowers if the player has moved since the last check
-                    Location lastLoc = com.aearost.aranarthcore.utils.AranarthUtils.playerLastFlowerLocation.get(player.getUniqueId());
-                    com.aearost.aranarthcore.utils.AranarthUtils.playerLastFlowerLocation.put(player.getUniqueId(), loc.clone());
+                    Location lastLoc = AranarthUtils.playerLastFlowerLocation.get(player.getUniqueId());
+                    AranarthUtils.playerLastFlowerLocation.put(player.getUniqueId(), loc.clone());
                     if (lastLoc != null
                             && loc.getBlockX() == lastLoc.getBlockX()
                             && loc.getBlockY() == lastLoc.getBlockY()
                             && loc.getBlockZ() == lastLoc.getBlockZ()) {
                         continue; // Hasn't moved to a new block
                     }
-                    org.bukkit.block.Biome biome = loc.getBlock().getBiome();
-                    if (!com.aearost.aranarthcore.utils.DateUtils.isFaeBiome(biome)
-                            && !com.aearost.aranarthcore.utils.DateUtils.isMushroomFieldsBiome(biome)) {
+                    Biome biome = loc.getBlock().getBiome();
+                    if (!DateUtils.isFaeBiome(biome)
+                            && !DateUtils.isMushroomFieldsBiome(biome)) {
                         continue;
                     }
                     Material flower = getFaeTrailFlower(biome);
@@ -1455,13 +1459,13 @@ public class AranarthCore extends JavaPlugin {
                                 continue;
                             }
                             Block candidate = loc.getWorld().getBlockAt(originX + bx, originY, originZ + bz);
-                            if (!com.aearost.aranarthcore.utils.AranarthUtils.isValidTrailSpot(candidate)) {
+                            if (!AranarthUtils.isValidTrailSpot(candidate)) {
                                 continue;
                             }
-                            if (com.projectkorra.projectkorra.util.TempBlock.isTempBlock(candidate)) {
+                            if (TempBlock.isTempBlock(candidate)) {
                                 continue;
                             }
-                            new com.projectkorra.projectkorra.util.TempBlock(candidate, flower.createBlockData(), 5000L);
+                            new TempBlock(candidate, flower.createBlockData(), 5000L);
                         }
                     }
                 }
@@ -1470,36 +1474,36 @@ public class AranarthCore extends JavaPlugin {
         }.runTaskLater(this, delay);
     }
 
-    private static Material getFaeTrailFlower(org.bukkit.block.Biome biome) {
+    private static Material getFaeTrailFlower(Biome biome) {
         Random rng = new Random();
-        if (biome == org.bukkit.block.Biome.FLOWER_FOREST) {
+        if (biome == Biome.FLOWER_FOREST) {
             Material[] flowers = {
                 Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
                 Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
                 Material.PINK_TULIP, Material.ALLIUM, Material.BLUE_ORCHID, Material.LILY_OF_THE_VALLEY
             };
             return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == org.bukkit.block.Biome.FOREST
-                || biome == org.bukkit.block.Biome.BIRCH_FOREST
-                || biome == org.bukkit.block.Biome.OLD_GROWTH_BIRCH_FOREST) {
+        } else if (biome == Biome.FOREST
+                || biome == Biome.BIRCH_FOREST
+                || biome == Biome.OLD_GROWTH_BIRCH_FOREST) {
             Material[] flowers = {
                 Material.DANDELION, Material.POPPY, Material.OXEYE_DAISY, Material.AZURE_BLUET,
                 Material.CORNFLOWER, Material.ORANGE_TULIP, Material.RED_TULIP, Material.WHITE_TULIP,
                 Material.PINK_TULIP, Material.ALLIUM
             };
             return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == org.bukkit.block.Biome.DARK_FOREST) {
+        } else if (biome == Biome.DARK_FOREST) {
             Material[] flowers = {Material.DANDELION, Material.POPPY, Material.ALLIUM, Material.AZURE_BLUET};
             return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == org.bukkit.block.Biome.CHERRY_GROVE) {
+        } else if (biome == Biome.CHERRY_GROVE) {
             return Material.PINK_PETALS;
-        } else if (biome == org.bukkit.block.Biome.MEADOW) {
+        } else if (biome == Biome.MEADOW) {
             Material[] flowers = {
                 Material.DANDELION, Material.POPPY, Material.ALLIUM,
                 Material.AZURE_BLUET, Material.CORNFLOWER, Material.OXEYE_DAISY
             };
             return flowers[rng.nextInt(flowers.length)];
-        } else if (biome == org.bukkit.block.Biome.MUSHROOM_FIELDS) {
+        } else if (biome == Biome.MUSHROOM_FIELDS) {
             return rng.nextBoolean() ? Material.BROWN_MUSHROOM : Material.RED_MUSHROOM;
         }
         return null;

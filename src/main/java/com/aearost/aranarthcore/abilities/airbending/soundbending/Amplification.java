@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -135,7 +136,7 @@ public class Amplification extends SoundAbility implements AddonAbility {
      * or null if none is currently running.
      */
     private CoreAbility findActiveSoundAbility() {
-        for (final Class<? extends SoundAbility> clazz : java.util.List.of(
+        for (final Class<? extends SoundAbility> clazz : List.of(
                 DeafeningScream.class, SonicPulse.class, SonicClap.class, SonicBoom.class)) {
             for (final CoreAbility ability : CoreAbility.getAbilities(clazz)) {
                 if (ability.getPlayer().equals(player)) {

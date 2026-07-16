@@ -23,7 +23,9 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.UUID;
 
@@ -39,7 +41,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
 
     private static final HashMap<UUID, AstralProjection> activeProjections = new HashMap<>();
     // Tracks UUIDs currently dealing sub-ability damage so the listener doesn't cancel it
-    private static final java.util.HashSet<UUID> subAbilityDamaging = new java.util.HashSet<>();
+    private static final HashSet<UUID> subAbilityDamaging = new HashSet<>();
 
     @Attribute(Attribute.COOLDOWN)
     private long cooldown;
@@ -59,7 +61,7 @@ public class AstralProjection extends SpiritualAbility implements AddonAbility, 
     // Armor stripped from the player when the projection launches; restored on end
     private ItemStack[] storedArmor;
     // Snapshot of the player's potion effects taken before projection (fallback for restore)
-    private java.util.Collection<PotionEffect> storedEffects;
+    private Collection<PotionEffect> storedEffects;
     // Pre-projection glowing state so it can be restored accurately on end
     private boolean wasGlowing;
     // Dedicated task that re-applies projection effects each tick AFTER PK's own tick completes

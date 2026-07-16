@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.network.NetworkPlayer;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -65,7 +66,7 @@ public class CommandWhereIs {
 
 		// 3. Look up UUID for offline lookup via Bukkit's offline player list
 		UUID uuid = null;
-		for (org.bukkit.OfflinePlayer op : Bukkit.getOfflinePlayers()) {
+		for (OfflinePlayer op : Bukkit.getOfflinePlayers()) {
 			if (targetName.equalsIgnoreCase(op.getName())) {
 				uuid = op.getUniqueId();
 				break;

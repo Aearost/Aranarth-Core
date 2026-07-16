@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.block;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
@@ -89,7 +90,7 @@ public class IncantationMagnetismBlockBreak {
      * Pulls item entities tagged with the held magnetism tool's UUID towards the player holding the tool.
      */
     public static void tickMagnetismPull() {
-        for (Player player : org.bukkit.Bukkit.getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (!player.isSneaking()) {
                 continue;
             }

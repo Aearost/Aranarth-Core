@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.attribute.AttributeInstance;
+import static org.bukkit.attribute.Attribute.MAX_ABSORPTION;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.ability.AddonAbility;
 import com.projectkorra.projectkorra.ability.HealingAbility;
@@ -214,7 +215,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         if (!target.isValid()) {
             return;
         }
-        AttributeInstance attr = target.getAttribute(org.bukkit.attribute.Attribute.MAX_ABSORPTION);
+        AttributeInstance attr = target.getAttribute(MAX_ABSORPTION);
         if (attr != null) {
             attr.setBaseValue(attr.getBaseValue() + amount);
         }
@@ -232,7 +233,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
             @Override
             public void run() {
                 if (expiryTarget.isValid()) {
-                    AttributeInstance attr = expiryTarget.getAttribute(org.bukkit.attribute.Attribute.MAX_ABSORPTION);
+                    AttributeInstance attr = expiryTarget.getAttribute(MAX_ABSORPTION);
                     if (attr != null) {
                         attr.setBaseValue(Math.max(0.0, attr.getBaseValue() - toRemove));
                     }
@@ -502,7 +503,7 @@ public class HealingHelix extends HealingAbility implements AddonAbility {
         if (player.hasPotionEffect(PotionEffectType.ABSORPTION)) {
             return;
         }
-        AttributeInstance attr = player.getAttribute(org.bukkit.attribute.Attribute.MAX_ABSORPTION);
+        AttributeInstance attr = player.getAttribute(MAX_ABSORPTION);
         if (attr != null) {
             attr.setBaseValue(0);
         }

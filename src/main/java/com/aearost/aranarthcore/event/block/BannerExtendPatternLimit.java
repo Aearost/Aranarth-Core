@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.event.block;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
@@ -305,7 +306,7 @@ public class BannerExtendPatternLimit {
             try {
                 PatternType type = Registry.BANNER_PATTERN.get(
                         NamespacedKey.minecraft(kv[0].toLowerCase()));
-                org.bukkit.DyeColor color = org.bukkit.DyeColor.valueOf(kv[1].toUpperCase());
+                DyeColor color = DyeColor.valueOf(kv[1].toUpperCase());
                 if (type != null) {
                     patterns.add(new Pattern(color, type));
                 }

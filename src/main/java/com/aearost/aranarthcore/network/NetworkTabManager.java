@@ -279,7 +279,7 @@ public class NetworkTabManager {
             Object gp = getGP.invoke(serverPlayer);
             Object propMap = gp.getClass().getMethod("getProperties").invoke(gp);
             // PropertyMap.get(Object) → Collection<Property>
-            java.util.Collection<?> props = (java.util.Collection<?>) propMap.getClass()
+            Collection<?> props = (Collection<?>) propMap.getClass()
                     .getMethod("get", Object.class).invoke(propMap, "textures");
             if (props == null || props.isEmpty()) return new String[]{"", ""};
             Object prop = props.iterator().next();

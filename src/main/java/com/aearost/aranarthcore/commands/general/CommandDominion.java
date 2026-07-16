@@ -444,7 +444,7 @@ public class CommandDominion implements CommandExecutor {
 
                                 List<UUID> conquered = new ArrayList<>();
 
-                                Map<UUID, DominionRank> memberRanks = new java.util.HashMap<>();
+                                Map<UUID, DominionRank> memberRanks = new HashMap<>();
                                 memberRanks.put(player.getUniqueId(), DominionRank.LEADER);
 
                                 Dominion dominion = new Dominion(
@@ -1904,7 +1904,7 @@ public class CommandDominion implements CommandExecutor {
         int topX = playerChunk.getX() - 7;
         int topZ = playerChunk.getZ() - 7;
         List<Dominion> dominionsNearby = new ArrayList<>();
-        Map<Outpost, Dominion> outpostsNearby = new java.util.LinkedHashMap<>();
+        Map<Outpost, Dominion> outpostsNearby = new LinkedHashMap<>();
         boolean hasSpawnChunks = false;
 
         player.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lDominion Map &8- - -"));

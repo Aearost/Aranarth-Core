@@ -426,7 +426,7 @@ public class MountListener implements Listener {
         if (config == null) {
             return;
         }
-        if (event.getHand() != org.bukkit.inventory.EquipmentSlot.HAND) {
+        if (event.getHand() != EquipmentSlot.HAND) {
             return;
         }
 

@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.network.NetworkPlayer;
+import com.aearost.aranarthcore.network.NetworkTabManager;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
@@ -15,6 +16,7 @@ import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.Chunk;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
@@ -547,13 +549,13 @@ public class AranarthUtils {
 			player.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, 320, 4));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 0));
 			player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 0));
-			org.bukkit.block.Biome biome = player.getLocation().getBlock().getBiome();
+			Biome biome = player.getLocation().getBlock().getBiome();
 			boolean isNight = player.getWorld().getTime() >= 13000 && player.getWorld().getTime() <= 23000;
 			if (DateUtils.isFaeBiome(biome)) {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 2));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 1));
 				if (isNight) {
-					org.bukkit.potion.PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+					PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
 					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
 					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
@@ -562,7 +564,7 @@ public class AranarthUtils {
 				player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 320, 4));
 				player.addPotionEffect(new PotionEffect(PotionEffectType.STRENGTH, 320, 2));
 				if (isNight) {
-					org.bukkit.potion.PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
+					PotionEffect existingRegen = player.getPotionEffect(PotionEffectType.REGENERATION);
 					int regenAmp = (existingRegen != null) ? existingRegen.getAmplifier() + 1 : 0;
 					regenAmp = PotionEffectListener.determineEffectAmplifierRestriction(regenAmp, PotionEffectType.REGENERATION, player);
 					player.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 320, regenAmp), true);
@@ -3178,9 +3180,9 @@ public class AranarthUtils {
 		});
 
 		// Collect non-vanished remote players for the combined sort
-		List<com.aearost.aranarthcore.network.NetworkPlayer> remotePlayers = new ArrayList<>();
+		List<NetworkPlayer> remotePlayers = new ArrayList<>();
 		if (NetworkManager.isActive()) {
-			for (com.aearost.aranarthcore.network.NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
 				if (!np.isVanished()) {
 					remotePlayers.add(np);
 				}
@@ -3191,14 +3193,14 @@ public class AranarthUtils {
 		// a single rank-ordered sequence. We represent each entry with a priority
 		// value and a marker for whether it belongs to a local Player or a remote
 		// NetworkPlayer, then derive absolute positions from the combined ordering.
-		record SortEntry(int priority, Player localPlayer, com.aearost.aranarthcore.network.NetworkPlayer remotePlayer) {}
+		record SortEntry(int priority, Player localPlayer, NetworkPlayer remotePlayer) {}
 
 		List<SortEntry> combined = new ArrayList<>();
 		for (Player p : onlinePlayers) {
 			AranarthPlayer ap = getPlayer(p.getUniqueId());
 			if (ap != null) combined.add(new SortEntry(getRankPriority(ap), p, null));
 		}
-		for (com.aearost.aranarthcore.network.NetworkPlayer np : remotePlayers) {
+		for (NetworkPlayer np : remotePlayers) {
 			combined.add(new SortEntry(getRankPriority(np), null, np));
 		}
 
@@ -3231,7 +3233,7 @@ public class AranarthUtils {
 			} else {
 				// Send a list-order packet for the remote fake entry so it slots in at
 				// the correct combined position instead of floating at the bottom.
-				com.aearost.aranarthcore.network.NetworkTabManager.sendListOrder(
+				NetworkTabManager.sendListOrder(
 						entry.remotePlayer().getUuid(), i, onlinePlayers);
 			}
 		}

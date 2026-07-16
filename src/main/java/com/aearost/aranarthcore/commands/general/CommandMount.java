@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 /**
@@ -44,7 +45,7 @@ public class CommandMount implements CommandExecutor {
                 if (args[1].equalsIgnoreCase("remove")) {
                     removeNickname(player);
                 } else {
-                    String name = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+                    String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
                     setNickname(player, name);
                 }
             }
