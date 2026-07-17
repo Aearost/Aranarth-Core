@@ -36,8 +36,9 @@ public class GuiBlacklistClick {
 			if (Objects.isNull(clickedItem)) {
 				return;
 			}
-			if (blacklistedItems.size() == 27) {
-				player.sendMessage(ChatUtils.chatMessage("&cYou have already blacklisted 27 items!"));
+			int size = e.getClickedInventory().getSize();
+			if (blacklistedItems.size() == size) {
+				player.sendMessage(ChatUtils.chatMessage("&cYou have already blacklisted " + size + " items!"));
 			} else {
 				for (ItemStack itemStack : blacklistedItems) {
 					if (clickedItem.getType() == itemStack.getType()) {
