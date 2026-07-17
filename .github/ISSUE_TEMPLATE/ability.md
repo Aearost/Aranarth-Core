@@ -3,7 +3,7 @@ name: Ability
 about: Ideas for new Bending Abilities
 title: "[ABILITY] "
 labels: ABILITY
-assignees: ''
+assignees: Aearost
 
 ---
 
