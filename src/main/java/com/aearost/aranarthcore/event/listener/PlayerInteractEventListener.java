@@ -66,6 +66,10 @@ public class PlayerInteractEventListener implements Listener {
                     }
                 }, 1L);
             }
+            // 3x3 till of dirt
+            if (type == Material.DIRT || type == Material.GRASS_BLOCK) {
+                Bukkit.getScheduler().runTaskLater(plugin, () -> new HoeTillArea().execute(e), 1L);
+            }
         }
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {

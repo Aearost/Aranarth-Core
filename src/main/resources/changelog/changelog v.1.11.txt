@@ -80,6 +80,7 @@ Minor Features
 [~] Made it so dominion chunks will auto-unclaim if exceeding total limit
 [+] Implemented /ac og to specify the list of OG players in-game rather than hardcoded
 [+] Added Thorns V to Aquatic Aranarthium Chestplates
+[+] Implemented 3x3 tilling of dirt with plentiful on a hoe
 
 Backend Code Changes
 - Implemented numerous fixes to widespread functionality affected by the migration of the SMP server
