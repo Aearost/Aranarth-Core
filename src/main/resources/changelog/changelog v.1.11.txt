@@ -79,6 +79,7 @@ Minor Features
 [~] Ensured that if a player is banned, they are removed from the dominion they are in
 [~] Made it so dominion chunks will auto-unclaim if exceeding total limit
 [+] Implemented /ac og to specify the list of OG players in-game rather than hardcoded
+[+] Added Thorns V to Aquatic Aranarthium Chestplates
 
 Backend Code Changes
 - Implemented numerous fixes to widespread functionality affected by the migration of the SMP server

@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ArmorMeta;
 import org.bukkit.inventory.meta.trim.ArmorTrim;
@@ -28,13 +29,14 @@ public class AquaticAranarthiumChestplate implements AranarthItem {
 	public ItemStack getItem() {
 		ItemStack item = new ItemStack(Material.NETHERITE_CHESTPLATE, 1);
 		ArmorMeta meta = (ArmorMeta) item.getItemMeta();
-		meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.TIDE));
-		ArrayList<String> lore = new ArrayList<>();
-		meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
-
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_aquatic_chestplate");
 			meta.setItemModel(key);
+			meta.setTrim(new ArmorTrim(TrimMaterial.DIAMOND, TrimPattern.TIDE));
+			meta.addEnchant(Enchantment.THORNS, 5, true);
+			ArrayList<String> lore = new ArrayList<>();
+			meta.getPersistentDataContainer().set(ARMOR_TYPE, PersistentDataType.STRING, "aquatic");
+
 			meta.setDisplayName(ChatUtils.translateToColor(getName()));
 			lore.add(ChatUtils.translateToColor(getLore()));
 			meta.setLore(lore);
