@@ -439,6 +439,37 @@ public class DatabaseManager {
         return result;
     }
 
+    /** Row returned by {@link #loadAllPlayerBalances()}. */
+    public record BalanceEntry(double balance, String username, String nickname) {}
+
+    /**
+     * Returns a map of UUID -> BalanceEntry for all players by parsing raw_data.
+     * Includes username and nickname so /baltop can display players not loaded on this server.
+     */
+    public Map<UUID, BalanceEntry> loadAllPlayerBalances() {
+        String sql = "SELECT uuid, username, raw_data FROM aranarth_players WHERE raw_data IS NOT NULL AND raw_data != ''";
+        Map<UUID, BalanceEntry> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String[] fields = rs.getString("raw_data").split("\\|");
+                if (fields.length > 9) {
+                    try {
+                        double balance = Double.parseDouble(fields[9]);
+                        String username = rs.getString("username");
+                        String nickname = fields[1]; // raw_data[1] = nickname
+                        result.put(UUID.fromString(rs.getString("uuid")), new BalanceEntry(balance, username, nickname));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player balances: " + e.getMessage());
+        }
+        return result;
+    }
+
     /** Saves the raw pipe-delimited player row to raw_data column. */
     public void saveAranarthPlayerRaw(UUID uuid, String rawData) {
         String sql = "INSERT INTO aranarth_players (uuid, username, data_json, raw_data) VALUES (?, '', '', ?) " +
@@ -876,6 +907,27 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save vote data for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Updates only the vote_count for a player. Used by the periodic sync so that
+     * pending key counts written by explicit claim/award events are never overwritten
+     * by potentially stale in-memory values from the other server.
+     */
+    public void saveVoteCountOnly(UUID uuid, int voteCount) {
+        String sql = """
+            INSERT INTO player_votes (uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys)
+            VALUES (?, ?, 0, 0, 0, 0)
+            ON DUPLICATE KEY UPDATE vote_count=VALUES(vote_count)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, voteCount);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save vote count for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -1349,6 +1401,33 @@ public class DatabaseManager {
             ps.setString(1, id.toString()); ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion " + id + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteDominionPermissions(UUID dominionId) {
+        String sql = "DELETE FROM server_dominion_permissions WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion permissions for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteDominionPlayerPerms(UUID dominionId) {
+        String sql = "DELETE FROM server_dominion_player_perms WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion player perms for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public void deleteDefendersForDominion(UUID dominionId) {
+        String sql = "DELETE FROM server_defenders WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete defenders for dominion " + dominionId + ": " + e.getMessage());
         }
     }
 

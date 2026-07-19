@@ -203,7 +203,11 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
-                ChatUtils.sendServerTips();
+                // Tips use Bukkit.broadcastMessage() so BroadcastRelayListener forwards them to SMP.
+                // Only send from one server to prevent players from receiving duplicates.
+                if (!isSmpServer()) {
+                    ChatUtils.sendServerTips();
+                }
 
                 // TODO Re-enable once we do the Avatar event
 //				// Attempts to automatically assign an avatar if there currently is none
@@ -436,6 +440,7 @@ public class AranarthCore extends JavaPlugin {
         } else {
             PersistenceUtils.loadAranarthPlayers();
         }
+        PersistenceUtils.loadOriginalPlayers();
         if (db) {
             PersistenceUtils.loadShopsFromDatabase();
             PersistenceUtils.loadServerShopsFromDatabase();
@@ -671,7 +676,11 @@ public class AranarthCore extends JavaPlugin {
         new PhantomSpawnPreventListener(this);
         new ArmorStandSwitchListener(this);
         new AnimalBreedingListener(this);
-        if (Bukkit.getPluginManager().isPluginEnabled("VotifierPlus")) {
+        // Only register Votifier on one server. If VotifierPlus is installed on both servers
+        // the external voting site would trigger the event on both, doubling vote rewards and
+        // announcements. Survival is the single authority; it relays announcements to SMP via
+        // NetworkManager.publishBroadcast / publishSoundAll in VotifierListener.
+        if (!isSmpServer() && Bukkit.getPluginManager().isPluginEnabled("VotifierPlus")) {
             new VotifierListener(this);
         }
         new ArmorStandInteractListener(this);
@@ -686,13 +695,17 @@ public class AranarthCore extends JavaPlugin {
                 discordMemberJoinListener = new ListenerAdapter() {
                     @Override
                     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-                        DiscordUtils.discordServerJoin(event.getUser().getEffectiveName(), event.getUser().getId());
+                        if (!AranarthCore.isSmpServer()) {
+                            DiscordUtils.discordServerJoin(event.getUser().getEffectiveName(), event.getUser().getId());
+                        }
                     }
                 };
                 discordMemberLeaveListener = new ListenerAdapter() {
                     @Override
                     public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-                        DiscordUtils.discordServerQuit(event.getUser().getEffectiveName(), event.getUser().getId());
+                        if (!AranarthCore.isSmpServer()) {
+                            DiscordUtils.discordServerQuit(event.getUser().getEffectiveName(), event.getUser().getId());
+                        }
                     }
                 };
                 jda.addEventListener(discordMemberJoinListener);
@@ -1359,6 +1372,35 @@ public class AranarthCore extends JavaPlugin {
      * restarters like UltimateAutoRestart that may bypass onDisable()).
      */
     private void saveAll() {
+        // Flush all online players' Bukkit data (inventory, ender chest, XP, health, etc.) to
+        // player.dat files before we exit. This is a no-op for graceful /stop (Paper already
+        // saved them while kicking players), but it protects against restart scripts that call
+        // System.exit() directly and bypass Paper's normal shutdown sequence — the JVM shutdown
+        // hook fires but Paper never got to write player.dat, causing inventory/EC rollbacks.
+        // We also snapshot each online player's live inventory into AranarthPlayer.survivalInventory
+        // so that MySQL stays in sync (avoids stale data if they transfer cross-server shortly
+        // after the restart).
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            try {
+                if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
+                    AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
+                    if (ap != null) {
+                        ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+                        ap.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
+                        ap.setSurvivalHealth(p.getHealth());
+                        ap.setSurvivalFoodLevel(p.getFoodLevel());
+                        ap.setSurvivalSaturation(p.getSaturation());
+                        ap.setSurvivalExpLevel(p.getLevel());
+                        ap.setSurvivalExpProgress(p.getExp());
+                        AranarthUtils.setPlayer(p.getUniqueId(), ap);
+                    }
+                }
+                p.saveData();
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(LOG_PREFIX + "Failed to save data for " + p.getName() + " on shutdown: " + e.getMessage());
+            }
+        }
+
         // End all active AstralProjections/cancel the abilities
         AstralProjection.endAllProjections();
         PastLives.endAllInstances();
@@ -1377,11 +1419,17 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveAranarthPlayers();
         PersistenceUtils.saveShops();
         PersistenceUtils.saveLockedContainers();
-        PersistenceUtils.saveDominions();
-        PersistenceUtils.saveOutposts();
-        PersistenceUtils.saveDefenders();
-        PersistenceUtils.saveDominionPermissions();
-        PersistenceUtils.saveDominionPlayerPermissions();
+        // SMP holds a read-only snapshot of dominion state; Survival is the sole authoritative
+        // writer. Skipping these on SMP shutdown matches the periodic-save guard (line ~165) and
+        // prevents SMP from resurrecting disbanded dominions or overwriting food/balance changes
+        // that happened on Survival since the last SMP restart.
+        if (!isSmpServer()) {
+            PersistenceUtils.saveDominions();
+            PersistenceUtils.saveOutposts();
+            PersistenceUtils.saveDefenders();
+            PersistenceUtils.saveDominionPermissions();
+            PersistenceUtils.saveDominionPlayerPermissions();
+        }
         PersistenceUtils.saveWarps();
         PersistenceUtils.savePunishments();
         PersistenceUtils.saveAvatars();

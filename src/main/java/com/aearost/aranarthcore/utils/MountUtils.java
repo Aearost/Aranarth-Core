@@ -250,9 +250,9 @@ public class MountUtils {
         String nameAndSkill = elementColor + displayName + "'s " + skillLabel;
         boolean maxed = level >= Mount.MAX_LEVEL;
 
-        return maxed
-                ? nameAndSkill + " §8» §fLvl " + level + " §a(MAX)"
-                : nameAndSkill + " §8» §fLvl " + level + " §7(§e" + xp + "§7/§e" + needed + " §eXP§7)";
+        return ChatUtils.translateToColor(maxed
+                ? nameAndSkill + " &8» &fLvl " + level + " &a(MAX)"
+                : nameAndSkill + " &8» &fLvl " + level + " &7(&e" + xp + "&7/&e" + needed + " &eXP&7)");
     }
 
     private static BarColor elementBarColor(String element) {
@@ -338,11 +338,11 @@ public class MountUtils {
 
     public static String getElementColor(String element) {
         return switch (element) {
-            case "AIR" -> "§7";
-            case "WATER" -> "§b";
-            case "EARTH" -> "§a";
-            case "FIRE" -> "§c";
-            default -> "§f";
+            case "AIR" -> "&7";
+            case "WATER" -> "&b";
+            case "EARTH" -> "&a";
+            case "FIRE" -> "&c";
+            default -> "&f";
         };
     }
 
@@ -455,8 +455,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eSpeed" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getSpeedLevel()));
+                                + "'s &eSpeed" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getSpeedLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
@@ -497,8 +497,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eHealth" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getHealthLevel()));
+                                + "'s &eHealth" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getHealthLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
@@ -532,8 +532,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eRamming" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel()));
+                                + "'s &eRamming" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getThirdLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
@@ -570,8 +570,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eDig Speed" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel()));
+                                + "'s &eDig Speed" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getThirdLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
@@ -608,8 +608,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eBellow Power" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel()));
+                                + "'s &eBellow Power" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getThirdLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);
@@ -646,8 +646,8 @@ public class MountUtils {
             if (leveled) {
                 owner.sendMessage(ChatUtils.chatMessage(
                         getElementColor(info[1]) + getDisplayName(ownerUUID, info[1])
-                                + "'s §eBite Strength" + getElementColor(info[1])
-                                + " has reached level §e" + pet.getThirdLevel()));
+                                + "'s &eBite Strength" + getElementColor(info[1])
+                                + " has reached level &e" + pet.getThirdLevel()));
                 MountListener ml = MountListener.getInstance();
                 if (ml != null) {
                     ml.updateMountStats(mountEntityUUID);

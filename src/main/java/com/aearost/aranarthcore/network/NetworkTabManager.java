@@ -194,8 +194,14 @@ public class NetworkTabManager {
                     property = propertyClass.getConstructor(String.class, String.class)
                             .newInstance("textures", textureValue);
                 }
-                // getProperties() returns a PropertyMap (Guava Multimap)
-                Object propMap = gameProfileClass.getMethod("getProperties").invoke(gp);
+                // getProperties() / properties() returns the PropertyMap — try both authlib API styles
+                Method propMapGetter = null;
+                for (String mName : new String[]{"getProperties", "properties"}) {
+                    try { propMapGetter = gameProfileClass.getMethod(mName); break; }
+                    catch (NoSuchMethodException ignored) {}
+                }
+                if (propMapGetter == null) throw new NoSuchMethodException("no getProperties/properties on GameProfile");
+                Object propMap = propMapGetter.invoke(gp);
                 propMap.getClass().getMethod("put", Object.class, Object.class).invoke(propMap, "textures", property);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] NetworkTabManager: texture injection failed for UUID " + uuid + ": " + e.getMessage());
@@ -230,7 +236,8 @@ public class NetworkTabManager {
                 args[i] = true; // listed=true; showHat=true (1.21.4+)
             } else if (p == int.class) {
                 // Use the component name to differentiate latency from listOrder.
-                args[i] = name.equals("listOrder") ? listOrder : 0;
+                // Latency 0 can render as "no bars" on some clients; use 1 (= full bars) for remote players.
+                args[i] = name.equals("listOrder") ? listOrder : 1;
             } else if (p == gameTypeClass) {
                 args[i] = survivalGameType;
             } else if (nmsComponentClass != null && p == nmsComponentClass) {
@@ -262,6 +269,9 @@ public class NetworkTabManager {
     /**
      * Extracts the skin texture value and signature from a locally-online player via NMS reflection.
      * Returns a two-element array {value, signature}; both are empty strings if unavailable.
+     *
+     * <p>Supports both old authlib API ({@code getValue()}/{@code getSignature()}) and the newer
+     * record-based API ({@code value()}/{@code signature()}) introduced in authlib 3.x (Minecraft 1.20+).</p>
      */
     static String[] extractPlayerTexture(Player player) {
         try {
@@ -275,23 +285,62 @@ public class NetworkTabManager {
                     break;
                 }
             }
-            if (getGP == null) return new String[]{"", ""};
+            if (getGP == null) {
+                Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture: getGameProfile not found on ServerPlayer for " + player.getName());
+                return new String[]{"", ""};
+            }
             Object gp = getGP.invoke(serverPlayer);
-            Object propMap = gp.getClass().getMethod("getProperties").invoke(gp);
+            // Support both old authlib (getProperties) and new record-based authlib (properties)
+            Method propMapGetter = null;
+            for (String mName : new String[]{"getProperties", "properties"}) {
+                try { propMapGetter = gp.getClass().getMethod(mName); break; }
+                catch (NoSuchMethodException ignored) {}
+            }
+            if (propMapGetter == null) {
+                Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture: no property map accessor (getProperties/properties) on GameProfile for " + player.getName());
+                return new String[]{"", ""};
+            }
+            Object propMap = propMapGetter.invoke(gp);
             // PropertyMap.get(Object) → Collection<Property>
             Collection<?> props = (Collection<?>) propMap.getClass()
                     .getMethod("get", Object.class).invoke(propMap, "textures");
-            if (props == null || props.isEmpty()) return new String[]{"", ""};
+            if (props == null || props.isEmpty()) {
+                Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture: no 'textures' property in GameProfile for " + player.getName());
+                return new String[]{"", ""};
+            }
             Object prop = props.iterator().next();
-            Method getValue = prop.getClass().getMethod("getValue");
-            String value = (String) getValue.invoke(prop);
+
+            // In authlib 3.x+ (Paper 1.20+) Property is a record: accessors are value()/signature().
+            // In older authlib it was a plain class: getValue()/getSignature().
+            // Try both so this works across server versions.
+            String value = null;
+            for (String methodName : new String[]{"getValue", "value"}) {
+                try {
+                    Object result = prop.getClass().getMethod(methodName).invoke(prop);
+                    if (result instanceof String s && !s.isEmpty()) {
+                        value = s;
+                        break;
+                    }
+                } catch (NoSuchMethodException ignored) {}
+            }
+            if (value == null || value.isEmpty()) {
+                Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture: texture value is null/empty for " + player.getName()
+                        + " (tried getValue/value on " + prop.getClass().getName() + ")");
+                return new String[]{"", ""};
+            }
+
             String signature = "";
-            try {
-                Method getSig = prop.getClass().getMethod("getSignature");
-                Object s = getSig.invoke(prop);
-                if (s instanceof String str) signature = str;
-            } catch (Exception ignored) {}
-            return new String[]{value != null ? value : "", signature};
+            for (String methodName : new String[]{"getSignature", "signature"}) {
+                try {
+                    Object result = prop.getClass().getMethod(methodName).invoke(prop);
+                    if (result instanceof String s && !s.isEmpty()) {
+                        signature = s;
+                        break;
+                    }
+                } catch (NoSuchMethodException ignored) {}
+            }
+
+            return new String[]{value, signature};
         } catch (Exception e) {
             Bukkit.getLogger().warning("[AC] NetworkTabManager.extractPlayerTexture failed for " + player.getName() + ": " + e.getMessage());
             return new String[]{"", ""};

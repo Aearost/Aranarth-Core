@@ -1,7 +1,10 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.items.GodAppleFragment;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.*;
 import org.bukkit.*;
 import org.bukkit.block.Biome;
@@ -481,6 +484,44 @@ public class DominionUtils {
         chunkKeyToDominion.values().removeIf(d -> d.isSameDominion(dominion));
 
         dominions.remove(dominion);
+
+        // Delete from database so it does not resurrect on reload
+        if (DatabaseManager.isActive()) {
+            final UUID dominionId = dominion.getId();
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+                DatabaseManager db = DatabaseManager.getInstance();
+                db.deleteDominion(dominionId);
+                db.deleteDominionPermissions(dominionId);
+                db.deleteDominionPlayerPerms(dominionId);
+                db.deleteDefendersForDominion(dominionId);
+            });
+        }
+
+        // Notify the other server so it evicts this dominion from its own memory
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishDominionDisband(dominion.getId());
+        }
+    }
+
+    /**
+     * Removes a dominion from all in-memory structures without touching the database or
+     * publishing any network events. Used by the cross-server disband handler so the
+     * receiving server can clean up its own memory after the originating server has already
+     * handled DB deletion and announcements.
+     *
+     * @param dominion The Dominion to evict.
+     */
+    public static void evictDominionFromMemory(Dominion dominion) {
+        DefenderUtils.sellAllDominionDefenders(dominion);
+        for (Outpost outpost : new ArrayList<>(OutpostUtils.getDominionOutposts(dominion.getId()))) {
+            OutpostUtils.disbandOutpost(dominion, outpost);
+        }
+        dominionById.remove(dominion.getId());
+        for (UUID memberUuid : dominion.getMembers()) {
+            playerToDominion.remove(memberUuid);
+        }
+        chunkKeyToDominion.values().removeIf(d -> d.isSameDominion(dominion));
+        dominions.remove(dominion);
     }
 
     /**
@@ -718,6 +759,32 @@ public class DominionUtils {
         for (Dominion dominion : new ArrayList<>(getDominions())) {
             // Conquered dominions are exempt from daily food/money/land taxes
             if (getConquerorOfDominion(dominion) != null) {
+                continue;
+            }
+
+            // If the dominion has more chunks than its member count allows, unclaim one chunk
+            // per day with priority over food/money consumption until within the limit
+            if (dominion.getChunks().size() > dominion.getMaxChunks()) {
+                Chunk chunkToRemove = null;
+                for (Chunk chunk : dominion.getChunks()) {
+                    if (dominion.getChunks().size() > 1 && dominion.getDominionHome().getChunk().equals(chunk)) {
+                        continue;
+                    }
+                    if (isAllClaimsConnectedAfterUnclaiming(dominion, chunk)) {
+                        chunkToRemove = chunk;
+                        break;
+                    }
+                }
+                if (chunkToRemove != null) {
+                    removePenaltyChunk(dominion, chunkToRemove);
+                    for (UUID memberUuid : dominion.getMembers()) {
+                        if (Bukkit.getOfflinePlayer(memberUuid).isOnline()) {
+                            Player member = Bukkit.getPlayer(memberUuid);
+                            member.sendMessage(ChatUtils.chatMessage("&e" + dominion.getName() + " &7has more chunks claimed than its membership allows"));
+                            member.sendMessage(ChatUtils.chatMessage("&7A chunk has been automatically unclaimed to bring the total within the limit"));
+                        }
+                    }
+                }
                 continue;
             }
 

@@ -56,7 +56,9 @@ public class CraftingOverridesAranarthium {
         } else {
             if (resultMeta.getPersistentDataContainer().has(ARANARTHIUM_INGOT)) {
                 String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
-                if (!ingotType.equals("aranarthium")) {
+                // Allow normal (non-echo-shard) ingredients in variant ingot recipes.
+                // Echo shards must be a proper AranarthiumIngot (custom PDC), not vanilla.
+                if (!ingotType.equals("aranarthium") && ingredient.getType() != Material.ECHO_SHARD) {
                     return;
                 }
             }
@@ -103,10 +105,12 @@ public class CraftingOverridesAranarthium {
                 return;
             }
         }
-        // Handles normal ingredients being used to craft enhanced Aranarthium
+        // Handles normal ingredients being used to craft enhanced Aranarthium.
+        // Echo shards are excluded here because they must specifically be an AranarthiumIngot (custom PDC),
+        // not a plain vanilla echo shard.
         else {
             String ingotType = resultMeta.getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING);
-            if (!ingotType.equals("aranarthium")) {
+            if (!ingotType.equals("aranarthium") && ingredient.getType() != Material.ECHO_SHARD) {
                 return;
             }
         }
@@ -130,17 +134,20 @@ public class CraftingOverridesAranarthium {
         } else if (material == Material.PHANTOM_MEMBRANE) {
             ingredientItem = new QuartzCluster();
         } else if (material == Material.ECHO_SHARD) {
-            if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("aquatic")) {
+            String ingotPdcValue = ingredient.hasItemMeta()
+                ? ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING)
+                : null;
+            if ("aquatic".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumAquatic();
-            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("ardent")) {
+            } else if ("ardent".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumArdent();
-            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("dwarven")) {
+            } else if ("dwarven".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumDwarven();
-            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("elven")) {
+            } else if ("elven".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumElven();
-            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("scorched")) {
+            } else if ("scorched".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumScorched();
-            } else if (ingredient.getItemMeta().getPersistentDataContainer().get(ARANARTHIUM_INGOT, PersistentDataType.STRING).equals("soulbound")) {
+            } else if ("soulbound".equals(ingotPdcValue)) {
                 ingredientItem = new AranarthiumSoulbound();
             } else {
                 ingredientItem = new AranarthiumIngot();
@@ -162,7 +169,10 @@ public class CraftingOverridesAranarthium {
                     player.sendMessage(ChatUtils.chatMessage("&cYou must use a " + itemName + " &cto craft this!"));
                 }
             } else {
-                if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
+                if (material == Material.ECHO_SHARD && ingredientItem instanceof AranarthiumIngot) {
+                    // Plain echo shard used where an Aranarthium Ingot (custom) is required
+                    player.sendMessage(ChatUtils.chatMessage("&cYou must use an " + itemName + " &cto craft this!"));
+                } else if (material == Material.IRON_INGOT || material == Material.TURTLE_SCUTE || material == Material.ECHO_SHARD) {
                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot use an " + itemName + " &cto craft this!"));
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot use a " + itemName + " &cto craft this!"));

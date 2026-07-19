@@ -1,5 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionPermission;
@@ -69,6 +71,11 @@ public class OutpostUtils {
         }
         notifyMembers(dominion, "&cThe outpost &e" + outpost.getName()
                 + " &chas been disbanded!");
+        if (DatabaseManager.isActive()) {
+            final UUID outpostId = outpost.getId();
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                    DatabaseManager.getInstance().deleteOutpost(outpostId));
+        }
     }
 
     /**

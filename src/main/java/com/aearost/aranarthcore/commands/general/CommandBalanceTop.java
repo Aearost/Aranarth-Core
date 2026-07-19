@@ -1,17 +1,20 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.BalanceComparator;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkPlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -76,25 +79,45 @@ public class CommandBalanceTop implements CommandExecutor {
 	}
 
 	/**
-	 * Provides the full list of all players' balances.
+	 * Provides the full list of all players' balances, queried fresh from the database
+	 * so that balances from other servers are included.
 	 * @return The full list of all player's balances.
 	 */
 	private static List<String> baltopSetup() {
-		HashMap<UUID, AranarthPlayer> players = AranarthUtils.getAranarthPlayers();
-		List<AranarthPlayer> playersAsList = new ArrayList<>(players.values());
-		List<String> lines = new ArrayList<>();
+		Map<UUID, DatabaseManager.BalanceEntry> balances = DatabaseManager.getInstance().loadAllPlayerBalances();
+		List<Map.Entry<UUID, DatabaseManager.BalanceEntry>> sorted = new ArrayList<>(balances.entrySet());
+		sorted.sort(Comparator.<Map.Entry<UUID, DatabaseManager.BalanceEntry>>comparingDouble(e -> e.getValue().balance()).reversed());
 
-		playersAsList.sort(new BalanceComparator());
+		List<String> lines = new ArrayList<>();
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		int counter = 1;
-		for (AranarthPlayer aranarthPlayer : playersAsList) {
-			UUID uuid = AranarthUtils.getUUIDFromUsername(aranarthPlayer.getUsername());
-			if (uuid == null) {
-				continue;
+		for (Map.Entry<UUID, DatabaseManager.BalanceEntry> entry : sorted) {
+			UUID uuid = entry.getKey();
+			DatabaseManager.BalanceEntry balanceEntry = entry.getValue();
+			AranarthPlayer aranarthPlayer = AranarthUtils.getAranarthPlayers().get(uuid);
+
+			String displayedName;
+			if (aranarthPlayer != null) {
+				displayedName = ChatUtils.providePrefixAndName(uuid);
+			} else {
+				// Player is not loaded on this server — use DB nickname/username for display.
+				// If they are currently online on another server, prefer the remote roster entry.
+				NetworkPlayer remote = NetworkManager.isActive()
+						? NetworkManager.getInstance().getRemotePlayer(uuid) : null;
+				if (remote != null) {
+					displayedName = remote.getNickname().isEmpty()
+							? remote.getUsername()
+							: ChatUtils.stripColorFormatting(remote.getNickname());
+				} else {
+					String nick = balanceEntry.nickname();
+					displayedName = (nick == null || nick.isEmpty())
+							? balanceEntry.username()
+							: ChatUtils.stripColorFormatting(nick);
+				}
 			}
-			String displayedName = ChatUtils.providePrefixAndName(uuid);
-			lines.add("&8[&6" + counter + "&8] &e" + displayedName + ", &6" + formatter.format(aranarthPlayer.getBalance()));
+
+			lines.add("&8[&6" + counter + "&8] &e" + displayedName + ", &6" + formatter.format(balanceEntry.balance()));
 			counter++;
 		}
 

@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -25,6 +26,18 @@ public class PlayerServerQuitListener implements Listener {
 
 	public PlayerServerQuitListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
+	}
+
+	/**
+	 * Grants discordsrv.silentquit before DiscordSRV's LOW-priority listener fires so that
+	 * cross-server transfers don't produce a Discord leave message.
+	 * DiscordSRV explicitly checks this permission and returns early when it's present.
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onPlayerQuitEarly(final PlayerQuitEvent e) {
+		if (!NetworkManager.isActive()) return;
+		if (!NetworkManager.getInstance().isTransferring(e.getPlayer().getUniqueId())) return;
+		e.getPlayer().addAttachment(AranarthCore.getInstance(), "discordsrv.silentquit", true);
 	}
 
 	@EventHandler

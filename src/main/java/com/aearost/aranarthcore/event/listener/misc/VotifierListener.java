@@ -1,10 +1,13 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.items.key.KeyVote;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
 import org.bukkit.Bukkit;
@@ -65,20 +68,38 @@ public class VotifierListener implements Listener {
 				amount = 2;
 			}
 
+			String voterNickname = AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname();
+			String announcementMsg = ChatUtils.chatMessage("&e" + voterNickname + " &7has voted and received &a" + amount + " vote points!");
+
+			// Announce to all locally-online players
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				if (onlinePlayer.getUniqueId().equals(offlinePlayer.getUniqueId())) {
 					onlinePlayer.sendMessage(ChatUtils.chatMessage("&7You voted and received &a" + amount + " vote points!"));
 				} else {
-					onlinePlayer.sendMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getPlayer(offlinePlayer.getUniqueId()).getNickname() + " &7has voted and received &a" + amount + " vote points!"));
+					onlinePlayer.sendMessage(announcementMsg);
 				}
 				onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1F, ThreadLocalRandom.current().nextFloat(1.4F, 1.7F));
+			}
+
+			// Relay announcement and sound to other servers so SMP players are notified.
+			// publishBroadcast only delivers to remote servers (originServer guard in handleBroadcast),
+			// so local players won't see a duplicate.
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().publishBroadcast(announcementMsg);
+				NetworkManager.getInstance().publishSoundAll("minecraft:entity.experience_orb.pickup", 1F, 1.55F);
 			}
 
 			// Adds their vote
 			AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
 
 			if (!offlinePlayer.isOnline()) {
+				// Player is offline or on a remote server — store as pending and immediately persist
+				// to DB so that /keyclaim on any server picks it up without waiting 30 minutes.
 				AranarthUtils.addPendingVoteKeys(uuid, 1);
+				if (DatabaseManager.isActive()) {
+					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+							() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+				}
 				return;
 			} else {
 				Player player = Bukkit.getPlayer(uuid);
@@ -91,11 +112,19 @@ public class VotifierListener implements Listener {
 					if (!remainder.isEmpty()) {
 						AranarthUtils.addPendingVoteKeys(uuid, 1);
 						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+						if (DatabaseManager.isActive()) {
+							Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+									() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+						}
 					}
 				} else {
 					AranarthUtils.addPendingVoteKeys(uuid, 1);
 					if (player != null) {
 						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
+					}
+					if (DatabaseManager.isActive()) {
+						Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+								() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
 					}
 				}
 			}

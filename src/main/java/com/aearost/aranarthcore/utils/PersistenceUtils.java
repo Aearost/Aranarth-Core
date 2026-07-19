@@ -1278,6 +1278,10 @@ public class PersistenceUtils {
 
                 String worldName = fields[7];
                 World world = Bukkit.getWorld(worldName);
+                if (world == null) {
+                    // This dominion's home world does not exist on this server (e.g. SMP dominion on Survival server).
+                    continue;
+                }
 
                 List<Chunk> chunks = new ArrayList<>();
                 String[] claimedChunks = fields[8].split("\\*\\*\\*");
@@ -1863,6 +1867,80 @@ public class PersistenceUtils {
         // MySQL sync
         if (DatabaseManager.isActive()) {
             runDbSync(PersistenceUtils::syncDominionPlayerPermissionsToDatabase);
+        }
+    }
+
+    /**
+     * Initializes the original players list from original_players.txt.
+     * Each line contains a single UUID.
+     */
+    public static void loadOriginalPlayers() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+                + "original_players.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            Bukkit.getLogger().info("[AC] Attempting to read the original players file...");
+            List<UUID> uuids = new ArrayList<>();
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine().trim();
+                if (row.isEmpty() || row.startsWith("#")) {
+                    continue;
+                }
+                try {
+                    uuids.add(UUID.fromString(row));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+            AranarthUtils.setOriginalPlayers(uuids);
+            Bukkit.getLogger().info("[AC] All original players have been initialized");
+            reader.close();
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the original players!");
+        }
+    }
+
+    /**
+     * Saves the original players list to original_players.txt.
+     * Each line contains a single UUID.
+     */
+    public static void saveOriginalPlayers() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "original_players.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (isDirectoryCreated) {
+            try {
+                if (file.createNewFile()) {
+                    Bukkit.getLogger().info("[AC] A new original_players.txt file has been generated");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of original_players.txt");
+            }
+
+            try {
+                FileWriter writer = new FileWriter(filePath);
+                writer.write("#uuid\n");
+                for (UUID uuid : AranarthUtils.getOriginalPlayers()) {
+                    writer.write(uuid.toString() + "\n");
+                }
+                writer.close();
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] There was an error in saving the original players");
+            }
         }
     }
 
@@ -4704,22 +4782,15 @@ public class PersistenceUtils {
             voteCounts.merge(vote.getUuid(), 1, Integer::sum);
         }
 
-        // Merge all key maps to get full set of UUIDs
-        Set<UUID> allUuids = new HashSet<>();
-        allUuids.addAll(voteCounts.keySet());
-        allUuids.addAll(AranarthUtils.getPendingVoteKeys().keySet());
-        allUuids.addAll(AranarthUtils.getPendingRareKeys().keySet());
-        allUuids.addAll(AranarthUtils.getPendingEpicKeys().keySet());
-        allUuids.addAll(AranarthUtils.getPendingGodlyKeys().keySet());
-
-        for (UUID uuid : allUuids) {
-            int vc = voteCounts.getOrDefault(uuid, 0);
-            int vk = AranarthUtils.getPendingVoteKeys().getOrDefault(uuid, 0);
-            int rk = AranarthUtils.getPendingRareKeys().getOrDefault(uuid, 0);
-            int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
-            int gk = AranarthUtils.getPendingGodlyKeys().getOrDefault(uuid, 0);
+        // Only iterate players who have votes — key counts are intentionally excluded from
+        // this periodic sync. Pending key counts are exclusively written by
+        // syncVoteKeysForPlayerToDatabase (called on vote receipt and after /keyclaim),
+        // which is the authoritative source. Writing in-memory key counts here would race
+        // against a claim on the other server and silently restore claimed keys in the DB.
+        for (UUID uuid : voteCounts.keySet()) {
+            int vc = voteCounts.get(uuid);
             try {
-                db.saveVoteData(uuid, vc, vk, rk, ek, gk);
+                db.saveVoteCountOnly(uuid, vc);
                 // Also save individual vote history
                 JsonArray history = new JsonArray();
                 for (AranarthVote vote : AranarthUtils.getVotes()) {
@@ -4739,6 +4810,51 @@ public class PersistenceUtils {
     }
 
     /**
+     * Immediately persists the current pending key counts for a single player to MySQL.
+     * Called after a vote is received or after /keyclaim processes keys so that the other
+     * server sees an up-to-date state without waiting for the 30-minute save cycle.
+     * Must be called from an async thread.
+     */
+    public static void syncVoteKeysForPlayerToDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        DatabaseManager db = DatabaseManager.getInstance();
+        int vc = 0;
+        for (AranarthVote vote : AranarthUtils.getVotes()) {
+            if (vote.getUuid().equals(uuid)) vc++;
+        }
+        int vk = AranarthUtils.getPendingVoteKeys().getOrDefault(uuid, 0);
+        int rk = AranarthUtils.getPendingRareKeys().getOrDefault(uuid, 0);
+        int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
+        int gk = AranarthUtils.getPendingGodlyKeys().getOrDefault(uuid, 0);
+        try {
+            db.saveVoteData(uuid, vc, vk, rk, ek, gk);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync vote keys for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Reads the pending key counts for a single player from MySQL and updates the in-memory maps.
+     * Called at the start of /keyclaim so the command always operates on authoritative DB state,
+     * regardless of which server processed the vote.
+     * May be called synchronously (blocks the calling thread briefly for the DB query).
+     */
+    public static void reloadVoteKeysForPlayerFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        int[] data = DatabaseManager.getInstance().loadVoteData(uuid);
+        if (data == null) return;
+        // data[0]=voteCount, [1]=voteKeys, [2]=rareKeys, [3]=epicKeys, [4]=godlyKeys
+        if (data[1] > 0) AranarthUtils.setPendingVoteKeys(uuid, data[1]);
+        else AranarthUtils.removePendingVoteKeys(uuid);
+        if (data[2] > 0) AranarthUtils.setPendingRareKeys(uuid, data[2]);
+        else AranarthUtils.removePendingRareKeys(uuid);
+        if (data[3] > 0) AranarthUtils.setPendingEpicKeys(uuid, data[3]);
+        else AranarthUtils.removePendingEpicKeys(uuid);
+        if (data[4] > 0) AranarthUtils.setPendingGodlyKeys(uuid, data[4]);
+        else AranarthUtils.removePendingGodlyKeys(uuid);
+    }
+
+    /**
      * Syncs quest state + progress to MySQL. Call after the files have been saved.
      * Stores the raw pipe-delimited lines as JSON strings.
      */
@@ -4752,12 +4868,11 @@ public class PersistenceUtils {
         String stateJson = "{\"lastDailyReset\":" + QuestUtils.getLastDailyReset()
                 + ",\"lastWeeklyReset\":" + QuestUtils.getLastWeeklyReset() + "}";
 
-        // Per-player quest progress — store as JSON mapping uuid -> progress string
-        Set<UUID> allUuids = new HashSet<>();
-        allUuids.addAll(QuestUtils.getPlayerActiveDailyQuestsMap().keySet());
-        allUuids.addAll(QuestUtils.getPlayerActiveWeeklyQuestsMap().keySet());
-        allUuids.addAll(QuestUtils.getPlayerDailyProgress().keySet());
-        allUuids.addAll(QuestUtils.getPlayerWeeklyProgress().keySet());
+        // Per-player quest progress — only sync UUIDs that had actual quest actions on THIS
+        // server this session, so we don't overwrite data for players active on the other server
+        // (both servers load all players from the shared DB at startup, but only the server where
+        // the player is actually playing should write back their progress).
+        Set<UUID> allUuids = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
 
         // Use a global uuid for the state row
         UUID stateUuid = new UUID(0L, 0L);
@@ -6259,6 +6374,7 @@ public class PersistenceUtils {
         obj.addProperty("weatherMessageDisabled", ap.isWeatherMessageDisabled());
         obj.addProperty("dominionMsgCompact", ap.isDominionMsgCompact());
         obj.addProperty("bulkSellShulker", ap.isBulkSellShulkerEnabled());
+        obj.addProperty("adminMode", ap.isInAdminMode());
         return GSON.toJson(obj);
     }
 
@@ -6330,6 +6446,9 @@ public class PersistenceUtils {
             }
             if (obj.has("bulkSellShulker")) {
                 ap.setBulkSellShulkerEnabled(obj.get("bulkSellShulker").getAsBoolean());
+            }
+            if (obj.has("adminMode")) {
+                ap.setInAdminMode(obj.get("adminMode").getAsBoolean());
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {

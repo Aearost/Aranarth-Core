@@ -72,10 +72,6 @@ public class PlayerServerJoinListener implements Listener {
 		boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
 		boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
 		boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
-		if (isCrossServerTransfer) {
-			Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] " + player.getName() + " joining as cross-server transfer (needsRouting=" + needsServerRouting + ", hasPendingTp=" + hasPendingTp + ")");
-		}
-
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
 		if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
@@ -154,7 +150,9 @@ public class PlayerServerJoinListener implements Listener {
 
 		if (isCrossServerTransfer) {
 			e.setJoinMessage(null);
-			// Suppress DiscordSRV join announcement for server-switch arrivals
+			// Suppress DiscordSRV join announcement for server-switch arrivals.
+			// DiscordSRV fires at MONITOR priority and checks discordsrv.silentjoin before posting.
+			player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
 			if (NetworkManager.isActive()) {
 				NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
 			}
@@ -189,7 +187,7 @@ public class PlayerServerJoinListener implements Listener {
 			if (NetworkManager.isActive()) {
 				AranarthPlayer apVanishCheck = AranarthUtils.getPlayer(player.getUniqueId());
 				if (apVanishCheck == null || !apVanishCheck.isVanished()) {
-					NetworkManager.getInstance().publishJoinMsg(joinMsgStr);
+					NetworkManager.getInstance().publishJoinMsg(joinMsgStr, isNewPlayer);
 				}
 			}
 		}
@@ -204,10 +202,12 @@ public class PlayerServerJoinListener implements Listener {
 				// Execute any pending cross-server teleport (e.g. player transferred here from SMP
 				// to complete a /tp or /tpaccept, or returning from SMP via /survival).
 				boolean hadPendingTp = false;
+				boolean isLoginRouting = false;
 				if (NetworkManager.isActive()) {
 					PendingTeleport pending = NetworkManager.getInstance().getPendingTeleport(player.getUniqueId());
 					if (pending != null) {
 						hadPendingTp = true;
+						isLoginRouting = pending.isLoginRouting();
 						NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
 
 						// If this transfer requires an inventory swap, reload player data from
@@ -218,7 +218,6 @@ public class PlayerServerJoinListener implements Listener {
 							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
 							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
 							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
-								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Applying survival inventory for " + player.getName() + " on arrival");
 								try {
 									player.getInventory().setContents(
 											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
@@ -255,6 +254,26 @@ public class PlayerServerJoinListener implements Listener {
 								player.setExp(apInv.getSurvivalExpProgress());
 							}
 							player.setGameMode(GameMode.SURVIVAL);
+							// If the player's last position on this server was in a non-survival world
+							// (e.g. creative or arena), Minecraft will have restored them there with the
+							// survival inventory we just applied — an inconsistent state. Any pending
+							// teleport to a survival world (e.g. "dominion home") would then trigger
+							// switchInventory(creative→world), wrongly saving the survival items as the
+							// creative inventory. Move the player to survival world spawn via a direct
+							// player.teleport() call (TeleportCause.PLUGIN) so the pending command fires
+							// from a survival-world context. PLUGIN cause is intentional: our
+							// PlayerTeleportBetweenWorldsListener only processes TeleportCause.COMMAND,
+							// so switchInventory is not triggered by this relocation.
+							if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+								World fallbackWorld = Bukkit.getWorld("spawn");
+								if (fallbackWorld == null) fallbackWorld = Bukkit.getWorld("world");
+								if (fallbackWorld != null) {
+									player.teleport(new Location(fallbackWorld, 0.5, 101, 0.5, 180, 0));
+								} else {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Could not find spawn/world to relocate " + player.getName()
+											+ " out of '" + player.getWorld().getName() + "' — pending teleport may corrupt creative/arena inventory");
+								}
+							}
 							// Re-publish with fresh data so remote servers see the correct nickname/rank
 							if (NetworkManager.isActive()) {
 								AranarthPlayer freshAp = AranarthUtils.getPlayer(player.getUniqueId());
@@ -289,10 +308,9 @@ public class PlayerServerJoinListener implements Listener {
 									}
 								}
 								if (NetworkManager.isActive()) {
-									NetworkManager.getInstance().publishJoinMsg(routedJoinMsg);
+									NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
 								}
 								PlayerServerJoinListener.this.playJoinSound();
-								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Net] Published login-routing join announcement for " + player.getName());
 							}
 						}
 
@@ -330,13 +348,17 @@ public class PlayerServerJoinListener implements Listener {
 				}
 
 				// Reload quest progress from DB so assignments and progress match the source server.
-				if (hadPendingTp && DatabaseManager.isActive()) {
+				// Skip when this is a login-routing transfer (player being routed back to the server
+				// they last logged off on) — the in-memory data here is already authoritative and
+				// the async DB write from the quit event may not have finished yet.
+				if (hadPendingTp && !isLoginRouting && DatabaseManager.isActive()) {
 					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
 				}
 
 				// Apply the /back location saved by the source server before transfer.
 				if (hadPendingTp && NetworkManager.isActive()) {
 					NetworkManager.getInstance().loadAndApplyCrossServerBack(player.getUniqueId());
+					NetworkManager.getInstance().loadAndApplyCrossServerLastMsg(player.getUniqueId());
 				}
 
 				// When arriving via cross-server transfer, force other clients to reload this
@@ -378,6 +400,7 @@ public class PlayerServerJoinListener implements Listener {
 					} else {
 						PendingTeleport pt = new PendingTeleport(
 								lastLoc.world, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch, "", "");
+						pt.setLoginRouting(true);
 						String velocityTarget = AranarthCore.getInstance().getConfig()
 								.getString("network.servers." + lastLoc.server, lastLoc.server);
 						NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);

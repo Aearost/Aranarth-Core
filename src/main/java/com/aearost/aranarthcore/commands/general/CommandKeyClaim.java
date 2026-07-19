@@ -1,11 +1,15 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -35,6 +39,11 @@ public class CommandKeyClaim implements CommandExecutor {
         }
 
         UUID uuid = player.getUniqueId();
+
+        // Pull fresh counts from the shared DB so keys awarded on another server (e.g. via
+        // Votifier firing on Survival while the player is on SMP) are always visible here.
+        PersistenceUtils.reloadVoteKeysForPlayerFromDatabase(uuid);
+
         Integer pendingVote = AranarthUtils.getPendingVoteKeys().get(uuid);
         Integer pendingRare = AranarthUtils.getPendingRareKeys().get(uuid);
         Integer pendingEpic = AranarthUtils.getPendingEpicKeys().get(uuid);
@@ -106,6 +115,13 @@ public class CommandKeyClaim implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cYour inventory is full - you still have &e" + totalRemaining + " " + keyWordRemaining + " &7to claim"));
         } else {
             player.sendMessage(ChatUtils.chatMessage("&7You have claimed all of your pending keys!"));
+        }
+
+        // Immediately persist the updated (reduced) key counts so the other server can't
+        // give the same keys twice if the player switches servers before the 30-minute save.
+        if (totalClaimed > 0 && DatabaseManager.isActive()) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
         }
 
         return true;

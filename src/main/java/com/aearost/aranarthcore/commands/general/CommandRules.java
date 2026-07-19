@@ -21,7 +21,7 @@ public class CommandRules implements CommandExecutor {
 	public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
 		sender.sendMessage(ChatUtils.translateToColor("&8      - - - &6&lAranarth Rules &8- - -"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&61&8] &eBe kind and respectful to everyone, regardless of race, orientation, gender, religion, etc."));
-		sender.sendMessage(ChatUtils.translateToColor("&8[&62&8] &7Do not spam chat, use caps lock, etc."));
+		sender.sendMessage(ChatUtils.translateToColor("&8[&62&8] &7Do not spam chat, excessively use caps lock, etc."));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&63&8] &eNo inappropriate conversation topics or excessive swearing"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&64&8] &7No inappropriate skins, builds, item names or nicknames"));
 		sender.sendMessage(ChatUtils.translateToColor("&8[&65&8] &eNo advertising or mentioning other servers"));

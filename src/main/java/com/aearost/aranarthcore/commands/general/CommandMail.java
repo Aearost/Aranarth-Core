@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Mail;
 import com.aearost.aranarthcore.utils.AranarthUtils;
@@ -74,12 +75,17 @@ public class CommandMail implements CommandExecutor {
                 }
 
                 MailUtils.addMail(targetUUID, new Mail(player.getUniqueId(), targetUUID, System.currentTimeMillis(), processedMessage));
+                AranarthPlayer senderPlayer = AranarthUtils.getPlayer(player.getUniqueId());
                 player.sendMessage(ChatUtils.chatMessage("&7The following mail has been sent to &e" + targetAranarthPlayer.getNickname() + "&7: &e" + processedMessage));
                 if (Bukkit.getOfflinePlayer(targetUUID).isOnline()) {
+                    // Recipient is on this server — notify directly
                     Player target = Bukkit.getPlayer(targetUUID);
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + aranarthPlayer.getNickname()));
+                    target.sendMessage(ChatUtils.chatMessage("&7You have received mail from &e" + senderPlayer.getNickname()));
                     target.sendMessage(ChatUtils.chatMessage("&7View it with &e/mail read"));
+                } else if (NetworkManager.isActive()
+                        && NetworkManager.getInstance().getRemotePlayer(targetUUID) != null) {
+                    // Recipient is on a remote server — relay the notification there
+                    NetworkManager.getInstance().publishMailNotification(targetUUID, senderPlayer.getNickname());
                 }
             }
             case "read" -> {

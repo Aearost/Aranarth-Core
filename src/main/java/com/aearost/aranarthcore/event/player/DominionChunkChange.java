@@ -21,7 +21,8 @@ public class DominionChunkChange {
 			return;
 		}
 
-		if (!e.getTo().getWorld().getName().startsWith("world")) {
+		String toWorldName = e.getTo().getWorld().getName();
+		if (!toWorldName.startsWith("world") && !toWorldName.startsWith("smp")) {
 			return;
 		}
 

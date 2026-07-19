@@ -158,15 +158,6 @@ public class AranarthUtils {
 	 */
 	public static void addPlayer(UUID uuid, AranarthPlayer aranarthPlayer) {
 		players.put(uuid, aranarthPlayer);
-		if (uuid.equals(getUUIDFromUsername("Aearost")) || uuid.equals(getUUIDFromUsername("Aearxst"))
-				|| uuid.equals(getUUIDFromUsername("cocomocody")) || uuid.equals(getUUIDFromUsername("Leiks"))
-				|| uuid.equals(getUUIDFromUsername("SachsiBua")) || uuid.equals(getUUIDFromUsername("_Seoltang"))
-				|| uuid.equals(getUUIDFromUsername("im_Hazel")) || uuid.equals(getUUIDFromUsername("_Breathtaking"))
-				|| uuid.equals(getUUIDFromUsername("Keos36")) || uuid.equals(getUUIDFromUsername("WitchEggDog"))
-				|| uuid.equals(getUUIDFromUsername("MasterlySnake")) || uuid.equals(getUUIDFromUsername("Cainaedriel"))
-				|| uuid.equals(getUUIDFromUsername("B3nnett_B"))) {
-			originalPlayers.add(uuid);
-		}
 	}
 
 	/**
@@ -183,15 +174,6 @@ public class AranarthUtils {
 			if (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix)) {
 				names.add(username);
 			}
-			// Also offer the stripped nickname as a completion so players can tab by nick
-			AranarthPlayer ap = getPlayer(p.getUniqueId());
-			if (ap != null && !ap.getNickname().isEmpty()) {
-				String nick = ChatUtils.stripColorFormatting(ap.getNickname());
-				if (!nick.equalsIgnoreCase(username)
-						&& (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix))) {
-					names.add(nick);
-				}
-			}
 		}
 		if (NetworkManager.isActive()) {
 			for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
@@ -199,21 +181,6 @@ public class AranarthUtils {
 				if (!username.isEmpty()
 						&& (lowerPrefix.isEmpty() || username.toLowerCase().startsWith(lowerPrefix))) {
 					names.add(username);
-				}
-				// Also offer the stripped nickname for remote players
-				if (!np.getNickname().isEmpty()) {
-					String nick = ChatUtils.stripColorFormatting(np.getNickname());
-					if (!nick.equalsIgnoreCase(username)
-							&& (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix))) {
-						names.add(nick);
-					}
-				}
-				// If no username at all, fall back to nickname
-				if (username.isEmpty() && !np.getNickname().isEmpty()) {
-					String nick = ChatUtils.stripColorFormatting(np.getNickname());
-					if (lowerPrefix.isEmpty() || nick.toLowerCase().startsWith(lowerPrefix)) {
-						names.add(nick);
-					}
 				}
 			}
 		}
@@ -226,11 +193,26 @@ public class AranarthUtils {
 	 * @return Confirmation whether the player is one of the original players of Aranarth.
 	 */
 	public static boolean isOriginalPlayer(UUID uuid) {
-		if (originalPlayers.contains(uuid)) {
-			return true;
-		} else {
-			return false;
+		return originalPlayers.contains(uuid);
+	}
+
+	public static void addOriginalPlayer(UUID uuid) {
+		if (!originalPlayers.contains(uuid)) {
+			originalPlayers.add(uuid);
 		}
+	}
+
+	public static void removeOriginalPlayer(UUID uuid) {
+		originalPlayers.remove(uuid);
+	}
+
+	public static void setOriginalPlayers(List<UUID> uuids) {
+		originalPlayers.clear();
+		originalPlayers.addAll(uuids);
+	}
+
+	public static List<UUID> getOriginalPlayers() {
+		return originalPlayers;
 	}
 
 	/**
@@ -355,17 +337,20 @@ public class AranarthUtils {
 		}
 	}
 
-	/**
-	 * Handles switching the player's inventory dependent on the world they are teleporting to.
-	 * If the player is teleporting to the arena world, the player will be given iron armor.
-	 *
-	 * @param player The player whose inventory is being altered.
-	 * @param currentWorld The world the player is teleporting from.
-	 * @param destinationWorld The world the player is teleporting to.
-	 * @throws IOException The exception potentially thrown when converting the inventory to Base64.
-	 */
+    /** Returns the number of non-null slots in the player's main inventory (for logging). */
+	private static int invSize(Player player) {
+		int count = 0;
+		for (ItemStack s : player.getInventory().getContents()) {
+			if (s != null) count++;
+		}
+		return count;
+	}
+
 	public static void switchInventory(Player player, String currentWorld, String destinationWorld) throws IOException {
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+		String rawFrom = currentWorld;
+		String rawTo = destinationWorld;
 
 		// Include any world that should share the inventory of Survival
 		if (isSmpWorld(currentWorld) || currentWorld.startsWith("resource") || currentWorld.startsWith("spawn") || currentWorld.equals("shops")) {
@@ -405,7 +390,8 @@ public class AranarthUtils {
 		if (currentWorld.startsWith("world")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
 			if (destinationWorld.startsWith("arena")) {
-				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
+				boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
+				if (hasArena) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
 					PermissionUtils.toggleArenaBendingPermissions(player, true);
@@ -420,7 +406,8 @@ public class AranarthUtils {
 				player.updateCommands();
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
-				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
+				boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
+				if (hasCreative) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
 				} else {
 					player.getInventory().clear();
@@ -432,7 +419,8 @@ public class AranarthUtils {
 		} else if (currentWorld.startsWith("arena")) {
 			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
-				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
+				boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
+				if (hasSurvival) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 				} else {
 					player.getInventory().clear();
@@ -444,7 +432,8 @@ public class AranarthUtils {
 				return;
 			} else if (destinationWorld.startsWith("creative")) {
 				aranarthPlayer.setArenaInventory(ItemUtils.toBase64(player.getInventory()));
-				if (!aranarthPlayer.getCreativeInventory().isEmpty()) {
+				boolean hasCreative = !aranarthPlayer.getCreativeInventory().isEmpty();
+				if (hasCreative) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getCreativeInventory()));
 				} else {
 					player.getInventory().clear();
@@ -459,7 +448,8 @@ public class AranarthUtils {
 		} else if (currentWorld.startsWith("creative")) {
 			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
-				if (!aranarthPlayer.getSurvivalInventory().isEmpty()) {
+				boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
+				if (hasSurvival) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 				} else {
 					player.getInventory().clear();
@@ -468,7 +458,8 @@ public class AranarthUtils {
 				return;
 			} else if (destinationWorld.startsWith("arena")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
-				if (!aranarthPlayer.getArenaInventory().isEmpty()) {
+				boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
+				if (hasArena) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getArenaInventory()));
 					player.setGameMode(GameMode.SURVIVAL);
 					PermissionUtils.toggleArenaBendingPermissions(player, true);
@@ -487,7 +478,7 @@ public class AranarthUtils {
 			}
 			player.getInventory().clear();
 		} else {
-			Bukkit.getLogger().info("[AC] Something went wrong with the current world name \"" + currentWorld + "\"!");
+			Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] switchInventory: unrecognised currentWorld \"" + currentWorld + "\" for " + player.getName() + " — no inventory action taken");
 			return;
 		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
@@ -2438,21 +2429,31 @@ public class AranarthUtils {
 			sentBoostReminders.remove(boost.name() + "_10");
 			sentBoostReminders.remove(boost.name() + "_1");
 
-			// Handles messages
-			if (uuid == null) {
-				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
-				if (AranarthCore.isPublicServer()) {
-					DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
-				}
-			} else {
-				AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
-				if (fromVoteShop) {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
+			// Handles messages — only broadcast and notify Discord on the primary (Survival) server
+			// to avoid duplicate messages when both servers independently receive a boost event.
+			if (!AranarthCore.isSmpServer()) {
+				if (uuid == null) {
+					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied"));
+					if (AranarthCore.isPublicServer()) {
+						DiscordUtils.updateBoostInDiscord(null, boost, true, fromVoteShop);
+					}
 				} else {
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
+					if (fromVoteShop) {
+						Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname()) + " &7used vote points to purchase the " + name));
+					} else {
+						Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has been applied by &e" + aranarthPlayer.getNickname()));
+					}
+					if (AranarthCore.isPublicServer()) {
+						DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
+					}
 				}
-				if (AranarthCore.isPublicServer()) {
-					DiscordUtils.updateBoostInDiscord(uuid, boost, true, fromVoteShop);
+				// Sync boost end-time to other servers so they apply effects without re-broadcasting
+				if (NetworkManager.isActive()) {
+					LocalDateTime endTime = serverBoosts.get(boost);
+					if (endTime != null) {
+						NetworkManager.getInstance().publishBoostSync(boost.name(), endTime.toString(), false);
+					}
 				}
 			}
 		}
@@ -2480,10 +2481,15 @@ public class AranarthUtils {
 			} else {
 				name = "&7&lUnspecified Boost";
 			}
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			if (AranarthCore.isPublicServer()) {
-				DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-				DiscordUtils.sendBoostExpiredToDiscord(boost);
+			if (!AranarthCore.isSmpServer()) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+				if (AranarthCore.isPublicServer()) {
+					DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+					DiscordUtils.sendBoostExpiredToDiscord(boost);
+				}
+				if (NetworkManager.isActive()) {
+					NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
+				}
 			}
 			serverBoosts.remove(boost);
 			sentBoostReminders.remove(boost.name() + "_60");
@@ -2566,16 +2572,21 @@ public class AranarthUtils {
 			} else {
 				name = "&7&lUnspecified Boost";
 			}
-			Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
-			if (AranarthCore.isPublicServer()) {
-				DiscordUtils.updateBoostInDiscord(null, boost, false, false);
-				DiscordUtils.sendBoostExpiredToDiscord(boost);
+			if (!AranarthCore.isSmpServer()) {
+				Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7has expired"));
+				if (AranarthCore.isPublicServer()) {
+					DiscordUtils.updateBoostInDiscord(null, boost, false, false);
+					DiscordUtils.sendBoostExpiredToDiscord(boost);
+				}
+				if (NetworkManager.isActive()) {
+					NetworkManager.getInstance().publishBoostSync(boost.name(), "", true);
+				}
+				serverBoosts.remove(boost);
+				sentBoostReminders.remove(boost.name() + "_60");
+				sentBoostReminders.remove(boost.name() + "_30");
+				sentBoostReminders.remove(boost.name() + "_10");
+				sentBoostReminders.remove(boost.name() + "_1");
 			}
-			serverBoosts.remove(boost);
-			sentBoostReminders.remove(boost.name() + "_60");
-			sentBoostReminders.remove(boost.name() + "_30");
-			sentBoostReminders.remove(boost.name() + "_10");
-			sentBoostReminders.remove(boost.name() + "_1");
 		}
 
 		// Send reminder messages at 60, 30, and 1 minute remaining
@@ -2603,9 +2614,11 @@ public class AranarthUtils {
 				String key = boost.name() + "_" + thresholds[i];
 				if (minutesLeft == thresholds[i] && !sentBoostReminders.contains(key)) {
 					sentBoostReminders.add(key);
-					Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
-					if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
-						DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+					if (!AranarthCore.isSmpServer()) {
+						Bukkit.broadcastMessage(ChatUtils.chatMessage("&7The " + name + " &7expires in " + labels[i] + "&7!"));
+						if (discordLabels[i] != null && AranarthCore.isPublicServer()) {
+							DiscordUtils.sendBoostReminderToDiscord(boost, discordLabels[i]);
+						}
 					}
 					for (Player player : Bukkit.getOnlinePlayers()) {
 						player.playSound(player.getLocation(), Sound.ITEM_GOAT_HORN_SOUND_0, 1.0f, 0.7f);
@@ -3190,27 +3203,38 @@ public class AranarthUtils {
 		}
 
 		// Build a unified sorted list so that both local and remote players share
-		// a single rank-ordered sequence. We represent each entry with a priority
-		// value and a marker for whether it belongs to a local Player or a remote
-		// NetworkPlayer, then derive absolute positions from the combined ordering.
-		record SortEntry(int priority, Player localPlayer, NetworkPlayer remotePlayer) {}
+		// a single rank-ordered sequence. Sort keys (all descending):
+		//   1. roleGroup  — council(5) > architect(4) > saint(3) > avatar(2) > regular(1)
+		//   2. roleTier   — councilRank/saintRank/architectRank within the same group
+		//   3. playerRank — game rank (8–0) as tiebreaker within the same role+tier
+		record SortEntry(int roleGroup, int roleTier, int playerRank, Player localPlayer, NetworkPlayer remotePlayer) {}
 
 		List<SortEntry> combined = new ArrayList<>();
 		for (Player p : onlinePlayers) {
 			AranarthPlayer ap = getPlayer(p.getUniqueId());
-			if (ap != null) combined.add(new SortEntry(getRankPriority(ap), p, null));
+			if (ap != null) {
+				int[] fields = computeSortFields(p.getUniqueId(), ap.getCouncilRank(), ap.getArchitectRank(), ap.getSaintRank(), ap.getRank());
+				combined.add(new SortEntry(fields[0], fields[1], fields[2], p, null));
+			}
 		}
 		for (NetworkPlayer np : remotePlayers) {
-			combined.add(new SortEntry(getRankPriority(np), null, np));
+			int[] fields = computeSortFields(np.getUuid(), np.getCouncilRank(), np.getArchitectRank(), np.getSaintRank(), np.getRank());
+			combined.add(new SortEntry(fields[0], fields[1], fields[2], null, np));
 		}
 
-		// Sort highest priority first (matches the previous local-only sort direction)
-		combined.sort((a, b) -> Integer.compare(b.priority(), a.priority()));
+		// Sort highest priority first across all servers combined
+		combined.sort((a, b) -> {
+			if (a.roleGroup() != b.roleGroup()) return Integer.compare(b.roleGroup(), a.roleGroup());
+			if (a.roleTier() != b.roleTier()) return Integer.compare(b.roleTier(), a.roleTier());
+			return Integer.compare(b.playerRank(), a.playerRank());
+		});
 
 		// Apply display names and list order.  Local players can be ordered directly;
 		// remote players get an NMS list-order packet via NetworkTabManager.
-		for (int i = 0; i < combined.size(); i++) {
+		int total = combined.size();
+		for (int i = 0; i < total; i++) {
 			SortEntry entry = combined.get(i);
+			int order = total - 1 - i;
 			if (entry.localPlayer() != null) {
 				Player player = entry.localPlayer();
 				UUID uuid = player.getUniqueId();
@@ -3229,100 +3253,30 @@ public class AranarthUtils {
 					display += " &8[&c" + ping + "ms&8]";
 				}
 				player.setPlayerListName(ChatUtils.translateToColor(display));
-				player.setPlayerListOrder(i);
+				player.setPlayerListOrder(order);
 			} else {
 				// Send a list-order packet for the remote fake entry so it slots in at
 				// the correct combined position instead of floating at the bottom.
 				NetworkTabManager.sendListOrder(
-						entry.remotePlayer().getUuid(), i, onlinePlayers);
+						entry.remotePlayer().getUuid(), order, onlinePlayers);
 			}
 		}
 
 	}
 
-    /** Rank priority using raw field values — shared by both overloads below. */
-	private static int computeRankPriority(int councilRank, int saintRank, int architectRank, int rank) {
-		if (councilRank == 3) return 48;
-		if (councilRank == 2) {
-			if (saintRank == 3) return 47;
-			if (saintRank == 2) return 46;
-			if (saintRank == 1) return 45;
-			return 44;
-		}
-		if (councilRank == 1) {
-			if (saintRank == 3) return 43;
-			if (saintRank == 2) return 42;
-			if (saintRank == 1) return 41;
-			return 40;
-		}
-		if (architectRank == 1) {
-			if (saintRank == 3) return 39;
-			if (saintRank == 2) return 38;
-			if (saintRank == 1) return 37;
-			return 36;
-		}
-		if (rank == 8) {
-			if (saintRank == 3) return 35;
-			if (saintRank == 2) return 34;
-			if (saintRank == 1) return 33;
-			return 32;
-		}
-		if (rank == 7) {
-			if (saintRank == 3) return 31;
-			if (saintRank == 2) return 30;
-			if (saintRank == 1) return 29;
-			return 28;
-		}
-		if (rank == 6) {
-			if (saintRank == 3) return 27;
-			if (saintRank == 2) return 26;
-			if (saintRank == 1) return 25;
-			return 24;
-		}
-		if (rank == 5) {
-			if (saintRank == 3) return 23;
-			if (saintRank == 2) return 22;
-			if (saintRank == 1) return 21;
-			return 20;
-		}
-		if (rank == 4) {
-			if (saintRank == 3) return 19;
-			if (saintRank == 2) return 18;
-			if (saintRank == 1) return 17;
-			return 16;
-		}
-		if (rank == 3) {
-			if (saintRank == 3) return 15;
-			if (saintRank == 2) return 14;
-			if (saintRank == 1) return 13;
-			return 12;
-		}
-		if (rank == 2) {
-			if (saintRank == 3) return 11;
-			if (saintRank == 2) return 10;
-			if (saintRank == 1) return 9;
-			return 8;
-		}
-		if (rank == 1) {
-			if (saintRank == 3) return 7;
-			if (saintRank == 2) return 6;
-			if (saintRank == 1) return 5;
-			return 4;
-		}
-		if (saintRank == 3) return 3;
-		if (saintRank == 2) return 2;
-		if (saintRank == 1) return 1;
-		return 0;
-	}
-
-	private static int getRankPriority(AranarthPlayer aranarthPlayer) {
-		return computeRankPriority(aranarthPlayer.getCouncilRank(), aranarthPlayer.getSaintRank(),
-				aranarthPlayer.getArchitectRank(), aranarthPlayer.getRank());
-	}
-
-	private static int getRankPriority(NetworkPlayer np) {
-		return computeRankPriority(np.getCouncilRank(), np.getSaintRank(),
-				np.getArchitectRank(), np.getRank());
+	/**
+	 * Returns the three sort keys used for tab-list ordering: [roleGroup, roleTier, playerRank].
+	 * Role groups (descending priority): council=5, architect=4, saint=3, avatar=2, regular=1.
+	 * Within the same group, roleTier distinguishes council/saint tiers.
+	 * playerRank is used as the final tiebreaker.
+	 */
+	private static int[] computeSortFields(UUID uuid, int councilRank, int architectRank, int saintRank, int rank) {
+		if (councilRank >= 1) return new int[]{5, councilRank, rank};
+		if (architectRank >= 1) return new int[]{4, architectRank, rank};
+		if (saintRank >= 1) return new int[]{3, saintRank, rank};
+		Avatar currentAvatar = AvatarUtils.getCurrentAvatar();
+		if (currentAvatar != null && uuid.equals(currentAvatar.getUuid())) return new int[]{2, 0, rank};
+		return new int[]{1, 0, rank};
 	}
 
 

@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
@@ -20,8 +21,8 @@ public class CommandSeenCompleter implements TabCompleter {
 	 */
 	@Override
 	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-		if (args.length == 1 && args[0].isEmpty()) {
-			return List.of("username");
+		if (args.length == 1) {
+			return AranarthUtils.getNetworkPlayerNames(args[0]);
 		}
 		return List.of();
 	}

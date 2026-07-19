@@ -117,6 +117,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandDiscordReload.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("migrate")) {
 			commandResult = CommandMigrate.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("og")) {
+			commandResult = CommandOG.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("disband")) {
 			if (args.length < 2) {
 				sender.sendMessage(ChatUtils.chatMessage("&cUsage: &e/ac disband <dominion name>"));

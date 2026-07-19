@@ -33,6 +33,16 @@ public class CommandTeleport implements CommandExecutor {
 				return true;
 			} else {
 				UUID targetUUID = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				// Fall back to remote roster for players who have never joined this server
+				if (targetUUID == null && NetworkManager.isActive()) {
+					for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+						if (np.getUsername().equalsIgnoreCase(args[0])
+								|| (!np.getNickname().isEmpty() && ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(args[0]))) {
+							targetUUID = np.getUuid();
+							break;
+						}
+					}
+				}
 				if (targetUUID != null) {
 					Player target = Bukkit.getPlayer(targetUUID);
 					if (target != null) {

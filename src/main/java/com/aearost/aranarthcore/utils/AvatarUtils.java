@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.destroystokyo.paper.profile.PlayerProfile;
@@ -216,6 +217,7 @@ public class AvatarUtils {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.playSound(player, Sound.ENTITY_BREEZE_INHALE, 1F, 0.1F);
 		}
+		if (NetworkManager.isActive()) NetworkManager.getInstance().publishSoundAll("minecraft:entity.breeze.inhale", 1F, 0.1F);
 
 		// Adds a 2-second delay
 		new BukkitRunnable() {
@@ -225,6 +227,7 @@ public class AvatarUtils {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					player.playSound(player, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 				}
+				if (NetworkManager.isActive()) NetworkManager.getInstance().publishSoundAll("minecraft:ui.toast.challenge_complete", 1F, 0.8F);
 				PersistenceUtils.saveAvatarBinds();
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 30);
@@ -255,6 +258,7 @@ public class AvatarUtils {
 		for (Player player : Bukkit.getOnlinePlayers()) {
 			player.playSound(player, Sound.ENTITY_WITHER_DEATH, 1F, 1.5F);
 		}
+		if (NetworkManager.isActive()) NetworkManager.getInstance().publishSoundAll("minecraft:entity.wither.death", 1F, 1.5F);
 
 		// Adds a 2-second delay
 		new BukkitRunnable() {
@@ -264,6 +268,7 @@ public class AvatarUtils {
 				for (Player player : Bukkit.getOnlinePlayers()) {
 					player.playSound(player, Sound.ENTITY_BREEZE_IDLE_AIR, 1F, 0.4F);
 				}
+				if (NetworkManager.isActive()) NetworkManager.getInstance().publishSoundAll("minecraft:entity.breeze.idle_air", 1F, 0.4F);
 			}
 		}.runTaskLater(AranarthCore.getInstance(), 70);
 	}

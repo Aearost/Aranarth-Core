@@ -109,22 +109,25 @@ public class CommandDominion implements CommandExecutor {
                         player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
                     }
                 } else if (args[0].equalsIgnoreCase("home")) {
-                    // On SMP: countdown here first, then transfer to Survival and replay home on arrival.
-                    if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
-                        AranarthPlayer apSmp = AranarthUtils.getPlayer(player.getUniqueId());
-                        String cmd = args.length >= 2
-                                ? "dominion home " + String.join(" ", Arrays.copyOfRange(args, 1, args.length))
-                                : "dominion home";
-                        AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
-                                apSmp.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
-                            if (success) {
-                                String survivalServer = AranarthCore.getInstance().getConfig()
-                                        .getString("network.servers.survival", "survival");
-                                NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServer,
-                                        PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
-                            }
-                        });
-                        return true;
+                    // Cross-server: transfer to whichever server the target dominion/outpost lives on.
+                    if (NetworkManager.isActive()) {
+                        String currentServer = AranarthCore.getInstance().getConfig()
+                                .getString("network.this-server", "survival");
+                        String targetServer = getHomeTargetServer(args, dominion);
+                        if (targetServer != null && !targetServer.equals(currentServer)) {
+                            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+                            String cmd = args.length >= 2
+                                    ? "dominion home " + String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                                    : "dominion home";
+                            AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                                    ap.isInAdminMode(), "&e&lDominion", "&7Transferring to your Dominion...", success -> {
+                                if (success) {
+                                    NetworkManager.getInstance().saveInventoryAndTransfer(player, targetServer,
+                                            PendingTeleport.forCommand(cmd, "&e&lDominion", "&7You have teleported to your Dominion"));
+                                }
+                            });
+                            return true;
+                        }
                     }
                     if (!player.hasPermission("aranarth.dominion.home")) {
                         player.sendMessage(ChatUtils.chatMessage("&cYou cannot use this command!"));
@@ -421,7 +424,7 @@ public class CommandDominion implements CommandExecutor {
                     // Ensures the chunk is not already claimed
                     if (dominionOfChunk == null) {
                         if (aranarthPlayer.getBalance() >= dominionCost) {
-                            if (player.getWorld().getName().startsWith("world")) {
+                            if (isGameplayWorld(player.getWorld().getName())) {
                                 if (AranarthUtils.isSpawnLocation(player.getLocation())) {
                                     player.sendMessage(ChatUtils.chatMessage("&cYou cannot create a Dominion here!"));
                                     return;
@@ -461,7 +464,7 @@ public class CommandDominion implements CommandExecutor {
                                 }
                                 DiscordUtils.dominionMessage(dominion, AranarthUtils.getNickname(player) + " has created the Dominion of " + dominionName, Color.GREEN);
                             } else {
-                                player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in Survival!"));
+                                player.sendMessage(ChatUtils.chatMessage("&cYou can only create a Dominion in a gameplay world!"));
                             }
                         } else {
                             player.sendMessage(ChatUtils.chatMessage("&cYou must have at least $" + NumberFormat.getNumberInstance().format((long) dominionCost) + " to afford this!"));
@@ -1251,8 +1254,9 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cOnly the Leader can create outposts!"));
             return;
         }
-        if (!player.getWorld().getName().startsWith("world")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only create outposts in survival worlds!"));
+        String dominionWorldPrefix = dominion.getDominionHomeWorldName().startsWith("smp") ? "smp" : "world";
+        if (!player.getWorld().getName().startsWith(dominionWorldPrefix)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou can only create outposts in the same server as your Dominion!"));
             return;
         }
         if (AranarthUtils.isSpawnLocation(player.getLocation())) {
@@ -2083,13 +2087,9 @@ public class CommandDominion implements CommandExecutor {
      * @param player   The player.
      */
     private static void resources(Dominion dominion, Player player) {
-        if (AranarthCore.isSmpServer()) {
-            player.sendMessage(ChatUtils.chatMessage("&cDominion resources cannot be claimed from the SMP server!"));
-            return;
-        }
         String worldName = player.getWorld().getName();
-        if (!worldName.startsWith("world")) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim Dominion resources in the main survival world!"));
+        if (!isGameplayWorld(worldName)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou can only claim Dominion resources in a gameplay world!"));
             return;
         }
         if (dominion != null) {
@@ -2593,5 +2593,52 @@ public class CommandDominion implements CommandExecutor {
         if (targetOnline != null && targetOnline.isOnline()) {
             targetOnline.sendMessage(ChatUtils.chatMessage("&7Your rank in &e" + dominion.getName() + "&7 has been changed to " + rankName));
         }
+    }
+
+    private static boolean isGameplayWorld(String worldName) {
+        return worldName.startsWith("world") || worldName.startsWith("smp");
+    }
+
+    private static String getServerForWorld(String worldName) {
+        if (worldName == null) return null;
+        String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
+        String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+        if (worldName.startsWith("world")) return survivalServer;
+        if (worldName.startsWith("smp")) return smpServer;
+        return null;
+    }
+
+    private static String getHomeTargetServer(String[] args, Dominion playerDominion) {
+        if (args.length < 2) {
+            if (playerDominion == null) return null;
+            return getServerForWorld(playerDominion.getDominionHomeWorldName());
+        }
+        String[] remaining = Arrays.copyOfRange(args, 1, args.length);
+        Dominion targetDominion = null;
+        String outpostPart = null;
+        for (int split = remaining.length; split >= 1; split--) {
+            String dominionPart = String.join(" ", Arrays.copyOfRange(remaining, 0, split));
+            Dominion match = DominionUtils.getDominions().stream()
+                    .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(dominionPart))
+                    .findFirst().orElse(null);
+            if (match != null) {
+                targetDominion = match;
+                if (split < remaining.length) {
+                    outpostPart = String.join(" ", Arrays.copyOfRange(remaining, split, remaining.length));
+                }
+                break;
+            }
+        }
+        if (targetDominion == null) return null;
+        if (outpostPart != null) {
+            String finalOutpostPart = outpostPart;
+            Outpost outpost = OutpostUtils.getDominionOutposts(targetDominion.getId()).stream()
+                    .filter(o -> ChatUtils.stripColorFormatting(o.getName()).equalsIgnoreCase(finalOutpostPart))
+                    .findFirst().orElse(null);
+            if (outpost != null && outpost.getHome() != null && outpost.getHome().getWorld() != null) {
+                return getServerForWorld(outpost.getHome().getWorld().getName());
+            }
+        }
+        return getServerForWorld(targetDominion.getDominionHomeWorldName());
     }
 }

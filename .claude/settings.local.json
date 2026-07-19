@@ -259,7 +259,8 @@
       "Bash(head -20 grep -rn \"CommandMsg\\\\|class CommandMsg\" \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" --include=\"*.java\" -l)",
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/.claude/worktrees/agent-a08fbfaf -name Fae* -o -name *fae*)",
       "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/src -name Fae* -o -name *fae*)",
-      "Bash(find \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" -name \"*.java\" -type f -exec grep -Hn \"[a-z][a-z0-9]*\\\\\\(\\\\.[a-z][a-z0-9]*\\\\\\)\\\\+\\\\.[A-Z]\" {})"
+      "Bash(find \"C:/Users/liamh/IdeaProjects/AranarthCore/src\" -name \"*.java\" -type f -exec grep -Hn \"[a-z][a-z0-9]*\\\\\\(\\\\.[a-z][a-z0-9]*\\\\\\)\\\\+\\\\.[A-Z]\" {})",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *PlayerServerJoin* -o -name *Listener* -o -name *DatabaseManager* -o -name *PersistenceUtils* -o -name *NetworkManager*)"
     ]
   }
 }

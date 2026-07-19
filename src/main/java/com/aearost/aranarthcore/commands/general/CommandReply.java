@@ -83,8 +83,6 @@ public class CommandReply implements CommandExecutor {
 							return true;
 						}
 					}
-					aranarthPlayer.setLastReceivedMessage(null);
-					AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 					player.sendMessage(ChatUtils.chatMessage("&cThis player is no longer online!"));
 					return false;
 				}

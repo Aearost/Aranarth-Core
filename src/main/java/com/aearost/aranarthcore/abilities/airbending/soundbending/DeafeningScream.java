@@ -122,7 +122,7 @@ public class DeafeningScream extends SoundAbility implements AddonAbility {
                                 origin.getBlockY() + dy,
                                 origin.getBlockZ() + dz);
                         if (isGlass(block.getType())) {
-                            shatterGlass(block);
+                            shatterGlass(player, block);
                         }
                     }
                 }

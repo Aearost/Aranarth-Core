@@ -30,6 +30,14 @@ public class PendingTeleport {
     private String titleSub;
     private boolean applyInventory = false;
 
+    /**
+     * True when this pending teleport was created purely to route a player back to the server
+     * they last logged off on at login. In that case the receiving server should NOT reload
+     * quest progress from the database — the in-memory (or startup-loaded) data for that server
+     * is already authoritative and the async DB write from the quit event may not have finished.
+     */
+    private boolean loginRouting = false;
+
     public PendingTeleport() {}
 
     /** Constructor for a fixed-location pending teleport. */
@@ -77,4 +85,6 @@ public class PendingTeleport {
     public String getTitleSub() { return titleSub; }
     public boolean isApplyInventory() { return applyInventory; }
     public void setApplyInventory(boolean applyInventory) { this.applyInventory = applyInventory; }
+    public boolean isLoginRouting() { return loginRouting; }
+    public void setLoginRouting(boolean loginRouting) { this.loginRouting = loginRouting; }
 }

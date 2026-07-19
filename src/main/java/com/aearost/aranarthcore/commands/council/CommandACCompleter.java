@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.commands.council;
 
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -30,7 +31,7 @@ public class CommandACCompleter implements TabCompleter {
 
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
-            "home", "invsee", "invswap", "msg", "mute", "perks", "punishments", "questnpc", "rankset",
+            "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "vanish", "vpedit", "warn", "weather", "whereis", "skull"
     );
@@ -181,6 +182,15 @@ public class CommandACCompleter implements TabCompleter {
                 }
                 yield List.of();
             }
+            case "og" -> {
+                if (args.length == 2) {
+                    yield filter(List.of("add", "remove"), args[1]);
+                }
+                if (args.length == 3) {
+                    yield filterPlayers(args[2]);
+                }
+                yield List.of();
+            }
             case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();
             case "vote" -> args.length == 2 ? filter(List.of("test"), args[1]) : List.of();
             case "vpedit" -> {
@@ -253,8 +263,14 @@ public class CommandACCompleter implements TabCompleter {
     }
 
     private static boolean isOnlinePlayer(String name) {
-        return Bukkit.getOnlinePlayers().stream()
-                .anyMatch(p -> p.getName().equalsIgnoreCase(name));
+        if (Bukkit.getOnlinePlayers().stream().anyMatch(p -> p.getName().equalsIgnoreCase(name))) {
+            return true;
+        }
+        if (NetworkManager.isActive()) {
+            return NetworkManager.getInstance().getRemoteRoster().values().stream()
+                    .anyMatch(np -> np.getUsername().equalsIgnoreCase(name));
+        }
+        return false;
     }
 
     private static List<String> filter(List<String> options, String input) {
@@ -267,9 +283,6 @@ public class CommandACCompleter implements TabCompleter {
     }
 
     private static List<String> filterPlayers(String input) {
-        return Bukkit.getOnlinePlayers().stream()
-                .map(Player::getName)
-                .filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
-                .collect(Collectors.toList());
+        return AranarthUtils.getNetworkPlayerNames(input);
     }
 }

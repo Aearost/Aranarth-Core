@@ -33,6 +33,16 @@ public class CommandMessage implements CommandExecutor {
 				return true;
 			} else {
 				UUID targetUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[0]);
+				// Fall back to remote roster for players who have never joined this server
+				if (targetUuid == null && NetworkManager.isActive()) {
+					for (NetworkPlayer np : NetworkManager.getInstance().getRemoteRoster().values()) {
+						if (np.getUsername().equalsIgnoreCase(args[0])
+								|| (!np.getNickname().isEmpty() && ChatUtils.stripColorFormatting(np.getNickname()).equalsIgnoreCase(args[0]))) {
+							targetUuid = np.getUuid();
+							break;
+						}
+					}
+				}
 				// If the player has played before
 				if (targetUuid != null) {
 					Player target = Bukkit.getPlayer(targetUuid);

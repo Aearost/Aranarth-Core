@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.gui.GuiInvsee;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -30,8 +31,12 @@ public class CommandInvsee {
 				if (target != null) {
 					GuiInvsee.open(player, target);
 					return true;
+				} else if (NetworkManager.isActive() && NetworkManager.getInstance().getRemoteRoster().values().stream()
+						.anyMatch(np -> np.getUsername().equalsIgnoreCase(args[1]))) {
+					player.sendMessage(ChatUtils.chatMessage("&cThat player is on another server"));
+					return true;
 				} else {
-					player.sendMessage(ChatUtils.chatMessage("&cThis player could not be found"));
+					player.sendMessage(ChatUtils.chatMessage("&cThat player could not be found"));
 					return true;
 				}
 			}

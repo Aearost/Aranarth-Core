@@ -1,9 +1,12 @@
 package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.Punishment;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
@@ -93,6 +96,23 @@ public class CommandBan {
 			player.ban(reason, unbanDate, null);
 			Punishment punishment = new Punishment(player.getUniqueId(), currentTime, "BAN", reason, senderUuid);
 			AranarthUtils.addPunishment(player.getUniqueId(), punishment, false);
+
+			// Permanent bans (unbanDate == null) remove the player from their dominion.
+			// If they are the leader, the dominion and all its outposts are disbanded.
+			if (unbanDate == null) {
+				Dominion dominion = DominionUtils.getPlayerDominion(uuid);
+				if (dominion != null) {
+					if (dominion.getLeader().equals(uuid)) {
+						DominionUtils.disbandDominion(dominion);
+					} else {
+						DominionUtils.removePlayerFromDominion(uuid);
+						dominion.getMembers().remove(uuid);
+						dominion.getMemberRanks().remove(uuid);
+						DominionUtils.updateDominion(dominion);
+						DominionLevelUtils.reevaluateDominion(dominion);
+					}
+				}
+			}
 		} else {
 			sender.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
 			return;

@@ -343,7 +343,8 @@ public class ChatUtils {
 		if (nickname != null && !nickname.isEmpty()) {
 			prefix += nickname + "&r";
 		} else {
-			prefix += player.getName();
+			String name = player.getName();
+			prefix += (name != null) ? name : aranarthPlayer.getUsername();
 		}
 
 		prefix += "&l⊱ &r";
@@ -518,10 +519,12 @@ public class ChatUtils {
 		} else {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 			AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(target.getUniqueId());
+			String senderDisplay = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+			String targetDisplay = targetAranarthPlayer.getNickname().isEmpty() ? target.getName() : targetAranarthPlayer.getNickname();
 			String prefixStart = "&7⊰&r";
 			String prefixEnd = "&7⊱&r";
-			String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetAranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o";
-			String targetPrefixRaw = prefixStart + "&7&l&oFrom: &r&e" + aranarthPlayer.getNickname() + prefixEnd + " &7&o>> &e&o";
+			String senderPrefixRaw = prefixStart + "&7&l&oTo: &r&e" + targetDisplay + prefixEnd + " &7&o>> &e&o";
+			String targetPrefixRaw = prefixStart + "&7&l&oFrom: &r&e" + senderDisplay + prefixEnd + " &7&o>> &e&o";
 
 			// Formats to color if the player sending has the permissions (no gradient for private messages)
 			String formattedMsg;
@@ -537,11 +540,11 @@ public class ChatUtils {
 
 			Component senderComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(senderPrefixRaw))
 					.append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
-			player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor("&7Message &e" + targetAranarthPlayer.getNickname()), "/msg " + target.getName() + " ", true));
+			player.sendMessage(ChatUtils.clickableCommand(senderComponent, ChatUtils.translateToColor("&7Message &e" + targetDisplay), "/msg " + target.getName() + " ", true));
 
 			Component targetComponent = LegacyComponentSerializer.legacySection().deserialize(ChatUtils.translateToColor(targetPrefixRaw))
 					.append(LegacyComponentSerializer.legacySection().deserialize(coloredFormattedMsg));
-			target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + aranarthPlayer.getNickname()), "/msg " + player.getName() + " ", true));
+			target.sendMessage(ChatUtils.clickableCommand(targetComponent, ChatUtils.translateToColor("&7Reply to &e" + senderDisplay), "/msg " + player.getName() + " ", true));
 			target.playSound(target, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 0.4f, 1f);
 
 			targetAranarthPlayer.setLastReceivedMessage(player.getUniqueId());
@@ -550,7 +553,7 @@ public class ChatUtils {
 			aranarthPlayer.setLastReceivedMessage(target.getUniqueId());
 			AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
 
-			String adminPrefix = prefixStart + "&r&e" + aranarthPlayer.getNickname() + " &7&o>> &r&e&o" + targetAranarthPlayer.getNickname() + prefixEnd + " &c&o";
+			String adminPrefix = prefixStart + "&r&e" + senderDisplay + " &7&o>> &r&e&o" + targetDisplay + prefixEnd + " &c&o";
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
 				if (onlineAranarthPlayer.isInAdminMode()) {
@@ -919,6 +922,10 @@ public class ChatUtils {
 			if (onlineAranarthPlayer.getCouncilRank() > 0 || onlineAranarthPlayer.getArchitectRank() >= 1) {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
 			}
+		}
+		// Relay to council members on other servers
+		if (com.aearost.aranarthcore.network.NetworkManager.isActive()) {
+			com.aearost.aranarthcore.network.NetworkManager.getInstance().publishCouncilMessage(prefixReceive + assembledMsg);
 		}
 		// Send message to logs
 		Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(prefixReceive + assembledMsg));

@@ -8,6 +8,7 @@ import com.aearost.aranarthcore.objects.Mount;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.MountUtils;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Block;
@@ -168,8 +169,8 @@ public class MountListener implements Listener {
             if (now < end) {
                 // Still on cooldown — give the player a quiet hint via action bar
                 long remaining = (end - now + 999) / 1000;
-                rider.sendActionBar(net.kyori.adventure.text.Component.text(
-                        "§7Bellow is ready in §e" + remaining + "s"));
+                rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
+                        ChatUtils.translateToColor("&7Bellow is ready in &e" + remaining + "s")));
                 return;
             }
             double maxDamage = mountData.getThirdAttribute() != null
@@ -202,8 +203,8 @@ public class MountListener implements Listener {
             long end = cooldownEnds.getOrDefault(id, 0L);
             if (now < end) {
                 long remaining = (end - now + 999) / 1000;
-                rider.sendActionBar(net.kyori.adventure.text.Component.text(
-                        "§7Bite is ready in §e" + remaining + "s"));
+                rider.sendActionBar(LegacyComponentSerializer.legacySection().deserialize(
+                        ChatUtils.translateToColor("&7Bite is ready in &e" + remaining + "s")));
                 return;
             }
             if (activeLunges.containsKey(id)) {

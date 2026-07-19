@@ -42,6 +42,6 @@ public class MailUtils {
     }
 
     public static void clearMail(UUID recipientUUID) {
-        mailbox.remove(recipientUUID);
+        mailbox.put(recipientUUID, new ArrayList<>());
     }
 }

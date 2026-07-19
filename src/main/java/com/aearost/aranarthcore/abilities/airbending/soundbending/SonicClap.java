@@ -94,7 +94,7 @@ public class SonicClap extends SoundAbility implements AddonAbility {
             wave.distanceTraveled += CLAP_SPEED;
 
             if (isGlass(wave.location.getBlock().getType())) {
-                shatterGlass(wave.location.getBlock());
+                shatterGlass(player, wave.location.getBlock());
             } else if (wave.location.getBlock().getType().isSolid()) {
                 it.remove();
                 continue;

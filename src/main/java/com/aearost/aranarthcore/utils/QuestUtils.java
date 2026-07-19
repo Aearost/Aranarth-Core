@@ -52,6 +52,10 @@ public class QuestUtils {
     // Tracks which rank the player's progress data applies to
     private static final HashMap<UUID, Integer> playerQuestRank = new HashMap<>();
 
+    // UUIDs that had quest actions on THIS server in the current session.
+    // Only these are synced to the shared DB so each server doesn't stomp the other's data.
+    private static final Set<UUID> locallyModifiedUuids = new HashSet<>();
+
     // Reset timestamps (milliseconds since epoch)
     private static long lastDailyReset = 0;
     private static long lastWeeklyReset = 0;
@@ -512,6 +516,7 @@ public class QuestUtils {
         playerDailyProgress.clear();
         playerDailyCompleted.clear();
         playerDailyClaimed.clear();
+        locallyModifiedUuids.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Daily quests have been reset.");
         // Persist reset timestamp to shared DB so both servers agree
         if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
@@ -534,6 +539,7 @@ public class QuestUtils {
         playerWeeklyProgress.clear();
         playerWeeklyCompleted.clear();
         playerWeeklyClaimed.clear();
+        locallyModifiedUuids.clear();
         Bukkit.getLogger().info("[AC] [AranarthCore] Weekly quests have been reset.");
         // Persist reset timestamp to shared DB so both servers agree
         if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
@@ -577,6 +583,7 @@ public class QuestUtils {
             playerQuestRank.put(uuid, rank);
         }
 
+        locallyModifiedUuids.add(uuid);
         assignQuestsIfNeeded(uuid, rank);
         updateProgressForType(player, uuid, taskType, amount, QuestType.DAILY);
         updateProgressForType(player, uuid, taskType, amount, QuestType.WEEKLY);
@@ -816,6 +823,10 @@ public class QuestUtils {
 
     public static HashMap<UUID, Integer> getPlayerQuestRank() {
         return playerQuestRank;
+    }
+
+    public static Set<UUID> getLocallyModifiedUuids() {
+        return locallyModifiedUuids;
     }
 
     public static long getLastDailyReset() {

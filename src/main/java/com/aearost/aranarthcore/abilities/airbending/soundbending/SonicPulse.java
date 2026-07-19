@@ -150,7 +150,7 @@ public class SonicPulse extends SoundAbility implements AddonAbility {
             // Shatter glass blocks without stopping the pulse
             Block block = pulse.location.getBlock();
             if (isGlass(block.getType())) {
-                shatterGlass(block);
+                shatterGlass(player, block);
             }
 
             // Block collision — pulse stops; close enough to the caster triggers recoil

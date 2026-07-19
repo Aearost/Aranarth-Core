@@ -136,7 +136,7 @@ public class SonicBoom extends SoundAbility implements AddonAbility {
 
 			Block block = blastLocation.getBlock();
 			if (isGlass(block.getType())) {
-				shatterGlass(block);
+				shatterGlass(player, block);
 			}
 
 			checkEntityCollisions();
