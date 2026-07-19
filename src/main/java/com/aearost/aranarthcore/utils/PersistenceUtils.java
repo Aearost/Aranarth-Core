@@ -3182,6 +3182,77 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads chat game guess counts from chat_game_guesses.txt.
+     */
+    public static void loadChatGameGuesses() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "chat_game_guesses.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        try (Scanner reader = new Scanner(file)) {
+            Bukkit.getLogger().info("[AC] Attempting to read the chat game guesses file...");
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#")) {
+                    continue;
+                }
+                // uuid|count
+                String[] fields = row.split("\\|");
+                UUID uuid = UUID.fromString(fields[0]);
+                int count = Integer.parseInt(fields[1]);
+                for (int i = 0; i < count; i++) {
+                    AranarthUtils.addChatGameGuess(uuid);
+                }
+            }
+            Bukkit.getLogger().info("[AC] All chat game guesses have been initialized");
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("[AC] Something went wrong with loading the chat game guesses!");
+        }
+    }
+
+    /**
+     * Saves chat game guess counts to chat_game_guesses.txt.
+     */
+    public static void saveChatGameGuesses() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "chat_game_guesses.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (isDirectoryCreated) {
+            try {
+                if (file.createNewFile()) {
+                    Bukkit.getLogger().info("[AC] A new chat_game_guesses.txt file has been generated");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] An error occurred in the creation of chat_game_guesses.txt");
+            }
+
+            try (FileWriter writer = new FileWriter(filePath)) {
+                writer.write("#uuid|count\n");
+                for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
+                    writer.write(entry.getKey() + "|" + entry.getValue() + "\n");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] There was an error in saving the chat game guesses");
+            }
+        }
+        if (DatabaseManager.isActive()) {
+            runDbSync(PersistenceUtils::syncChatGameGuessesToDatabase);
+        }
+    }
+
+    /**
      * Loads the pending vote keys from vote_keys.txt.
      */
     public static void loadVoteKeys() {
@@ -4767,6 +4838,23 @@ public class PersistenceUtils {
     }
 
     /**
+     * Syncs chat game guess counts to MySQL.
+     */
+    public static void syncChatGameGuessesToDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        DatabaseManager db = DatabaseManager.getInstance();
+        for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
+            try {
+                db.saveChatGameGuessCount(entry.getKey(), entry.getValue());
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync chat game guess for " + entry.getKey() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Syncs vote and key data to MySQL. Call after the files have been saved.
      * Votes are stored per-player as an aggregate vote count + pending keys.
      */
@@ -5928,6 +6016,25 @@ public class PersistenceUtils {
             }
         }
         Bukkit.getLogger().info("[AC] Kill/death data initialized from MySQL");
+    }
+
+    /**
+     * Loads chat game guess counts from MySQL. Falls back to file if empty.
+     */
+    public static void loadChatGameGuessesFromDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        Map<UUID, Integer> all = db.loadAllChatGameGuesses();
+        if (all.isEmpty()) {
+            loadChatGameGuesses();
+            return;
+        }
+        Bukkit.getLogger().info("[AC] Loading chat game guesses from MySQL...");
+        for (Map.Entry<UUID, Integer> entry : all.entrySet()) {
+            for (int i = 0; i < entry.getValue(); i++) {
+                AranarthUtils.addChatGameGuess(entry.getKey());
+            }
+        }
+        Bukkit.getLogger().info("[AC] Chat game guesses initialized from MySQL");
     }
 
     /**

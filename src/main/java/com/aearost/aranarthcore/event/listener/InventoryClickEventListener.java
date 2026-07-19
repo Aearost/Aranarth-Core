@@ -121,6 +121,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiTopDeathsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
                 new GuiTopKillsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
+                new GuiTopGuessesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
                 new GuiQuestsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Login Streak")) {
@@ -131,7 +133,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiVoteTopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
                 new GuiMctopClick().execute(e);
             }
         } else {

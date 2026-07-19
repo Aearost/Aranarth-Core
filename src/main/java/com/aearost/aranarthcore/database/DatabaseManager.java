@@ -186,6 +186,12 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
             """
+            CREATE TABLE IF NOT EXISTS player_chat_game_guesses (
+                uuid VARCHAR(36) PRIMARY KEY,
+                guess_count INT NOT NULL DEFAULT 0
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
             CREATE TABLE IF NOT EXISTS player_votes (
                 uuid VARCHAR(36) PRIMARY KEY,
                 vote_count INT DEFAULT 0,
@@ -513,6 +519,44 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all kill/death data: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Upserts the guess count for a single player.
+     */
+    public void saveChatGameGuessCount(UUID uuid, int guessCount) {
+        String sql = """
+            INSERT INTO player_chat_game_guesses (uuid, guess_count)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, guessCount);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save chat game guess count for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads all chat game guess counts.
+     * @return Map of UUID to guess count.
+     */
+    public Map<UUID, Integer> loadAllChatGameGuesses() {
+        String sql = "SELECT uuid, guess_count FROM player_chat_game_guesses";
+        Map<UUID, Integer> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("uuid")), rs.getInt("guess_count"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load chat game guesses: " + e.getMessage());
         }
         return result;
     }

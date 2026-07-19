@@ -179,6 +179,9 @@ public class AranarthCore extends JavaPlugin {
                     PersistenceUtils.saveShopCollaborators();
                 }
                 PersistenceUtils.saveKillDeathCount();
+                if (!isSmpServer()) {
+                    PersistenceUtils.saveChatGameGuesses();
+                }
                 PersistenceUtils.saveQuestState();
                 PersistenceUtils.saveQuestProgress();
                 PersistenceUtils.saveLoginStreaks();
@@ -543,6 +546,11 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadKillDeathCount();
         }
         if (db) {
+            PersistenceUtils.loadChatGameGuessesFromDatabase();
+        } else {
+            PersistenceUtils.loadChatGameGuesses();
+        }
+        if (db) {
             PersistenceUtils.loadQuestStateFromDatabase();
         } else {
             PersistenceUtils.loadQuestState();
@@ -589,6 +597,10 @@ public class AranarthCore extends JavaPlugin {
         DefenderUtils.startTargetingTask();
         DefenderUtils.startFollowTask();
         DefenderUtils.startGuardTask();
+        // Only Survival runs the game; its broadcast is relayed to SMP via BroadcastRelayListener.
+        if (!isSmpServer()) {
+            ChatGameUtils.initialize(this);
+        }
     }
 
     /**
@@ -659,6 +671,7 @@ public class AranarthCore extends JavaPlugin {
         new PlayerCommandSendEventListener(this);
         new PlayerServerJoinListener(this);
         new PlayerServerQuitListener(this);
+        new ChatGameListener(this);
         new PlayerChatListener(this);
         new BroadcastRelayListener(this);
         discordChatListener = new DiscordChatListener(this);
@@ -877,6 +890,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("toggle").setTabCompleter(new CommandToggleCompleter());
         getCommand("topdeaths").setExecutor(new CommandTopDeaths());
         getCommand("topkills").setExecutor(new CommandTopKills());
+        getCommand("topguesses").setExecutor(new CommandTopGuesses());
         getCommand("tpaccept").setExecutor(new CommandTpAccept());
         getCommand("tpdeny").setExecutor(new CommandTpDeny());
         getCommand("tphere").setExecutor(new CommandTpHere());
@@ -1416,6 +1430,9 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveGodlyKeys();
         PersistenceUtils.saveToggledFeatures();
         PersistenceUtils.saveKillDeathCount();
+        if (!isSmpServer()) {
+            PersistenceUtils.saveChatGameGuesses();
+        }
         PersistenceUtils.saveAranarthPlayers();
         PersistenceUtils.saveShops();
         PersistenceUtils.saveLockedContainers();

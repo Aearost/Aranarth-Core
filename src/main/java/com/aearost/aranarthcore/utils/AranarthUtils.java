@@ -104,6 +104,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, BukkitTask> teleportingPlayers = new HashMap<>();
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
+	private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
@@ -3896,6 +3897,32 @@ public class AranarthUtils {
 		// Sort by deaths descending and return UUIDs
 		return totalDeaths.entrySet()
 				.stream()
+				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.map(Map.Entry::getKey)
+				.toList();
+	}
+
+	/**
+	 * Provides the map of chat game guess counts for all players.
+	 */
+	public static HashMap<UUID, Integer> getChatGameGuesses() {
+		return chatGameGuesses;
+	}
+
+	/**
+	 * Increments the chat game guess count for the given player by 1.
+	 */
+	public static void addChatGameGuess(UUID uuid) {
+		chatGameGuesses.merge(uuid, 1, Integer::sum);
+	}
+
+	/**
+	 * Provides a list of UUIDs sorted by chat game guess count descending.
+	 */
+	public static List<UUID> getTopGuesses() {
+		return chatGameGuesses.entrySet()
+				.stream()
+				.filter(e -> e.getValue() > 0)
 				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
 				.map(Map.Entry::getKey)
 				.toList();
