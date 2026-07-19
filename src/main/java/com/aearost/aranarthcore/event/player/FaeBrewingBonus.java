@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.aearost.aranarthcore.objects.CustomKeys.FAE_BREWED_POTION;
 import static com.aearost.aranarthcore.objects.CustomKeys.FAE_BREWING_COPY;
 
 /**
@@ -62,6 +63,16 @@ public class FaeBrewingBonus {
             activeCopyLocations.remove(loc);
             return; // Let vanilla handle the pickup
         }
+
+        // Only trigger the bonus for potions that were actually brewed
+        if (!item.hasItemMeta() || !item.getItemMeta().getPersistentDataContainer().has(FAE_BREWED_POTION, PersistentDataType.BYTE)) {
+            return;
+        }
+
+        // Strip the brewed tag so the same potion cannot trigger the bonus again if placed back
+        var strippedMeta = item.getItemMeta();
+        strippedMeta.getPersistentDataContainer().remove(FAE_BREWED_POTION);
+        item.setItemMeta(strippedMeta);
 
         // 25% chance to trigger double
         if (ThreadLocalRandom.current().nextInt(4) != 0) {

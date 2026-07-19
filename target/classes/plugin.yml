@@ -238,6 +238,10 @@ commands:
     description: Shows the players with the most deaths
     aliases: [td]
     permission: aranarth.topdeaths
+  topguesses:
+    description: Shows the players with the most correct chat game guesses
+    aliases: [tg]
+    permission: aranarth.topguesses
   tpaccept:
     description: Allows the player to accept a teleport request
     aliases: [tpa]

@@ -36,4 +36,5 @@ public class CustomKeys {
     public static final NamespacedKey DEFENDER_ASSIGNED_OUTPOST = new NamespacedKey(AranarthCore.getInstance(), "defender_assigned_outpost");
     public static final NamespacedKey MAP_ORIGINAL = new NamespacedKey(AranarthCore.getInstance(), "map_original");
     public static final NamespacedKey FAE_BREWING_COPY = new NamespacedKey(AranarthCore.getInstance(), "fae_brewing_copy");
+    public static final NamespacedKey FAE_BREWED_POTION = new NamespacedKey(AranarthCore.getInstance(), "fae_brewed_potion");
 }
