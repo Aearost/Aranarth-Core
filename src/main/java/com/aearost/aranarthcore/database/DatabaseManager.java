@@ -1431,10 +1431,6 @@ public class DatabaseManager {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // server_dominion_permissions  (per-dominion JSON)
-    // -------------------------------------------------------------------------
-
     public void saveDominionPermissions(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_dominion_permissions (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1458,9 +1454,31 @@ public class DatabaseManager {
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // server_dominion_player_perms  (per-dominion JSON)
-    // -------------------------------------------------------------------------
+    public String loadDominionPermissionsById(UUID dominionId) {
+        String sql = "SELECT data_json FROM server_dominion_permissions WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load permissions for dominion " + dominionId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    public String loadDominionPlayerPermsById(UUID dominionId) {
+        String sql = "SELECT data_json FROM server_dominion_player_perms WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load player perms for dominion " + dominionId + ": " + e.getMessage());
+        }
+        return null;
+    }
 
     public void saveDominionPlayerPerms(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_dominion_player_perms (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1484,10 +1502,6 @@ public class DatabaseManager {
         }
         return result;
     }
-
-    // -------------------------------------------------------------------------
-    // server_outposts  (per-outpost JSON)
-    // -------------------------------------------------------------------------
 
     public void saveOutpost(UUID id, String dataJson) {
         String sql = "INSERT INTO server_outposts (id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1521,10 +1535,6 @@ public class DatabaseManager {
         }
     }
 
-    // -------------------------------------------------------------------------
-    // server_defenders  (per-dominion JSON array)
-    // -------------------------------------------------------------------------
-
     public void saveDefendersForDominion(UUID dominionId, String dataJson) {
         String sql = "INSERT INTO server_defenders (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1547,10 +1557,6 @@ public class DatabaseManager {
         }
         return result;
     }
-
-    // -------------------------------------------------------------------------
-    // player_toggles  (per-player JSON)
-    // -------------------------------------------------------------------------
 
     public void savePlayerToggles(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_toggles (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1588,10 +1594,6 @@ public class DatabaseManager {
         return null;
     }
 
-    // -------------------------------------------------------------------------
-    // player_compressible  (per-player JSON)
-    // -------------------------------------------------------------------------
-
     public void savePlayerCompressible(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_compressible (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1614,10 +1616,6 @@ public class DatabaseManager {
         }
         return result;
     }
-
-    // -------------------------------------------------------------------------
-    // player_sentinels  (per-player JSON)
-    // -------------------------------------------------------------------------
 
     public void savePlayerSentinels(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_sentinels (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1642,10 +1640,6 @@ public class DatabaseManager {
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // server_shops  (singleton row, id=1 — stores all null-UUID server shops)
-    // -------------------------------------------------------------------------
-
     public void saveServerShops(String dataJson) {
         String sql = "INSERT INTO server_shops (id, data_json) VALUES (1, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1665,10 +1659,6 @@ public class DatabaseManager {
         }
         return null;
     }
-
-    // -------------------------------------------------------------------------
-    // player_shops  (per-player JSON array of shops)
-    // -------------------------------------------------------------------------
 
     public void savePlayerShops(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shops (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1692,10 +1682,6 @@ public class DatabaseManager {
         }
         return result;
     }
-
-    // -------------------------------------------------------------------------
-    // player_shop_locations  (per-player JSON)
-    // -------------------------------------------------------------------------
 
     public void savePlayerShopLocation(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shop_locations (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
@@ -1729,10 +1715,6 @@ public class DatabaseManager {
         return result;
     }
 
-    // -------------------------------------------------------------------------
-    // player_shop_collaborators  (per-player JSON)
-    // -------------------------------------------------------------------------
-
     public void savePlayerShopCollaborators(UUID uuid, String dataJson) {
         String sql = "INSERT INTO player_shop_collaborators (uuid, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
         try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1755,10 +1737,6 @@ public class DatabaseManager {
         }
         return result;
     }
-
-    // -------------------------------------------------------------------------
-    // player_last_location
-    // -------------------------------------------------------------------------
 
     public void saveLastLocation(UUID uuid, String server, String world,
                                  double x, double y, double z, float yaw, float pitch) {

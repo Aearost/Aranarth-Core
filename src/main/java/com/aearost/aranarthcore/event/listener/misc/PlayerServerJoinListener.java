@@ -353,6 +353,8 @@ public class PlayerServerJoinListener implements Listener {
 				// the async DB write from the quit event may not have finished yet.
 				if (hadPendingTp && !isLoginRouting && DatabaseManager.isActive()) {
 					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
+					// Reload the player's dominion in case it was created on the other server
+					PersistenceUtils.reloadDominionForPlayer(player.getUniqueId());
 				}
 
 				// Apply the /back location saved by the source server before transfer.

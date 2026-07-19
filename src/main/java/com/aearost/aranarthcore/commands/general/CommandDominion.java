@@ -15,6 +15,7 @@ import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.objects.Outpost;
 import com.aearost.aranarthcore.utils.OutpostUtils;
 import org.bukkit.*;
@@ -458,6 +459,7 @@ public class CommandDominion implements CommandExecutor {
                                         dominionCost);
                                 dominion.setFoundedTimestamp(DominionLevelUtils.getCurrentInGameDayTotal());
                                 DominionUtils.createDominion(dominion);
+                                PersistenceUtils.saveSingleDominionToDatabase(dominion);
                                 Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + AranarthUtils.getNickname(player) + " &7has created the Dominion of &e" + dominionName));
                                 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                                     onlinePlayer.playSound(onlinePlayer, Sound.ENTITY_PLAYER_LEVELUP, 1.2F, 1.5F);

@@ -6782,6 +6782,103 @@ public class PersistenceUtils {
     }
 
     /**
+     * Immediately persists a single dominion to MySQL without touching other dominions.
+     */
+    public static void saveSingleDominionToDatabase(Dominion dominion) {
+        if (!DatabaseManager.isActive()) return;
+        Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            try {
+                String row = buildDominionRow(dominion);
+                DatabaseManager.getInstance().saveDominion(dominion.getId(), row);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to immediately save new dominion " + dominion.getId() + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Checks if the given player's dominion is in the cache, and attempts to load it from MySQL.
+     */
+    public static void reloadDominionForPlayer(UUID playerUuid) {
+        if (!DatabaseManager.isActive()) return;
+        if (DominionUtils.getPlayerDominion(playerUuid) != null) return;
+
+        DatabaseManager db = DatabaseManager.getInstance();
+        String uuidStr = playerUuid.toString();
+        Map<UUID, String> all = db.loadAllDominions();
+        for (Map.Entry<UUID, String> entry : all.entrySet()) {
+            if (DominionUtils.getDominionById(entry.getKey()) != null) continue;
+            // Check only the leader and member list
+            String[] fields = entry.getValue().split("\\|");
+            if (fields.length < 4) continue;
+            boolean isMember = fields[2].equals(uuidStr);
+            if (!isMember) {
+                for (String m : fields[3].split("\\*\\*\\*")) {
+                    if (m.equals(uuidStr)) { isMember = true; break; }
+                }
+            }
+            if (!isMember) continue;
+            try {
+                parseAndAddDominionRow(entry.getValue());
+                Dominion loaded = DominionUtils.getPlayerDominion(playerUuid);
+                if (loaded == null) continue;
+
+                // Load rank permissions for this dominion
+                String permsData = db.loadDominionPermissionsById(loaded.getId());
+                if (permsData != null && !permsData.isEmpty()) {
+                    Map<DominionRank, Set<DominionPermission>> allPerms = new EnumMap<>(DominionRank.class);
+                    for (String rankEntry : permsData.split(";")) {
+                        String[] parts = rankEntry.split(":", 2);
+                        if (parts.length == 2) {
+                            try {
+                                DominionRank rank = DominionRank.valueOf(parts[0]);
+                                Set<DominionPermission> perms = new HashSet<>();
+                                if (!parts[1].isEmpty()) {
+                                    for (String permName : parts[1].split(",")) {
+                                        try { perms.add(DominionPermission.valueOf(permName)); } catch (IllegalArgumentException ignored) {}
+                                    }
+                                }
+                                allPerms.put(rank, perms);
+                            } catch (IllegalArgumentException ignored) {}
+                        }
+                    }
+                    allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
+                    loaded.setDominionPermissions(new DominionPermissions(allPerms));
+                }
+
+                // Load per-player permission overrides
+                String playerPermsData = db.loadDominionPlayerPermsById(loaded.getId());
+                if (playerPermsData != null && !playerPermsData.isEmpty()) {
+                    Map<UUID, Map<DominionPermission, Boolean>> allOverrides = new HashMap<>();
+                    for (String playerEntry : playerPermsData.split(";")) {
+                        String[] parts = playerEntry.split(":", 2);
+                        if (parts.length != 2) continue;
+                        try {
+                            UUID pUuid = UUID.fromString(parts[0]);
+                            Map<DominionPermission, Boolean> overrides = new HashMap<>();
+                            if (!parts[1].isEmpty()) {
+                                for (String permEntry : parts[1].split(",")) {
+                                    String[] kv = permEntry.split("=", 2);
+                                    if (kv.length == 2) {
+                                        try { overrides.put(DominionPermission.valueOf(kv[0]), Boolean.parseBoolean(kv[1])); } catch (IllegalArgumentException ignored) {}
+                                    }
+                                }
+                            }
+                            if (!overrides.isEmpty()) allOverrides.put(pUuid, overrides);
+                        } catch (IllegalArgumentException ignored) {}
+                    }
+                    loaded.setPlayerPermissionOverrides(allOverrides);
+                }
+
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Reloaded dominion '" + loaded.getName() + "' from MySQL for cross-server player " + playerUuid);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload dominion for player " + playerUuid + ": " + e.getMessage());
+            }
+            break; // A player belongs to at most one dominion
+        }
+    }
+
+    /**
      * Loads dominion permissions from MySQL. Must be called after loadDominionsFromDatabase().
      * Falls back to file if empty.
      */
