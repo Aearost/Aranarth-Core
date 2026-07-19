@@ -351,6 +351,17 @@ public class AranarthiumArmourCraft {
 					enhancedAranarthiumArmor = new SoulboundAranarthiumBoots().getItem();
 				}
             }
+            case "fae" -> {
+				if (type == Material.NETHERITE_HELMET) {
+					enhancedAranarthiumArmor = new FaeAranarthiumHelmet().getItem();
+				} else if (type == Material.NETHERITE_CHESTPLATE) {
+					enhancedAranarthiumArmor = new FaeAranarthiumChestplate().getItem();
+				} else if (type == Material.NETHERITE_LEGGINGS) {
+					enhancedAranarthiumArmor = new FaeAranarthiumLeggings().getItem();
+				} else if (type == Material.NETHERITE_BOOTS) {
+					enhancedAranarthiumArmor = new FaeAranarthiumBoots().getItem();
+				}
+            }
         }
 		Map<Enchantment, Integer> enchantments = armor.getEnchantments();
 		for (Enchantment enchantment : enchantments.keySet()) {

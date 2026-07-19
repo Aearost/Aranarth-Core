@@ -23,7 +23,7 @@ public class AranarthiumFae implements AranarthItem {
 	 * @return The Fae Aranarthium Ingot.
 	 */
 	public ItemStack getItem() {
-		ItemStack item = new ItemStack(Material.PINK_PETALS, 1);
+		ItemStack item = new ItemStack(Material.ECHO_SHARD, 1);
 		ItemMeta meta = item.getItemMeta();
 		if (Objects.nonNull(meta)) {
 			NamespacedKey key = new NamespacedKey(AranarthCore.getInstance(), "aranarthium_fae");
