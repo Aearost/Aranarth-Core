@@ -14,7 +14,10 @@ import org.bukkit.scheduler.BukkitTask;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Manages the chat word-scramble mini-game.
@@ -32,6 +36,7 @@ public class ChatGameUtils {
     private static final double[] RANK_REWARDS = { 50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000 };
 
     private static final List<String> wordPool = new ArrayList<>();
+    private static Plugin plugin;
     private static final List<String> remainingWords = new ArrayList<>();
     private static final Random random = new Random();
     private static final Object gameLock = new Object();
@@ -57,7 +62,8 @@ public class ChatGameUtils {
     /**
      * Loads words from the words.txt resource file and schedules the first game.
      */
-    public static void initialize(Plugin plugin) {
+    public static void initialize(Plugin p) {
+        plugin = p;
         File wordsFile = new File(plugin.getDataFolder(), "words.txt");
         if (!wordsFile.exists()) {
             plugin.saveResource("words.txt", false);
@@ -81,6 +87,66 @@ public class ChatGameUtils {
         } catch (IOException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to load words.txt: " + e.getMessage());
         }
+    }
+
+    /**
+     * Returns a sorted snapshot of the current word pool, for tab completion.
+     */
+    public static List<String> getWords() {
+        List<String> sorted = new ArrayList<>(wordPool);
+        Collections.sort(sorted);
+        return sorted;
+    }
+
+    /**
+     * Adds a word to the pool and appends it to words.txt.
+     * @return false if the word already exists
+     */
+    public static boolean addWord(String word) {
+        word = word.toLowerCase();
+        if (wordPool.contains(word)) {
+            return false;
+        }
+        wordPool.add(word);
+        remainingWords.add(word);
+        File wordsFile = new File(plugin.getDataFolder(), "words.txt");
+        try {
+            byte[] bytes = Files.readAllBytes(wordsFile.toPath());
+            boolean needsNewline = bytes.length > 0 && bytes[bytes.length - 1] != '\n';
+            try (PrintWriter pw = new PrintWriter(new FileWriter(wordsFile, true))) {
+                if (needsNewline) {
+                    pw.println();
+                }
+                pw.println(word);
+            }
+        } catch (IOException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to save words.txt: " + e.getMessage());
+        }
+        return true;
+    }
+
+    /**
+     * Removes a word from the pool and from words.txt.
+     * @return false if the word was not found
+     */
+    public static boolean removeWord(String word) {
+        word = word.toLowerCase();
+        if (!wordPool.remove(word)) {
+            return false;
+        }
+        remainingWords.remove(word);
+        File wordsFile = new File(plugin.getDataFolder(), "words.txt");
+        try {
+            List<String> lines = Files.readAllLines(wordsFile.toPath());
+            final String finalWord = word;
+            List<String> filtered = lines.stream()
+                    .filter(line -> !line.trim().equalsIgnoreCase(finalWord))
+                    .collect(Collectors.toList());
+            Files.write(wordsFile.toPath(), filtered);
+        } catch (IOException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Failed to save words.txt: " + e.getMessage());
+        }
+        return true;
     }
 
     /**
@@ -273,6 +339,7 @@ public class ChatGameUtils {
             currentAnswer = answer;
             currentScrambled = scrambled;
             currentGameOrigin = originServer;
+            gameStartTime = System.currentTimeMillis();
         }
         String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
         for (Player p : Bukkit.getOnlinePlayers()) {

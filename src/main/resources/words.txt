@@ -47,15 +47,15 @@ amon
 tarlok
 
 # Bending arts
-airbending
-earthbending
-firebending
-waterbending
-icebending
-lavabending
-metalbending
-bloodbending
-sandbending
+air
+earth
+fire
+water
+ice
+lava
+metal
+blood
+sand
 combustion
 lightning
 sound

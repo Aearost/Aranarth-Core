@@ -3,6 +3,7 @@ package com.aearost.aranarthcore.commands.council;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -33,7 +34,7 @@ public class CommandACCompleter implements TabCompleter {
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
             "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
-            "vanish", "vpedit", "warn", "weather", "whereis", "skull"
+            "unscramble", "vanish", "vpedit", "warn", "weather", "whereis", "skull"
     );
 
     private static final List<String> ITEM_NAMES;
@@ -192,6 +193,15 @@ public class CommandACCompleter implements TabCompleter {
                 yield List.of();
             }
             case "questnpc" -> args.length == 2 ? filter(List.of("spawn", "remove"), args[1]) : List.of();
+            case "unscramble" -> {
+                if (args.length == 2) {
+                    yield filter(List.of("add", "remove"), args[1]);
+                }
+                if (args.length == 3 && args[1].equalsIgnoreCase("remove")) {
+                    yield filter(ChatGameUtils.getWords(), args[2]);
+                }
+                yield List.of();
+            }
             case "vote" -> args.length == 2 ? filter(List.of("test"), args[1]) : List.of();
             case "vpedit" -> {
                 if (args.length == 2) {
