@@ -96,6 +96,7 @@ public class NetworkManager {
     public static final String CH_MAIL_NOTIFY       = "aranarth:mail_notify";
     public static final String CH_COUNCIL_MSG       = "aranarth:council_msg";
     public static final String CH_DOMINION_DISBAND  = "aranarth:dominion_disband";
+    public static final String CH_DOMINION_CREATE   = "aranarth:dominion_create";
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
 
@@ -284,6 +285,7 @@ public class NetworkManager {
             case CH_MAIL_NOTIFY      -> handleMailNotification(json);
             case CH_COUNCIL_MSG      -> handleCouncilMessage(json);
             case CH_DOMINION_DISBAND -> handleDominionDisband(json);
+            case CH_DOMINION_CREATE  -> handleDominionCreate(json);
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
         }
@@ -1528,6 +1530,23 @@ public class NetworkManager {
             if (dominion == null) return;
             DominionUtils.evictDominionFromMemory(dominion);
         });
+    }
+
+    /** Publishes a dominion creation event so other servers load it into memory. */
+    public void publishDominionCreate(UUID dominionId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("dominionId", dominionId.toString());
+        publish(CH_DOMINION_CREATE, json);
+    }
+
+    private void handleDominionCreate(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        UUID dominionId = UUID.fromString(json.get("dominionId").getAsString());
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () ->
+            PersistenceUtils.loadSingleDominionFromDatabase(dominionId));
     }
 
     private void handleChatGameStart(JsonObject json) {

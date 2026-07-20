@@ -1425,6 +1425,19 @@ public class DatabaseManager {
         }
     }
 
+    public String loadDominion(UUID id) {
+        String sql = "SELECT raw_data FROM server_dominions WHERE id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, id.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("raw_data");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load dominion " + id + ": " + e.getMessage());
+        }
+        return null;
+    }
+
     public Map<UUID, String> loadAllDominions() {
         String sql = "SELECT id, raw_data FROM server_dominions";
         Map<UUID, String> result = new HashMap<>();

@@ -6892,15 +6892,36 @@ public class PersistenceUtils {
      * Immediately persists a single dominion to MySQL without touching other dominions.
      */
     public static void saveSingleDominionToDatabase(Dominion dominion) {
+        saveSingleDominionToDatabase(dominion, null);
+    }
+
+    public static void saveSingleDominionToDatabase(Dominion dominion, Runnable afterSave) {
         if (!DatabaseManager.isActive()) return;
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
             try {
                 String row = buildDominionRow(dominion);
                 DatabaseManager.getInstance().saveDominion(dominion.getId(), row);
+                if (afterSave != null) afterSave.run();
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to immediately save new dominion " + dominion.getId() + ": " + e.getMessage());
             }
         });
+    }
+
+    /**
+     * Loads a single dominion from MySQL by ID and registers it in memory.
+     * No-op if the dominion is already in memory or not found in the database.
+     */
+    public static void loadSingleDominionFromDatabase(UUID dominionId) {
+        if (!DatabaseManager.isActive()) return;
+        if (DominionUtils.getDominionById(dominionId) != null) return;
+        String raw = DatabaseManager.getInstance().loadDominion(dominionId);
+        if (raw == null) return;
+        try {
+            parseAndAddDominionRow(raw);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to parse dominion row for " + dominionId + ": " + e.getMessage());
+        }
     }
 
     /**

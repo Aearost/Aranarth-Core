@@ -24,6 +24,9 @@ public class SleepSkipListener implements Listener {
 
 	public SleepSkipListener(AranarthCore plugin) {
 		Bukkit.getPluginManager().registerEvents(this, plugin);
+		if (NetworkManager.isActive()) {
+			NetworkManager.getInstance().setRemoteSleepCallback(this::updateSleepMessage);
+		}
 	}
 
 	private int amountRequiredToSkip = 0;
@@ -78,7 +81,12 @@ public class SleepSkipListener implements Listener {
 
 		amountRequiredToSkip = (int) Math.ceil(onlinePlayersInSurvivalWorlds * percentRequiredToSkip);
 		int sleepingPlayerNum = sleepingPlayers.size();
-		String message = "Players sleeping: " + sleepingPlayerNum + "/" + amountRequiredToSkip;
+		// Include players sleeping on the other server so the combined count is accurate
+		if (NetworkManager.isActive()) {
+			sleepingPlayerNum += NetworkManager.getInstance().getRemoteSleepingCount();
+		}
+		final int totalSleepingPlayerNum = sleepingPlayerNum;
+		String message = "Players sleeping: " + totalSleepingPlayerNum + "/" + amountRequiredToSkip;
 		Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
 			// Displays the bar to all players in the survival worlds
 			for (Player player : Bukkit.getOnlinePlayers()) {
@@ -92,13 +100,13 @@ public class SleepSkipListener implements Listener {
 			}
 			// Publish to the other server so their players also see the sleep count
 			if (NetworkManager.isActive()) {
-				NetworkManager.getInstance().publishSleepMessage(message, sleepingPlayerNum, amountRequiredToSkip);
+				NetworkManager.getInstance().publishSleepMessage(message, totalSleepingPlayerNum, amountRequiredToSkip);
 			}
 		}, 1L);
 
 
 		// Enough players are sleeping to skip the night
-		if (sleepingPlayerNum >= amountRequiredToSkip) {
+		if (totalSleepingPlayerNum >= amountRequiredToSkip) {
 			skipNight();
 		} else {
 			doNotSkipNight();
@@ -116,7 +124,11 @@ public class SleepSkipListener implements Listener {
 
 		scheduledSkipTask = Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
 			// If players have left their bed and there are no longer enough to skip the night
-			if (sleepingPlayers.size() < amountRequiredToSkip) {
+			int totalSleeping = sleepingPlayers.size();
+			if (NetworkManager.isActive()) {
+				totalSleeping += NetworkManager.getInstance().getRemoteSleepingCount();
+			}
+			if (totalSleeping < amountRequiredToSkip) {
 				scheduledSkipTask = -1;
 				return;
 			}
