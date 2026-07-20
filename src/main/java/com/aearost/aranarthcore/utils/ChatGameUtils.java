@@ -29,7 +29,7 @@ import java.util.UUID;
 public class ChatGameUtils {
 
     // Each value is proportional to the cost to reach the next rank from that tier
-    private static final double[] RANK_REWARDS = { 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 25000, };
+    private static final double[] RANK_REWARDS = { 50, 100, 200, 500, 1000, 2000, 4000, 7000, 10000 };
 
     private static final List<String> wordPool = new ArrayList<>();
     private static final List<String> remainingWords = new ArrayList<>();
@@ -46,6 +46,9 @@ public class ChatGameUtils {
 
     // Timeout task for the active game (cancelled on win)
     private static volatile BukkitTask timeoutTask = null;
+
+    // Timestamp (ms) when the current game started, for speed calculation
+    private static volatile long gameStartTime = 0;
 
     private static final int TIMEOUT_TICKS = 600; // 30 seconds
 
@@ -121,6 +124,7 @@ public class ChatGameUtils {
             currentGameOrigin = NetworkManager.isActive()
                     ? NetworkManager.getInstance().getThisServer()
                     : "local";
+            gameStartTime = System.currentTimeMillis();
             answer = word;
             scrambled = sc;
 
@@ -174,6 +178,7 @@ public class ChatGameUtils {
         final String answer;
         final String origin;
         final int localStreakCount;
+        final double elapsedSeconds;
         synchronized (gameLock) {
             if (currentAnswer == null) {
                 return false;
@@ -182,11 +187,13 @@ public class ChatGameUtils {
                 return false;
             }
 
+            elapsedSeconds = (System.currentTimeMillis() - gameStartTime) / 1000.0;
             answer = currentAnswer;
             origin = currentGameOrigin;
             currentAnswer = null;
             currentScrambled = null;
             currentGameOrigin = null;
+            gameStartTime = 0;
 
             if (timeoutTask != null) {
                 timeoutTask.cancel();
@@ -207,7 +214,7 @@ public class ChatGameUtils {
             AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
             int rank = Math.min(ap.getRank(), RANK_REWARDS.length - 1);
             double baseReward = RANK_REWARDS[rank];
-            double multiplier = Math.pow(1.1, localStreakCount - 1);
+            double multiplier = Math.min(1.0 + 0.1 * (localStreakCount - 1), 2.0);
             double reward = baseReward * multiplier;
 
             ap.setBalance(ap.getBalance() + reward);
@@ -222,7 +229,8 @@ public class ChatGameUtils {
             }
 
             String winnerNickname = ap.getNickname();
-            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!");
+            String timeStr = String.format("%.2f", elapsedSeconds);
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);

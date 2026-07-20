@@ -89,6 +89,11 @@ public class PlayerChatListener implements Listener {
             }
         }
 
+        // If another listener (e.g. chat game) already cancelled this event, don't send it to chat
+        if (e.isCancelled()) {
+            return;
+        }
+
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
 
         // Prevents chat messages from going through if the receiving user has toggled their chat
