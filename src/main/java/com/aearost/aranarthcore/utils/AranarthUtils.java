@@ -3749,6 +3749,15 @@ public class AranarthUtils {
 		killDeathScores.put(pkds.getUuid(), list);
 	}
 
+	private static final Set<String> SURVIVAL_WORLD_PREFIXES = Set.of("world", "resource", "spawn");
+
+	/**
+	 * Returns true if the given world prefix belongs to the Survival server group.
+	 */
+	private static boolean isSurvivalWorldPrefix(String prefix) {
+		return SURVIVAL_WORLD_PREFIXES.contains(prefix.toLowerCase());
+	}
+
 	/**
 	 * Provides the number of kills/deaths the player has in the input world.
 	 * @param uuid The UUID of the player.
@@ -3762,14 +3771,22 @@ public class AranarthUtils {
 			return 0;
 		}
 
+		String worldPrefix = world.getName().split("_")[0];
 		List<PlayerKillDeathScore> scores = killDeathScores.get(uuid);
-		for (PlayerKillDeathScore pkds : scores) {
-			if (pkds.getWorldPrefix().equals(world.getName().split("_")[0])) {
-				if (isGettingKills) {
-					return pkds.getKills();
-				} else {
-					return pkds.getDeaths();
+
+		if (isSurvivalWorldPrefix(worldPrefix)) {
+			int total = 0;
+			for (PlayerKillDeathScore pkds : scores) {
+				if (isSurvivalWorldPrefix(pkds.getWorldPrefix())) {
+					total += isGettingKills ? pkds.getKills() : pkds.getDeaths();
 				}
+			}
+			return total;
+		}
+
+		for (PlayerKillDeathScore pkds : scores) {
+			if (pkds.getWorldPrefix().equals(worldPrefix)) {
+				return isGettingKills ? pkds.getKills() : pkds.getDeaths();
 			}
 		}
 		return 0;
@@ -3848,12 +3865,13 @@ public class AranarthUtils {
 	 */
 	public static List<UUID> getTopKills(World world) {
 		String worldName = world.getName().split("_")[0];
+		boolean isSurvival = isSurvivalWorldPrefix(worldName);
 		Map<UUID, Integer> totalKills = new HashMap<>();
 		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
 			int sum = 0;
 
 			for (PlayerKillDeathScore score : entry.getValue()) {
-				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+				if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
 					sum += score.getKills();
 				}
 			}
@@ -3879,12 +3897,13 @@ public class AranarthUtils {
 	 */
 	public static List<UUID> getTopDeaths(World world) {
 		String worldName = world.getName().split("_")[0];
+		boolean isSurvival = isSurvivalWorldPrefix(worldName);
 		Map<UUID, Integer> totalDeaths = new HashMap<>();
 		for (Map.Entry<UUID, List<PlayerKillDeathScore>> entry : killDeathScores.entrySet()) {
 			int sum = 0;
 
 			for (PlayerKillDeathScore score : entry.getValue()) {
-				if (score.getWorldPrefix().equalsIgnoreCase(worldName)) {
+				if (isSurvival ? isSurvivalWorldPrefix(score.getWorldPrefix()) : score.getWorldPrefix().equalsIgnoreCase(worldName)) {
 					sum += score.getDeaths();
 				}
 			}
