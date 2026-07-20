@@ -83,6 +83,8 @@ public class CommandAC implements CommandExecutor {
 			commandResult = CommandPerks.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("admin")) {
 			commandResult = CommandAdmin.onCommand(sender, args);
+		} else if (args[0].equalsIgnoreCase("spy")) {
+			commandResult = CommandSpy.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("speed")) {
 			commandResult = CommandSpeed.onCommand(sender, args);
 		} else if (args[0].equalsIgnoreCase("time")) {

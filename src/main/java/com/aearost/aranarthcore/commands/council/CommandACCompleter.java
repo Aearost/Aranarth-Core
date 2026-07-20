@@ -32,7 +32,7 @@ public class CommandACCompleter implements TabCompleter {
     private static final List<String> COUNCIL_OPTIONS = List.of(
             "admin", "ban", "broadcast", "clearchat", "dateset", "discordreload", "give",
             "home", "invsee", "invswap", "msg", "mute", "og", "perks", "punishments", "questnpc", "rankset",
-            "speed", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
+            "speed", "spy", "sudo", "time", "tp", "tpf", "tpw", "unban", "unmute",
             "vanish", "vpedit", "warn", "weather", "whereis", "skull"
     );
 

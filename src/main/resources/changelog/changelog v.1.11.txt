@@ -84,6 +84,7 @@ Minor Features
 [+] Implemented 3x3 tilling of dirt with plentiful on a hoe
 [+] Made it so Dominions can be created in the SMP server as well
 [~] Prevented leads from being equipped on Flying Bison
+[~] Made /ac spy a separate command from /ac admin, and made it spy on dominion chat as well
 
 Backend Code Changes
 - Implemented discord support bot basis

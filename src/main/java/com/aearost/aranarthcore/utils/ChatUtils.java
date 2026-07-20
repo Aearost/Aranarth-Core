@@ -556,7 +556,7 @@ public class ChatUtils {
 			String adminPrefix = prefixStart + "&r&e" + senderDisplay + " &7&o>> &r&e&o" + targetDisplay + prefixEnd + " &c&o";
 			for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 				AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
-				if (onlineAranarthPlayer.isInAdminMode()) {
+				if (onlineAranarthPlayer.isInSpyMode()) {
 					if (!player.getUniqueId().equals(onlinePlayer.getUniqueId()) && !target.getUniqueId().equals(onlinePlayer.getUniqueId())) {
 						onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + adminPrefix + formattedMsg));
 					}
@@ -865,6 +865,13 @@ public class ChatUtils {
 		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
 			if (recipientUuids.contains(onlinePlayer.getUniqueId())) {
 				onlinePlayer.sendMessage(ChatUtils.translateToColor(prefixReceive + assembledMsg));
+			}
+		}
+
+		for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			AranarthPlayer onlineAranarthPlayer = AranarthUtils.getPlayer(onlinePlayer.getUniqueId());
+			if (onlineAranarthPlayer.isInSpyMode() && !recipientUuids.contains(onlinePlayer.getUniqueId())) {
+				onlinePlayer.sendMessage(ChatUtils.translateToColor("&8&l[&4&lSPY&8&l] " + prefixReceive + assembledMsg));
 			}
 		}
 

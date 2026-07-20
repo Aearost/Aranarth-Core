@@ -92,6 +92,7 @@ public class AranarthPlayer {
 	private boolean isInCouncilChat = false;
 	private boolean isInDominionChat = false;
 	private String dominionChatType = "dominion";
+	private boolean isInSpyMode = false;
 	private boolean isHurtingOwnPets = false;
 	private boolean isGradientChatEnabled = false;
 	private String gradientChatColors = "";
@@ -1387,6 +1388,22 @@ public class AranarthPlayer {
 	 */
 	public void setDominionChatType(String dominionChatType) {
 		this.dominionChatType = dominionChatType;
+	}
+
+	/**
+	 * Provides the temporary variable tracking whether the player is in spy mode, intercepting private and dominion chat messages.
+	 * @return Whether the player is in spy mode.
+	 */
+	public boolean isInSpyMode() {
+		return isInSpyMode;
+	}
+
+	/**
+	 * Updates the temporary variable tracking whether the player is in spy mode.
+	 * @param inSpyMode Whether the player is in spy mode.
+	 */
+	public void setInSpyMode(boolean inSpyMode) {
+		isInSpyMode = inSpyMode;
 	}
 
 	/**
