@@ -69,10 +69,11 @@ public class CommandMctop implements CommandExecutor {
             } catch (InvalidSkillException ignored) {
             }
 
-            // Filter out players below the minimum level threshold
+            // Filter out players below the minimum level threshold or with null names
             int minLevel = (skill == null) ? 100 : 25;
             leaderboard = leaderboard.stream()
                     .filter(stat -> stat.value() > minLevel)
+                    .filter(stat -> stat.playerName() != null)
                     .collect(Collectors.toList());
 
             // If the requested page is empty and it's not page 0, wrap to the first page

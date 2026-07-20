@@ -106,6 +106,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
 	private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
 	private static final HashMap<UUID, Double> chatGameEarnings = new HashMap<>();
+	private static final HashMap<UUID, Double> chatGameBestTimes = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
@@ -3955,6 +3956,27 @@ public class AranarthUtils {
 	 */
 	public static void setChatGameEarnings(UUID uuid, double amount) {
 		chatGameEarnings.put(uuid, amount);
+	}
+
+	/**
+	 * Provides the map of personal best unscramble times for all players (0 = unset).
+	 */
+	public static HashMap<UUID, Double> getChatGameBestTimes() {
+		return chatGameBestTimes;
+	}
+
+	/**
+	 * Returns the player's personal best unscramble time in seconds, or 0 if never set.
+	 */
+	public static double getChatGameBestTime(UUID uuid) {
+		return chatGameBestTimes.getOrDefault(uuid, 0.0);
+	}
+
+	/**
+	 * Sets the personal best unscramble time for the given player (used during load and on record).
+	 */
+	public static void setChatGameBestTime(UUID uuid, double time) {
+		chatGameBestTimes.put(uuid, time);
 	}
 
 	/**

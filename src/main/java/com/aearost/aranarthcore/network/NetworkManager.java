@@ -865,6 +865,7 @@ public class NetworkManager {
         // message — the server still needs to broadcast the player's departure in that case.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            boolean dbWriteSucceeded = true;
             try {
                 if (rawRow != null && DatabaseManager.isActive()) {
                     DatabaseManager.getInstance().saveAranarthPlayerRaw(uuid, rawRow);
@@ -880,14 +881,23 @@ public class NetworkManager {
                     db.saveTempData(KEY_LAST_MSG + uuid, lastMsgUuid.toString(), 300);
                 }
             } catch (Exception e) {
+                dbWriteSucceeded = false;
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                         + "DB write before transfer failed for " + player.getName() + ": " + e.getMessage());
             }
+            final boolean transferAllowed = dbWriteSucceeded;
             // Send the BungeeCord Connect message on the main thread after both writes complete.
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
                     // Player disconnected during the async write — quit message was not suppressed
                     // (flag was never set), so no cleanup needed here.
+                    return;
+                }
+                if (!transferAllowed) {
+                    // The pending-TP write failed: transferring now would leave the player on the
+                    // destination with no inventory state. Abort and notify the player instead.
+                    player.sendMessage(ChatUtils.chatMessage(
+                            "&cTransfer failed due to a database error. Please try again."));
                     return;
                 }
                 try {
@@ -919,14 +929,22 @@ public class NetworkManager {
         // NOTE: transferringPlayers is NOT set here — see saveInventoryAndTransfer for rationale.
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
+            boolean dbWriteSucceeded = true;
             try {
                 db.saveTempData(KEY_PENDING_TP + uuid, pendingJson, 300);
             } catch (Exception e) {
+                dbWriteSucceeded = false;
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
                         + "DB write before transfer failed for " + player.getName() + ": " + e.getMessage());
             }
+            final boolean transferAllowed = dbWriteSucceeded;
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 if (!player.isOnline()) {
+                    return;
+                }
+                if (!transferAllowed) {
+                    player.sendMessage(ChatUtils.chatMessage(
+                            "&cTransfer failed due to a database error. Please try again."));
                     return;
                 }
                 try {
@@ -1506,12 +1524,21 @@ public class NetworkManager {
     }
 
     /** Notifies all other servers that the word-scramble game was won on this server. */
-    public void publishChatGameWin(String winnerNickname, String answer, java.util.UUID winnerUUID) {
+    public void publishChatGameWin(String winnerNickname, String answer, java.util.UUID winnerUUID,
+            double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname,
+            java.util.UUID newHolderUUID, double newGlobalBestTime) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("winner", winnerNickname);
         json.addProperty("answer", answer);
         json.addProperty("winnerUUID", winnerUUID.toString());
+        json.addProperty("elapsedSeconds", elapsedSeconds);
+        json.addProperty("newGlobalRecord", newGlobalRecord);
+        if (newGlobalRecord && newHolderUUID != null) {
+            json.addProperty("newHolderNickname", newHolderNickname);
+            json.addProperty("newHolderUUID", newHolderUUID.toString());
+            json.addProperty("newGlobalBestTime", newGlobalBestTime);
+        }
         publish(CH_CHAT_GAME_WIN, json);
     }
 
@@ -1576,7 +1603,14 @@ public class NetworkManager {
         String winner = json.get("winner").getAsString();
         String answer = json.get("answer").getAsString();
         java.util.UUID winnerUUID = java.util.UUID.fromString(json.get("winnerUUID").getAsString());
-        ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer, winnerUUID);
+        double elapsedSeconds = json.has("elapsedSeconds") ? json.get("elapsedSeconds").getAsDouble() : 0;
+        boolean newGlobalRecord = json.has("newGlobalRecord") && json.get("newGlobalRecord").getAsBoolean();
+        String newHolderNickname = newGlobalRecord && json.has("newHolderNickname") ? json.get("newHolderNickname").getAsString() : "";
+        java.util.UUID newHolderUUID = newGlobalRecord && json.has("newHolderUUID")
+                ? java.util.UUID.fromString(json.get("newHolderUUID").getAsString()) : null;
+        double newGlobalBestTime = newGlobalRecord && json.has("newGlobalBestTime") ? json.get("newGlobalBestTime").getAsDouble() : 0;
+        ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer, winnerUUID,
+                elapsedSeconds, newGlobalRecord, newHolderNickname, newHolderUUID, newGlobalBestTime);
     }
 
     private void handleChatGameExpire(JsonObject json) {

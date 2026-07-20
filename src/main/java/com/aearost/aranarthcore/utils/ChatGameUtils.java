@@ -55,6 +55,12 @@ public class ChatGameUtils {
     // Timestamp (ms) when the current game started, for speed calculation
     private static volatile long gameStartTime = 0;
 
+    // Global all-time speed record
+    private static final Object globalRecordLock = new Object();
+    private static volatile UUID globalBestHolderUUID = null;
+    private static volatile String globalBestHolderNickname = "";
+    private static volatile double globalBestTime = 0;
+
     private static final int TIMEOUT_TICKS = 600; // 30 seconds
 
     private ChatGameUtils() {}
@@ -71,6 +77,37 @@ public class ChatGameUtils {
         loadWords(wordsFile);
         if (!wordPool.isEmpty()) {
             scheduleNextGame(plugin);
+        }
+    }
+
+    /**
+     * Loads the global all-time best unscramble time from the database into the in-memory cache.
+     * Called once on startup after chat game data has been loaded.
+     */
+    public static void loadGlobalBestFromDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        DatabaseManager.GlobalBestEntry entry = DatabaseManager.getInstance().loadGlobalBestTime();
+        if (entry != null) {
+            synchronized (globalRecordLock) {
+                globalBestHolderUUID = entry.holderUUID();
+                globalBestHolderNickname = entry.nickname();
+                globalBestTime = entry.time();
+            }
+        }
+    }
+
+    /**
+     * Updates the in-memory global best cache. Called when another server beats the record.
+     */
+    public static void updateGlobalBestCache(UUID holderUUID, String holderNickname, double time) {
+        synchronized (globalRecordLock) {
+            if (globalBestTime == 0 || time < globalBestTime) {
+                globalBestHolderUUID = holderUUID;
+                globalBestHolderNickname = holderNickname;
+                globalBestTime = time;
+            }
         }
     }
 
@@ -302,6 +339,46 @@ public class ChatGameUtils {
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
             }
 
+            // Personal best check
+            double personalBest = AranarthUtils.getChatGameBestTime(player.getUniqueId());
+            if (personalBest == 0 || elapsedSeconds < personalBest) {
+                AranarthUtils.setChatGameBestTime(player.getUniqueId(), elapsedSeconds);
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                            DatabaseManager.getInstance().updatePersonalBestTime(player.getUniqueId(), elapsedSeconds));
+                }
+            }
+
+            // Global record check
+            final String oldHolderNickname;
+            final double oldGlobalBestTime;
+            final boolean newGlobalRecord;
+            synchronized (globalRecordLock) {
+                if (globalBestTime == 0 || elapsedSeconds < globalBestTime) {
+                    newGlobalRecord = true;
+                    oldHolderNickname = globalBestHolderNickname;
+                    oldGlobalBestTime = globalBestTime;
+                    globalBestTime = elapsedSeconds;
+                    globalBestHolderUUID = player.getUniqueId();
+                    globalBestHolderNickname = winnerNickname;
+                } else {
+                    newGlobalRecord = false;
+                    oldHolderNickname = null;
+                    oldGlobalBestTime = 0;
+                }
+            }
+
+            if (newGlobalRecord && oldHolderNickname != null && !oldHolderNickname.isEmpty()) {
+                String oldTimeStr = String.format("%.2f", oldGlobalBestTime);
+                String recordMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7has beat &e" + oldHolderNickname + "&e's &7record of &e" + oldTimeStr + "s");
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.sendMessage(recordMsg);
+                }
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBroadcast(recordMsg);
+                }
+            }
+
             String rewardText = formatMoney(reward);
             if (localStreakCount > 1) {
                 player.sendMessage(ChatUtils.chatMessage(
@@ -312,7 +389,8 @@ public class ChatGameUtils {
             }
 
             if (NetworkManager.isActive()) {
-                NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, player.getUniqueId());
+                NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, player.getUniqueId(),
+                        elapsedSeconds, newGlobalRecord, winnerNickname, player.getUniqueId(), elapsedSeconds);
             }
 
             // Only the server that originated the game schedules the next one
@@ -351,7 +429,8 @@ public class ChatGameUtils {
     /**
      * Called by NetworkManager when a player on another server has won the chat game.
      */
-    public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID) {
+    public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID,
+            double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime) {
         final boolean wasOrigin;
         synchronized (gameLock) {
             wasOrigin = NetworkManager.isActive()
@@ -370,7 +449,11 @@ public class ChatGameUtils {
                 streakCount = 1;
             }
         }
-        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!");
+        if (newGlobalRecord && newHolderUUID != null) {
+            updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
+        }
+        String timeStr = String.format("%.2f", elapsedSeconds);
+        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(winMsg);
             p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
