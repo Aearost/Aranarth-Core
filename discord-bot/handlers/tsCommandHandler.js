@@ -17,7 +17,7 @@ async function handle(interaction, client) {
     return;
   }
 
-  const newStatus = interaction.options.getString('status');
+  const newStatus = interaction.options.getString('status').toUpperCase();
   const displayName = member.nickname
     ? `${interaction.user.username} (${member.nickname})`
     : interaction.user.username;

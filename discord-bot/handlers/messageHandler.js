@@ -6,16 +6,18 @@ const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
 
 async function handle(message, client) {
-  // ── Question channel: reset Awaiting Info timer when opener speaks ──
+  // ── Question channel: inactivity timer management ──
   const statusInfo = statusTracker.get(message.channel.id);
-  if (statusInfo && message.author.id === statusInfo.userId && statusInfo.status === 'AWAITING_INFO') {
-    statusTracker.update(message.channel.id, { status: 'OPEN' });
-    timerManager.cancel(message.channel.id);
-    try {
-      const statusMsg = await message.channel.messages.fetch(statusInfo.messageId);
-      await statusMsg.edit({ embeds: [statusTracker.buildStatusEmbed('OPEN')] });
-    } catch { /* message may be gone */ }
-    await message.channel.send('🔎 Status reset to **Open** — the ticket opener has responded.');
+  if (statusInfo) {
+    if (message.author.id === statusInfo.userId) {
+      // Opener responded — cancel any pending inactivity notification and close timers
+      timerManager.cancelInactivity(message.channel.id);
+      timerManager.cancel(message.channel.id);
+    } else {
+      // Council responded — (re)start the 1-hour inactivity notification timer
+      timerManager.cancel(message.channel.id);
+      timerManager.scheduleInactivity(client, message.channel.id, statusInfo.userId);
+    }
     return;
   }
 
@@ -37,7 +39,6 @@ async function handleAnswer(message, session, template, client) {
   session.answers[question.key] = message.content.trim();
 
   if (session.editMode) {
-    // After re-answering one question, go back to the confirmation screen
     session.editMode = false;
     await showConfirmation(message.channel, session, template, message.author, client);
   } else {

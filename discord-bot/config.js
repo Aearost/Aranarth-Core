@@ -14,9 +14,8 @@ module.exports = {
 
   STATUS_EMOJIS: {
     OPEN: '🔎',
-    AWAITING_INFO: '⏳',
     RESOLVED: '✅',
-    FORCE_CLOSE: '🔒',
+    CLOSE: '🔒',
   },
 
   CONFIRM_EMOJIS: {
@@ -26,9 +25,10 @@ module.exports = {
   },
 
   // Auto-close delays
-  AWAITING_INFO_MS: 5 * 24 * 60 * 60 * 1000, // 5 days
-  RESOLVED_MS: 48 * 60 * 60 * 1000,           // 48 hours
-  WARN_BEFORE_MS: 60 * 60 * 1000,             // warn 1 hour before close
+  INACTIVITY_NOTIFY_MS: 60 * 60 * 1000,        // 1 hour after council responds with no activity → notify player
+  INACTIVITY_CLOSE_MS: 5 * 24 * 60 * 60 * 1000, // 5 days after notification → close
+  RESOLVED_MS: 48 * 60 * 60 * 1000,             // 48 hours after resolved → close
+  WARN_BEFORE_MS: 60 * 60 * 1000,               // warn 1 hour before close
 
   COLORS: {
     BUG: 0xFF4444,

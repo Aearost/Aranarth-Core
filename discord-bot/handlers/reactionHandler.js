@@ -120,9 +120,8 @@ async function setupQuestionChannel(channel, guild, user, client) {
   const statusEmbed = statusTracker.buildStatusEmbed('OPEN');
   const statusMsg = await channel.send({ embeds: [statusEmbed] });
   await statusMsg.react(config.STATUS_EMOJIS.OPEN);
-  await statusMsg.react(config.STATUS_EMOJIS.AWAITING_INFO);
   await statusMsg.react(config.STATUS_EMOJIS.RESOLVED);
-  await statusMsg.react(config.STATUS_EMOJIS.FORCE_CLOSE);
+  await statusMsg.react(config.STATUS_EMOJIS.CLOSE);
   try {
     await statusMsg.pin();
     // Delete the "pinned a message" system notification Discord auto-sends
@@ -282,9 +281,8 @@ async function handleStatusReaction(reaction, user, client, channel, statusInfo,
 
   const statusMap = {
     [config.STATUS_EMOJIS.OPEN]: 'OPEN',
-    [config.STATUS_EMOJIS.AWAITING_INFO]: 'AWAITING_INFO',
     [config.STATUS_EMOJIS.RESOLVED]: 'RESOLVED',
-    [config.STATUS_EMOJIS.FORCE_CLOSE]: 'FORCE_CLOSE',
+    [config.STATUS_EMOJIS.CLOSE]: 'CLOSE',
   };
 
   const newStatus = statusMap[emojiName];

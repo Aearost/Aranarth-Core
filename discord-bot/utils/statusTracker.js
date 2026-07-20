@@ -53,19 +53,13 @@ function buildStatusEmbed(status) {
       color: 0x2ECC71,
       desc: 'This ticket is open and active.',
     },
-    AWAITING_INFO: {
-      emoji: '⏳',
-      label: 'Awaiting Info',
-      color: 0xF39C12,
-      desc: 'The Council is waiting for more information from the ticket opener.\nThis channel will auto-close after **5 days** of inactivity from the opener.',
-    },
     RESOLVED: {
       emoji: '✅',
       label: 'Resolved',
       color: 0x3498DB,
       desc: 'This ticket has been marked as resolved.\nThis channel will automatically close in **48 hours**.',
     },
-    FORCE_CLOSE: {
+    CLOSE: {
       emoji: '🔒',
       label: 'Closing...',
       color: 0xFF4444,
@@ -79,7 +73,7 @@ function buildStatusEmbed(status) {
     .setDescription(
       `${s.desc}\n\n` +
       '**Council: react below to change status**\n' +
-      '🔎 Open · ⏳ Awaiting Info · ✅ Resolved · 🔒 Force Close'
+      '🔎 Open · ✅ Resolved · 🔒 Close'
     )
     .setColor(s.color)
     .setFooter({ text: '🔒 Staff controls — reactions restricted to Council' })

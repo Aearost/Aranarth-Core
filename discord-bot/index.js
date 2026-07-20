@@ -93,10 +93,9 @@ async function registerSlashCommands(c) {
                 type: ApplicationCommandOptionType.String,
                 required: true,
                 choices: [
-                  { name: 'Open',          value: 'OPEN' },
-                  { name: 'Awaiting Info', value: 'AWAITING_INFO' },
-                  { name: 'Resolved',      value: 'RESOLVED' },
-                  { name: 'Force Close',   value: 'FORCE_CLOSE' },
+                  { name: 'open',    value: 'open' },
+                  { name: 'resolve', value: 'resolve' },
+                  { name: 'close',   value: 'close' },
                 ],
               },
             ],
