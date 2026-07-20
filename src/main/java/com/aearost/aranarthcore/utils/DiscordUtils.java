@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Provides a variety of utility methods for everything related to Discord integration.
@@ -167,10 +168,16 @@ public class DiscordUtils {
 		String playerDiscordId = DiscordSRV.getPlugin().getAccountLinkManager().getDiscordId(player.getUniqueId());
 		if (playerDiscordId == null) {
 			Bukkit.getLogger().info("[AC] " + player.getName() + "'s Discord roles could not be updated as they have not linked their Discord");
+			return;
 		}
 
 		Guild guild = getGuild();
-		Role roleToAdd = switch (newRankNum) {
+		Member discordMember = guild.getMemberById(playerDiscordId);
+		if (discordMember == null) {
+			return;
+		}
+
+		Role targetRole = switch (newRankNum) {
 			case 1 -> guild.getRoleById(discordRole("esquire"));
 			case 2 -> guild.getRoleById(discordRole("knight"));
 			case 3 -> guild.getRoleById(discordRole("baron"));
@@ -182,19 +189,21 @@ public class DiscordUtils {
 			default -> guild.getRoleById(discordRole("peasant"));
 		};
 
-		if (playerDiscordId != null && guild.getMemberById(playerDiscordId) != null) {
-			List<Role> playerDiscordRoles = guild.getMemberById(playerDiscordId).getRoles();
-			for (Role role : playerDiscordRoles) {
-				// Any of the rank-based roles
-				if (role.getId().equals(discordRole("esquire")) || role.getId().equals(discordRole("knight"))
-						|| role.getId().equals(discordRole("baron")) || role.getId().equals(discordRole("count"))
-						|| role.getId().equals(discordRole("duke")) || role.getId().equals(discordRole("prince"))
-						|| role.getId().equals(discordRole("king")) || role.getId().equals(discordRole("emperor"))
-						|| role.getId().equals(discordRole("peasant"))) {
-					guild.removeRoleFromMember(playerDiscordId, role).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-				}
-			}
-			guild.addRoleToMember(playerDiscordId, roleToAdd).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+		List<String> allRankRoleIds = List.of(
+			discordRole("peasant"), discordRole("esquire"), discordRole("knight"),
+			discordRole("baron"), discordRole("count"), discordRole("duke"),
+			discordRole("prince"), discordRole("king"), discordRole("emperor")
+		);
+
+		List<Role> currentRoles = discordMember.getRoles();
+		List<Role> rolesToRemove = currentRoles.stream()
+			.filter(r -> allRankRoleIds.contains(r.getId()) && !r.equals(targetRole))
+			.collect(Collectors.toList());
+		List<Role> rolesToAdd = currentRoles.contains(targetRole) ? List.of() : List.of(targetRole);
+
+		if (!rolesToAdd.isEmpty() || !rolesToRemove.isEmpty()) {
+			guild.modifyMemberRoles(discordMember, rolesToAdd, rolesToRemove)
+				.queue(null, unlinkIfUnknownMember(player.getUniqueId()));
 		}
 
 		// Only display intentional changes in Discord, not auto-assign
@@ -337,38 +346,45 @@ public class DiscordUtils {
 			return;
 		}
 
-		boolean isHelper = false;
-		boolean isModerator = false;
-		boolean isAdmin = false;
+		Member discordMember = guild.getMemberById(playerDiscordId);
 
-		if (playerDiscordId != null) {
-			// Remove all council ranks
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById(discordRole("council"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById(discordRole("helper"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById(discordRole("moderator"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			guild.removeRoleFromMember(playerDiscordId, guild.getRoleById(discordRole("admin"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+		Role councilRole   = guild.getRoleById(discordRole("council"));
+		Role helperRole    = guild.getRoleById(discordRole("helper"));
+		Role moderatorRole = guild.getRoleById(discordRole("moderator"));
+		Role adminRole     = guild.getRoleById(discordRole("admin"));
 
-			// If they are a Council member
-			if (newRankNum == 1) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("council"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("helper"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			} else if (newRankNum == 2) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("council"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("moderator"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			} else if (newRankNum == 3) {
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("council"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-				guild.addRoleToMember(playerDiscordId, guild.getRoleById(discordRole("admin"))).queue(null, unlinkIfUnknownMember(player.getUniqueId()));
-			}
-		}
+		List<Role> allCouncilRoles = List.of(councilRole, helperRole, moderatorRole, adminRole);
 
-		// If they are a Council member
+		List<Role> targetRoles = new ArrayList<>();
 		if (newRankNum == 1) {
-			isHelper = true;
+			targetRoles.add(councilRole);
+			targetRoles.add(helperRole);
 		} else if (newRankNum == 2) {
-			isModerator = true;
+			targetRoles.add(councilRole);
+			targetRoles.add(moderatorRole);
 		} else if (newRankNum == 3) {
-			isAdmin = true;
+			targetRoles.add(councilRole);
+			targetRoles.add(adminRole);
 		}
+
+		List<Role> currentRoles = discordMember.getRoles();
+		List<Role> rolesToAdd = targetRoles.stream()
+			.filter(r -> !currentRoles.contains(r))
+			.collect(Collectors.toList());
+		List<Role> rolesToRemove = allCouncilRoles.stream()
+			.filter(r -> currentRoles.contains(r) && !targetRoles.contains(r))
+			.collect(Collectors.toList());
+
+		if (!rolesToAdd.isEmpty() || !rolesToRemove.isEmpty()) {
+			Bukkit.getLogger().info("[AC] [DiscordUtils] Council role update for " + player.getName()
+				+ " (rank=" + newRankNum + "): +" + rolesToAdd.size() + " / -" + rolesToRemove.size());
+			guild.modifyMemberRoles(discordMember, rolesToAdd, rolesToRemove)
+				.queue(null, unlinkIfUnknownMember(player.getUniqueId()));
+		}
+
+		boolean isHelper    = newRankNum == 1;
+		boolean isModerator = newRankNum == 2;
+		boolean isAdmin     = newRankNum == 3;
 
 		// Only display intentional changes in Discord, not auto-assign
 		if (isIntentionalChange) {
@@ -403,6 +419,7 @@ public class DiscordUtils {
 		if (!AranarthCore.isPublicServer()) {
 			return;
 		}
+		Bukkit.getLogger().info("[AC] [DiscordUtils] Running full Discord role sync for all linked accounts...");
 		for (UUID uuid : DiscordSRV.getPlugin().getAccountLinkManager().getLinkedAccounts().values()) {
 			AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(uuid);
 			// Strange bug where a player links their account but they do not have an AranarthPlayer
