@@ -2140,6 +2140,11 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
+        if (AranarthUtils.isSmpWorld(dominion.getDominionHomeWorldName())) {
+            player.sendMessage(ChatUtils.chatMessage("&cDominions in the SMP cannot conquer or be conquered!"));
+            return;
+        }
+
         // Block if there is already an active conquest attempt from this dominion
         boolean alreadyConquering = DominionUtils.getDominions().stream()
                 .anyMatch(d -> d.getConqueredRequest() != null && d.getConqueredRequest().equals(dominion.getLeader()));
@@ -2183,6 +2188,10 @@ public class CommandDominion implements CommandExecutor {
                 }
                 if (dominion.getConquered().contains(dominionFromList.getLeader())) {
                     player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has already conquered &e" + dominionFromList.getName()));
+                    return;
+                }
+                if (AranarthUtils.isSmpWorld(dominionFromList.getDominionHomeWorldName())) {
+                    player.sendMessage(ChatUtils.chatMessage("&cDominions in the SMP cannot conquer or be conquered!"));
                     return;
                 }
                 UUID conquerorUuid = DominionUtils.getConquerorOfDominion(dominionFromList);

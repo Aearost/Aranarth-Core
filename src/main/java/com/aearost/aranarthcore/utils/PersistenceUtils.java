@@ -1358,6 +1358,8 @@ public class PersistenceUtils {
                 int boughtOutpostChunks = fields.length > 34 ? Integer.parseInt(fields[34]) : 0;
                 String cachedLivestockByWorldString = fields.length > 35 ? fields[35] : "";
                 boolean bendingEnabled = fields.length <= 36 || !fields[36].equals("0");
+                UUID conqueredRequest = fields.length > 37 && !fields[37].isEmpty() ? UUID.fromString(fields[37]) : null;
+                UUID rebelRequest = fields.length > 38 && !fields[38].isEmpty() ? UUID.fromString(fields[38]) : null;
 
                 Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                         x, y, z, yaw, pitch, food, claimableResources, conquered, null,
@@ -1380,6 +1382,8 @@ public class PersistenceUtils {
                 dominion.setLevelDropTimestamp(levelDropTimestamp);
                 dominion.setBoughtOutpostChunks(boughtOutpostChunks);
                 dominion.setBendingEnabled(bendingEnabled);
+                dominion.setConqueredRequest(conqueredRequest);
+                dominion.setRebelRequest(rebelRequest);
                 if (!cachedLivestockByWorldString.isEmpty()) {
                     for (String entry : cachedLivestockByWorldString.split(";")) {
                         String[] kv = entry.split("=", 2);
@@ -1433,7 +1437,7 @@ public class PersistenceUtils {
                 List<Dominion> dominions = DominionUtils.getDominions();
                 try {
                     FileWriter writer = new FileWriter(filePath);
-                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled\n");
+                    writer.write("#id|name|leader|members|allied|truced|enemied|world|chunks|x|y|z|yaw|pitch|food|claimableResources|conquered|balance|memberRanks|memberPvpEnabled|mobSpawningEnabled|conqueredRequestTimestamp|lastConquerAttemptTimestamp|rebelRequestTimestamp|conqueredRequestDefenderLastSeen|rebelRequestConquerorLastSeen|lastRebelAttemptTimestamp|conqueredTimestamp|boughtChunks|dominionLevel|cachedFarmlandCount|cachedLivestockCount|foundedTimestamp|levelDropTimestamp|boughtOutpostChunks|cachedLivestockByWorld|bendingEnabled|conqueredRequest|rebelRequest\n");
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
@@ -1566,7 +1570,9 @@ public class PersistenceUtils {
                 + "|" + dominion.getCachedLivestockByWorld().entrySet().stream()
                 .map(e -> e.getKey() + "=" + e.getValue())
                 .collect(Collectors.joining(";"))
-                + "|" + (dominion.isBendingEnabled() ? "1" : "0");
+                + "|" + (dominion.isBendingEnabled() ? "1" : "0")
+                + "|" + (dominion.getConqueredRequest() != null ? dominion.getConqueredRequest().toString() : "")
+                + "|" + (dominion.getRebelRequest() != null ? dominion.getRebelRequest().toString() : "");
     }
 
     /**
@@ -6836,6 +6842,8 @@ public class PersistenceUtils {
         int boughtOutpostChunks = fields.length > 34 ? Integer.parseInt(fields[34]) : 0;
         String cachedLivestockByWorldString = fields.length > 35 ? fields[35] : "";
         boolean bendingEnabled = fields.length <= 36 || !fields[36].equals("0");
+        UUID conqueredRequest = fields.length > 37 && !fields[37].isEmpty() ? UUID.fromString(fields[37]) : null;
+        UUID rebelRequest = fields.length > 38 && !fields[38].isEmpty() ? UUID.fromString(fields[38]) : null;
 
         Dominion dominion = new Dominion(id, name, leader, members, memberRanks, allies, truced, enemies, worldName, chunks,
                 x, y, z, yaw, pitch, food, claimableResources, conquered, null, balance);
@@ -6856,6 +6864,8 @@ public class PersistenceUtils {
         dominion.setLevelDropTimestamp(levelDropTimestamp);
         dominion.setBoughtOutpostChunks(boughtOutpostChunks);
         dominion.setBendingEnabled(bendingEnabled);
+        dominion.setConqueredRequest(conqueredRequest);
+        dominion.setRebelRequest(rebelRequest);
         if (!cachedLivestockByWorldString.isEmpty()) {
             for (String kv : cachedLivestockByWorldString.split(";")) {
                 String[] kvParts = kv.split("=", 2);
