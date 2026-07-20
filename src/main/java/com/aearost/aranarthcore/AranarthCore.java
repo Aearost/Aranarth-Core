@@ -144,6 +144,27 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
             @Override
             public void run() {
+                // Snapshot online players' survival inventory into their AranarthPlayer so MySQL
+                // has a recent copy — limits inventory loss to at most 30 minutes on ungraceful shutdown.
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    try {
+                        if (AranarthUtils.isSurvivalWorld(p.getWorld().getName())) {
+                            AranarthPlayer ap = AranarthUtils.getPlayer(p.getUniqueId());
+                            if (ap != null) {
+                                ap.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(p.getInventory().getContents()));
+                                ap.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(p.getEnderChest().getContents()));
+                                ap.setSurvivalHealth(p.getHealth());
+                                ap.setSurvivalFoodLevel(p.getFoodLevel());
+                                ap.setSurvivalSaturation(p.getSaturation());
+                                ap.setSurvivalExpLevel(p.getLevel());
+                                ap.setSurvivalExpProgress(p.getExp());
+                                AranarthUtils.setPlayer(p.getUniqueId(), ap);
+                            }
+                        }
+                    } catch (Exception e) {
+                        Bukkit.getLogger().warning(LOG_PREFIX + "Failed to snapshot inventory for " + p.getName() + " during periodic save: " + e.getMessage());
+                    }
+                }
                 PersistenceUtils.saveHomepads();
                 PersistenceUtils.saveSentinels();
                 PersistenceUtils.saveAranarthPlayers();

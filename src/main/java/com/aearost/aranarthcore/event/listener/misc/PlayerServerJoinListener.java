@@ -409,6 +409,40 @@ public class PlayerServerJoinListener implements Listener {
 					}
 				}
 
+				// Apply MySQL survival inventory as a recovery fallback for same-server logins.
+				// MySQL is kept current by quit-time and periodic snapshots, so it is more
+				// reliable than a stale player.dat left by an ungraceful server shutdown.
+				if (!hadPendingTp && lastLoc != null && NetworkManager.isActive()
+						&& lastLoc.server.equals(NetworkManager.getInstance().getThisServer())
+						&& AranarthUtils.isSurvivalWorld(lastLoc.world)) {
+					AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
+					if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
+						try {
+							player.getInventory().setContents(
+									ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
+						} catch (Exception ex) {
+							Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+									+ "[Inv] Failed to apply survival inventory on login for " + player.getName() + ": " + ex.getMessage());
+						}
+						if (!apInv.getSurvivalEnderChest().isEmpty()) {
+							try {
+								player.getEnderChest().setContents(
+										ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalEnderChest()));
+							} catch (Exception ex) {
+								Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+										+ "[Inv] Failed to apply ender chest on login for " + player.getName() + ": " + ex.getMessage());
+							}
+						}
+						if (apInv.getSurvivalHealth() > 0) {
+							player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+						}
+						player.setFoodLevel(apInv.getSurvivalFoodLevel());
+						player.setSaturation(apInv.getSurvivalSaturation());
+						player.setLevel(apInv.getSurvivalExpLevel());
+						player.setExp(apInv.getSurvivalExpProgress());
+					}
+				}
+
 				// Displays a welcome message after the join message
 				if (finalIsNewPlayer) {
 					for (Player online : Bukkit.getOnlinePlayers()) {

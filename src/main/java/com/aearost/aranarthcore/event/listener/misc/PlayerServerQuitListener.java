@@ -84,6 +84,9 @@ public class PlayerServerQuitListener implements Listener {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
 		}
 		PersistenceUtils.saveQuestProgress();
+		// Prevent this player's stale in-memory quest data from being written to the shared DB
+		// after they leave — the other server owns their quest state from this point on.
+		QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
 		PersistenceUtils.saveLoginStreaks();
 		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
@@ -93,7 +96,31 @@ public class PlayerServerQuitListener implements Listener {
 		}
 
 		aranarthPlayer.setCombatLogTime(new HashMap<>());
+		// Snapshot survival inventory so MySQL is current at logout time.
+		// The same-server login path uses this as a fallback if player.dat is stale
+		// (e.g. the server crashed on the previous session without saving player.dat).
+		if (!isCrossServerTransfer) {
+			String quitWorld = player.getWorld() != null ? player.getWorld().getName() : "";
+			if (AranarthUtils.isSurvivalWorld(quitWorld)) {
+				try { aranarthPlayer.setSurvivalInventory(ItemUtils.itemStackArrayToBase64(player.getInventory().getContents())); } catch (Exception ignored) {}
+				try { aranarthPlayer.setSurvivalEnderChest(ItemUtils.itemStackArrayToBase64(player.getEnderChest().getContents())); } catch (Exception ignored) {}
+				aranarthPlayer.setSurvivalHealth(player.getHealth());
+				aranarthPlayer.setSurvivalFoodLevel(player.getFoodLevel());
+				aranarthPlayer.setSurvivalSaturation(player.getSaturation());
+				aranarthPlayer.setSurvivalExpLevel(player.getLevel());
+				aranarthPlayer.setSurvivalExpProgress(player.getExp());
+			}
+		}
 		AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+		// Flush the updated player row to MySQL so the snapshot is durable before the next periodic save.
+		if (!isCrossServerTransfer && DatabaseManager.isActive()) {
+			final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(player.getUniqueId());
+			if (rawRow != null) {
+				final java.util.UUID quittingUuid = player.getUniqueId();
+				Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+						() -> DatabaseManager.getInstance().saveAranarthPlayerRaw(quittingUuid, rawRow));
+			}
+		}
 
 		// Called to save the Avatar's abilities to prevent loss of avatar abilities
 		if (AvatarUtils.getCurrentAvatar() != null) {

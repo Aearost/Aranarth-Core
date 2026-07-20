@@ -101,6 +101,9 @@ public class GuiMctop {
 			UUID uuid = profile != null && profile.getId() != null ? profile.getId() : null;
 			AranarthPlayer aranarthPlayer = uuid != null ? AranarthUtils.getPlayer(uuid) : null;
 			String displayName = aranarthPlayer != null ? aranarthPlayer.getNickname() : stat.playerName();
+			if (displayName == null) {
+				displayName = stat.playerName() != null ? stat.playerName() : "Unknown";
+			}
 			skullMeta.setDisplayName(ChatUtils.translateToColor(displayName));
 
 			List<String> lore = new ArrayList<>();

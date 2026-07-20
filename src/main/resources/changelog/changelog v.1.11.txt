@@ -89,6 +89,7 @@ Minor Features
 [~] Fixed issue where Dominion relation requests (conquer, rebel, etc) were not persisted
 [~] Fixed issue where players could access the SMP even without being in the list, if they had a prior home there
 [~] Fixed issue where Survival, Spawn, and Resource worlds were not sharing the same /topkills and /topdeaths stats
+[~] Fixed issue where /mctop <skill> was erroring due to a null username field in their AranarthPlayer object
 
 Backend Code Changes
 - Implemented discord support bot basis

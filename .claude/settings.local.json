@@ -264,7 +264,10 @@
       "Bash(find C:UsersliamhIdeaProjectsAranarthCore -name config*.yml)",
       "Bash(cmd.exe /c \"mvn compile 2>&1\")",
       "Bash(cmd.exe /c \"mvn compile\" 2>&1)",
-      "Bash(powershell.exe -Command \"Get-ChildItem 'C:/Users/liamh/IdeaProjects/AranarthCore' | Select-Object Name\")"
+      "Bash(powershell.exe -Command \"Get-ChildItem 'C:/Users/liamh/IdeaProjects/AranarthCore' | Select-Object Name\")",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.yml -o -name *.yaml)",
+      "Bash(find /c/Users/liamh/IdeaProjects -path */mcMMO* -o -path *plugins*mcMMO*)",
+      "Bash(find /c/Users/liamh/IdeaProjects -type f \\\\\\(-name *.java -o -name *.yml \\\\\\) -path */plugin* -o -path */server*)"
     ]
   }
 }

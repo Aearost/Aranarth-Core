@@ -500,13 +500,39 @@ public class QuestUtils {
         long nowMillis = System.currentTimeMillis();
 
         if (nowMillis >= todayReset3amMillis && lastDailyReset < todayReset3amMillis) {
-            resetDailyQuests();
+            // Sync from DB first — the other server may have already reset this period.
+            // Only runs when a reset is imminent (once per day), so the synchronous DB read is acceptable.
+            if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+                try {
+                    String dbStamp = com.aearost.aranarthcore.database.DatabaseManager.getInstance()
+                            .loadTempData("quest:lastDailyReset");
+                    if (dbStamp != null) {
+                        long dbReset = Long.parseLong(dbStamp);
+                        if (dbReset > lastDailyReset) lastDailyReset = dbReset;
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (lastDailyReset < todayReset3amMillis) {
+                resetDailyQuests();
+            }
         }
 
         if (nowEst.getDayOfWeek() == DayOfWeek.SUNDAY
                 && nowMillis >= todayReset3amMillis
                 && lastWeeklyReset < todayReset3amMillis) {
-            resetWeeklyQuests();
+            if (com.aearost.aranarthcore.database.DatabaseManager.isActive()) {
+                try {
+                    String dbStamp = com.aearost.aranarthcore.database.DatabaseManager.getInstance()
+                            .loadTempData("quest:lastWeeklyReset");
+                    if (dbStamp != null) {
+                        long dbReset = Long.parseLong(dbStamp);
+                        if (dbReset > lastWeeklyReset) lastWeeklyReset = dbReset;
+                    }
+                } catch (Exception ignored) {}
+            }
+            if (lastWeeklyReset < todayReset3amMillis) {
+                resetWeeklyQuests();
+            }
         }
     }
 
