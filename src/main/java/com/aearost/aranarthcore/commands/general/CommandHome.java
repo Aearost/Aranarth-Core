@@ -41,6 +41,10 @@ public class CommandHome implements CommandExecutor {
 				String homeName = homeNameBuilder.toString();
 				for (Home home : aranarthPlayer.getHomes()) {
 					if (homeName.equalsIgnoreCase(ChatUtils.stripColorFormatting(home.getName()))) {
+						if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+							player.sendMessage(ChatUtils.chatMessage("&cOnly OG players can teleport to SMP homes!"));
+							return true;
+						}
 						boolean networkActive = NetworkManager.isActive();
 
 						// Survival server → SMP home: transfer to SMP then teleport there

@@ -392,6 +392,11 @@ public class DatabaseManager {
                 pitch     FLOAT       NOT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS server_original_players (
+                uuid VARCHAR(36) PRIMARY KEY
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -1863,6 +1868,65 @@ public class DatabaseManager {
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save last location for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // server_original_players
+    // -------------------------------------------------------------------------
+
+    /** Returns all UUIDs in the original players table. */
+    public List<UUID> loadAllOriginalPlayers() {
+        String sql = "SELECT uuid FROM server_original_players";
+        List<UUID> result = new ArrayList<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(UUID.fromString(rs.getString("uuid")));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load original players: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /** Replaces all rows in server_original_players with the given list. */
+    public void saveAllOriginalPlayers(List<UUID> uuids) {
+        try (Connection conn = dataSource.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement del = conn.prepareStatement("DELETE FROM server_original_players")) {
+                del.executeUpdate();
+            }
+            if (!uuids.isEmpty()) {
+                try (PreparedStatement ins = conn.prepareStatement(
+                        "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)")) {
+                    for (UUID uuid : uuids) {
+                        ins.setString(1, uuid.toString());
+                        ins.addBatch();
+                    }
+                    ins.executeBatch();
+                }
+            }
+            conn.commit();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save original players: " + e.getMessage());
+        }
+    }
+
+    /** Adds any UUIDs not already present in server_original_players. Used for one-time file migration. */
+    public void mergeOriginalPlayers(List<UUID> uuids) {
+        if (uuids.isEmpty()) return;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT IGNORE INTO server_original_players (uuid) VALUES (?)")) {
+            for (UUID uuid : uuids) {
+                ps.setString(1, uuid.toString());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to merge original players: " + e.getMessage());
         }
     }
 

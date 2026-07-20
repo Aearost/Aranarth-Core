@@ -87,6 +87,7 @@ Minor Features
 [~] Made /ac spy a separate command from /ac admin, and made it spy on dominion chat as well
 [~] Updated the rules to clarify chat spam, and overall refining of rules
 [~] Fixed issue where Dominion relation requests (conquer, rebel, etc) were not persisted
+[~] Fixed issue where players could access the SMP even without being in the list, if they had a prior home there
 
 Backend Code Changes
 - Implemented discord support bot basis

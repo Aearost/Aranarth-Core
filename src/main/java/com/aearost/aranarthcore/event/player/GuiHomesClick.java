@@ -59,6 +59,12 @@ public class GuiHomesClick {
 					int homeIndex = hasBedSpawn ? e.getSlot() - 1 : e.getSlot();
 					Home home = aranarthPlayer.getHomes().get(homeIndex);
 
+					if (home.isSmpHome() && !AranarthUtils.isOriginalPlayer(player.getUniqueId())) {
+						player.sendMessage(ChatUtils.chatMessage("&cOnly OG players can teleport to SMP homes!"));
+						player.closeInventory();
+						return;
+					}
+
 					Material heldItem = e.getCursor().getType();
 					// If the user is trying to update the icon of a home
 					if (heldItem != Material.AIR) {

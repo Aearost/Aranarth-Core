@@ -1881,72 +1881,42 @@ public class PersistenceUtils {
      * Each line contains a single UUID.
      */
     public static void loadOriginalPlayers() {
-        String currentPath = System.getProperty("user.dir");
-        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
-                + "original_players.txt";
-        File file = new File(filePath);
-
-        if (!file.exists()) {
-            return;
-        }
-
-        Scanner reader;
-        try {
-            reader = new Scanner(file);
-            Bukkit.getLogger().info("[AC] Attempting to read the original players file...");
-            List<UUID> uuids = new ArrayList<>();
-            while (reader.hasNextLine()) {
-                String row = reader.nextLine().trim();
-                if (row.isEmpty() || row.startsWith("#")) {
-                    continue;
-                }
-                try {
-                    uuids.add(UUID.fromString(row));
-                } catch (IllegalArgumentException ignored) {
+        // One-time migration: merge any UUIDs from the local file into the DB so both servers
+        // contribute their lists regardless of startup order.
+        if (DatabaseManager.isActive()) {
+            String currentPath = System.getProperty("user.dir");
+            String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore" + File.separator
+                    + "original_players.txt";
+            File file = new File(filePath);
+            if (file.exists()) {
+                List<UUID> fileUuids = new ArrayList<>();
+                try (Scanner reader = new Scanner(file)) {
+                    while (reader.hasNextLine()) {
+                        String row = reader.nextLine().trim();
+                        if (row.isEmpty() || row.startsWith("#")) continue;
+                        try { fileUuids.add(UUID.fromString(row)); } catch (IllegalArgumentException ignored) {}
+                    }
+                } catch (FileNotFoundException ignored) {}
+                if (!fileUuids.isEmpty()) {
+                    DatabaseManager.getInstance().mergeOriginalPlayers(fileUuids);
+                    Bukkit.getLogger().info("[AC] Merged " + fileUuids.size() + " original players from file into database");
                 }
             }
+
+            List<UUID> uuids = DatabaseManager.getInstance().loadAllOriginalPlayers();
             AranarthUtils.setOriginalPlayers(uuids);
-            Bukkit.getLogger().info("[AC] All original players have been initialized");
-            reader.close();
-        } catch (FileNotFoundException e) {
-            Bukkit.getLogger().info("[AC] Something went wrong with loading the original players!");
+            Bukkit.getLogger().info("[AC] All original players have been initialized from database (" + uuids.size() + " entries)");
         }
     }
 
     /**
-     * Saves the original players list to original_players.txt.
-     * Each line contains a single UUID.
+     * Saves the original players list to the database.
      */
     public static void saveOriginalPlayers() {
-        String currentPath = System.getProperty("user.dir");
-        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
-                + File.separator + "original_players.txt";
-        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
-        File file = new File(filePath);
-
-        boolean isDirectoryCreated = true;
-        if (!pluginDirectory.isDirectory()) {
-            isDirectoryCreated = pluginDirectory.mkdir();
-        }
-        if (isDirectoryCreated) {
-            try {
-                if (file.createNewFile()) {
-                    Bukkit.getLogger().info("[AC] A new original_players.txt file has been generated");
-                }
-            } catch (IOException e) {
-                Bukkit.getLogger().info("[AC] An error occurred in the creation of original_players.txt");
-            }
-
-            try {
-                FileWriter writer = new FileWriter(filePath);
-                writer.write("#uuid\n");
-                for (UUID uuid : AranarthUtils.getOriginalPlayers()) {
-                    writer.write(uuid.toString() + "\n");
-                }
-                writer.close();
-            } catch (IOException e) {
-                Bukkit.getLogger().info("[AC] There was an error in saving the original players");
-            }
+        if (DatabaseManager.isActive()) {
+            DatabaseManager.getInstance().saveAllOriginalPlayers(AranarthUtils.getOriginalPlayers());
+        } else {
+            Bukkit.getLogger().warning("[AC] Database is not active, original players could not be saved!");
         }
     }
 
