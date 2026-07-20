@@ -22,6 +22,7 @@ public class PlayerMoveEventListener implements Listener {
         String worldName = e.getPlayer().getLocation().getWorld().getName();
         if (AranarthUtils.isSmpWorld(worldName)) {
             new HomepadStep().execute(e);
+            new DominionChunkChange().execute(e);
         } else if (worldName.startsWith("world")) {
             new DominionChunkChange().execute(e);
             new SpawnChangeLocation().execute(e);
