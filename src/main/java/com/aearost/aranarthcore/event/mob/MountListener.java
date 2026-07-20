@@ -434,8 +434,15 @@ public class MountListener implements Listener {
         Player player = event.getPlayer();
         ItemStack mainHand = player.getInventory().getItemInMainHand();
 
-        // Let vanilla attach it without interference
+        // Block leads on Flying Bison mounts; allow them on normal Happy Ghasts
         if (mainHand.getType() == Material.LEAD) {
+            if (clickedEntity instanceof HappyGhast
+                    && clickedEntity.getPersistentDataContainer()
+                            .has(CustomKeys.MOUNT_ELEMENT, PersistentDataType.STRING)) {
+                event.setCancelled(true);
+                player.sendMessage(ChatUtils.chatMessage("&cYou cannot put a lead on a Flying Bison!"));
+                return;
+            }
             return;
         }
 
