@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
@@ -8,15 +9,19 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * Manages the chat word-scramble mini-game.
@@ -34,6 +39,15 @@ public class ChatGameUtils {
     private static volatile String currentAnswer = null;
     private static volatile String currentScrambled = null;
     private static volatile String currentGameOrigin = null;
+
+    // Streak state tracks consecutive wins by the same player
+    private static volatile UUID streakWinnerUUID = null;
+    private static volatile int streakCount = 0;
+
+    // Timeout task for the active game (cancelled on win)
+    private static volatile BukkitTask timeoutTask = null;
+
+    private static final int TIMEOUT_TICKS = 600; // 30 seconds
 
     private ChatGameUtils() {}
 
@@ -70,8 +84,8 @@ public class ChatGameUtils {
      * Schedules the next game to start after a random delay of 5-15 minutes.
      */
     public static void scheduleNextGame(Plugin plugin) {
-        // Random delay between 5-10 minutes
-        int delay = 6000 + random.nextInt(6001);
+        // Random delay between 8-10 minutes
+        int delay = 9600 + random.nextInt(4800);
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -109,65 +123,142 @@ public class ChatGameUtils {
                     : "local";
             answer = word;
             scrambled = sc;
+
+            // Schedule timeout inside the lock so tryAnswer can never miss it
+            timeoutTask = new BukkitRunnable() {
+                @Override
+                public void run() {
+                    handleTimeout(plugin, word);
+                }
+            }.runTaskLater(plugin, TIMEOUT_TICKS);
         }
 
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&8&l[&6&lAC&8&l] &7Unscramble the following word: &e" + scrambled));
+        String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(startMsg);
+            p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+        }
 
         if (NetworkManager.isActive()) {
             NetworkManager.getInstance().publishChatGameStart(scrambled, answer);
         }
     }
 
+    private static void handleTimeout(Plugin plugin, String expectedAnswer) {
+        synchronized (gameLock) {
+            if (!expectedAnswer.equals(currentAnswer)) {
+                return; // Game already won or ended
+            }
+            currentAnswer = null;
+            currentScrambled = null;
+            currentGameOrigin = null;
+            timeoutTask = null;
+        }
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + expectedAnswer);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(expireMsg);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 1.0f);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 0.1f);
+        }
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishChatGameExpire(expectedAnswer);
+        }
+        scheduleNextGame(plugin);
+    }
+
     /**
      * Checks whether the given message is the correct answer to the active game.
+     * @return true if the player guessed correctly (caller should cancel the chat event)
      */
-    public static void tryAnswer(Player player, String message) {
+    public static boolean tryAnswer(Player player, String message) {
+        final String answer;
+        final String origin;
+        final int localStreakCount;
         synchronized (gameLock) {
             if (currentAnswer == null) {
-                return;
+                return false;
             }
             if (!message.equalsIgnoreCase(currentAnswer)) {
-                return;
+                return false;
             }
 
-            final String answer = currentAnswer;
-            final String origin = currentGameOrigin;
+            answer = currentAnswer;
+            origin = currentGameOrigin;
             currentAnswer = null;
             currentScrambled = null;
             currentGameOrigin = null;
 
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
-                int rank = Math.min(ap.getRank(), RANK_REWARDS.length - 1);
-                double reward = RANK_REWARDS[rank];
-                ap.setBalance(ap.getBalance() + reward);
-                AranarthUtils.addChatGameGuess(player.getUniqueId());
+            if (timeoutTask != null) {
+                timeoutTask.cancel();
+                timeoutTask = null;
+            }
 
-                String winnerNickname = ap.getNickname();
-                Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                        "&8&l[&6&lAC&8&l] &e" + winnerNickname
-                                + " &7guessed &e" + answer + " &7correctly!"));
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
-
-                if (NetworkManager.isActive()) {
-                    NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer);
-                }
-
-                // Only the server that originated the game schedules the next one
-                boolean isOrigin = !NetworkManager.isActive()
-                        || NetworkManager.getInstance().getThisServer().equals(origin);
-                if (isOrigin) {
-                    scheduleNextGame(AranarthCore.getInstance());
-                }
-            });
+            UUID uuid = player.getUniqueId();
+            if (uuid.equals(streakWinnerUUID)) {
+                streakCount++;
+            } else {
+                streakWinnerUUID = uuid;
+                streakCount = 1;
+            }
+            localStreakCount = streakCount;
         }
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+            int rank = Math.min(ap.getRank(), RANK_REWARDS.length - 1);
+            double baseReward = RANK_REWARDS[rank];
+            double multiplier = Math.pow(1.1, localStreakCount - 1);
+            double reward = baseReward * multiplier;
+
+            ap.setBalance(ap.getBalance() + reward);
+            AranarthUtils.addChatGameGuess(player.getUniqueId());
+            AranarthUtils.addChatGameEarnings(player.getUniqueId(), reward);
+
+            // Increment in DB so /topguesses is always accurate across servers
+            if (DatabaseManager.isActive()) {
+                final double finalReward = reward;
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                        DatabaseManager.getInstance().incrementChatGameGuessCount(player.getUniqueId(), finalReward));
+            }
+
+            String winnerNickname = ap.getNickname();
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!");
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(winMsg);
+                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            }
+
+            String rewardText = formatMoney(reward);
+            if (localStreakCount > 1) {
+                player.sendMessage(ChatUtils.chatMessage(
+                        "&7You earned &6" + rewardText
+                                + " &7- &e" + localStreakCount + "x streak"));
+            } else {
+                player.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText));
+            }
+
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, player.getUniqueId());
+            }
+
+            // Only the server that originated the game schedules the next one
+            boolean isOrigin = !NetworkManager.isActive()
+                    || NetworkManager.getInstance().getThisServer().equals(origin);
+            if (isOrigin) {
+                scheduleNextGame(AranarthCore.getInstance());
+            }
+        });
+        return true;
+    }
+
+    private static String formatMoney(double amount) {
+        NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
+        nf.setMaximumFractionDigits(0);
+        return "$" + nf.format(Math.round(amount));
     }
 
     /**
      * Called by NetworkManager when another server has started a chat game.
-     * Sets local game state and broadcasts the scramble message to players on this server.
-     * Must be called on the main thread.
      */
     public static void applyNetworkGameStart(String scrambled, String answer, String originServer) {
         synchronized (gameLock) {
@@ -175,17 +266,17 @@ public class ChatGameUtils {
             currentScrambled = scrambled;
             currentGameOrigin = originServer;
         }
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&8&l[&6&lAC&8&l] &7Unscramble the following word: &e" + scrambled));
+        String startMsg = ChatUtils.chatMessage("&7Unscramble the following word: &e" + scrambled);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(startMsg);
+            p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 5f, 1f);
+        }
     }
 
     /**
      * Called by NetworkManager when a player on another server has won the chat game.
-     * Clears local game state, broadcasts the win message, and — if this server was the
-     * game's origin — schedules the next game.
-     * Must be called on the main thread.
      */
-    public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer) {
+    public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID) {
         final boolean wasOrigin;
         synchronized (gameLock) {
             wasOrigin = NetworkManager.isActive()
@@ -193,9 +284,52 @@ public class ChatGameUtils {
             currentAnswer = null;
             currentScrambled = null;
             currentGameOrigin = null;
+            if (timeoutTask != null) {
+                timeoutTask.cancel();
+                timeoutTask = null;
+            }
+            if (winnerUUID.equals(streakWinnerUUID)) {
+                streakCount++;
+            } else {
+                streakWinnerUUID = winnerUUID;
+                streakCount = 1;
+            }
         }
-        Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                "&8&l[&6&lAC&8&l] &e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!"));
+        String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!");
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(winMsg);
+            p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        }
+        if (wasOrigin) {
+            scheduleNextGame(plugin);
+        }
+    }
+
+    /**
+     * Called by NetworkManager when the game on another server expired with no winner.
+     */
+    public static void applyNetworkGameExpire(Plugin plugin, String answer) {
+        final boolean wasOrigin;
+        synchronized (gameLock) {
+            if (!answer.equals(currentAnswer)) {
+                return; // Already handled locally
+            }
+            wasOrigin = NetworkManager.isActive()
+                    && NetworkManager.getInstance().getThisServer().equals(currentGameOrigin);
+            currentAnswer = null;
+            currentScrambled = null;
+            currentGameOrigin = null;
+            if (timeoutTask != null) {
+                timeoutTask.cancel();
+                timeoutTask = null;
+            }
+        }
+        String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + answer);
+        for (Player p : Bukkit.getOnlinePlayers()) {
+            p.sendMessage(expireMsg);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 1.0f);
+            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_DIDGERIDOO, 1f, 0.1f);
+        }
         if (wasOrigin) {
             scheduleNextGame(plugin);
         }

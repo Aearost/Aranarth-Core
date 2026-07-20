@@ -414,7 +414,8 @@ public class DatabaseManager {
         String[] migrations = {
             "ALTER TABLE aranarth_players ADD COLUMN IF NOT EXISTS raw_data LONGTEXT",
             "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
-            "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''"
+            "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
+            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -523,19 +524,28 @@ public class DatabaseManager {
         return result;
     }
 
+    /** Holds a player's chat game stats loaded from the database. */
+    public record ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname) {
+        /** Constructor used during startup load (no display info needed). */
+        public ChatGameEntry(int guessCount, double totalEarnings) {
+            this(guessCount, totalEarnings, "", "");
+        }
+    }
+
     /**
-     * Upserts the guess count for a single player.
+     * Upserts the guess count and total earnings for a single player.
      */
-    public void saveChatGameGuessCount(UUID uuid, int guessCount) {
+    public void saveChatGameGuessCount(UUID uuid, int guessCount, double totalEarnings) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count)
-            VALUES (?, ?)
-            ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count)
+            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count), total_earnings = VALUES(total_earnings)
             """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, uuid.toString());
             ps.setInt(2, guessCount);
+            ps.setDouble(3, totalEarnings);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save chat game guess count for " + uuid + ": " + e.getMessage());
@@ -543,17 +553,54 @@ public class DatabaseManager {
     }
 
     /**
-     * Loads all chat game guess counts.
-     * @return Map of UUID to guess count.
+     * Atomically increments the guess count and total earnings for a single player by 1 and
+     * the given amount respectively. Safe for concurrent updates from multiple servers.
      */
-    public Map<UUID, Integer> loadAllChatGameGuesses() {
-        String sql = "SELECT uuid, guess_count FROM player_chat_game_guesses";
-        Map<UUID, Integer> result = new HashMap<>();
+    public void incrementChatGameGuessCount(UUID uuid, double earnedAmount) {
+        String sql = """
+            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings)
+            VALUES (?, 1, ?)
+            ON DUPLICATE KEY UPDATE guess_count = guess_count + 1, total_earnings = total_earnings + VALUES(total_earnings)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setDouble(2, earnedAmount);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to increment chat game guess count for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Loads all chat game stats (guess count, total earnings, username, nickname) across all
+     * servers by joining with aranarth_players. Sorted descending by guess count.
+     * @return Map of UUID to ChatGameEntry.
+     */
+    public Map<UUID, ChatGameEntry> loadAllChatGameGuesses() {
+        String sql = """
+            SELECT g.uuid, g.guess_count, g.total_earnings,
+                   COALESCE(p.username, '') AS username,
+                   COALESCE(p.raw_data, '') AS raw_data
+            FROM player_chat_game_guesses g
+            LEFT JOIN aranarth_players p ON p.uuid = g.uuid
+            """;
+        Map<UUID, ChatGameEntry> result = new HashMap<>();
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                result.put(UUID.fromString(rs.getString("uuid")), rs.getInt("guess_count"));
+                String rawData = rs.getString("raw_data");
+                String nickname = "";
+                if (rawData != null && !rawData.isEmpty()) {
+                    String[] fields = rawData.split("\\|");
+                    if (fields.length > 1) {
+                        nickname = fields[1]; // raw_data[1] = nickname
+                    }
+                }
+                result.put(UUID.fromString(rs.getString("uuid")),
+                        new ChatGameEntry(rs.getInt("guess_count"), rs.getDouble("total_earnings"),
+                                rs.getString("username"), nickname));
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load chat game guesses: " + e.getMessage());

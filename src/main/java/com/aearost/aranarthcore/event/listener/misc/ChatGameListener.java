@@ -28,6 +28,8 @@ public class ChatGameListener implements Listener {
         if (ChatUtils.isPlayerMuted(player)) {
             return;
         }
-        ChatGameUtils.tryAnswer(player, e.getMessage());
+        if (ChatGameUtils.tryAnswer(player, e.getMessage())) {
+            e.setCancelled(true);
+        }
     }
 }

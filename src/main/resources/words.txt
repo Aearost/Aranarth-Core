@@ -67,6 +67,7 @@ chakra
 avatar
 
 # Aranarth armor sets
+aranarth
 aranarthium
 aquatic
 scorched
@@ -101,6 +102,10 @@ pillager
 silverfish
 magmacube
 slime
+flyingbison
+polarbeardog
+komodorhino
+badgermole
 
 # Minecraft blocks and materials
 obsidian

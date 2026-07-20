@@ -105,6 +105,7 @@ public class AranarthUtils {
 	private static final List<AranarthVote> votes = new ArrayList<>();
 	private static final HashMap<UUID, List<PlayerKillDeathScore>> killDeathScores = new HashMap<>();
 	private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
+	private static final HashMap<UUID, Double> chatGameEarnings = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
@@ -3914,6 +3915,27 @@ public class AranarthUtils {
 	 */
 	public static void addChatGameGuess(UUID uuid) {
 		chatGameGuesses.merge(uuid, 1, Integer::sum);
+	}
+
+	/**
+	 * Provides the map of all-time chat game earnings for all players.
+	 */
+	public static HashMap<UUID, Double> getChatGameEarnings() {
+		return chatGameEarnings;
+	}
+
+	/**
+	 * Adds to the all-time chat game earnings for the given player.
+	 */
+	public static void addChatGameEarnings(UUID uuid, double amount) {
+		chatGameEarnings.merge(uuid, amount, Double::sum);
+	}
+
+	/**
+	 * Sets the all-time chat game earnings for the given player directly (used during load).
+	 */
+	public static void setChatGameEarnings(UUID uuid, double amount) {
+		chatGameEarnings.put(uuid, amount);
 	}
 
 	/**

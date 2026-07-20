@@ -503,6 +503,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.warp", true);
         perms.setPermission("aranarth.mctop", true);
         perms.setPermission("aranarth.map", true);
+        perms.setPermission("aranarth.topguesses", true);
 
         // Disable aranarth functionality
         perms.setPermission("aranarth.ac", false);
@@ -558,6 +559,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.chat.gradient", false);
         perms.setPermission("aranarth.chat.gradientbold", false);
         perms.setPermission("aranarth.gate", false);
+        perms.setPermission("aranarth.mount", false);
 
         // Armor stand
         perms.setPermission("aranarth.armorstand.lock", false);

@@ -99,6 +99,7 @@ public class NetworkManager {
     public static final String CH_DOMINION_CREATE   = "aranarth:dominion_create";
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
+    public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -288,6 +289,7 @@ public class NetworkManager {
             case CH_DOMINION_CREATE  -> handleDominionCreate(json);
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
+            case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
         }
     }
 
@@ -1504,12 +1506,21 @@ public class NetworkManager {
     }
 
     /** Notifies all other servers that the word-scramble game was won on this server. */
-    public void publishChatGameWin(String winnerNickname, String answer) {
+    public void publishChatGameWin(String winnerNickname, String answer, java.util.UUID winnerUUID) {
         JsonObject json = new JsonObject();
         json.addProperty("server", thisServer);
         json.addProperty("winner", winnerNickname);
         json.addProperty("answer", answer);
+        json.addProperty("winnerUUID", winnerUUID.toString());
         publish(CH_CHAT_GAME_WIN, json);
+    }
+
+    /** Notifies all other servers that the word-scramble game expired with no winner. */
+    public void publishChatGameExpire(String answer) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("answer", answer);
+        publish(CH_CHAT_GAME_EXPIRE, json);
     }
 
     /** Publishes a dominion disband event so the other server evicts it from memory. */
@@ -1564,7 +1575,16 @@ public class NetworkManager {
 
         String winner = json.get("winner").getAsString();
         String answer = json.get("answer").getAsString();
-        ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer);
+        java.util.UUID winnerUUID = java.util.UUID.fromString(json.get("winnerUUID").getAsString());
+        ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer, winnerUUID);
+    }
+
+    private void handleChatGameExpire(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String answer = json.get("answer").getAsString();
+        ChatGameUtils.applyNetworkGameExpire(AranarthCore.getInstance(), answer);
     }
 
     // -------------------------------------------------------------------------

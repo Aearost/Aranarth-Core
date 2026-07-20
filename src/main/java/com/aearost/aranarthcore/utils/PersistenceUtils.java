@@ -3201,12 +3201,16 @@ public class PersistenceUtils {
                 if (row.startsWith("#")) {
                     continue;
                 }
-                // uuid|count
+                // uuid|count|earnings
                 String[] fields = row.split("\\|");
                 UUID uuid = UUID.fromString(fields[0]);
                 int count = Integer.parseInt(fields[1]);
                 for (int i = 0; i < count; i++) {
                     AranarthUtils.addChatGameGuess(uuid);
+                }
+                if (fields.length >= 3) {
+                    double earnings = Double.parseDouble(fields[2]);
+                    AranarthUtils.setChatGameEarnings(uuid, earnings);
                 }
             }
             Bukkit.getLogger().info("[AC] All chat game guesses have been initialized");
@@ -3239,16 +3243,14 @@ public class PersistenceUtils {
             }
 
             try (FileWriter writer = new FileWriter(filePath)) {
-                writer.write("#uuid|count\n");
+                writer.write("#uuid|count|earnings\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
-                    writer.write(entry.getKey() + "|" + entry.getValue() + "\n");
+                    double earnings = AranarthUtils.getChatGameEarnings().getOrDefault(entry.getKey(), 0.0);
+                    writer.write(entry.getKey() + "|" + entry.getValue() + "|" + earnings + "\n");
                 }
             } catch (IOException e) {
                 Bukkit.getLogger().info("[AC] There was an error in saving the chat game guesses");
             }
-        }
-        if (DatabaseManager.isActive()) {
-            runDbSync(PersistenceUtils::syncChatGameGuessesToDatabase);
         }
     }
 
@@ -4847,7 +4849,8 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
             try {
-                db.saveChatGameGuessCount(entry.getKey(), entry.getValue());
+                double earnings = AranarthUtils.getChatGameEarnings().getOrDefault(entry.getKey(), 0.0);
+                db.saveChatGameGuessCount(entry.getKey(), entry.getValue(), earnings);
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync chat game guess for " + entry.getKey() + ": " + e.getMessage());
             }
@@ -6023,16 +6026,17 @@ public class PersistenceUtils {
      */
     public static void loadChatGameGuessesFromDatabase() {
         DatabaseManager db = DatabaseManager.getInstance();
-        Map<UUID, Integer> all = db.loadAllChatGameGuesses();
+        Map<UUID, DatabaseManager.ChatGameEntry> all = db.loadAllChatGameGuesses();
         if (all.isEmpty()) {
             loadChatGameGuesses();
             return;
         }
         Bukkit.getLogger().info("[AC] Loading chat game guesses from MySQL...");
-        for (Map.Entry<UUID, Integer> entry : all.entrySet()) {
-            for (int i = 0; i < entry.getValue(); i++) {
+        for (Map.Entry<UUID, DatabaseManager.ChatGameEntry> entry : all.entrySet()) {
+            for (int i = 0; i < entry.getValue().guessCount(); i++) {
                 AranarthUtils.addChatGameGuess(entry.getKey());
             }
+            AranarthUtils.setChatGameEarnings(entry.getKey(), entry.getValue().totalEarnings());
         }
         Bukkit.getLogger().info("[AC] Chat game guesses initialized from MySQL");
     }

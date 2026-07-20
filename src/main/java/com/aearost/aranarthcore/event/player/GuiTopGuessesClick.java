@@ -31,7 +31,7 @@ public class GuiTopGuessesClick {
                             player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
                             GuiTopGuesses.open(player, currentPage - 1);
                         } else {
-                            int playerNum = AranarthUtils.getTopGuesses().size();
+                            int playerNum = GuiTopGuesses.getCachedTotalCount(player.getUniqueId());
                             int maxPages = playerNum % 45 == 0 ? playerNum / 45 : (playerNum / 45) + 1;
                             if (maxPages > 1) {
                                 player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
@@ -42,7 +42,7 @@ public class GuiTopGuessesClick {
                         player.closeInventory();
                         player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
                     } else if (e.getSlot() == 53) {
-                        int playerNum = AranarthUtils.getTopGuesses().size();
+                        int playerNum = GuiTopGuesses.getCachedTotalCount(player.getUniqueId());
                         int currentPage = aranarthPlayer.getCurrentGuiPageNum();
                         int maxPages = playerNum % 45 == 0 ? playerNum / 45 : (playerNum / 45) + 1;
                         player.playSound(player, Sound.UI_BUTTON_CLICK, 0.25F, 1);
