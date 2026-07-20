@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -12,7 +13,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +33,7 @@ public class ChatGameUtils {
 
     private static volatile String currentAnswer = null;
     private static volatile String currentScrambled = null;
+    private static volatile String currentGameOrigin = null;
 
     private ChatGameUtils() {}
 
@@ -84,21 +85,38 @@ public class ChatGameUtils {
             return;
         }
 
-        if (remainingWords.isEmpty()) {
-            remainingWords.addAll(wordPool);
-            Collections.shuffle(remainingWords, random);
-        }
-
-        String word = remainingWords.remove(remainingWords.size() - 1);
-        String scrambled = scramble(word);
-
+        final String answer;
+        final String scrambled;
         synchronized (gameLock) {
+            if (currentAnswer != null) {
+                // A cross-server game is already active
+                scheduleNextGame(plugin);
+                return;
+            }
+
+            if (remainingWords.isEmpty()) {
+                remainingWords.addAll(wordPool);
+                Collections.shuffle(remainingWords, random);
+            }
+
+            String word = remainingWords.remove(remainingWords.size() - 1);
+            String sc = scramble(word);
+
             currentAnswer = word;
-            currentScrambled = scrambled;
+            currentScrambled = sc;
+            currentGameOrigin = NetworkManager.isActive()
+                    ? NetworkManager.getInstance().getThisServer()
+                    : "local";
+            answer = word;
+            scrambled = sc;
         }
 
         Bukkit.broadcastMessage(ChatUtils.chatMessage(
                 "&8&l[&6&lAC&8&l] &7Unscramble the following word: &e" + scrambled));
+
+        if (NetworkManager.isActive()) {
+            NetworkManager.getInstance().publishChatGameStart(scrambled, answer);
+        }
     }
 
     /**
@@ -114,8 +132,10 @@ public class ChatGameUtils {
             }
 
             final String answer = currentAnswer;
+            final String origin = currentGameOrigin;
             currentAnswer = null;
             currentScrambled = null;
+            currentGameOrigin = null;
 
             Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
                 AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
@@ -124,15 +144,60 @@ public class ChatGameUtils {
                 ap.setBalance(ap.getBalance() + reward);
                 AranarthUtils.addChatGameGuess(player.getUniqueId());
 
-                NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                String winnerNickname = ap.getNickname();
                 Bukkit.broadcastMessage(ChatUtils.chatMessage(
-                        "&8&l[&6&lAC&8&l] &e" + ap.getNickname()
+                        "&8&l[&6&lAC&8&l] &e" + winnerNickname
                                 + " &7guessed &e" + answer + " &7correctly!"));
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
 
-                scheduleNextGame(AranarthCore.getInstance());
-            });
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer);
+                }
 
+                // Only the server that originated the game schedules the next one
+                boolean isOrigin = !NetworkManager.isActive()
+                        || NetworkManager.getInstance().getThisServer().equals(origin);
+                if (isOrigin) {
+                    scheduleNextGame(AranarthCore.getInstance());
+                }
+            });
+        }
+    }
+
+    /**
+     * Called by NetworkManager when another server has started a chat game.
+     * Sets local game state and broadcasts the scramble message to players on this server.
+     * Must be called on the main thread.
+     */
+    public static void applyNetworkGameStart(String scrambled, String answer, String originServer) {
+        synchronized (gameLock) {
+            currentAnswer = answer;
+            currentScrambled = scrambled;
+            currentGameOrigin = originServer;
+        }
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(
+                "&8&l[&6&lAC&8&l] &7Unscramble the following word: &e" + scrambled));
+    }
+
+    /**
+     * Called by NetworkManager when a player on another server has won the chat game.
+     * Clears local game state, broadcasts the win message, and — if this server was the
+     * game's origin — schedules the next game.
+     * Must be called on the main thread.
+     */
+    public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer) {
+        final boolean wasOrigin;
+        synchronized (gameLock) {
+            wasOrigin = NetworkManager.isActive()
+                    && NetworkManager.getInstance().getThisServer().equals(currentGameOrigin);
+            currentAnswer = null;
+            currentScrambled = null;
+            currentGameOrigin = null;
+        }
+        Bukkit.broadcastMessage(ChatUtils.chatMessage(
+                "&8&l[&6&lAC&8&l] &e" + winnerNickname + " &7guessed &e" + answer + " &7correctly!"));
+        if (wasOrigin) {
+            scheduleNextGame(plugin);
         }
     }
 

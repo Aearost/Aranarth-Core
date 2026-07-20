@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
@@ -95,6 +96,8 @@ public class NetworkManager {
     public static final String CH_MAIL_NOTIFY       = "aranarth:mail_notify";
     public static final String CH_COUNCIL_MSG       = "aranarth:council_msg";
     public static final String CH_DOMINION_DISBAND  = "aranarth:dominion_disband";
+    public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
+    public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -281,6 +284,8 @@ public class NetworkManager {
             case CH_MAIL_NOTIFY      -> handleMailNotification(json);
             case CH_COUNCIL_MSG      -> handleCouncilMessage(json);
             case CH_DOMINION_DISBAND -> handleDominionDisband(json);
+            case CH_CHAT_GAME_START  -> handleChatGameStart(json);
+            case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
         }
     }
 
@@ -449,6 +454,21 @@ public class NetworkManager {
     public int getRemoteSleepEligibleCount() {
         // All remote players count — they are on survival/SMP gameplay servers
         return remoteRoster.size();
+    }
+
+    /** Number of players currently sleeping on other servers. Updated by handleSleepMessage. */
+    private volatile int remoteSleepingCount = 0;
+
+    /** Callback invoked on the main thread whenever the remote sleeping count changes. */
+    private Runnable remoteSleepCallback = null;
+
+    public void setRemoteSleepCallback(Runnable callback) {
+        this.remoteSleepCallback = callback;
+    }
+
+    /** Returns the number of players currently sleeping on other servers. */
+    public int getRemoteSleepingCount() {
+        return remoteSleepingCount;
     }
 
     public void publishSyncWeather(String weatherType, int duration, boolean isThunder, int stormDuration, int stormDelay) {
@@ -1398,6 +1418,15 @@ public class NetworkManager {
                 }
             }
         }
+
+        // Update the remote sleeping count and notify SleepSkipListener so it can re-evaluate
+        // whether the combined (local + remote) sleeping players are enough to skip the night.
+        if (json.has("sleeping")) {
+            remoteSleepingCount = json.get("sleeping").getAsInt();
+            if (remoteSleepCallback != null) {
+                remoteSleepCallback.run();
+            }
+        }
     }
 
     private void handleSoundAll(JsonObject json) {
@@ -1463,6 +1492,24 @@ public class NetworkManager {
         }
     }
 
+    /** Notifies all other servers that a new word-scramble game has started on this server. */
+    public void publishChatGameStart(String scrambled, String answer) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("scrambled", scrambled);
+        json.addProperty("answer", answer);
+        publish(CH_CHAT_GAME_START, json);
+    }
+
+    /** Notifies all other servers that the word-scramble game was won on this server. */
+    public void publishChatGameWin(String winnerNickname, String answer) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("winner", winnerNickname);
+        json.addProperty("answer", answer);
+        publish(CH_CHAT_GAME_WIN, json);
+    }
+
     /** Publishes a dominion disband event so the other server evicts it from memory. */
     public void publishDominionDisband(UUID dominionId) {
         JsonObject json = new JsonObject();
@@ -1481,6 +1528,24 @@ public class NetworkManager {
             if (dominion == null) return;
             DominionUtils.evictDominionFromMemory(dominion);
         });
+    }
+
+    private void handleChatGameStart(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String scrambled = json.get("scrambled").getAsString();
+        String answer = json.get("answer").getAsString();
+        ChatGameUtils.applyNetworkGameStart(scrambled, answer, originServer);
+    }
+
+    private void handleChatGameWin(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+
+        String winner = json.get("winner").getAsString();
+        String answer = json.get("answer").getAsString();
+        ChatGameUtils.applyNetworkGameWin(AranarthCore.getInstance(), winner, answer);
     }
 
     // -------------------------------------------------------------------------
