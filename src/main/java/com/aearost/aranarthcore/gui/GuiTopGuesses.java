@@ -179,19 +179,23 @@ public class GuiTopGuesses {
             // Resolve stats
             final int guessCount;
             final double earnings;
+            final double bestTime;
             if (!dbData.isEmpty()) {
                 DatabaseManager.ChatGameEntry entry = dbData.get(uuid);
                 guessCount = entry != null ? entry.guessCount() : 0;
                 earnings = entry != null ? entry.totalEarnings() : 0.0;
+                bestTime = entry != null ? entry.bestTime() : 0.0;
             } else {
                 guessCount = AranarthUtils.getChatGameGuesses().getOrDefault(uuid, 0);
                 earnings = AranarthUtils.getChatGameEarnings().getOrDefault(uuid, 0.0);
+                bestTime = AranarthUtils.getChatGameBestTimes().getOrDefault(uuid, 0.0);
             }
 
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7&o" + guessCount + " correct guess" + (guessCount == 1 ? "" : "es")));
             lore.add(ChatUtils.translateToColor("&6&o$" + nf.format(Math.round(earnings)) + " &7&ototal earned"));
+            lore.add(ChatUtils.translateToColor("&7&o" + guessCount + " correct guess" + (guessCount == 1 ? "" : "es")));
+            lore.add(ChatUtils.translateToColor("&7&oBest speed: &f&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
