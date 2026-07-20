@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageType } = require('discord.js');
 const config = require('../config');
 const formManager = require('../forms/formManager');
 const TEMPLATES = require('../forms/templates');
@@ -8,6 +8,7 @@ const channelManager = require('../utils/channelManager');
 const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
 const { createIssue } = require('../github/issueCreator');
+const { applyStatusChange } = require('../utils/statusManager');
 
 const ACTIVE_MSG_PATH = path.join(__dirname, '..', 'data', 'activeMessage.json');
 
@@ -79,6 +80,12 @@ async function handleInitialReaction(reaction, user, client, emojiName) {
   const { channel } = await channelManager.createTicketChannel(guild, user, type);
   const session = formManager.createSession(user.id, channel.id, type);
 
+  // Notify user with a direct link to their new channel
+  try {
+    const dm = await user.createDM();
+    await dm.send(`✅ Your channel has been created! Click here to jump to it: ${channel.url}`);
+  } catch { /* DMs may be closed */ }
+
   if (type === 'QUESTION') {
     formManager.deleteSession(user.id, channel.id); // Questions use free-form, no form session needed
     await setupQuestionChannel(channel, guild, user, client);
@@ -109,14 +116,20 @@ async function setupQuestionChannel(channel, guild, user, client) {
   await channel.send({ embeds: [welcomeEmbed] });
   await channel.send(`<@&${config.COUNCIL_ROLE_ID}> — ${user} has a question for you!`);
 
-  // Post the pinned status message
+  // Post and pin the status message, suppressing the pin notification
   const statusEmbed = statusTracker.buildStatusEmbed('OPEN');
   const statusMsg = await channel.send({ embeds: [statusEmbed] });
   await statusMsg.react(config.STATUS_EMOJIS.OPEN);
   await statusMsg.react(config.STATUS_EMOJIS.AWAITING_INFO);
   await statusMsg.react(config.STATUS_EMOJIS.RESOLVED);
   await statusMsg.react(config.STATUS_EMOJIS.FORCE_CLOSE);
-  try { await statusMsg.pin(); } catch { /* non-critical */ }
+  try {
+    await statusMsg.pin();
+    // Delete the "pinned a message" system notification Discord auto-sends
+    const recent = await channel.messages.fetch({ limit: 5 });
+    const pinNotice = recent.find(m => m.type === MessageType.ChannelPinnedMessage);
+    if (pinNotice) await pinNotice.delete();
+  } catch { /* non-critical */ }
 
   statusTracker.set(channel.id, {
     messageId: statusMsg.id,
@@ -197,6 +210,15 @@ async function handleSubmit(channel, session, user, client) {
       ],
     });
 
+    // DM the user their issue link so they have it after the channel is deleted
+    try {
+      const dm = await user.createDM();
+      await dm.send(
+        `✅ Your **${template.displayName}** was submitted successfully to Aranarth!\n\n` +
+        `🔗 You can track it here: ${issueUrl}`
+      );
+    } catch { /* DMs may be closed */ }
+
     formManager.deleteSession(user.id, channel.id);
     await channelManager.deleteChannel(channel, 5000);
   } catch (err) {
@@ -272,35 +294,7 @@ async function handleStatusReaction(reaction, user, client, channel, statusInfo,
     ? `${user.username} (${member.nickname})`
     : user.username;
 
-  // Update the pinned status embed
-  try {
-    const statusMsg = await channel.messages.fetch(statusInfo.messageId);
-    await statusMsg.edit({ embeds: [statusTracker.buildStatusEmbed(newStatus)] });
-  } catch { /* message gone */ }
-
-  statusTracker.update(channel.id, { status: newStatus });
-
-  if (newStatus === 'OPEN') {
-    timerManager.cancel(channel.id);
-    await channel.send(`🔎 **${displayName}** set the status to **Open**.`);
-  } else if (newStatus === 'AWAITING_INFO') {
-    timerManager.schedule(client, channel.id, statusInfo.userId, 'AWAITING_INFO', config.AWAITING_INFO_MS);
-    await channel.send(
-      `⏳ **${displayName}** set the status to **Awaiting Info**.\n` +
-      `<@${statusInfo.userId}> — if you don't respond within **5 days**, this channel will automatically close.`
-    );
-  } else if (newStatus === 'RESOLVED') {
-    timerManager.schedule(client, channel.id, statusInfo.userId, 'RESOLVED', config.RESOLVED_MS);
-    await channel.send(
-      `✅ **${displayName}** marked this ticket as **Resolved**!\n` +
-      `This channel will automatically close in **48 hours**. Feel free to ask any follow-up questions before then!`
-    );
-  } else if (newStatus === 'FORCE_CLOSE') {
-    timerManager.cancel(channel.id);
-    await channel.send(`🔒 **${displayName}** closed this ticket.`);
-    await channelManager.deleteChannel(channel, 3000);
-    statusTracker.remove(channel.id);
-  }
+  await applyStatusChange(channel, statusInfo, newStatus, displayName, client);
 }
 
 module.exports = { handle };

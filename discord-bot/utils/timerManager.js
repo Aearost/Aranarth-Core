@@ -43,14 +43,14 @@ function schedule(client, channelId, userId, reason, delayMs) {
   const ids = {};
 
   if (delayMs > WARN * 2) {
-    ids.warnId = setTimeout(() => sendWarning(client, channelId, reason, WARN), delayMs - WARN);
+    ids.warnId = setTimeout(() => sendWarning(client, channelId, userId, reason, WARN), delayMs - WARN);
   }
   ids.closeId = setTimeout(() => closeChannel(client, channelId, reason), delayMs);
 
   activeTimers.set(channelId, ids);
 }
 
-async function sendWarning(client, channelId, reason, timeLeftMs) {
+async function sendWarning(client, channelId, userId, reason, timeLeftMs) {
   try {
     const channel = await client.channels.fetch(channelId);
     if (!channel) return;
@@ -59,6 +59,16 @@ async function sendWarning(client, channelId, reason, timeLeftMs) {
       ? 'no response from the ticket opener'
       : 'being marked as Resolved';
     await channel.send(`⚠️ This channel will automatically close in **${minutes} minutes** due to ${why}.`);
+
+    // DM the ticket opener with the warning
+    try {
+      const ticketUser = await client.users.fetch(userId);
+      const dm = await ticketUser.createDM();
+      const dmWhy = reason === 'AWAITING_INFO'
+        ? `your ticket is still awaiting your response`
+        : `your ticket was marked as Resolved`;
+      await dm.send(`⚠️ Your ticket in **Aranarth** will automatically close in **${minutes} minutes** because ${dmWhy}. Jump back in here if needed: ${channel.url}`);
+    } catch { /* DMs may be closed */ }
   } catch { /* channel may already be gone */ }
 }
 
@@ -70,11 +80,26 @@ async function closeChannel(client, channelId, reason) {
     const channel = await client.channels.fetch(channelId);
     if (!channel) return;
 
+    const statusInfo = statusTracker.get(channelId);
+
     const why = reason === 'AWAITING_INFO'
       ? 'no response from the ticket opener in 5 days'
       : 'being marked as Resolved with no further activity';
 
     await channel.send(`🔒 Closing this channel automatically due to ${why}.`);
+
+    // DM the ticket opener so they know why the channel disappeared
+    if (statusInfo?.userId) {
+      try {
+        const ticketUser = await client.users.fetch(statusInfo.userId);
+        const dm = await ticketUser.createDM();
+        const dmWhy = reason === 'AWAITING_INFO'
+          ? 'it was awaiting your response for 5 days with no reply'
+          : 'it was marked as Resolved with no further activity';
+        await dm.send(`🔒 Your ticket in **Aranarth** has been automatically closed because ${dmWhy}. Feel free to open a new ticket if you need further help!`);
+      } catch { /* DMs may be closed */ }
+    }
+
     await new Promise(r => setTimeout(r, 3000));
     await channel.delete();
   } catch { /* ignore if already deleted */ }

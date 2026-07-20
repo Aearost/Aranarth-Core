@@ -1,3 +1,4 @@
 node_modules/
 .env
-data/activeMessage.json
+data/
+Aranarth Support Bot/

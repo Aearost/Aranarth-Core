@@ -82,6 +82,7 @@ function buildStatusEmbed(status) {
       '🔎 Open · ⏳ Awaiting Info · ✅ Resolved · 🔒 Force Close'
     )
     .setColor(s.color)
+    .setFooter({ text: '🔒 Staff controls — reactions restricted to Council' })
     .setTimestamp();
 }
 

@@ -7,11 +7,15 @@ const {
   Partials,
   Events,
   EmbedBuilder,
+  REST,
+  Routes,
+  ApplicationCommandOptionType,
 } = require('discord.js');
 
 const config = require('./config');
 const reactionHandler = require('./handlers/reactionHandler');
 const messageHandler = require('./handlers/messageHandler');
+const tsCommandHandler = require('./handlers/tsCommandHandler');
 const timerManager = require('./utils/timerManager');
 const statusTracker = require('./utils/statusTracker');
 
@@ -35,6 +39,7 @@ client.once(Events.ClientReady, async (c) => {
   statusTracker.load();
   await setupSupportMessage(client);
   timerManager.restoreTimers(client);
+  await registerSlashCommands(c);
 });
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
@@ -55,6 +60,55 @@ client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
   await messageHandler.handle(message, client);
 });
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isChatInputCommand()) return;
+  if (interaction.commandName === 'ts') {
+    await tsCommandHandler.handle(interaction, client);
+  }
+});
+
+// ── Slash command registration ──────────────────────────────────────────────
+
+async function registerSlashCommands(c) {
+  const guild = c.guilds.cache.first();
+  if (!guild) {
+    console.error('[Bot] No guild found — slash commands not registered.');
+    return;
+  }
+
+  const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+  try {
+    await rest.put(
+      Routes.applicationGuildCommands(c.user.id, guild.id),
+      {
+        body: [
+          {
+            name: 'ts',
+            description: 'Change the status of this support ticket (Council only)',
+            options: [
+              {
+                name: 'status',
+                description: 'The new status to set',
+                type: ApplicationCommandOptionType.String,
+                required: true,
+                choices: [
+                  { name: 'Open',          value: 'OPEN' },
+                  { name: 'Awaiting Info', value: 'AWAITING_INFO' },
+                  { name: 'Resolved',      value: 'RESOLVED' },
+                  { name: 'Force Close',   value: 'FORCE_CLOSE' },
+                ],
+              },
+            ],
+          },
+        ],
+      }
+    );
+    console.log('[Bot] Slash commands registered.');
+  } catch (err) {
+    console.error('[Bot] Failed to register slash commands:', err.message);
+  }
+}
 
 // ── Support message setup ───────────────────────────────────────────────────
 
