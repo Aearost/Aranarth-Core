@@ -175,39 +175,31 @@ public class NetworkTabManager {
     // -------------------------------------------------------------------------
 
     /**
-     * Creates a com.mojang.authlib.GameProfile via reflection, optionally adding the skin
-     * texture property so the client renders the correct player head in the tab list.
+     * Creates a com.mojang.authlib.GameProfile via Paper's PlayerProfile API, optionally adding
+     * the skin texture property so the client renders the correct player head in the tab list.
+     * Uses Paper's abstraction rather than authlib internals because newer authlib versions
+     * (shipped with Paper 1.20.2+) make PropertyMap immutable, causing direct put() calls to fail.
      */
     private static Object createGameProfile(UUID uuid, String name,
                                             String textureValue, String textureSignature) throws Exception {
-        Object gp = gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
-        if (propertyClass != null && textureValue != null && !textureValue.isEmpty()) {
+        com.destroystokyo.paper.profile.PlayerProfile paperProfile = Bukkit.createProfile(uuid, name);
+        if (textureValue != null && !textureValue.isEmpty()) {
             try {
-                // Build a Property("textures", value, signature)
-                Object property;
-                try {
-                    property = propertyClass.getConstructor(String.class, String.class, String.class)
-                            .newInstance("textures", textureValue,
-                                    (textureSignature != null && !textureSignature.isEmpty()) ? textureSignature : null);
-                } catch (NoSuchMethodException e2) {
-                    // Some authlib versions have a 2-arg constructor without signature
-                    property = propertyClass.getConstructor(String.class, String.class)
-                            .newInstance("textures", textureValue);
-                }
-                // getProperties() / properties() returns the PropertyMap — try both authlib API styles
-                Method propMapGetter = null;
-                for (String mName : new String[]{"getProperties", "properties"}) {
-                    try { propMapGetter = gameProfileClass.getMethod(mName); break; }
-                    catch (NoSuchMethodException ignored) {}
-                }
-                if (propMapGetter == null) throw new NoSuchMethodException("no getProperties/properties on GameProfile");
-                Object propMap = propMapGetter.invoke(gp);
-                propMap.getClass().getMethod("put", Object.class, Object.class).invoke(propMap, "textures", property);
+                String sig = (textureSignature != null && !textureSignature.isEmpty()) ? textureSignature : null;
+                paperProfile.setProperty(new com.destroystokyo.paper.profile.ProfileProperty("textures", textureValue, sig));
             } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] NetworkTabManager: texture injection failed for UUID " + uuid + ": " + e.getMessage());
+                Throwable cause = (e.getCause() != null) ? e.getCause() : e;
+                Bukkit.getLogger().warning("[AC] NetworkTabManager: texture injection failed for UUID " + uuid + ": " + cause);
             }
         }
-        return gp;
+        // Extract the underlying com.mojang.authlib.GameProfile from Paper's CraftPlayerProfile
+        for (Method m : paperProfile.getClass().getMethods()) {
+            if (gameProfileClass.isAssignableFrom(m.getReturnType()) && m.getParameterCount() == 0) {
+                return m.invoke(paperProfile);
+            }
+        }
+        // Fallback: bare profile without skin
+        return gameProfileClass.getConstructor(UUID.class, String.class).newInstance(uuid, name);
     }
 
     /** Creates a ClientboundPlayerInfoUpdatePacket.Entry record via reflection.

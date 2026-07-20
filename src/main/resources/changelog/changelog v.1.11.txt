@@ -85,6 +85,7 @@ Minor Features
 [+] Made it so Dominions can be created in the SMP server as well
 
 Backend Code Changes
+- Implemented discord support bot basis
 - Implemented numerous fixes to widespread functionality affected by the migration of the SMP server
 - Fixed all player world checks to use AranarthUtils.isSurvivalWorld() instead of explicit world references
 - Cleaned up AranarthBendingUtils documentation
