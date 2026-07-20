@@ -85,6 +85,7 @@ Minor Features
 [+] Made it so Dominions can be created in the SMP server as well
 [~] Prevented leads from being equipped on Flying Bison
 [~] Made /ac spy a separate command from /ac admin, and made it spy on dominion chat as well
+[~] Updated the rules to clarify chat spam, and overall refining of rules
 
 Backend Code Changes
 - Implemented discord support bot basis
