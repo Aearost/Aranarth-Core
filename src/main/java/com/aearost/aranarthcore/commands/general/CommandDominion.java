@@ -38,6 +38,7 @@ public class CommandDominion implements CommandExecutor {
 
     private static final Map<UUID, Integer> pendingChunkPurchases = new HashMap<>();
     private static final Map<UUID, Integer> pendingOutpostChunkPurchases = new HashMap<>();
+    private static final Map<UUID, String> pendingConfirmations = new HashMap<>();
 
     /**
      * @param sender  The user that entered the command.
@@ -82,7 +83,7 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("remove")) {
                     removePlayer(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("disband")) {
-                    disbandDominion(dominion, player);
+                    disbandDominion(dominion, player, args);
                 } else if (args[0].equalsIgnoreCase("claim")) {
                     player.sendMessage(ChatUtils.chatMessage(DominionUtils.claimChunk(player, player.getChunk())));
                 } else if (args[0].equalsIgnoreCase("unclaim")) {
@@ -493,36 +494,71 @@ public class CommandDominion implements CommandExecutor {
     /**
      * Disbands an existing dominion.
      *
-     * @param dominion The dominion being disbanded.
+     * @param dominion The dominion of the executing player, if any.
      * @param player   The player attempting to disband the dominion.
+     * @param args     The full command arguments.
      */
-    private static void disbandDominion(Dominion dominion, Player player) {
-        if (dominion != null) {
-            if (dominion.getLeader().equals(player.getUniqueId())) {
-                if (dominion.getConqueredRequest() != null) {
-                    player.sendMessage(ChatUtils.chatMessage("&cYou cannot disband your Dominion while it is under active conquest!"));
-                    return;
-                }
-                long oneWeekMs = 7L * 24 * 60 * 60 * 1000;
-                if (DominionUtils.getConquerorOfDominion(dominion) != null) {
-                    long timeElapsed = System.currentTimeMillis() - dominion.getConqueredTimestamp();
-                    if (timeElapsed < oneWeekMs) {
-                        long daysLeft = (oneWeekMs - timeElapsed) / (1000 * 60 * 60 * 24) + 1;
-                        player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot disband for another &e" + daysLeft + " day(s) &cafter being conquered!"));
-                        return;
-                    }
-                    // Past the 7-day lock — allow disband but apply a 1-week creation/join cooldown
-                    AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
-                    aranarthPlayer.setConquestDisbandCooldownEnd(System.currentTimeMillis() + oneWeekMs);
-                    AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
-                }
-                // Must update the relations between Dominions, and then will disband
-                DominionUtils.updateDominionLeader(dominion, null, true);
-            } else {
-                player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
+    private static void disbandDominion(Dominion dominion, Player player, String[] args) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+
+        // Admin path of /d disband <name>
+        if (args.length >= 2 && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
+            String targetName = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+            Dominion target = DominionUtils.getDominions().stream()
+                .filter(d -> ChatUtils.stripColorFormatting(d.getName()).equalsIgnoreCase(targetName))
+                .findFirst().orElse(null);
+            if (target == null) {
+                player.sendMessage(ChatUtils.chatMessage("&cNo Dominion named &e" + targetName + " &cwas found!"));
+                return;
             }
-        } else {
+            String key = "admin-disband:" + target.getId();
+            if (key.equals(pendingConfirmations.get(player.getUniqueId()))) {
+                pendingConfirmations.remove(player.getUniqueId());
+                DominionUtils.disbandDominion(target);
+            } else {
+                pendingConfirmations.put(player.getUniqueId(), key);
+                player.sendMessage(ChatUtils.chatMessage("&cAre you sure you would like to disband &e" + target.getName() + "&c?"));
+                player.sendMessage(ChatUtils.chatMessage("&cUse &e/d disband " + targetName + " &cto confirm"));
+            }
+            return;
+        }
+
+        // Regular leader path
+        if (dominion == null) {
             player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+            return;
+        }
+        if (!dominion.getLeader().equals(player.getUniqueId())) {
+            player.sendMessage(ChatUtils.chatMessage("&cOnly the owner can disband the Dominion!"));
+            return;
+        }
+        if (dominion.getConqueredRequest() != null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou cannot disband your Dominion while it is under active conquest!"));
+            return;
+        }
+        long oneWeekMs = 7L * 24 * 60 * 60 * 1000;
+        boolean wasConquered = DominionUtils.getConquerorOfDominion(dominion) != null;
+        if (wasConquered) {
+            long timeElapsed = System.currentTimeMillis() - dominion.getConqueredTimestamp();
+            if (timeElapsed < oneWeekMs) {
+                long daysLeft = (oneWeekMs - timeElapsed) / (1000 * 60 * 60 * 24) + 1;
+                player.sendMessage(ChatUtils.chatMessage("&cYour Dominion cannot disband for another &e" + daysLeft + " day(s) &cafter being conquered!"));
+                return;
+            }
+        }
+        if ("disband".equals(pendingConfirmations.get(player.getUniqueId()))) {
+            pendingConfirmations.remove(player.getUniqueId());
+            if (wasConquered) {
+                // Past the 7-day lock, apply a 1-week creation/join cooldown on confirmed disband
+                aranarthPlayer.setConquestDisbandCooldownEnd(System.currentTimeMillis() + oneWeekMs);
+                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+            }
+            // Must update the relations between Dominions, and then will disband
+            DominionUtils.updateDominionLeader(dominion, null, true);
+        } else {
+            pendingConfirmations.put(player.getUniqueId(), "disband");
+            player.sendMessage(ChatUtils.chatMessage("&cAre you sure you would like to disband your Dominion?"));
+            player.sendMessage(ChatUtils.chatMessage("&cUse &e/d disband &cto confirm"));
         }
     }
 
@@ -1202,15 +1238,22 @@ public class CommandDominion implements CommandExecutor {
                 if (dominion.getLeader().equals(player.getUniqueId())) {
                     UUID uuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
                     if (uuid != null) {
-                        OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                         Dominion offlinePlayerDominion = DominionUtils.getPlayerDominion(uuid);
                         if (offlinePlayerDominion != null && dominion.isSameDominion(offlinePlayerDominion)) {
                             if (!uuid.equals(dominion.getLeader())) {
-                                AranarthPlayer oldLeader = AranarthUtils.getPlayer(player.getUniqueId());
-                                AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
-                                Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + newLeader.getNickname() + " &7is the new leader of &e" + dominion.getName()));
-                                DominionUtils.updateDominionLeader(dominion, uuid, false);
-                                DiscordUtils.dominionMessage(dominion, newLeader.getNickname() + " is the new leader of " + dominion.getName(), Color.CYAN);
+                                String key = "setleader:" + uuid;
+                                if (key.equals(pendingConfirmations.get(player.getUniqueId()))) {
+                                    pendingConfirmations.remove(player.getUniqueId());
+                                    AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
+                                    Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + newLeader.getNickname() + " &7is the new leader of &e" + dominion.getName()));
+                                    DominionUtils.updateDominionLeader(dominion, uuid, false);
+                                    DiscordUtils.dominionMessage(dominion, newLeader.getNickname() + " is the new leader of " + dominion.getName(), Color.CYAN);
+                                } else {
+                                    pendingConfirmations.put(player.getUniqueId(), key);
+                                    AranarthPlayer newLeader = AranarthUtils.getPlayer(uuid);
+                                    player.sendMessage(ChatUtils.chatMessage("&cAre you sure you would like to set &e" + newLeader.getNickname() + " &cas the leader of your Dominion?"));
+                                    player.sendMessage(ChatUtils.chatMessage("&cUse &e/d setleader " + args[1] + " &cto confirm"));
+                                }
                             } else {
                                 player.sendMessage(ChatUtils.chatMessage("&cYou cannot set yourself as the new leader!"));
                             }

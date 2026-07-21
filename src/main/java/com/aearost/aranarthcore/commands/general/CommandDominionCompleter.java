@@ -159,6 +159,19 @@ public class CommandDominionCompleter implements TabCompleter {
 				yield List.of();
 			}
 			case "msg" -> filter(DOMINION_CHAT_TYPES, args[1]);
+			case "disband" -> {
+				if (sender instanceof Player player) {
+					AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+					if (aranarthPlayer != null && aranarthPlayer.isInAdminMode() && aranarthPlayer.getCouncilRank() == 3) {
+						String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
+						yield DominionUtils.getDominions().stream()
+							.map(d -> ChatUtils.stripColorFormatting(d.getName()))
+							.filter(name -> query.isEmpty() || name.toLowerCase().startsWith(query.toLowerCase()))
+							.collect(Collectors.toList());
+					}
+				}
+				yield List.of();
+			}
 			case "info", "ally", "truce", "enemy", "neutral", "conquer", "surrender", "rebel", "retreat" -> {
 				String query = String.join(" ", Arrays.copyOfRange(args, 1, args.length));
 				yield DominionUtils.getDominions().stream()
