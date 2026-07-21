@@ -38,12 +38,12 @@ public class CommandShopCompleter implements TabCompleter {
 		}
 
 		if (args.length == 2) {
-			// /shop delete <username> — admin mode only
+			// /shop delete <username> - admin mode only
 			if (args[0].equalsIgnoreCase("delete") && aranarthPlayer.isInAdminMode()) {
 				return filterPlayers(args[1]);
 			}
-			// /shop biome <biome> — saint rank 1+
-			if (args[0].equalsIgnoreCase("biome") && (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.isInAdminMode())) {
+			// /shop biome <biome> - saint rank 1+ or council rank 1+
+			if (args[0].equalsIgnoreCase("biome") && (aranarthPlayer.getSaintRank() >= 1 || aranarthPlayer.getCouncilRank() >= 1 || aranarthPlayer.isInAdminMode())) {
 				return filter(BIOME_NAMES, args[1]);
 			}
 			// /shop invite <username> - shop owner only

@@ -375,8 +375,8 @@ public class CommandShop implements CommandExecutor {
         }
 
         if (args[0].equalsIgnoreCase("biome")) {
-            if (aranarthPlayer.getSaintRank() < 1 && !aranarthPlayer.isInAdminMode()) {
-                player.sendMessage(ChatUtils.chatMessage("&cYou must be a &6&lSaint &cor higher to change your island's biome"));
+            if (aranarthPlayer.getSaintRank() < 1 && aranarthPlayer.getCouncilRank() < 1 && !aranarthPlayer.isInAdminMode()) {
+                player.sendMessage(ChatUtils.chatMessage("&cYou must be a &b⚜ &6&lSaint &cor higher to change your island's biome"));
                 return true;
             }
             if (!AranarthUtils.getShopIslandCenters().containsKey(player.getUniqueId())) {

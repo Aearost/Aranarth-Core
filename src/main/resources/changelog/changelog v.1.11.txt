@@ -96,6 +96,7 @@ Minor Features
 [~] Made the dominion food consumption based on the dominion rank and not by chunk size
 [+] Added clickable /tpa and /tpd messages when receiving a teleport request
 [+] Added wither skeleton skulls and blaze rods to nether fortress simulations in dominion resource claims for the nether biomes
+[~] Added shop biome permission for council
 
 Backend Code Changes
 - Implemented discord support bot basis
