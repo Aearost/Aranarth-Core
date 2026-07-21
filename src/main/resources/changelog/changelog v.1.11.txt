@@ -100,6 +100,7 @@ Minor Features
 [~] Prevented Repair and Salvage from being used with Aranarthium armor
 [+] Added broadcast parameter to /ac give for keys, so that the give messages have the option to be broadcasted or default to silent otherwise
 [+] Added broadcast to nearby players when a crate is opened
+[~] Scaled dominion resource claim caps by the dominion's rank
 
 Backend Code Changes
 - Implemented discord support bot basis

@@ -2216,8 +2216,9 @@ public class DominionUtils {
         if (getConquerorOfDominion(dominion) != null) {
             return 8;
         }
-        // Base amount of 16, increase by 8 for each conquered Dominion, and 4 per outpost
-        int total = 16;
+        // Base amount by dominion level
+        int[] baseByLevel = {8, 12, 20, 28, 36};
+        int total = baseByLevel[dominion.getDominionLevel() - 1];
         total += dominion.getConquered().size() * 8;
         total += OutpostUtils.getDominionOutposts(dominion.getLeader()).size() * 4;
         return total;
