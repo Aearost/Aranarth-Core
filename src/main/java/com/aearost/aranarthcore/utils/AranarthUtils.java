@@ -1123,15 +1123,15 @@ public class AranarthUtils {
 			LockedContainer container = iterator.next();
 			Location loc1 = container.getLocations()[0];
 			Location loc2 = container.getLocations()[1];
-			boolean inChunk = (loc1 != null && loc1.getChunk().equals(chunk))
-					|| (loc2 != null && loc2.getChunk().equals(chunk));
+			boolean inChunk = (loc1 != null && loc1.getWorld() != null && loc1.getChunk().equals(chunk))
+					|| (loc2 != null && loc2.getWorld() != null && loc2.getChunk().equals(chunk));
 			if (!inChunk) {
 				continue;
 			}
 			// Skip chest shops
-			boolean isShop = (loc1 != null && ShopUtils.getShopFromLocation(
+			boolean isShop = (loc1 != null && loc1.getWorld() != null && ShopUtils.getShopFromLocation(
 					loc1.getBlock().getRelative(BlockFace.UP).getLocation()) != null)
-					|| (loc2 != null && ShopUtils.getShopFromLocation(
+					|| (loc2 != null && loc2.getWorld() != null && ShopUtils.getShopFromLocation(
 					loc2.getBlock().getRelative(BlockFace.UP).getLocation()) != null);
 			if (!isShop) {
 				iterator.remove();
