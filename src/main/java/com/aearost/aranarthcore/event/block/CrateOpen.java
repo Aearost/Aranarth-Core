@@ -426,6 +426,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$500 of In-Game Currency", "&aVote Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$500 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
@@ -457,6 +458,7 @@ public class CrateOpen {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     AranarthUtils.addVote(new AranarthVote(player.getUniqueId(), 10, System.currentTimeMillis()));
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&aVote Points +10", "&aVote Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +10"));
                     return;
                 } else if (chance <= 90) {
@@ -481,6 +483,7 @@ public class CrateOpen {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
+                broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&aVote Crate");
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Vote Crate"));
             });
@@ -519,6 +522,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.RARE);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$5,000 of In-Game Currency", "&6Rare Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$5,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
@@ -579,6 +583,7 @@ public class CrateOpen {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
+                broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&6Rare Crate");
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Rare Crate"));
             });
@@ -618,6 +623,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$25,000 of In-Game Currency", "&3Epic Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$25,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
@@ -687,6 +693,7 @@ public class CrateOpen {
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&3Epic Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                     Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in an Epic Crate"));
                     return;
@@ -709,6 +716,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.EPIC);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&eAll Skills +10 Levels", "&3Epic Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e10 Levels"));
                     return;
                 } else if (chance <= 85) {
@@ -743,6 +751,7 @@ public class CrateOpen {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
+                broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&3Epic Crate");
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
             });
         }
@@ -781,6 +790,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&6$75,000 of In-Game Currency", "&5Godly Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &6$75,000 of In-Game Currency"));
                     return;
                 } else if (chance <= 24) {
@@ -816,6 +826,7 @@ public class CrateOpen {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.GODLY);
                     AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                    broadcastRewardToNearbyPlayers(player, aranarthPlayer, "&eAll Skills +30 Levels", "&5Godly Crate");
                     player.sendMessage(ChatUtils.chatMessage("&7Your mcMMO Skills have each increased by &e30 Levels"));
                     return;
                 } else if (chance <= 60) {
@@ -870,9 +881,25 @@ public class CrateOpen {
                         player.getLocation().getWorld().dropItemNaturally(player.getLocation(), remain);
                     }
                 }
+                broadcastRewardToNearbyPlayers(player, aranarthPlayer, name, "&5Godly Crate");
                 player.sendMessage(ChatUtils.chatMessage("&7You have earned " + name));
                 Bukkit.getLogger().info("[AC] " + ChatUtils.stripColorFormatting(aranarthPlayer.getNickname() + " has rolled " + name + " in a Godly Crate"));
             });
+        }
+    }
+
+    /**
+     * Sends a nearby broadcast message to all players within 10 blocks of the crate opener.
+     * @param player The player that opened the crate.
+     * @param aranarthPlayer The AranarthPlayer object of the opener.
+     * @param reward The reward string to display.
+     * @param crateName The name of the crate type (with color codes).
+     */
+    private void broadcastRewardToNearbyPlayers(Player player, AranarthPlayer aranarthPlayer, String reward, String crateName) {
+        for (Player nearby : Bukkit.getOnlinePlayers()) {
+            if (!nearby.equals(player) && nearby.getWorld().equals(player.getWorld()) && nearby.getLocation().distance(player.getLocation()) <= 10) {
+                nearby.sendMessage(ChatUtils.chatMessage("&e" + aranarthPlayer.getNickname() + " &7has rolled " + reward + " &7in a " + crateName));
+            }
         }
     }
 

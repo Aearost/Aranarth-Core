@@ -99,6 +99,7 @@ Minor Features
 [~] Added shop biome permission for council
 [~] Prevented Repair and Salvage from being used with Aranarthium armor
 [+] Added broadcast parameter to /ac give for keys, so that the give messages have the option to be broadcasted or default to silent otherwise
+[+] Added broadcast to nearby players when a crate is opened
 
 Backend Code Changes
 - Implemented discord support bot basis
