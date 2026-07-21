@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.LoginStreakUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -60,6 +61,10 @@ public class GuiLoginStreakClick {
         if (!success) {
             return;
         }
+
+        // Immediately persist the claim to MySQL so a crash before the next periodic
+        // save doesn't roll the player back to their previous streak day.
+        PersistenceUtils.savePlayerLoginStreak(uuid);
 
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
         player.closeInventory();

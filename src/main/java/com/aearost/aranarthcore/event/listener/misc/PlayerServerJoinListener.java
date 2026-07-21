@@ -632,6 +632,10 @@ public class PlayerServerJoinListener implements Listener {
 		}
 
 		// Login streak notification
+		Bukkit.getLogger().info("[AC][Streak] JOIN " + player.getUniqueId()
+				+ " (" + player.getName() + ") | day=" + LoginStreakUtils.getStreakDay(player.getUniqueId())
+				+ " lastClaim=" + LoginStreakUtils.getLastClaimEpochDay(player.getUniqueId())
+				+ " lastLogin=" + LoginStreakUtils.getLastLoginEpochDay(player.getUniqueId()));
 		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
 		if (streakReset) {
 			player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));

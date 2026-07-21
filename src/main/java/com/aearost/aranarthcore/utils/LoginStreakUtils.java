@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.items.key.KeyVote;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -22,6 +23,7 @@ public class LoginStreakUtils {
 
     private static final HashMap<UUID, Integer> currentStreakDay = new HashMap<>();
     private static final HashMap<UUID, Long> lastClaimEpochDay = new HashMap<>();
+    private static final HashMap<UUID, Long> lastLoginEpochDay = new HashMap<>();
     private static final ZoneId EST = ZoneId.of("America/New_York");
     private static final NumberFormat MONEY_FORMAT = NumberFormat.getInstance();
 
@@ -57,6 +59,22 @@ public class LoginStreakUtils {
         return lastClaimEpochDay.getOrDefault(uuid, 0L);
     }
 
+    /**
+     * Returns the EST epoch day on which the player last logged in (updated on quit).
+     * Returns 0 if the player has no recorded login day.
+     */
+    public static long getLastLoginEpochDay(UUID uuid) {
+        return lastLoginEpochDay.getOrDefault(uuid, 0L);
+    }
+
+    /**
+     * Records today as the player's last login day. Call this on player quit so that
+     * a crash/disconnect doesn't erase the fact that the player was online that day.
+     */
+    public static void refreshLastLogin(UUID uuid) {
+        lastLoginEpochDay.put(uuid, getTodayEpochDay());
+    }
+
     // -------------------------------------------------------------------------
     // Streak validation
     // -------------------------------------------------------------------------
@@ -71,11 +89,21 @@ public class LoginStreakUtils {
         long today = getTodayEpochDay();
         int day = getStreakDay(uuid);
 
+        // Use the most recent of lastClaim or lastLogin as the effective last activity date.
+        // This prevents a crash/disconnect from resetting the streak when the player was
+        // online that day but disconnected before claiming (lastLogin is saved on quit).
+        long lastActivity = Math.max(lastClaim, getLastLoginEpochDay(uuid));
+
         // If the player is past day 1 and missed yesterday, reset
-        if (day > 1 && lastClaim < today - 1) {
+        if (day > 1 && lastActivity < today - 1) {
+            Bukkit.getLogger().warning("[AC][Streak] RESET for " + uuid
+                    + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + getLastLoginEpochDay(uuid)
+                    + " lastActivity=" + lastActivity + " today=" + today);
             currentStreakDay.put(uuid, 1);
             return true;
         }
+        Bukkit.getLogger().info("[AC][Streak] ensureStreakValid OK for " + uuid
+                + " | day=" + day + " lastClaim=" + lastClaim + " lastActivity=" + lastActivity + " today=" + today);
         return false;
     }
 
@@ -111,6 +139,10 @@ public class LoginStreakUtils {
 
         lastClaimEpochDay.put(uuid, getTodayEpochDay());
         currentStreakDay.put(uuid, day == 28 ? 1 : day + 1);
+
+        Bukkit.getLogger().info("[AC][Streak] CLAIMED day " + day + " for " + uuid
+                + " (" + player.getName() + ") | newDay=" + getStreakDay(uuid)
+                + " newLastClaim=" + getLastClaimEpochDay(uuid));
 
         return true;
     }
@@ -262,11 +294,19 @@ public class LoginStreakUtils {
         return lastClaimEpochDay;
     }
 
+    public static HashMap<UUID, Long> getLastLoginEpochDayMap() {
+        return lastLoginEpochDay;
+    }
+
     public static void setStreakDay(UUID uuid, int day) {
         currentStreakDay.put(uuid, day);
     }
 
     public static void setLastClaimEpochDay(UUID uuid, long epochDay) {
         lastClaimEpochDay.put(uuid, epochDay);
+    }
+
+    public static void setLastLoginEpochDay(UUID uuid, long epochDay) {
+        lastLoginEpochDay.put(uuid, epochDay);
     }
 }

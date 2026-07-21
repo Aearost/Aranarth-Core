@@ -14,6 +14,7 @@ import com.aearost.aranarthcore.objects.DefenderType;
 import com.aearost.aranarthcore.objects.Quest;
 import com.projectkorra.projectkorra.BendingPlayer;
 
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
@@ -3848,9 +3849,11 @@ public class PersistenceUtils {
                 UUID uuid = UUID.fromString(fields[0]);
                 int day = Integer.parseInt(fields[1]);
                 long lastClaim = Long.parseLong(fields[2]);
+                long lastLogin = fields.length >= 4 ? Long.parseLong(fields[3]) : lastClaim;
 
                 LoginStreakUtils.setStreakDay(uuid, day);
                 LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
+                LoginStreakUtils.setLastLoginEpochDay(uuid, lastLogin);
             }
 
             Bukkit.getLogger().info("[AC] Login streaks have been initialized");
@@ -3889,21 +3892,34 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#uuid|currentDay|lastClaimEpochDay\n");
+            writer.write("#uuid|currentDay|lastClaimEpochDay|lastLoginEpochDay\n");
 
             HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
             HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
+            HashMap<UUID, Long> logins = LoginStreakUtils.getLastLoginEpochDayMap();
 
+            long today = LocalDate.now(java.time.ZoneId.of("America/New_York")).toEpochDay();
             for (UUID uuid : days.keySet()) {
                 int day = days.get(uuid);
                 long lastClaim = claims.getOrDefault(uuid, 0L);
-                writer.write(uuid + "|" + day + "|" + lastClaim + "\n");
+                long lastLogin = logins.getOrDefault(uuid, lastClaim);
+                writer.write(uuid + "|" + day + "|" + lastClaim + "|" + lastLogin + "\n");
+                if (lastClaim == today || lastLogin == today) {
+                    Bukkit.getLogger().info("[AC][Streak] SAVE " + uuid
+                            + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
+                }
             }
 
             // Also persist players who have a lastClaim but no explicit day entry
             for (UUID uuid : claims.keySet()) {
                 if (!days.containsKey(uuid)) {
-                    writer.write(uuid + "|1|" + claims.get(uuid) + "\n");
+                    long lastClaim = claims.get(uuid);
+                    long lastLogin = logins.getOrDefault(uuid, lastClaim);
+                    writer.write(uuid + "|1|" + lastClaim + "|" + lastLogin + "\n");
+                    if (lastClaim == today || lastLogin == today) {
+                        Bukkit.getLogger().info("[AC][Streak] SAVE(claim-only) " + uuid
+                                + " | day=1 lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
+                    }
                 }
             }
 
@@ -5026,6 +5042,28 @@ public class PersistenceUtils {
     }
 
     /**
+     * Immediately persists a single player's login streak to MySQL.
+     * Call this right after a successful claim so the data is durable even if the
+     * server crashes or the player disconnects before the next periodic save.
+     */
+    public static void savePlayerLoginStreak(UUID uuid) {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        int day = LoginStreakUtils.getCurrentStreakDayMap().getOrDefault(uuid, 1);
+        long lastClaim = LoginStreakUtils.getLastClaimEpochDayMap().getOrDefault(uuid, 0L);
+        long lastLogin = LoginStreakUtils.getLastLoginEpochDayMap().getOrDefault(uuid, lastClaim);
+        String json = "{\"day\":" + day + ",\"lastClaim\":" + lastClaim + ",\"lastLogin\":" + lastLogin + "}";
+        runDbSync(() -> {
+            try {
+                DatabaseManager.getInstance().saveLoginStreak(uuid, json);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save login streak for " + uuid + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /**
      * Syncs login streak data to MySQL. Call after the file has been saved.
      */
     public static void syncLoginStreaksToDatabase() {
@@ -5035,13 +5073,15 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
         HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
+        HashMap<UUID, Long> logins = LoginStreakUtils.getLastLoginEpochDayMap();
         Set<UUID> allUuids = new HashSet<>();
         allUuids.addAll(days.keySet());
         allUuids.addAll(claims.keySet());
         for (UUID uuid : allUuids) {
             int day = days.getOrDefault(uuid, 1);
             long lastClaim = claims.getOrDefault(uuid, 0L);
-            String json = "{\"day\":" + day + ",\"lastClaim\":" + lastClaim + "}";
+            long lastLogin = logins.getOrDefault(uuid, lastClaim);
+            String json = "{\"day\":" + day + ",\"lastClaim\":" + lastClaim + ",\"lastLogin\":" + lastLogin + "}";
             try {
                 db.saveLoginStreak(uuid, json);
             } catch (Exception e) {
@@ -6205,8 +6245,10 @@ public class PersistenceUtils {
                 JsonObject j = GSON.fromJson(entry.getValue(), JsonObject.class);
                 int day = j.has("day") ? j.get("day").getAsInt() : 1;
                 long lastClaim = j.has("lastClaim") ? j.get("lastClaim").getAsLong() : 0L;
+                long lastLogin = j.has("lastLogin") ? j.get("lastLogin").getAsLong() : lastClaim;
                 LoginStreakUtils.setStreakDay(uuid, day);
                 LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
+                LoginStreakUtils.setLastLoginEpochDay(uuid, lastLogin);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse login streak for " + uuid + ": " + e.getMessage());
             }

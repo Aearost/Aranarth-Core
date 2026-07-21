@@ -87,6 +87,10 @@ public class PlayerServerQuitListener implements Listener {
 		// Prevent this player's stale in-memory quest data from being written to the shared DB
 		// after they leave — the other server owns their quest state from this point on.
 		QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
+		// Record today as the player's last login day before saving. This ensures that if the
+		// player crashes before claiming their streak, the saved data captures that they were
+		// online today, preventing a false reset when they reconnect after midnight.
+		LoginStreakUtils.refreshLastLogin(player.getUniqueId());
 		PersistenceUtils.saveLoginStreaks();
 		PermissionUtils.clearPlayerAttachments(player.getUniqueId());
 		AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
