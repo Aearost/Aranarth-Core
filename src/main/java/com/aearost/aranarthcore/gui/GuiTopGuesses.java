@@ -194,8 +194,8 @@ public class GuiTopGuesses {
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
             lore.add(ChatUtils.translateToColor("&6&o$" + nf.format(Math.round(earnings)) + " &7&ototal earned"));
-            lore.add(ChatUtils.translateToColor("&7&o" + guessCount + " correct guess" + (guessCount == 1 ? "" : "es")));
-            lore.add(ChatUtils.translateToColor("&7&oBest speed: &f&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&e&o" + guessCount + " &7&ocorrect guess" + (guessCount == 1 ? "" : "es")));
+            lore.add(ChatUtils.translateToColor("&7&oBest speed: &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
