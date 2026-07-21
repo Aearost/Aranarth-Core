@@ -100,6 +100,7 @@ public class NetworkManager {
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
+    public static final String CH_CHAT_GAME_CLAIM   = "aranarth:chat_game_claim";
     public static final String CH_DEATH             = "aranarth:death";
 
     // Temp-data key prefixes
@@ -291,6 +292,7 @@ public class NetworkManager {
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
+            case CH_CHAT_GAME_CLAIM  -> handleChatGameClaim(json);
             case CH_DEATH            -> handleDeath(json);
         }
     }
@@ -1574,6 +1576,16 @@ public class NetworkManager {
         publish(CH_CHAT_GAME_WIN, json);
     }
 
+    /** Forwards a correct guess from a non-origin server to the origin for authoritative win processing. */
+    public void publishChatGameClaim(java.util.UUID playerUUID, String playerNickname, double elapsedSeconds) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("playerUUID", playerUUID.toString());
+        json.addProperty("playerNickname", playerNickname);
+        json.addProperty("elapsedSeconds", elapsedSeconds);
+        publish(CH_CHAT_GAME_CLAIM, json);
+    }
+
     /** Notifies all other servers that the word-scramble game expired with no winner. */
     public void publishChatGameExpire(String answer) {
         JsonObject json = new JsonObject();
@@ -1651,6 +1663,16 @@ public class NetworkManager {
 
         String answer = json.get("answer").getAsString();
         ChatGameUtils.applyNetworkGameExpire(AranarthCore.getInstance(), answer);
+    }
+
+    private void handleChatGameClaim(JsonObject json) {
+        String claimingServer = json.get("server").getAsString();
+        if (claimingServer.equals(thisServer)) return; // ignore own claims
+
+        java.util.UUID playerUUID = java.util.UUID.fromString(json.get("playerUUID").getAsString());
+        String playerNickname = json.get("playerNickname").getAsString();
+        double elapsedSeconds = json.get("elapsedSeconds").getAsDouble();
+        ChatGameUtils.processRemoteClaim(AranarthCore.getInstance(), playerUUID, playerNickname, elapsedSeconds);
     }
 
     // -------------------------------------------------------------------------

@@ -284,6 +284,7 @@ public class ChatGameUtils {
         final String origin;
         final int localStreakCount;
         final double elapsedSeconds;
+        final boolean isOrigin;
         synchronized (gameLock) {
             if (currentAnswer == null) {
                 return false;
@@ -305,14 +306,31 @@ public class ChatGameUtils {
                 timeoutTask = null;
             }
 
-            UUID uuid = player.getUniqueId();
-            if (uuid.equals(streakWinnerUUID)) {
-                streakCount++;
+            isOrigin = !NetworkManager.isActive()
+                    || NetworkManager.getInstance().getThisServer().equals(origin);
+
+            if (isOrigin) {
+                UUID uuid = player.getUniqueId();
+                if (uuid.equals(streakWinnerUUID)) {
+                    streakCount++;
+                } else {
+                    streakWinnerUUID = uuid;
+                    streakCount = 1;
+                }
+                localStreakCount = streakCount;
             } else {
-                streakWinnerUUID = uuid;
-                streakCount = 1;
+                localStreakCount = 0; // Unused in claim path
             }
-            localStreakCount = streakCount;
+        }
+
+        // This server did not originate the game
+        if (!isOrigin) {
+            final UUID claimUUID = player.getUniqueId();
+            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+                AranarthPlayer ap = AranarthUtils.getPlayer(claimUUID);
+                NetworkManager.getInstance().publishChatGameClaim(claimUUID, ap.getNickname(), elapsedSeconds);
+            });
+            return true;
         }
 
         Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
@@ -416,8 +434,6 @@ public class ChatGameUtils {
             }
 
             // Only the server that originated the game schedules the next one
-            boolean isOrigin = !NetworkManager.isActive()
-                    || NetworkManager.getInstance().getThisServer().equals(origin);
             if (isOrigin) {
                 scheduleNextGame(AranarthCore.getInstance());
             }
@@ -429,6 +445,95 @@ public class ChatGameUtils {
         NumberFormat nf = NumberFormat.getNumberInstance(Locale.US);
         nf.setMaximumFractionDigits(0);
         return "$" + nf.format(Math.round(amount));
+    }
+
+    /**
+     * Called by NetworkManager when a non-origin server's player has claimed the active game.
+     */
+    public static void processRemoteClaim(Plugin plugin, UUID winnerUUID, String winnerNickname, double elapsedSeconds) {
+        final String answer;
+        final String origin;
+        final int localStreakCount;
+        synchronized (gameLock) {
+            if (currentAnswer == null) {
+                return; // Already ended
+            }
+            boolean isOriginServer = !NetworkManager.isActive()
+                    || NetworkManager.getInstance().getThisServer().equals(currentGameOrigin);
+            if (!isOriginServer) {
+                return; // Only the origin resolves claims
+            }
+            answer = currentAnswer;
+            origin = currentGameOrigin;
+            currentAnswer = null;
+            currentScrambled = null;
+            currentGameOrigin = null;
+            gameStartTime = 0;
+            if (timeoutTask != null) {
+                timeoutTask.cancel();
+                timeoutTask = null;
+            }
+            if (winnerUUID.equals(streakWinnerUUID)) {
+                streakCount++;
+            } else {
+                streakWinnerUUID = winnerUUID;
+                streakCount = 1;
+            }
+            localStreakCount = streakCount;
+        }
+
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            String timeStr = String.format("%.2f", elapsedSeconds);
+            String winMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7guessed &e" + answer + " &7correctly in &e" + timeStr + "s!");
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(winMsg);
+                p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            }
+
+            if (localStreakCount >= 3) {
+                String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + localStreakCount + "x &7unscramble streak!");
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.sendMessage(streakMsg);
+                }
+                NetworkManager.getInstance().publishBroadcast(streakMsg);
+            }
+
+            final boolean newGlobalRecord;
+            final String oldHolderNickname;
+            final double oldGlobalBestTime;
+            synchronized (globalRecordLock) {
+                if (globalBestTime == 0 || elapsedSeconds < globalBestTime) {
+                    newGlobalRecord = true;
+                    oldHolderNickname = globalBestHolderNickname;
+                    oldGlobalBestTime = globalBestTime;
+                    globalBestTime = elapsedSeconds;
+                    globalBestHolderUUID = winnerUUID;
+                    globalBestHolderNickname = winnerNickname;
+                } else {
+                    newGlobalRecord = false;
+                    oldHolderNickname = null;
+                    oldGlobalBestTime = 0;
+                }
+            }
+
+            if (newGlobalRecord && oldHolderNickname != null && !oldHolderNickname.isEmpty()) {
+                String oldTimeStr = String.format("%.2f", oldGlobalBestTime);
+                String recordMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7has beat &e" + oldHolderNickname + "&e's &7record of &e" + oldTimeStr + "s");
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.sendMessage(recordMsg);
+                }
+                NetworkManager.getInstance().publishBroadcast(recordMsg);
+            }
+
+            NetworkManager.getInstance().publishChatGameWin(winnerNickname, answer, winnerUUID,
+                    elapsedSeconds, newGlobalRecord, winnerNickname, winnerUUID, elapsedSeconds);
+
+            boolean isOrigin = !NetworkManager.isActive()
+                    || NetworkManager.getInstance().getThisServer().equals(origin);
+            if (isOrigin) {
+                scheduleNextGame(plugin);
+            }
+        });
     }
 
     /**
@@ -488,6 +593,55 @@ public class ChatGameUtils {
                 p.sendMessage(streakMsg);
             }
         }
+
+        // Award the player if they are on this server
+        final int streakForReward = networkStreakCount;
+        final double elapsedForReward = elapsedSeconds;
+        Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
+            Player winner = Bukkit.getPlayer(winnerUUID);
+            if (winner == null) return;
+            AranarthPlayer ap = AranarthUtils.getPlayer(winner.getUniqueId());
+            int rank = Math.min(ap.getRank(), RANK_REWARDS.length - 1);
+            double baseReward = RANK_REWARDS[rank];
+            double multiplier = Math.min(1.0 + 0.1 * (streakForReward - 1), 2.0);
+            double reward = baseReward * multiplier;
+
+            ap.setBalance(ap.getBalance() + reward);
+            AranarthUtils.addChatGameGuess(winner.getUniqueId());
+            AranarthUtils.addChatGameEarnings(winner.getUniqueId(), reward);
+
+            if (DatabaseManager.isActive()) {
+                Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                        DatabaseManager.getInstance().incrementChatGameGuessCount(winner.getUniqueId(), reward));
+            }
+
+            double personalBest = AranarthUtils.getChatGameBestTime(winner.getUniqueId());
+            if (personalBest == 0 || elapsedForReward < personalBest) {
+                AranarthUtils.setChatGameBestTime(winner.getUniqueId(), elapsedForReward);
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                            DatabaseManager.getInstance().updatePersonalBestTime(winner.getUniqueId(), elapsedForReward));
+                }
+            }
+
+            int currentHighestStreak = AranarthUtils.getChatGameHighestStreak(winner.getUniqueId());
+            if (streakForReward > currentHighestStreak) {
+                AranarthUtils.setChatGameHighestStreak(winner.getUniqueId(), streakForReward);
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                            DatabaseManager.getInstance().updateHighestStreak(winner.getUniqueId(), streakForReward));
+                }
+            }
+
+            String rewardText = formatMoney(reward);
+            if (streakForReward > 1) {
+                winner.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText
+                        + " &7- &e" + streakForReward + "x streak"));
+            } else {
+                winner.sendMessage(ChatUtils.chatMessage("&7You earned &6" + rewardText));
+            }
+        });
+
         if (wasOrigin) {
             scheduleNextGame(plugin);
         }

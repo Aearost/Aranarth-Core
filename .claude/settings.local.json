@@ -270,7 +270,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects -type f \\\\\\(-name *.java -o -name *.yml \\\\\\) -path */plugin* -o -path */server*)",
       "Bash(git remote:*)",
       "Bash(find ~/.m2 -name *.jar -path *mcmmo*)",
-      "Bash(find ~/.m2 -name *.jar -path *mcMMO*)"
+      "Bash(find ~/.m2 -name *.jar -path *mcMMO*)",
+      "Read(//c/ProgramData/chocolatey/**)",
+      "Bash(find /c -name mvn -maxdepth 6)"
     ]
   }
 }
