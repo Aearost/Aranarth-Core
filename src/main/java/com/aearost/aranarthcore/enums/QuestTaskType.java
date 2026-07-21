@@ -5,12 +5,9 @@ public enum QuestTaskType {
     MINE_STONE,
     KILL_HOSTILE_MOB,
     KILL_PASSIVE_MOB,
-    CRAFT_PLANKS,
-    CRAFT_TORCHES,
     HARVEST_CROPS,
     PLANT_CROPS,
     FISH,
-    COOK_FOOD,
     BREED_ANIMALS,
     KILL_WITH_SWORD,
     BREAK_SAND,
@@ -38,9 +35,5 @@ public enum QuestTaskType {
     KILL_CHICKEN,
     KILL_SHEEP,
     KILL_RABBIT,
-    CRAFT_BREAD,
-    CRAFT_GLASS,
-    CRAFT_IRON_INGOTS,
-    CRAFT_GOLDEN_APPLE,
     KILL_PLAYER
 }

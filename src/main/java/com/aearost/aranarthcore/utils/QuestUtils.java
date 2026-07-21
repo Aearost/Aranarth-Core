@@ -152,7 +152,6 @@ public class QuestUtils {
             case PLANT_CROPS -> "Plant " + count + " Crops";
             case BREED_ANIMALS -> "Breed " + count + " Animals";
             case FISH -> "Fish " + count + " Fish";
-            case COOK_FOOD -> "Cook " + count + " Food";
             case KILL_HOSTILE_MOB -> "Kill " + count + " Hostile Mobs";
             case KILL_PASSIVE_MOB -> "Kill " + count + " Passive Mobs";
             case KILL_WITH_MELEE -> "Kill " + count + " Mobs with a Melee Weapon";
@@ -174,12 +173,6 @@ public class QuestUtils {
             case KILL_RABBIT -> "Kill " + count + " Rabbits";
             case KILL_PLAYER -> "Kill " + count + " Players";
             case TRAVEL_BLOCKS -> "Travel " + count + " Blocks";
-            case CRAFT_PLANKS -> "Craft " + count + " Planks";
-            case CRAFT_TORCHES -> "Craft " + count + " Torches";
-            case CRAFT_BREAD -> "Craft " + count + " Bread";
-            case CRAFT_GLASS -> "Craft " + count + " Glass";
-            case CRAFT_IRON_INGOTS -> "Craft " + count + " Iron Ingots";
-            case CRAFT_GOLDEN_APPLE -> "Craft " + count + " Golden Apples";
         };
     }
 
@@ -402,8 +395,7 @@ public class QuestUtils {
         }
         return switch (taskType) {
             // Easy
-            case HARVEST_CROPS, PLANT_CROPS, BREED_ANIMALS, COOK_FOOD,
-                 CRAFT_PLANKS, CRAFT_TORCHES, CRAFT_GLASS, CRAFT_BREAD, CRAFT_IRON_INGOTS,
+            case HARVEST_CROPS, PLANT_CROPS, BREED_ANIMALS,
                  BREAK_LOG, BREAK_SAND, BREAK_DIRT, BREAK_GRAVEL,
                  TRAVEL_BLOCKS, KILL_PASSIVE_MOB,
                  KILL_COW, KILL_PIG, KILL_CHICKEN, KILL_SHEEP, KILL_RABBIT -> 0.5;
@@ -413,8 +405,7 @@ public class QuestUtils {
                  KILL_WITH_SWORD, KILL_WITH_BOW, KILL_WITH_MELEE, KILL_WITH_RANGED -> 1.0;
             // Hard
             case FISH, MINE_GOLD_ORE, MINE_DIAMOND, MINE_ANCIENT_DEBRIS,
-                 KILL_ENDERMAN, KILL_WITCH, KILL_BLAZE, KILL_GHAST,
-                 CRAFT_GOLDEN_APPLE -> 1.5;
+                 KILL_ENDERMAN, KILL_WITCH, KILL_BLAZE, KILL_GHAST -> 1.5;
             // Very hard
             case KILL_PLAYER -> 2.0;
         };
@@ -885,13 +876,6 @@ public class QuestUtils {
 
     public static List<Quest> getWeeklyQuestPool(int rank) {
         return weeklyQuestPool.getOrDefault(rank, new ArrayList<>());
-    }
-
-    /**
-     * Returns true if the world allows crafting quest progress.
-     */
-    public static boolean isCraftingAllowedWorld(String worldName) {
-        return AranarthUtils.isSurvivalWorld(worldName);
     }
 
     /**

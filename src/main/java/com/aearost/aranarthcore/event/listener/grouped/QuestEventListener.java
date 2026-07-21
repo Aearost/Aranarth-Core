@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import com.gmail.nossr50.mcMMO;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
@@ -18,16 +17,10 @@ import org.bukkit.event.entity.EntityBreedEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -100,21 +93,6 @@ public class QuestEventListener implements Listener {
     // Material name suffixes for melee weapon detection
     private static final String SWORD_SUFFIX = "_SWORD";
     private static final String AXE_SUFFIX = "_AXE";
-
-    // Cooked food materials
-    private static final Set<Material> COOKED_FOOD_MATERIALS = Set.of(
-            Material.COOKED_BEEF, Material.COOKED_PORKCHOP, Material.COOKED_CHICKEN,
-            Material.COOKED_SALMON, Material.COOKED_COD, Material.BAKED_POTATO,
-            Material.COOKED_MUTTON, Material.COOKED_RABBIT, Material.DRIED_KELP
-    );
-
-    // Plank materials
-    private static final Set<Material> PLANK_MATERIALS = Set.of(
-            Material.OAK_PLANKS, Material.SPRUCE_PLANKS, Material.BIRCH_PLANKS,
-            Material.JUNGLE_PLANKS, Material.ACACIA_PLANKS, Material.DARK_OAK_PLANKS,
-            Material.MANGROVE_PLANKS, Material.CHERRY_PLANKS, Material.BAMBOO_PLANKS,
-            Material.CRIMSON_PLANKS, Material.WARPED_PLANKS
-    );
 
     public QuestEventListener(AranarthCore plugin) {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -320,120 +298,6 @@ public class QuestEventListener implements Listener {
             return;
         }
         QuestUtils.updateProgress(player, QuestTaskType.FISH, 1);
-    }
-
-    // -------------------------------------------------------------------------
-    // Cooking — track via furnace result slot click
-    // -------------------------------------------------------------------------
-
-    @EventHandler
-    public void onFurnaceResultTake(InventoryClickEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-        InventoryType topType = e.getView().getTopInventory().getType();
-        if (topType != InventoryType.FURNACE && topType != InventoryType.SMOKER) {
-            return;
-        }
-        // Result slot is raw slot 2
-        if (e.getRawSlot() != 2) {
-            return;
-        }
-
-        ItemStack result = e.getCurrentItem();
-        if (result == null || result.getType().isAir()) {
-            return;
-        }
-        if (!COOKED_FOOD_MATERIALS.contains(result.getType())) {
-            return;
-        }
-
-        String worldName = player.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName)) {
-            return;
-        }
-
-        Material type = result.getType();
-
-        if (e.isShiftClick()) {
-            // Snapshot before to correctly count what actually fits into the inventory
-            Map<Material, Integer> before = countRelevantItems(player, type);
-            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
-                Map<Material, Integer> after = countRelevantItems(player, type);
-                int gained = after.getOrDefault(type, 0) - before.getOrDefault(type, 0);
-                if (gained > 0) {
-                    QuestUtils.updateProgress(player, QuestTaskType.COOK_FOOD, gained);
-                }
-            }, 1L);
-        } else {
-            QuestUtils.updateProgress(player, QuestTaskType.COOK_FOOD, result.getAmount());
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Crafting — uses before/after inventory snapshot to count shift-click correctly
-    // -------------------------------------------------------------------------
-
-    @EventHandler
-    public void onCraftItem(CraftItemEvent e) {
-        if (!(e.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-        String worldName = player.getWorld().getName();
-        if (!QuestUtils.isCraftingAllowedWorld(worldName)) {
-            return;
-        }
-
-        ItemStack result = e.getRecipe().getResult();
-        Material type = result.getType();
-
-        QuestTaskType taskType = null;
-        if (PLANK_MATERIALS.contains(type)) {
-            taskType = QuestTaskType.CRAFT_PLANKS;
-        } else if (type == Material.TORCH || type == Material.SOUL_TORCH) {
-            taskType = QuestTaskType.CRAFT_TORCHES;
-        } else if (type == Material.BREAD) {
-            taskType = QuestTaskType.CRAFT_BREAD;
-        } else if (type == Material.GLASS || type == Material.GLASS_PANE) {
-            taskType = QuestTaskType.CRAFT_GLASS;
-        } else if (type == Material.IRON_INGOT) {
-            taskType = QuestTaskType.CRAFT_IRON_INGOTS;
-        } else if (type == Material.GOLDEN_APPLE) {
-            taskType = QuestTaskType.CRAFT_GOLDEN_APPLE;
-        }
-
-        if (taskType == null) {
-            return;
-        }
-
-        // Snapshot inventory before craft completes, then compare after 1 tick
-        // to accurately count how many items were crafted (handles shift-click)
-        final QuestTaskType finalTaskType = taskType;
-        final Map<Material, Integer> before = countRelevantItems(player, type);
-
-        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
-            Map<Material, Integer> after = countRelevantItems(player, type);
-            int gained = after.getOrDefault(type, 0) - before.getOrDefault(type, 0);
-            if (gained > 0) {
-                QuestUtils.updateProgress(player, finalTaskType, gained);
-            }
-        }, 1L);
-    }
-
-    /**
-     * Counts how many of the given material (and same-type variants for glass panes) the player has.
-     */
-    private Map<Material, Integer> countRelevantItems(Player player, Material target) {
-        Map<Material, Integer> counts = new HashMap<>();
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item == null) {
-                continue;
-            }
-            if (item.getType() == target) {
-                counts.merge(target, item.getAmount(), Integer::sum);
-            }
-        }
-        return counts;
     }
 
     // -------------------------------------------------------------------------
