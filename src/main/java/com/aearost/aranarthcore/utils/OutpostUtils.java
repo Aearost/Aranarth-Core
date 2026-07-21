@@ -160,13 +160,26 @@ public class OutpostUtils {
     }
 
     /**
-     * Calculates the total cost of buying additional outpost chunks
-     * Formula: 50000 * 1.06^(currentBought + i) per chunk.
+     * Calculates the total cost of buying additional outpost chunks.
+     * The base multiplier (1.06) scales down to 1.001 over 12 Aranarth years (360 real-life days)
+     * based on the age of the Dominion.
      */
-    public static double calculateBuyOutpostChunksCost(int currentBought, int amount) {
+    public static double calculateBuyOutpostChunksCost(int currentBought, int amount, Dominion dominion) {
+        // April 2, 2026 00:00:00 UTC - 17th of Solarvor, Year 109 (founding date for ancient/legacy dominions)
+        final long ancientFoundedMs = 1775088000000L;
+        long foundedTimestamp = dominion.getFoundedTimestamp() == 0L ? ancientFoundedMs : dominion.getFoundedTimestamp();
+        long ageMs = System.currentTimeMillis() - foundedTimestamp;
+        long twelveAranarthYears = 12L * 30 * 24 * 60 * 60 * 1000;
+        double multiplier;
+        if (ageMs >= twelveAranarthYears) {
+            multiplier = 1.001;
+        } else {
+            double progress = (double) ageMs / twelveAranarthYears;
+            multiplier = 1.06 - progress * (1.06 - 1.001);
+        }
         double total = 0;
         for (int i = 0; i < amount; i++) {
-            total += 50_000 * Math.pow(1.06, currentBought + i);
+            total += 50_000 * Math.pow(multiplier, currentBought + i);
         }
         return total;
     }

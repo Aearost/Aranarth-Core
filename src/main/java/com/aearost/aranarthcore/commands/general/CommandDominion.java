@@ -1439,7 +1439,7 @@ public class CommandDominion implements CommandExecutor {
         }
 
         int currentBought = dominion.getBoughtOutpostChunks();
-        double totalCost = OutpostUtils.calculateBuyOutpostChunksCost(currentBought, amount);
+        double totalCost = OutpostUtils.calculateBuyOutpostChunksCost(currentBought, amount, dominion);
 
         Integer pending = pendingOutpostChunkPurchases.get(player.getUniqueId());
         if (pending != null && pending == amount) {
@@ -1515,10 +1515,27 @@ public class CommandDominion implements CommandExecutor {
         return cleaned;
     }
 
-    private static double calculateBuyChunksCost(int currentBought, int amount) {
+    private static double calculateBuyChunksCost(int currentBought, int amount, Dominion dominion) {
+        // April 2, 2026 00:00:00 UTC - 17th of Solarvor, Year 109 (founding date for ancient/legacy dominions)
+        final long ancientFoundedMs = 1775088000000L;
+        long foundedTimestamp = dominion.getFoundedTimestamp() == 0L ? ancientFoundedMs : dominion.getFoundedTimestamp();
+        long ageMs = System.currentTimeMillis() - foundedTimestamp;
+        long msPerAranarthYear = 30L * 24 * 60 * 60 * 1000;
+        long threeYears = 3 * msPerAranarthYear;
+        long sixYears = 6 * msPerAranarthYear;
+        double multiplier;
+        if (ageMs >= sixYears) {
+            multiplier = 1.001;
+        } else if (ageMs >= threeYears) {
+            double progress = (double) (ageMs - threeYears) / threeYears;
+            multiplier = 1.01 - progress * (1.01 - 1.001);
+        } else {
+            double progress = (double) ageMs / threeYears;
+            multiplier = 1.02 - progress * (1.02 - 1.01);
+        }
         double total = 0;
         for (int i = 0; i < amount; i++) {
-            total += 10000 * Math.pow(1.02, currentBought + i);
+            total += 10000 * Math.pow(multiplier, currentBought + i);
         }
         return total;
     }
@@ -1556,8 +1573,19 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
+        int currentMax = dominion.getMaxChunks();
+        if (currentMax >= 25000) {
+            player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has reached the maximum limit of &e25,000 chunks&c!"));
+            return;
+        }
+        int canBuy = 25000 - currentMax;
+        if (amount > canBuy) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou can only purchase up to &e" + canBuy + " &cmore chunk(s) before hitting the 25,000 chunk cap!"));
+            return;
+        }
+
         int currentBought = dominion.getBoughtChunks();
-        double totalCost = calculateBuyChunksCost(currentBought, amount);
+        double totalCost = calculateBuyChunksCost(currentBought, amount, dominion);
 
         Integer pending = pendingChunkPurchases.get(player.getUniqueId());
         if (pending != null && pending == amount) {

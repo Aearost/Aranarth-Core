@@ -90,6 +90,7 @@ Minor Features
 [~] Fixed issue where players could access the SMP even without being in the list, if they had a prior home there
 [~] Fixed issue where Survival, Spawn, and Resource worlds were not sharing the same /topkills and /topdeaths stats
 [~] Fixed issue where /mctop <skill> was erroring due to a null username field in their AranarthPlayer object
+[~] Implemented a decreasing buychunks price based on the dominion's age
 
 Backend Code Changes
 - Implemented discord support bot basis
