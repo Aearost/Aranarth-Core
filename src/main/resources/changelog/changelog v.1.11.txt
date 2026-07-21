@@ -92,6 +92,7 @@ Minor Features
 [~] Fixed issue where /mctop <skill> was erroring due to a null username field in their AranarthPlayer object
 [~] Implemented a decreasing buychunks price based on the dominion's age
 [~] Fixed issue where /shop was inaccessible from the SMP server
+[+] Added an additional 25% brew bonus during the month of Strigavor, stackable with Fae Aranarthium
 
 Backend Code Changes
 - Implemented discord support bot basis

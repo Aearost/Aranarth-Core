@@ -4,7 +4,7 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
-import com.aearost.aranarthcore.event.player.FaeBrewingBonus;
+import com.aearost.aranarthcore.event.player.DoubleBrewingBonus;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
@@ -32,21 +32,21 @@ public class InventoryClickEventListener implements Listener {
     }
 
     /**
-     * Prevents hoppers from extracting Fae brewing copies before the player can pick them up.
+     * Prevents hoppers from extracting double brew copies before the player can pick them up.
      */
     @EventHandler
     public void onInventoryMove(InventoryMoveItemEvent e) {
-        if (FaeBrewingBonus.activeCopyLocations.isEmpty()) {
+        if (DoubleBrewingBonus.activeCopyLocations.isEmpty()) {
             return;
         }
         if (!(e.getSource() instanceof BrewerInventory brewer)) {
             return;
         }
         var loc = brewer.getLocation();
-        if (loc != null && FaeBrewingBonus.activeCopyLocations.contains(loc)) {
+        if (loc != null && DoubleBrewingBonus.activeCopyLocations.contains(loc)) {
             if (e.getItem().hasItemMeta()) {
                 ItemMeta meta = e.getItem().getItemMeta();
-                if (meta.getPersistentDataContainer().has(CustomKeys.FAE_BREWING_COPY, PersistentDataType.BYTE)) {
+                if (meta.getPersistentDataContainer().has(CustomKeys.BREWING_COPY, PersistentDataType.BYTE)) {
                     e.setCancelled(true);
                 }
             }
@@ -147,7 +147,7 @@ public class InventoryClickEventListener implements Listener {
                     new FletchingTableCraft().execute(e);
                 } else if (e.getView().getType() == InventoryType.BREWING) {
                     new OrderChaosPotionBrewingPrevent().execute(e);
-                    new FaeBrewingBonus().execute(e);
+                    new DoubleBrewingBonus().execute(e);
                 }
             }
         }

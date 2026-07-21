@@ -11,16 +11,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.FAE_BREWED_POTION;
+import static com.aearost.aranarthcore.objects.CustomKeys.BREWED_POTION;
 
 /**
- * Tags potions in brewing stand output slots when a brew completes so that
- * FaeBrewingBonus can verify the potion was actually brewed rather than placed
- * there manually.
+ * Tags potions in brewing stand output slots when a brew completes to avoid potion duplication.
  */
-public class FaeBrewListener implements Listener {
+public class BrewingListener implements Listener {
 
-    public FaeBrewListener(AranarthCore plugin) {
+    public BrewingListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
@@ -38,7 +36,7 @@ public class FaeBrewListener implements Listener {
                 if (meta == null) {
                     continue;
                 }
-                meta.getPersistentDataContainer().set(FAE_BREWED_POTION, PersistentDataType.BYTE, (byte) 1);
+                meta.getPersistentDataContainer().set(BREWED_POTION, PersistentDataType.BYTE, (byte) 1);
                 item.setItemMeta(meta);
             }
         }, 1L);

@@ -1,6 +1,7 @@
 package com.aearost.aranarthcore.event.player;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.enums.Month;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,22 +20,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static com.aearost.aranarthcore.objects.CustomKeys.FAE_BREWED_POTION;
-import static com.aearost.aranarthcore.objects.CustomKeys.FAE_BREWING_COPY;
+import static com.aearost.aranarthcore.objects.CustomKeys.BREWED_POTION;
+import static com.aearost.aranarthcore.objects.CustomKeys.BREWING_COPY;
 
 /**
- * Gives Fae Aranarthium wearers a 25% chance to brew an additional potion.
+ * Grants a 25% chance to brew an additional potion during Strigavor, and an additional 25% for Fae Aranarthium wearers (stackable, up to 50%).
  */
-public class FaeBrewingBonus {
+public class DoubleBrewingBonus {
 
     public static final Set<Location> activeCopyLocations = new HashSet<>();
     private static final Map<Location, Integer> cleanupTasks = new HashMap<>();
 
     public void execute(InventoryClickEvent e) {
         if (!(e.getWhoClicked() instanceof Player player)) {
-            return;
-        }
-        if (!AranarthUtils.isWearingArmorType(player, "fae")) {
             return;
         }
         if (e.getView().getType() != InventoryType.BREWING) {
@@ -56,7 +54,7 @@ public class FaeBrewingBonus {
         }
 
         // If this slot already has a Fae copy waiting, allow normally
-        if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(FAE_BREWING_COPY, PersistentDataType.BYTE)) {
+        if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(BREWING_COPY, PersistentDataType.BYTE)) {
             // Remove tracking
             Location loc = brewer.getLocation();
             cancelCleanup(loc);
@@ -65,17 +63,25 @@ public class FaeBrewingBonus {
         }
 
         // Only trigger the bonus for potions that were actually brewed
-        if (!item.hasItemMeta() || !item.getItemMeta().getPersistentDataContainer().has(FAE_BREWED_POTION, PersistentDataType.BYTE)) {
+        if (!item.hasItemMeta() || !item.getItemMeta().getPersistentDataContainer().has(BREWED_POTION, PersistentDataType.BYTE)) {
             return;
         }
 
         // Strip the brewed tag so the same potion cannot trigger the bonus again if placed back
         var strippedMeta = item.getItemMeta();
-        strippedMeta.getPersistentDataContainer().remove(FAE_BREWED_POTION);
+        strippedMeta.getPersistentDataContainer().remove(BREWED_POTION);
         item.setItemMeta(strippedMeta);
 
-        // 25% chance to trigger double
-        if (ThreadLocalRandom.current().nextInt(4) != 0) {
+        // 25% chance per qualifying condition (Strigavor month and/or Fae Aranarthium armor), stacking up to 50%
+        boolean isStrigavor = AranarthUtils.getMonth() == Month.STRIGAVOR;
+        boolean wearingFae = AranarthUtils.isWearingArmorType(player, "fae");
+        if (!isStrigavor && !wearingFae) {
+            return;
+        }
+        int chance = 0;
+        if (isStrigavor) chance += 25;
+        if (wearingFae) chance += 25;
+        if (ThreadLocalRandom.current().nextInt(100) >= chance) {
             return;
         }
 
@@ -84,7 +90,7 @@ public class FaeBrewingBonus {
         copy.setAmount(1);
         if (copy.getItemMeta() != null) {
             var copyMeta = copy.getItemMeta();
-            copyMeta.getPersistentDataContainer().set(FAE_BREWING_COPY, PersistentDataType.BYTE, (byte) 1);
+            copyMeta.getPersistentDataContainer().set(BREWING_COPY, PersistentDataType.BYTE, (byte) 1);
             copy.setItemMeta(copyMeta);
         }
 
@@ -103,7 +109,7 @@ public class FaeBrewingBonus {
                 int taskId = Bukkit.getScheduler().scheduleSyncDelayedTask(AranarthCore.getInstance(), () -> {
                     ItemStack inSlot = brewer.getItem(finalSlot);
                     if (inSlot != null && inSlot.hasItemMeta()
-                            && inSlot.getItemMeta().getPersistentDataContainer().has(FAE_BREWING_COPY, PersistentDataType.BYTE)) {
+                            && inSlot.getItemMeta().getPersistentDataContainer().has(BREWING_COPY, PersistentDataType.BYTE)) {
                         brewer.setItem(finalSlot, null);
                     }
                     activeCopyLocations.remove(standLoc);
