@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
@@ -88,7 +89,10 @@ public class Dominion {
 		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
 		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
-		this.dominionHome = new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+		// worldName may be stored in "smp:<name>" form to distinguish SMP worlds from Survival worlds.
+		// Strip the prefix to get the actual Bukkit world name for this server.
+		String actualWorldName = worldName != null && worldName.startsWith("smp:") ? worldName.substring(4) : worldName;
+		this.dominionHome = new Location(Bukkit.getWorld(actualWorldName), x, y, z, yaw, pitch);
 		this.dominionHomeWorldName = worldName;
 		this.food = food;
 		this.claimableResources = claimableResources;
@@ -388,14 +392,13 @@ public class Dominion {
 
 	/**
 	 * Updates the Location of the dominion's home.
-	 * @param dominionHome The new Location of the dominion's home.
 	 */
 	public String getDominionHomeWorldName() { return dominionHomeWorldName; }
 
 	public void setDominionHome(Location dominionHome) {
 		this.dominionHome = dominionHome;
 		if (dominionHome != null && dominionHome.getWorld() != null) {
-			this.dominionHomeWorldName = dominionHome.getWorld().getName();
+			this.dominionHomeWorldName = AranarthUtils.toStoredDominionWorldName(dominionHome.getWorld().getName());
 		}
 	}
 

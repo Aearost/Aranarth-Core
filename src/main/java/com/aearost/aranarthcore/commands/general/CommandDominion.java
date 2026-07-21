@@ -452,7 +452,7 @@ public class CommandDominion implements CommandExecutor {
                                 memberRanks.put(player.getUniqueId(), DominionRank.LEADER);
 
                                 Dominion dominion = new Dominion(
-                                        null, dominionName, player.getUniqueId(), members, memberRanks, allies, truced, enemies, loc.getWorld().getName(), chunks,
+                                        null, dominionName, player.getUniqueId(), members, memberRanks, allies, truced, enemies, AranarthUtils.toStoredDominionWorldName(loc.getWorld().getName()), chunks,
                                         loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch(), new ItemStack[18], 0,
                                         conquered, null,
                                         // Keep the balance at the end
@@ -1320,7 +1320,7 @@ public class CommandDominion implements CommandExecutor {
         outpostChunks.add(chunk);
 
         Outpost outpost = new Outpost(null, outpostName, dominion.getId(), nextIndex,
-                loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(),
+                AranarthUtils.toStoredDominionWorldName(loc.getWorld().getName()), loc.getX(), loc.getY(), loc.getZ(),
                 loc.getYaw(), loc.getPitch(), outpostChunks, System.currentTimeMillis());
         OutpostUtils.registerOutpost(outpost);
 
@@ -2619,8 +2619,10 @@ public class CommandDominion implements CommandExecutor {
         if (worldName == null) return null;
         String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
         String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
+        // Check SMP first: isSmpWorld is server-aware ("world" on SMP server, "smp*" elsewhere).
+        // Also handles stored "smp:*" names and old data with raw "world" stored from the SMP server.
+        if (AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("smp:")) return smpServer;
         if (worldName.startsWith("world")) return survivalServer;
-        if (worldName.startsWith("smp")) return smpServer;
         return null;
     }
 

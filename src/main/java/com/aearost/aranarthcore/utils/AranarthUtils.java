@@ -4075,6 +4075,19 @@ public class AranarthUtils {
 	}
 
 	/**
+	 * Converts a Bukkit world name to the canonical stored form used in the dominion database row.
+	 * On the SMP server, worlds are named "world", "world_nether", "world_the_end", which clash with
+	 * the Survival server's world names. We prefix them with "smp:" so the stored value is unambiguous
+	 * (matching the convention already used by the homepad system).
+	 */
+	public static String toStoredDominionWorldName(String worldName) {
+		if (AranarthCore.isSmpServer() && isSmpWorld(worldName)) {
+			return "smp:" + worldName;
+		}
+		return worldName;
+	}
+
+	/**
 	 * Returns true if the world is one of the SMP worlds on whichever server is currently running.
 	 * On the test server or survival server: "smp", "smp_nether", "smp_the_end".
 	 * On the SMP server: "overworld", "the_nether", "the_end".

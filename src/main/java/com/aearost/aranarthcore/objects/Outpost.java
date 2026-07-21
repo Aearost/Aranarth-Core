@@ -28,7 +28,8 @@ public class Outpost {
         this.name = name;
         this.dominionId = dominionId;
         this.outpostIndex = outpostIndex;
-        this.home = new Location(Bukkit.getWorld(worldName), homeX, homeY, homeZ, homeYaw, homePitch);
+        String actualWorldName = worldName != null && worldName.startsWith("smp:") ? worldName.substring(4) : worldName;
+        this.home = new Location(Bukkit.getWorld(actualWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
         this.chunks = chunks;
         this.createdTimestamp = createdTimestamp;
     }

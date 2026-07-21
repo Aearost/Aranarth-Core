@@ -1277,7 +1277,11 @@ public class PersistenceUtils {
                 }
 
                 String worldName = fields[7];
-                World world = Bukkit.getWorld(worldName);
+                // Strip "smp:" prefix only on the SMP server where those worlds actually exist as "world" etc.
+                // On other servers, keep the raw name so Bukkit.getWorld() returns null and the dominion is skipped.
+                String lookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+                        ? worldName.substring(4) : worldName;
+                World world = Bukkit.getWorld(lookupName);
                 if (world == null) {
                     // This dominion's home world does not exist on this server (e.g. SMP dominion on Survival server).
                     continue;
@@ -4339,7 +4343,9 @@ public class PersistenceUtils {
                 float homeYaw = Float.parseFloat(fields[8]);
                 float homePitch = Float.parseFloat(fields[9]);
 
-                World world = Bukkit.getWorld(worldName);
+                String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+                        ? worldName.substring(4) : worldName;
+                World world = Bukkit.getWorld(outpostLookupName);
                 if (world == null) {
                     Bukkit.getLogger().warning("Outpost " + name + " references unknown world: " + worldName + " — skipping.");
                     continue;
@@ -4422,7 +4428,7 @@ public class PersistenceUtils {
                             + outpost.getDominionId() + "|"
                             + outpost.getName() + "|"
                             + outpost.getOutpostIndex() + "|"
-                            + home.getWorld().getName() + "|"
+                            + AranarthUtils.toStoredDominionWorldName(home.getWorld().getName()) + "|"
                             + home.getX() + "|"
                             + home.getY() + "|"
                             + home.getZ() + "|"
@@ -5723,7 +5729,7 @@ public class PersistenceUtils {
                 obj.addProperty("dominionId", outpost.getDominionId().toString());
                 obj.addProperty("name", outpost.getName());
                 obj.addProperty("outpostIndex", outpost.getOutpostIndex());
-                obj.addProperty("worldName", home.getWorld().getName());
+                obj.addProperty("worldName", AranarthUtils.toStoredDominionWorldName(home.getWorld().getName()));
                 obj.addProperty("homeX", home.getX());
                 obj.addProperty("homeY", home.getY());
                 obj.addProperty("homeZ", home.getZ());
@@ -6749,7 +6755,11 @@ public class PersistenceUtils {
         }
 
         String worldName = fields[7];
-        World world = Bukkit.getWorld(worldName);
+        // Strip "smp:" prefix only on the SMP server where those worlds actually exist as "world" etc.
+        // On other servers, keep the raw name so Bukkit.getWorld() returns null (cross-server stub with empty chunks).
+        String lookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+                ? worldName.substring(4) : worldName;
+        World world = Bukkit.getWorld(lookupName);
 
         List<Chunk> chunks = new ArrayList<>();
         String[] claimedChunks = fields[8].split("\\*\\*\\*");
@@ -7428,7 +7438,9 @@ public class PersistenceUtils {
                 float homeYaw = obj.get("homeYaw").getAsFloat();
                 float homePitch = obj.get("homePitch").getAsFloat();
                 long createdTimestamp = obj.get("createdTimestamp").getAsLong();
-                World world = Bukkit.getWorld(worldName);
+                String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
+                        ? worldName.substring(4) : worldName;
+                World world = Bukkit.getWorld(outpostLookupName);
                 if (world == null) {
                     Bukkit.getLogger().warning("[AC] Outpost " + name + " references unknown world: " + worldName + " — skipping.");
                     continue;
