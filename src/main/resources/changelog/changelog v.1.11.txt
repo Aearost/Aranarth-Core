@@ -97,6 +97,7 @@ Minor Features
 [+] Added clickable /tpa and /tpd messages when receiving a teleport request
 [+] Added wither skeleton skulls and blaze rods to nether fortress simulations in dominion resource claims for the nether biomes
 [~] Added shop biome permission for council
+[~] Prevented Repair and Salvage from being used with Aranarthium armor
 
 Backend Code Changes
 - Implemented discord support bot basis

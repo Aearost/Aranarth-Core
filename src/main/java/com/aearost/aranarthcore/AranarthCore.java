@@ -683,6 +683,7 @@ public class AranarthCore extends JavaPlugin {
         new FireProtectionListener(this);
         new SleepSkipListener(this);
         new BoostEffectsListener(this);
+        new McMMOListener(this);
         new LeafDropsListener(this);
         new AranarthCoreBendingListener(this);
         new MountStatsListener(this);

@@ -268,7 +268,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.yml -o -name *.yaml)",
       "Bash(find /c/Users/liamh/IdeaProjects -path */mcMMO* -o -path *plugins*mcMMO*)",
       "Bash(find /c/Users/liamh/IdeaProjects -type f \\\\\\(-name *.java -o -name *.yml \\\\\\) -path */plugin* -o -path */server*)",
-      "Bash(git remote:*)"
+      "Bash(git remote:*)",
+      "Bash(find ~/.m2 -name *.jar -path *mcmmo*)",
+      "Bash(find ~/.m2 -name *.jar -path *mcMMO*)"
     ]
   }
 }
