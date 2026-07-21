@@ -528,12 +528,15 @@ public class AranarthCore extends JavaPlugin {
         } else {
             PersistenceUtils.loadCompressible();
         }
+        // Shop locations are loaded on both servers so the /shop GUI and cross-server
+        // teleport work from SMP. The island counter and collaborators are only needed
+        // on Survival where islands are actually created and managed.
+        if (db) {
+            PersistenceUtils.loadShopLocationsFromDatabase();
+        } else {
+            PersistenceUtils.loadShopLocations();
+        }
         if (!isSmpServer()) {
-            if (db) {
-                PersistenceUtils.loadShopLocationsFromDatabase();
-            } else {
-                PersistenceUtils.loadShopLocations();
-            }
             PersistenceUtils.loadShopIslandCounter();
             if (db) {
                 PersistenceUtils.loadShopCollaboratorsFromDatabase();

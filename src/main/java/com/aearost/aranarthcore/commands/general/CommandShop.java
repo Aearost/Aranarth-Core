@@ -1,7 +1,10 @@
 package com.aearost.aranarthcore.commands.general;
 
+import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.Pronouns;
 import com.aearost.aranarthcore.gui.GuiShopLocation;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.PersistenceUtils;
@@ -58,6 +61,21 @@ public class CommandShop implements CommandExecutor {
                 return true;
             }
 
+            // Shops only exist on Survival — transfer the player there and re-run the command on arrival.
+            if (AranarthCore.isSmpServer() && NetworkManager.isActive()) {
+                String survivalServerName = AranarthCore.getInstance().getConfig()
+                        .getString("network.servers.survival", "survival");
+                AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                        aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7Creating your shop...", success -> {
+                    if (success) {
+                        PendingTeleport pt = PendingTeleport.forCommand(
+                                "shop create", "&e&lYour Shop", "&7Your shop island has been created");
+                        NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+                    }
+                });
+                return true;
+            }
+
             World shopsWorld = Bukkit.getWorld(ShopIslandUtils.SHOPS_WORLD);
             if (shopsWorld == null) {
                 player.sendMessage(ChatUtils.chatMessage("&cSomething went wrong with the shops world"));
@@ -92,6 +110,23 @@ public class CommandShop implements CommandExecutor {
             Location shopHome = AranarthUtils.getShopLocations().get(player.getUniqueId());
             if (shopHome == null) {
                 player.sendMessage(ChatUtils.chatMessage("&cYou do not have a shop. Create one with &e/shop create"));
+                return true;
+            }
+            // Shops world only exists on Survival — transfer the player there if on SMP.
+            if (AranarthCore.isSmpServer() && NetworkManager.isActive() && shopHome.getWorld() == null) {
+                String survivalServerName = AranarthCore.getInstance().getConfig()
+                        .getString("network.servers.survival", "survival");
+                AranarthUtils.teleportPlayer(player, player.getLocation(), player.getLocation(),
+                        aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7Transferring to shop...", success -> {
+                    if (success) {
+                        PendingTeleport pt = new PendingTeleport(
+                                ShopIslandUtils.SHOPS_WORLD,
+                                shopHome.getX(), shopHome.getY(), shopHome.getZ(),
+                                shopHome.getYaw(), shopHome.getPitch(),
+                                "&e&lYour Shop", "&7You have teleported to your shop");
+                        NetworkManager.getInstance().saveInventoryAndTransfer(player, survivalServerName, pt);
+                    }
+                });
                 return true;
             }
             AranarthUtils.teleportPlayer(player, player.getLocation(), shopHome, aranarthPlayer.isInAdminMode(), "&e&lYour Shop", "&7You have teleported to your shop", success -> {
