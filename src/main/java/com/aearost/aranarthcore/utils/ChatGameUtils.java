@@ -260,6 +260,8 @@ public class ChatGameUtils {
             currentScrambled = null;
             currentGameOrigin = null;
             timeoutTask = null;
+            streakWinnerUUID = null;
+            streakCount = 0;
         }
         String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + expectedAnswer);
         for (Player p : Bukkit.getOnlinePlayers()) {
@@ -337,6 +339,16 @@ public class ChatGameUtils {
             for (Player p : Bukkit.getOnlinePlayers()) {
                 p.sendMessage(winMsg);
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+            }
+
+            if (localStreakCount >= 3) {
+                String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + localStreakCount + "x &7unscramble streak!");
+                for (Player p : Bukkit.getOnlinePlayers()) {
+                    p.sendMessage(streakMsg);
+                }
+                if (NetworkManager.isActive()) {
+                    NetworkManager.getInstance().publishBroadcast(streakMsg);
+                }
             }
 
             // Personal best speed check
@@ -442,6 +454,7 @@ public class ChatGameUtils {
     public static void applyNetworkGameWin(Plugin plugin, String winnerNickname, String answer, UUID winnerUUID,
             double elapsedSeconds, boolean newGlobalRecord, String newHolderNickname, UUID newHolderUUID, double newGlobalBestTime) {
         final boolean wasOrigin;
+        final int networkStreakCount;
         synchronized (gameLock) {
             wasOrigin = NetworkManager.isActive()
                     && NetworkManager.getInstance().getThisServer().equals(currentGameOrigin);
@@ -458,6 +471,7 @@ public class ChatGameUtils {
                 streakWinnerUUID = winnerUUID;
                 streakCount = 1;
             }
+            networkStreakCount = streakCount;
         }
         if (newGlobalRecord && newHolderUUID != null) {
             updateGlobalBestCache(newHolderUUID, newHolderNickname, newGlobalBestTime);
@@ -467,6 +481,12 @@ public class ChatGameUtils {
         for (Player p : Bukkit.getOnlinePlayers()) {
             p.sendMessage(winMsg);
             p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        }
+        if (networkStreakCount >= 3) {
+            String streakMsg = ChatUtils.chatMessage("&e" + winnerNickname + " &7is on a &e" + networkStreakCount + "x &7unscramble streak!");
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(streakMsg);
+            }
         }
         if (wasOrigin) {
             scheduleNextGame(plugin);
@@ -491,6 +511,8 @@ public class ChatGameUtils {
                 timeoutTask.cancel();
                 timeoutTask = null;
             }
+            streakWinnerUUID = null;
+            streakCount = 0;
         }
         String expireMsg = ChatUtils.chatMessage("&7Nobody guessed! The word was &e" + answer);
         for (Player p : Bukkit.getOnlinePlayers()) {

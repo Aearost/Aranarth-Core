@@ -103,7 +103,7 @@ Minor Features
 [~] Scaled dominion resource claim caps by the dominion's rank
 [+] Added functionality to drop the dominion food reserves on dominion disband
 [+] Added /d disband and /d setleader confirmation messages
-[+] Also added /d disband <dominion> for admins to forcefully disband a dominion
+[+] Added /d disband <dominion> for admins to forcefully disband a dominion
 
 Backend Code Changes
 - Implemented discord support bot basis
