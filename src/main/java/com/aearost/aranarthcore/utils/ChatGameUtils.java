@@ -339,13 +339,23 @@ public class ChatGameUtils {
                 p.playSound(p.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
             }
 
-            // Personal best check
+            // Personal best speed check
             double personalBest = AranarthUtils.getChatGameBestTime(player.getUniqueId());
             if (personalBest == 0 || elapsedSeconds < personalBest) {
                 AranarthUtils.setChatGameBestTime(player.getUniqueId(), elapsedSeconds);
                 if (DatabaseManager.isActive()) {
                     Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                             DatabaseManager.getInstance().updatePersonalBestTime(player.getUniqueId(), elapsedSeconds));
+                }
+            }
+
+            // Personal best streak check
+            int currentHighestStreak = AranarthUtils.getChatGameHighestStreak(player.getUniqueId());
+            if (localStreakCount > currentHighestStreak) {
+                AranarthUtils.setChatGameHighestStreak(player.getUniqueId(), localStreakCount);
+                if (DatabaseManager.isActive()) {
+                    Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
+                            DatabaseManager.getInstance().updateHighestStreak(player.getUniqueId(), localStreakCount));
                 }
             }
 

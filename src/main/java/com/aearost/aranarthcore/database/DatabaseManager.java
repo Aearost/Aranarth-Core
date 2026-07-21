@@ -421,7 +421,8 @@ public class DatabaseManager {
             "ALTER TABLE player_votes ADD COLUMN IF NOT EXISTS history_json MEDIUMTEXT",
             "ALTER TABLE network_roster MODIFY COLUMN nickname TEXT DEFAULT ''",
             "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS total_earnings DOUBLE NOT NULL DEFAULT 0",
-            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0"
+            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS best_time DOUBLE NOT NULL DEFAULT 0",
+            "ALTER TABLE player_chat_game_guesses ADD COLUMN IF NOT EXISTS highest_streak INT NOT NULL DEFAULT 0"
         };
         try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement()) {
             for (String sql : migrations) {
@@ -531,13 +532,16 @@ public class DatabaseManager {
     }
 
     /** Holds a player's chat game stats loaded from the database. */
-    public record ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime) {
+    public record ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime, int highestStreak) {
         /** Constructor used during startup load (no display info needed). */
         public ChatGameEntry(int guessCount, double totalEarnings) {
-            this(guessCount, totalEarnings, "", "", 0.0);
+            this(guessCount, totalEarnings, "", "", 0.0, 0);
         }
         public ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname) {
-            this(guessCount, totalEarnings, username, nickname, 0.0);
+            this(guessCount, totalEarnings, username, nickname, 0.0, 0);
+        }
+        public ChatGameEntry(int guessCount, double totalEarnings, String username, String nickname, double bestTime) {
+            this(guessCount, totalEarnings, username, nickname, bestTime, 0);
         }
     }
 
@@ -548,12 +552,13 @@ public class DatabaseManager {
      * Upserts the guess count, total earnings, and personal best time for a single player.
      * A bestTime of 0 means unset and will not overwrite an existing record.
      */
-    public void saveChatGameGuessCount(UUID uuid, int guessCount, double totalEarnings, double bestTime) {
+    public void saveChatGameGuessCount(UUID uuid, int guessCount, double totalEarnings, double bestTime, int highestStreak) {
         String sql = """
-            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, best_time, highest_streak)
+            VALUES (?, ?, ?, ?, ?)
             ON DUPLICATE KEY UPDATE guess_count = VALUES(guess_count), total_earnings = VALUES(total_earnings),
-                best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time)
+                best_time = IF(VALUES(best_time) > 0 AND (best_time = 0 OR VALUES(best_time) < best_time), VALUES(best_time), best_time),
+                highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
             """;
         try (Connection conn = dataSource.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -561,9 +566,29 @@ public class DatabaseManager {
             ps.setInt(2, guessCount);
             ps.setDouble(3, totalEarnings);
             ps.setDouble(4, bestTime);
+            ps.setInt(5, highestStreak);
             ps.executeUpdate();
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save chat game guess count for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Atomically updates a player's highest chat game streak if the new streak is higher.
+     */
+    public void updateHighestStreak(UUID uuid, int streak) {
+        String sql = """
+            INSERT INTO player_chat_game_guesses (uuid, guess_count, total_earnings, highest_streak)
+            VALUES (?, 0, 0, ?)
+            ON DUPLICATE KEY UPDATE highest_streak = IF(VALUES(highest_streak) > highest_streak, VALUES(highest_streak), highest_streak)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setInt(2, streak);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to update highest streak for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -643,7 +668,7 @@ public class DatabaseManager {
      */
     public Map<UUID, ChatGameEntry> loadAllChatGameGuesses() {
         String sql = """
-            SELECT g.uuid, g.guess_count, g.total_earnings, g.best_time,
+            SELECT g.uuid, g.guess_count, g.total_earnings, g.best_time, g.highest_streak,
                    COALESCE(p.username, '') AS username,
                    COALESCE(p.raw_data, '') AS raw_data
             FROM player_chat_game_guesses g
@@ -664,7 +689,7 @@ public class DatabaseManager {
                 }
                 result.put(UUID.fromString(rs.getString("uuid")),
                         new ChatGameEntry(rs.getInt("guess_count"), rs.getDouble("total_earnings"),
-                                rs.getString("username"), nickname, rs.getDouble("best_time")));
+                                rs.getString("username"), nickname, rs.getDouble("best_time"), rs.getInt("highest_streak")));
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load chat game guesses: " + e.getMessage());

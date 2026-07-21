@@ -58,7 +58,7 @@ public class GuiTopGuesses {
                 dbData = DatabaseManager.getInstance().loadAllChatGameGuesses();
                 sortedUuids = dbData.entrySet().stream()
                         .filter(e -> e.getValue().guessCount() > 0)
-                        .sorted((a, b) -> Integer.compare(b.getValue().guessCount(), a.getValue().guessCount()))
+                        .sorted((a, b) -> Double.compare(b.getValue().totalEarnings(), a.getValue().totalEarnings()))
                         .map(Map.Entry::getKey)
                         .toList();
             } else {
@@ -180,22 +180,26 @@ public class GuiTopGuesses {
             final int guessCount;
             final double earnings;
             final double bestTime;
+            final int highestStreak;
             if (!dbData.isEmpty()) {
                 DatabaseManager.ChatGameEntry entry = dbData.get(uuid);
                 guessCount = entry != null ? entry.guessCount() : 0;
                 earnings = entry != null ? entry.totalEarnings() : 0.0;
                 bestTime = entry != null ? entry.bestTime() : 0.0;
+                highestStreak = entry != null ? entry.highestStreak() : 0;
             } else {
                 guessCount = AranarthUtils.getChatGameGuesses().getOrDefault(uuid, 0);
                 earnings = AranarthUtils.getChatGameEarnings().getOrDefault(uuid, 0.0);
                 bestTime = AranarthUtils.getChatGameBestTimes().getOrDefault(uuid, 0.0);
+                highestStreak = AranarthUtils.getChatGameHighestStreak(uuid);
             }
 
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&6&o$" + nf.format(Math.round(earnings)) + " &7&ototal earned"));
-            lore.add(ChatUtils.translateToColor("&e&o" + guessCount + " &7&ocorrect guess" + (guessCount == 1 ? "" : "es")));
-            lore.add(ChatUtils.translateToColor("&7&oBest speed: &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
+            lore.add(ChatUtils.translateToColor("&7&oCorrect guesses - &e&o" + guessCount));
+            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oFastest guess - &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);

@@ -107,6 +107,7 @@ public class AranarthUtils {
 	private static final HashMap<UUID, Integer> chatGameGuesses = new HashMap<>();
 	private static final HashMap<UUID, Double> chatGameEarnings = new HashMap<>();
 	private static final HashMap<UUID, Double> chatGameBestTimes = new HashMap<>();
+	private static final HashMap<UUID, Integer> chatGameHighestStreaks = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingVoteKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingRareKeys = new HashMap<>();
 	private static final HashMap<UUID, Integer> pendingEpicKeys = new HashMap<>();
@@ -3980,13 +3981,36 @@ public class AranarthUtils {
 	}
 
 	/**
-	 * Provides a list of UUIDs sorted by chat game guess count descending.
+	 * Provides the map of personal best chat game streaks for all players.
+	 */
+	public static HashMap<UUID, Integer> getChatGameHighestStreaks() {
+		return chatGameHighestStreaks;
+	}
+
+	/**
+	 * Returns the player's personal best chat game streak, or 0 if never set.
+	 */
+	public static int getChatGameHighestStreak(UUID uuid) {
+		return chatGameHighestStreaks.getOrDefault(uuid, 0);
+	}
+
+	/**
+	 * Sets the personal best chat game streak for the given player (used during load and on record).
+	 */
+	public static void setChatGameHighestStreak(UUID uuid, int streak) {
+		chatGameHighestStreaks.put(uuid, streak);
+	}
+
+	/**
+	 * Provides a list of UUIDs sorted by total chat game earnings descending.
 	 */
 	public static List<UUID> getTopGuesses() {
 		return chatGameGuesses.entrySet()
 				.stream()
 				.filter(e -> e.getValue() > 0)
-				.sorted((a, b) -> Integer.compare(b.getValue(), a.getValue()))
+				.sorted((a, b) -> Double.compare(
+						chatGameEarnings.getOrDefault(b.getKey(), 0.0),
+						chatGameEarnings.getOrDefault(a.getKey(), 0.0)))
 				.map(Map.Entry::getKey)
 				.toList();
 	}

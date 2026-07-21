@@ -3198,6 +3198,12 @@ public class PersistenceUtils {
                         AranarthUtils.setChatGameBestTime(uuid, bestTime);
                     }
                 }
+                if (fields.length >= 5) {
+                    int highestStreak = Integer.parseInt(fields[4]);
+                    if (highestStreak > 0) {
+                        AranarthUtils.setChatGameHighestStreak(uuid, highestStreak);
+                    }
+                }
             }
             Bukkit.getLogger().info("[AC] All chat game guesses have been initialized");
         } catch (FileNotFoundException e) {
@@ -3229,11 +3235,12 @@ public class PersistenceUtils {
             }
 
             try (FileWriter writer = new FileWriter(filePath)) {
-                writer.write("#uuid|count|earnings|bestTime\n");
+                writer.write("#uuid|count|earnings|bestTime|highestStreak\n");
                 for (Map.Entry<UUID, Integer> entry : AranarthUtils.getChatGameGuesses().entrySet()) {
                     double earnings = AranarthUtils.getChatGameEarnings().getOrDefault(entry.getKey(), 0.0);
                     double bestTime = AranarthUtils.getChatGameBestTime(entry.getKey());
-                    writer.write(entry.getKey() + "|" + entry.getValue() + "|" + earnings + "|" + bestTime + "\n");
+                    int highestStreak = AranarthUtils.getChatGameHighestStreak(entry.getKey());
+                    writer.write(entry.getKey() + "|" + entry.getValue() + "|" + earnings + "|" + bestTime + "|" + highestStreak + "\n");
                 }
             } catch (IOException e) {
                 Bukkit.getLogger().info("[AC] There was an error in saving the chat game guesses");
@@ -4840,7 +4847,8 @@ public class PersistenceUtils {
             try {
                 double earnings = AranarthUtils.getChatGameEarnings().getOrDefault(entry.getKey(), 0.0);
                 double bestTime = AranarthUtils.getChatGameBestTime(entry.getKey());
-                db.saveChatGameGuessCount(entry.getKey(), entry.getValue(), earnings, bestTime);
+                int highestStreak = AranarthUtils.getChatGameHighestStreak(entry.getKey());
+                db.saveChatGameGuessCount(entry.getKey(), entry.getValue(), earnings, bestTime, highestStreak);
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync chat game guess for " + entry.getKey() + ": " + e.getMessage());
             }
@@ -6029,6 +6037,9 @@ public class PersistenceUtils {
             AranarthUtils.setChatGameEarnings(entry.getKey(), entry.getValue().totalEarnings());
             if (entry.getValue().bestTime() > 0) {
                 AranarthUtils.setChatGameBestTime(entry.getKey(), entry.getValue().bestTime());
+            }
+            if (entry.getValue().highestStreak() > 0) {
+                AranarthUtils.setChatGameHighestStreak(entry.getKey(), entry.getValue().highestStreak());
             }
         }
         Bukkit.getLogger().info("[AC] Chat game guesses initialized from MySQL");
