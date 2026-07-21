@@ -1295,6 +1295,9 @@ public class NetworkManager {
 
         List<World> syncWorlds = AranarthUtils.getSyncWorlds();
 
+        World mainWorld = Bukkit.getWorld("world");
+        boolean isNewDay = mainWorld != null && (int) (mainWorld.getTime() / 20) < 5;
+
         switch (weatherType) {
             case "CLEAR" -> {
                 AranarthUtils.setStormDuration(0);
@@ -1312,7 +1315,9 @@ public class NetworkManager {
                     if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
                     if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
                     p.sendMessage(ChatUtils.chatMessage("&7&oThe storm has subsided..."));
-                    DateUtils.playClearSound(p);
+                    if (!isNewDay) {
+                        DateUtils.playClearSound(p);
+                    }
                 }
             }
             case "RAIN", "THUNDER" -> {
@@ -1335,10 +1340,12 @@ public class NetworkManager {
                     if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
                     if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
                     p.sendMessage(ChatUtils.chatMessage(broadcastMsg));
-                    if (isThunder) {
-                        DateUtils.playThunderStartSound(p);
-                    } else {
-                        DateUtils.playRainStartSound(p);
+                    if (!isNewDay) {
+                        if (isThunder) {
+                            DateUtils.playThunderStartSound(p);
+                        } else {
+                            DateUtils.playRainStartSound(p);
+                        }
                     }
                 }
             }
@@ -1359,7 +1366,9 @@ public class NetworkManager {
                     if (pWorld.equals("arena") || pWorld.equals("creative")) continue;
                     if (AranarthUtils.getPlayer(p.getUniqueId()).isWeatherMessageDisabled()) continue;
                     p.sendMessage(ChatUtils.chatMessage("&7&oIt has started to snow..."));
-                    DateUtils.playSnowStartSound(p);
+                    if (!isNewDay) {
+                        DateUtils.playSnowStartSound(p);
+                    }
                 }
             }
         }
