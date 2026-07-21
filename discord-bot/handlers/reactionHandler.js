@@ -7,7 +7,7 @@ const TEMPLATES = require('../forms/templates');
 const channelManager = require('../utils/channelManager');
 const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
-const { createIssue } = require('../github/issueCreator');
+const { createIssue, uploadAttachment } = require('../github/issueCreator');
 const { applyStatusChange } = require('../utils/statusManager');
 
 const ACTIVE_MSG_PATH = path.join(__dirname, '..', 'data', 'activeMessage.json');
@@ -191,8 +191,19 @@ async function handleSubmit(channel, session, user, client) {
   });
 
   try {
+    // Upload Discord attachments to GitHub so URLs are permanent
+    const screenshots = session.screenshots || [];
+    for (const screenshot of screenshots) {
+      try {
+        screenshot.url = await uploadAttachment(screenshot.name, screenshot.url, template.label);
+      } catch (uploadErr) {
+        console.error(`[ReactionHandler] Failed to upload attachment ${screenshot.name}:`, uploadErr.message);
+        // Keep the original Discord URL as fallback; it may still be valid at submit time
+      }
+    }
+
     const title = template.issueTitle(session.answers);
-    const body = template.buildBody(session.answers, displayName);
+    const body = template.buildBody(session.answers, displayName, screenshots);
     const issueUrl = await createIssue(title, body, template.label);
 
     await channel.send({

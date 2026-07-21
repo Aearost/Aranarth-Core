@@ -2,6 +2,18 @@ function skipOrValue(val) {
   return !val || val.toLowerCase() === 'skip' ? 'N/A' : val;
 }
 
+function buildAttachmentsSection(screenshots) {
+  if (!screenshots || screenshots.length === 0) return null;
+  const lines = screenshots.map((s, i) => {
+    const label = `**Attachment ${i + 1}** *(attached during: ${s.step})*`;
+    if (s.contentType && s.contentType.startsWith('image/')) {
+      return `${label}\n![${s.name}](${s.url})`;
+    }
+    return `${label}\n[${s.name}](${s.url})`;
+  });
+  return `**Screenshots / Attachments:**\n${lines.join('\n\n')}`;
+}
+
 const TEMPLATES = {
   BUG: {
     color: 0xFF4444,
@@ -42,15 +54,18 @@ const TEMPLATES = {
         optional: true,
       },
     ],
-    buildBody(answers, reportedBy) {
-      return [
+    buildBody(answers, reportedBy, screenshots = []) {
+      const parts = [
         `**Detailed Description:**\n${answers.description}`,
         `**Expected vs Actual Behaviour:**\n${answers.expectedActual}`,
         `**Steps to Reproduce:**\n${answers.steps}`,
         `**Proposed Fix (if applicable):**\n${skipOrValue(answers.proposedFix)}`,
         `**Reported By**\n${reportedBy}`,
         `**Additional context**\n${skipOrValue(answers.additionalContext)}`,
-      ].join('\n\n');
+      ];
+      const attachments = buildAttachmentsSection(screenshots);
+      if (attachments) parts.push(attachments);
+      return parts.join('\n\n');
     },
     issueTitle: (answers) => `[BUG] ${answers.title}`,
   },
@@ -88,14 +103,17 @@ const TEMPLATES = {
         optional: true,
       },
     ],
-    buildBody(answers, suggestedBy) {
-      return [
+    buildBody(answers, suggestedBy, screenshots = []) {
+      const parts = [
         `**Explanation of Suggestion**\n${answers.explanation}`,
         `**Purpose of Suggestion**\n${answers.purpose}`,
         `**Proposed Way to Implement**\n${answers.implementation}`,
         `**Suggested By**\n${suggestedBy}`,
         `**Additional context**\n${skipOrValue(answers.additionalContext)}`,
-      ].join('\n\n');
+      ];
+      const attachments = buildAttachmentsSection(screenshots);
+      if (attachments) parts.push(attachments);
+      return parts.join('\n\n');
     },
     issueTitle: (answers) => `[IDEA] ${answers.title}`,
   },
@@ -133,14 +151,17 @@ const TEMPLATES = {
         optional: true,
       },
     ],
-    buildBody(answers, suggestedBy) {
-      return [
+    buildBody(answers, suggestedBy, screenshots = []) {
+      const parts = [
         `**Element/Sub-Element**\n${answers.element}`,
         `**Explanation of Suggestion**\n${answers.explanation}`,
         `**How to Use Ability**\n${answers.howToUse}`,
         `**Suggested By**\n${suggestedBy}`,
         `**Additional context**\n${skipOrValue(answers.additionalContext)}`,
-      ].join('\n\n');
+      ];
+      const attachments = buildAttachmentsSection(screenshots);
+      if (attachments) parts.push(attachments);
+      return parts.join('\n\n');
     },
     issueTitle: (answers) => `[ABILITY] ${answers.title}`,
   },

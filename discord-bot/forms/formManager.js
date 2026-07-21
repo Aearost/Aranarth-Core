@@ -10,6 +10,7 @@ function createSession(userId, channelId, type) {
     type,
     currentStep: 0,
     answers: {},
+    screenshots: [], // { url, name, contentType, step }
     state: 'ANSWERING', // 'ANSWERING' | 'CONFIRMING' | 'EDITING'
     editMode: false,
     confirmMessageId: null,

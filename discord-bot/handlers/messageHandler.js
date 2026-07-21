@@ -25,6 +25,28 @@ async function handle(message, client) {
   const session = formManager.getSessionByChannel(message.channel.id);
   if (!session || message.author.id !== session.userId) return;
 
+  // Collect any attachments the user sends at any stage
+  if (message.attachments.size > 0) {
+    const template = TEMPLATES[session.type];
+    let stepLabel;
+    if (session.state === 'CONFIRMING') {
+      stepLabel = 'Review';
+    } else if (session.state === 'EDITING') {
+      stepLabel = 'Edit';
+    } else {
+      const q = template.questions[session.currentStep];
+      stepLabel = q ? q.label : 'Unknown';
+    }
+    message.attachments.forEach(att => {
+      session.screenshots.push({
+        url: att.url,
+        name: att.name,
+        contentType: att.contentType || '',
+        step: stepLabel,
+      });
+    });
+  }
+
   const template = TEMPLATES[session.type];
 
   if (session.state === 'ANSWERING') {
@@ -94,6 +116,13 @@ async function showConfirmation(channel, session, template, user, client) {
     name: `${i + 1}. ${q.label}`,
     value: (session.answers[q.key] || '*Not answered*').substring(0, 1024),
   }));
+
+  if (session.screenshots.length > 0) {
+    fields.push({
+      name: '📎 Attachments',
+      value: session.screenshots.map((s, i) => `${i + 1}. [${s.name}](${s.url}) *(${s.step})*`).join('\n').substring(0, 1024),
+    });
+  }
 
   const previewEmbed = new EmbedBuilder()
     .setTitle(`📋 Review Your ${template.displayName}`)
