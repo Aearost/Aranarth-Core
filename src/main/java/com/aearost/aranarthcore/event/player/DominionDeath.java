@@ -4,6 +4,7 @@ import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.objects.DominionRank;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.DominionLevelUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -117,15 +118,7 @@ public class DominionDeath {
      */
     private boolean attemptFoodDecrease(Dominion dominion, boolean wasKilledByPlayer, int warMultiplier) {
         int totalFoodPower = DominionUtils.getTotalFoodPower(dominion);
-        int powerBeingConsumed = 0;
-        // Consume 100 power per day for <=25 chunks
-        if (dominion.getChunks().size() <= 25) {
-            powerBeingConsumed = 50;
-        } else if (dominion.getChunks().size() <= 100) {
-            powerBeingConsumed = 125;
-        } else {
-            powerBeingConsumed = 250;
-        }
+        int powerBeingConsumed = DominionLevelUtils.getDailyFoodPower(dominion.getDominionLevel());
 
         if (wasKilledByPlayer) {
             // Equivalent of 2 days worth of food

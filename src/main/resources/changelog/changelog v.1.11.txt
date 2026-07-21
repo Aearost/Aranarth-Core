@@ -93,6 +93,7 @@ Minor Features
 [~] Implemented a decreasing buychunks price based on the dominion's age
 [~] Fixed issue where /shop was inaccessible from the SMP server
 [+] Added an additional 25% brew bonus during the month of Strigavor, stackable with Fae Aranarthium
+[~] Made the dominion food consumption based on the dominion rank and not by chunk size
 
 Backend Code Changes
 - Implemented discord support bot basis

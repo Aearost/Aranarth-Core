@@ -77,12 +77,25 @@ public class DominionLevelUtils {
     private static final double[] DAILY_BALANCE_COST = {150, 500, 2_000, 7_500, 25_000};
 
     /**
+     * Daily food power consumed per dominion level.
+     */
+    private static final int[] DAILY_FOOD_POWER = {100, 250, 500, 1_000, 2_000};
+
+    /**
      * Returns the daily balance cost for a dominion based on its current level.
      * Used as a fallback when the dominion does not have enough food in its reserves.
      */
     public static double getDailyBalanceCost(int dominionLevel) {
         int i = Math.max(0, Math.min(dominionLevel - 1, DAILY_BALANCE_COST.length - 1));
         return DAILY_BALANCE_COST[i];
+    }
+
+    /**
+     * Returns the daily food power cost for a dominion based on its current level.
+     */
+    public static int getDailyFoodPower(int dominionLevel) {
+        int i = Math.max(0, Math.min(dominionLevel - 1, DAILY_FOOD_POWER.length - 1));
+        return DAILY_FOOD_POWER[i];
     }
 
     private static int idx(int targetLevel) {

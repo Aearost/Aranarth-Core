@@ -790,15 +790,7 @@ public class DominionUtils {
 
             int totalFoodPower = getTotalFoodPower(dominion);
 
-            int powerBeingConsumed = 0;
-            // Consume 100 power per day for <=25 chunks
-            if (dominion.getChunks().size() <= 25) {
-                powerBeingConsumed = 100;
-            } else if (dominion.getChunks().size() <= 100) {
-                powerBeingConsumed = 250;
-            } else {
-                powerBeingConsumed = 500;
-            }
+            int powerBeingConsumed = DominionLevelUtils.getDailyFoodPower(dominion.getDominionLevel());
 
             if (totalFoodPower >= powerBeingConsumed) {
                 consumeFood(dominion, powerBeingConsumed);
