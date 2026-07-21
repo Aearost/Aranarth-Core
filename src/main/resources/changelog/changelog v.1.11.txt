@@ -101,6 +101,7 @@ Minor Features
 [+] Added broadcast parameter to /ac give for keys, so that the give messages have the option to be broadcasted or default to silent otherwise
 [+] Added broadcast to nearby players when a crate is opened
 [~] Scaled dominion resource claim caps by the dominion's rank
+[~] Added functionality to drop the dominion food reserves on dominion disband
 
 Backend Code Changes
 - Implemented discord support bot basis

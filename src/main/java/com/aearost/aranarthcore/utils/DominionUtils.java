@@ -464,7 +464,16 @@ public class DominionUtils {
         AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(dominion.getLeader());
         aranarthPlayer.setBalance(aranarthPlayer.getBalance() + dominion.getBalance());
         if (Bukkit.getOfflinePlayer(dominion.getLeader()).isOnline()) {
-            Bukkit.getPlayer(dominion.getLeader()).sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
+            Player leader = Bukkit.getPlayer(dominion.getLeader());
+            leader.sendMessage(ChatUtils.chatMessage("&7Your Dominion's balance has been added to your own"));
+            ItemStack[] foodReserves = dominion.getFood();
+            if (foodReserves != null) {
+                for (ItemStack item : foodReserves) {
+                    if (item != null && item.getType() != Material.AIR) {
+                        leader.getWorld().dropItemNaturally(leader.getLocation(), item);
+                    }
+                }
+            }
         }
 
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
