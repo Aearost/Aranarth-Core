@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.commands.council;
 
 import com.aearost.aranarthcore.items.AranarthItem;
 import com.aearost.aranarthcore.items.incantation.Incantation;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
@@ -103,12 +104,17 @@ public class CommandGive {
                     }
 
                     boolean willBroadcast = isKey && !args[2].equals("KeyVote");
+                    boolean isBroadcast = willBroadcast && args.length >= 5 && args[4].equalsIgnoreCase("broadcast");
 
                     // For crate keys in non-survival worlds, store as pending instead of giving directly
                     if (isKey) {
-                        if (willBroadcast) {
+                        if (isBroadcast) {
+                            String broadcastMessage = ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + itemName + " x" + quantity);
                             DiscordUtils.donationNotification(player.getName() + " has purchased " + itemName + " x" + quantity, player.getUniqueId(), Color.CYAN);
-                            Bukkit.broadcastMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has purchased " + itemName + " x" + quantity));
+                            Bukkit.broadcastMessage(broadcastMessage);
+                            if (NetworkManager.isActive()) {
+                                NetworkManager.getInstance().publishBroadcast(broadcastMessage);
+                            }
                         }
 
                         String worldName = player.getWorld().getName();
@@ -128,10 +134,15 @@ public class CommandGive {
                         }
                     }
 
-                    if (isInventoryFull) {
-                        player.sendMessage(ChatUtils.chatMessage("&e" + itemName + " &7has been dropped to the floor"));
-                    } else {
-                        player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                    if (!isKey || !isBroadcast) {
+                        if (isInventoryFull) {
+                            player.sendMessage(ChatUtils.chatMessage("&e" + itemName + " &7has been dropped to the floor"));
+                        } else {
+                            player.sendMessage(ChatUtils.chatMessage("&7You have been given " + itemName + " x" + quantity));
+                        }
+                        if (isKey && sender instanceof Player senderPlayer && !senderPlayer.getUniqueId().equals(player.getUniqueId())) {
+                            sender.sendMessage(ChatUtils.chatMessage("&e" + player.getName() + " &7has been given " + itemName + " x" + quantity));
+                        }
                     }
                 } else if (instance instanceof Incantation incantation) {
                     ItemStack item = incantation.getItem();
