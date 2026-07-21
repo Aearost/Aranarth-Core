@@ -448,8 +448,8 @@ public class PlayerServerJoinListener implements Listener {
 					for (Player online : Bukkit.getOnlinePlayers()) {
 						online.sendMessage("");
 						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-						online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","
-								+ "\n                    &7to the &6&lRealm of Aranarth!"));
+						online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","));
+						online.sendMessage(ChatUtils.translateToColor("                    &7to the &6&lRealm of Aranarth!"));
 						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
 						online.sendMessage("");
 					}
@@ -457,8 +457,8 @@ public class PlayerServerJoinListener implements Listener {
 					if (NetworkManager.isActive()) {
 						NetworkManager.getInstance().publishChat("", "");
 						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
-						NetworkManager.getInstance().publishChat("", "                     &7Welcome, &e" + player.getName() + "," +
-								"\n                    &7to the &6&lRealm of Aranarth!");
+						NetworkManager.getInstance().publishChat("", "                     &7Welcome, &e" + player.getName() + ",");
+						NetworkManager.getInstance().publishChat("", "                    &7to the &6&lRealm of Aranarth!");
 						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
 						NetworkManager.getInstance().publishChat("", "");
 					}

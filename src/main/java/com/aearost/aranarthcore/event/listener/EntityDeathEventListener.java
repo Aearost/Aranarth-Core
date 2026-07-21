@@ -10,6 +10,7 @@ import com.aearost.aranarthcore.event.player.MountKillDeathMessage;
 import com.aearost.aranarthcore.event.player.PlayerHeadDrop;
 import com.aearost.aranarthcore.event.player.PlayerKillDeathStats;
 import com.aearost.aranarthcore.event.player.PlayerKillMoneySteal;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Animals;
@@ -45,6 +46,11 @@ public class EntityDeathEventListener implements Listener {
             new PlayerKillMoneySteal().execute(e);
             new MountKillDeathMessage().execute((PlayerDeathEvent) e);
             new DefenderKillDeathMessage().execute((PlayerDeathEvent) e);
+            PlayerDeathEvent playerDeath = (PlayerDeathEvent) e;
+            String deathMessage = playerDeath.getDeathMessage();
+            if (deathMessage != null && NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishDeath(deathMessage);
+            }
         }
 
         // If the mob was a sentinel

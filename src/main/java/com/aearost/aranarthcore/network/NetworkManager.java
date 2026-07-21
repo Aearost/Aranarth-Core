@@ -100,6 +100,7 @@ public class NetworkManager {
     public static final String CH_CHAT_GAME_START   = "aranarth:chat_game_start";
     public static final String CH_CHAT_GAME_WIN     = "aranarth:chat_game_win";
     public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
+    public static final String CH_DEATH             = "aranarth:death";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -290,6 +291,7 @@ public class NetworkManager {
             case CH_CHAT_GAME_START  -> handleChatGameStart(json);
             case CH_CHAT_GAME_WIN    -> handleChatGameWin(json);
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
+            case CH_DEATH            -> handleDeath(json);
         }
     }
 
@@ -495,6 +497,17 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("message", rawMessage);
         publish(CH_BROADCAST, json);
+    }
+
+    /**
+     * Broadcasts a player death message from this server to all other servers.
+     * The message should already contain translated § color codes.
+     */
+    public void publishDeath(String deathMessage) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("message", deathMessage);
+        publish(CH_DEATH, json);
     }
 
     /**
@@ -1425,6 +1438,16 @@ public class NetworkManager {
     }
 
     private void handleBroadcast(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        String message = json.get("message").getAsString();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            player.sendMessage(message);
+        }
+        Bukkit.getConsoleSender().sendMessage(message);
+    }
+
+    private void handleDeath(JsonObject json) {
         String originServer = json.get("server").getAsString();
         if (originServer.equals(thisServer)) return;
         String message = json.get("message").getAsString();
