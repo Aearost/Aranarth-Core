@@ -1203,7 +1203,7 @@ public class NetworkManager {
         } else {
             target.sendMessage(ChatUtils.chatMessage("&e" + fromNickname + " &7has requested to teleport to you"));
         }
-        target.sendMessage(ChatUtils.chatMessage("&7Use &e/tpaccept &7or &e/tpdeny"));
+        target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
         AranarthUtils.playTeleportSound(target);
     }
 

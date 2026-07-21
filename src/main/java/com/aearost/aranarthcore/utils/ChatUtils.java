@@ -566,6 +566,29 @@ public class ChatUtils {
 	}
 
 	/**
+	 * Builds the /tpaccept or /tpdeny prompt as a clickable Component.
+	 *
+	 * @return The formatted Component ready to send to a player.
+	 */
+	public static Component buildTpAcceptDenyPrompt() {
+		Component prefix = LegacyComponentSerializer.legacySection().deserialize(chatMessage("&7Use "));
+		Component tpa = clickableCommand(
+				LegacyComponentSerializer.legacySection().deserialize(translateToColor("&e/tpaccept")),
+				translateToColor("&7Click to accept"),
+				"/tpaccept",
+				true
+		);
+		Component or = LegacyComponentSerializer.legacySection().deserialize(translateToColor("&7 or "));
+		Component tpd = clickableCommand(
+				LegacyComponentSerializer.legacySection().deserialize(translateToColor("&e/tpdeny")),
+				translateToColor("&7Click to deny"),
+				"/tpdeny",
+				true
+		);
+		return prefix.append(tpa).append(or).append(tpd);
+	}
+
+	/**
 	 * Builds a clickable chat component that suggests a command on click.
 	 *
 	 * @param displayComponent The visible text in chat (supports & color codes)

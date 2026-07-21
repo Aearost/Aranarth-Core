@@ -65,7 +65,7 @@ public class CommandTeleport implements CommandExecutor {
 						AranarthUtils.setPlayer(target.getUniqueId(), targetPlayer);
 						player.sendMessage(ChatUtils.chatMessage("&7You have requested to teleport to &e" + targetPlayer.getNickname()));
 						target.sendMessage(ChatUtils.chatMessage("&e" + senderPlayer.getNickname() + " &7has requested to teleport to you"));
-						target.sendMessage(ChatUtils.chatMessage("&7Use &e/tpaccept &7or &e/tpdeny"));
+						target.sendMessage(ChatUtils.buildTpAcceptDenyPrompt());
 						AranarthUtils.playTeleportSound(player);
 						AranarthUtils.playTeleportSound(target);
 					} else if (NetworkManager.isActive()) {
