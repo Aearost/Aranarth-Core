@@ -864,6 +864,12 @@ public class NetworkManager {
 
         // Build the serialized forms now, on the main thread, so the async task only does I/O.
         final String rawRow = PersistenceUtils.buildPlayerRowForTransfer(uuid);
+        // Advance this server's balance snapshot to what we are about to write
+        // If the player returns here, the delta calculation starts from the value we just handed off
+        AranarthPlayer apForSnapshot = AranarthUtils.getPlayer(uuid);
+        if (apForSnapshot != null) {
+            apForSnapshot.setBalanceSnapshot(apForSnapshot.getBalance());
+        }
         final String toggleJson = PersistenceUtils.buildPlayerToggleJson(uuid);
         final String pendingJson = gson.toJson(pending);
 

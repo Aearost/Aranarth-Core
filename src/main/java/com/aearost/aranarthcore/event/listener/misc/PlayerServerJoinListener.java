@@ -214,8 +214,22 @@ public class PlayerServerJoinListener implements Listener {
 						// the source server (which saved it to MySQL just before transferring)
 						// and apply the stored survival inventory.
 						if (pending.isApplyInventory()) {
+							// Capture this server's balance delta before reloading
+							AranarthPlayer preReloadAp = AranarthUtils.getPlayer(player.getUniqueId());
+							double localDelta = 0.0;
+							if (preReloadAp != null && preReloadAp.getBalanceSnapshot() >= 0.0) {
+								localDelta = preReloadAp.getBalance() - preReloadAp.getBalanceSnapshot();
+							}
 							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
 							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+							if (localDelta != 0.0) {
+								AranarthPlayer apBalance = AranarthUtils.getPlayer(player.getUniqueId());
+								if (apBalance != null) {
+									double mergedBalance = apBalance.getBalance() + localDelta;
+									apBalance.setBalance(mergedBalance);
+									apBalance.setBalanceSnapshot(mergedBalance);
+								}
+							}
 							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
 							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
 								try {

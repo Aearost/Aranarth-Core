@@ -286,7 +286,10 @@
       "Bash(2)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.java -path */src/main/*)",
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main -type f -name *.java)",
-      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main -type f -name *.java -exec grep -l \"interact\\\\|Hook\\\\|jda\" {})"
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main -type f -name *.java -exec grep -l \"interact\\\\|Hook\\\\|jda\" {})",
+      "Bash(./gradlew compileJava)",
+      "Bash(mvn.cmd compile:*)",
+      "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn compile:*)"
     ]
   }
 }

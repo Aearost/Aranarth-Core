@@ -711,7 +711,9 @@ public class DatabaseManager {
         }
     }
 
-    /** Returns all vote data rows: uuid -> int[]{voteCount, voteKeys, rareKeys, epicKeys, godlyKeys} */
+    /**
+     * Returns uuid for every row in player_votes.
+     */
     public Map<UUID, int[]> loadAllVoteCounts() {
         String sql = "SELECT uuid, vote_count, pending_vote_keys, pending_rare_keys, pending_epic_keys, pending_godly_keys FROM player_votes";
         Map<UUID, int[]> result = new HashMap<>();
@@ -729,6 +731,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load vote counts: " + e.getMessage());
+            return null; // Query error
         }
         return result;
     }
@@ -745,6 +748,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load vote histories: " + e.getMessage());
+            return null; // Query error
         }
         return result;
     }
@@ -782,7 +786,11 @@ public class DatabaseManager {
         return result;
     }
 
-    /** Returns recipient_uuid -> data_json for all mail rows (one row per recipient). */
+    /**
+     * Returns recipient_uuid -> data_json for every row in player_mail.
+     * Returns an empty map when the table is genuinely empty. Returns null on SQL failure
+     * so callers can distinguish "no mail" from "query error". #195
+     */
     public Map<UUID, String> loadAllMailData() {
         String sql = "SELECT recipient_uuid, data_json FROM player_mail";
         Map<UUID, String> result = new HashMap<>();
@@ -794,6 +802,7 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all mail: " + e.getMessage());
+            return null; // null = query error; empty map = table genuinely has no rows
         }
         return result;
     }

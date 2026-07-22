@@ -3333,6 +3333,7 @@ public class PersistenceUtils {
             return;
         }
         try {
+            Bukkit.getLogger().info("[AC] Attempting to read the rare keys file...");
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -3343,6 +3344,7 @@ public class PersistenceUtils {
                 AranarthUtils.setPendingRareKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
             }
             reader.close();
+            Bukkit.getLogger().info("[AC] All pending rare keys have been initialized");
         } catch (FileNotFoundException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading the rare keys!");
         }
@@ -3385,6 +3387,7 @@ public class PersistenceUtils {
             return;
         }
         try {
+            Bukkit.getLogger().info("[AC] Attempting to read the epic keys file...");
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -3395,6 +3398,7 @@ public class PersistenceUtils {
                 AranarthUtils.setPendingEpicKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
             }
             reader.close();
+            Bukkit.getLogger().info("[AC] All pending epic keys have been initialized");
         } catch (FileNotFoundException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading the epic keys!");
         }
@@ -3437,6 +3441,7 @@ public class PersistenceUtils {
             return;
         }
         try {
+            Bukkit.getLogger().info("[AC] Attempting to read the godly keys file...");
             Scanner reader = new Scanner(file);
             while (reader.hasNextLine()) {
                 String row = reader.nextLine();
@@ -3447,6 +3452,7 @@ public class PersistenceUtils {
                 AranarthUtils.setPendingGodlyKeys(UUID.fromString(parts[0]), Integer.parseInt(parts[1]));
             }
             reader.close();
+            Bukkit.getLogger().info("[AC] All pending godly keys have been initialized");
         } catch (FileNotFoundException e) {
             Bukkit.getLogger().info("[AC] Something went wrong with loading the godly keys!");
         }
@@ -4751,6 +4757,8 @@ public class PersistenceUtils {
             return;
         }
         String rawRow = buildAranarthPlayerRow(uuid, ap);
+        // Advance the snapshot to reflect what we are about to write
+        ap.setBalanceSnapshot(ap.getBalance());
         DatabaseManager db = DatabaseManager.getInstance();
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () ->
                 db.saveAranarthPlayerRaw(uuid, rawRow)
@@ -6001,6 +6009,8 @@ public class PersistenceUtils {
                 muteEndDate, particles, perks, saintExpireDate, isCompressingItems, votePointsSpent, isUsingSpawnBoost,
                 firstJoinDate,
                 pronouns));
+        // Stamp the snapshot so cross-server delta logic knows what this server loaded from DB
+        AranarthUtils.getPlayer(uuid).setBalanceSnapshot(balance);
         long conquestDisbandCooldownEnd = fields.length > 24 ? Long.parseLong(fields[23]) : 0L;
         String survivalEnderChest = fields.length > 25 ? fields[24] : "";
         double survivalHealth = fields.length > 26 ? Double.parseDouble(fields[25]) : 20.0;
@@ -6093,7 +6103,9 @@ public class PersistenceUtils {
         DatabaseManager db = DatabaseManager.getInstance();
         Map<UUID, String> histories = db.loadAllVoteHistories();
         Map<UUID, int[]> counts = db.loadAllVoteCounts();
-        if (counts.isEmpty()) {
+        if (counts == null) {
+            // DB query failed so fall back to flat files so the server is not left with no data
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllVoteCounts failed; falling back to flat files");
             loadVotes();
             loadVoteKeys();
             loadRareKeys();
@@ -6101,40 +6113,54 @@ public class PersistenceUtils {
             loadGodlyKeys();
             return;
         }
+        if (counts.isEmpty()) {
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL — starting with empty vote data");
+            return;
+        }
         Bukkit.getLogger().info("[AC] Loading vote data from MySQL...");
         // Restore individual vote history
-        for (Map.Entry<UUID, String> entry : histories.entrySet()) {
-            UUID uuid = entry.getKey();
-            try {
-                JsonArray arr = GSON.fromJson(entry.getValue(), JsonArray.class);
-                for (com.google.gson.JsonElement el : arr) {
-                    JsonObject v = el.getAsJsonObject();
-                    int keyNum = v.get("keyNum").getAsInt();
-                    long timestamp = v.get("timestamp").getAsLong();
-                    AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
+        if (histories == null) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllVoteHistories failed; vote history will be empty this session");
+        } else {
+            for (Map.Entry<UUID, String> entry : histories.entrySet()) {
+                UUID uuid = entry.getKey();
+                try {
+                    JsonArray arr = GSON.fromJson(entry.getValue(), JsonArray.class);
+                    for (com.google.gson.JsonElement el : arr) {
+                        JsonObject v = el.getAsJsonObject();
+                        int keyNum = v.get("keyNum").getAsInt();
+                        long timestamp = v.get("timestamp").getAsLong();
+                        AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
+                    }
+                } catch (Exception e) {
+                    Bukkit.getLogger().warning("[AC] Failed to parse vote history for " + uuid + ": " + e.getMessage());
                 }
-            } catch (Exception e) {
-                Bukkit.getLogger().warning("[AC] Failed to parse vote history for " + uuid + ": " + e.getMessage());
             }
         }
         // Restore pending key counts
+        int totalVote = 0, totalRare = 0, totalEpic = 0, totalGodly = 0;
         for (Map.Entry<UUID, int[]> entry : counts.entrySet()) {
             UUID uuid = entry.getKey();
             int[] vals = entry.getValue();
             if (vals[1] > 0) {
                 AranarthUtils.setPendingVoteKeys(uuid, vals[1]);
+                totalVote += vals[1];
             }
             if (vals[2] > 0) {
                 AranarthUtils.setPendingRareKeys(uuid, vals[2]);
+                totalRare += vals[2];
             }
             if (vals[3] > 0) {
                 AranarthUtils.setPendingEpicKeys(uuid, vals[3]);
+                totalEpic += vals[3];
             }
             if (vals[4] > 0) {
                 AranarthUtils.setPendingGodlyKeys(uuid, vals[4]);
+                totalGodly += vals[4];
             }
         }
-        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL");
+        Bukkit.getLogger().info("[AC] Vote data initialized from MySQL — " + counts.size() + " player(s) with pending keys"
+                + " (vote=" + totalVote + ", rare=" + totalRare + ", epic=" + totalEpic + ", godly=" + totalGodly + ")");
     }
 
     /**
@@ -6262,8 +6288,17 @@ public class PersistenceUtils {
     public static void loadMailFromDatabase() {
         DatabaseManager db = DatabaseManager.getInstance();
         Map<UUID, String> all = db.loadAllMailData();
-        if (all.isEmpty()) {
+        if (all == null) {
+            // DB query failed — fall back to flat file as best-effort. #195
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllMailData failed; falling back to flat file");
             loadMail();
+            return;
+        }
+        if (all.isEmpty()) {
+            // Table is genuinely empty (e.g. everyone has cleared their mail). Do NOT fall back
+            // to mail.txt — the file may contain old mail that was already read/deleted from DB,
+            // and loading it would resurface it. #195
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No mail rows in MySQL — starting with empty mailbox");
             return;
         }
         Bukkit.getLogger().info("[AC] Loading mail from MySQL...");
@@ -6286,7 +6321,8 @@ public class PersistenceUtils {
             }
         }
         MailUtils.setAllMail(mailData);
-        Bukkit.getLogger().info("[AC] Mail initialized from MySQL");
+        int totalMessages = mailData.values().stream().mapToInt(List::size).sum();
+        Bukkit.getLogger().info("[AC] Mail initialized from MySQL — " + mailData.size() + " recipient(s), " + totalMessages + " message(s)");
     }
 
     /**

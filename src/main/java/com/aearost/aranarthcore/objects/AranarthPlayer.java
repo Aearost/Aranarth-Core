@@ -42,6 +42,7 @@ public class AranarthPlayer {
 	private boolean isRandomizing;
 	private boolean isMissingItemMessageSent;
 	private double balance;
+	private double balanceSnapshot = -1.0;
 	private int potionQuantityToRemove;
 	private UUID trustedPlayerUUID;
 	private UUID untrustedPlayerUUID;
@@ -597,6 +598,16 @@ public class AranarthPlayer {
 	 */
 	public void setBalance(double balance) {
 		this.balance = balance;
+	}
+
+	/** Returns the balance as it was when last synced from/to MySQL on this server. */
+	public double getBalanceSnapshot() {
+		return balanceSnapshot;
+	}
+
+	/** Updates the snapshot to match the value that was just written to (or read from) MySQL. */
+	public void setBalanceSnapshot(double balanceSnapshot) {
+		this.balanceSnapshot = balanceSnapshot;
 	}
 
 	/**

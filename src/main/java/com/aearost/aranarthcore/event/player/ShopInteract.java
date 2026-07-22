@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.objects.Shop;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.CropUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -304,6 +305,8 @@ public class ShopInteract {
                 clickUser.setBalance(clickUser.getBalance() - shop.getBuyPrice());
                 if (shopUser != null) {
                     shopUser.setBalance(shopUser.getBalance() + shop.getBuyPrice());
+                    // Immediately persist the shop owner's new balance
+                    PersistenceUtils.saveAranarthPlayerImmediately(shop.getUuid());
                 }
 
                 // Logic to add items to player's inventory
@@ -509,6 +512,8 @@ public class ShopInteract {
                 clickUser.setBalance(clickUser.getBalance() + shop.getSellPrice());
                 if (shopUser != null) {
                     shopUser.setBalance(shopUser.getBalance() - shop.getSellPrice());
+                    // Same cross-server race fix as in handleBuyLogic
+                    PersistenceUtils.saveAranarthPlayerImmediately(shop.getUuid());
                     ItemStack shopItem = shop.getItem().clone();
                     shopItem.setAmount(shop.getQuantity());
                     chestInventory.addItem(shopItem);
