@@ -5,6 +5,7 @@ import com.aearost.aranarthcore.utils.DefenderUtils;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 
 import java.util.Random;
@@ -30,6 +31,19 @@ public class DefenderCombat {
                 return;
             }
             // Different-dominion defenders can damage each other (attacker system)
+        }
+
+        // Defender is the attacker and the target is a tamed pet
+        if (e.getEntity() instanceof Tameable pet
+                && pet.getOwner() instanceof Player petOwner) {
+            UUID defenderUUID = getDefenderSource(e);
+            if (defenderUUID != null) {
+                UUID dominionId = DefenderUtils.getDefenderDominionId(defenderUUID);
+                if (dominionId != null && !DefenderUtils.shouldDefenderTarget(dominionId, petOwner)) {
+                    e.setCancelled(true);
+                    return;
+                }
+            }
         }
 
         // Defender is the attacker and the target is a player
@@ -61,6 +75,19 @@ public class DefenderCombat {
                 return;
             }
             if (!DefenderUtils.shouldDefenderTarget(dominionId, attacker)) {
+                e.setCancelled(true);
+            }
+        }
+
+        // A tamed pet is attacking a Defender
+        else if (DefenderUtils.isDefender(e.getEntity().getUniqueId())
+                && e.getDamager() instanceof Tameable pet
+                && pet.getOwner() instanceof Player owner) {
+            UUID dominionId = DefenderUtils.getDefenderDominionId(e.getEntity().getUniqueId());
+            if (dominionId == null) {
+                return;
+            }
+            if (!DefenderUtils.shouldDefenderTarget(dominionId, owner)) {
                 e.setCancelled(true);
             }
         }
