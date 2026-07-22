@@ -110,7 +110,7 @@ public class GuiBrewBookClick {
     private String brewingStand() {
         return ChatUtils.translateToColor(
                 "&6&lStep 2 - Distilling&r\n\n" +
-                        "Some recipes require distillation. Place your bottles in a Brewing Stand with Blaze Powder.\n\n" +
+                        "Some recipes require distillation. Place your bottles in a Brewing Stand with Glowstone Dust.\n\n" +
                         "The number of passes matters &o- too few or too many will reduce the quality!"
         );
     }
