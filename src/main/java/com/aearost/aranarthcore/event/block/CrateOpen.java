@@ -18,6 +18,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.AranarthVote;
 import com.aearost.aranarthcore.objects.CrateType;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DiscordUtils;
 import com.gmail.nossr50.datatypes.player.McMMOPlayer;
@@ -72,8 +73,36 @@ public class CrateOpen {
                             // Previews the contents of the crate
                             if (player.isSneaking()) {
                                 player.playSound(block.getLocation(), Sound.BLOCK_CHEST_OPEN, 1, 0.6F);
-                                GuiCrate gui = new GuiCrate(player, CrateType.VOTE, null);
+                                aranarthPlayer.setOpeningCrateWithCyclingItem(true);
+                                AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
+                                List<Integer> indexes = new ArrayList<>();
+                                indexes.add(0); // blaze rod and breeze rod
+                                indexes.add(0); // brew recipes
+                                GuiCrate gui = new GuiCrate(player, CrateType.VOTE, indexes);
                                 gui.openGui();
+                                indexes.set(0, 1);
+                                indexes.set(1, 1);
+
+                                scheduledSkipTask = Bukkit.getScheduler().scheduleSyncRepeatingTask(AranarthCore.getInstance(), new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (aranarthPlayer.isOpeningCrateWithCyclingItem()) {
+                                            gui.updateVoteCrateItems(indexes.get(0), indexes.get(1));
+
+                                            // Alternate between blaze rod (0) and breeze rod (1)
+                                            indexes.set(0, indexes.get(0) == 0 ? 1 : 0);
+
+                                            // Cycle through middle recipe maps
+                                            int nextRecipe = indexes.get(1) + 1;
+                                            if (nextRecipe >= BrewRecipeUtils.getMiddleRecipeCount()) {
+                                                nextRecipe = 0;
+                                            }
+                                            indexes.set(1, nextRecipe);
+                                        } else {
+                                            Bukkit.getScheduler().cancelTask(scheduledSkipTask);
+                                        }
+                                    }
+                                }, 20, 20);
                             }
                             // Attempts to open the crate
                             else {
@@ -462,11 +491,24 @@ public class CrateOpen {
                     player.sendMessage(ChatUtils.chatMessage("&7You have earned &aVote Points +10"));
                     return;
                 } else if (chance <= 90) {
-                    reward = new ItemStack(Material.BLAZE_ROD, 8);
-                    name = "#fcbf00&lBlaze Rod x8";
+                    // 50/50 blaze rod or breeze rod
+                    if (new Random().nextBoolean()) {
+                        reward = new ItemStack(Material.BLAZE_ROD, 8);
+                        name = "#fcbf00&lBlaze Rod x8";
+                    } else {
+                        reward = new ItemStack(Material.BREEZE_ROD, 8);
+                        name = "#bdadc7&lBreeze Rod x8";
+                    }
                 } else if (chance <= 95) {
-                    reward = new ItemStack(Material.BREEZE_ROD, 8);
-                    name = "#bdadc7&lBreeze Rod x8";
+                    // Random locked middle-tier brew recipe map; fallback to breeze rod if all unlocked
+                    com.aearost.aranarthcore.items.brew.BrewRecipe lockedMiddle = BrewRecipeUtils.getRandomLockedMiddle(player.getUniqueId());
+                    if (lockedMiddle != null) {
+                        reward = BrewRecipeUtils.createRecipeMapItem(lockedMiddle);
+                        name = "&6&l[Recipe] " + lockedMiddle.getDisplayName();
+                    } else {
+                        reward = new ItemStack(Material.BREEZE_ROD, 8);
+                        name = "#bdadc7&lBreeze Rod x8";
+                    }
                 } else {
                     reward = new KeyRare().getItem();
                     name = "&l" + reward.getItemMeta().getDisplayName() + " x1";

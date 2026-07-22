@@ -580,6 +580,7 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadQuestState();
         }
         QuestUtils.initialize(this);
+        BrewRecipeUtils.initialize(this);
         // Load shared quest reset timestamps from DB so both servers stay synchronized
         if (db) {
             try {
@@ -707,6 +708,7 @@ public class AranarthCore extends JavaPlugin {
         new VillagerCamelDismountListener(this);
         new PotionEffectListener(this);
         new BrewingListener(this);
+        new BrewRecipeUnlockListener(this);
         new ShopCreateListener(this);
         new ShopHologramChunkListener(this);
         new WeatherChangeListener(this);
@@ -941,6 +943,7 @@ public class AranarthCore extends JavaPlugin {
         getCommand("mail").setExecutor(new CommandMail());
         getCommand("mail").setTabCompleter(new CommandMailCompleter());
         getCommand("map").setExecutor(new CommandMap());
+        getCommand("brewbook").setExecutor(new CommandBrewBook());
     }
 
     /**

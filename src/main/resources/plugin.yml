@@ -34,6 +34,9 @@ commands:
   back:
     description: Sets the player back to their previous location
     permission: aranarth.back
+  brewbook:
+    description: Opens the player's Brew Book showing all unlocked brewing recipes
+    permission: aranarth.brewbook
   balance:
     description: Provides the balance of the player or the input player
     aliases: [bal]

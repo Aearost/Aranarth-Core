@@ -37,4 +37,5 @@ public class CustomKeys {
     public static final NamespacedKey MAP_ORIGINAL = new NamespacedKey(AranarthCore.getInstance(), "map_original");
     public static final NamespacedKey BREWING_COPY = new NamespacedKey(AranarthCore.getInstance(), "fae_brewing_copy");
     public static final NamespacedKey BREWED_POTION = new NamespacedKey(AranarthCore.getInstance(), "fae_brewed_potion");
+    public static final NamespacedKey BREW_RECIPE = new NamespacedKey(AranarthCore.getInstance(), "brew_recipe");
 }

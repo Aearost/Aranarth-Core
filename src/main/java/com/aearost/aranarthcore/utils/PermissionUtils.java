@@ -504,6 +504,7 @@ public class PermissionUtils {
         perms.setPermission("aranarth.mctop", true);
         perms.setPermission("aranarth.map", true);
         perms.setPermission("aranarth.topguesses", true);
+        perms.setPermission("aranarth.brewbook", true);
 
         // Disable aranarth functionality
         perms.setPermission("aranarth.ac", false);

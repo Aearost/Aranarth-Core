@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.enums.QuestTaskType;
 import com.aearost.aranarthcore.enums.QuestType;
+import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
@@ -25,6 +26,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.Map;
 
+import static com.aearost.aranarthcore.objects.CustomKeys.BREW_RECIPE;
 import static com.aearost.aranarthcore.objects.CustomKeys.CRATE_KEY;
 import static com.aearost.aranarthcore.objects.CustomKeys.QUEST_NPC;
 
@@ -253,6 +255,20 @@ public class QuestUtils {
             assigned.set(keyIndex, assigned.get(keyIndex).withItemReward(getWeeklyKeyReward(rank)));
         }
 
+        // 33% chance one weekly quest rewards a higher-tier brew recipe
+        if (rank >= 5 && !BrewRecipeUtils.allHigherUnlocked(uuid) && RANDOM.nextFloat() < 0.33f) {
+            BrewRecipe lockedHigher = BrewRecipeUtils.getRandomLockedHigher(uuid);
+            if (lockedHigher != null) {
+                int hardestIndex = 0;
+                for (int i = 1; i < assigned.size(); i++) {
+                    if (assigned.get(i).getRequired() > assigned.get(hardestIndex).getRequired()) {
+                        hardestIndex = i;
+                    }
+                }
+                assigned.set(hardestIndex, assigned.get(hardestIndex).withItemReward(BrewRecipeUtils.createRecipeMapItem(lockedHigher)));
+            }
+        }
+
         playerActiveWeeklyQuests.put(uuid, assigned);
     }
 
@@ -279,6 +295,14 @@ public class QuestUtils {
      */
     public static int getItemRewardSentinel(ItemStack item) {
         if (item == null || !item.hasItemMeta()) return -1;
+        // Check for brew recipe map first
+        String recipeId = item.getItemMeta().getPersistentDataContainer().get(BREW_RECIPE, PersistentDataType.STRING);
+        if (recipeId != null) {
+            BrewRecipe recipe = BrewRecipe.fromId(recipeId);
+            if (recipe != null) {
+                return -(100 + recipe.ordinal());
+            }
+        }
         String keyType = item.getItemMeta().getPersistentDataContainer().get(CRATE_KEY, PersistentDataType.STRING);
         return switch (keyType != null ? keyType : "") {
             case "key_epic" -> -2;
@@ -291,6 +315,14 @@ public class QuestUtils {
      * Returns the ItemStack for a persisted key sentinel (-1=rare, -2=epic, -3=godly).
      */
     public static ItemStack resolveKeyFromSentinel(int sentinel) {
+        if (sentinel <= -100) {
+            int ordinal = -(sentinel + 100);
+            BrewRecipe[] recipes = BrewRecipe.values();
+            if (ordinal >= 0 && ordinal < recipes.length) {
+                return BrewRecipeUtils.createRecipeMapItem(recipes[ordinal]);
+            }
+            return new KeyRare().getItem();
+        }
         return switch (sentinel) {
             case -2 -> new KeyEpic().getItem();
             case -3 -> new KeyGodly().getItem();

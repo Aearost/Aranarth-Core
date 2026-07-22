@@ -1,0 +1,378 @@
+package com.aearost.aranarthcore.utils;
+
+import com.aearost.aranarthcore.items.brew.BrewRecipe;
+import com.aearost.aranarthcore.objects.CustomKeys;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.NumberFormat;
+import java.util.*;
+
+/**
+ * Manages brewery recipe unlocks per player, including file-based persistence.
+ */
+public class BrewRecipeUtils {
+
+    private static final HashMap<UUID, Set<String>> playerUnlocks = new HashMap<>();
+    private static File dataFile;
+    private static YamlConfiguration dataConfig;
+    private static final Random RANDOM = new Random();
+
+    /**
+     * Loads all player recipe unlocks from brew_unlocks.yml.
+     */
+    public static void initialize(Plugin plugin) {
+        dataFile = new File(plugin.getDataFolder(), "brew_unlocks.yml");
+        if (!dataFile.exists()) {
+            try {
+                if (dataFile.createNewFile()) {
+                    Bukkit.getLogger().info("[AC] A new brew_unlocks.txt file has been generated");
+                }
+            } catch (IOException e) {
+                plugin.getLogger().warning("[AC] Failed to create brew_unlocks.yml: " + e.getMessage());
+            }
+        }
+        dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        for (String uuidStr : dataConfig.getKeys(false)) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                List<String> recipes = dataConfig.getStringList(uuidStr + ".unlocked");
+                playerUnlocks.put(uuid, new HashSet<>(recipes));
+            } catch (IllegalArgumentException ignored) {}
+        }
+        loadBreweryRecipes(plugin);
+    }
+
+    /**
+     * Parses the BreweryX recipes.yml and injects display name, ingredients, and color
+     * into each BrewRecipe enum value so they don't need to be hardcoded.
+     */
+    private static void loadBreweryRecipes(Plugin plugin) {
+        File recipesFile = new File(plugin.getDataFolder().getParentFile(), "BreweryX/recipes.yml");
+        if (!recipesFile.exists()) {
+            Bukkit.getLogger().warning("[AC] BreweryX recipes.yml not found at " + recipesFile.getPath()
+                    + " - brew displays will fall back to recipe IDs.");
+            return;
+        }
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(recipesFile);
+        ConfigurationSection recipesSection = config.getConfigurationSection("recipes");
+        if (recipesSection == null) {
+            Bukkit.getLogger().warning("[AC] No 'recipes' section found in BreweryX recipes.yml.");
+            return;
+        }
+        int loaded = 0;
+        for (BrewRecipe recipe : BrewRecipe.values()) {
+            ConfigurationSection section = recipesSection.getConfigurationSection(recipe.getId());
+            if (section == null) {
+                Bukkit.getLogger().warning("[AC] Recipe '" + recipe.getId() + "' not found in BreweryX recipes.yml.");
+                continue;
+            }
+            // Name
+            String nameRaw = section.getString("name", recipe.getId());
+            String[] nameParts = nameRaw.split("/");
+            String displayName = ChatColor.stripColor(
+                    ChatUtils.translateToColor(nameParts[nameParts.length - 1].trim()));
+
+            // Ingredients
+            List<String> rawIngredients = section.getStringList("ingredients");
+            String[] ingredients = rawIngredients.stream()
+                    .map(BrewRecipeUtils::prettifyIngredient)
+                    .toArray(String[]::new);
+
+            // Color
+            String colorHex = resolveBreweryColor(section.getString("color", "8888FF"));
+
+            recipe.injectRuntimeData(new BrewRecipe.RuntimeData(displayName, ingredients, colorHex));
+            loaded++;
+        }
+        Bukkit.getLogger().info("[AC] Loaded BreweryX display data for " + loaded + "/" + BrewRecipe.values().length + " brew recipes.");
+    }
+
+    /**
+     * Converts a raw BreweryX ingredient string into a human-readable label.
+     */
+    private static String prettifyIngredient(String raw) {
+        String[] parts = raw.split("/");
+        String material = parts[0].trim();
+        String amount = parts.length > 1 ? parts[1].trim() : "1";
+        // Strip plugin prefix
+        if (material.contains(":")) {
+            material = material.substring(material.indexOf(':') + 1);
+        }
+        // Split on underscores and hyphens, title-case each word
+        String[] words = material.replace('-', '_').split("_");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (word.isEmpty()) continue;
+            if (!sb.isEmpty()) sb.append(' ');
+            sb.append(Character.toUpperCase(word.charAt(0)));
+            sb.append(word.substring(1).toLowerCase());
+        }
+        return sb + " x" + amount;
+    }
+
+    /**
+     * Resolves a BreweryX color value (named color or hex string) to a 6-char uppercase hex string.
+     */
+    private static String resolveBreweryColor(String raw) {
+        if (raw == null) return "8888FF";
+        String cleaned = raw.replace("'", "").replace("\"", "").trim();
+        if (cleaned.matches("[0-9A-Fa-f]{6}")) return cleaned.toUpperCase();
+        return switch (cleaned.toUpperCase()) {
+            case "DARK_RED"    -> "8B0000";
+            case "RED"         -> "C80000";
+            case "BRIGHT_RED"  -> "FF3300";
+            case "ORANGE"      -> "FF8C00";
+            case "YELLOW"      -> "FFFF00";
+            case "PINK"        -> "FF91A4";
+            case "PURPLE"      -> "7B2FBE";
+            case "BLUE"        -> "2E52A3";
+            case "CYAN"        -> "00BFFF";
+            case "WATER"       -> "3F76FF";
+            case "TEAL"        -> "00827F";
+            case "OLIVE"       -> "808000";
+            case "GREEN"       -> "008000";
+            case "LIME"        -> "00FF00";
+            case "BLACK"       -> "1A1A1A";
+            case "GREY"        -> "808080";
+            case "BRIGHT_GREY" -> "C0C0C0";
+            case "WHITE"       -> "F0F0F0";
+            default            -> "8888FF";
+        };
+    }
+
+    public static boolean isUnlocked(UUID uuid, BrewRecipe recipe) {
+        return recipe.isDefaultUnlocked() || playerUnlocks.getOrDefault(uuid, Collections.emptySet()).contains(recipe.getId());
+    }
+
+    public static boolean isUnlocked(UUID uuid, String recipeId) {
+        BrewRecipe recipe = BrewRecipe.fromId(recipeId);
+        if (recipe != null && recipe.isDefaultUnlocked()) return true;
+        return playerUnlocks.getOrDefault(uuid, Collections.emptySet()).contains(recipeId);
+    }
+
+    public static void unlock(UUID uuid, String recipeId) {
+        playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
+        saveUnlocks(uuid);
+    }
+
+    private static void saveUnlocks(UUID uuid) {
+        Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
+        dataConfig.set(uuid.toString() + ".unlocked", new ArrayList<>(unlocked));
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException e) {
+
+        }
+    }
+
+    /** Returns all recipes unlocked by this player (including defaults), in enum declaration order. */
+    public static List<BrewRecipe> getUnlockedRecipes(UUID uuid) {
+        Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
+        List<BrewRecipe> result = new ArrayList<>();
+        for (BrewRecipe r : BrewRecipe.values()) {
+            if (r.isDefaultUnlocked() || unlocked.contains(r.getId())) result.add(r);
+        }
+        return result;
+    }
+
+    /**
+     * Returns all BASIC recipes that are purchasable in the shop — excludes default-unlocked
+     * recipes and any the player has already bought.
+     */
+    public static List<BrewRecipe> getLockedBasicRecipes(UUID uuid) {
+        Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
+        List<BrewRecipe> result = new ArrayList<>();
+        for (BrewRecipe r : BrewRecipe.values()) {
+            if (r.getTier() == BrewRecipe.Tier.BASIC && !r.isDefaultUnlocked() && !unlocked.contains(r.getId())) {
+                result.add(r);
+            }
+        }
+        return result;
+    }
+
+    /** Returns all recipes of the given tier that the player has NOT yet unlocked. */
+    private static List<BrewRecipe> getLockedRecipesByTier(UUID uuid, BrewRecipe.Tier tier) {
+        Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
+        List<BrewRecipe> result = new ArrayList<>();
+        for (BrewRecipe r : BrewRecipe.values()) {
+            if (r.getTier() == tier && !r.isDefaultUnlocked() && !unlocked.contains(r.getId())) result.add(r);
+        }
+        return result;
+    }
+
+    /**
+     * Returns a random MIDDLE-tier recipe the player hasn't unlocked yet,
+     * or null if all are already unlocked.
+     */
+    public static BrewRecipe getRandomLockedMiddle(UUID uuid) {
+        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.MIDDLE);
+        return locked.isEmpty() ? null : locked.get(RANDOM.nextInt(locked.size()));
+    }
+
+    /**
+     * Returns a random HIGHER-tier recipe the player hasn't unlocked yet,
+     * or null if all are already unlocked.
+     */
+    public static BrewRecipe getRandomLockedHigher(UUID uuid) {
+        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.HIGHER);
+        return locked.isEmpty() ? null : locked.get(RANDOM.nextInt(locked.size()));
+    }
+
+    /** Returns true when every HIGHER-tier recipe has been unlocked by this player. */
+    public static boolean allHigherUnlocked(UUID uuid) {
+        return getLockedRecipesByTier(uuid, BrewRecipe.Tier.HIGHER).isEmpty();
+    }
+
+    /**
+     * Creates the FILLED_MAP unlock token for the given recipe.
+     */
+    public static ItemStack createRecipeMapItem(BrewRecipe recipe) {
+        ItemStack item = new ItemStack(Material.FILLED_MAP);
+        ItemMeta meta = item.getItemMeta();
+
+        String tierColor = switch (recipe.getTier()) {
+            case BASIC  -> "&a";
+            case MIDDLE -> "&6";
+            case HIGHER -> "&5";
+        };
+        String tierName = switch (recipe.getTier()) {
+            case BASIC  -> "Basic";
+            case MIDDLE -> "Artisan";
+            case HIGHER -> "Avatar";
+        };
+
+        meta.setDisplayName(ChatUtils.translateToColor("&6&l[Recipe] &f" + recipe.getDisplayName()));
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatUtils.translateToColor("&7This page contains the recipe for:"));
+        lore.add(ChatUtils.translateToColor("&f&l" + recipe.getDisplayName()));
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
+        lore.add(ChatUtils.translateToColor("&7&oRight-click to unlock this recipe!"));
+        meta.setLore(lore);
+
+        meta.getPersistentDataContainer().set(CustomKeys.BREW_RECIPE, PersistentDataType.STRING, recipe.getId());
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Creates a display POTION item representing the given unlocked recipe,
+     * with ingredient lore (secret ingredient obfuscated for HIGHER-tier brews).
+     */
+    public static ItemStack createPotionDisplay(BrewRecipe recipe) {
+        ItemStack item = new ItemStack(Material.POTION);
+        PotionMeta meta = (PotionMeta) item.getItemMeta();
+
+        meta.setColor(recipe.getPotionColor());
+        meta.setDisplayName(ChatUtils.translateToColor("&f&l" + recipe.getDisplayName()));
+
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatUtils.translateToColor("&8Ingredients:"));
+
+        String[] ingredients = recipe.getIngredients();
+        int secret = recipe.getSecretIngredientIndex();
+        for (int i = 0; i < ingredients.length; i++) {
+            if (i == secret) {
+                // Obfuscated "fading" secret ingredient
+                lore.add(ChatUtils.translateToColor("&8&o~ &7&k" + "????????????????????" + " &8&o~"));
+            } else {
+                lore.add(ChatUtils.translateToColor("&7&o  " + ingredients[i]));
+            }
+        }
+
+        String tierColor = switch (recipe.getTier()) {
+            case BASIC  -> "&a";
+            case MIDDLE -> "&6";
+            case HIGHER -> "&5";
+        };
+        String tierName = switch (recipe.getTier()) {
+            case BASIC  -> "Basic";
+            case MIDDLE -> "Artisan";
+            case HIGHER -> "Avatar";
+        };
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Creates the shop display item for a locked BASIC-tier recipe (shows purchase price).
+     */
+    public static ItemStack createShopPotionDisplay(BrewRecipe recipe) {
+        ItemStack item = new ItemStack(Material.POTION);
+        PotionMeta meta = (PotionMeta) item.getItemMeta();
+
+        meta.setColor(recipe.getPotionColor());
+        meta.setDisplayName(ChatUtils.translateToColor("&f&l" + recipe.getDisplayName()));
+
+        String tierColor = switch (recipe.getTier()) {
+            case BASIC  -> "&a";
+            case MIDDLE -> "&6";
+            case HIGHER -> "&5";
+        };
+        String tierName = switch (recipe.getTier()) {
+            case BASIC  -> "Basic";
+            case MIDDLE -> "Artisan";
+            case HIGHER -> "Avatar";
+        };
+
+        NumberFormat fmt = NumberFormat.getInstance();
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatUtils.translateToColor("&8&oIngredients revealed on purchase"));
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
+        lore.add(ChatUtils.translateToColor("&8Price: &6$" + fmt.format(recipe.getPrice())));
+        lore.add(ChatUtils.translateToColor("&7&oClick to purchase!"));
+        meta.setLore(lore);
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Creates a cycling recipe map display for the vote crate GUI preview.
+     * Uses the Nth MIDDLE-tier recipe (wraps around).
+     */
+    public static ItemStack createCyclingRecipeMapDisplay(int index) {
+        List<BrewRecipe> middleRecipes = new ArrayList<>();
+        for (BrewRecipe r : BrewRecipe.values()) {
+            if (r.getTier() == BrewRecipe.Tier.MIDDLE) middleRecipes.add(r);
+        }
+        if (middleRecipes.isEmpty()) return new ItemStack(Material.FILLED_MAP);
+        BrewRecipe recipe = middleRecipes.get(index % middleRecipes.size());
+
+        ItemStack item = new ItemStack(Material.FILLED_MAP);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(ChatUtils.translateToColor("&f" + recipe.getDisplayName() + " Recipe"));
+        List<String> lore = new ArrayList<>();
+        lore.add(ChatUtils.translateToColor("&8Tier: &6Artisan"));
+        lore.add(ChatUtils.translateToColor("&c5% Chance"));
+        meta.setLore(lore);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /** Returns the total number of MIDDLE-tier recipes (used for cycling bounds). */
+    public static int getMiddleRecipeCount() {
+        int count = 0;
+        for (BrewRecipe r : BrewRecipe.values()) {
+            if (r.getTier() == BrewRecipe.Tier.MIDDLE) count++;
+        }
+        return count;
+    }
+}

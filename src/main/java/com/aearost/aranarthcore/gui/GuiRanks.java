@@ -230,6 +230,7 @@ public class GuiRanks {
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 25 quiver slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f&o- 750 potion slots"));
 		dukeLore.add(ChatUtils.translateToColor("&f- &oArmor Stand &e&oAttention &f&opose"));
+		dukeLore.add(ChatUtils.translateToColor("&f- &6&oAvatar &f&obrew recipes in weekly quests"));
 		dukeLore.add("");
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO overall: 2500 levels"));
 		dukeLore.add(ChatUtils.translateToColor("&7&oRequired mcMMO per category: 750 levels"));

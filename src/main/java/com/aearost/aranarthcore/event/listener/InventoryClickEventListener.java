@@ -5,6 +5,8 @@ import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
 import com.aearost.aranarthcore.event.player.DoubleBrewingBonus;
+import com.aearost.aranarthcore.gui.GuiBrewBook;
+import com.aearost.aranarthcore.gui.GuiBrewShop;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
@@ -113,6 +115,10 @@ public class InventoryClickEventListener implements Listener {
                 new GuiOutpostsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {
                 new GuiDominionMembersClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewBook.TITLE)) {
+                new GuiBrewBookClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewShop.TITLE)) {
+                new GuiBrewShopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Vote Shop")) {
                 new GuiVoteShopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Vote Shop Purchase")) {

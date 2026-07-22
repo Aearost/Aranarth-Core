@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.items.key.KeyEpic;
 import com.aearost.aranarthcore.items.key.KeyGodly;
 import com.aearost.aranarthcore.items.key.KeyRare;
 import com.aearost.aranarthcore.objects.CrateType;
+import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -47,6 +48,9 @@ public class GuiCrate {
 			updateGodlyCrateItems(indexes.get(0), indexes.get(1), indexes.get(2));
 		} else {
 			this.initializedGui = initializeVoteCrate(player);
+			if (indexes != null) {
+				updateVoteCrateItems(indexes.get(0), indexes.get(1));
+			}
 		}
 	}
 
@@ -145,23 +149,22 @@ public class GuiCrate {
 		votePoints10.setItemMeta(votePoints10Meta);
 		gui.setItem(20, votePoints10);
 
-		ItemStack blazeRod = new ItemStack(Material.BLAZE_ROD, 8);
-		ItemMeta blazeRodMeta = blazeRod.getItemMeta();
-		blazeRodMeta.setDisplayName(ChatUtils.translateToColor("#fcbf00&lBlaze Rod"));
-		List<String> blazeRodLore = new ArrayList<>();
-		blazeRodLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		blazeRodMeta.setLore(blazeRodLore);
-		blazeRod.setItemMeta(blazeRodMeta);
-		gui.setItem(21, blazeRod);
+		ItemStack rods = new ItemStack(Material.BLAZE_ROD, 8);
+		ItemMeta rodsMeta = rods.getItemMeta();
+		rodsMeta.setDisplayName(ChatUtils.translateToColor("#fcbf00&lBlaze Rod"));
+		List<String> rodsLore = new ArrayList<>();
+		rodsLore.add(ChatUtils.translateToColor("&c5% Chance &7(alternates with Breeze Rod)"));
+		rodsMeta.setLore(rodsLore);
+		rods.setItemMeta(rodsMeta);
+		gui.setItem(21, rods);
 
-		ItemStack breezeRod = new ItemStack(Material.BREEZE_ROD, 8);
-		ItemMeta breezeRodMeta = breezeRod.getItemMeta();
-		breezeRodMeta.setDisplayName(ChatUtils.translateToColor("#bdadc7&lBreeze Rod"));
-		List<String> breezeRodLore = new ArrayList<>();
-		breezeRodLore.add(ChatUtils.translateToColor("&c5% Chance"));
-		breezeRodMeta.setLore(breezeRodLore);
-		breezeRod.setItemMeta(breezeRodMeta);
-		gui.setItem(23, breezeRod);
+		ItemStack defaultRecipeMap = BrewRecipeUtils.createCyclingRecipeMapDisplay(0);
+		List<String> recipeMapLore = new ArrayList<>();
+		ItemMeta defaultRecipeMapMeta = defaultRecipeMap.getItemMeta();
+		recipeMapLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		defaultRecipeMapMeta.setLore(recipeMapLore);
+		defaultRecipeMap.setItemMeta(defaultRecipeMapMeta);
+		gui.setItem(23, defaultRecipeMap);
 
 		ItemStack rareKey = new KeyRare().getItem();
 		ItemMeta rareKeyMeta = rareKey.getItemMeta();
@@ -500,6 +503,41 @@ public class GuiCrate {
 			}
 		}
 		return gui;
+	}
+
+	/**
+	 * Updates the cycling items in the Vote Crate GUI.
+	 * @param rodIndex    0 = Blaze Rod, 1 = Breeze Rod
+	 * @param recipeMapIndex Index into the list of MIDDLE-tier recipes.
+	 */
+	public void updateVoteCrateItems(int rodIndex, int recipeMapIndex) {
+		ItemStack rod;
+		String rodName;
+		String rodColor;
+		if (rodIndex == 0) {
+			rod = new ItemStack(Material.BLAZE_ROD, 8);
+			rodName = "#fcbf00&lBlaze Rod";
+			rodColor = "&c5% Chance";
+		} else {
+			rod = new ItemStack(Material.BREEZE_ROD, 8);
+			rodName = "#bdadc7&lBreeze Rod";
+			rodColor = "&c5% Chance";
+		}
+		ItemMeta rodMeta = rod.getItemMeta();
+		rodMeta.setDisplayName(ChatUtils.translateToColor(rodName));
+		List<String> rodLore = new ArrayList<>();
+		rodLore.add(ChatUtils.translateToColor(rodColor));
+		rodMeta.setLore(rodLore);
+		rod.setItemMeta(rodMeta);
+		initializedGui.setItem(21, rod);
+
+		ItemStack recipeMap = BrewRecipeUtils.createCyclingRecipeMapDisplay(recipeMapIndex);
+		ItemMeta recipeMapMeta = recipeMap.getItemMeta();
+		List<String> recipeMapLore = new ArrayList<>();
+		recipeMapLore.add(ChatUtils.translateToColor("&c5% Chance"));
+		recipeMapMeta.setLore(recipeMapLore);
+		recipeMap.setItemMeta(recipeMapMeta);
+		initializedGui.setItem(23, recipeMap);
 	}
 
 	/**

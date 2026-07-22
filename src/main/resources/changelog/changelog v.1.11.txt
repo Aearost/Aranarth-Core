@@ -2,6 +2,7 @@ AranarthCore v. 1.11
 
 Major Features
 [+] Implemented Fae Aranarthium
+[+] Implemented /brewbook to view all unlocked BreweryX recipes as a paged GUI
 [+] Implemented shop collaboration through /shop invite, restricted to owning or collaborating on an island
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank
 [+] Implemented a bending permission flag in Dominions, automatically toggling bending by relations or globally in a Dominion's lands
@@ -104,6 +105,9 @@ Minor Features
 [+] Added functionality to drop the dominion food reserves on dominion disband
 [+] Added /d disband and /d setleader confirmation messages
 [+] Added /d disband <dominion> for admins to forcefully disband a dominion
+[~] Replaced vote crate's blaze rod slot with a cycle blaze rod and breeze rod
+[~] Replaced vote crate's breeze rod slot with a cycling brew recipe
+[-] Removed redundant unused cooking food and crafting quests
 
 Backend Code Changes
 - Implemented discord support bot basis
