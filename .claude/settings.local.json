@@ -281,7 +281,12 @@
       "Bash(find /c/Users/liamh -name *.py -path *discord*)",
       "Bash(find /c/Users/liamh -name *.py -path *bot*)",
       "Bash(find /c/Users/liamh/IdeaProjects -name *.py)",
-      "Bash(find /c/Users/liamh -name *.js -o -name *.ts)"
+      "Bash(find /c/Users/liamh -name *.js -o -name *.ts)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *.java -type f -exec grep -l \"ListenerAdapter\\\\|EventListener\" {})",
+      "Bash(2)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore -type f -name *.java -path */src/main/*)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main -type f -name *.java)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main -type f -name *.java -exec grep -l \"interact\\\\|Hook\\\\|jda\" {})"
     ]
   }
 }

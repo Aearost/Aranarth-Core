@@ -246,6 +246,7 @@ async function handleReaction(reaction, user, client) {
 
   // ── Take Note ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.TAKE_NOTE) {
+    if (workQueueManager.getPendingOp(user.id)) return;
     workQueueManager.setPendingOp(user.id, {
       type: 'note',
       issueNumber,
@@ -266,6 +267,7 @@ async function handleReaction(reaction, user, client) {
   // ── On Hold ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.ON_HOLD) {
     if (status === 'on-hold') return; // Already on hold — no-op
+    if (workQueueManager.getPendingOp(user.id)) return;
     workQueueManager.setPendingOp(user.id, {
       type: 'on-hold',
       issueNumber,
@@ -286,6 +288,7 @@ async function handleReaction(reaction, user, client) {
 
   // ── Close ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.CLOSE) {
+    if (workQueueManager.getPendingOp(user.id)) return;
     workQueueManager.setPendingOp(user.id, {
       type: 'close',
       issueNumber,
