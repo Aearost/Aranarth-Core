@@ -1,3 +1,5 @@
+const councilActivityManager = require('./councilActivityManager');
+
 const PRIORITY_BASE = { P1: 10000, P2: 1000, P3: 100, P4: 10 };
 const DEFAULT_BASE = 1;
 
@@ -18,7 +20,15 @@ function score(issue) {
 
   const onHoldMultiplier = labels.includes('ON HOLD') ? 0.05 : 1.0;
 
-  return (priorityBase * typeMultiplier + ageBonus + activityBonus) * onHoldMultiplier;
+  // Issues untouched by council for longer score progressively higher to prevent them
+  // from being perpetually buried. Grows by 3 pts/day after 7 idle days, capped at 150.
+  const lastWorked = councilActivityManager.getTimestamp(issue.number);
+  const idleDays = lastWorked
+    ? (Date.now() - lastWorked) / (1000 * 60 * 60 * 24)
+    : daysSince; // never touched → treat age as idle time
+  const stalenessBonus = idleDays > 7 ? Math.min((idleDays - 7) * 3, 150) : 0;
+
+  return (priorityBase * typeMultiplier + ageBonus + activityBonus + stalenessBonus) * onHoldMultiplier;
 }
 
 function isWip(issue) {

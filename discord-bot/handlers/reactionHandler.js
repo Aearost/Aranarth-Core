@@ -243,8 +243,9 @@ async function handleSubmit(channel, session, user, client) {
     const rawTitle = session.answers.title;
     const body = template.buildBody(session.answers, displayName, screenshots);
 
-    // Build embed fields for the review embed and forum thread
-    const embedFields = template.questions.map((q, i) => ({
+    // Build embed fields for the review embed and forum thread (hidden fields are encoded in the title)
+    const visibleQuestions = template.questions.filter(q => !q.hiddenFromFields);
+    const embedFields = visibleQuestions.map((q, i) => ({
       name: `${i + 1}. ${q.label}`,
       value: (session.answers[q.key] || '*Not answered*').substring(0, 1024),
     }));

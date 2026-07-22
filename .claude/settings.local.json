@@ -275,7 +275,9 @@
       "Bash(find /c -name mvn -maxdepth 6)",
       "Bash(ls:*)",
       "Bash(where gh:*)",
-      "Read(//c/Users/**)"
+      "Read(//c/Users/**)",
+      "Bash(find /c/Users/liamh -name *.py -path *discord* -o -name *.js -path *discord* -o -name *.ts -path *discord*)",
+      "Bash(find /c/Users/liamh -name *.py)"
     ]
   }
 }

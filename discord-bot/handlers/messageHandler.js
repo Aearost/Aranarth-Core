@@ -137,7 +137,8 @@ async function showConfirmation(channel, session, template, user, client) {
     ? `${user.username} (${member.nickname})`
     : user.username;
 
-  const fields = template.questions.map((q, i) => ({
+  const visibleQuestions = template.questions.filter(q => !q.hiddenFromFields);
+  const fields = visibleQuestions.map((q, i) => ({
     name: `${i + 1}. ${q.label}`,
     value: (session.answers[q.key] || '*Not answered*').substring(0, 1024),
   }));

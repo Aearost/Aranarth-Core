@@ -2,6 +2,27 @@ function skipOrValue(val) {
   return !val || val.toLowerCase() === 'skip' ? 'N/A' : val;
 }
 
+/**
+ * Capitalises each word of each slash-separated element part.
+ * e.g. "fire, lava" → "Fire/Lava", "firebending" → "Firebending"
+ */
+function formatElement(raw) {
+  if (!raw || !raw.trim()) return '';
+  const normalized = raw.trim().replace(/\s*[,\/\-]\s*/g, '/');
+  return normalized
+    .split('/')
+    .map(p => p.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
+    .join('/');
+}
+
+/**
+ * Removes any trailing parenthetical(s) from a title string.
+ * e.g. "New ability (Fire)" → "New ability"
+ */
+function stripTrailingParens(title) {
+  return title.trim().replace(/(\s*\([^)]*\))+\s*$/, '').trim();
+}
+
 function buildAttachmentsSection(screenshots) {
   if (!screenshots || screenshots.length === 0) return null;
   const lines = screenshots.map((s, i) => {
@@ -133,6 +154,7 @@ const TEMPLATES = {
         key: 'element',
         label: 'Element/Sub-Element',
         prompt: '**Step 2 of 5 — Element/Sub-Element**\nWhat is the name of the element and/or its Sub-Element?',
+        hiddenFromFields: true,
       },
       {
         key: 'explanation',
@@ -153,7 +175,6 @@ const TEMPLATES = {
     ],
     buildBody(answers, suggestedBy, screenshots = []) {
       const parts = [
-        `**Element/Sub-Element**\n${answers.element}`,
         `**Explanation of Suggestion**\n${answers.explanation}`,
         `**How to Use Ability**\n${answers.howToUse}`,
         `**Suggested By**\n${suggestedBy}`,
@@ -163,7 +184,11 @@ const TEMPLATES = {
       if (attachments) parts.push(attachments);
       return parts.join('\n\n');
     },
-    issueTitle: (answers) => `[ABILITY] ${answers.title}`,
+    issueTitle: (answers) => {
+      const cleanTitle = stripTrailingParens(answers.title || '');
+      const element = formatElement(answers.element || '');
+      return `[ABILITY] ${cleanTitle}${element ? ` (${element})` : ''}`;
+    },
   },
 };
 

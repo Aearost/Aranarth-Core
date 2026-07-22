@@ -162,7 +162,9 @@ async function handle(reaction, user, client) {
       fieldIndex: null,
     });
 
-    const fieldList = template.questions.map((q, i) => `**${i + 1}.** ${q.label}`).join('\n');
+    const fieldList = template.questions.map((q, i) =>
+      `**${i + 1}.** ${q.label}${q.hiddenFromFields ? ' *(encoded in title)*' : ''}`
+    ).join('\n');
     const prompt = await message.channel.send({
       embeds: [
         new EmbedBuilder()
@@ -442,7 +444,8 @@ async function handleReviewMessage(message, client) {
     pending.rawTitle = pending.answers.title;
     pending.body = template.buildBody(pending.answers, pending.displayName, pending.screenshots || []);
 
-    const newEmbedFields = template.questions.map((q, i) => ({
+    const visibleQuestions = template.questions.filter(q => !q.hiddenFromFields);
+    const newEmbedFields = visibleQuestions.map((q, i) => ({
       name: `${i + 1}. ${q.label}`,
       value: (pending.answers[q.key] || '*Not answered*').substring(0, 1024),
     }));

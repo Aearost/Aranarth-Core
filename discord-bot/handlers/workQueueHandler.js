@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 const config = require('../config');
 const workQueueManager = require('../utils/workQueueManager');
 const scoringEngine = require('../utils/scoringEngine');
+const councilActivityManager = require('../utils/councilActivityManager');
 const { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue } = require('../github/githubManager');
 const { postNoteToForum, postTagChangeToForum, lockForumThread } = require('./forumHandler');
 
@@ -12,29 +13,54 @@ const PRIORITY_COLORS = {
   P4: config.COLORS.P4,
 };
 
+const DESC_LIMIT = 200;
+
+function extractDescription(issue) {
+  const body = issue.body || '';
+  const labels = issue.labels.map(l => l.name);
+  const header = labels.includes('BUG') ? '**Detailed Description:**' : '**Explanation of Suggestion**';
+  const idx = body.indexOf(header);
+  if (idx === -1) return null;
+  const afterHeader = body.slice(idx + header.length).replace(/^\n+/, '');
+  const nextSection = afterHeader.search(/\n\*\*/);
+  const content = (nextSection === -1 ? afterHeader : afterHeader.slice(0, nextSection)).trim();
+  if (!content) return null;
+  const flat = content.replace(/\s+/g, ' ').trim();
+  const truncated = flat.length > DESC_LIMIT ? flat.substring(0, DESC_LIMIT - 3) + '...' : flat;
+  return `> *${truncated}*`;
+}
+
 function buildQueueEmbed(issue) {
   const priority = scoringEngine.getPriority(issue);
   const status = scoringEngine.getStatus(issue);
 
   const statusDisplay = {
-    wip: '▶️ In Progress',
-    'on-hold': '⏸️ On Hold',
-    normal: '⚪ Open',
-  }[status] || '⚪ Open';
+    wip: 'In Progress',
+    'on-hold': 'On Hold',
+    normal: 'Open',
+  }[status] || 'Open';
 
   const priorityDisplay = priority || 'Untagged';
   const color = PRIORITY_COLORS[priority] || config.COLORS.DEFAULT;
 
+  const createdTs = Math.floor(new Date(issue.created_at).getTime() / 1000);
+  const lastWorked = councilActivityManager.getTimestamp(issue.number);
+  const lastUpdatedValue = lastWorked ? `<t:${Math.floor(lastWorked / 1000)}:f>` : 'N/A';
+  const description = extractDescription(issue);
+
   return new EmbedBuilder()
     .setTitle(`${issue.title} · #${issue.number}`)
     .setURL(issue.html_url)
-    .setDescription(issue.html_url)
+    .setDescription(description ?? null)
     .addFields(
       { name: 'Priority', value: priorityDisplay, inline: true },
       { name: 'Status', value: statusDisplay, inline: true },
+      { name: '\u200b', value: '\u200b', inline: true },
+      { name: 'Creation Date', value: `<t:${createdTs}:f>`, inline: true },
+      { name: 'Last Updated', value: lastUpdatedValue, inline: true },
+      { name: '\u200b', value: '\u200b', inline: true },
     )
-    .setColor(color)
-    .setTimestamp();
+    .setColor(color);
 }
 
 async function postWorkQueueMessage(channel, issue) {
@@ -209,6 +235,7 @@ async function handleReaction(reaction, user, client) {
         await addLabel(issueNumber, 'WIP');
         await postTagChangeToForum(client, issueNumber, 'wip', displayName);
       }
+      councilActivityManager.record(issueNumber);
       await refreshWorkQueue(client);
     } catch (err) {
       console.error('[WorkQueue] Failed to toggle WIP:', err.message);
@@ -236,14 +263,23 @@ async function handleReaction(reaction, user, client) {
   // ── On Hold ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.ON_HOLD) {
     if (status === 'on-hold') return; // Already on hold — no-op
-    try {
-      if (status === 'wip') await removeLabel(issueNumber, 'WIP');
-      await addLabel(issueNumber, 'ON HOLD');
-      await postTagChangeToForum(client, issueNumber, 'on-hold', displayName);
-      await refreshWorkQueue(client);
-    } catch (err) {
-      console.error('[WorkQueue] Failed to set ON HOLD:', err.message);
-    }
+    workQueueManager.setPendingOp(user.id, {
+      type: 'on-hold',
+      issueNumber,
+      issueTitle,
+      previousStatus: status,
+      queueMessageId: message.id,
+      promptMessageId: null,
+    });
+    const prompt = await message.channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setDescription(`⏸️ <@${user.id}> — Reply with a note for placing **${issueTitle} · #${issueNumber}** on hold, \`skip\` to apply with no note, or \`cancel\` to abort.`)
+          .setColor(config.COLORS.WARNING),
+      ],
+    });
+    const op = workQueueManager.getPendingOp(user.id);
+    if (op) op.promptMessageId = prompt.id;
 
   // ── Close ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.CLOSE) {
@@ -298,15 +334,36 @@ async function handleWorkQueueMessage(message, client) {
     try {
       await addComment(pending.issueNumber, githubComment);
       await postNoteToForum(client, pending.issueNumber, noteText, displayName);
+      councilActivityManager.record(pending.issueNumber);
     } catch (err) {
       console.error('[WorkQueue] Failed to post note:', err.message);
     }
 
+  } else if (pending.type === 'on-hold') {
+    try {
+      if (pending.previousStatus === 'wip') await removeLabel(pending.issueNumber, 'WIP');
+      await addLabel(pending.issueNumber, 'ON HOLD');
+      await postTagChangeToForum(client, pending.issueNumber, 'on-hold', displayName);
+      const noteText = message.content.trim();
+      if (noteText.toLowerCase() !== 'skip') {
+        const githubComment = `⏸️ **On Hold note by ${displayName}:**\n\n${noteText}`;
+        await addComment(pending.issueNumber, githubComment);
+        await postNoteToForum(client, pending.issueNumber, noteText, displayName);
+      }
+      councilActivityManager.record(pending.issueNumber);
+    } catch (err) {
+      console.error('[WorkQueue] Failed to set ON HOLD:', err.message);
+    }
+    await refreshWorkQueue(client);
+
   } else if (pending.type === 'close') {
     const closeComment = `🔒 **Closed by ${displayName}:**\n\n${message.content.trim()}`;
     try {
+      await removeLabel(pending.issueNumber, 'WIP');
+      await removeLabel(pending.issueNumber, 'ON HOLD');
       await closeIssue(pending.issueNumber, closeComment);
       await lockForumThread(client, pending.issueNumber);
+      councilActivityManager.remove(pending.issueNumber);
     } catch (err) {
       console.error('[WorkQueue] Failed to close issue:', err.message);
     }
