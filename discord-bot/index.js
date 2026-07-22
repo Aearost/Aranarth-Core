@@ -19,6 +19,7 @@ const tsCommandHandler = require('./handlers/tsCommandHandler');
 const timerManager = require('./utils/timerManager');
 const statusTracker = require('./utils/statusTracker');
 const workQueueHandler = require('./handlers/workQueueHandler');
+const pendingReviewManager = require('./utils/pendingReviewManager');
 
 const client = new Client({
   intents: [
@@ -40,6 +41,7 @@ client.once(Events.ClientReady, async (c) => {
   statusTracker.load();
   await setupSupportMessage(client);
   timerManager.restoreTimers(client);
+  await restorePendingReviewReactions(client);
   await workQueueHandler.refreshWorkQueue(client);
   scheduleDailyRefresh(client);
   await registerSlashCommands(c);
@@ -126,6 +128,48 @@ async function registerSlashCommands(c) {
   }
 }
 
+// ── Restore reactions on pending review messages ───────────────────────────
+
+async function restorePendingReviewReactions(c) {
+  const channel = await c.channels.fetch(config.PRIORITY_REVIEW_CHANNEL_ID).catch(() => null);
+  if (!channel) return;
+
+  const allPending = pendingReviewManager.getAll();
+  const expectedReactions = [
+    config.PRIORITY_EMOJIS.P1,
+    config.PRIORITY_EMOJIS.P2,
+    config.PRIORITY_EMOJIS.P3,
+    config.PRIORITY_EMOJIS.P4,
+    config.PRIORITY_EMOJIS.EDIT,
+    config.PRIORITY_EMOJIS.REJECT,
+  ];
+
+  for (const messageId of Object.keys(allPending)) {
+    let msg;
+    try {
+      msg = await channel.messages.fetch(messageId);
+    } catch {
+      // Message no longer exists — remove stale entry
+      pendingReviewManager.remove(messageId);
+      console.log(`[Bot] Removed stale pending review ${messageId} (message not found).`);
+      continue;
+    }
+
+    // Remove all bot reactions so we can re-add them in the correct order
+    for (const [, reaction] of msg.reactions.cache) {
+      if (!reaction.me) continue;
+      try { await reaction.users.remove(c.user.id); } catch { /* ignore */ }
+    }
+
+    // Re-add reactions in the correct order
+    for (const emoji of expectedReactions) {
+      try { await msg.react(emoji); } catch { /* ignore */ }
+    }
+
+    console.log(`[Bot] Restored reactions on pending review ${messageId}.`);
+  }
+}
+
 // ── Support message setup ───────────────────────────────────────────────────
 
 const ACTIVE_MSG_PATH = path.join(__dirname, 'data', 'activeMessage.json');
@@ -159,7 +203,7 @@ async function setupSupportMessage(c) {
       '🐛 **Bug Report** — Found something that\'s not working as intended?\n' +
       '💡 **Idea** — Have a suggestion to improve the server?\n' +
       '✨ **Ability** — Want to suggest a new ability?\n' +
-      '❓ **Question** — Have a question for the Council?'
+      '❓ **General Support** — Have a question for the Council?'
     )
     .setColor(config.COLORS.DEFAULT)
     .setFooter({ text: 'Aranarth Support System' });

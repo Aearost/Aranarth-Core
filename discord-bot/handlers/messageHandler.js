@@ -4,6 +4,7 @@ const formManager = require('../forms/formManager');
 const TEMPLATES = require('../forms/templates');
 const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
+const { sendSilent } = require('../utils/channelManager');
 
 async function handle(message, client) {
   // ── Priority review channel: rejection reason collection ──
@@ -45,6 +46,9 @@ async function handle(message, client) {
   // ── Form channel handling ──
   const session = formManager.getSessionByChannel(message.channel.id);
   if (!session || message.author.id !== session.userId) return;
+
+  // Any message from the user is activity — reset the 24-hour inactivity timer
+  timerManager.schedule(client, message.channel.id, session.userId, 'FORM_INACTIVITY', config.FORM_INACTIVITY_MS);
 
   // Collect any attachments the user sends at any stage
   if (message.attachments.size > 0) {
@@ -98,7 +102,7 @@ async function handleEditSelection(message, session, template) {
   const num = parseInt(message.content.trim(), 10);
 
   if (isNaN(num) || num < 1 || num > template.questions.length) {
-    await message.channel.send({
+    await sendSilent(message.channel, {
       embeds: [
         new EmbedBuilder()
           .setDescription(`❌ Please reply with a number between **1** and **${template.questions.length}**.`)
@@ -116,7 +120,7 @@ async function handleEditSelection(message, session, template) {
 
 async function sendQuestionEmbed(channel, session, template) {
   const q = template.questions[session.currentStep];
-  await channel.send({
+  await sendSilent(channel, {
     embeds: [
       new EmbedBuilder()
         .setDescription(q.prompt)
@@ -156,7 +160,7 @@ async function showConfirmation(channel, session, template, user, client) {
     .setFooter({ text: `Submitting as ${displayName}` })
     .setTimestamp();
 
-  await channel.send({ embeds: [previewEmbed] });
+  await sendSilent(channel, { embeds: [previewEmbed] });
 
   const actionEmbed = new EmbedBuilder()
     .setDescription(
@@ -166,7 +170,7 @@ async function showConfirmation(channel, session, template, user, client) {
     )
     .setColor(config.COLORS.DEFAULT);
 
-  const actionMsg = await channel.send({ embeds: [actionEmbed] });
+  const actionMsg = await sendSilent(channel, { embeds: [actionEmbed] });
   await actionMsg.react(config.CONFIRM_EMOJIS.SUBMIT);
   await actionMsg.react(config.CONFIRM_EMOJIS.EDIT);
   await actionMsg.react(config.CONFIRM_EMOJIS.CANCEL);

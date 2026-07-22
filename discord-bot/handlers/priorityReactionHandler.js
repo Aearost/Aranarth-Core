@@ -28,12 +28,16 @@ const TYPE_DISPLAY = {
 
 const CONFIRM_EMOJI = '✅';
 const GO_BACK_EMOJI = '⬅️';
+const EDIT_CANCEL_EMOJI = '❌';
 
 // userId → { stage: 'awaiting_reason', reviewMessageId, pendingData, submitterUser, typeName, promptMessageId, reason, confirmMessageId }
 const pendingRejections = new Map();
 
-// userId → { stage: 'awaiting_field'|'awaiting_value', reviewMessageId, pendingData, promptMessageId, fieldIndex }
+// userId → { stage: 'awaiting_field'|'awaiting_value', reviewMessageId, originalPendingData, pendingData, promptMessageId, fieldIndex }
 const pendingEdits = new Map();
+
+// messageIds currently being edited — blocks priority/reject reactions from claiming mid-edit
+const editingMessages = new Set();
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -51,7 +55,7 @@ async function postReviewMessage(channel, pending) {
     .setDescription(`**Title:** \`${pending.title}\`\nSubmitted by **${pending.displayName}**`)
     .addFields(pending.embedFields)
     .setColor(template.color)
-    .setFooter({ text: 'React with a priority to approve, ✏️ to edit, or ❌ to reject' })
+    .setFooter({ text: 'React with a priority to approve, 📝 to edit, or ❌ to reject' })
     .setTimestamp();
 
   const msg = await channel.send({ embeds: [embed] });
@@ -62,6 +66,59 @@ async function postReviewMessage(channel, pending) {
   await msg.react(config.PRIORITY_EMOJIS.EDIT);
   await msg.react(config.PRIORITY_EMOJIS.REJECT);
   return msg;
+}
+
+/**
+ * Reconstructs pending review data from the embed of a review message.
+ * Used as a fallback when a message is not found in pendingReviewManager
+ * (e.g. messages created before tracking was in place, or after a data loss).
+ * userId will be null — DM to submitter on approval will be skipped.
+ */
+function reconstructPendingFromEmbed(message) {
+  const embed = message.embeds?.[0];
+  if (!embed) return null;
+
+  // Parse type from embed title: "📥 New Bug Report — Pending Review"
+  let type, label;
+  const embedTitle = embed.title || '';
+  if (embedTitle.includes('Bug Report'))        { type = 'BUG';     label = 'BUG'; }
+  else if (embedTitle.includes('Idea Suggestion'))    { type = 'IDEA';    label = 'IDEA'; }
+  else if (embedTitle.includes('Ability Suggestion')) { type = 'ABILITY'; label = 'ABILITY'; }
+  else return null;
+
+  const template = TEMPLATES[type];
+  const desc = embed.description || '';
+
+  // Parse issue title from: "**Title:** `[BUG] The Title`"
+  const titleMatch = desc.match(/\*\*Title:\*\* `([^`]+)`/);
+  const issueTitle = titleMatch ? titleMatch[1] : '[Unknown Title]';
+
+  // Parse submitter display name from: "Submitted by **Name**"
+  const submittedByMatch = desc.match(/Submitted by \*\*(.+?)\*\*/);
+  const displayName = submittedByMatch ? submittedByMatch[1] : 'Unknown';
+
+  // Strip type prefix to get raw title: "[BUG] Title" → "Title"
+  const rawTitleMatch = issueTitle.match(/^\[[^\]]+\]\s*(.+)$/);
+  const rawTitle = rawTitleMatch ? rawTitleMatch[1] : issueTitle;
+
+  // Reconstruct answers from numbered embed fields: "1. Title", "2. Explanation", ...
+  const answers = {};
+  const embedFields = [];
+  for (const field of (embed.fields || [])) {
+    const numMatch = field.name.match(/^(\d+)\.\s+/);
+    if (numMatch) {
+      const idx = parseInt(numMatch[1], 10) - 1;
+      const question = template.questions[idx];
+      if (question) {
+        answers[question.key] = field.value === '*Not answered*' ? '' : field.value;
+      }
+      embedFields.push({ name: field.name, value: field.value });
+    }
+  }
+
+  const body = template.buildBody(answers, displayName, []);
+
+  return { userId: null, type, label, title: issueTitle, rawTitle, body, embedFields, displayName, answers, screenshots: [] };
 }
 
 // ── Reaction handler ───────────────────────────────────────────────────────
@@ -88,21 +145,19 @@ async function handle(reaction, user, client) {
     return;
   }
 
-  // ── Retrieve and atomically claim the pending review ──
-  const pending = pendingReviewManager.get(message.id);
-  if (!pending) return;
-  pendingReviewManager.remove(message.id);
-
-  const submitterUser = await client.users.fetch(pending.userId).catch(() => null);
-  const typeName = TYPE_DISPLAY[pending.type] || pending.type;
-
   // ── Edit: prompt field selection ──
+  // Handled before the claim so the pending review is NOT removed from disk until confirmed.
   if (emojiName === config.PRIORITY_EMOJIS.EDIT) {
-    const template = TEMPLATES[pending.type];
+    const editPending = pendingReviewManager.get(message.id) ?? reconstructPendingFromEmbed(message);
+    if (!editPending || editingMessages.has(message.id)) return;
+
+    editingMessages.add(message.id);
+    const template = TEMPLATES[editPending.type];
     pendingEdits.set(user.id, {
       stage: 'awaiting_field',
       reviewMessageId: message.id,
-      pendingData: pending,
+      originalPendingData: JSON.parse(JSON.stringify(editPending)),
+      pendingData: JSON.parse(JSON.stringify(editPending)),
       promptMessageId: null,
       fieldIndex: null,
     });
@@ -124,6 +179,16 @@ async function handle(reaction, user, client) {
     if (pe) pe.promptMessageId = prompt.id;
     return;
   }
+
+  // ── Retrieve and atomically claim the pending review ──
+  // Guard: don't claim a message that's currently being edited
+  if (editingMessages.has(message.id)) return;
+  const pending = pendingReviewManager.get(message.id) ?? reconstructPendingFromEmbed(message);
+  if (!pending) return;
+  pendingReviewManager.remove(message.id); // no-op if not tracked, safe to call
+
+  const submitterUser = await client.users.fetch(pending.userId).catch(() => null);
+  const typeName = TYPE_DISPLAY[pending.type] || pending.type;
 
   // ── Reject: prompt for reason ──
   if (emojiName === config.PRIORITY_EMOJIS.REJECT) {
@@ -320,8 +385,8 @@ async function handleReviewMessage(message, client) {
   }
 
   if (message.content.trim().toLowerCase() === 'cancel') {
+    editingMessages.delete(pe.reviewMessageId);
     pendingEdits.delete(message.author.id);
-    pendingReviewManager.add(pe.reviewMessageId, pe.pendingData);
     return;
   }
 
@@ -366,15 +431,13 @@ async function handleReviewMessage(message, client) {
     return;
   }
 
-  // ── Stage 2: new value input ──
+  // ── Stage 2: new value input — apply immediately, update embed in-place ──
   if (pe.stage === 'awaiting_value') {
     const pending = pe.pendingData;
     const question = template.questions[pe.fieldIndex];
 
-    // Apply the edit
     pending.answers[question.key] = message.content.trim();
 
-    // Rebuild title, body, and embed fields from updated answers
     pending.title = template.issueTitle(pending.answers);
     pending.rawTitle = pending.answers.title;
     pending.body = template.buildBody(pending.answers, pending.displayName, pending.screenshots || []);
@@ -391,17 +454,30 @@ async function handleReviewMessage(message, client) {
     }
     pending.embedFields = newEmbedFields;
 
-    // Delete the old review message
+    // Persist updated data under the same message ID
+    pendingReviewManager.add(pe.reviewMessageId, pending);
+
+    // Edit the review embed in-place (reactions are preserved)
     try {
       const reviewMsg = await message.channel.messages.fetch(pe.reviewMessageId).catch(() => null);
-      if (reviewMsg) await reviewMsg.delete();
-    } catch { /* ignore */ }
+      if (reviewMsg) {
+        const typeDisplayMap = { BUG: 'Bug Report', IDEA: 'Idea Suggestion', ABILITY: 'Ability Suggestion' };
+        const updatedEmbed = new EmbedBuilder()
+          .setTitle(`📥 New ${typeDisplayMap[pending.type] || pending.type} — Pending Review`)
+          .setDescription(`**Title:** \`${pending.title}\`\nSubmitted by **${pending.displayName}**`)
+          .addFields(newEmbedFields)
+          .setColor(template.color)
+          .setFooter({ text: 'React with a priority to approve, 📝 to edit, or ❌ to reject' })
+          .setTimestamp();
+        await reviewMsg.edit({ embeds: [updatedEmbed] });
+      }
+    } catch (err) {
+      console.error('[PriorityHandler] Failed to update review embed:', err.message);
+    }
 
+    // Release the edit lock and clear the session
+    editingMessages.delete(pe.reviewMessageId);
     pendingEdits.delete(message.author.id);
-
-    // Re-post the updated review message and register it
-    const newMsg = await postReviewMessage(message.channel, pending);
-    pendingReviewManager.add(newMsg.id, pending);
   }
 }
 

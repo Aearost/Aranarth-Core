@@ -3,7 +3,7 @@ const config = require('../config');
 const workQueueManager = require('../utils/workQueueManager');
 const scoringEngine = require('../utils/scoringEngine');
 const { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue } = require('../github/githubManager');
-const { postNoteToForum, lockForumThread } = require('./forumHandler');
+const { postNoteToForum, postTagChangeToForum, lockForumThread } = require('./forumHandler');
 
 const PRIORITY_COLORS = {
   P1: config.COLORS.P1,
@@ -51,12 +51,21 @@ async function deleteWorkQueueMessages(client) {
   const channel = await client.channels.fetch(config.WORK_QUEUE_CHANNEL_ID).catch(() => null);
   if (!channel) return;
 
-  for (const item of workQueueManager.getAll()) {
+  // Delete ALL messages in the channel so stale untracked messages from old bot versions are removed too
+  let fetched;
+  do {
+    fetched = await channel.messages.fetch({ limit: 100 });
+    if (fetched.size === 0) break;
     try {
-      const msg = await channel.messages.fetch(item.messageId).catch(() => null);
-      if (msg) await msg.delete();
-    } catch { /* already deleted */ }
-  }
+      await channel.bulkDelete(fetched);
+    } catch {
+      // bulkDelete fails for messages older than 14 days — fall back to individual deletes
+      for (const msg of fetched.values()) {
+        try { await msg.delete(); } catch { /* ignore */ }
+      }
+    }
+  } while (fetched.size === 100);
+
   workQueueManager.setMessages([]);
 }
 
@@ -77,6 +86,22 @@ async function refreshWorkQueue(client) {
       return;
     }
 
+    // Legend message always appears at the top
+    const legendMsg = await channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle('📋 To-Do List Legend')
+          .setDescription(
+            `${config.WORK_QUEUE_EMOJIS.IN_PROGRESS} **In Progress** — Mark this issue as actively being worked on\n` +
+            `${config.WORK_QUEUE_EMOJIS.TAKE_NOTE} **Progress Note** — Add a note to the issue (mirrored to GitHub)\n` +
+            `${config.WORK_QUEUE_EMOJIS.ON_HOLD} **On Hold** — Pause work on this issue\n` +
+            `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it`
+          )
+          .setColor(config.COLORS.DEFAULT),
+      ],
+    });
+    const newMessages = [{ messageId: legendMsg.id, issueNumber: null, isLegend: true }];
+
     if (selected.length === 0) {
       const emptyMsg = await channel.send({
         embeds: [
@@ -87,12 +112,26 @@ async function refreshWorkQueue(client) {
             .setTimestamp(),
         ],
       });
-      workQueueManager.setMessages([{ messageId: emptyMsg.id, issueNumber: null, isEmpty: true }]);
+      newMessages.push({ messageId: emptyMsg.id, issueNumber: null, isEmpty: true });
+      workQueueManager.setMessages(newMessages);
       return;
     }
 
-    const newMessages = [];
-    for (const issue of selected) {
+    const wipIssues = selected.filter(i => scoringEngine.isWip(i));
+    const otherIssues = selected.filter(i => !scoringEngine.isWip(i));
+
+    if (wipIssues.length > 0) {
+      const wipSepMsg = await channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription('**─────────────────────────────────**\n▶️  **In Progress**\n**─────────────────────────────────**')
+            .setColor(0x2B2D31),
+        ],
+      });
+      newMessages.push({ messageId: wipSepMsg.id, issueNumber: null, isSeparator: true });
+    }
+
+    for (const issue of wipIssues) {
       const msg = await postWorkQueueMessage(channel, issue);
       newMessages.push({
         messageId: msg.id,
@@ -104,8 +143,33 @@ async function refreshWorkQueue(client) {
         status: scoringEngine.getStatus(issue),
       });
     }
+
+    if (wipIssues.length > 0 && otherIssues.length > 0) {
+      const sepMsg = await channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription('**─────────────────────────────────**\n📋  **To Review**\n**─────────────────────────────────**')
+            .setColor(0x2B2D31),
+        ],
+      });
+      newMessages.push({ messageId: sepMsg.id, issueNumber: null, isSeparator: true });
+    }
+
+    for (const issue of otherIssues) {
+      const msg = await postWorkQueueMessage(channel, issue);
+      newMessages.push({
+        messageId: msg.id,
+        issueNumber: issue.number,
+        issueTitle: issue.title,
+        issueUrl: issue.html_url,
+        priority: scoringEngine.getPriority(issue),
+        type: scoringEngine.getType(issue),
+        status: scoringEngine.getStatus(issue),
+      });
+    }
+
     workQueueManager.setMessages(newMessages);
-    console.log(`[WorkQueue] Posted ${newMessages.length} item(s).`);
+    console.log(`[WorkQueue] Posted ${wipIssues.length} WIP + ${otherIssues.length} other item(s).`);
   } catch (err) {
     console.error('[WorkQueue] Error during refresh:', err.message);
   }
@@ -127,22 +191,27 @@ async function handleReaction(reaction, user, client) {
   if (!member || !member.roles.cache.has(config.COUNCIL_ROLE_ID)) return;
 
   const item = workQueueManager.getByMessageId(message.id);
-  if (!item || item.isEmpty) return;
+  if (!item || item.isEmpty || item.isSeparator || item.isLegend) return;
 
   const { issueNumber, issueTitle, status } = item;
   const displayName = member.nickname
     ? `${user.username} (${member.nickname})`
     : user.username;
 
-  // ── In Progress ──
+  // ── In Progress (toggle) ──
   if (emojiName === config.WORK_QUEUE_EMOJIS.IN_PROGRESS) {
-    if (status === 'wip') return; // Already WIP — no-op
     try {
-      if (status === 'on-hold') await removeLabel(issueNumber, 'ON HOLD');
-      await addLabel(issueNumber, 'WIP');
+      if (status === 'wip') {
+        await removeLabel(issueNumber, 'WIP');
+        await postTagChangeToForum(client, issueNumber, 'wip-removed', displayName);
+      } else {
+        if (status === 'on-hold') await removeLabel(issueNumber, 'ON HOLD');
+        await addLabel(issueNumber, 'WIP');
+        await postTagChangeToForum(client, issueNumber, 'wip', displayName);
+      }
       await refreshWorkQueue(client);
     } catch (err) {
-      console.error('[WorkQueue] Failed to set WIP:', err.message);
+      console.error('[WorkQueue] Failed to toggle WIP:', err.message);
     }
 
   // ── Take Note ──
@@ -170,6 +239,7 @@ async function handleReaction(reaction, user, client) {
     try {
       if (status === 'wip') await removeLabel(issueNumber, 'WIP');
       await addLabel(issueNumber, 'ON HOLD');
+      await postTagChangeToForum(client, issueNumber, 'on-hold', displayName);
       await refreshWorkQueue(client);
     } catch (err) {
       console.error('[WorkQueue] Failed to set ON HOLD:', err.message);

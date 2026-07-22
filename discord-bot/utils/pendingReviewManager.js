@@ -34,4 +34,8 @@ function remove(messageId) {
 
 load();
 
-module.exports = { add, get, remove };
+function getAll() {
+  return { ...reviews };
+}
+
+module.exports = { add, get, remove, getAll };

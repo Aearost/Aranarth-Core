@@ -5,6 +5,7 @@ const config = require('../config');
 const formManager = require('../forms/formManager');
 const TEMPLATES = require('../forms/templates');
 const channelManager = require('../utils/channelManager');
+const { sendSilent } = channelManager;
 const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
 const { uploadAttachment } = require('../github/issueCreator');
@@ -46,16 +47,20 @@ async function handle(reaction, user, client) {
     return;
   }
 
-  // ── 2. Confirmation message (submit/edit/cancel) ──
+  // ── 2. Form channel reactions ──
   const session = formManager.getSessionByChannel(message.channel.id);
-  if (
-    session &&
-    session.state === 'CONFIRMING' &&
-    session.confirmMessageId === message.id &&
-    user.id === session.userId
-  ) {
-    await handleConfirmReaction(reaction, user, client, session, emojiName, message.channel);
-    return;
+  if (session && user.id === session.userId) {
+    // Cancel button (persistent, pinned at top of channel)
+    if (session.cancelMessageId === message.id) {
+      try { await reaction.users.remove(user.id); } catch { /* ignore */ }
+      await handleCancel(message.channel, session, user);
+      return;
+    }
+    // Confirmation message (submit/edit/cancel)
+    if (session.state === 'CONFIRMING' && session.confirmMessageId === message.id) {
+      await handleConfirmReaction(reaction, user, client, session, emojiName, message.channel);
+      return;
+    }
   }
 
   // ── 3. Status message in question channels ──
@@ -106,6 +111,7 @@ async function handleInitialReaction(reaction, user, client, emojiName) {
     await setupQuestionChannel(channel, guild, user, client);
   } else {
     await startForm(channel, user, session);
+    timerManager.schedule(client, channel.id, user.id, 'FORM_INACTIVITY', config.FORM_INACTIVITY_MS);
   }
 }
 
@@ -116,7 +122,7 @@ async function setupQuestionChannel(channel, guild, user, client) {
     : user.username;
 
   const welcomeEmbed = new EmbedBuilder()
-    .setTitle('❓ Question Channel')
+    .setTitle('❓ General Support')
     .setDescription(
       `Welcome, **${displayName}**! 👋\n\n` +
       `This is your personal space to ask the Council your question. Feel free to type freely and include as much detail as you'd like!\n\n` +
@@ -166,7 +172,22 @@ async function startForm(channel, user, session) {
     .setColor(template.color)
     .setFooter({ text: `${template.questions.length} questions total` });
 
-  await channel.send({ embeds: [introEmbed] });
+  await sendSilent(channel, { embeds: [introEmbed] });
+
+  // Send a persistent cancel button pinned at the top of the channel
+  const cancelEmbed = new EmbedBuilder()
+    .setDescription('❌ React below at any time to cancel this submission and close the channel.')
+    .setColor(config.COLORS.ERROR);
+  const cancelMsg = await sendSilent(channel, { embeds: [cancelEmbed] });
+  await cancelMsg.react(config.CONFIRM_EMOJIS.CANCEL);
+  try {
+    await cancelMsg.pin();
+    const recent = await channel.messages.fetch({ limit: 5 });
+    const pinNotice = recent.find(m => m.type === MessageType.ChannelPinnedMessage);
+    if (pinNotice) await pinNotice.delete();
+  } catch { /* non-critical */ }
+  session.cancelMessageId = cancelMsg.id;
+
   await sendFirstQuestion(channel, session, template);
 }
 
@@ -183,6 +204,8 @@ async function handleConfirmReaction(reaction, user, client, session, emojiName,
   if (emojiName === config.CONFIRM_EMOJIS.SUBMIT) {
     await handleSubmit(channel, session, user, client);
   } else if (emojiName === config.CONFIRM_EMOJIS.EDIT) {
+    // Reset the inactivity timer — user is still actively working on the form
+    timerManager.schedule(client, channel.id, session.userId, 'FORM_INACTIVITY', config.FORM_INACTIVITY_MS);
     await handleEdit(channel, session);
   } else if (emojiName === config.CONFIRM_EMOJIS.CANCEL) {
     await handleCancel(channel, session, user);
@@ -197,7 +220,7 @@ async function handleSubmit(channel, session, user, client) {
     ? `${user.username} (${member.nickname})`
     : user.username;
 
-  await channel.send({
+  await sendSilent(channel, {
     embeds: [
       new EmbedBuilder()
         .setDescription('⏳ Sending your submission for Council review...')
@@ -244,7 +267,7 @@ async function handleSubmit(channel, session, user, client) {
       .setDescription(`**Title:** \`${title}\`\nSubmitted by **${displayName}**`)
       .addFields(embedFields)
       .setColor(template.color)
-      .setFooter({ text: 'React with a priority to approve, ✏️ to edit, or ❌ to reject' })
+      .setFooter({ text: 'React with a priority to approve, 📝 to edit, or ❌ to reject' })
       .setTimestamp();
 
     const reviewMsg = await reviewChannel.send({ embeds: [reviewEmbed] });
@@ -270,7 +293,7 @@ async function handleSubmit(channel, session, user, client) {
     });
 
     // Notify user in the ticket channel
-    await channel.send({
+    await sendSilent(channel, {
       embeds: [
         new EmbedBuilder()
           .setTitle('✅ Submission Received!')
@@ -294,12 +317,13 @@ async function handleSubmit(channel, session, user, client) {
     } catch { /* DMs may be closed */ }
 
     formManager.deleteSession(user.id, channel.id);
+    timerManager.cancel(channel.id);
     await channelManager.deleteChannel(channel, 5000);
 
   } catch (err) {
     console.error('[ReactionHandler] Submission failed:', err);
 
-    const errMsg = await channel.send({
+    const errMsg = await sendSilent(channel, {
       embeds: [
         new EmbedBuilder()
           .setTitle('❌ Submission Failed')
@@ -328,12 +352,12 @@ async function handleEdit(channel, session) {
     )
     .setColor(config.COLORS.WARNING);
 
-  await channel.send({ embeds: [editEmbed] });
+  await sendSilent(channel, { embeds: [editEmbed] });
   session.state = 'EDITING';
 }
 
 async function handleCancel(channel, session, user) {
-  await channel.send({
+  await sendSilent(channel, {
     embeds: [
       new EmbedBuilder()
         .setTitle('❌ Cancelled')
@@ -343,6 +367,7 @@ async function handleCancel(channel, session, user) {
   });
 
   formManager.deleteSession(user.id, channel.id);
+  timerManager.cancel(channel.id);
   await channelManager.deleteChannel(channel, 5000);
 }
 

@@ -273,7 +273,9 @@
       "Bash(find ~/.m2 -name *.jar -path *mcMMO*)",
       "Read(//c/ProgramData/chocolatey/**)",
       "Bash(find /c -name mvn -maxdepth 6)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(where gh:*)",
+      "Read(//c/Users/**)"
     ]
   }
 }

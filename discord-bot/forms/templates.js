@@ -94,7 +94,7 @@ const TEMPLATES = {
       {
         key: 'implementation',
         label: 'Proposed Way to Implement',
-        prompt: '**Step 4 of 5 — Proposed Way to Implement**\nHow would you suggest this is implemented?',
+        prompt: '**Step 4 of 5 — Proposed Way to Implement**\nHow should the functionality be triggered? Is anything in particular needed to be noted?',
       },
       {
         key: 'additionalContext',

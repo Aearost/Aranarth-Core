@@ -29,18 +29,26 @@ function isOnHold(issue) {
   return issue.labels.some(l => l.name === 'ON HOLD');
 }
 
+const QUEUE_LIMIT = 5;
+
 /**
- * Selects top issues. WIP always included; remaining slots (up to 5) filled by score.
+ * Selects top issues, capped at QUEUE_LIMIT total.
+ * WIP issues take priority slots first (sorted by score), non-WIP fill the rest.
  */
 function selectTop(issues) {
-  const wipIssues = issues.filter(isWip);
-  const others = issues.filter(i => !isWip(i));
+  const wipIssues = issues
+    .filter(isWip)
+    .map(i => ({ issue: i, score: score(i) }))
+    .sort((a, b) => b.score - a.score)
+    .map(s => s.issue)
+    .slice(0, QUEUE_LIMIT);
 
-  const scored = others
+  const scored = issues
+    .filter(i => !isWip(i))
     .map(i => ({ issue: i, score: score(i) }))
     .sort((a, b) => b.score - a.score);
 
-  const remaining = Math.max(0, 5 - wipIssues.length);
+  const remaining = Math.max(0, QUEUE_LIMIT - wipIssues.length);
   return [...wipIssues, ...scored.slice(0, remaining).map(s => s.issue)];
 }
 

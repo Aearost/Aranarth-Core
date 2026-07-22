@@ -96,6 +96,7 @@ async function createIssue(title, body, labels) {
     title,
     body,
     labels: Array.isArray(labels) ? labels : [labels],
+    assignees: config.GITHUB_ASSIGNEE ? [config.GITHUB_ASSIGNEE] : [],
   });
   return { url: res.data.html_url, number: res.data.number };
 }

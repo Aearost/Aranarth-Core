@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { MessageFlags } = require('discord.js');
 const config = require('../config');
 
 const TIMERS_PATH = path.join(__dirname, '..', 'data', 'timers.json');
@@ -111,17 +112,23 @@ async function sendWarning(client, channelId, userId, reason, timeLeftMs) {
     const channel = await client.channels.fetch(channelId);
     if (!channel) return;
     const minutes = Math.round(timeLeftMs / 60_000);
-    const why = reason === 'INACTIVITY_CLOSE'
-      ? 'inactivity after your question appeared to be answered'
-      : 'being marked as Resolved';
-    await channel.send(`⚠️ This channel will automatically close in **${minutes} minutes** due to ${why}.`);
+    const why = reason === 'FORM_INACTIVITY'
+      ? 'inactivity in your submission form'
+      : reason === 'INACTIVITY_CLOSE'
+        ? 'inactivity after your question appeared to be answered'
+        : 'being marked as Resolved';
+    const warnPayload = { content: `⚠️ This channel will automatically close in **${minutes} minutes** due to ${why}.` };
+    if (reason === 'FORM_INACTIVITY') warnPayload.flags = MessageFlags.SuppressNotifications;
+    await channel.send(warnPayload);
 
     try {
       const ticketUser = await client.users.fetch(userId);
       const dm = await ticketUser.createDM();
-      const dmWhy = reason === 'INACTIVITY_CLOSE'
-        ? 'it has been inactive for a while'
-        : 'it was marked as Resolved';
+      const dmWhy = reason === 'FORM_INACTIVITY'
+        ? 'your form submission has been inactive for nearly 24 hours'
+        : reason === 'INACTIVITY_CLOSE'
+          ? 'it has been inactive for a while'
+          : 'it was marked as Resolved';
       await dm.send(`⚠️ Your ticket **#${channel.name}** in **Aranarth** will automatically close in **${minutes} minutes** because ${dmWhy}. Jump back in here if needed: ${channel.url}`);
     } catch { /* DMs may be closed */ }
   } catch { /* channel may already be gone */ }
@@ -137,19 +144,31 @@ async function closeChannel(client, channelId, reason) {
 
     const statusInfo = statusTracker.get(channelId);
 
-    const why = reason === 'INACTIVITY_CLOSE'
-      ? 'inactivity after the question appeared to be answered'
-      : 'being marked as Resolved with no further activity';
+    let why, dmWhy, userId;
+    if (reason === 'FORM_INACTIVITY') {
+      why = 'abandonment — no activity for 24 hours';
+      dmWhy = 'it was inactive for 24 hours without being submitted or cancelled';
+      // Try the live session first, fall back to the persisted timer record
+      userId = formManager.getSessionByChannel(channelId)?.userId
+        ?? readFile()[channelId]?.userId;
+    } else if (reason === 'INACTIVITY_CLOSE') {
+      why = 'inactivity after the question appeared to be answered';
+      dmWhy = 'it was inactive for too long after appearing to be answered';
+      userId = statusInfo?.userId;
+    } else {
+      why = 'being marked as Resolved with no further activity';
+      dmWhy = 'it was marked as Resolved with no further activity';
+      userId = statusInfo?.userId;
+    }
 
-    await channel.send(`🔒 Closing this channel automatically due to ${why}.`);
+    const closePayload = { content: `🔒 Closing this channel automatically due to ${why}.` };
+    if (reason === 'FORM_INACTIVITY') closePayload.flags = MessageFlags.SuppressNotifications;
+    await channel.send(closePayload);
 
-    if (statusInfo?.userId) {
+    if (userId) {
       try {
-        const ticketUser = await client.users.fetch(statusInfo.userId);
+        const ticketUser = await client.users.fetch(userId);
         const dm = await ticketUser.createDM();
-        const dmWhy = reason === 'INACTIVITY_CLOSE'
-          ? 'it was inactive for too long after appearing to be answered'
-          : 'it was marked as Resolved with no further activity';
         await dm.send(`🔒 Your ticket **#${channel.name}** in **Aranarth** has been automatically closed because ${dmWhy}. Feel free to open a new ticket if you need further help!`);
       } catch { /* DMs may be closed */ }
     }

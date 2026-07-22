@@ -4,6 +4,7 @@ module.exports = {
   COUNCIL_ROLE_ID: '1436877816796020836',
   GITHUB_OWNER: 'Aearost',
   GITHUB_REPO: 'Aranarth-Core',
+  GITHUB_ASSIGNEE: 'Aearost',
 
   EMOJIS: {
     BUG: '🐛',
@@ -29,6 +30,7 @@ module.exports = {
   INACTIVITY_CLOSE_MS: 5 * 24 * 60 * 60 * 1000, // 5 days after notification → close
   RESOLVED_MS: 48 * 60 * 60 * 1000,             // 48 hours after resolved → close
   WARN_BEFORE_MS: 60 * 60 * 1000,               // warn 1 hour before close
+  FORM_INACTIVITY_MS: 24 * 60 * 60 * 1000,      // 24 hours of no activity in a bug/idea/ability form channel → delete
 
   COLORS: {
     BUG: 0xFF4444,
@@ -49,7 +51,7 @@ module.exports = {
     BUG: 'bug',
     IDEA: 'idea',
     ABILITY: 'ability',
-    QUESTION: 'question',
+    QUESTION: 'support',
   },
 
   PRIORITY_REVIEW_CHANNEL_ID: '1529242982912360508',
@@ -62,7 +64,7 @@ module.exports = {
     P2: '🟠',
     P3: '🟡',
     P4: '🟢',
-    EDIT: '✏️',
+    EDIT: '📝',
     REJECT: '❌',
   },
 

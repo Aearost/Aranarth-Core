@@ -24,8 +24,10 @@ async function createForumThread(client, issueNumber, issueTitle, embedFields, t
 
   const priorityLabels = { P1: '🔴 Critical', P2: '🟠 High', P3: '🟡 Medium', P4: '🟢 Low / Backlog' };
 
+  const githubUrl = `https://github.com/${config.GITHUB_OWNER}/${config.GITHUB_REPO}/issues/${issueNumber}`;
+
   const embed = new EmbedBuilder()
-    .setTitle(issueTitle)
+    .setTitle(`${issueTitle} #${issueNumber}`)
     .setDescription(`**Priority:** ${priorityLabels[priority] || priority}`)
     .addFields(embedFields)
     .setColor(color)
@@ -34,11 +36,29 @@ async function createForumThread(client, issueNumber, issueTitle, embedFields, t
 
   const thread = await channel.threads.create({
     name: `${issueTitle} #${issueNumber}`,
-    message: { embeds: [embed] },
+    message: { content: `<${githubUrl}>`, embeds: [embed] },
   });
 
   forumManager.set(issueNumber, thread.id);
   console.log(`[ForumHandler] Created forum thread ${thread.id} for issue #${issueNumber}.`);
+}
+
+/**
+ * Resolves Discord mention tokens in message content to readable names for GitHub.
+ * e.g. <@123456> → @username, <@&789> → @RoleName, <#456> → #channel-name
+ */
+function resolveMentions(content, message) {
+  let resolved = content;
+  for (const [id, user] of message.mentions.users) {
+    resolved = resolved.replace(new RegExp(`<@!?${id}>`, 'g'), `@${user.username}`);
+  }
+  for (const [id, role] of message.mentions.roles) {
+    resolved = resolved.replace(new RegExp(`<@&${id}>`, 'g'), `@${role.name}`);
+  }
+  for (const [id, channel] of message.mentions.channels) {
+    resolved = resolved.replace(new RegExp(`<#${id}>`, 'g'), `#${channel.name}`);
+  }
+  return resolved;
 }
 
 /**
@@ -54,6 +74,8 @@ async function handleForumMessage(message) {
     ? `${message.author.username} (${message.member.nickname})`
     : message.author.username;
 
+  const content = resolveMentions(message.content, message);
+
   let commentBody;
   if (message.reference) {
     try {
@@ -61,12 +83,12 @@ async function handleForumMessage(message) {
       const refAuthor = refMsg.author.bot
         ? 'Aranarth'
         : (refMsg.member?.nickname || refMsg.author.username);
-      commentBody = `**💬 [Discord Community] ${authorName}** *(replying to ${refAuthor})*:\n\n${message.content}`;
+      commentBody = `**💬 [Discord Community] ${authorName}** *(replying to ${refAuthor})*:\n\n${content}`;
     } catch {
-      commentBody = `**💬 [Discord Community] ${authorName}:**\n\n${message.content}`;
+      commentBody = `**💬 [Discord Community] ${authorName}:**\n\n${content}`;
     }
   } else {
-    commentBody = `**💬 [Discord Community] ${authorName}:**\n\n${message.content}`;
+    commentBody = `**💬 [Discord Community] ${authorName}:**\n\n${content}`;
   }
 
   if (message.attachments.size > 0) {
@@ -104,6 +126,51 @@ async function postNoteToForum(client, issueNumber, note, authorName) {
 }
 
 /**
+ * Posts a status-change notification embed to the forum thread when a label changes.
+ * @param {string} newStatus  'wip' | 'on-hold'
+ * @param {string} markedBy   Display name of the council member who made the change
+ */
+async function postTagChangeToForum(client, issueNumber, newStatus, markedBy) {
+  const threadId = forumManager.getThreadId(issueNumber);
+  if (!threadId) return;
+
+  const thread = await client.channels.fetch(threadId).catch(() => null);
+  if (!thread) return;
+
+  const statusConfig = {
+    wip: {
+      title: '▶️ Now In Progress',
+      description: 'This issue has been picked up and is actively being worked on.',
+      color: config.COLORS.SUCCESS,
+    },
+    'wip-removed': {
+      title: '⬜ No Longer In Progress',
+      description: 'This issue has been unmarked as in progress and is back in the queue.',
+      color: config.COLORS.DEFAULT,
+    },
+    'on-hold': {
+      title: '⏸️ Placed On Hold',
+      description: 'Work on this issue has been paused for now.',
+      color: config.COLORS.WARNING,
+    },
+  };
+
+  const sc = statusConfig[newStatus];
+  if (!sc) return;
+
+  await thread.send({
+    embeds: [
+      new EmbedBuilder()
+        .setTitle(sc.title)
+        .setDescription(sc.description)
+        .setColor(sc.color)
+        .setFooter({ text: `Marked by ${markedBy}` })
+        .setTimestamp(),
+    ],
+  });
+}
+
+/**
  * Locks the forum thread for a closed issue and posts a closure notice.
  */
 async function lockForumThread(client, issueNumber) {
@@ -129,4 +196,4 @@ async function lockForumThread(client, issueNumber) {
   }
 }
 
-module.exports = { createForumThread, handleForumMessage, postNoteToForum, lockForumThread };
+module.exports = { createForumThread, handleForumMessage, postNoteToForum, postTagChangeToForum, lockForumThread };

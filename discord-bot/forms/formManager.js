@@ -14,6 +14,7 @@ function createSession(userId, channelId, type) {
     state: 'ANSWERING', // 'ANSWERING' | 'CONFIRMING' | 'EDITING'
     editMode: false,
     confirmMessageId: null,
+    cancelMessageId: null,
   };
   activeSessions.set(userId, session);
   channelToUser.set(channelId, userId);
