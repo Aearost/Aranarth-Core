@@ -53,8 +53,14 @@ public enum BrewRecipe {
     GREEN_TEA(        "atla14", Tier.HIGHER, 0, 1,  false),  // SPEED+SATURATION
     OOLONG_TEA(       "atla15", Tier.HIGHER, 0, 1,  false),  // HASTE+RESISTANCE
     ONION_BANANA(     "atla16", Tier.HIGHER, 0, 2,  false),  // NAUSEA+REGEN (lore-significant)
-    SPIRIT_TONIC(     "atla17", Tier.HIGHER, 0, 1,  false),  // diff 8, SLOW_FALLING+NIGHT_VISION+INVISIBILITY
-    AVATAR_ELIXIR(    "atla18", Tier.HIGHER, 0, 3,  false);  // diff 10, RESISTANCE/2+STRENGTH/2+SPEED
+    SPIRIT_TONIC(       "atla17", Tier.HIGHER, 0, 1,  false),  // diff 8, SLOW_FALLING+NIGHT_VISION+INVISIBILITY
+    AVATAR_ELIXIR(      "atla18", Tier.HIGHER, 0, 3,  false),  // diff 10, RESISTANCE/2+STRENGTH/2+SPEED
+    BADGERMOLE_BREW(    "atla19", Tier.HIGHER, 0, -1, false),  // diff 10, HASTE/4-5+NIGHT_VISION, Mangrove age 16
+    PAI_SHO_CORDIAL(    "atla20", Tier.HIGHER, 0, -1, false),  // diff 9, LUCK/2+ABSORPTION/2+RESISTANCE, Pale Oak age 15
+    FULL_MOON_VINTAGE(  "atla21", Tier.HIGHER, 0, -1, false),  // diff 9, STRENGTH/2+NIGHT_VISION, Crimson age 14
+    SUN_WARRIOR_MEAD(   "atla22", Tier.HIGHER, 0, -1, false),  // diff 9, FIRE_RESISTANCE+STRENGTH/2+REGEN, Acacia age 12
+    NEUTRAL_JING_JULEP( "atla23", Tier.HIGHER, 0, -1, false),  // diff 8, JUMP_BOOST/3+HASTE/2, Bamboo age 8
+    FORBIDDEN_INK(      "atla24", Tier.HIGHER, 0, -1, false);  // diff 9, NIGHT_VISION+LUCK+SLOW_FALLING, Dark Oak age 12
 
     public enum Tier {
         BASIC, MIDDLE, HIGHER
@@ -65,11 +71,20 @@ public enum BrewRecipe {
         public final String displayName;
         public final String[] ingredients;
         public final String colorHex;
+        public final int cookingTime;
+        public final int distillRuns;
+        public final int age;
+        public final int wood;
 
-        public RuntimeData(String displayName, String[] ingredients, String colorHex) {
+        public RuntimeData(String displayName, String[] ingredients, String colorHex,
+                           int cookingTime, int distillRuns, int age, int wood) {
             this.displayName = displayName;
             this.ingredients = ingredients;
             this.colorHex = colorHex;
+            this.cookingTime = cookingTime;
+            this.distillRuns = distillRuns;
+            this.age = age;
+            this.wood = wood;
         }
     }
 
@@ -104,6 +119,11 @@ public enum BrewRecipe {
     public String[] getIngredients() {
         return runtimeData != null ? runtimeData.ingredients : new String[0];
     }
+
+    public int getCookingTime() { return runtimeData != null ? runtimeData.cookingTime : 0; }
+    public int getDistillRuns() { return runtimeData != null ? runtimeData.distillRuns : 0; }
+    public int getAge()         { return runtimeData != null ? runtimeData.age : 0; }
+    public int getWood()        { return runtimeData != null ? runtimeData.wood : 0; }
 
     public Color getPotionColor() {
         if (runtimeData == null) return Color.fromRGB(136, 136, 255);

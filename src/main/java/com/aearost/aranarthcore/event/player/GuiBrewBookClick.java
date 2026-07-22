@@ -89,7 +89,7 @@ public class GuiBrewBookClick {
     private String brewingOverview() {
         return ChatUtils.translateToColor(
                 "&6&lBrewing Overview&r\n\n" +
-                        "The &lBrewery &rplugin lets you brew drinks with unique effects. " +
+                        "The &oBrewery &rplugin lets you brew drinks with unique effects. " +
                         "Most recipes involve up to 3 stages:\n" +
                         "1. &rCauldron\n" +
                         "2. &rBrewing Stand\n" +
@@ -118,8 +118,8 @@ public class GuiBrewBookClick {
     private String brewingSmallBarrel() {
         return ChatUtils.translateToColor(
                 "&6&lStep 3 - Aging&r\n\n" +
-                        "Brews are aged by storing them in a barrel.\n\n" +
-                        "&lSmall Barrel:&r Arrange 8 Stairs in a barrel shape (any wood). Place a Sign on the lower-right front block and write &o\"Barrel\"&r on line 1 to seal it."
+                        "Brews are aged by being stored in a type of barrel.\n\n" +
+                        "&lSmall Barrel:&r Arrange 8 Stairs in a barrel shape. Place a Sign on the lower-right front block and write &o\"Barrel\"&r on line 1 to seal it."
         );
     }
 
@@ -143,7 +143,7 @@ public class GuiBrewBookClick {
                         "- Cauldron timing\n" +
                         "- Distillation passes\n" +
                         "- Barrel wood type\n" +
-                        "- Aging time in years"
+                        "- Aging time"
         );
     }
 

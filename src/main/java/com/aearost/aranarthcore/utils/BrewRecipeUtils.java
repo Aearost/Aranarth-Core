@@ -92,7 +92,14 @@ public class BrewRecipeUtils {
             // Color
             String colorHex = resolveBreweryColor(section.getString("color", "8888FF"));
 
-            recipe.injectRuntimeData(new BrewRecipe.RuntimeData(displayName, ingredients, colorHex));
+            // Process fields
+            int cookingTime  = section.getInt("cookingtime", 0);
+            int distillRuns  = section.getInt("distillruns", 0);
+            int age          = section.getInt("age", 0);
+            Object woodRaw   = section.get("wood");
+            int wood         = resolveWoodInt(woodRaw != null ? woodRaw.toString() : "0");
+
+            recipe.injectRuntimeData(new BrewRecipe.RuntimeData(displayName, ingredients, colorHex, cookingTime, distillRuns, age, wood));
             loaded++;
         }
         Bukkit.getLogger().info("[AC] Loaded BreweryX display data for " + loaded + "/" + BrewRecipe.values().length + " brew recipes.");
@@ -119,6 +126,55 @@ public class BrewRecipeUtils {
             sb.append(word.substring(1).toLowerCase());
         }
         return sb + " x" + amount;
+    }
+
+    /**
+     * Resolves a BreweryX wood value (number or name string) to its integer ID.
+     * 0=Any 1=Birch 2=Oak 3=Jungle 4=Spruce 5=Acacia 6=Dark Oak 7=Crimson 8=Warped
+     * 9=Mangrove 10=Cherry 11=Bamboo 12=Cut Copper 13=Pale Oak
+     */
+    private static int resolveWoodInt(String raw) {
+        if (raw == null) return 0;
+        String cleaned = raw.trim();
+        try {
+            return Integer.parseInt(cleaned);
+        } catch (NumberFormatException ignored) {}
+        return switch (cleaned.replace(' ', '_').toUpperCase()) {
+            case "BIRCH"      -> 1;
+            case "OAK"        -> 2;
+            case "JUNGLE"     -> 3;
+            case "SPRUCE"     -> 4;
+            case "ACACIA"     -> 5;
+            case "DARK_OAK"   -> 6;
+            case "CRIMSON"    -> 7;
+            case "WARPED"     -> 8;
+            case "MANGROVE"   -> 9;
+            case "CHERRY"     -> 10;
+            case "BAMBOO"     -> 11;
+            case "CUT_COPPER" -> 12;
+            case "PALE_OAK"   -> 13;
+            default           -> 0;
+        };
+    }
+
+    /** Converts a wood integer ID to a human-readable barrel label. */
+    private static String woodName(int wood) {
+        return switch (wood) {
+            case 1  -> "Birch Barrel";
+            case 2  -> "Oak Barrel";
+            case 3  -> "Jungle Barrel";
+            case 4  -> "Spruce Barrel";
+            case 5  -> "Acacia Barrel";
+            case 6  -> "Dark Oak Barrel";
+            case 7  -> "Crimson Barrel";
+            case 8  -> "Warped Barrel";
+            case 9  -> "Mangrove Barrel";
+            case 10 -> "Cherry Barrel";
+            case 11 -> "Bamboo Barrel";
+            case 12 -> "Cut Copper Barrel";
+            case 13 -> "Pale Oak Barrel";
+            default -> "Any";
+        };
     }
 
     /**
@@ -290,6 +346,23 @@ public class BrewRecipeUtils {
             } else {
                 lore.add(ChatUtils.translateToColor("&7&o  " + ingredients[i]));
             }
+        }
+
+        // Process section
+        lore.add("");
+        lore.add(ChatUtils.translateToColor("&8Process:"));
+
+        int cookingTime = recipe.getCookingTime();
+        lore.add(ChatUtils.translateToColor("&7&o  Ferment: " + (cookingTime > 0 ? cookingTime + " min" : "None")));
+
+        int distillRuns = recipe.getDistillRuns();
+        lore.add(ChatUtils.translateToColor("&7&o  Distill: " + (distillRuns > 0 ? distillRuns + " run" + (distillRuns > 1 ? "s" : "") : "None")));
+
+        int age = recipe.getAge();
+        lore.add(ChatUtils.translateToColor("&7&o  Age: " + (age > 0 ? age + " year" + (age > 1 ? "s" : "") : "None")));
+
+        if (age > 0) {
+            lore.add(ChatUtils.translateToColor("&7&o  Barrel: " + woodName(recipe.getWood())));
         }
 
         String tierColor = switch (recipe.getTier()) {
