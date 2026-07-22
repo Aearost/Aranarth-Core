@@ -1,5 +1,6 @@
 package com.aearost.aranarthcore.objects;
 
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -18,6 +19,7 @@ public class Outpost {
     private final UUID dominionId;
     private int outpostIndex;
     private Location home;
+    private String homeWorldName;
     private List<Chunk> chunks;
     private final long createdTimestamp;
 
@@ -30,6 +32,7 @@ public class Outpost {
         this.outpostIndex = outpostIndex;
         String actualWorldName = worldName != null && worldName.startsWith("smp:") ? worldName.substring(4) : worldName;
         this.home = new Location(Bukkit.getWorld(actualWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
+        this.homeWorldName = worldName;
         this.chunks = chunks;
         this.createdTimestamp = createdTimestamp;
     }
@@ -62,8 +65,15 @@ public class Outpost {
         return home;
     }
 
+    public String getHomeWorldName() {
+        return homeWorldName;
+    }
+
     public void setHome(Location home) {
         this.home = home;
+        if (home != null && home.getWorld() != null) {
+            this.homeWorldName = AranarthUtils.toStoredDominionWorldName(home.getWorld().getName());
+        }
     }
 
     public List<Chunk> getChunks() {

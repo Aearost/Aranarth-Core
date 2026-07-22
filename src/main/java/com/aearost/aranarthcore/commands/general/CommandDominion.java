@@ -2690,9 +2690,10 @@ public class CommandDominion implements CommandExecutor {
         if (worldName == null) return null;
         String survivalServer = AranarthCore.getInstance().getConfig().getString("network.servers.survival", "survival");
         String smpServer = AranarthCore.getInstance().getConfig().getString("network.servers.smp", "smp");
-        // Check SMP first: isSmpWorld is server-aware ("world" on SMP server, "smp*" elsewhere).
-        // Also handles stored "smp:*" names and old data with raw "world" stored from the SMP server.
-        if (AranarthUtils.isSmpWorld(worldName) || worldName.startsWith("smp:")) return smpServer;
+        // Use stored-name logic, NOT isSmpWorld(), which is server-aware and would misidentify
+        // survival's "world" as SMP when running on the SMP server.
+        // Stored names: "smp*" / "smp:*" = SMP; "world*" = survival.
+        if (worldName.startsWith("smp")) return smpServer;
         if (worldName.startsWith("world")) return survivalServer;
         return null;
     }
@@ -2724,8 +2725,8 @@ public class CommandDominion implements CommandExecutor {
             Outpost outpost = OutpostUtils.getDominionOutposts(targetDominion.getId()).stream()
                     .filter(o -> ChatUtils.stripColorFormatting(o.getName()).equalsIgnoreCase(finalOutpostPart))
                     .findFirst().orElse(null);
-            if (outpost != null && outpost.getHome() != null && outpost.getHome().getWorld() != null) {
-                return getServerForWorld(outpost.getHome().getWorld().getName());
+            if (outpost != null && outpost.getHomeWorldName() != null) {
+                return getServerForWorld(outpost.getHomeWorldName());
             }
         }
         return getServerForWorld(targetDominion.getDominionHomeWorldName());
