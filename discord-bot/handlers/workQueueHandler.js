@@ -3,6 +3,7 @@ const config = require('../config');
 const workQueueManager = require('../utils/workQueueManager');
 const scoringEngine = require('../utils/scoringEngine');
 const councilActivityManager = require('../utils/councilActivityManager');
+const holdTimestampManager = require('../utils/holdTimestampManager');
 const { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue } = require('../github/githubManager');
 const { postNoteToForum, postTagChangeToForum, lockForumThread } = require('./forumHandler');
 
@@ -234,7 +235,7 @@ async function handleReaction(reaction, user, client) {
         await removeLabel(issueNumber, 'WIP');
         await postTagChangeToForum(client, issueNumber, 'wip-removed', displayName);
       } else {
-        if (status === 'on-hold') await removeLabel(issueNumber, 'ON HOLD');
+        if (status === 'on-hold') { await removeLabel(issueNumber, 'ON HOLD'); holdTimestampManager.remove(issueNumber); }
         await addLabel(issueNumber, 'WIP');
         await postTagChangeToForum(client, issueNumber, 'wip', displayName);
       }
@@ -349,6 +350,7 @@ async function handleWorkQueueMessage(message, client) {
     try {
       if (pending.previousStatus === 'wip') await removeLabel(pending.issueNumber, 'WIP');
       await addLabel(pending.issueNumber, 'ON HOLD');
+      holdTimestampManager.record(pending.issueNumber);
       await postTagChangeToForum(client, pending.issueNumber, 'on-hold', displayName);
       const noteText = message.content.trim();
       if (noteText.toLowerCase() !== 'skip') {
@@ -367,6 +369,7 @@ async function handleWorkQueueMessage(message, client) {
     try {
       await removeLabel(pending.issueNumber, 'WIP');
       await removeLabel(pending.issueNumber, 'ON HOLD');
+      holdTimestampManager.remove(pending.issueNumber);
       await closeIssue(pending.issueNumber, closeComment);
       await lockForumThread(client, pending.issueNumber);
       councilActivityManager.remove(pending.issueNumber);

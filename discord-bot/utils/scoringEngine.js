@@ -1,4 +1,5 @@
 const councilActivityManager = require('./councilActivityManager');
+const holdTimestampManager = require('./holdTimestampManager');
 
 const PRIORITY_BASE = { P1: 10000, P2: 1000, P3: 100, P4: 10 };
 const DEFAULT_BASE = 1;
@@ -28,7 +29,16 @@ function score(issue) {
     : daysSince; // never touched → treat age as idle time
   const stalenessBonus = idleDays > 7 ? Math.min((idleDays - 7) * 3, 150) : 0;
 
-  return (priorityBase * typeMultiplier + ageBonus + activityBonus + stalenessBonus) * onHoldMultiplier;
+  // On-hold issues gain +100 priority per 15-day interval so old holds resurface over time.
+  // Applied outside the suppression multiplier so the bonus is never dampened.
+  const HOLD_INTERVAL_DAYS = 15;
+  const HOLD_BONUS_PER_INTERVAL = 100;
+  const holdStart = holdTimestampManager.getTimestamp(issue.number);
+  const holdAgeBonus = (holdStart && labels.includes('ON HOLD'))
+    ? Math.floor((Date.now() - holdStart) / (1000 * 60 * 60 * 24 * HOLD_INTERVAL_DAYS)) * HOLD_BONUS_PER_INTERVAL
+    : 0;
+
+  return (priorityBase * typeMultiplier + ageBonus + activityBonus + stalenessBonus) * onHoldMultiplier + holdAgeBonus;
 }
 
 function isWip(issue) {
