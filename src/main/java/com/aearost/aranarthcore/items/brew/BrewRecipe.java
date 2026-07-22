@@ -6,35 +6,54 @@ public enum BrewRecipe {
 
     // ─── BASIC tier ───────────────────────────────────────────────────────────
     // Simple brews - no distilling, short/no aging, mild or no effects
-    POTATO_SOUP("potato_soup", Tier.BASIC, 0,     -1, true),   // diff 1, INSTANT_HEALTH/1
-    HOT_CHOC(   "hot_choc",   Tier.BASIC, 0,     -1, true),   // diff 2, HASTE/40
-    WHEAT_BEER( "wheatbeer",  Tier.BASIC, 0,     -1, true),   // diff 1, no effects
-    BEER(       "beer",       Tier.BASIC, 7000,  -1, false),  // diff 1, no effects
-    COFFEE(     "coffee",     Tier.BASIC, 9000,  -1, false),  // diff 3, mild REGEN+SPEED
-    MEAD(       "mead",       Tier.BASIC, 11000, -1, false),  // diff 2, age 4, no effects
-    ICED_COFFEE("iced_coffee",Tier.BASIC, 12000, -1, false),  // diff 4, no distill/age, mild REGEN+SPEED
-    EGGNOG(     "eggnog",     Tier.BASIC, 13000, -1, false),  // diff 4, age 3, no effects
-    CIDRE(      "cidre",      Tier.BASIC, 15000, -1, false),  // diff 4, age 3, no effects
+    POTATO_SOUP( "potato_soup",  Tier.BASIC, 0,     -1, true),   // diff 1, INSTANT_HEALTH/1
+    HOT_CHOC(    "hot_choc",     Tier.BASIC, 0,     -1, true),   // diff 2, HASTE+REGEN
+    WHEAT_BEER(  "wheatbeer",    Tier.BASIC, 0,     -1, true),   // diff 1, age 2 Birch
+    BEER(        "beer",         Tier.BASIC, 7000,  -1, false),  // diff 1, age 3
+    PALE_ALE(    "pale_ale",     Tier.BASIC, 8000,  -1, false),  // diff 2, age 4 Pale Oak
+    COFFEE(      "coffee",       Tier.BASIC, 9000,  -1, false),  // diff 3, REGEN+SPEED
+    PUMPKIN_BEER("pumpkin_beer", Tier.BASIC, 10000, -1, false),  // diff 3, age 5 Oak
+    MEAD(        "mead",         Tier.BASIC, 11000, -1, false),  // diff 2, age 4 Oak
+    ICED_COFFEE( "iced_coffee",  Tier.BASIC, 12000, -1, false),  // diff 4, REGEN+SPEED
+    EGGNOG(      "eggnog",       Tier.BASIC, 13000, -1, false),  // diff 4, age 3
+    HONEY_MEAD(  "honey_mead",   Tier.BASIC, 14000, -1, false),  // diff 3, age 6 Oak, ABSORPTION
+    CIDRE(       "cidre",        Tier.BASIC, 15000, -1, false),  // diff 4, age 3
 
     // ─── MIDDLE tier ──────────────────────────────────────────────────────────
     // Moderate complexity - specific barrel wood, distillruns 1–3, longer aging, or notable single effect.
-    DARK_BEER(   "darkbeer",     Tier.MIDDLE, 0, -1, false),  // diff 2 but age 8 Dark Oak specifically
-    APPLE_MEAD(  "ap_mead",     Tier.MIDDLE, 0, -1, false),  // diff 4, WATER_BREATHING/2/150s
-    WINE(        "wine",        Tier.MIDDLE, 0, -1, false),  // diff 4, age 20 — very long
-    VODKA(       "vodka",       Tier.MIDDLE, 0, -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
-    APPLE_LIQUOR("apple_liquor",Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3, age 6 Acacia
-    TEQUILA(     "tequila",     Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 12 Birch
-    GIN(         "gin",         Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2
-    RUM(         "rum",         Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 14, FIRE_RESISTANCE+POISON
-    GOLDEN_VODKA("g_vodka",     Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 3, WEAKNESS+POISON
+    DARK_BEER(       "darkbeer",         Tier.MIDDLE, 0, -1, false),  // diff 2, age 8 Dark Oak
+    APPLE_MEAD(      "ap_mead",          Tier.MIDDLE, 0, -1, false),  // diff 4, age 4 Oak, WATER_BREATHING
+    WINE(            "wine",             Tier.MIDDLE, 0, -1, false),  // diff 4, age 20
+    CHERRY_WINE(     "cherry_wine",      Tier.MIDDLE, 0, -1, false),  // diff 5, age 16 Cherry
+    GLOW_WINE(       "glow_wine",        Tier.MIDDLE, 0, -1, false),  // diff 5, age 8 Pale Oak, GLOWING+NIGHT_VISION
+    VODKA(           "vodka",            Tier.MIDDLE, 0, -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
+    MELON_VODKA(     "melon_vodka",      Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3
+    BEETROOT_SPIRIT( "beetroot_spirit",  Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3
+    SAKE(            "sake",             Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 1, age 3 Bamboo
+    CACHACA(         "cachaca",          Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 4 Jungle
+    APPLE_LIQUOR(    "apple_liquor",     Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3, age 6 Acacia
+    DANDELION_LIQUOR("dandelion_liquor", Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 4 Birch
+    TEQUILA(         "tequila",          Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 12 Birch
+    GIN(             "gin",              Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2
+    CHAMPAGNE(       "champagne",        Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 1, age 4
+    RUM(             "rum",              Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 14, FIRE_RESISTANCE+POISON
+    MANGROVE_RUM(    "mangrove_rum",     Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 12 Mangrove
+    BRANDY(          "brandy",           Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 12 Oak
+    POPPY_LIQUOR(    "poppy_liquor",     Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 6 Acacia
+    GOLDEN_VODKA(    "g_vodka",          Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 3, WEAKNESS+POISON
+    WARPED_ALE(      "warped_ale",       Tier.MIDDLE, 0, -1, false),  // diff 6, age 6 Warped, NIGHT_VISION
 
     // ─── HIGHER tier ──────────────────────────────────────────────────────────
     // High complexity - distillruns 4+, age 16+ OR powerful multi-effects OR Avatar theme.
-    WHISKEY(       "whiskey",     Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 18 Spruce
-    FIRE_WHISKEY(  "fire_whiskey",Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 3, age 18 Spruce
-    SHROOM_VODKA(  "shroom_vodka",Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 5, WEAKNESS/80+NAUSEA+NIGHT_VISION
-    ABSINTHE(      "absinthe",    Tier.HIGHER, 0, -1, false),  // diff 8, distillruns 6, POISON/25
-    GREEN_ABSINTHE("gr_absinthe", Tier.HIGHER, 0, -1, false),  // diff 9, distillruns 6, POISON/40+INSTANT_DAMAGE
+    WHISKEY(       "whiskey",      Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 18 Spruce
+    FIRE_WHISKEY(  "fire_whiskey", Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 3, age 18 Spruce
+    BOURBON(       "bourbon",      Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 22 Oak
+    BAMBOO_LIQUOR( "bamboo_liquor",Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 6 Bamboo
+    SHROOM_VODKA(  "shroom_vodka", Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 5, WEAKNESS+NAUSEA+NIGHT_VISION
+    MOONSHINE(     "moonshine",    Tier.HIGHER, 0, -1, false),  // diff 6, distillruns 4, age 2 Cut Copper, BLINDNESS+POISON
+    ABSINTHE(      "absinthe",     Tier.HIGHER, 0, -1, false),  // diff 8, distillruns 6, POISON/25
+    NETHER_GROG(   "nether_grog",  Tier.HIGHER, 0, -1, false),  // diff 8, distillruns 2, age 10 Crimson, FIRE_RESISTANCE
+    GREEN_ABSINTHE("gr_absinthe",  Tier.HIGHER, 0, -1, false),  // diff 9, distillruns 6, POISON/40+INSTANT_DAMAGE
 
     // Avatar brews - all HIGHER by theme regardless of mechanical complexity
     CACTUS_JUICE(     "atla1",  Tier.HIGHER, 0, 1,  false),  // NAUSEA+BLINDNESS+SPEED
