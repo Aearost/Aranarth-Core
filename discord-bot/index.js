@@ -18,6 +18,7 @@ const messageHandler = require('./handlers/messageHandler');
 const tsCommandHandler = require('./handlers/tsCommandHandler');
 const timerManager = require('./utils/timerManager');
 const statusTracker = require('./utils/statusTracker');
+const workQueueHandler = require('./handlers/workQueueHandler');
 
 const client = new Client({
   intents: [
@@ -39,6 +40,8 @@ client.once(Events.ClientReady, async (c) => {
   statusTracker.load();
   await setupSupportMessage(client);
   timerManager.restoreTimers(client);
+  await workQueueHandler.refreshWorkQueue(client);
+  scheduleDailyRefresh(client);
   await registerSlashCommands(c);
 });
 
@@ -65,6 +68,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   if (interaction.commandName === 'ts') {
     await tsCommandHandler.handle(interaction, client);
+  }
+
+  if (interaction.commandName === 'refresh-queue') {
+    const member = await interaction.guild.members.fetch(interaction.user.id).catch(() => null);
+    if (!member || !member.roles.cache.has(config.COUNCIL_ROLE_ID)) {
+      await interaction.reply({ content: '❌ This command is restricted to the Council.', ephemeral: true });
+      return;
+    }
+    await interaction.reply({ content: '🔄 Refreshing work queue...', ephemeral: true });
+    await workQueueHandler.refreshWorkQueue(client);
   }
 });
 
@@ -99,6 +112,10 @@ async function registerSlashCommands(c) {
                 ],
               },
             ],
+          },
+          {
+            name: 'refresh-queue',
+            description: 'Force refresh the work queue (Council only)',
           },
         ],
       }
@@ -155,6 +172,27 @@ async function setupSupportMessage(c) {
 
   fs.writeFileSync(ACTIVE_MSG_PATH, JSON.stringify({ messageId: msg.id }));
   console.log(`[Bot] Support message created (ID: ${msg.id}).`);
+}
+
+function scheduleDailyRefresh(client) {
+  const now = new Date();
+  const next = new Date();
+  next.setHours(2, 0, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const msUntilNext = next - now;
+
+  setTimeout(async () => {
+    console.log('[Bot] Running scheduled daily work queue refresh...');
+    await workQueueHandler.refreshWorkQueue(client);
+    setInterval(async () => {
+      console.log('[Bot] Running scheduled daily work queue refresh...');
+      await workQueueHandler.refreshWorkQueue(client);
+    }, 24 * 60 * 60 * 1000);
+  }, msUntilNext);
+
+  const h = next.getHours().toString().padStart(2, '0');
+  const m = next.getMinutes().toString().padStart(2, '0');
+  console.log(`[Bot] Daily queue refresh scheduled for ${h}:${m} (in ${Math.round(msUntilNext / 60000)} min).`);
 }
 
 client.login(process.env.DISCORD_TOKEN);

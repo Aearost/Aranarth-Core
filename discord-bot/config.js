@@ -39,6 +39,10 @@ module.exports = {
     WARNING: 0xF39C12,
     ERROR: 0xFF4444,
     DEFAULT: 0x5865F2,
+    P1: 0xE53935,
+    P2: 0xFB8C00,
+    P3: 0xFDD835,
+    P4: 0x43A047,
   },
 
   TICKET_PREFIXES: {
@@ -46,5 +50,27 @@ module.exports = {
     IDEA: 'idea',
     ABILITY: 'ability',
     QUESTION: 'question',
+  },
+
+  PRIORITY_REVIEW_CHANNEL_ID: '1529242982912360508',
+  WORK_QUEUE_CHANNEL_ID: '1529244791634792558',
+  FORUM_CHANNEL_ID: '1529310558673834005',
+
+  // Emoji characters used for priority review (emoji.name returns the Unicode char)
+  PRIORITY_EMOJIS: {
+    P1: '🔴',
+    P2: '🟠',
+    P3: '🟡',
+    P4: '🟢',
+    EDIT: '✏️',
+    REJECT: '❌',
+  },
+
+  // Emoji characters used for work queue status reactions
+  WORK_QUEUE_EMOJIS: {
+    IN_PROGRESS: '▶️',
+    TAKE_NOTE: '💬',
+    ON_HOLD: '⏸️',
+    CLOSE: '🔒',
   },
 };

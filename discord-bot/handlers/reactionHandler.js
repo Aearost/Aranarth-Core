@@ -7,7 +7,10 @@ const TEMPLATES = require('../forms/templates');
 const channelManager = require('../utils/channelManager');
 const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
-const { createIssue, uploadAttachment } = require('../github/issueCreator');
+const { uploadAttachment } = require('../github/issueCreator');
+const pendingReviewManager = require('../utils/pendingReviewManager');
+const priorityReactionHandler = require('./priorityReactionHandler');
+const workQueueHandler = require('./workQueueHandler');
 const { applyStatusChange } = require('../utils/statusManager');
 
 const ACTIVE_MSG_PATH = path.join(__dirname, '..', 'data', 'activeMessage.json');
@@ -23,6 +26,18 @@ function getActiveMessageId() {
 async function handle(reaction, user, client) {
   const { message, emoji } = reaction;
   const emojiName = emoji.name;
+
+  // ── Priority review channel ──
+  if (message.channel.id === config.PRIORITY_REVIEW_CHANNEL_ID) {
+    await priorityReactionHandler.handle(reaction, user, client);
+    return;
+  }
+
+  // ── Work queue channel ──
+  if (message.channel.id === config.WORK_QUEUE_CHANNEL_ID) {
+    await workQueueHandler.handleReaction(reaction, user, client);
+    return;
+  }
 
   // ── 1. Initial support message ──
   const activeId = getActiveMessageId();
@@ -185,34 +200,83 @@ async function handleSubmit(channel, session, user, client) {
   await channel.send({
     embeds: [
       new EmbedBuilder()
-        .setDescription('⏳ Submitting your report to GitHub...')
+        .setDescription('⏳ Sending your submission for Council review...')
         .setColor(config.COLORS.WARNING),
     ],
   });
 
   try {
-    // Upload Discord attachments to GitHub so URLs are permanent
+    // Upload attachments first so URLs are permanent
     const screenshots = session.screenshots || [];
     for (const screenshot of screenshots) {
       try {
         screenshot.url = await uploadAttachment(screenshot.name, screenshot.url, template.label);
       } catch (uploadErr) {
         console.error(`[ReactionHandler] Failed to upload attachment ${screenshot.name}:`, uploadErr.message);
-        // Keep the original Discord URL as fallback; it may still be valid at submit time
       }
     }
 
     const title = template.issueTitle(session.answers);
+    const rawTitle = session.answers.title;
     const body = template.buildBody(session.answers, displayName, screenshots);
-    const issueUrl = await createIssue(title, body, template.label);
 
+    // Build embed fields for the review embed and forum thread
+    const embedFields = template.questions.map((q, i) => ({
+      name: `${i + 1}. ${q.label}`,
+      value: (session.answers[q.key] || '*Not answered*').substring(0, 1024),
+    }));
+    if (screenshots.length > 0) {
+      embedFields.push({
+        name: '📎 Attachments',
+        value: screenshots.map((s, i) => `${i + 1}. [${s.name}](${s.url})`).join('\n').substring(0, 1024),
+      });
+    }
+
+    // Send review embed to priority review channel
+    const reviewChannel = await client.channels.fetch(config.PRIORITY_REVIEW_CHANNEL_ID).catch(() => null);
+    if (!reviewChannel) throw new Error('Priority review channel not found');
+
+    const typeDisplayMap = { BUG: 'Bug Report', IDEA: 'Idea Suggestion', ABILITY: 'Ability Suggestion' };
+    const typeName = typeDisplayMap[session.type] || session.type;
+
+    const reviewEmbed = new EmbedBuilder()
+      .setTitle(`📥 New ${typeName} — Pending Review`)
+      .setDescription(`**Title:** \`${title}\`\nSubmitted by **${displayName}**`)
+      .addFields(embedFields)
+      .setColor(template.color)
+      .setFooter({ text: 'React with a priority to approve, ✏️ to edit, or ❌ to reject' })
+      .setTimestamp();
+
+    const reviewMsg = await reviewChannel.send({ embeds: [reviewEmbed] });
+    await reviewMsg.react(config.PRIORITY_EMOJIS.P1);
+    await reviewMsg.react(config.PRIORITY_EMOJIS.P2);
+    await reviewMsg.react(config.PRIORITY_EMOJIS.P3);
+    await reviewMsg.react(config.PRIORITY_EMOJIS.P4);
+    await reviewMsg.react(config.PRIORITY_EMOJIS.EDIT);
+    await reviewMsg.react(config.PRIORITY_EMOJIS.REJECT);
+
+    // Store pending review data
+    pendingReviewManager.add(reviewMsg.id, {
+      userId: user.id,
+      type: session.type,
+      label: template.label,
+      title,
+      rawTitle,
+      body,
+      embedFields,
+      displayName,
+      answers: { ...session.answers },
+      screenshots: [...screenshots],
+    });
+
+    // Notify user in the ticket channel
     await channel.send({
       embeds: [
         new EmbedBuilder()
-          .setTitle('✅ Submitted Successfully!')
+          .setTitle('✅ Submission Received!')
           .setDescription(
-            `Your ${template.displayName.toLowerCase()} has been submitted to GitHub!\n\n` +
-            `🔗 [View Issue](${issueUrl})\n\n` +
+            `Your **${typeName}** has been sent to the Council for review.\n\n` +
+            `You'll receive a DM once it's been reviewed.\n\n` +
             `This channel will be deleted in a few seconds.`
           )
           .setColor(config.COLORS.SUCCESS)
@@ -220,26 +284,27 @@ async function handleSubmit(channel, session, user, client) {
       ],
     });
 
-    // DM the user their issue link so they have it after the channel is deleted
+    // DM the user
     try {
       const dm = await user.createDM();
       await dm.send(
-        `✅ Your **${template.displayName}** was submitted successfully to Aranarth!\n\n` +
-        `🔗 You can track it here: ${issueUrl}`
+        `⏳ Your **${typeName}** titled **"${rawTitle}"** has been received and is pending Council review.\n\n` +
+        `You'll be notified here once the Council has reviewed it.`
       );
     } catch { /* DMs may be closed */ }
 
     formManager.deleteSession(user.id, channel.id);
     await channelManager.deleteChannel(channel, 5000);
+
   } catch (err) {
-    console.error('[ReactionHandler] GitHub issue creation failed:', err);
+    console.error('[ReactionHandler] Submission failed:', err);
 
     const errMsg = await channel.send({
       embeds: [
         new EmbedBuilder()
           .setTitle('❌ Submission Failed')
           .setDescription(
-            'Something went wrong while creating the GitHub issue. Please try again.\n\n' +
+            'Something went wrong while submitting your report. Please try again.\n\n' +
             'React ✅ to retry, or ❌ to cancel.'
           )
           .setColor(config.COLORS.ERROR),

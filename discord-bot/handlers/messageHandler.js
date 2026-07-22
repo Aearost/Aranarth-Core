@@ -6,6 +6,27 @@ const statusTracker = require('../utils/statusTracker');
 const timerManager = require('../utils/timerManager');
 
 async function handle(message, client) {
+  // ── Priority review channel: rejection reason collection ──
+  if (message.channel.id === config.PRIORITY_REVIEW_CHANNEL_ID) {
+    const { handleReviewMessage } = require('./priorityReactionHandler');
+    await handleReviewMessage(message, client);
+    return;
+  }
+
+  // ── Work queue channel: pending close/note operations ──
+  if (message.channel.id === config.WORK_QUEUE_CHANNEL_ID) {
+    const { handleWorkQueueMessage } = require('./workQueueHandler');
+    await handleWorkQueueMessage(message, client);
+    return;
+  }
+
+  // ── Forum thread messages: mirror to GitHub ──
+  if (message.channel.isThread?.()) {
+    const { handleForumMessage } = require('./forumHandler');
+    await handleForumMessage(message);
+    return;
+  }
+
   // ── Question channel: inactivity timer management ──
   const statusInfo = statusTracker.get(message.channel.id);
   if (statusInfo) {
