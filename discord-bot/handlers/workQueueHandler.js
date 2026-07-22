@@ -97,11 +97,14 @@ async function deleteWorkQueueMessages(client) {
 
 /**
  * Clears and repopulates the work queue channel based on current GitHub issue scores.
+ * @param {*} client
+ * @param {number|null} excludeIssueNumber - Issue number to exclude (e.g. one just closed whose state may not have propagated yet)
  */
-async function refreshWorkQueue(client) {
+async function refreshWorkQueue(client, excludeIssueNumber = null) {
   console.log('[WorkQueue] Refreshing...');
   try {
-    const issues = await fetchOpenIssues();
+    let issues = await fetchOpenIssues();
+    if (excludeIssueNumber != null) issues = issues.filter(i => i.number !== excludeIssueNumber);
     const selected = scoringEngine.selectTop(issues);
 
     await deleteWorkQueueMessages(client);
@@ -367,7 +370,7 @@ async function handleWorkQueueMessage(message, client) {
     } catch (err) {
       console.error('[WorkQueue] Failed to close issue:', err.message);
     }
-    await refreshWorkQueue(client);
+    await refreshWorkQueue(client, pending.issueNumber);
   }
 
   return true;
