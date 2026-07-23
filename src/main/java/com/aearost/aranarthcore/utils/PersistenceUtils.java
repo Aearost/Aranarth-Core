@@ -5319,14 +5319,18 @@ public class PersistenceUtils {
         HashMap<UUID, Integer> days = LoginStreakUtils.getCurrentStreakDayMap();
         HashMap<UUID, Long> claims = LoginStreakUtils.getLastClaimEpochDayMap();
         HashMap<UUID, Long> logins = LoginStreakUtils.getLastLoginEpochDayMap();
-        Set<UUID> allUuids = new HashSet<>();
-        allUuids.addAll(days.keySet());
-        allUuids.addAll(claims.keySet());
+        // Only write back UUIDs that were actually modified on this server (quit/claim/reset).
+        // Writing all loaded UUIDs would overwrite updates made by other network servers with
+        // the stale data this server loaded at startup, corrupting cross-server streak tracking.
+        Set<UUID> allUuids = LoginStreakUtils.getLocallyModifiedUuids();
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Streak] MySQL sync: " + allUuids.size() + " locally-modified record(s)");
         for (UUID uuid : allUuids) {
             int day = days.getOrDefault(uuid, 1);
             long lastClaim = claims.getOrDefault(uuid, 0L);
             long lastLogin = logins.getOrDefault(uuid, lastClaim);
             String json = "{\"day\":" + day + ",\"lastClaim\":" + lastClaim + ",\"lastLogin\":" + lastLogin + "}";
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Streak] MySQL sync: " + uuid
+                    + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
             try {
                 db.saveLoginStreak(uuid, json);
             } catch (Exception e) {

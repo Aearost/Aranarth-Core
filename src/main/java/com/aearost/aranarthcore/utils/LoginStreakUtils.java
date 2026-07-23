@@ -13,7 +13,9 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -24,6 +26,10 @@ public class LoginStreakUtils {
     private static final HashMap<UUID, Integer> currentStreakDay = new HashMap<>();
     private static final HashMap<UUID, Long> lastClaimEpochDay = new HashMap<>();
     private static final HashMap<UUID, Long> lastLoginEpochDay = new HashMap<>();
+    // UUIDs whose streak data was modified by a local event (quit/claim/reset) on this server.
+    // Only these are written back to the shared MySQL to avoid overwriting updates made by
+    // another server in the network with stale data loaded at startup.
+    private static final Set<UUID> locallyModified = new HashSet<>();
     private static final ZoneId EST = ZoneId.of("America/New_York");
     private static final NumberFormat MONEY_FORMAT = NumberFormat.getInstance();
 
@@ -73,6 +79,7 @@ public class LoginStreakUtils {
      */
     public static void refreshLastLogin(UUID uuid) {
         lastLoginEpochDay.put(uuid, getTodayEpochDay());
+        locallyModified.add(uuid);
     }
 
     // -------------------------------------------------------------------------
@@ -100,6 +107,7 @@ public class LoginStreakUtils {
                     + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + getLastLoginEpochDay(uuid)
                     + " lastActivity=" + lastActivity + " today=" + today);
             currentStreakDay.put(uuid, 1);
+            locallyModified.add(uuid);
             return true;
         }
         Bukkit.getLogger().info("[AC][Streak] ensureStreakValid OK for " + uuid
@@ -139,6 +147,7 @@ public class LoginStreakUtils {
 
         lastClaimEpochDay.put(uuid, getTodayEpochDay());
         currentStreakDay.put(uuid, day == 28 ? 1 : day + 1);
+        locallyModified.add(uuid);
 
         Bukkit.getLogger().info("[AC][Streak] CLAIMED day " + day + " for " + uuid
                 + " (" + player.getName() + ") | newDay=" + getStreakDay(uuid)
@@ -296,6 +305,10 @@ public class LoginStreakUtils {
 
     public static HashMap<UUID, Long> getLastLoginEpochDayMap() {
         return lastLoginEpochDay;
+    }
+
+    public static Set<UUID> getLocallyModifiedUuids() {
+        return locallyModified;
     }
 
     public static void setStreakDay(UUID uuid, int day) {
