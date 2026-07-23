@@ -453,7 +453,7 @@ public class ChatUtils {
 		if (tips.isEmpty()) {
 			tips.add("&7&oNeed some materials? Gather them in &e&o/resource");
 			tips.add("&7&oGet your roles in &5&oDiscord &7&owith &e&o/discord link");
-			tips.add("&7&oIf you're confused with &6&oAranarth&7&o, go to &e&o/tutorial");
+			tips.add("&7&oHave any questions about &6&oAranarth&7&o? Go to &e&o/tutorial");
 			tips.add("&7&oInterested in special &d&operks? &7&oCheck out &e&o/store");
 			tips.add("&7&oUse &e&o/vote &7&oto get daily &a&oVote Crate Keys &7&oto redeem at &e&o/crates");
 			tips.add("&7&oFound a &c&obug &7&oor have a &6&osuggestion&7&o? Log it in our &5&oDiscord");
