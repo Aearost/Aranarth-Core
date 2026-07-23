@@ -59,7 +59,8 @@ public class Dominion {
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
 
 	private int boughtOutpostChunks;
-	private Map<String, Set<UUID>> plotAssignments;
+	private Map<String, String> plotChunkNames;  // chunk key → plot name
+	private Map<String, Set<UUID>> plotMembers;  // plot name → member UUIDs
 	// A null entry for a permission means it is inherited from the player's rank or relation
 	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
 
@@ -86,7 +87,8 @@ public class Dominion {
 		this.members = members;
 		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
 		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
-		this.plotAssignments = new HashMap<>();
+		this.plotChunkNames = new HashMap<>();
+		this.plotMembers = new HashMap<>();
 		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
 		// worldName may be stored in "smp:<name>" form to distinguish SMP worlds from Survival worlds.
@@ -271,20 +273,37 @@ public class Dominion {
 	}
 
 	/**
-	 * Provides the plot assignments map.
+	 * Provides the chunk-to-plot-name map (chunk key → plot name).
 	 */
-	public Map<String, Set<UUID>> getPlotAssignments() {
-		if (plotAssignments == null) {
-			plotAssignments = new HashMap<>();
+	public Map<String, String> getPlotChunkNames() {
+		if (plotChunkNames == null) {
+			plotChunkNames = new HashMap<>();
 		}
-		return plotAssignments;
+		return plotChunkNames;
 	}
 
 	/**
-	 * Replaces the plot assignments map.
+	 * Replaces the chunk-to-plot-name map.
 	 */
-	public void setPlotAssignments(Map<String, Set<UUID>> plotAssignments) {
-		this.plotAssignments = plotAssignments != null ? plotAssignments : new HashMap<>();
+	public void setPlotChunkNames(Map<String, String> plotChunkNames) {
+		this.plotChunkNames = plotChunkNames != null ? plotChunkNames : new HashMap<>();
+	}
+
+	/**
+	 * Provides the plot-name-to-members map (plot name → member UUIDs).
+	 */
+	public Map<String, Set<UUID>> getPlotMembers() {
+		if (plotMembers == null) {
+			plotMembers = new HashMap<>();
+		}
+		return plotMembers;
+	}
+
+	/**
+	 * Replaces the plot-name-to-members map.
+	 */
+	public void setPlotMembers(Map<String, Set<UUID>> plotMembers) {
+		this.plotMembers = plotMembers != null ? plotMembers : new HashMap<>();
 	}
 
 	/**

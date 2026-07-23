@@ -736,11 +736,12 @@ public class DominionProtectionListener implements Listener {
             // Check plot assignments
             Chunk targetChunk = block != null ? block.getChunk() : entity.getLocation().getChunk();
             String chunkKey = targetChunk.getWorld().getName() + ":" + targetChunk.getX() + ":" + targetChunk.getZ();
-            Set<UUID> plotOwners = dominion.getPlotAssignments().get(chunkKey);
-            if (plotOwners != null && !plotOwners.isEmpty()) {
+            String plotName = dominion.getPlotChunkNames().get(chunkKey);
+            if (plotName != null) {
+                Set<UUID> plotOwners = dominion.getPlotMembers().get(plotName);
                 UUID playerUuid = player.getUniqueId();
                 if (playerUuid.equals(dominion.getLeader())
-                        || plotOwners.contains(playerUuid)
+                        || (plotOwners != null && plotOwners.contains(playerUuid))
                         || DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_PLOTS)) {
                     return false; // Plot owner, leader, or bypass permission
                 }

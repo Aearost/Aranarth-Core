@@ -119,7 +119,7 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "remove", "setleader", "plot" -> {
+			case "remove", "setleader" -> {
 				if (sender instanceof Player player) {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 					if (dominion != null) {
@@ -127,6 +127,31 @@ public class CommandDominionCompleter implements TabCompleter {
 							.map(uuid -> Bukkit.getOfflinePlayer(uuid).getName())
 							.filter(name -> name != null && (args[1].isEmpty() || name.toLowerCase().startsWith(args[1].toLowerCase())))
 							.collect(Collectors.toList());
+					}
+				}
+				yield List.of();
+			}
+			case "plot" -> {
+				if (args.length == 2) {
+					yield filter(List.of("add", "claim", "create", "remove", "rename"), args[1]);
+				}
+				if (args.length == 3) {
+					String plotSub = args[1].toLowerCase();
+					if (sender instanceof Player player) {
+						Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
+						if (dominion != null) {
+							yield switch (plotSub) {
+								case "add", "remove" -> dominion.getMembers().stream()
+										.map(uuid -> Bukkit.getOfflinePlayer(uuid).getName())
+										.filter(name -> name != null && (args[2].isEmpty() || name.toLowerCase().startsWith(args[2].toLowerCase())))
+										.collect(Collectors.toList());
+								case "claim", "rename" -> dominion.getPlotMembers().keySet().stream()
+										.filter(name -> args[2].isEmpty() || name.toLowerCase().startsWith(args[2].toLowerCase()))
+										.collect(Collectors.toList());
+								case "create" -> args[2].isEmpty() ? List.of("name") : List.of();
+								default -> List.of();
+							};
+						}
 					}
 				}
 				yield List.of();

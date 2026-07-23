@@ -278,7 +278,7 @@ public class CommandDominion implements CommandExecutor {
                 } else if (args[0].equalsIgnoreCase("outpost")) {
                     handleOutpost(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("plot")) {
-                    assignPlot(args, dominion, player);
+                    handlePlot(args, dominion, player);
                 } else {
                     player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/dominion <command>"));
                     return false;
@@ -734,16 +734,14 @@ public class CommandDominion implements CommandExecutor {
         }
     }
 
+    private static final int[] PLOT_LIMITS_BY_LEVEL = {0, 4, 12, 25, Integer.MAX_VALUE};
+
     /**
-     * Assigns or unassigns the current chunk as a plot for the specified member.
-     *
-     * @param args     The command arguments.
-     * @param dominion The Dominion of the player executing the command.
-     * @param player   The player executing the command.
+     * Dispatches /d plot sub-commands.
      */
-    private static void assignPlot(String[] args, Dominion dominion, Player player) {
-        if (args.length == 1) {
-            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot <player>"));
+    private static void handlePlot(String[] args, Dominion dominion, Player player) {
+        if (args.length < 2) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot <create|claim|rename|add|remove>"));
             return;
         }
 
@@ -757,16 +755,161 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        Chunk currentChunk = player.getLocation().getChunk();
-        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
-        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
-            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion to assign a plot"));
+        String sub = args[1].toLowerCase();
+        switch (sub) {
+            case "create" -> plotCreate(args, dominion, player);
+            case "claim" -> plotClaim(args, dominion, player);
+            case "rename" -> plotRename(args, dominion, player);
+            case "add" -> plotAdd(args, dominion, player);
+            case "remove" -> plotRemove(args, dominion, player);
+            default -> player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot <create|claim|rename|add|remove>"));
+        }
+    }
+
+    private static void plotCreate(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot create <name>"));
             return;
         }
 
-        UUID inputUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[1]);
+        int level = dominion.getDominionLevel();
+        int maxPlots = PLOT_LIMITS_BY_LEVEL[level - 1];
+        if (maxPlots == 0) {
+            player.sendMessage(ChatUtils.chatMessage("&cYour Dominion must be at least Level 2 to create plots!"));
+            return;
+        }
+        int currentPlots = dominion.getPlotMembers().size();
+        if (maxPlots != Integer.MAX_VALUE && currentPlots >= maxPlots) {
+            player.sendMessage(ChatUtils.chatMessage("&cYour Dominion has reached its plot limit of &e" + maxPlots + " &cfor Level &e" + level + "&c!"));
+            return;
+        }
+
+        String plotName = args[2];
+        if (!plotName.matches("[a-zA-Z0-9_]+")) {
+            player.sendMessage(ChatUtils.chatMessage("&cPlot names can only contain letters, numbers, and underscores!"));
+            return;
+        }
+
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion!"));
+            return;
+        }
+
+        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
+        String existingPlot = dominion.getPlotChunkNames().get(chunkKey);
+        if (existingPlot != null) {
+            player.sendMessage(ChatUtils.chatMessage("&cThis chunk is already part of the plot &e" + existingPlot));
+            return;
+        }
+
+        if (dominion.getPlotMembers().containsKey(plotName)) {
+            player.sendMessage(ChatUtils.chatMessage("&cA plot named &e" + plotName + " &calready exists!"));
+            return;
+        }
+
+        dominion.getPlotChunkNames().put(chunkKey, plotName);
+        dominion.getPlotMembers().put(plotName, new HashSet<>());
+        DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage("&7Created plot &e" + plotName + " &7in this chunk!"));
+    }
+
+    private static void plotClaim(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot claim <name>"));
+            return;
+        }
+
+        String plotName = args[2];
+        if (!dominion.getPlotMembers().containsKey(plotName)) {
+            player.sendMessage(ChatUtils.chatMessage("&cNo plot named &e" + plotName + " &cexists!"));
+            return;
+        }
+
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion!"));
+            return;
+        }
+
+        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
+        String existingPlot = dominion.getPlotChunkNames().get(chunkKey);
+        if (existingPlot != null) {
+            if (existingPlot.equals(plotName)) {
+                player.sendMessage(ChatUtils.chatMessage("&cThis chunk is already part of the plot &e" + plotName));
+            } else {
+                player.sendMessage(ChatUtils.chatMessage("&cThis chunk is already part of the plot &e" + existingPlot));
+            }
+            return;
+        }
+
+        dominion.getPlotChunkNames().put(chunkKey, plotName);
+        DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage("&7This chunk has been added to the plot &e" + plotName));
+    }
+
+    private static void plotRename(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot rename <new name>"));
+            return;
+        }
+
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion!"));
+            return;
+        }
+
+        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
+        String plotName = dominion.getPlotChunkNames().get(chunkKey);
+        if (plotName == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not standing in a plot!"));
+            return;
+        }
+
+        String newName = args[2];
+        if (!newName.matches("[a-zA-Z0-9_]+")) {
+            player.sendMessage(ChatUtils.chatMessage("&cPlot names can only contain letters, numbers, and underscores!"));
+            return;
+        }
+        if (dominion.getPlotMembers().containsKey(newName)) {
+            player.sendMessage(ChatUtils.chatMessage("&cA plot named &e" + newName + " &calready exists!"));
+            return;
+        }
+
+        dominion.getPlotChunkNames().replaceAll((k, v) -> v.equals(plotName) ? newName : v);
+        Set<UUID> members = dominion.getPlotMembers().remove(plotName);
+        dominion.getPlotMembers().put(newName, members != null ? members : new HashSet<>());
+        DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage("&7Plot &e" + plotName + " &7has been renamed to &e" + newName));
+    }
+
+    private static void plotAdd(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot add <player>"));
+            return;
+        }
+
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion!"));
+            return;
+        }
+
+        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
+        String plotName = dominion.getPlotChunkNames().get(chunkKey);
+        if (plotName == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not standing in a plot!"));
+            return;
+        }
+
+        UUID inputUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[2]);
         if (inputUuid == null) {
-            player.sendMessage(ChatUtils.chatMessage("&e" + args[1] + " &ccould not be found"));
+            player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found"));
             return;
         }
 
@@ -776,27 +919,55 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
-        Set<UUID> plotOwners = dominion.getPlotAssignments().computeIfAbsent(chunkKey, k -> new HashSet<>());
+        Set<UUID> members = dominion.getPlotMembers().computeIfAbsent(plotName, k -> new HashSet<>());
+        if (members.contains(inputUuid)) {
+            player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &7is already a member of plot &e" + plotName));
+            return;
+        }
+        members.add(inputUuid);
+        DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &7has been added to the plot &e" + plotName));
+        Player targetPlayer = Bukkit.getPlayer(inputUuid);
+        if (targetPlayer != null) {
+            targetPlayer.sendMessage(ChatUtils.chatMessage("&7You have been added to the plot &e" + plotName + " &7in &e" + dominion.getName()));
+        }
+    }
 
-        if (plotOwners.contains(inputUuid)) {
-            // Toggle off — remove this player from the plot
-            plotOwners.remove(inputUuid);
-            if (plotOwners.isEmpty()) {
-                dominion.getPlotAssignments().remove(chunkKey);
-            }
-            player.sendMessage(ChatUtils.chatMessage("&7This chunk is no longer a plot for &e" + targetAranarthPlayer.getNickname()));
-        } else {
-            // Assign the plot
-            plotOwners.add(inputUuid);
-            player.sendMessage(ChatUtils.chatMessage("&7This chunk has been assigned as a plot for &e" + targetAranarthPlayer.getNickname()));
-            Player targetPlayer = Bukkit.getPlayer(inputUuid);
-            if (targetPlayer != null) {
-                targetPlayer.sendMessage(ChatUtils.chatMessage("&7You have been assigned a plot in &e" + dominion.getName()));
-            }
+    private static void plotRemove(String[] args, Dominion dominion, Player player) {
+        if (args.length < 3) {
+            player.sendMessage(ChatUtils.chatMessage("&cUsage: &e/d plot remove <player>"));
+            return;
         }
 
+        Chunk currentChunk = player.getLocation().getChunk();
+        Dominion chunkDominion = DominionUtils.getDominionOfChunk(currentChunk);
+        if (chunkDominion == null || !chunkDominion.isSameDominion(dominion)) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in a claimed chunk of your Dominion!"));
+            return;
+        }
+
+        String chunkKey = currentChunk.getWorld().getName() + ":" + currentChunk.getX() + ":" + currentChunk.getZ();
+        String plotName = dominion.getPlotChunkNames().get(chunkKey);
+        if (plotName == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not standing in a plot!"));
+            return;
+        }
+
+        UUID inputUuid = AranarthUtils.getUUIDFromUsernameOrNickname(args[2]);
+        if (inputUuid == null) {
+            player.sendMessage(ChatUtils.chatMessage("&e" + args[2] + " &ccould not be found"));
+            return;
+        }
+
+        AranarthPlayer targetAranarthPlayer = AranarthUtils.getPlayer(inputUuid);
+        Set<UUID> members = dominion.getPlotMembers().getOrDefault(plotName, new HashSet<>());
+        if (!members.contains(inputUuid)) {
+            player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &7is not a member of plot &e" + plotName));
+            return;
+        }
+        members.remove(inputUuid);
         DominionUtils.updateDominion(dominion);
+        player.sendMessage(ChatUtils.chatMessage("&e" + targetAranarthPlayer.getNickname() + " &7has been removed from the plot &e" + plotName));
     }
 
     private static void leaveDominion(Dominion dominion, Player player) {
@@ -810,8 +981,7 @@ public class CommandDominion implements CommandExecutor {
             DominionUtils.removePlayerFromDominion(player.getUniqueId());
             dominion.getMembers().remove(player.getUniqueId());
             dominion.getMemberRanks().remove(player.getUniqueId());
-            dominion.getPlotAssignments().values().forEach(owners -> owners.remove(player.getUniqueId()));
-            dominion.getPlotAssignments().entrySet().removeIf(e -> e.getValue().isEmpty());
+            dominion.getPlotMembers().values().forEach(members -> members.remove(player.getUniqueId()));
             DominionUtils.updateDominion(dominion);
             DominionLevelUtils.reevaluateDominion(dominion);
             for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
@@ -856,8 +1026,7 @@ public class CommandDominion implements CommandExecutor {
                     DominionUtils.removePlayerFromDominion(inputUuid);
                     dominion.getMembers().remove(inputUuid);
                     dominion.getMemberRanks().remove(inputUuid);
-                    dominion.getPlotAssignments().values().forEach(owners -> owners.remove(inputUuid));
-                    dominion.getPlotAssignments().entrySet().removeIf(e -> e.getValue().isEmpty());
+                    dominion.getPlotMembers().values().forEach(members -> members.remove(inputUuid));
                     DominionUtils.updateDominion(dominion);
                     DominionLevelUtils.reevaluateDominion(dominion);
                     for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {

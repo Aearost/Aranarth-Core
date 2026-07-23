@@ -7,6 +7,8 @@ import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.OutpostUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Chunk;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -49,6 +51,21 @@ public class DominionChunkChange {
 		Dominion effectiveFrom = (dominionFrom != null) ? dominionFrom : outpostDominionFrom;
 		Dominion effectiveTo = (dominionTo != null) ? dominionTo : outpostDominionTo;
 
+		// Action bar for plot entry/exit (must run before same-dominion early returns)
+		String fromChunkKey = from.getWorld().getName() + ":" + from.getX() + ":" + from.getZ();
+		String toChunkKey = to.getWorld().getName() + ":" + to.getX() + ":" + to.getZ();
+		String fromPlotName = (dominionFrom != null) ? dominionFrom.getPlotChunkNames().get(fromChunkKey) : null;
+		String toPlotName = (dominionTo != null) ? dominionTo.getPlotChunkNames().get(toChunkKey) : null;
+
+		if (fromPlotName != null && !fromPlotName.equals(toPlotName)) {
+			player.sendActionBar(Component.text("You have exited the plot of ").color(NamedTextColor.GRAY)
+					.append(Component.text(fromPlotName).color(NamedTextColor.YELLOW)));
+		}
+		if (toPlotName != null && !toPlotName.equals(fromPlotName)) {
+			player.sendActionBar(Component.text("You have entered the plot of ").color(NamedTextColor.GRAY)
+					.append(Component.text(toPlotName).color(NamedTextColor.YELLOW)));
+		}
+
 		// Determine if moving within the same territory
 		if (effectiveFrom != null && effectiveTo != null && effectiveFrom.isSameDominion(effectiveTo)) {
 			if (dominionFrom == null && dominionTo == null && outpostFrom != null && outpostTo != null
@@ -90,5 +107,6 @@ public class DominionChunkChange {
 						+ "&7's outpost, &e" + outpostTo.getName()));
 			}
 		}
+
 	}
 }

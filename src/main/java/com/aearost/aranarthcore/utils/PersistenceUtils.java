@@ -1923,8 +1923,11 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                Map<String, Set<UUID>> plotAssignments = parseDominionPlotsString(fields[1]);
-                dominion.setPlotAssignments(plotAssignments);
+                Map<String, String> plotChunkNames = new HashMap<>();
+                Map<String, Set<UUID>> plotMembers = new HashMap<>();
+                parseDominionPlotsString(fields[1], plotChunkNames, plotMembers);
+                dominion.setPlotChunkNames(plotChunkNames);
+                dominion.setPlotMembers(plotMembers);
             }
 
             reader.close();
@@ -1966,14 +1969,14 @@ public class PersistenceUtils {
             try {
                 FileWriter writer = new FileWriter(filePath);
                 writer.write("#dominionId|plots\n");
-                writer.write("#format: dominionId|world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3\n");
+                writer.write("#format: dominionId|plotName=uuid1,uuid2+world:chunkX:chunkZ,world:chunkX:chunkZ;plotName2=...\n");
 
                 for (Dominion dominion : dominions) {
-                    Map<String, Set<UUID>> plots = dominion.getPlotAssignments();
+                    Map<String, Set<UUID>> plots = dominion.getPlotMembers();
                     if (plots.isEmpty()) {
                         continue;
                     }
-                    String plotStr = buildDominionPlotsString(plots);
+                    String plotStr = buildDominionPlotsString(dominion.getPlotChunkNames(), plots);
                     writer.write(dominion.getId().toString() + "|" + plotStr + "\n");
                 }
                 writer.close();
@@ -2000,11 +2003,11 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
-            Map<String, Set<UUID>> plots = dominion.getPlotAssignments();
+            Map<String, Set<UUID>> plots = dominion.getPlotMembers();
             if (plots.isEmpty()) {
                 continue;
             }
-            String plotStr = buildDominionPlotsString(plots);
+            String plotStr = buildDominionPlotsString(dominion.getPlotChunkNames(), plots);
             try {
                 db.saveDominionPlots(dominion.getId(), plotStr);
             } catch (Exception e) {
@@ -2031,7 +2034,11 @@ public class PersistenceUtils {
                 continue;
             }
             try {
-                dominion.setPlotAssignments(parseDominionPlotsString(entry.getValue()));
+                Map<String, String> plotChunkNames = new HashMap<>();
+                Map<String, Set<UUID>> plotMembers = new HashMap<>();
+                parseDominionPlotsString(entry.getValue(), plotChunkNames, plotMembers);
+                dominion.setPlotChunkNames(plotChunkNames);
+                dominion.setPlotMembers(plotMembers);
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse dominion plots for " + dominionId + ": " + e.getMessage());
             }
@@ -2040,44 +2047,63 @@ public class PersistenceUtils {
     }
 
     /**
-     * Parses a dominion plots string into a chunkKey → Set&lt;UUID&gt; map.
-     * Format: world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3
+     * Parses a dominion plots string into the two new plot maps.
+     * Format: plotName=uuid1,uuid2+world:x:z,world:x:z;plotName2=...
      */
-    private static Map<String, Set<UUID>> parseDominionPlotsString(String raw) {
-        Map<String, Set<UUID>> result = new HashMap<>();
+    private static void parseDominionPlotsString(String raw, Map<String, String> plotChunkNames, Map<String, Set<UUID>> plotMembers) {
         if (raw == null || raw.isBlank()) {
-            return result;
+            return;
         }
-        for (String entry : raw.split(";")) {
-            String[] kv = entry.split("=", 2);
-            if (kv.length != 2) {
+        for (String plotEntry : raw.split(";")) {
+            String[] nameParts = plotEntry.split("=", 2);
+            if (nameParts.length != 2) {
                 continue;
             }
-            Set<UUID> owners = new HashSet<>();
-            for (String uuidStr : kv[1].split(",")) {
-                try {
-                    owners.add(UUID.fromString(uuidStr.trim()));
-                } catch (IllegalArgumentException ignored) {
+            String plotName = nameParts[0];
+            String[] dataParts = nameParts[1].split("\\+", 2);
+            if (dataParts.length != 2) {
+                continue;
+            }
+            Set<UUID> members = new HashSet<>();
+            if (!dataParts[0].isBlank()) {
+                for (String uuidStr : dataParts[0].split(",")) {
+                    try {
+                        members.add(UUID.fromString(uuidStr.trim()));
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
             }
-            if (!owners.isEmpty()) {
-                result.put(kv[0], owners);
+            plotMembers.put(plotName, members);
+            if (!dataParts[1].isBlank()) {
+                for (String chunkKey : dataParts[1].split(",")) {
+                    plotChunkNames.put(chunkKey.trim(), plotName);
+                }
             }
         }
-        return result;
     }
 
     /**
-     * Serializes a chunkKey → Set&lt;UUID&gt; plot map into a string.
-     * Format: world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3
+     * Serializes the two plot maps into a string.
+     * Format: plotName=uuid1,uuid2+world:x:z,world:x:z;plotName2=...
      */
-    private static String buildDominionPlotsString(Map<String, Set<UUID>> plots) {
-        return plots.entrySet().stream()
-                .filter(e -> !e.getValue().isEmpty())
-                .map(e -> e.getKey() + "=" + e.getValue().stream()
-                        .map(UUID::toString)
-                        .collect(Collectors.joining(",")))
-                .collect(Collectors.joining(";"));
+    private static String buildDominionPlotsString(Map<String, String> plotChunkNames, Map<String, Set<UUID>> plotMembers) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, Set<UUID>> entry : plotMembers.entrySet()) {
+            String plotName = entry.getKey();
+            Set<UUID> members = entry.getValue();
+            if (!sb.isEmpty()) {
+                sb.append(";");
+            }
+            sb.append(plotName).append("=");
+            sb.append(members.stream().map(UUID::toString).collect(Collectors.joining(",")));
+            sb.append("+");
+            String chunks = plotChunkNames.entrySet().stream()
+                    .filter(e -> e.getValue().equals(plotName))
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.joining(","));
+            sb.append(chunks);
+        }
+        return sb.toString();
     }
 
     /**
@@ -7380,7 +7406,11 @@ public class PersistenceUtils {
                 // Load plot assignments
                 String plotsData = db.loadDominionPlotsById(loaded.getId());
                 if (plotsData != null && !plotsData.isEmpty()) {
-                    loaded.setPlotAssignments(parseDominionPlotsString(plotsData));
+                    Map<String, String> plotChunkNames = new HashMap<>();
+                    Map<String, Set<UUID>> plotMembers = new HashMap<>();
+                    parseDominionPlotsString(plotsData, plotChunkNames, plotMembers);
+                    loaded.setPlotChunkNames(plotChunkNames);
+                    loaded.setPlotMembers(plotMembers);
                 }
 
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Reloaded dominion '" + loaded.getName() + "' from MySQL for cross-server player " + playerUuid);
