@@ -7,6 +7,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Boost;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatGameUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.DateUtils;
@@ -102,6 +103,7 @@ public class NetworkManager {
     public static final String CH_CHAT_GAME_EXPIRE  = "aranarth:chat_game_expire";
     public static final String CH_CHAT_GAME_CLAIM   = "aranarth:chat_game_claim";
     public static final String CH_DEATH             = "aranarth:death";
+    public static final String CH_BREW_UNLOCK       = "aranarth:brew_unlock";
 
     // Temp-data key prefixes
     private static final String KEY_PENDING_TP = "pending_tp:";
@@ -294,6 +296,7 @@ public class NetworkManager {
             case CH_CHAT_GAME_EXPIRE -> handleChatGameExpire(json);
             case CH_CHAT_GAME_CLAIM  -> handleChatGameClaim(json);
             case CH_DEATH            -> handleDeath(json);
+            case CH_BREW_UNLOCK      -> handleBrewUnlock(json);
         }
     }
 
@@ -499,6 +502,18 @@ public class NetworkManager {
         json.addProperty("server", thisServer);
         json.addProperty("message", rawMessage);
         publish(CH_BROADCAST, json);
+    }
+
+    /**
+     * Notifies all other servers that a player has unlocked a brew recipe so their in-memory
+     * caches stay in sync. The DB write is handled by the originating server before this publish.
+     */
+    public void publishBrewUnlock(UUID uuid, String recipeId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("server", thisServer);
+        json.addProperty("uuid", uuid.toString());
+        json.addProperty("recipeId", recipeId);
+        publish(CH_BREW_UNLOCK, json);
     }
 
     /**
@@ -1463,6 +1478,14 @@ public class NetworkManager {
             player.sendMessage(message);
         }
         Bukkit.getConsoleSender().sendMessage(message);
+    }
+
+    private void handleBrewUnlock(JsonObject json) {
+        String originServer = json.get("server").getAsString();
+        if (originServer.equals(thisServer)) return;
+        UUID uuid = UUID.fromString(json.get("uuid").getAsString());
+        String recipeId = json.get("recipeId").getAsString();
+        BrewRecipeUtils.applyRemoteUnlock(uuid, recipeId);
     }
 
     private void handleSleepMessage(JsonObject json) {

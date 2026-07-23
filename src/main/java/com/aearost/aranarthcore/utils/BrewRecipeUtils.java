@@ -1,6 +1,9 @@
 package com.aearost.aranarthcore.utils;
 
+import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
+import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,17 +32,41 @@ public class BrewRecipeUtils {
     private static final Random RANDOM = new Random();
 
     /**
-     * Loads all player recipe unlocks from brew_unlocks.yml.
+     * Loads all player recipe unlocks. When MySQL is available the shared {@code player_brew_unlocks}
+     * table is used as the source of truth. On the Survival server a one-time migration from the
+     * local {@code brew_unlocks.yml} is performed for any players not yet in the database.
+     * Falls back to YAML-only mode when the database is not active (e.g. dev environment).
      */
     public static void initialize(Plugin plugin) {
         dataFile = new File(plugin.getDataFolder(), "brew_unlocks.yml");
+
+        if (DatabaseManager.isActive()) {
+            // Primary path: load from shared MySQL
+            Map<UUID, Set<String>> dbUnlocks = DatabaseManager.getInstance().loadAllBrewUnlocks();
+            playerUnlocks.putAll(dbUnlocks);
+            Bukkit.getLogger().info("[AC] Loaded brew unlocks from MySQL for " + dbUnlocks.size() + " player(s)");
+
+            // One-time migration: only on Survival, import YAML records not yet in DB
+            if (!AranarthCore.isSmpServer() && dataFile.exists()) {
+                migrateYamlToDatabase();
+            }
+        } else {
+            // Fallback: load from local YAML (dev / offline mode)
+            loadFromYaml();
+        }
+
+        loadBreweryRecipes(plugin);
+    }
+
+    /** Loads brew unlocks from the local brew_unlocks.yml into the in-memory map. */
+    private static void loadFromYaml() {
         if (!dataFile.exists()) {
             try {
                 if (dataFile.createNewFile()) {
-                    Bukkit.getLogger().info("[AC] A new brew_unlocks.txt file has been generated");
+                    Bukkit.getLogger().info("[AC] A new brew_unlocks.yml file has been generated");
                 }
             } catch (IOException e) {
-                plugin.getLogger().warning("[AC] Failed to create brew_unlocks.yml: " + e.getMessage());
+                Bukkit.getLogger().warning("[AC] Failed to create brew_unlocks.yml: " + e.getMessage());
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
@@ -50,7 +77,30 @@ public class BrewRecipeUtils {
                 playerUnlocks.put(uuid, new HashSet<>(recipes));
             } catch (IllegalArgumentException ignored) {}
         }
-        loadBreweryRecipes(plugin);
+    }
+
+    /**
+     * Imports Survival's brew_unlocks.yml into MySQL for any players who have no DB record yet.
+     * Only called on the Survival server during startup so SMP YAML data is never promoted.
+     */
+    private static void migrateYamlToDatabase() {
+        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(dataFile);
+        int migrated = 0;
+        for (String uuidStr : yaml.getKeys(false)) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                if (playerUnlocks.containsKey(uuid)) continue; // already in DB
+                List<String> recipes = yaml.getStringList(uuidStr + ".unlocked");
+                if (recipes.isEmpty()) continue;
+                Set<String> recipeSet = new HashSet<>(recipes);
+                playerUnlocks.put(uuid, recipeSet);
+                DatabaseManager.getInstance().saveBrewUnlocksBulk(uuid, recipeSet);
+                migrated++;
+            } catch (IllegalArgumentException ignored) {}
+        }
+        if (migrated > 0) {
+            Bukkit.getLogger().info("[AC] Migrated brew unlocks from YAML to MySQL for " + migrated + " player(s)");
+        }
     }
 
     /**
@@ -219,10 +269,28 @@ public class BrewRecipeUtils {
 
     public static void unlock(UUID uuid, String recipeId) {
         playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
-        saveUnlocks(uuid);
+        if (DatabaseManager.isActive()) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().saveBrewUnlock(uuid, recipeId));
+            if (NetworkManager.isActive()) {
+                NetworkManager.getInstance().publishBrewUnlock(uuid, recipeId);
+            }
+        } else {
+            saveUnlocks(uuid);
+        }
     }
 
+    /**
+     * Updates the in-memory unlock map when a brew is unlocked on another server.
+     * No DB write is needed here — the originating server already persisted it.
+     */
+    public static void applyRemoteUnlock(UUID uuid, String recipeId) {
+        playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
+    }
+
+    /** Saves unlocks to YAML. Only used as a fallback when MySQL is not available. */
     private static void saveUnlocks(UUID uuid) {
+        if (dataConfig == null) return;
         Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
         dataConfig.set(uuid.toString() + ".unlocked", new ArrayList<>(unlocked));
         try {

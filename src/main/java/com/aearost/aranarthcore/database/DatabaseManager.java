@@ -404,6 +404,13 @@ public class DatabaseManager {
             CREATE TABLE IF NOT EXISTS server_original_players (
                 uuid VARCHAR(36) PRIMARY KEY
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_brew_unlocks (
+                uuid VARCHAR(36) NOT NULL,
+                recipe_id VARCHAR(64) NOT NULL,
+                PRIMARY KEY (uuid, recipe_id)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -2098,5 +2105,56 @@ public class DatabaseManager {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load last location for " + uuid + ": " + e.getMessage());
         }
         return null;
+    }
+
+    // -------------------------------------------------------------------------
+    // Brew unlocks (shared across servers)
+    // -------------------------------------------------------------------------
+
+    /** Loads all brew unlocks for all players from MySQL. */
+    public Map<UUID, Set<String>> loadAllBrewUnlocks() {
+        String sql = "SELECT uuid, recipe_id FROM player_brew_unlocks";
+        Map<UUID, Set<String>> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                UUID uuid = UUID.fromString(rs.getString("uuid"));
+                result.computeIfAbsent(uuid, k -> new HashSet<>()).add(rs.getString("recipe_id"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load brew unlocks: " + e.getMessage());
+        }
+        return result;
+    }
+
+    /** Persists a single brew unlock for the given player. Uses INSERT IGNORE so duplicates are silently skipped. */
+    public void saveBrewUnlock(UUID uuid, String recipeId) {
+        String sql = "INSERT IGNORE INTO player_brew_unlocks (uuid, recipe_id) VALUES (?, ?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, recipeId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save brew unlock for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /** Batch-inserts a set of brew unlocks for one player. Used for one-time YAML→DB migration. */
+    public void saveBrewUnlocksBulk(UUID uuid, Set<String> recipeIds) {
+        if (recipeIds.isEmpty()) return;
+        String sql = "INSERT IGNORE INTO player_brew_unlocks (uuid, recipe_id) VALUES (?, ?)";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (String recipeId : recipeIds) {
+                ps.setString(1, uuid.toString());
+                ps.setString(2, recipeId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to bulk-save brew unlocks for " + uuid + ": " + e.getMessage());
+        }
     }
 }
