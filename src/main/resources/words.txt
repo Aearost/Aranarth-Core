@@ -10,8 +10,6 @@ kyoshi
 roku
 aang
 korra
-raava
-vaatu
 
 # ATLA characters
 katara
@@ -28,22 +26,31 @@ bumi
 pakku
 tylee
 mai
+raava
+vaatu
 
 # LOK characters
 mako
 bolin
 asami
+lin
 tenzin
+kya
 varrick
 kuvira
 zaheer
+ghazan
+minghua
+pli
 unalaq
 suyin
+opal
+kai
 jinora
 ikki
 meelo
-tonraq
 amon
+hiroshi
 tarlok
 
 # Bending arts
@@ -61,10 +68,10 @@ lightning
 sound
 seismic
 healing
-crystal
 spirit
 chakra
 avatar
+avatarstate
 
 # Aranarth armor sets
 aranarth
@@ -76,6 +83,7 @@ elven
 ardent
 soulbound
 fae
+cluster
 
 # Minecraft mobs
 creeper
@@ -125,15 +133,10 @@ andesite
 blackstone
 sandstone
 prismarine
-honeycomb
-cobweb
 
 # Minecraft structures and biomes
 fortress
 stronghold
-dungeon
-woodland
-monument
 outpost
 mineshaft
 village
@@ -142,7 +145,6 @@ igloo
 jungle
 savanna
 badlands
-tundra
 mangrove
 mushroom
 swamp
