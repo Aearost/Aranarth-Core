@@ -414,12 +414,73 @@ public class PlayerServerJoinListener implements Listener {
 							}.runTaskLater(AranarthCore.getInstance(), 2L);
 						}
 					} else {
-						PendingTeleport pt = new PendingTeleport(
-								lastLoc.world, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch, "", "");
-						pt.setLoginRouting(true);
-						String velocityTarget = AranarthCore.getInstance().getConfig()
+						// Unplanned cross-server landing: the player's last known location is on
+						// another server (e.g. that server shut down and Velocity routed them here
+						// as a fallback). This server's in-memory snapshot of the player may be
+						// stale if it restarted while they were active on the other server.
+						// Delay briefly before reloading from MySQL so that the source server's
+						// async shutdown save has time to commit before we read it. Then apply the
+						// survival inventory defensively:
+						//   - If the route back succeeds: they transfer away and the apply is harmless.
+						//   - If the source server is unreachable and they stay here: they have the
+						//     correct inventory instead of a stale pre-restart snapshot, preventing
+						//     item duplication/loss.
+						final String velocityTarget = AranarthCore.getInstance().getConfig()
 								.getString("network.servers." + lastLoc.server, lastLoc.server);
-						NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+						final String locWorld = lastLoc.world;
+						final double locX = lastLoc.x, locY = lastLoc.y, locZ = lastLoc.z;
+						final float locYaw = lastLoc.yaw, locPitch = lastLoc.pitch;
+						Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned cross-server landing for "
+								+ player.getName() + " — last server: " + lastLoc.server
+								+ ", routing to: " + velocityTarget + ". Reloading from MySQL in 2s.");
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								if (!player.isOnline()) return;
+								if (DatabaseManager.isActive()) {
+									PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+									PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+								}
+								AranarthPlayer apFallback = AranarthUtils.getPlayer(player.getUniqueId());
+								if (apFallback != null && !apFallback.getSurvivalInventory().isEmpty()) {
+									Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Applying fallback inventory for "
+											+ player.getName() + " from MySQL snapshot.");
+									try {
+										player.getInventory().setContents(
+												ItemUtils.itemStackArrayFromBase64(apFallback.getSurvivalInventory()));
+									} catch (Exception ex) {
+										Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+												+ "[Inv] Failed to apply fallback inventory for " + player.getName() + ": " + ex.getMessage());
+									}
+									if (!apFallback.getSurvivalEnderChest().isEmpty()) {
+										try {
+											player.getEnderChest().setContents(
+													ItemUtils.itemStackArrayFromBase64(apFallback.getSurvivalEnderChest()));
+										} catch (Exception ex) {
+											Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+													+ "[Inv] Failed to apply fallback ender chest for " + player.getName() + ": " + ex.getMessage());
+										}
+									}
+									if (apFallback.getSurvivalHealth() > 0) {
+										player.setHealth(Math.min(apFallback.getSurvivalHealth(),
+												player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+									}
+									player.setFoodLevel(apFallback.getSurvivalFoodLevel());
+									player.setSaturation(apFallback.getSurvivalSaturation());
+									player.setLevel(apFallback.getSurvivalExpLevel());
+									player.setExp(apFallback.getSurvivalExpProgress());
+								} else {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] No MySQL inventory snapshot available for "
+											+ player.getName() + " — skipping fallback apply.");
+								}
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Routing " + player.getName()
+										+ " back to " + velocityTarget + " after unplanned landing.");
+								PendingTeleport pt = new PendingTeleport(
+										locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
+								pt.setLoginRouting(true);
+								NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+							}
+						}.runTaskLater(AranarthCore.getInstance(), 40L); // 2s — allows source server's async shutdown save to commit to MySQL
 					}
 				}
 
