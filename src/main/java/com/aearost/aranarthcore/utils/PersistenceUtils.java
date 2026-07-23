@@ -6286,6 +6286,12 @@ public class PersistenceUtils {
             pronouns = Pronouns.NEUTRAL;
         }
 
+        if (survivalInventory.isEmpty() && (!creativeInventory.isEmpty() || !arenaInventory.isEmpty())) {
+            Bukkit.getLogger().warning("[AC] [Inv] Loaded " + uuid + " from DB with empty survivalInventory"
+                    + " (creativeInventory=" + (creativeInventory.isEmpty() ? "empty" : "set")
+                    + ", arenaInventory=" + (arenaInventory.isEmpty() ? "empty" : "set") + ")"
+                    + " — will skip clear if they switch to survival");
+        }
         AranarthUtils.addPlayer(uuid, new AranarthPlayer(Bukkit.getOfflinePlayer(uuid).getName(), nickname,
                 survivalInventory, arenaInventory, creativeInventory, potions, arrows, blacklist,
                 blacklistingMethod, balance, rank, saintRank, councilRank, architectRank, homes,

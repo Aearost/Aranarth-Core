@@ -484,6 +484,20 @@ public class PlayerServerJoinListener implements Listener {
 					}
 				}
 
+				// Log survivalInventory state for players arriving from a non-survival world
+				// (e.g. creative, arena). These players won't have their survival inventory
+				// applied on login, so if it's empty here it will be empty when they /home.
+				if (lastLoc != null && !AranarthUtils.isSurvivalWorld(lastLoc.world)) {
+					AranarthPlayer apInvCheck = AranarthUtils.getPlayer(player.getUniqueId());
+					if (apInvCheck != null) {
+						boolean empty = apInvCheck.getSurvivalInventory().isEmpty();
+						Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName()
+								+ " joined from non-survival world '" + lastLoc.world + "': survivalInventory "
+								+ (empty ? "EMPTY — will skip clear if they switch to survival"
+										: "set (length=" + apInvCheck.getSurvivalInventory().length() + ")"));
+					}
+				}
+
 				// Apply MySQL survival inventory as a recovery fallback for same-server logins.
 				// MySQL is kept current by quit-time and periodic snapshots, so it is more
 				// reliable than a stale player.dat left by an ungraceful server shutdown.

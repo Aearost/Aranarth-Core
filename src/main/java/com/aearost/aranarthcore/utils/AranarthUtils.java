@@ -393,6 +393,9 @@ public class AranarthUtils {
 
 		if (currentWorld.startsWith("world")) {
 			aranarthPlayer.setSurvivalInventory(ItemUtils.toBase64(player.getInventory()));
+			// Immediately persist the survival snapshot to MySQL so it survives a rapid server
+			// restart before the next periodic save or quit-time async write can run.
+			PersistenceUtils.saveAranarthPlayerImmediately(player.getUniqueId());
 			if (destinationWorld.startsWith("arena")) {
 				boolean hasArena = !aranarthPlayer.getArenaInventory().isEmpty();
 				if (hasArena) {
@@ -427,7 +430,12 @@ public class AranarthUtils {
 				if (hasSurvival) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 				} else {
-					player.getInventory().clear();
+					// survivalInventory is empty — this should not happen for a player who has
+					// previously played in survival. Skipping clear to avoid wiping items that
+					// were not properly persisted (MySQL race condition on restart). Logging so
+					// admins can investigate and use /invswap to correct if needed.
+					Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
+							+ player.getName() + " during arena→world switch — skipping clear to protect items");
 				}
 				player.setGameMode(GameMode.SURVIVAL);
 				PermissionUtils.toggleArenaBendingPermissions(player, false);
@@ -453,10 +461,18 @@ public class AranarthUtils {
 			if (destinationWorld.startsWith("world")) {
 				aranarthPlayer.setCreativeInventory(ItemUtils.toBase64(player.getInventory()));
 				boolean hasSurvival = !aranarthPlayer.getSurvivalInventory().isEmpty();
+				Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] creative→world switch for "
+						+ player.getName() + ": survivalInventory "
+						+ (hasSurvival ? "set (length=" + aranarthPlayer.getSurvivalInventory().length() + ")" : "EMPTY"));
 				if (hasSurvival) {
 					player.getInventory().setContents(ItemUtils.itemStackArrayFromBase64(aranarthPlayer.getSurvivalInventory()));
 				} else {
-					player.getInventory().clear();
+					// survivalInventory is empty — this should not happen for a player who has
+					// previously played in survival. Skipping clear to avoid wiping items that
+					// were not properly persisted (MySQL race condition on restart). Logging so
+					// admins can investigate and use /invswap to correct if needed.
+					Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] survivalInventory empty for "
+							+ player.getName() + " during creative→world switch — skipping clear to protect items");
 				}
 				player.setGameMode(GameMode.SURVIVAL);
 				return;
