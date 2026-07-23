@@ -1495,6 +1495,11 @@ public class AranarthCore extends JavaPlugin {
         }
         PersistenceUtils.saveQuestState();
         PersistenceUtils.saveQuestProgress();
+        // saveQuestProgress() only DB-syncs locallyModifiedUuids, which is empty by shutdown
+        // (quit events cleared it). Sync all known players instead to avoid data loss.
+        if (DatabaseManager.isActive()) {
+            PersistenceUtils.syncAllQuestDataToDatabase();
+        }
         PersistenceUtils.saveLoginStreaks();
         PersistenceUtils.saveGates();
         MountUtils.syncAllActiveHealthToData();

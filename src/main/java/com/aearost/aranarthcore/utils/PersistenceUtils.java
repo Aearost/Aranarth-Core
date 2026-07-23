@@ -3768,10 +3768,10 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving the quest state");
         }
-        // MySQL sync
+        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
         if (DatabaseManager.isActive()) {
-            runDbSync(
-                    PersistenceUtils::syncQuestDataToDatabase);
+            Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
+            runDbSync(() -> syncQuestDataToDatabase(snapshot));
         }
     }
 
@@ -4010,10 +4010,10 @@ public class PersistenceUtils {
         } catch (IOException e) {
             Bukkit.getLogger().info("[AC] There was an error in saving quest progress");
         }
-        // MySQL sync
+        // MySQL sync — snapshot UUIDs now so async dispatch doesn't miss any removed after this call
         if (DatabaseManager.isActive()) {
-            runDbSync(
-                    PersistenceUtils::syncQuestDataToDatabase);
+            Set<UUID> snapshot = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
+            runDbSync(() -> syncQuestDataToDatabase(snapshot));
         }
     }
 
@@ -5206,6 +5206,24 @@ public class PersistenceUtils {
      * Stores the raw pipe-delimited lines as JSON strings.
      */
     public static void syncQuestDataToDatabase() {
+        syncQuestDataToDatabase(new HashSet<>(QuestUtils.getLocallyModifiedUuids()));
+    }
+
+    /**
+     * Shutdown-safe DB sync. Uses sessionModifiedUuids — the set of players whose quest
+     * data was touched on THIS server during this session — instead of locallyModifiedUuids,
+     * which is cleared by quit events before onDisable() runs.
+     * This avoids clobbering the other server's data for players it actively owns, while
+     * still ensuring all locally-touched data is persisted.
+     */
+    public static void syncAllQuestDataToDatabase() {
+        Set<UUID> uuids = new HashSet<>(QuestUtils.getSessionModifiedUuids());
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Quest] Shutdown DB sync: writing "
+                + uuids.size() + " session-modified player(s) to MySQL.");
+        syncQuestDataToDatabase(uuids);
+    }
+
+    private static void syncQuestDataToDatabase(Set<UUID> uuidsToSync) {
         if (!DatabaseManager.isActive()) {
             return;
         }
@@ -5215,12 +5233,6 @@ public class PersistenceUtils {
         String stateJson = "{\"lastDailyReset\":" + QuestUtils.getLastDailyReset()
                 + ",\"lastWeeklyReset\":" + QuestUtils.getLastWeeklyReset() + "}";
 
-        // Per-player quest progress — only sync UUIDs that had actual quest actions on THIS
-        // server this session, so we don't overwrite data for players active on the other server
-        // (both servers load all players from the shared DB at startup, but only the server where
-        // the player is actually playing should write back their progress).
-        Set<UUID> allUuids = new HashSet<>(QuestUtils.getLocallyModifiedUuids());
-
         // Use a global uuid for the state row
         UUID stateUuid = new UUID(0L, 0L);
         try {
@@ -5229,7 +5241,11 @@ public class PersistenceUtils {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync quest state: " + e.getMessage());
         }
 
-        for (UUID uuid : allUuids) {
+        // Per-player quest progress — only sync UUIDs that had actual quest actions on THIS
+        // server this session, so we don't overwrite data for players active on the other server
+        // (both servers load all players from the shared DB at startup, but only the server where
+        // the player is actually playing should write back their progress).
+        for (UUID uuid : uuidsToSync) {
             // Build a compact JSON snapshot of the player's quest progress + assignments
             JsonObject prog = new JsonObject();
             int[] dp = QuestUtils.getPlayerDailyProgress().getOrDefault(uuid, new int[3]);

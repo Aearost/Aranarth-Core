@@ -58,6 +58,11 @@ public class QuestUtils {
     // Only these are synced to the shared DB so each server doesn't stomp the other's data.
     private static final Set<UUID> locallyModifiedUuids = new HashSet<>();
 
+    // Superset of locallyModifiedUuids — never cleared during the session, only reset on startup.
+    // Used at shutdown to safely write back all player data this server touched, even after
+    // locallyModifiedUuids has been cleared by quit events.
+    private static final Set<UUID> sessionModifiedUuids = new HashSet<>();
+
     // Reset timestamps (milliseconds since epoch)
     private static long lastDailyReset = 0;
     private static long lastWeeklyReset = 0;
@@ -633,6 +638,7 @@ public class QuestUtils {
         }
 
         locallyModifiedUuids.add(uuid);
+        sessionModifiedUuids.add(uuid);
         assignQuestsIfNeeded(uuid, rank);
         updateProgressForType(player, uuid, taskType, amount, QuestType.DAILY);
         updateProgressForType(player, uuid, taskType, amount, QuestType.WEEKLY);
@@ -714,6 +720,8 @@ public class QuestUtils {
         }
 
         claimed[index] = true;
+        locallyModifiedUuids.add(uuid);
+        sessionModifiedUuids.add(uuid);
 
         Quest quest = active.get(index);
 
@@ -876,6 +884,10 @@ public class QuestUtils {
 
     public static Set<UUID> getLocallyModifiedUuids() {
         return locallyModifiedUuids;
+    }
+
+    public static Set<UUID> getSessionModifiedUuids() {
+        return sessionModifiedUuids;
     }
 
     public static long getLastDailyReset() {
