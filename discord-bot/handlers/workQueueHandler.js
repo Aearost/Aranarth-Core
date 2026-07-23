@@ -101,11 +101,14 @@ async function deleteWorkQueueMessages(client) {
  * @param {*} client
  * @param {number|null} excludeIssueNumber - Issue number to exclude (e.g. one just closed whose state may not have propagated yet)
  */
-async function refreshWorkQueue(client, excludeIssueNumber = null) {
+async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue = null) {
   console.log('[WorkQueue] Refreshing...');
   try {
     let issues = await fetchOpenIssues();
     if (excludeIssueNumber != null) issues = issues.filter(i => i.number !== excludeIssueNumber);
+    if (injectIssue != null && !issues.some(i => i.number === injectIssue.number)) {
+      issues = [injectIssue, ...issues];
+    }
     const selected = scoringEngine.selectTop(issues);
 
     await deleteWorkQueueMessages(client);

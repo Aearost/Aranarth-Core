@@ -98,7 +98,7 @@ async function createIssue(title, body, labels) {
     labels: Array.isArray(labels) ? labels : [labels],
     assignees: config.GITHUB_ASSIGNEE ? [config.GITHUB_ASSIGNEE] : [],
   });
-  return { url: res.data.html_url, number: res.data.number };
+  return { url: res.data.html_url, number: res.data.number, data: res.data };
 }
 
 module.exports = { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue, createIssue };

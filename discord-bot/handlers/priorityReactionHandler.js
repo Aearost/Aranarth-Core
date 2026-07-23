@@ -274,7 +274,7 @@ async function handle(reaction, user, client) {
   }
 
   try {
-    await refreshWorkQueue(client);
+    await refreshWorkQueue(client, null, issueData.data);
   } catch (err) {
     console.error('[PriorityHandler] Failed to refresh work queue:', err.message);
   }
