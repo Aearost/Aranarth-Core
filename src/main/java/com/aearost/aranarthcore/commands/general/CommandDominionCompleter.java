@@ -28,7 +28,7 @@ public class CommandDominionCompleter implements TabCompleter {
 	private static final List<String> DOMINION_OPTIONS = List.of(
 		"accept", "ally", "autoclaim", "balance", "buychunks", "claim", "conquer", "create",
 		"deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
-		"leave", "list", "map", "msg", "neutral", "outpost", "rank", "setrank",
+		"leave", "list", "map", "msg", "neutral", "outpost", "plot", "rank", "setrank",
 		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
 		"surrender", "truce", "unclaim", "who", "withdraw"
 	);
@@ -119,7 +119,7 @@ public class CommandDominionCompleter implements TabCompleter {
 				}
 				yield List.of();
 			}
-			case "remove", "setleader" -> {
+			case "remove", "setleader", "plot" -> {
 				if (sender instanceof Player player) {
 					Dominion dominion = DominionUtils.getPlayerDominion(player.getUniqueId());
 					if (dominion != null) {

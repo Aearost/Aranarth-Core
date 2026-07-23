@@ -58,10 +58,9 @@ public class Dominion {
 	private long foundedTimestamp;     // ms epoch; 0 = "ancient" (pre-feature legacy dominion)
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
 
-	// Outpost system
 	private int boughtOutpostChunks;
-
-	// A null entry for a permission means it is inherited from the player's rank or relation.
+	private Map<String, Set<UUID>> plotAssignments;
+	// A null entry for a permission means it is inherited from the player's rank or relation
 	private Map<UUID, Map<DominionPermission, Boolean>> playerPermissionOverrides;
 
 	// Keep balance at the end
@@ -87,6 +86,7 @@ public class Dominion {
 		this.members = members;
 		this.memberRanks = memberRanks != null ? memberRanks : new HashMap<>();
 		this.dominionPermissions = dominionPermissions != null ? dominionPermissions : DominionPermissions.createDefaults();
+		this.plotAssignments = new HashMap<>();
 		this.playerPermissionOverrides = new HashMap<>();
 		this.chunks = chunks;
 		// worldName may be stored in "smp:<name>" form to distinguish SMP worlds from Survival worlds.
@@ -268,6 +268,23 @@ public class Dominion {
 	 */
 	public void clearPlayerPermissionOverrides(UUID playerUuid) {
 		getPlayerPermissionOverrides().remove(playerUuid);
+	}
+
+	/**
+	 * Provides the plot assignments map.
+	 */
+	public Map<String, Set<UUID>> getPlotAssignments() {
+		if (plotAssignments == null) {
+			plotAssignments = new HashMap<>();
+		}
+		return plotAssignments;
+	}
+
+	/**
+	 * Replaces the plot assignments map.
+	 */
+	public void setPlotAssignments(Map<String, Set<UUID>> plotAssignments) {
+		this.plotAssignments = plotAssignments != null ? plotAssignments : new HashMap<>();
 	}
 
 	/**

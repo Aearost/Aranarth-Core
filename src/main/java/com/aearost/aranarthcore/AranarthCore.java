@@ -187,6 +187,7 @@ public class AranarthCore extends JavaPlugin {
                     PersistenceUtils.saveDominions();
                     PersistenceUtils.saveDominionPermissions();
                     PersistenceUtils.saveDominionPlayerPermissions();
+                    PersistenceUtils.saveDominionPlots();
                     DominionUtils.checkAndProcessConquestDeadlines();
                 }
                 PersistenceUtils.saveWarps();
@@ -492,6 +493,11 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.loadDominionPlayerPermissionsFromDatabase();
         } else {
             PersistenceUtils.loadDominionPlayerPermissions();
+        }
+        if (db) {
+            PersistenceUtils.loadDominionPlotsFromDatabase();
+        } else {
+            PersistenceUtils.loadDominionPlots();
         }
         if (db) {
             PersistenceUtils.loadOutpostsFromDatabase();
@@ -1475,6 +1481,7 @@ public class AranarthCore extends JavaPlugin {
             PersistenceUtils.saveDefenders();
             PersistenceUtils.saveDominionPermissions();
             PersistenceUtils.saveDominionPlayerPermissions();
+            PersistenceUtils.saveDominionPlots();
         }
         PersistenceUtils.saveWarps();
         PersistenceUtils.savePunishments();

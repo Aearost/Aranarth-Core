@@ -2,6 +2,7 @@ AranarthCore v. 1.11
 
 Major Features
 [+] Implemented Fae Aranarthium
+[+] Implemented Dominion plots, allowing you to designate chunks for individual players
 [+] Implemented /brewbook to view all unlocked BreweryX recipes as a paged GUI
 [+] Implemented shop collaboration through /shop invite, restricted to owning or collaborating on an island
 [~] Overhauled quest thresholds to be more accurate for the scaling of the player's rank

@@ -318,6 +318,13 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """,
             """
+            CREATE TABLE IF NOT EXISTS server_dominion_plots (
+                dominion_id VARCHAR(36) PRIMARY KEY,
+                data_json MEDIUMTEXT NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
             CREATE TABLE IF NOT EXISTS server_outposts (
                 id VARCHAR(36) PRIMARY KEY,
                 data_json MEDIUMTEXT NOT NULL,
@@ -1701,6 +1708,51 @@ public class DatabaseManager {
             }
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion player perms: " + e.getMessage());
+        }
+        return result;
+    }
+
+    public void deleteDominionPlots(UUID dominionId) {
+        String sql = "DELETE FROM server_dominion_plots WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to delete dominion plots for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public void saveDominionPlots(UUID dominionId, String dataJson) {
+        String sql = "INSERT INTO server_dominion_plots (dominion_id, data_json) VALUES (?, ?) ON DUPLICATE KEY UPDATE data_json=VALUES(data_json)";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString()); ps.setString(2, dataJson); ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save dominion plots for " + dominionId + ": " + e.getMessage());
+        }
+    }
+
+    public String loadDominionPlotsById(UUID dominionId) {
+        String sql = "SELECT data_json FROM server_dominion_plots WHERE dominion_id = ?";
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, dominionId.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load plots for dominion " + dominionId + ": " + e.getMessage());
+        }
+        return null;
+    }
+
+    public Map<UUID, String> loadAllDominionPlots() {
+        String sql = "SELECT dominion_id, data_json FROM server_dominion_plots";
+        Map<UUID, String> result = new HashMap<>();
+        try (Connection conn = dataSource.getConnection(); PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.put(UUID.fromString(rs.getString("dominion_id")), rs.getString("data_json"));
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load all dominion plots: " + e.getMessage());
         }
         return result;
     }

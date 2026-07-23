@@ -86,6 +86,7 @@ public class GuiDominionPermissions {
         map.put(36, DominionPermission.OUTPOST_HOME);
         map.put(37, DominionPermission.MANAGE_OUTPOSTS);
         map.put(38, DominionPermission.MANAGE_DEFENDERS);
+        map.put(39, DominionPermission.MANAGE_PLOTS);
         return map;
     }
 
@@ -405,6 +406,7 @@ public class GuiDominionPermissions {
             case RETREAT -> Material.FEATHER;
             case MANAGE_OUTPOSTS -> Material.OAK_LOG;
             case MANAGE_DEFENDERS -> Material.SHIELD;
+            case MANAGE_PLOTS -> Material.GRASS_BLOCK;
             case WITHDRAW -> Material.GOLD_NUGGET;
         };
     }

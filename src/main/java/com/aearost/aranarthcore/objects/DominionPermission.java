@@ -44,6 +44,9 @@ public enum DominionPermission {
     // Defender management (buy/sell defenders)
     MANAGE_DEFENDERS,
 
+    // Plot management (assign/unassign chunks to members; also grants bypass of plot restrictions)
+    MANAGE_PLOTS,
+
     // Leader-restricted commands (enforced in commands, not configurable per rank)
     WITHDRAW
 }

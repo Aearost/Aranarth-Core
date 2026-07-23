@@ -1882,6 +1882,205 @@ public class PersistenceUtils {
     }
 
     /**
+     * Loads dominion plot assignments from dominions_plots.txt.
+     * Must be called after loadDominions().
+     */
+    public static void loadDominionPlots() {
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "dominions_plots.txt";
+        File file = new File(filePath);
+
+        if (!file.exists()) {
+            return;
+        }
+
+        Scanner reader;
+        try {
+            reader = new Scanner(file);
+            Bukkit.getLogger().info("[AC] Attempting to read the dominions_plots file...");
+
+            while (reader.hasNextLine()) {
+                String row = reader.nextLine();
+                if (row.startsWith("#") || row.isBlank()) {
+                    continue;
+                }
+
+                String[] fields = row.split("\\|", -1);
+                if (fields.length < 2) {
+                    continue;
+                }
+
+                UUID dominionId;
+                try {
+                    dominionId = UUID.fromString(fields[0]);
+                } catch (IllegalArgumentException ignored) {
+                    continue;
+                }
+
+                Dominion dominion = DominionUtils.getDominionById(dominionId);
+                if (dominion == null) {
+                    continue;
+                }
+
+                Map<String, Set<UUID>> plotAssignments = parseDominionPlotsString(fields[1]);
+                dominion.setPlotAssignments(plotAssignments);
+            }
+
+            reader.close();
+            Bukkit.getLogger().info("[AC] Dominion plots initialized from file");
+        } catch (FileNotFoundException e) {
+            Bukkit.getLogger().info("[AC] dominions_plots.txt not found, skipping");
+        }
+    }
+
+    /**
+     * Saves dominion plot assignments to dominions_plots.txt.
+     */
+    public static void saveDominionPlots() {
+        List<Dominion> dominions = DominionUtils.getDominions();
+        if (dominions == null || dominions.isEmpty()) {
+            return;
+        }
+
+        String currentPath = System.getProperty("user.dir");
+        String filePath = currentPath + File.separator + "plugins" + File.separator + "AranarthCore"
+                + File.separator + "dominions_plots.txt";
+        File pluginDirectory = new File(currentPath + File.separator + "plugins" + File.separator + "AranarthCore");
+        File file = new File(filePath);
+
+        boolean isDirectoryCreated = true;
+        if (!pluginDirectory.isDirectory()) {
+            isDirectoryCreated = pluginDirectory.mkdir();
+        }
+        if (isDirectoryCreated) {
+            try {
+                if (file.createNewFile()) {
+                    Bukkit.getLogger().info("[AC] A new dominions_plots.txt file has been generated");
+                }
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] An error occurred creating dominions_plots.txt");
+                return;
+            }
+
+            try {
+                FileWriter writer = new FileWriter(filePath);
+                writer.write("#dominionId|plots\n");
+                writer.write("#format: dominionId|world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3\n");
+
+                for (Dominion dominion : dominions) {
+                    Map<String, Set<UUID>> plots = dominion.getPlotAssignments();
+                    if (plots.isEmpty()) {
+                        continue;
+                    }
+                    String plotStr = buildDominionPlotsString(plots);
+                    writer.write(dominion.getId().toString() + "|" + plotStr + "\n");
+                }
+                writer.close();
+            } catch (IOException e) {
+                Bukkit.getLogger().info("[AC] There was an error saving dominion plots!");
+            }
+        }
+        // MySQL sync
+        if (DatabaseManager.isActive()) {
+            runDbSync(PersistenceUtils::syncDominionPlotsToDatabase);
+        }
+    }
+
+    /**
+     * Syncs dominion plot assignments to MySQL.
+     */
+    public static void syncDominionPlotsToDatabase() {
+        if (!DatabaseManager.isActive()) {
+            return;
+        }
+        DatabaseManager db = DatabaseManager.getInstance();
+        List<Dominion> dominions = DominionUtils.getDominions();
+        if (dominions == null) {
+            return;
+        }
+        for (Dominion dominion : dominions) {
+            Map<String, Set<UUID>> plots = dominion.getPlotAssignments();
+            if (plots.isEmpty()) {
+                continue;
+            }
+            String plotStr = buildDominionPlotsString(plots);
+            try {
+                db.saveDominionPlots(dominion.getId(), plotStr);
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync dominion plots for " + dominion.getId() + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Loads dominion plot assignments from MySQL. Falls back to file if empty.
+     */
+    public static void loadDominionPlotsFromDatabase() {
+        DatabaseManager db = DatabaseManager.getInstance();
+        Map<UUID, String> all = db.loadAllDominionPlots();
+        if (all.isEmpty()) {
+            loadDominionPlots();
+            return;
+        }
+        Bukkit.getLogger().info("[AC] Loading dominion plots from MySQL...");
+        for (Map.Entry<UUID, String> entry : all.entrySet()) {
+            UUID dominionId = entry.getKey();
+            Dominion dominion = DominionUtils.getDominionById(dominionId);
+            if (dominion == null) {
+                continue;
+            }
+            try {
+                dominion.setPlotAssignments(parseDominionPlotsString(entry.getValue()));
+            } catch (Exception e) {
+                Bukkit.getLogger().warning("[AC] Failed to parse dominion plots for " + dominionId + ": " + e.getMessage());
+            }
+        }
+        Bukkit.getLogger().info("[AC] Dominion plots initialized from MySQL");
+    }
+
+    /**
+     * Parses a dominion plots string into a chunkKey → Set&lt;UUID&gt; map.
+     * Format: world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3
+     */
+    private static Map<String, Set<UUID>> parseDominionPlotsString(String raw) {
+        Map<String, Set<UUID>> result = new HashMap<>();
+        if (raw == null || raw.isBlank()) {
+            return result;
+        }
+        for (String entry : raw.split(";")) {
+            String[] kv = entry.split("=", 2);
+            if (kv.length != 2) {
+                continue;
+            }
+            Set<UUID> owners = new HashSet<>();
+            for (String uuidStr : kv[1].split(",")) {
+                try {
+                    owners.add(UUID.fromString(uuidStr.trim()));
+                } catch (IllegalArgumentException ignored) {
+                }
+            }
+            if (!owners.isEmpty()) {
+                result.put(kv[0], owners);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Serializes a chunkKey → Set&lt;UUID&gt; plot map into a string.
+     * Format: world:chunkX:chunkZ=uuid1,uuid2;world:chunkX:chunkZ=uuid3
+     */
+    private static String buildDominionPlotsString(Map<String, Set<UUID>> plots) {
+        return plots.entrySet().stream()
+                .filter(e -> !e.getValue().isEmpty())
+                .map(e -> e.getKey() + "=" + e.getValue().stream()
+                        .map(UUID::toString)
+                        .collect(Collectors.joining(",")))
+                .collect(Collectors.joining(";"));
+    }
+
+    /**
      * Initializes the original players list from original_players.txt.
      * Each line contains a single UUID.
      */
@@ -7156,6 +7355,12 @@ public class PersistenceUtils {
                         } catch (IllegalArgumentException ignored) {}
                     }
                     loaded.setPlayerPermissionOverrides(allOverrides);
+                }
+
+                // Load plot assignments
+                String plotsData = db.loadDominionPlotsById(loaded.getId());
+                if (plotsData != null && !plotsData.isEmpty()) {
+                    loaded.setPlotAssignments(parseDominionPlotsString(plotsData));
                 }
 
                 Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "Reloaded dominion '" + loaded.getName() + "' from MySQL for cross-server player " + playerUuid);

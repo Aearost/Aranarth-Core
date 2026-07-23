@@ -12,6 +12,7 @@ import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.MountUtils;
 import com.aearost.aranarthcore.utils.ShopUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -732,6 +733,29 @@ public class DominionProtectionListener implements Listener {
         }
 
         if (dominion != null) {
+            // Check plot assignments
+            Chunk targetChunk = block != null ? block.getChunk() : entity.getLocation().getChunk();
+            String chunkKey = targetChunk.getWorld().getName() + ":" + targetChunk.getX() + ":" + targetChunk.getZ();
+            Set<UUID> plotOwners = dominion.getPlotAssignments().get(chunkKey);
+            if (plotOwners != null && !plotOwners.isEmpty()) {
+                UUID playerUuid = player.getUniqueId();
+                if (playerUuid.equals(dominion.getLeader())
+                        || plotOwners.contains(playerUuid)
+                        || DominionUtils.hasPermission(player, dominion, DominionPermission.MANAGE_PLOTS)) {
+                    return false; // Plot owner, leader, or bypass permission
+                }
+                if (dominion.getMembers().contains(playerUuid)) {
+                    // Dominion member who does not own this plot and lacks bypass, deny them
+                    long now = System.currentTimeMillis();
+                    Long last = lastDenyMessageTime.get(playerUuid);
+                    if (last == null || now - last >= DENY_MESSAGE_COOLDOWN_MS) {
+                        player.sendMessage(ChatUtils.chatMessage("&cThis chunk is a plot that does not belong to you!"));
+                        lastDenyMessageTime.put(playerUuid, now);
+                    }
+                    return true;
+                }
+            }
+
             if (!DominionUtils.hasPermission(player, dominion, permission)) {
                 long now = System.currentTimeMillis();
                 Long last = lastDenyMessageTime.get(player.getUniqueId());

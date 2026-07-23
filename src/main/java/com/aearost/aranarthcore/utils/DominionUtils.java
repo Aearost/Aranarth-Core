@@ -502,6 +502,7 @@ public class DominionUtils {
                 db.deleteDominion(dominionId);
                 db.deleteDominionPermissions(dominionId);
                 db.deleteDominionPlayerPerms(dominionId);
+                db.deleteDominionPlots(dominionId);
                 db.deleteDefendersForDominion(dominionId);
             });
         }
