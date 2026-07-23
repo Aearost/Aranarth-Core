@@ -196,10 +196,10 @@ public class GuiTopGuesses {
 
             skullMeta.setDisplayName(ChatUtils.translateToColor("&e" + displayName));
             List<String> lore = new ArrayList<>();
-            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
             lore.add(ChatUtils.translateToColor("&7&oCorrect guesses - &e&o" + guessCount));
-            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
             lore.add(ChatUtils.translateToColor("&7&oFastest guess - &e&o" + (bestTime > 0 ? String.format("%.2f", bestTime) + "s" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oLongest streak - &e&o" + (highestStreak > 0 ? highestStreak + "x" : "N/A")));
+            lore.add(ChatUtils.translateToColor("&7&oTotal earned - &6&o$" + nf.format(Math.round(earnings))));
             skullMeta.setLore(lore);
             head.setItemMeta(skullMeta);
             gui.setItem(i, head);
