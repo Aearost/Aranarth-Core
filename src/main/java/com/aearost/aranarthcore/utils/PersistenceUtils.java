@@ -4799,38 +4799,73 @@ public class PersistenceUtils {
             }
             JsonObject prog = GSON.fromJson(row[1], JsonObject.class);
             int rank = prog.has("rank") ? prog.get("rank").getAsInt() : 0;
-            if (prog.has("dp")) {
-                QuestUtils.getPlayerDailyProgress().put(uuid, GSON.fromJson(prog.get("dp"), int[].class));
+            // Discard data that was saved before the last reset (stale from previous period)
+            long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
+            long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
+            boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
+            boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
+            if (dailyCurrent) {
+                if (prog.has("dp")) {
+                    QuestUtils.getPlayerDailyProgress().put(uuid, GSON.fromJson(prog.get("dp"), int[].class));
+                }
+                if (prog.has("dc")) {
+                    QuestUtils.getPlayerDailyCompleted().put(uuid, GSON.fromJson(prog.get("dc"), boolean[].class));
+                }
+                if (prog.has("dClaim")) {
+                    QuestUtils.getPlayerDailyClaimed().put(uuid, GSON.fromJson(prog.get("dClaim"), boolean[].class));
+                }
+            } else {
+                Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data on transfer for " + uuid
+                        + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
+                QuestUtils.getPlayerDailyProgress().remove(uuid);
+                QuestUtils.getPlayerDailyCompleted().remove(uuid);
+                QuestUtils.getPlayerDailyClaimed().remove(uuid);
             }
-            if (prog.has("dc")) {
-                QuestUtils.getPlayerDailyCompleted().put(uuid, GSON.fromJson(prog.get("dc"), boolean[].class));
-            }
-            if (prog.has("dClaim")) {
-                QuestUtils.getPlayerDailyClaimed().put(uuid, GSON.fromJson(prog.get("dClaim"), boolean[].class));
-            }
-            if (prog.has("wp")) {
-                QuestUtils.getPlayerWeeklyProgress().put(uuid, GSON.fromJson(prog.get("wp"), int[].class));
-            }
-            if (prog.has("wc")) {
-                QuestUtils.getPlayerWeeklyCompleted().put(uuid, GSON.fromJson(prog.get("wc"), boolean[].class));
-            }
-            if (prog.has("wClaim")) {
-                QuestUtils.getPlayerWeeklyClaimed().put(uuid, GSON.fromJson(prog.get("wClaim"), boolean[].class));
+            if (weeklyCurrent) {
+                if (prog.has("wp")) {
+                    QuestUtils.getPlayerWeeklyProgress().put(uuid, GSON.fromJson(prog.get("wp"), int[].class));
+                }
+                if (prog.has("wc")) {
+                    QuestUtils.getPlayerWeeklyCompleted().put(uuid, GSON.fromJson(prog.get("wc"), boolean[].class));
+                }
+                if (prog.has("wClaim")) {
+                    QuestUtils.getPlayerWeeklyClaimed().put(uuid, GSON.fromJson(prog.get("wClaim"), boolean[].class));
+                }
+            } else {
+                Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data on transfer for " + uuid
+                        + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
+                QuestUtils.getPlayerWeeklyProgress().remove(uuid);
+                QuestUtils.getPlayerWeeklyCompleted().remove(uuid);
+                QuestUtils.getPlayerWeeklyClaimed().remove(uuid);
             }
             QuestUtils.getPlayerQuestRank().put(uuid, rank);
-            if (prog.has("dTasks") && prog.has("wTasks")) {
+            if (dailyCurrent && prog.has("dTasks") && prog.has("dRewards")) {
                 String[] dTasks = GSON.fromJson(prog.get("dTasks"), String[].class);
-                double[] dRewards = prog.has("dRewards") ? GSON.fromJson(prog.get("dRewards"), double[].class) : new double[3];
-                String[] wTasks = GSON.fromJson(prog.get("wTasks"), String[].class);
-                double[] wRewards = prog.has("wRewards") ? GSON.fromJson(prog.get("wRewards"), double[].class) : new double[3];
+                double[] dRewards = GSON.fromJson(prog.get("dRewards"), double[].class);
                 List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
                 if (activeDailyQuests != null) {
                     QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
+                } else {
+                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments on transfer for " + uuid
+                            + " from stored tasks: " + java.util.Arrays.toString(dTasks));
+                    QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
                 }
+            } else if (!dailyCurrent) {
+                QuestUtils.getPlayerActiveDailyQuestsMap().remove(uuid);
+            }
+            if (weeklyCurrent && prog.has("wTasks") && prog.has("wRewards")) {
+                String[] wTasks = GSON.fromJson(prog.get("wTasks"), String[].class);
+                double[] wRewards = GSON.fromJson(prog.get("wRewards"), double[].class);
+                List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
                 if (activeWeeklyQuests != null) {
                     QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
+                } else {
+                    Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments on transfer for " + uuid
+                            + " from stored tasks: " + java.util.Arrays.toString(wTasks));
+                    QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
                 }
+            } else if (!weeklyCurrent) {
+                QuestUtils.getPlayerActiveWeeklyQuestsMap().remove(uuid);
             }
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload quest progress for " + uuid + ": " + e.getMessage());
@@ -5012,6 +5047,9 @@ public class PersistenceUtils {
             prog.add("wp", GSON.toJsonTree(wp));
             prog.add("wc", GSON.toJsonTree(wc));
             prog.add("wClaim", GSON.toJsonTree(wClaim));
+            // Tag progress with the reset period so stale data is detected on reload
+            prog.addProperty("dailyPeriod", QuestUtils.getLastDailyReset());
+            prog.addProperty("weeklyPeriod", QuestUtils.getLastWeeklyReset());
             // Persist quest assignments so the other server can restore the same tasks
             List<Quest> dq = QuestUtils.getPlayerActiveDailyQuestsMap().getOrDefault(uuid, new ArrayList<>());
             List<Quest> wq = QuestUtils.getPlayerActiveWeeklyQuestsMap().getOrDefault(uuid, new ArrayList<>());
@@ -6225,6 +6263,25 @@ public class PersistenceUtils {
                 int[] wp = GSON.fromJson(prog.get("wp"), int[].class);
                 boolean[] wc = GSON.fromJson(prog.get("wc"), boolean[].class);
                 boolean[] wClaim = GSON.fromJson(prog.get("wClaim"), boolean[].class);
+                // Discard data that was saved before the last reset (stale from previous period)
+                long dailyPeriod = prog.has("dailyPeriod") ? prog.get("dailyPeriod").getAsLong() : 0L;
+                long weeklyPeriod = prog.has("weeklyPeriod") ? prog.get("weeklyPeriod").getAsLong() : 0L;
+                boolean dailyCurrent = dailyPeriod >= QuestUtils.getLastDailyReset();
+                boolean weeklyCurrent = weeklyPeriod >= QuestUtils.getLastWeeklyReset();
+                if (!dailyCurrent) {
+                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale daily data for " + uuid
+                            + " (savedPeriod=" + dailyPeriod + ", lastDailyReset=" + QuestUtils.getLastDailyReset() + ")");
+                    dp = new int[3];
+                    dc = new boolean[3];
+                    dClaim = new boolean[3];
+                }
+                if (!weeklyCurrent) {
+                    Bukkit.getLogger().info("[AC] [Quest] Discarding stale weekly data for " + uuid
+                            + " (savedPeriod=" + weeklyPeriod + ", lastWeeklyReset=" + QuestUtils.getLastWeeklyReset() + ")");
+                    wp = new int[3];
+                    wc = new boolean[3];
+                    wClaim = new boolean[3];
+                }
                 QuestUtils.getPlayerDailyProgress().put(uuid, dp);
                 QuestUtils.getPlayerDailyCompleted().put(uuid, dc);
                 QuestUtils.getPlayerDailyClaimed().put(uuid, dClaim);
@@ -6232,19 +6289,27 @@ public class PersistenceUtils {
                 QuestUtils.getPlayerWeeklyCompleted().put(uuid, wc);
                 QuestUtils.getPlayerWeeklyClaimed().put(uuid, wClaim);
                 QuestUtils.getPlayerQuestRank().put(uuid, rank);
-                // Restore quest assignments if present
-                if (prog.has("dTasks") && prog.has("wTasks")) {
-                    String[] dTasks = GSON.fromJson(prog.get("dTasks"), String[].class);
-                    double[] dRewards = prog.has("dRewards") ? GSON.fromJson(prog.get("dRewards"), double[].class) : new double[3];
-                    String[] wTasks = GSON.fromJson(prog.get("wTasks"), String[].class);
-                    double[] wRewards = prog.has("wRewards") ? GSON.fromJson(prog.get("wRewards"), double[].class) : new double[3];
+                // Restore quest assignments if present and still current
+                String[] dTasks = (dailyCurrent && prog.has("dTasks")) ? GSON.fromJson(prog.get("dTasks"), String[].class) : null;
+                double[] dRewards = (dailyCurrent && prog.has("dRewards")) ? GSON.fromJson(prog.get("dRewards"), double[].class) : null;
+                String[] wTasks = (weeklyCurrent && prog.has("wTasks")) ? GSON.fromJson(prog.get("wTasks"), String[].class) : null;
+                double[] wRewards = (weeklyCurrent && prog.has("wRewards")) ? GSON.fromJson(prog.get("wRewards"), double[].class) : null;
+                if (dTasks != null && dRewards != null) {
                     List<Quest> activeDailyQuests = resolveQuestsFromPool(uuid, rank, dTasks, dRewards, QuestType.DAILY);
-                    List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
                     if (activeDailyQuests != null) {
                         QuestUtils.setPlayerActiveDailyQuests(uuid, activeDailyQuests);
+                    } else {
+                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve daily quest assignments for " + uuid
+                                + " from stored tasks: " + java.util.Arrays.toString(dTasks));
                     }
+                }
+                if (wTasks != null && wRewards != null) {
+                    List<Quest> activeWeeklyQuests = resolveQuestsFromPool(uuid, rank, wTasks, wRewards, QuestType.WEEKLY);
                     if (activeWeeklyQuests != null) {
                         QuestUtils.setPlayerActiveWeeklyQuests(uuid, activeWeeklyQuests);
+                    } else {
+                        Bukkit.getLogger().warning("[AC] [Quest] Could not resolve weekly quest assignments for " + uuid
+                                + " from stored tasks: " + java.util.Arrays.toString(wTasks));
                     }
                 }
             } catch (Exception e) {

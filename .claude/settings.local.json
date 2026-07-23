@@ -292,7 +292,9 @@
       "Bash(/c/Users/liamh/Desktop/Folders/Minecraft/BuildTools/apache-maven-3.9.6/bin/mvn compile:*)",
       "Bash(git filter-repo:*)",
       "Bash(pip show:*)",
-      "Bash(pip3 show:*)"
+      "Bash(pip3 show:*)",
+      "Bash(gunzip -c 2026-07-22-3.log.gz)",
+      "Bash(gunzip -c 2026-07-22-4.log.gz)"
     ]
   }
 }
