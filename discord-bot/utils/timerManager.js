@@ -29,6 +29,7 @@ function cancel(channelId) {
   if (t) {
     clearTimeout(t.closeId);
     clearTimeout(t.warnId);
+    clearTimeout(t.remindId);
     activeTimers.delete(channelId);
   }
   const data = readFile();
@@ -45,8 +46,12 @@ function schedule(client, channelId, userId, reason, delayMs) {
   writeFile(data);
 
   const WARN = config.WARN_BEFORE_MS;
+  const REMIND = config.FORM_INACTIVITY_REMIND_MS;
   const ids = {};
 
+  if (reason === 'FORM_INACTIVITY' && delayMs > REMIND + WARN) {
+    ids.remindId = setTimeout(() => sendFormReminder(client, channelId, userId), delayMs - REMIND);
+  }
   if (delayMs > WARN * 2) {
     ids.warnId = setTimeout(() => sendWarning(client, channelId, userId, reason, WARN), delayMs - WARN);
   }
@@ -106,6 +111,29 @@ async function triggerInactivityNotification(client, channelId, userId) {
 }
 
 // ── Warning and close ──────────────────────────────────────────────────────
+
+async function sendFormReminder(client, channelId, userId) {
+  try {
+    const channel = await client.channels.fetch(channelId);
+    if (!channel) return;
+
+    const hoursLeft = Math.round(config.FORM_INACTIVITY_REMIND_MS / (60 * 60 * 1000));
+    await channel.send({
+      content: `<@${userId}> 📝 Just a reminder — you still have an unfinished submission here! Please continue answering the questions and submit when ready. If you don't respond within **${hoursLeft} hours**, this channel will be automatically closed.`,
+      flags: MessageFlags.SuppressNotifications,
+    });
+
+    try {
+      const ticketUser = await client.users.fetch(userId);
+      const dm = await ticketUser.createDM();
+      await dm.send(
+        `📝 Heads up! Your submission form in **Aranarth** has been sitting idle. ` +
+        `You have **${hoursLeft} hours** left to finish and submit it before the channel is automatically closed. ` +
+        `Jump back in here: ${channel.url}`
+      );
+    } catch { /* DMs may be closed */ }
+  } catch { /* channel may be gone */ }
+}
 
 async function sendWarning(client, channelId, userId, reason, timeLeftMs) {
   try {

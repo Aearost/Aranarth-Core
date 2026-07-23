@@ -31,6 +31,7 @@ module.exports = {
   RESOLVED_MS: 48 * 60 * 60 * 1000,             // 48 hours after resolved → close
   WARN_BEFORE_MS: 60 * 60 * 1000,               // warn 1 hour before close
   FORM_INACTIVITY_MS: 24 * 60 * 60 * 1000,      // 24 hours of no activity in a bug/idea/ability form channel → delete
+  FORM_INACTIVITY_REMIND_MS: 12 * 60 * 60 * 1000, // remind at 12-hour mark to finish submitting
 
   COLORS: {
     BUG: 0xFF4444,

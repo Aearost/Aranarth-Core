@@ -29,13 +29,15 @@ function score(issue) {
     : daysSince; // never touched → treat age as idle time
   const stalenessBonus = idleDays > 7 ? Math.min((idleDays - 7) * 3, 150) : 0;
 
-  // On-hold issues gain +100 priority per 15-day interval so old holds resurface over time.
+  // On-hold issues resurface at a rate that depends on their priority.
+  // P1 re-enters scoring within 2 days; P4 can wait up to 20 days per interval.
   // Applied outside the suppression multiplier so the bonus is never dampened.
-  const HOLD_INTERVAL_DAYS = 15;
+  const HOLD_INTERVAL_DAYS_BY_PRIORITY = { P1: 2, P2: 5, P3: 10, P4: 20 };
   const HOLD_BONUS_PER_INTERVAL = 100;
   const holdStart = holdTimestampManager.getTimestamp(issue.number);
+  const holdIntervalDays = HOLD_INTERVAL_DAYS_BY_PRIORITY[getPriority(issue)] ?? 15;
   const holdAgeBonus = (holdStart && labels.includes('ON HOLD'))
-    ? Math.floor((Date.now() - holdStart) / (1000 * 60 * 60 * 24 * HOLD_INTERVAL_DAYS)) * HOLD_BONUS_PER_INTERVAL
+    ? Math.floor((Date.now() - holdStart) / (1000 * 60 * 60 * 24 * holdIntervalDays)) * HOLD_BONUS_PER_INTERVAL
     : 0;
 
   return (priorityBase * typeMultiplier + ageBonus + activityBonus + stalenessBonus) * onHoldMultiplier + holdAgeBonus;

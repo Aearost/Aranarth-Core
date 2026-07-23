@@ -1,6 +1,7 @@
 const { EmbedBuilder } = require('discord.js');
 const config = require('../config');
 const forumManager = require('../utils/forumManager');
+const forumDeletionManager = require('../utils/forumDeletionManager');
 const { addComment } = require('../github/githubManager');
 
 /**
@@ -191,6 +192,7 @@ async function lockForumThread(client, issueNumber) {
       ],
     });
     await thread.setLocked(true);
+    forumDeletionManager.schedule(client, thread.id);
   } catch (err) {
     console.error(`[ForumHandler] Failed to lock thread for issue #${issueNumber}:`, err.message);
   }

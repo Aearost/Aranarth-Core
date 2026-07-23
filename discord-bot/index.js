@@ -18,6 +18,7 @@ const messageHandler = require('./handlers/messageHandler');
 const tsCommandHandler = require('./handlers/tsCommandHandler');
 const timerManager = require('./utils/timerManager');
 const statusTracker = require('./utils/statusTracker');
+const forumDeletionManager = require('./utils/forumDeletionManager');
 const workQueueHandler = require('./handlers/workQueueHandler');
 const pendingReviewManager = require('./utils/pendingReviewManager');
 
@@ -41,6 +42,7 @@ client.once(Events.ClientReady, async (c) => {
   statusTracker.load();
   await setupSupportMessage(client);
   timerManager.restoreTimers(client);
+  forumDeletionManager.restore(client);
   await restorePendingReviewReactions(client);
   await workQueueHandler.refreshWorkQueue(client);
   scheduleDailyRefresh(client);
