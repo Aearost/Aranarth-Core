@@ -5192,15 +5192,28 @@ public class PersistenceUtils {
         if (!DatabaseManager.isActive()) return;
         DatabaseManager db = DatabaseManager.getInstance();
         int vc = 0;
+        JsonArray history = new JsonArray();
         for (AranarthVote vote : AranarthUtils.getVotes()) {
-            if (vote.getUuid().equals(uuid)) vc++;
+            if (vote.getUuid().equals(uuid)) {
+                vc++;
+                JsonObject v = new JsonObject();
+                v.addProperty("keyNum", vote.getPointsRewarded());
+                v.addProperty("timestamp", vote.getTimestamp());
+                history.add(v);
+            }
         }
         int vk = AranarthUtils.getPendingVoteKeys().getOrDefault(uuid, 0);
         int rk = AranarthUtils.getPendingRareKeys().getOrDefault(uuid, 0);
         int ek = AranarthUtils.getPendingEpicKeys().getOrDefault(uuid, 0);
         int gk = AranarthUtils.getPendingGodlyKeys().getOrDefault(uuid, 0);
+        Bukkit.getLogger().info("[AC] [VOTE] Syncing vote data to DB for " + uuid
+                + " — vote_count=" + vc + ", history_entries=" + history.size()
+                + ", pendingVoteKeys=" + vk + ", pendingRareKeys=" + rk
+                + ", pendingEpicKeys=" + ek + ", pendingGodlyKeys=" + gk);
         try {
             db.saveVoteData(uuid, vc, vk, rk, ek, gk);
+            db.saveVoteHistory(uuid, GSON.toJson(history));
+            Bukkit.getLogger().info("[AC] [VOTE] DB sync complete for " + uuid);
         } catch (Exception e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync vote keys for " + uuid + ": " + e.getMessage());
         }
@@ -6406,11 +6419,13 @@ public class PersistenceUtils {
             Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[DB] No vote rows in MySQL — starting with empty vote data");
             return;
         }
-        Bukkit.getLogger().info("[AC] Loading vote data from MySQL...");
+        Bukkit.getLogger().info("[AC] Loading vote data from MySQL — " + counts.size() + " player row(s), "
+                + (histories != null ? histories.size() : 0) + " with history_json");
         // Restore individual vote history
         if (histories == null) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] loadAllVoteHistories failed; vote history will be empty this session");
         } else {
+            int totalRestoredVotes = 0;
             for (Map.Entry<UUID, String> entry : histories.entrySet()) {
                 UUID uuid = entry.getKey();
                 try {
@@ -6420,9 +6435,20 @@ public class PersistenceUtils {
                         int keyNum = v.get("keyNum").getAsInt();
                         long timestamp = v.get("timestamp").getAsLong();
                         AranarthUtils.addVote(new AranarthVote(uuid, keyNum, timestamp));
+                        totalRestoredVotes++;
                     }
                 } catch (Exception e) {
                     Bukkit.getLogger().warning("[AC] Failed to parse vote history for " + uuid + ": " + e.getMessage());
+                }
+            }
+            Bukkit.getLogger().info("[AC] [VOTE] Restored " + totalRestoredVotes + " vote record(s) across " + histories.size() + " player(s) from history_json");
+            // Warn about players who have a vote_count in DB but no history_json
+            for (Map.Entry<UUID, int[]> entry : counts.entrySet()) {
+                UUID uuid = entry.getKey();
+                int dbVoteCount = entry.getValue()[0];
+                if (dbVoteCount > 0 && !histories.containsKey(uuid)) {
+                    Bukkit.getLogger().warning("[AC] [VOTE] Player " + uuid + " has vote_count=" + dbVoteCount
+                            + " in DB but no history_json — their vote points will show as 0 this session!");
                 }
             }
         }

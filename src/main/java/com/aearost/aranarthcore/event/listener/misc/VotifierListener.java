@@ -91,14 +91,21 @@ public class VotifierListener implements Listener {
 
 			// Adds their vote
 			AranarthUtils.addVote(new AranarthVote(offlinePlayer.getUniqueId(), amount, System.currentTimeMillis()));
+			int totalVotePoints = AranarthUtils.getVotePoints(uuid);
+			int totalVoteNum = AranarthUtils.getVoteNum(uuid);
+			Bukkit.getLogger().info("[AC] [VOTE] Vote recorded for " + username + " (" + uuid + "): +"
+					+ amount + " points. In-memory totals — votes: " + totalVoteNum + ", points: " + totalVotePoints);
 
 			if (!offlinePlayer.isOnline()) {
 				// Player is offline or on a remote server — store as pending and immediately persist
 				// to DB so that /keyclaim on any server picks it up without waiting 30 minutes.
 				AranarthUtils.addPendingVoteKeys(uuid, 1);
+				Bukkit.getLogger().info("[AC] [VOTE] " + username + " is offline — storing pending key and syncing to DB");
 				if (DatabaseManager.isActive()) {
 					Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
 							() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+				} else {
+					Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
 				}
 				return;
 			} else {
@@ -112,19 +119,27 @@ public class VotifierListener implements Listener {
 					if (!remainder.isEmpty()) {
 						AranarthUtils.addPendingVoteKeys(uuid, 1);
 						player.sendMessage(ChatUtils.chatMessage("&7Your inventory was full! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
-						if (DatabaseManager.isActive()) {
-							Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
-									() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
-						}
+						Bukkit.getLogger().info("[AC] [VOTE] " + username + " inventory full — key stored as pending");
+					} else {
+						Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in valid world (" + worldName + ") — key given directly");
+					}
+					if (DatabaseManager.isActive()) {
+						Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+								() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+					} else {
+						Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
 					}
 				} else {
 					AranarthUtils.addPendingVoteKeys(uuid, 1);
+					Bukkit.getLogger().info("[AC] [VOTE] " + username + " is online in invalid world (" + worldName + ") — key stored as pending");
 					if (player != null) {
 						player.sendMessage(ChatUtils.chatMessage("&7You cannot receive crate keys here! &7Use &e/keyclaim &7in a Survival world to obtain your key!"));
 					}
 					if (DatabaseManager.isActive()) {
 						Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
 								() -> PersistenceUtils.syncVoteKeysForPlayerToDatabase(uuid));
+					} else {
+						Bukkit.getLogger().warning("[AC] [VOTE] DB is not active — vote for " + username + " will only persist on next scheduled save");
 					}
 				}
 			}
