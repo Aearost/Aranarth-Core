@@ -179,15 +179,12 @@ public class AranarthCore extends JavaPlugin {
                 PersistenceUtils.saveShops();
                 ShopUtils.removeAllHolograms();
                 ShopUtils.initializeAllHolograms();
-                // Dominion saves must only happen on the Survival server. The SMP server
-                // keeps a stale in-memory copy (loaded at startup, not updated by Survival-side
-                // changes); saving from SMP would overwrite MySQL with that stale data, wiping
-                // food reserves and other changes made on the Survival server since last restart.
+                // Each server saves its own dominions
+                PersistenceUtils.saveDominions();
+                PersistenceUtils.saveDominionPermissions();
+                PersistenceUtils.saveDominionPlayerPermissions();
+                PersistenceUtils.saveDominionPlots();
                 if (!isSmpServer()) {
-                    PersistenceUtils.saveDominions();
-                    PersistenceUtils.saveDominionPermissions();
-                    PersistenceUtils.saveDominionPlayerPermissions();
-                    PersistenceUtils.saveDominionPlots();
                     DominionUtils.checkAndProcessConquestDeadlines();
                 }
                 PersistenceUtils.saveWarps();
@@ -1471,17 +1468,14 @@ public class AranarthCore extends JavaPlugin {
         PersistenceUtils.saveAranarthPlayers();
         PersistenceUtils.saveShops();
         PersistenceUtils.saveLockedContainers();
-        // SMP holds a read-only snapshot of dominion state; Survival is the sole authoritative
-        // writer. Skipping these on SMP shutdown matches the periodic-save guard (line ~165) and
-        // prevents SMP from resurrecting disbanded dominions or overwriting food/balance changes
-        // that happened on Survival since the last SMP restart.
+        // Each server saves its own dominions
+        PersistenceUtils.saveDominions();
+        PersistenceUtils.saveDominionPermissions();
+        PersistenceUtils.saveDominionPlayerPermissions();
+        PersistenceUtils.saveDominionPlots();
         if (!isSmpServer()) {
-            PersistenceUtils.saveDominions();
             PersistenceUtils.saveOutposts();
             PersistenceUtils.saveDefenders();
-            PersistenceUtils.saveDominionPermissions();
-            PersistenceUtils.saveDominionPlayerPermissions();
-            PersistenceUtils.saveDominionPlots();
         }
         PersistenceUtils.saveWarps();
         PersistenceUtils.savePunishments();

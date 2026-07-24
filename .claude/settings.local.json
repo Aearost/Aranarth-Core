@@ -298,7 +298,8 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java -name \"DominionPermission.java\" -exec cat -n {})",
       "Bash(/c/Users/liamh/AppData/Roaming/JetBrains/Toolbox/apps/intellij-idea-community/jbr/bin/javac -version)",
       "Bash(zcat \"$f\")",
-      "Bash(zcat \"2026-07-23-6.log.gz\")"
+      "Bash(zcat \"2026-07-23-6.log.gz\")",
+      "Bash(gunzip -c 2026-07-23-9.log.gz)"
     ]
   }
 }

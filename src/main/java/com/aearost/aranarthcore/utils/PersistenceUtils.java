@@ -1446,6 +1446,8 @@ public class PersistenceUtils {
 
                     if (dominions != null && !dominions.isEmpty()) {
                         for (Dominion dominion : dominions) {
+                            // Skip dominions that belong to the other server
+                            if (dominion.getChunks().isEmpty()) continue;
                             String row = buildDominionRow(dominion) + "\n";
                             writer.write(row);
                         }
@@ -4961,8 +4963,14 @@ public class PersistenceUtils {
             json.addProperty("conquestDisbandCooldownEnd", ap.getConquestDisbandCooldownEnd());
             try {
                 db.saveAranarthPlayer(uuid, username, GSON.toJson(json));
-                String rawRow = buildAranarthPlayerRow(uuid, ap);
-                db.saveAranarthPlayerRaw(uuid, rawRow);
+                // Only write the full raw row for players currently online on this server.
+                // Offline players may have transferred to another server and made inventory
+                // changes there; writing our stale in-memory snapshot would overwrite the
+                // other server's correct quit-time save.
+                if (Bukkit.getPlayer(uuid) != null) {
+                    String rawRow = buildAranarthPlayerRow(uuid, ap);
+                    db.saveAranarthPlayerRaw(uuid, rawRow);
+                }
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync player " + uuid + ": " + e.getMessage());
             }
@@ -5713,6 +5721,9 @@ public class PersistenceUtils {
             return;
         }
         for (Dominion dominion : dominions) {
+            // Skip cross-server stubs (empty chunk list) — saving them would overwrite valid
+            // chunk data in the DB with an empty string, corrupting the row on next load.
+            if (dominion.getChunks().isEmpty()) continue;
             try {
                 String row = buildDominionRow(dominion);
                 db.saveDominion(dominion.getId(), row);

@@ -185,10 +185,8 @@ public class DateUtils {
 
 			if (weekdayNum == 7) {
 				weekdayNum = 0;
-				// Additionally sends messages to inform the leader (Survival server only)
-				if (!AranarthCore.isSmpServer()) {
-					DominionUtils.provideDominionRewards();
-				}
+				// Each server accrues rewards for its own dominions
+				DominionUtils.provideDominionRewards();
 			} else {
 				weekdayNum++;
 			}
