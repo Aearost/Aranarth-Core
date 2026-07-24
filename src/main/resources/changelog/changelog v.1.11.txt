@@ -123,3 +123,4 @@ Backend Code Changes
 - Added [AC] prefix to all AranarthCore log statements
 - Removed redundant absolute paths of objects across the repository
 - Tweaked Discord role sync logic
+- Added missing log statements to crate rolls
