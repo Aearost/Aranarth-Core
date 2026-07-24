@@ -58,7 +58,7 @@ public class GuiTopGuesses {
                 dbData = DatabaseManager.getInstance().loadAllChatGameGuesses();
                 sortedUuids = dbData.entrySet().stream()
                         .filter(e -> e.getValue().guessCount() > 0)
-                        .sorted((a, b) -> Double.compare(b.getValue().totalEarnings(), a.getValue().totalEarnings()))
+                        .sorted((a, b) -> Integer.compare(b.getValue().guessCount(), a.getValue().guessCount()))
                         .map(Map.Entry::getKey)
                         .toList();
             } else {
