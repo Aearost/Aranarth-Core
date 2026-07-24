@@ -63,6 +63,7 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthBendingUtils;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
+import com.aearost.aranarthcore.utils.ShopIslandUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.Ability;
@@ -73,11 +74,14 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.ability.EarthAbility;
 import com.projectkorra.projectkorra.ability.FireAbility;
 import com.projectkorra.projectkorra.ability.LavaAbility;
+import com.projectkorra.projectkorra.ability.PassiveAbility;
 import com.projectkorra.projectkorra.ability.PlantAbility;
 import com.projectkorra.projectkorra.ability.SandAbility;
 import com.projectkorra.projectkorra.ability.SpiritualAbility;
 import com.projectkorra.projectkorra.ability.WaterAbility;
 import com.projectkorra.projectkorra.event.AbilityDamageEntityEvent;
+import com.projectkorra.projectkorra.event.AbilityProgressEvent;
+import com.projectkorra.projectkorra.event.AbilityStartEvent;
 import com.projectkorra.projectkorra.event.BendingReloadEvent;
 import com.projectkorra.projectkorra.event.PlayerCooldownChangeEvent;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -223,57 +227,69 @@ public class AranarthCoreBendingListener implements Listener {
     }
 
     /**
-     * Prevents players from manually re-enabling their bending where bending is blocked for them.
+     * Returns true if bending should be blocked for the player at the given location.
      */
-    @EventHandler
-    public void onToggleBendingCommand(final PlayerCommandPreprocessEvent e) {
-        String[] parts = e.getMessage().split(" ");
-        if (parts.length < 2) {
+    private boolean isBendingRestricted(Player player, Location loc) {
+        if (AranarthUtils.isSpawnLocation(loc)) {
+            return true;
+        }
+        if (loc.getWorld() != null && loc.getWorld().getName().equals("arena")) {
+            int x = loc.getBlockX();
+            int y = loc.getBlockY();
+            int z = loc.getBlockZ();
+            if ((x >= -10 && x <= 10) && (y >= 100 && y <= 111) && (z >= -10 && z <= 10)) {
+                return true;
+            }
+        }
+        if (loc.getWorld() != null && loc.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
+            UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(loc);
+            if (owner == null || (!player.getUniqueId().equals(owner) && !AranarthUtils.isShopCollaborator(owner, player.getUniqueId()))) {
+                return true;
+            }
+        }
+        return AranarthBendingUtils.isBendingBlockedAtLocation(player, loc);
+    }
+
+    /**
+     * Prevents bending abilities from starting when the player is in a restricted zone.
+     * Passive abilities are always exempt.
+     */
+    @EventHandler(ignoreCancelled = true)
+    public void onAbilityStartInRestrictedZone(final AbilityStartEvent e) {
+        if (e.getAbility() instanceof PassiveAbility) {
             return;
         }
-        if (!parts[0].startsWith("/b") && !parts[0].startsWith("/bending")) {
+        Player player = e.getAbility().getPlayer();
+        if (player == null) {
             return;
         }
-        if (!parts[1].equals("t") && !parts[1].equals("toggle")) {
-            return;
-        }
-        Player player = e.getPlayer();
-        if (AranarthBendingUtils.isBendingBlockedAtLocation(player, player.getLocation())) {
+        if (isBendingRestricted(player, player.getLocation())) {
             e.setCancelled(true);
-            player.sendMessage(ChatUtils.chatMessage("&cYou cannot toggle your bending in this Dominion!"));
         }
     }
 
     /**
-     * Toggles bending on/off when a player moves into or out of a bending-disabled dominion chunk.
+     * Prevents bending abilities from progressing when the player is in a restricted zone.
+     * Passive abilities are always exempt.
      */
     @EventHandler
-    public void onMoveDominionBending(final PlayerMoveEvent e) {
-        Location from = e.getFrom();
-        Location to = e.getTo();
-        if (from.getBlockX() == to.getBlockX() && from.getBlockZ() == to.getBlockZ()) {
+    public void onAbilityProgressInRestrictedZone(final AbilityProgressEvent e) {
+        if (e.getAbility() instanceof PassiveAbility) {
             return;
         }
-        AranarthBendingUtils.applyDominionBendingToggle(e.getPlayer(), from, to);
-    }
-
-    /**
-     * Applies the dominion bending toggle on teleport, covering cases like /home and /tp.
-     */
-    @EventHandler
-    public void onTeleportDominionBending(final PlayerTeleportEvent e) {
-        AranarthBendingUtils.applyDominionBendingToggle(e.getPlayer(), e.getFrom(), e.getTo());
-    }
-
-    /**
-     * Applies the dominion bending toggle when a player joins, restoring correct state
-     * if they logged out inside a bending-disabled dominion.
-     */
-    @EventHandler
-    public void onJoinDominionBending(final PlayerJoinEvent e) {
-        Player player = e.getPlayer();
-        Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(),
-                () -> AranarthBendingUtils.applyDominionBendingToggleOnJoin(player), 5L);
+        Player player = e.getAbility().getPlayer();
+        if (player == null) {
+            return;
+        }
+        if (isBendingRestricted(player, player.getLocation())) {
+            e.getAbility().remove();
+            return;
+        }
+        // Kill abilities whose effect has traveled into a bending-disabled dominion
+        Location abilityLoc = e.getAbility().getLocation();
+        if (abilityLoc != null && AranarthBendingUtils.isBendingBlockedAtLocation(player, abilityLoc)) {
+            e.getAbility().remove();
+        }
     }
 
     @EventHandler

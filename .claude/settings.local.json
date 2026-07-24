@@ -299,7 +299,9 @@
       "Bash(/c/Users/liamh/AppData/Roaming/JetBrains/Toolbox/apps/intellij-idea-community/jbr/bin/javac -version)",
       "Bash(zcat \"$f\")",
       "Bash(zcat \"2026-07-23-6.log.gz\")",
-      "Bash(gunzip -c 2026-07-23-9.log.gz)"
+      "Bash(gunzip -c 2026-07-23-9.log.gz)",
+      "Bash(find C:Usersliamh.m2repositorycomprojectkorra -name *.jar)",
+      "Bash(mkdir:*)"
     ]
   }
 }

@@ -290,64 +290,6 @@ public class AranarthBendingUtils {
     }
 
     /**
-     * Dynamically toggles a player's bending.
-     *
-     * @param player The player.
-     * @param from   The location the player is moving from.
-     * @param to     The location the player is moving to or teleporting to.
-     */
-    public static void applyDominionBendingToggle(Player player, Location from, Location to) {
-        BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-        if (bPlayer == null) {
-            return;
-        }
-        // Don't interfere with bending management in worlds that have their own restriction systems
-        String toWorld = to.getWorld().getName();
-        if (toWorld.equals("spawn") || toWorld.equals("arena") || toWorld.equals("shops")) {
-            return;
-        }
-        boolean wasBlocked = isBendingBlockedAtLocation(player, from);
-        boolean shouldBlock = isBendingBlockedAtLocation(player, to);
-        if (shouldBlock && bPlayer.isToggled()) {
-            bPlayer.toggleBending();
-        } else if (!shouldBlock && wasBlocked && !bPlayer.isToggled()) {
-            // Only re-enable when transitioning out of a blocked dominion
-            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
-                if (player.isOnline()) {
-                    bPlayer.toggleBending();
-                }
-            }, 1L);
-        }
-    }
-
-    /**
-     * Applies the correct dominion bending state when a player joins the server.
-     *
-     * @param player The player who joined.
-     */
-    public static void applyDominionBendingToggleOnJoin(Player player) {
-        BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-        if (bPlayer == null) {
-            return;
-        }
-        Location loc = player.getLocation();
-        String worldName = loc.getWorld().getName();
-        if (worldName.equals("spawn") || worldName.equals("arena") || worldName.equals("shops")) {
-            return;
-        }
-        boolean shouldBlock = isBendingBlockedAtLocation(player, loc);
-        if (shouldBlock && bPlayer.isToggled()) {
-            bPlayer.toggleBending();
-        } else if (!shouldBlock && !bPlayer.isToggled()) {
-            Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> {
-                if (player.isOnline()) {
-                    bPlayer.toggleBending();
-                }
-            }, 1L);
-        }
-    }
-
-    /**
      * Returns true if the player's ability should be prevented near a Dominion where they
      * do not have the Build permission.
      *

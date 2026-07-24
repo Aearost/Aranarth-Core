@@ -16,6 +16,7 @@ Major Features
 [+] Implemented interactive chat unscrambler with /topguesses for leaderboards
 [~] Adjusted the server tips about /tutorial
 [~] Updates to the server rules, namely the automated farms rule
+[~] Changed how bending is prevented in protected locations, to now cancel the ability rather than toggle the bending
 
 Minor Features
 [~] Fixed issue where teleports were canceled at times if yaw/pitch was changed

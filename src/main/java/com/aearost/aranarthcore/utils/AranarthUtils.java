@@ -12,7 +12,6 @@ import com.aearost.aranarthcore.enums.Weather;
 import com.aearost.aranarthcore.items.arrow.*;
 import com.aearost.aranarthcore.event.listener.misc.PotionEffectListener;
 import com.aearost.aranarthcore.objects.*;
-import com.projectkorra.projectkorra.BendingPlayer;
 import org.bukkit.*;
 import org.bukkit.ban.ProfileBanList;
 import org.bukkit.Chunk;
@@ -1884,13 +1883,6 @@ public class AranarthUtils {
 	 * @return Confirmation if the teleportation was successful.
 	 */
 	private static boolean handleTeleportLogic(Player player, Location from, Location to) {
-		// Teleporting seems to manually toggle on a player's bending when it was toggled off
-		BendingPlayer bendingPlayer = BendingPlayer.getBendingPlayer(player);
-		boolean isToggled = false;
-		if (bendingPlayer != null && !bendingPlayer.isToggled()) {
-			isToggled = true;
-		}
-
 		Location locToTeleportTo = getSafeTeleportLocation(to);
 		// If i.e over the void
 		if (locToTeleportTo == null) {
@@ -1963,10 +1955,6 @@ public class AranarthUtils {
 
 		try {
 			AranarthUtils.switchInventory(player, actualFromWorld, to.getWorld().getName());
-			// Toggles off the bending if it should be toggled off
-			if (isToggled && (!actualFromWorld.equals("spawn") && to.getWorld().getName().equals("spawn"))) {
-				bendingPlayer.toggleBending();
-			}
 
 			for (LivingEntity leashed : leashedEntities) {
 				leashed.setLeashHolder(player);

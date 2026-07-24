@@ -5,7 +5,6 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.ShopIslandUtils;
-import com.projectkorra.projectkorra.BendingPlayer;
 import io.papermc.paper.event.player.PlayerOpenSignEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -72,58 +71,6 @@ public class ShopProtectionListener implements Listener {
         }
         player.teleport(dest);
         player.playSound(player, Sound.ENTITY_ENDERMAN_TELEPORT, 1F, 0.9F);
-    }
-
-    /**
-     * Returns true if the player is a non-owner, non-collaborator visitor at the given shops-world location.
-     */
-    private boolean isNonOwnerInShopsWorld(Player player, Location location) {
-        if (location.getWorld() == null || !location.getWorld().getName().equals(ShopIslandUtils.SHOPS_WORLD)) {
-            return false;
-        }
-        UUID owner = ShopIslandUtils.getIslandOwnerAtLocation(location);
-        if (owner == null) {
-            return true;
-        }
-        return !player.getUniqueId().equals(owner)
-                && !AranarthUtils.isShopCollaborator(owner, player.getUniqueId());
-    }
-
-    /**
-     * Toggles bending on/off based on whether the player is a non-owner visitor.
-     */
-    private void toggleBendingForShopLocation(Player player, Location from, Location to) {
-        boolean wasNonOwner = isNonOwnerInShopsWorld(player, from.getBlock().getLocation());
-        boolean isNonOwner = isNonOwnerInShopsWorld(player, to.getBlock().getLocation());
-
-        // Leaving a non-owner zone should re-enable bending
-        if (wasNonOwner && !isNonOwner) {
-            BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-            if (bPlayer != null) {
-                if (!bPlayer.isToggled()) {
-                    Bukkit.getScheduler().runTaskLater(AranarthCore.getInstance(), () -> bPlayer.toggleBending(), 1L);
-                    return;
-                }
-            }
-        }
-
-        // Consistently keep bending disabled for visitors
-        if (isNonOwner) {
-            BendingPlayer bPlayer = BendingPlayer.getBendingPlayer(player);
-            if (bPlayer != null) {
-                if (bPlayer.isToggled()) {
-                    bPlayer.toggleBending();
-                }
-            }
-        }
-    }
-
-    /**
-     * Handles bending toggle when a player teleports to or from the shops world.
-     */
-    @EventHandler
-    public void onTeleportToShops(PlayerTeleportEvent e) {
-        toggleBendingForShopLocation(e.getPlayer(), e.getFrom(), e.getTo());
     }
 
     @EventHandler
@@ -328,9 +275,6 @@ public class ShopProtectionListener implements Listener {
         if (e.getTo() == null) {
             return;
         }
-
-        // Toggle bending whenever the player moves
-        toggleBendingForShopLocation(player, e.getFrom(), e.getTo());
 
         double y = e.getTo().getY();
         if (y <= 50) {
