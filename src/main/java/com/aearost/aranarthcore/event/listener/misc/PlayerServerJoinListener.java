@@ -300,6 +300,20 @@ public class PlayerServerJoinListener implements Listener {
 							// routing on login (e.g. last logged off on SMP, routed here from Survival).
 							// No inventory apply needed (Minecraft restores state from player data), but
 							// we DO need to publish a join announcement since the routing server suppressed it.
+							if (isLoginRouting) {
+								int nonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
+									if (is != null) nonNull++;
+								}
+								int armorNonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getArmorContents()) {
+									if (is != null) armorNonNull++;
+								}
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] LoginRouting arrival for "
+										+ player.getName() + " — player.dat inventory: " + nonNull
+										+ " non-null main slot(s), " + armorNonNull + " armor piece(s)."
+										+ (nonNull == 0 ? " WARNING: main inventory is empty — player.dat may be stale." : ""));
+							}
 							AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
 							if (apJoin != null && !apJoin.isVanished()) {
 								String routedName = "&7" + AranarthUtils.getNickname(player);
@@ -416,15 +430,17 @@ public class PlayerServerJoinListener implements Listener {
 					} else {
 						// Unplanned cross-server landing: the player's last known location is on
 						// another server (e.g. that server shut down and Velocity routed them here
-						// as a fallback). This server's in-memory snapshot of the player may be
-						// stale if it restarted while they were active on the other server.
-						// Delay briefly before reloading from MySQL so that the source server's
-						// async shutdown save has time to commit before we read it. Then apply the
-						// survival inventory defensively:
-						//   - If the route back succeeds: they transfer away and the apply is harmless.
-						//   - If the source server is unreachable and they stay here: they have the
-						//     correct inventory instead of a stale pre-restart snapshot, preventing
-						//     item duplication/loss.
+						// as a fallback). Reload AranarthPlayer state from MySQL so that balance,
+						// rank, and other non-inventory fields are current, then route the player
+						// back immediately.
+						//
+						// We deliberately do NOT apply the MySQL survivalInventory snapshot here.
+						// The 2-second window is not long enough to guarantee the source server's
+						// shutdown save has committed to MySQL, so the snapshot may be stale. A
+						// stale apply would clear the player's main inventory and, if this server
+						// then kicks the player (e.g. its own restart), it would write the stale
+						// data back to MySQL — corrupting the snapshot permanently. The receiving
+						// server loads from its own player.dat which is authoritative for inventory.
 						final String velocityTarget = AranarthCore.getInstance().getConfig()
 								.getString("network.servers." + lastLoc.server, lastLoc.server);
 						final String locWorld = lastLoc.world;
@@ -441,38 +457,18 @@ public class PlayerServerJoinListener implements Listener {
 									PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
 									PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
 								}
-								AranarthPlayer apFallback = AranarthUtils.getPlayer(player.getUniqueId());
-								if (apFallback != null && !apFallback.getSurvivalInventory().isEmpty()) {
-									Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Applying fallback inventory for "
-											+ player.getName() + " from MySQL snapshot.");
-									try {
-										player.getInventory().setContents(
-												ItemUtils.itemStackArrayFromBase64(apFallback.getSurvivalInventory()));
-									} catch (Exception ex) {
-										Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
-												+ "[Inv] Failed to apply fallback inventory for " + player.getName() + ": " + ex.getMessage());
-									}
-									if (!apFallback.getSurvivalEnderChest().isEmpty()) {
-										try {
-											player.getEnderChest().setContents(
-													ItemUtils.itemStackArrayFromBase64(apFallback.getSurvivalEnderChest()));
-										} catch (Exception ex) {
-											Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
-													+ "[Inv] Failed to apply fallback ender chest for " + player.getName() + ": " + ex.getMessage());
-										}
-									}
-									if (apFallback.getSurvivalHealth() > 0) {
-										player.setHealth(Math.min(apFallback.getSurvivalHealth(),
-												player.getAttribute(Attribute.MAX_HEALTH).getValue()));
-									}
-									player.setFoodLevel(apFallback.getSurvivalFoodLevel());
-									player.setSaturation(apFallback.getSurvivalSaturation());
-									player.setLevel(apFallback.getSurvivalExpLevel());
-									player.setExp(apFallback.getSurvivalExpProgress());
-								} else {
-									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] No MySQL inventory snapshot available for "
-											+ player.getName() + " — skipping fallback apply.");
+								AranarthPlayer apSnapshot = AranarthUtils.getPlayer(player.getUniqueId());
+								String snapState = apSnapshot == null ? "no AranarthPlayer in memory"
+										: apSnapshot.getSurvivalInventory().isEmpty() ? "EMPTY"
+										: "length=" + apSnapshot.getSurvivalInventory().length();
+								int currentNonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
+									if (is != null) currentNonNull++;
 								}
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned landing state for "
+										+ player.getName() + " — MySQL survivalInventory snapshot: " + snapState
+										+ "; current inventory on this server (from player.dat): " + currentNonNull + " non-null slot(s)."
+										+ " Snapshot NOT applied — routing to destination server.");
 								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Routing " + player.getName()
 										+ " back to " + velocityTarget + " after unplanned landing.");
 								PendingTeleport pt = new PendingTeleport(
