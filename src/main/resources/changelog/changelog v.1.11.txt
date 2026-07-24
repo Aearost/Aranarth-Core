@@ -112,6 +112,7 @@ Minor Features
 [~] Replaced vote crate's breeze rod slot with a cycling brew recipe
 [-] Removed redundant unused cooking food and crafting quests
 [~] Fixed issues with defenders targetting pets and vice-versa
+[~] Fixed issue where quests for breaking blocks progressed despite not having block break permission i.e claimed dominion land
 
 Backend Code Changes
 - Implemented discord support bot basis

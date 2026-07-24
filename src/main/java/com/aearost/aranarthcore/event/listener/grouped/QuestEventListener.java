@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.data.Ageable;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
@@ -102,7 +103,7 @@ public class QuestEventListener implements Listener {
     // Block Break — logs, stone, ores, sand, dirt, gravel, crops, ancient debris
     // -------------------------------------------------------------------------
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onBlockBreak(BlockBreakEvent e) {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
