@@ -27,6 +27,8 @@ import java.util.*;
 public class BrewRecipeUtils {
 
     private static final HashMap<UUID, Set<String>> playerUnlocks = new HashMap<>();
+    private static final HashMap<UUID, Set<String>> masteredBrews = new HashMap<>();
+    private static final String MASTERED_PREFIX = "mastered:";
     private static File dataFile;
     private static YamlConfiguration dataConfig;
     private static final Random RANDOM = new Random();
@@ -43,7 +45,7 @@ public class BrewRecipeUtils {
         if (DatabaseManager.isActive()) {
             // Primary path: load from shared MySQL
             Map<UUID, Set<String>> dbUnlocks = DatabaseManager.getInstance().loadAllBrewUnlocks();
-            playerUnlocks.putAll(dbUnlocks);
+            splitAndLoad(dbUnlocks);
             Bukkit.getLogger().info("[AC] Loaded brew unlocks from MySQL for " + dbUnlocks.size() + " player(s)");
 
             // One-time migration: only on Survival, import YAML records not yet in DB
@@ -70,12 +72,31 @@ public class BrewRecipeUtils {
             }
         }
         dataConfig = YamlConfiguration.loadConfiguration(dataFile);
+        Map<UUID, Set<String>> loaded = new HashMap<>();
         for (String uuidStr : dataConfig.getKeys(false)) {
             try {
                 UUID uuid = UUID.fromString(uuidStr);
                 List<String> recipes = dataConfig.getStringList(uuidStr + ".unlocked");
-                playerUnlocks.put(uuid, new HashSet<>(recipes));
+                loaded.put(uuid, new HashSet<>(recipes));
             } catch (IllegalArgumentException ignored) {}
+        }
+        splitAndLoad(loaded);
+    }
+
+    /**
+     * Splits raw entries (which may include "mastered:" prefixed records) into the
+     * {@code playerUnlocks} and {@code masteredBrews} in-memory maps.
+     */
+    private static void splitAndLoad(Map<UUID, Set<String>> raw) {
+        for (Map.Entry<UUID, Set<String>> entry : raw.entrySet()) {
+            UUID uuid = entry.getKey();
+            for (String id : entry.getValue()) {
+                if (id.startsWith(MASTERED_PREFIX)) {
+                    masteredBrews.computeIfAbsent(uuid, k -> new HashSet<>()).add(id.substring(MASTERED_PREFIX.length()));
+                } else {
+                    playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(id);
+                }
+            }
         }
     }
 
@@ -288,11 +309,51 @@ public class BrewRecipeUtils {
         playerUnlocks.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
     }
 
+    /**
+     * Records that a player has personally brewed this recipe to perfect quality.
+     */
+    public static void master(UUID uuid, String recipeId) {
+        masteredBrews.computeIfAbsent(uuid, k -> new HashSet<>()).add(recipeId);
+        if (DatabaseManager.isActive()) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().saveBrewUnlock(uuid, MASTERED_PREFIX + recipeId));
+        } else {
+            saveMastery(uuid);
+        }
+        // Also unlock the recipe if it wasn't already
+        if (!isUnlocked(uuid, recipeId)) {
+            unlock(uuid, recipeId);
+        }
+    }
+
+    /** Returns true if this player has personally brewed this recipe to perfect quality. */
+    public static boolean isMastered(UUID uuid, BrewRecipe recipe) {
+        return masteredBrews.getOrDefault(uuid, Collections.emptySet()).contains(recipe.getId());
+    }
+
     /** Saves unlocks to YAML. Only used as a fallback when MySQL is not available. */
     private static void saveUnlocks(UUID uuid) {
         if (dataConfig == null) return;
         Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
         dataConfig.set(uuid.toString() + ".unlocked", new ArrayList<>(unlocked));
+        try {
+            dataConfig.save(dataFile);
+        } catch (IOException e) {
+
+        }
+    }
+
+    /** Saves mastery entries to YAML (fallback when MySQL is not available). */
+    private static void saveMastery(UUID uuid) {
+        if (dataConfig == null) return;
+        Set<String> mastered = masteredBrews.getOrDefault(uuid, Collections.emptySet());
+        // Combine existing unlocks with mastered: prefixed entries
+        Set<String> existing = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
+        List<String> all = new ArrayList<>(existing);
+        for (String id : mastered) {
+            all.add(MASTERED_PREFIX + id);
+        }
+        dataConfig.set(uuid.toString() + ".unlocked", all);
         try {
             dataConfig.save(dataFile);
         } catch (IOException e) {
@@ -393,11 +454,10 @@ public class BrewRecipeUtils {
 
     /**
      * Creates a display POTION item representing the given unlocked recipe,
-     * with ingredient lore. For avatar brews of Rare tier or above, the secret
-     * ingredient's name is obfuscated while its quantity remains visible.
-     * Non-avatar brews never have any ingredient obfuscated.
+     * with ingredient lore. For LEGENDARY recipes with a secret ingredient, the
+     * secret is obfuscated unless the player has personally mastered the recipe.
      */
-    public static ItemStack createPotionDisplay(BrewRecipe recipe) {
+    public static ItemStack createPotionDisplay(BrewRecipe recipe, UUID viewerUuid) {
         ItemStack item = new ItemStack(Material.POTION);
         PotionMeta meta = (PotionMeta) item.getItemMeta();
 
@@ -409,7 +469,9 @@ public class BrewRecipeUtils {
 
         String[] ingredients = recipe.getIngredients();
         int secret = recipe.getSecretIngredientIndex();
-        boolean obfuscateSecrets = secret >= 0 && recipe.getTier() == BrewRecipe.Tier.LEGENDARY;
+        boolean obfuscateSecrets = secret >= 0
+                && recipe.getTier() == BrewRecipe.Tier.LEGENDARY
+                && !isMastered(viewerUuid, recipe);
         for (int i = 0; i < ingredients.length; i++) {
             if (i == secret && obfuscateSecrets) {
                 // Show the quantity but obfuscate the ingredient name

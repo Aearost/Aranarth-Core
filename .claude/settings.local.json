@@ -301,7 +301,20 @@
       "Bash(zcat \"2026-07-23-6.log.gz\")",
       "Bash(gunzip -c 2026-07-23-9.log.gz)",
       "Bash(find C:Usersliamh.m2repositorycomprojectkorra -name *.jar)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java -name *BreweryX* -o -name *brewery* -o -name *Quality*)",
+      "Bash(find /c/Users/liamh/.m2/repository/com/dre -name *.jar)",
+      "Bash(find /c/Users/liamh -name BreweryX*.jar)",
+      "Bash(find /c/Users/liamh/IdeaProjects -name *.jar -path *brew*)",
+      "Bash(mvn install:install-file -Dfile=\"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/BreweryX-3.7.0.jar\" -DgroupId=com.dre.brewery -DartifactId=BreweryX -Dversion=3.7.0 -Dpackaging=jar -q)",
+      "Bash(find /c/Users/liamh/.m2 -name *BreweryX* -o -name *brewery*)",
+      "Bash(cmd /c 'where mvn')",
+      "Bash(MVN=\"/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2024.3.4/plugins/maven/lib/maven3/bin/mvn.cmd\")",
+      "Bash(\"$MVN\" install:install-file -Dfile=\"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/BreweryX-3.7.0.jar\" -DgroupId=com.dre.brewery -DartifactId=BreweryX -Dversion=3.7.0 -Dpackaging=jar -q)",
+      "Bash(find /c/Users/liamh/.m2 -name *BreweryX*)",
+      "Bash(find /c/Users/liamh/.m2/repository -name *.jar -newer /c/Users/liamh/IdeaProjects/AranarthCore/pom.xml)",
+      "Bash(mkdir -p /c/Users/liamh/IdeaProjects/AranarthCore/libs)",
+      "Bash(cp \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/BreweryX-3.7.0.jar\" /c/Users/liamh/IdeaProjects/AranarthCore/libs/)"
     ]
   }
 }

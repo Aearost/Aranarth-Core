@@ -48,7 +48,7 @@ public class GuiBrewBook {
         int end   = Math.min(start + PAGE_SIZE, unlocked.size());
 
         for (int i = start; i < end; i++) {
-            inv.setItem(CONTENT_START + (i - start), BrewRecipeUtils.createPotionDisplay(unlocked.get(i)));
+            inv.setItem(CONTENT_START + (i - start), BrewRecipeUtils.createPotionDisplay(unlocked.get(i), player.getUniqueId()));
         }
 
         // Previous page

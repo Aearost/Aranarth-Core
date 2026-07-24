@@ -171,5 +171,11 @@
             <version>2.7.2</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.BreweryTeam</groupId>
+            <artifactId>BreweryX</artifactId>
+            <version>3.7.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>
