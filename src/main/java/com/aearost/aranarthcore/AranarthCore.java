@@ -256,11 +256,8 @@ public class AranarthCore extends JavaPlugin {
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     PermissionUtils.reEvaluateMonthlySaints(player);
                 }
-                // Dominion level scans include penalty application (food/balance drains).
-                // Only the Survival server holds the authoritative in-memory Dominion state.
-                if (!isSmpServer()) {
-                    DominionLevelUtils.runPeriodicScan();
-                }
+                // Each server scans only its own dominions
+                DominionLevelUtils.runPeriodicScan();
             }
         }, 12000, 12000);
 
