@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.items.GodAppleFragment;
 import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.aranarthium.clusters.*;
 import com.aearost.aranarthcore.items.aranarthium.ingots.*;
+import com.aearost.aranarthcore.items.brew.BrewRecipe;
 import com.aearost.aranarthcore.items.incantation.IncantationBeheading;
 import com.aearost.aranarthcore.items.incantation.IncantationLifesteal;
 import com.aearost.aranarthcore.items.incantation.IncantationMagnetism;
@@ -92,9 +93,9 @@ public class CrateOpen {
                                             // Alternate between blaze rod (0) and breeze rod (1)
                                             indexes.set(0, indexes.get(0) == 0 ? 1 : 0);
 
-                                            // Cycle through middle recipe maps
+                                            // Cycle through rare recipe maps
                                             int nextRecipe = indexes.get(1) + 1;
-                                            if (nextRecipe >= BrewRecipeUtils.getMiddleRecipeCount()) {
+                                            if (nextRecipe >= BrewRecipeUtils.getRareRecipeCount()) {
                                                 nextRecipe = 0;
                                             }
                                             indexes.set(1, nextRecipe);
@@ -502,8 +503,8 @@ public class CrateOpen {
                         name = "#bdadc7&lBreeze Rod x8";
                     }
                 } else if (chance <= 95) {
-                    // Random locked middle-tier brew recipe map; fallback to breeze rod if all unlocked
-                    com.aearost.aranarthcore.items.brew.BrewRecipe lockedMiddle = BrewRecipeUtils.getRandomLockedMiddle(player.getUniqueId());
+                    // Random locked rare-tier brew recipe map; fallback to breeze rod if all unlocked
+                    BrewRecipe lockedMiddle = BrewRecipeUtils.getRandomLockedRare(player.getUniqueId());
                     if (lockedMiddle != null) {
                         reward = BrewRecipeUtils.createRecipeMapItem(lockedMiddle);
                         name = "&6&l[Recipe] " + lockedMiddle.getDisplayName();

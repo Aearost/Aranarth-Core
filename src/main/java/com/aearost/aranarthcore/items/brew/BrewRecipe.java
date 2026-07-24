@@ -4,85 +4,83 @@ import org.bukkit.Color;
 
 public enum BrewRecipe {
 
-    // ─── BASIC tier ───────────────────────────────────────────────────────────
-    // Simple brews - no distilling, short/no aging, mild or no effects
-    POTATO_SOUP( "potato_soup",  Tier.BASIC, 0,     -1, true),   // diff 1, INSTANT_HEALTH/1
-    HOT_CHOC(    "hot_choc",     Tier.BASIC, 0,     -1, true),   // diff 2, HASTE+REGEN
-    WHEAT_BEER(  "wheatbeer",    Tier.BASIC, 0,     -1, true),   // diff 1, age 2 Birch
-    BEER(        "beer",         Tier.BASIC, 7000,  -1, false),  // diff 1, age 3
-    PALE_ALE(    "pale_ale",     Tier.BASIC, 8000,  -1, false),  // diff 2, age 4 Pale Oak
-    COFFEE(      "coffee",       Tier.BASIC, 9000,  -1, false),  // diff 3, REGEN+SPEED
-    PUMPKIN_BEER("pumpkin_beer", Tier.BASIC, 10000, -1, false),  // diff 3, age 5 Oak
-    MEAD(        "mead",         Tier.BASIC, 11000, -1, false),  // diff 2, age 4 Oak
-    ICED_COFFEE( "iced_coffee",  Tier.BASIC, 12000, -1, false),  // diff 4, REGEN+SPEED
-    EGGNOG(      "eggnog",       Tier.BASIC, 13000, -1, false),  // diff 4, age 3
-    HONEY_MEAD(  "honey_mead",   Tier.BASIC, 14000, -1, false),  // diff 3, age 6 Oak, ABSORPTION
-    CIDRE(       "cidre",        Tier.BASIC, 15000, -1, false),  // diff 4, age 3
+    // ─── COMMON tier ──────────────────────────────────────────────────────────
+    // Difficulty 1–4. Unlocked through the brew shop.
+    POTATO_SOUP( "potato_soup",  Tier.COMMON, 0,     -1, true),   // diff 1, INSTANT_HEALTH/1
+    HOT_CHOC(    "hot_choc",     Tier.COMMON, 0,     -1, true),   // diff 2, HASTE+REGEN
+    WHEAT_BEER(  "wheatbeer",    Tier.COMMON, 0,     -1, true),   // diff 1, age 2 Birch
+    BEER(        "beer",         Tier.COMMON, 7000,  -1, false),  // diff 1, age 3
+    PALE_ALE(    "pale_ale",     Tier.COMMON, 8000,  -1, false),  // diff 2, age 4 Pale Oak
+    COFFEE(      "coffee",       Tier.COMMON, 9000,  -1, false),  // diff 3, REGEN+SPEED
+    PUMPKIN_BEER("pumpkin_beer", Tier.COMMON, 10000, -1, false),  // diff 3, age 5 Oak
+    MEAD(        "mead",         Tier.COMMON, 11000, -1, false),  // diff 2, age 4 Oak
+    ICED_COFFEE( "iced_coffee",  Tier.COMMON, 12000, -1, false),  // diff 4, REGEN+SPEED
+    HONEY_MEAD(  "honey_mead",   Tier.COMMON, 14000, -1, false),  // diff 3, age 6 Oak, ABSORPTION
+    CIDRE(       "cidre",        Tier.COMMON, 15000, -1, false),  // diff 4, age 3
+    DARK_BEER(   "darkbeer",     Tier.COMMON, 0,     -1, false),  // diff 2, age 8 Dark Oak
+    APPLE_MEAD(  "ap_mead",      Tier.COMMON, 0,     -1, false),  // diff 4, age 4 Oak, WATER_BREATHING
+    WINE(        "wine",         Tier.COMMON, 0,     -1, false),  // diff 4, age 20
+    VODKA(       "vodka",        Tier.COMMON, 0,     -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
+    WHITE_JADE_TEA(  "atla4",  Tier.COMMON, 0, 1, false),  // POISON+NAUSEA (lore-significant)
+    ONION_BANANA(    "atla16", Tier.COMMON, 0, 2, false),  // NAUSEA+REGEN (lore-significant)
+    CACTUS_JUICE(    "atla1",  Tier.COMMON, 0, 1, false),  // NAUSEA+BLINDNESS+SPEED
+    JASMINE_TEA(     "atla3",  Tier.COMMON, 0, 2, false),  // REGEN+ABSORPTION/120s
+    SKY_BISON_CREAM( "atla7",  Tier.COMMON, 0, 2, false),  // JUMP_BOOST/2/120s+SLOW_FALLING
+    CABBAGE_WINE(    "atla11", Tier.COMMON, 0, 1, false),  // SATURATION
+    GINSENG_TEA(     "atla12", Tier.COMMON, 0, 1, false),  // SPEED+HASTE
+    GREEN_TEA(       "atla14", Tier.COMMON, 0, 1, false),  // SPEED+SATURATION
+    OOLONG_TEA(      "atla15", Tier.COMMON, 0, 1, false),  // HASTE+RESISTANCE
 
-    // ─── MIDDLE tier ──────────────────────────────────────────────────────────
-    // Moderate complexity - specific barrel wood, distillruns 1–3, longer aging, or notable single effect.
-    DARK_BEER(       "darkbeer",         Tier.MIDDLE, 0, -1, false),  // diff 2, age 8 Dark Oak
-    APPLE_MEAD(      "ap_mead",          Tier.MIDDLE, 0, -1, false),  // diff 4, age 4 Oak, WATER_BREATHING
-    WINE(            "wine",             Tier.MIDDLE, 0, -1, false),  // diff 4, age 20
-    CHERRY_WINE(     "cherry_wine",      Tier.MIDDLE, 0, -1, false),  // diff 5, age 16 Cherry
-    GLOW_WINE(       "glow_wine",        Tier.MIDDLE, 0, -1, false),  // diff 5, age 8 Pale Oak, GLOWING+NIGHT_VISION
-    VODKA(           "vodka",            Tier.MIDDLE, 0, -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
-    MELON_VODKA(     "melon_vodka",      Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3
-    BEETROOT_SPIRIT( "beetroot_spirit",  Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3
-    SAKE(            "sake",             Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 1, age 3 Bamboo
-    CACHACA(         "cachaca",          Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 4 Jungle
-    APPLE_LIQUOR(    "apple_liquor",     Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 3, age 6 Acacia
-    DANDELION_LIQUOR("dandelion_liquor", Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 4 Birch
-    TEQUILA(         "tequila",          Tier.MIDDLE, 0, -1, false),  // diff 5, distillruns 2, age 12 Birch
-    GIN(             "gin",              Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2
-    CHAMPAGNE(       "champagne",        Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 1, age 4
-    RUM(             "rum",              Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 14, FIRE_RESISTANCE+POISON
-    MANGROVE_RUM(    "mangrove_rum",     Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 12 Mangrove
-    BRANDY(          "brandy",           Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 12 Oak
-    POPPY_LIQUOR(    "poppy_liquor",     Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 2, age 6 Acacia
-    GOLDEN_VODKA(    "g_vodka",          Tier.MIDDLE, 0, -1, false),  // diff 6, distillruns 3, WEAKNESS+POISON
-    WARPED_ALE(      "warped_ale",       Tier.MIDDLE, 0, -1, false),  // diff 6, age 6 Warped, NIGHT_VISION
+    // ─── RARE tier ────────────────────────────────────────────────────────────
+    // Difficulty 5–6. Unlocked through vote crates.
+    CHERRY_WINE(     "cherry_wine",      Tier.RARE, 0, -1, false),  // diff 5, age 16 Cherry
+    GLOW_WINE(       "glow_wine",        Tier.RARE, 0, -1, false),  // diff 5, age 8 Pale Oak, GLOWING+NIGHT_VISION
+    MELON_VODKA(     "melon_vodka",      Tier.RARE, 0, -1, false),  // diff 5, distillruns 3
+    BEETROOT_SPIRIT( "beetroot_spirit",  Tier.RARE, 0, -1, false),  // diff 5, distillruns 3
+    SAKE(            "sake",             Tier.RARE, 0, -1, false),  // diff 5, distillruns 1, age 3 Bamboo
+    CACHACA(         "cachaca",          Tier.RARE, 0, -1, false),  // diff 5, distillruns 2, age 4 Jungle
+    APPLE_LIQUOR(    "apple_liquor",     Tier.RARE, 0, -1, false),  // diff 5, distillruns 3, age 6 Acacia
+    DANDELION_LIQUOR("dandelion_liquor", Tier.RARE, 0, -1, false),  // diff 5, distillruns 2, age 4 Birch
+    TEQUILA(         "tequila",          Tier.RARE, 0, -1, false),  // diff 5, distillruns 2, age 12 Birch
+    GIN(             "gin",              Tier.RARE, 0, -1, false),  // diff 6, distillruns 2
+    CHAMPAGNE(       "champagne",        Tier.RARE, 0, -1, false),  // diff 6, distillruns 1, age 4
+    RUM(             "rum",              Tier.RARE, 0, -1, false),  // diff 6, distillruns 2, age 14, FIRE_RESISTANCE+POISON
+    MANGROVE_RUM(    "mangrove_rum",     Tier.RARE, 0, -1, false),  // diff 6, distillruns 2, age 12 Mangrove
+    BRANDY(          "brandy",           Tier.RARE, 0, -1, false),  // diff 6, distillruns 2, age 12 Oak
+    POPPY_LIQUOR(    "poppy_liquor",     Tier.RARE, 0, -1, false),  // diff 6, distillruns 2, age 6 Acacia
+    GOLDEN_VODKA(    "g_vodka",          Tier.RARE, 0, -1, false),  // diff 6, distillruns 3, WEAKNESS+POISON
+    WARPED_ALE(      "warped_ale",       Tier.RARE, 0, -1, false),  // diff 6, age 6 Warped, NIGHT_VISION
+    MOONSHINE(       "moonshine",        Tier.RARE, 0, -1, false),  // diff 6, distillruns 4, age 2 Cut Copper, BLINDNESS+POISON
+    SEAWEED_GROG(    "atla5",            Tier.RARE, 0, 1,  false),  // WATER_BREATHING/180s+RESISTANCE
+    RICE_WINE(       "atla6",            Tier.RARE, 0, 1,  false),  // diff 6, age 8, RESISTANCE+HASTE
+    WHITE_DRAGON_TEA("atla13",           Tier.RARE, 0, 1,  false),  // REGEN+LUCK/160s
 
-    // ─── HIGHER tier ──────────────────────────────────────────────────────────
-    // High complexity - distillruns 4+, age 16+ OR powerful multi-effects OR Avatar theme.
-    WHISKEY(       "whiskey",      Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 18 Spruce
-    FIRE_WHISKEY(  "fire_whiskey", Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 3, age 18 Spruce
-    BOURBON(       "bourbon",      Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 22 Oak
-    BAMBOO_LIQUOR( "bamboo_liquor",Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 2, age 6 Bamboo
-    SHROOM_VODKA(  "shroom_vodka", Tier.HIGHER, 0, -1, false),  // diff 7, distillruns 5, WEAKNESS+NAUSEA+NIGHT_VISION
-    MOONSHINE(     "moonshine",    Tier.HIGHER, 0, -1, false),  // diff 6, distillruns 4, age 2 Cut Copper, BLINDNESS+POISON
-    ABSINTHE(      "absinthe",     Tier.HIGHER, 0, -1, false),  // diff 8, distillruns 6, POISON/25
-    NETHER_GROG(   "nether_grog",  Tier.HIGHER, 0, -1, false),  // diff 8, distillruns 2, age 10 Crimson, FIRE_RESISTANCE
-    GREEN_ABSINTHE("gr_absinthe",  Tier.HIGHER, 0, -1, false),  // diff 9, distillruns 6, POISON/40+INSTANT_DAMAGE
-
-    // Avatar brews - all HIGHER by theme regardless of mechanical complexity
-    CACTUS_JUICE(     "atla1",  Tier.HIGHER, 0, 1,  false),  // NAUSEA+BLINDNESS+SPEED
-    FIRE_WHISKEY_ATLA("atla2",  Tier.HIGHER, 0, 2,  false),  // diff 7, FIRE_RESISTANCE+STRENGTH
-    JASMINE_TEA(      "atla3",  Tier.HIGHER, 0, 2,  false),  // REGEN+ABSORPTION/120s
-    WHITE_JADE_TEA(   "atla4",  Tier.HIGHER, 0, 1,  false),  // POISON+NAUSEA (lore-significant)
-    SEAWEED_GROG(     "atla5",  Tier.HIGHER, 0, 1,  false),  // WATER_BREATHING/180s+RESISTANCE
-    RICE_WINE(        "atla6",  Tier.HIGHER, 0, 1,  false),  // diff 6, age 8, RESISTANCE+HASTE
-    SKY_BISON_CREAM(  "atla7",  Tier.HIGHER, 0, 2,  false),  // JUMP_BOOST/2/120s+SLOW_FALLING
-    SWAMP_BREW(       "atla8",  Tier.HIGHER, 0, 2,  false),  // NIGHT_VISION/180s
-    OASIS_WATER(      "atla9",  Tier.HIGHER, 0, 2,  false),  // diff 8, REGEN/2+ABSORPTION/2+INSTANT_HEALTH
-    COMET_BRANDY(     "atla10", Tier.HIGHER, 0, 2,  false),  // diff 9, STRENGTH/2+SPEED/2+FIRE_RESISTANCE
-    CABBAGE_WINE(     "atla11", Tier.HIGHER, 0, 1,  false),  // SATURATION
-    GINSENG_TEA(      "atla12", Tier.HIGHER, 0, 1,  false),  // SPEED+HASTE
-    WHITE_DRAGON_TEA( "atla13", Tier.HIGHER, 0, 1,  false),  // REGEN+LUCK/160s
-    GREEN_TEA(        "atla14", Tier.HIGHER, 0, 1,  false),  // SPEED+SATURATION
-    OOLONG_TEA(       "atla15", Tier.HIGHER, 0, 1,  false),  // HASTE+RESISTANCE
-    ONION_BANANA(     "atla16", Tier.HIGHER, 0, 2,  false),  // NAUSEA+REGEN (lore-significant)
-    SPIRIT_TONIC(       "atla17", Tier.HIGHER, 0, 1,  false),  // diff 8, SLOW_FALLING+NIGHT_VISION+INVISIBILITY
-    AVATAR_ELIXIR(      "atla18", Tier.HIGHER, 0, 3,  false),  // diff 10, RESISTANCE/2+STRENGTH/2+SPEED
-    BADGERMOLE_BREW(    "atla19", Tier.HIGHER, 0, -1, false),  // diff 10, HASTE/4-5+NIGHT_VISION, Mangrove age 16
-    PAI_SHO_CORDIAL(    "atla20", Tier.HIGHER, 0, -1, false),  // diff 9, LUCK/2+ABSORPTION/2+RESISTANCE, Pale Oak age 15
-    FULL_MOON_VINTAGE(  "atla21", Tier.HIGHER, 0, -1, false),  // diff 9, STRENGTH/2+NIGHT_VISION, Crimson age 14
-    SUN_WARRIOR_MEAD(   "atla22", Tier.HIGHER, 0, -1, false),  // diff 9, FIRE_RESISTANCE+STRENGTH/2+REGEN, Acacia age 12
-    NEUTRAL_JING_JULEP( "atla23", Tier.HIGHER, 0, -1, false),  // diff 8, JUMP_BOOST/3+HASTE/2, Bamboo age 8
-    FORBIDDEN_INK(      "atla24", Tier.HIGHER, 0, -1, false);  // diff 9, NIGHT_VISION+LUCK+SLOW_FALLING, Dark Oak age 12
+    // ─── LEGENDARY tier ───────────────────────────────────────────────────────
+    // Difficulty 7–10. Unlocked through weekly quests (rank 5+, 33% chance).
+    EGGNOG(            "eggnog",       Tier.LEGENDARY, 0, -1, false),  // diff 4→end-tier Advocaat
+    WHISKEY(           "whiskey",      Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 2, age 18 Spruce
+    FIRE_WHISKEY(      "fire_whiskey", Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 3, age 18 Spruce
+    BOURBON(           "bourbon",      Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 2, age 22 Oak
+    BAMBOO_LIQUOR(     "bamboo_liquor",Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 2, age 6 Bamboo
+    SHROOM_VODKA(      "shroom_vodka", Tier.LEGENDARY, 0, -1, false),  // diff 7, distillruns 5, WEAKNESS+NAUSEA+NIGHT_VISION
+    ABSINTHE(          "absinthe",     Tier.LEGENDARY, 0, -1, false),  // diff 8, distillruns 6, POISON/25
+    NETHER_GROG(       "nether_grog",  Tier.LEGENDARY, 0, -1, false),  // diff 8, distillruns 2, age 10 Crimson, FIRE_RESISTANCE
+    GREEN_ABSINTHE(    "gr_absinthe",  Tier.LEGENDARY, 0, -1, false),  // diff 9, distillruns 6, POISON/40+INSTANT_DAMAGE
+    FIRE_WHISKEY_ATLA( "atla2",        Tier.LEGENDARY, 0, 2,  false),  // diff 7, FIRE_RESISTANCE+STRENGTH
+    SWAMP_BREW(        "atla8",        Tier.LEGENDARY, 0, 2,  false),  // NIGHT_VISION/180s
+    OASIS_WATER(       "atla9",        Tier.LEGENDARY, 0, 2,  false),  // diff 8, REGEN/2+ABSORPTION/2+INSTANT_HEALTH
+    COMET_BRANDY(      "atla10",       Tier.LEGENDARY, 0, 2,  false),  // diff 9, STRENGTH/2+SPEED/2+FIRE_RESISTANCE
+    SPIRIT_TONIC(      "atla17",       Tier.LEGENDARY, 0, 1,  false),  // diff 8, SLOW_FALLING+NIGHT_VISION+INVISIBILITY
+    AVATAR_ELIXIR(     "atla18",       Tier.LEGENDARY, 0, 3,  false),  // diff 10, RESISTANCE/2+STRENGTH/2+SPEED
+    BADGERMOLE_BREW(   "atla19",       Tier.LEGENDARY, 0, -1, false),  // diff 10, HASTE/4-5+NIGHT_VISION, Mangrove age 16
+    PAI_SHO_CORDIAL(   "atla20",       Tier.LEGENDARY, 0, -1, false),  // diff 9, LUCK/2+ABSORPTION/2+RESISTANCE, Pale Oak age 15
+    FULL_MOON_VINTAGE( "atla21",       Tier.LEGENDARY, 0, -1, false),  // diff 9, STRENGTH/2+NIGHT_VISION, Crimson age 14
+    SUN_WARRIOR_MEAD(  "atla22",       Tier.LEGENDARY, 0, -1, false),  // diff 9, FIRE_RESISTANCE+STRENGTH/2+REGEN, Acacia age 12
+    NEUTRAL_JING_JULEP("atla23",       Tier.LEGENDARY, 0, -1, false),  // diff 8, JUMP_BOOST/3+HASTE/2, Bamboo age 8
+    FORBIDDEN_INK(     "atla24",       Tier.LEGENDARY, 0, -1, false);  // diff 9, NIGHT_VISION+LUCK+SLOW_FALLING, Dark Oak age 12
 
     public enum Tier {
-        BASIC, MIDDLE, HIGHER
+        COMMON, RARE, LEGENDARY
     }
 
     /** Config-sourced data injected at startup by BrewRecipeUtils.initialize(). */

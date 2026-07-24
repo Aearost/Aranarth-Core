@@ -55,7 +55,7 @@ public class GuiBrewShopClick {
 
             BrewRecipe target = null;
             for (BrewRecipe r : BrewRecipe.values()) {
-                if (r.getTier() == BrewRecipe.Tier.BASIC && r.getDisplayName().equalsIgnoreCase(rawName)) {
+                if (r.getTier() == BrewRecipe.Tier.COMMON && r.getDisplayName().equalsIgnoreCase(rawName)) {
                     target = r;
                     break;
                 }

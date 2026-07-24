@@ -34,7 +34,7 @@ public class GuiBrewShop {
     private Inventory build() {
         Inventory inv = Bukkit.createInventory(player, 54, TITLE);
 
-        List<BrewRecipe> locked = BrewRecipeUtils.getLockedBasicRecipes(player.getUniqueId());
+        List<BrewRecipe> locked = BrewRecipeUtils.getLockedCommonRecipes(player.getUniqueId());
         int start = page * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, locked.size());
 

@@ -261,8 +261,8 @@ public class QuestUtils {
         }
 
         // 33% chance one weekly quest rewards a higher-tier brew recipe
-        if (rank >= 5 && !BrewRecipeUtils.allHigherUnlocked(uuid) && RANDOM.nextFloat() < 0.33f) {
-            BrewRecipe lockedHigher = BrewRecipeUtils.getRandomLockedHigher(uuid);
+        if (rank >= 5 && !BrewRecipeUtils.allLegendaryUnlocked(uuid) && RANDOM.nextFloat() < 0.33f) {
+            BrewRecipe lockedHigher = BrewRecipeUtils.getRandomLockedLegendary(uuid);
             if (lockedHigher != null) {
                 int hardestIndex = 0;
                 for (int i = 1; i < assigned.size(); i++) {

@@ -311,14 +311,14 @@ public class BrewRecipeUtils {
     }
 
     /**
-     * Returns all BASIC recipes that are purchasable in the shop — excludes default-unlocked
-     * recipes and any the player has already bought.
+     * Returns all COMMON recipes that are purchasable in the shop — excludes default-unlocked
+     * recipes, price-0 recipes, and any the player has already bought.
      */
-    public static List<BrewRecipe> getLockedBasicRecipes(UUID uuid) {
+    public static List<BrewRecipe> getLockedCommonRecipes(UUID uuid) {
         Set<String> unlocked = playerUnlocks.getOrDefault(uuid, Collections.emptySet());
         List<BrewRecipe> result = new ArrayList<>();
         for (BrewRecipe r : BrewRecipe.values()) {
-            if (r.getTier() == BrewRecipe.Tier.BASIC && !r.isDefaultUnlocked() && !unlocked.contains(r.getId())) {
+            if (r.getTier() == BrewRecipe.Tier.COMMON && r.getPrice() > 0 && !r.isDefaultUnlocked() && !unlocked.contains(r.getId())) {
                 result.add(r);
             }
         }
@@ -336,26 +336,26 @@ public class BrewRecipeUtils {
     }
 
     /**
-     * Returns a random MIDDLE-tier recipe the player hasn't unlocked yet,
+     * Returns a random RARE-tier recipe the player hasn't unlocked yet,
      * or null if all are already unlocked.
      */
-    public static BrewRecipe getRandomLockedMiddle(UUID uuid) {
-        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.MIDDLE);
+    public static BrewRecipe getRandomLockedRare(UUID uuid) {
+        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.RARE);
         return locked.isEmpty() ? null : locked.get(RANDOM.nextInt(locked.size()));
     }
 
     /**
-     * Returns a random HIGHER-tier recipe the player hasn't unlocked yet,
+     * Returns a random LEGENDARY-tier recipe the player hasn't unlocked yet,
      * or null if all are already unlocked.
      */
-    public static BrewRecipe getRandomLockedHigher(UUID uuid) {
-        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.HIGHER);
+    public static BrewRecipe getRandomLockedLegendary(UUID uuid) {
+        List<BrewRecipe> locked = getLockedRecipesByTier(uuid, BrewRecipe.Tier.LEGENDARY);
         return locked.isEmpty() ? null : locked.get(RANDOM.nextInt(locked.size()));
     }
 
-    /** Returns true when every HIGHER-tier recipe has been unlocked by this player. */
-    public static boolean allHigherUnlocked(UUID uuid) {
-        return getLockedRecipesByTier(uuid, BrewRecipe.Tier.HIGHER).isEmpty();
+    /** Returns true when every LEGENDARY-tier recipe has been unlocked by this player. */
+    public static boolean allLegendaryUnlocked(UUID uuid) {
+        return getLockedRecipesByTier(uuid, BrewRecipe.Tier.LEGENDARY).isEmpty();
     }
 
     /**
@@ -366,14 +366,14 @@ public class BrewRecipeUtils {
         ItemMeta meta = item.getItemMeta();
 
         String tierColor = switch (recipe.getTier()) {
-            case BASIC  -> "&a";
-            case MIDDLE -> "&6";
-            case HIGHER -> "&5";
+            case COMMON    -> "&f";
+            case RARE      -> "&9";
+            case LEGENDARY -> "&6";
         };
         String tierName = switch (recipe.getTier()) {
-            case BASIC  -> "Basic";
-            case MIDDLE -> "Artisan";
-            case HIGHER -> "Avatar";
+            case COMMON    -> "Common";
+            case RARE      -> "Rare";
+            case LEGENDARY -> "Legendary";
         };
 
         meta.setDisplayName(ChatUtils.translateToColor("&6&l[Recipe] &f" + recipe.getDisplayName()));
@@ -393,7 +393,9 @@ public class BrewRecipeUtils {
 
     /**
      * Creates a display POTION item representing the given unlocked recipe,
-     * with ingredient lore (secret ingredient obfuscated for HIGHER-tier brews).
+     * with ingredient lore. For avatar brews of Rare tier or above, the secret
+     * ingredient's name is obfuscated while its quantity remains visible.
+     * Non-avatar brews never have any ingredient obfuscated.
      */
     public static ItemStack createPotionDisplay(BrewRecipe recipe) {
         ItemStack item = new ItemStack(Material.POTION);
@@ -407,10 +409,14 @@ public class BrewRecipeUtils {
 
         String[] ingredients = recipe.getIngredients();
         int secret = recipe.getSecretIngredientIndex();
+        boolean obfuscateSecrets = secret >= 0 && recipe.getTier() == BrewRecipe.Tier.LEGENDARY;
         for (int i = 0; i < ingredients.length; i++) {
-            if (i == secret) {
-                // Obfuscated "fading" secret ingredient
-                lore.add(ChatUtils.translateToColor("&8&o~ &7&k" + "????????????????????" + " &8&o~"));
+            if (i == secret && obfuscateSecrets) {
+                // Show the quantity but obfuscate the ingredient name
+                String ing = ingredients[i];
+                int lastX = ing.lastIndexOf(" x");
+                String amount = lastX >= 0 ? ing.substring(lastX) : "";
+                lore.add(ChatUtils.translateToColor("&7&o  &7&k????????????????&r&7&o" + amount));
             } else {
                 lore.add(ChatUtils.translateToColor("&7&o  " + ingredients[i]));
             }
@@ -434,14 +440,14 @@ public class BrewRecipeUtils {
         }
 
         String tierColor = switch (recipe.getTier()) {
-            case BASIC  -> "&a";
-            case MIDDLE -> "&6";
-            case HIGHER -> "&5";
+            case COMMON    -> "&f";
+            case RARE      -> "&9";
+            case LEGENDARY -> "&6";
         };
         String tierName = switch (recipe.getTier()) {
-            case BASIC  -> "Basic";
-            case MIDDLE -> "Artisan";
-            case HIGHER -> "Avatar";
+            case COMMON    -> "Common";
+            case RARE      -> "Rare";
+            case LEGENDARY -> "Legendary";
         };
         lore.add("");
         lore.add(ChatUtils.translateToColor("&8Tier: " + tierColor + tierName));
@@ -452,7 +458,7 @@ public class BrewRecipeUtils {
     }
 
     /**
-     * Creates the shop display item for a locked BASIC-tier recipe (shows purchase price).
+     * Creates the shop display item for a locked COMMON-tier recipe (shows purchase price).
      */
     public static ItemStack createShopPotionDisplay(BrewRecipe recipe) {
         ItemStack item = new ItemStack(Material.POTION);
@@ -462,14 +468,14 @@ public class BrewRecipeUtils {
         meta.setDisplayName(ChatUtils.translateToColor("&f&l" + recipe.getDisplayName()));
 
         String tierColor = switch (recipe.getTier()) {
-            case BASIC  -> "&a";
-            case MIDDLE -> "&6";
-            case HIGHER -> "&5";
+            case COMMON    -> "&f";
+            case RARE      -> "&9";
+            case LEGENDARY -> "&6";
         };
         String tierName = switch (recipe.getTier()) {
-            case BASIC  -> "Basic";
-            case MIDDLE -> "Artisan";
-            case HIGHER -> "Avatar";
+            case COMMON    -> "Common";
+            case RARE      -> "Rare";
+            case LEGENDARY -> "Legendary";
         };
 
         NumberFormat fmt = NumberFormat.getInstance();
@@ -487,32 +493,32 @@ public class BrewRecipeUtils {
 
     /**
      * Creates a cycling recipe map display for the vote crate GUI preview.
-     * Uses the Nth MIDDLE-tier recipe (wraps around).
+     * Uses the Nth RARE-tier recipe (wraps around).
      */
     public static ItemStack createCyclingRecipeMapDisplay(int index) {
-        List<BrewRecipe> middleRecipes = new ArrayList<>();
+        List<BrewRecipe> rareRecipes = new ArrayList<>();
         for (BrewRecipe r : BrewRecipe.values()) {
-            if (r.getTier() == BrewRecipe.Tier.MIDDLE) middleRecipes.add(r);
+            if (r.getTier() == BrewRecipe.Tier.RARE) rareRecipes.add(r);
         }
-        if (middleRecipes.isEmpty()) return new ItemStack(Material.FILLED_MAP);
-        BrewRecipe recipe = middleRecipes.get(index % middleRecipes.size());
+        if (rareRecipes.isEmpty()) return new ItemStack(Material.FILLED_MAP);
+        BrewRecipe recipe = rareRecipes.get(index % rareRecipes.size());
 
         ItemStack item = new ItemStack(Material.FILLED_MAP);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatUtils.translateToColor("&f" + recipe.getDisplayName() + " Recipe"));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&8Tier: &6Artisan"));
+        lore.add(ChatUtils.translateToColor("&8Tier: &9Rare"));
         lore.add(ChatUtils.translateToColor("&c5% Chance"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
 
-    /** Returns the total number of MIDDLE-tier recipes (used for cycling bounds). */
-    public static int getMiddleRecipeCount() {
+    /** Returns the total number of RARE-tier recipes (used for cycling bounds). */
+    public static int getRareRecipeCount() {
         int count = 0;
         for (BrewRecipe r : BrewRecipe.values()) {
-            if (r.getTier() == BrewRecipe.Tier.MIDDLE) count++;
+            if (r.getTier() == BrewRecipe.Tier.RARE) count++;
         }
         return count;
     }
