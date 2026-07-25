@@ -1646,6 +1646,19 @@ public class PersistenceUtils {
                 // LEADER always has all permissions regardless of what was persisted,
                 // since new permissions added to the enum would otherwise be missing.
                 allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
+                // Retroactively apply new default permissions to existing dominions
+                DominionPermissions defaults = DominionPermissions.createDefaults();
+                for (DominionRank rank : DominionRank.values()) {
+                    if (rank == DominionRank.LEADER) {
+                        continue;
+                    }
+                    Set<DominionPermission> stored = allPerms.get(rank);
+                    if (stored == null) {
+                        allPerms.put(rank, new HashSet<>(defaults.getPermissions(rank)));
+                    } else {
+                        stored.addAll(defaults.getPermissions(rank));
+                    }
+                }
                 dominion.setDominionPermissions(new DominionPermissions(allPerms));
             }
             Bukkit.getLogger().info("[AC] All dominion permissions have been initialized");
@@ -7419,6 +7432,19 @@ public class PersistenceUtils {
                         }
                     }
                     allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
+                    // Retroactively apply new default permissions to existing dominions
+                    DominionPermissions defaults = DominionPermissions.createDefaults();
+                    for (DominionRank rank : DominionRank.values()) {
+                        if (rank == DominionRank.LEADER) {
+                            continue;
+                        }
+                        Set<DominionPermission> stored = allPerms.get(rank);
+                        if (stored == null) {
+                            allPerms.put(rank, new HashSet<>(defaults.getPermissions(rank)));
+                        } else {
+                            stored.addAll(defaults.getPermissions(rank));
+                        }
+                    }
                     loaded.setDominionPermissions(new DominionPermissions(allPerms));
                 }
 
@@ -7506,6 +7532,19 @@ public class PersistenceUtils {
                     }
                 }
                 allPerms.put(DominionRank.LEADER, new HashSet<>(Arrays.asList(DominionPermission.values())));
+                // Retroactively apply new default permissions to existing dominions
+                DominionPermissions defaults = DominionPermissions.createDefaults();
+                for (DominionRank rank : DominionRank.values()) {
+                    if (rank == DominionRank.LEADER) {
+                        continue; // Already handled above
+                    }
+                    Set<DominionPermission> stored = allPerms.get(rank);
+                    if (stored == null) {
+                        allPerms.put(rank, new HashSet<>(defaults.getPermissions(rank)));
+                    } else {
+                        stored.addAll(defaults.getPermissions(rank));
+                    }
+                }
                 dominion.setDominionPermissions(new DominionPermissions(allPerms));
             } catch (Exception e) {
                 Bukkit.getLogger().warning("[AC] Failed to parse dominion permissions for " + dominionId + ": " + e.getMessage());
