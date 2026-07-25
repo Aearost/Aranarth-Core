@@ -4,17 +4,29 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.block.BannerExtendPatternLimit;
 import com.aearost.aranarthcore.event.mob.GuiVillagerClick;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.event.player.DoubleBrewingBonus;
+import com.aearost.aranarthcore.gui.GuiBrewBook;
+import com.aearost.aranarthcore.gui.GuiBrewShop;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
+import com.aearost.aranarthcore.gui.GuiJobs;
+import com.aearost.aranarthcore.gui.GuiJobsJoin;
+import com.aearost.aranarthcore.gui.GuiJobsLeave;
+import com.aearost.aranarthcore.gui.GuiJobsStats;
 import com.aearost.aranarthcore.gui.GuiOutposts;
+import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.BrewerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 /**
  * Centralizes all logic to be called by clicking in an inventory.
@@ -23,6 +35,28 @@ public class InventoryClickEventListener implements Listener {
 
     public InventoryClickEventListener(AranarthCore plugin) {
         Bukkit.getPluginManager().registerEvents(this, plugin);
+    }
+
+    /**
+     * Prevents hoppers from extracting double brew copies before the player can pick them up.
+     */
+    @EventHandler
+    public void onInventoryMove(InventoryMoveItemEvent e) {
+        if (DoubleBrewingBonus.activeCopyLocations.isEmpty()) {
+            return;
+        }
+        if (!(e.getSource() instanceof BrewerInventory brewer)) {
+            return;
+        }
+        var loc = brewer.getLocation();
+        if (loc != null && DoubleBrewingBonus.activeCopyLocations.contains(loc)) {
+            if (e.getItem().hasItemMeta()) {
+                ItemMeta meta = e.getItem().getItemMeta();
+                if (meta.getPersistentDataContainer().has(CustomKeys.BREWING_COPY, PersistentDataType.BYTE)) {
+                    e.setCancelled(true);
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -67,13 +101,13 @@ public class InventoryClickEventListener implements Listener {
                 new GuiCrateClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Shops")) {
                 new GuiShopLocationClick().execute(e);
-            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Food")) {
+            } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Resources")) {
                 new GuiDominionResourcesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiDominionPermissions.HUB_TITLE)
                     || (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith(" Permissions")
-                        && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions"))) {
                 new GuiDominionPermissionsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).endsWith("'s Permissions")) {
                 new GuiDominionPlayerPermissionsClick().execute(e);
@@ -85,6 +119,10 @@ public class InventoryClickEventListener implements Listener {
                 new GuiOutpostsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Dominion Members")) {
                 new GuiDominionMembersClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewBook.TITLE)) {
+                new GuiBrewBookClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiBrewShop.TITLE)) {
+                new GuiBrewShopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarth Vote Shop")) {
                 new GuiVoteShopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Vote Shop Purchase")) {
@@ -93,8 +131,18 @@ public class InventoryClickEventListener implements Listener {
                 new GuiTopDeathsClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")) {
                 new GuiTopKillsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
+                new GuiTopGuessesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
                 new GuiQuestsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobs.TITLE)) {
+                new GuiJobsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsJoin.TITLE)) {
+                new GuiJobsJoinClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsStats.TITLE)) {
+                new GuiJobsStatsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsLeave.TITLE)) {
+                new GuiJobsLeaveClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Login Streak")) {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Toggles")) {
@@ -103,7 +151,8 @@ public class InventoryClickEventListener implements Listener {
                 new GuiVoteTopClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).startsWith("Top ")
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Kills")
-                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")) {
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")
+                    && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
                 new GuiMctopClick().execute(e);
             }
         } else {
@@ -116,6 +165,7 @@ public class InventoryClickEventListener implements Listener {
                     new FletchingTableCraft().execute(e);
                 } else if (e.getView().getType() == InventoryType.BREWING) {
                     new OrderChaosPotionBrewingPrevent().execute(e);
+                    new DoubleBrewingBonus().execute(e);
                 }
             }
         }
@@ -125,5 +175,9 @@ public class InventoryClickEventListener implements Listener {
             new AfkCancelByInteract().execute(player);
         }
 //        new QuiverSwitchSlots().execute(e);
+    }
+
+    private static boolean isDominionFoodTitle(String title) {
+        return title.endsWith(" Food") || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

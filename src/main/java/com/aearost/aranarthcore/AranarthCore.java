@@ -21,6 +21,10 @@ import com.aearost.aranarthcore.recipes.*;
 import com.aearost.aranarthcore.recipes.aranarthium.*;
 import com.aearost.aranarthcore.utils.*;
 import com.aearost.aranarthcore.event.listener.grouped.QuestEventListener;
+import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
+import com.aearost.aranarthcore.commands.general.CommandJobs;
+import com.aearost.aranarthcore.commands.general.CommandJobsCompleter;
+import com.aearost.aranarthcore.utils.JobUtils;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import github.scarsz.discordsrv.DiscordSRV;
@@ -141,6 +145,8 @@ public class AranarthCore extends JavaPlugin {
                 MountUtils.syncAllActiveHealthToData();
                 PersistenceUtils.saveMounts();
                 PersistenceUtils.saveMail();
+                PersistenceUtils.saveAllJobData();
+                JobUtils.clearBuilderPlacedBlocks();
                 DiscordUtils.updateAllDiscordRoles();
                 Bukkit.getLogger().info("Aranarth data has been saved");
 
@@ -308,6 +314,7 @@ public class AranarthCore extends JavaPlugin {
         // Listeners that must run early
         new CropInfoEventListener(this);
         new QuestEventListener(this);
+        new JobEventListener(this);
 
         // General listeners
         new BlockBreakEventListener(this);
@@ -551,6 +558,8 @@ public class AranarthCore extends JavaPlugin {
         getCommand("randomizer").setTabCompleter(new CommandRandomizerCompleter());
         getCommand("ranks").setExecutor(new CommandRanks());
         getCommand("rankup").setExecutor(new CommandRankup());
+        getCommand("jobs").setExecutor(new CommandJobs());
+        getCommand("jobs").setTabCompleter(new CommandJobsCompleter());
         getCommand("reply").setExecutor(new CommandReply());
         getCommand("resource").setExecutor(new CommandResource());
         getCommand("rules").setExecutor(new CommandRules());
@@ -1066,6 +1075,7 @@ public class AranarthCore extends JavaPlugin {
         MountUtils.syncAllActiveHealthToData();
         PersistenceUtils.saveMounts();
         PersistenceUtils.saveMail();
+        PersistenceUtils.saveAllJobData();
         Bukkit.getLogger().info("Aranarth data has been saved (shutdown)");
     }
 

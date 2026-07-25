@@ -96,6 +96,7 @@ public class AranarthPlayer {
 	private boolean isDominionMsgCompact = false;
 	private long containerToggleExpiry = 0;
 	private long bulkTransactionExpiry = 0;
+	private JobData jobData = new JobData();
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1463,5 +1464,13 @@ public class AranarthPlayer {
 
 	public void setBulkTransactionExpiry(long bulkTransactionExpiry) {
 		this.bulkTransactionExpiry = bulkTransactionExpiry;
+	}
+
+	public JobData getJobData() {
+		return jobData;
+	}
+
+	public void setJobData(JobData jobData) {
+		this.jobData = jobData;
 	}
 }

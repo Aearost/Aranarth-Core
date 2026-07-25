@@ -1,7 +1,11 @@
 package com.aearost.aranarthcore.event.listener.misc;
 
 import com.aearost.aranarthcore.AranarthCore;
+import com.aearost.aranarthcore.database.DatabaseManager;
 import com.aearost.aranarthcore.enums.SpecialDay;
+import com.aearost.aranarthcore.network.NetworkManager;
+import com.aearost.aranarthcore.network.NetworkTabManager;
+import com.aearost.aranarthcore.network.PendingTeleport;
 import com.aearost.aranarthcore.items.HoneyGlazedHam;
 import com.aearost.aranarthcore.items.Quiver;
 import com.aearost.aranarthcore.items.arrow.ArrowIron;
@@ -9,9 +13,12 @@ import com.aearost.aranarthcore.objects.AranarthPlayer;
 import com.aearost.aranarthcore.objects.Avatar;
 import com.aearost.aranarthcore.objects.Dominion;
 import com.aearost.aranarthcore.utils.*;
+import com.aearost.aranarthcore.utils.ItemUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import com.projectkorra.projectkorra.BendingPlayer;
 import com.projectkorra.projectkorra.event.BendingPlayerLoadEvent;
 import org.bukkit.*;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -28,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Adds a new entry to the players HashMap if the player is not being tracked.
@@ -43,6 +51,27 @@ public class PlayerServerJoinListener implements Listener {
 	public void onPlayerJoin(final PlayerJoinEvent e) {
 		Player player = e.getPlayer();
 
+		// Clear any stale BendingPlayer data PK may have cached from a previous session on
+		// this server. Without this, players who switch to SMP, change element, then return
+		// here would still see their old element because PK skips the DB load when the player
+		// is already present in its cache. Clearing here forces PK's own join listener (which
+		// fires at NORMAL priority, after this) to do a fresh MySQL read.
+		BendingPlayer.getPlayers().remove(player.getUniqueId());
+		BendingPlayer.getOfflinePlayers().remove(player.getUniqueId());
+
+		// Load the player's last logout location for login routing and position restoration.
+		// Done synchronously here (matching the getPendingTeleport pattern below) so the result
+		// is available immediately and can be captured by the delayed-task lambda.
+		final DatabaseManager.LastLocation lastLoc = DatabaseManager.isActive()
+				? DatabaseManager.getInstance().loadLastLocation(player.getUniqueId())
+				: null;
+
+		// Detect cross-server transfers: either a pending TP from a normal cross-server action,
+		// or the player logged off on a different server and needs to be routed there on login.
+		String thisServerName = NetworkManager.isActive() ? NetworkManager.getInstance().getThisServer() : null;
+		boolean needsServerRouting = lastLoc != null && thisServerName != null && !lastLoc.server.equals(thisServerName);
+		boolean hasPendingTp = NetworkManager.isActive() && NetworkManager.getInstance().getPendingTeleport(player.getUniqueId()) != null;
+		boolean isCrossServerTransfer = needsServerRouting || hasPendingTp;
 		// If the player was offline when the resource world was reset, teleport them to spawn
 		long resetTime = AranarthUtils.getLastResourceWorldResetTime();
 		if (resetTime > 0 && player.getWorld().getName().startsWith("resource")
@@ -100,6 +129,13 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
+		// Load job data from MySQL for this player
+		if (DatabaseManager.isActive()) {
+			final UUID joinUuid = player.getUniqueId();
+			Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+				() -> PersistenceUtils.loadJobDataForPlayer(joinUuid));
+		}
+
 		// Permissions must be applied before nickname check is done
 		PermissionUtils.evaluatePlayerPermissions(player);
 
@@ -113,43 +149,420 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
-		if (!isNewPlayer) {
-			displayMotd(player);
+		// Announce this player to the network now that permissions and nickname are finalised.
+		if (NetworkManager.isActive()) {
+			AranarthPlayer apForNetwork = AranarthUtils.getPlayer(player.getUniqueId());
+			NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), apForNetwork);
 		}
 
-		DateUtils dateUtils = new DateUtils();
-		String nameToDisplay;
-		
-		if (!AranarthUtils.getNickname(player).isEmpty()) {
-			nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+		if (isCrossServerTransfer) {
+			e.setJoinMessage(null);
+			// Suppress DiscordSRV join announcement for server-switch arrivals.
+			// DiscordSRV fires at MONITOR priority and checks discordsrv.silentjoin before posting.
+			player.addAttachment(AranarthCore.getInstance(), "discordsrv.silentjoin", true);
+			if (NetworkManager.isActive()) {
+				NetworkManager.getInstance().markCrossServerJoin(player.getUniqueId());
+			}
 		} else {
-			nameToDisplay = "&7" + AranarthUtils.getUsername(player);
-		}
-		
-		if (dateUtils.isValentinesDay()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES)));
-		} else if (dateUtils.isEaster()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER)));
-		} else if (dateUtils.isHalloween()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN)));
-		} else if (dateUtils.isChristmas()) {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS)));
-		} else {
-			e.setJoinMessage(ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay));
+			if (!isNewPlayer) {
+				displayMotd(player);
+			}
+			DateUtils dateUtils = new DateUtils();
+			String nameToDisplay;
+
+			if (!AranarthUtils.getNickname(player).isEmpty()) {
+				nameToDisplay = "&7" + AranarthUtils.getNickname(player);
+			} else {
+				nameToDisplay = "&7" + AranarthUtils.getUsername(player);
+			}
+
+			String joinMsgStr;
+			if (dateUtils.isValentinesDay()) {
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.VALENTINES));
+			} else if (dateUtils.isEaster()) {
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.EASTER));
+			} else if (dateUtils.isHalloween()) {
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.HALLOWEEN));
+			} else if (dateUtils.isChristmas()) {
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(nameToDisplay, SpecialDay.CHRISTMAS));
+			} else {
+				joinMsgStr = ChatUtils.translateToColor("&8[&a+&8] &7" + nameToDisplay);
+			}
+			e.setJoinMessage(joinMsgStr);
+
+			// Notify other servers to display the join message and play the join sound
+			if (NetworkManager.isActive()) {
+				AranarthPlayer apVanishCheck = AranarthUtils.getPlayer(player.getUniqueId());
+				if (apVanishCheck == null || !apVanishCheck.isVanished()) {
+					NetworkManager.getInstance().publishJoinMsg(joinMsgStr, isNewPlayer);
+				}
+			}
 		}
 
 		boolean finalIsNewPlayer = isNewPlayer;
 		new BukkitRunnable() {
 			@Override
 			public void run() {
+				// Inject existing remote-server players into this player's tab list.
+				NetworkTabManager.syncAllToPlayer(player);
+
+				// Execute any pending cross-server teleport (e.g. player transferred here from SMP
+				// to complete a /tp or /tpaccept, or returning from SMP via /survival).
+				boolean hadPendingTp = false;
+				boolean isLoginRouting = false;
+				if (NetworkManager.isActive()) {
+					PendingTeleport pending = NetworkManager.getInstance().getPendingTeleport(player.getUniqueId());
+					if (pending != null) {
+						hadPendingTp = true;
+						isLoginRouting = pending.isLoginRouting();
+						NetworkManager.getInstance().clearPendingTeleport(player.getUniqueId());
+
+						// If this transfer requires an inventory swap, reload player data from
+						// the source server (which saved it to MySQL just before transferring)
+						// and apply the stored survival inventory.
+						if (pending.isApplyInventory()) {
+							// Capture this server's balance delta before reloading
+							AranarthPlayer preReloadAp = AranarthUtils.getPlayer(player.getUniqueId());
+							double localDelta = 0.0;
+							if (preReloadAp != null && preReloadAp.getBalanceSnapshot() >= 0.0) {
+								localDelta = preReloadAp.getBalance() - preReloadAp.getBalanceSnapshot();
+							}
+							PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+							PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+							if (localDelta != 0.0) {
+								AranarthPlayer apBalance = AranarthUtils.getPlayer(player.getUniqueId());
+								if (apBalance != null) {
+									double mergedBalance = apBalance.getBalance() + localDelta;
+									apBalance.setBalance(mergedBalance);
+									apBalance.setBalanceSnapshot(mergedBalance);
+								}
+							}
+							AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
+							if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
+								try {
+									player.getInventory().setContents(
+											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
+								} catch (Exception e) {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply survival inventory for " + player.getName() + ": " + e.getMessage());
+									player.getInventory().clear();
+								}
+							} else {
+								// survivaInventory is an empty string, meaning it was never
+								// serialized (default value) or the DB write failed before the
+								// transfer completed (e.g. the player crashed mid-transfer).
+								// Do NOT clear the inventory — doing so would wipe the player's
+								// items (Bukkit's clear() leaves armor slots, producing the
+								// "only armor remained" symptom). Leave Minecraft's native
+								// player data intact and log a warning for diagnosis.
+								Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+										+ "[Inv] survivaInventory is empty for " + player.getName()
+										+ " on isApplyInventory arrival — skipping clear to protect items (stale pending teleport?)");
+							}
+							if (apInv != null && !apInv.getSurvivalEnderChest().isEmpty()) {
+								try {
+									player.getEnderChest().setContents(
+											ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalEnderChest()));
+								} catch (Exception e) {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Failed to apply ender chest for " + player.getName() + ": " + e.getMessage());
+									player.getEnderChest().clear();
+								}
+							}
+							if (apInv != null) {
+								player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+								player.setFoodLevel(apInv.getSurvivalFoodLevel());
+								player.setSaturation(apInv.getSurvivalSaturation());
+								player.setLevel(apInv.getSurvivalExpLevel());
+								player.setExp(apInv.getSurvivalExpProgress());
+							}
+							player.setGameMode(GameMode.SURVIVAL);
+							// If the player's last position on this server was in a non-survival world
+							// (e.g. creative or arena), Minecraft will have restored them there with the
+							// survival inventory we just applied — an inconsistent state. Any pending
+							// teleport to a survival world (e.g. "dominion home") would then trigger
+							// switchInventory(creative→world), wrongly saving the survival items as the
+							// creative inventory. Move the player to survival world spawn via a direct
+							// player.teleport() call (TeleportCause.PLUGIN) so the pending command fires
+							// from a survival-world context. PLUGIN cause is intentional: our
+							// PlayerTeleportBetweenWorldsListener only processes TeleportCause.COMMAND,
+							// so switchInventory is not triggered by this relocation.
+							if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) {
+								World fallbackWorld = Bukkit.getWorld("spawn");
+								if (fallbackWorld == null) fallbackWorld = Bukkit.getWorld("world");
+								if (fallbackWorld != null) {
+									player.teleport(new Location(fallbackWorld, 0.5, 101, 0.5, 180, 0));
+								} else {
+									Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Inv] Could not find spawn/world to relocate " + player.getName()
+											+ " out of '" + player.getWorld().getName() + "' — pending teleport may corrupt creative/arena inventory");
+								}
+							}
+							// Re-publish with fresh data so remote servers see the correct nickname/rank
+							if (NetworkManager.isActive()) {
+								AranarthPlayer freshAp = AranarthUtils.getPlayer(player.getUniqueId());
+								if (freshAp != null) {
+									NetworkManager.getInstance().publishPlayerJoin(player.getUniqueId(), freshAp);
+								}
+							}
+						} else if (hadPendingTp) {
+							// Login routing: player arrived at their final destination via cross-server
+							// routing on login (e.g. last logged off on SMP, routed here from Survival).
+							// No inventory apply needed (Minecraft restores state from player data), but
+							// we DO need to publish a join announcement since the routing server suppressed it.
+							if (isLoginRouting) {
+								int nonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
+									if (is != null) nonNull++;
+								}
+								int armorNonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getArmorContents()) {
+									if (is != null) armorNonNull++;
+								}
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] LoginRouting arrival for "
+										+ player.getName() + " — player.dat inventory: " + nonNull
+										+ " non-null main slot(s), " + armorNonNull + " armor piece(s)."
+										+ (nonNull == 0 ? " WARNING: main inventory is empty — player.dat may be stale." : ""));
+							}
+							AranarthPlayer apJoin = AranarthUtils.getPlayer(player.getUniqueId());
+							if (apJoin != null && !apJoin.isVanished()) {
+								String routedName = "&7" + AranarthUtils.getNickname(player);
+								DateUtils routedDateUtils = new DateUtils();
+								String routedJoinMsg;
+								if (routedDateUtils.isValentinesDay()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.VALENTINES));
+								} else if (routedDateUtils.isEaster()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.EASTER));
+								} else if (routedDateUtils.isHalloween()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.HALLOWEEN));
+								} else if (routedDateUtils.isChristmas()) {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + ChatUtils.getSpecialJoinMessage(routedName, SpecialDay.CHRISTMAS));
+								} else {
+									routedJoinMsg = ChatUtils.translateToColor("&8[&a+&8] &7" + routedName);
+								}
+								for (Player online : Bukkit.getOnlinePlayers()) {
+									if (!online.getUniqueId().equals(player.getUniqueId())) {
+										online.sendMessage(routedJoinMsg);
+									}
+								}
+								if (NetworkManager.isActive()) {
+									NetworkManager.getInstance().publishJoinMsg(routedJoinMsg, false);
+								}
+								PlayerServerJoinListener.this.playJoinSound();
+							}
+						}
+
+						if ("player".equals(pending.getType())) {
+							// TP to wherever the named player currently is
+							Player target = Bukkit.getPlayer(UUID.fromString(pending.getTargetUuid()));
+							if (target != null) {
+								AranarthUtils.teleportPlayer(player, player.getLocation(), target.getLocation(),
+										true, pending.getTitleMain(), pending.getTitleSub(), success -> {});
+							}
+						} else if ("command".equals(pending.getType())) {
+							// Dispatch a command as if the player ran it on this server.
+							// Force admin mode so the command skips its own countdown
+							// (the countdown already happened on the source server).
+							AranarthPlayer apCmd = AranarthUtils.getPlayer(player.getUniqueId());
+							boolean wasAdmin = apCmd.isInAdminMode();
+							apCmd.setInAdminMode(true);
+							AranarthUtils.setPlayer(player.getUniqueId(), apCmd);
+							Bukkit.dispatchCommand(player, pending.getCommand());
+							AranarthPlayer apCmdAfter = AranarthUtils.getPlayer(player.getUniqueId());
+							apCmdAfter.setInAdminMode(wasAdmin);
+							AranarthUtils.setPlayer(player.getUniqueId(), apCmdAfter);
+						} else {
+							// TP to the stored coordinates
+							World w = Bukkit.getWorld(pending.getWorld());
+							if (w != null) {
+								Location dest = new Location(w,
+										pending.getX(), pending.getY(), pending.getZ(),
+										pending.getYaw(), pending.getPitch());
+								AranarthUtils.teleportPlayer(player, player.getLocation(), dest,
+										true, pending.getTitleMain(), pending.getTitleSub(), success -> {});
+							}
+						}
+					}
+				}
+
+				// Reload quest progress from DB so assignments and progress match the source server.
+				// Skip when this is a login-routing transfer (player being routed back to the server
+				// they last logged off on) — the in-memory data here is already authoritative and
+				// the async DB write from the quit event may not have finished yet.
+				if (hadPendingTp && !isLoginRouting && DatabaseManager.isActive()) {
+					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
+					PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
+					// Reload the player's dominion in case it was created on the other server
+					PersistenceUtils.reloadDominionForPlayer(player.getUniqueId());
+					// Reload streak and mail so this server has authoritative state from MySQL.
+					// Without this, the source server's claim/clear changes would be invisible here
+					// (stale data from our startup load), and when the player quits from this server,
+					// the stale data would be written back to MySQL — overwriting the correct state.
+					Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[XServer] Reloading streak+mail from MySQL for "
+							+ player.getName() + " on cross-server arrival");
+					PersistenceUtils.reloadPlayerLoginStreakFromDatabase(player.getUniqueId());
+					PersistenceUtils.reloadPlayerMailFromDatabase(player.getUniqueId());
+				}
+
+				// Apply the /back location saved by the source server before transfer.
+				if (hadPendingTp && NetworkManager.isActive()) {
+					NetworkManager.getInstance().loadAndApplyCrossServerBack(player.getUniqueId());
+					NetworkManager.getInstance().loadAndApplyCrossServerLastMsg(player.getUniqueId());
+				}
+
+				// When arriving via cross-server transfer, force other clients to reload this
+				// player's skin and tab entry by briefly hiding then re-showing them.
+				if (hadPendingTp) {
+					new BukkitRunnable() {
+						@Override
+						public void run() {
+							if (!player.isOnline()) return;
+							for (Player other : Bukkit.getOnlinePlayers()) {
+								if (!other.getUniqueId().equals(player.getUniqueId())) {
+									other.hidePlayer(AranarthCore.getInstance(), player);
+									other.showPlayer(AranarthCore.getInstance(), player);
+								}
+							}
+							// Also force a tab update for the joining player to see themselves
+							AranarthUtils.updateTab();
+						}
+					}.runTaskLater(AranarthCore.getInstance(), 20L);
+				}
+
+				// Restore the player to where they last logged out.
+				// If they logged off on this server: teleport them to the saved position.
+				// If they logged off on another server: route them there via a pending teleport,
+				// which the receiving server will execute on arrival.
+				if (!hadPendingTp && lastLoc != null && NetworkManager.isActive()) {
+					if (lastLoc.server.equals(NetworkManager.getInstance().getThisServer())) {
+						World w = Bukkit.getWorld(lastLoc.world);
+						if (w != null) {
+							Location dest = new Location(
+									w, lastLoc.x, lastLoc.y, lastLoc.z, lastLoc.yaw, lastLoc.pitch);
+							new BukkitRunnable() {
+								@Override
+								public void run() {
+									if (player.isOnline()) player.teleport(dest);
+								}
+							}.runTaskLater(AranarthCore.getInstance(), 2L);
+						}
+					} else {
+						// Unplanned cross-server landing: the player's last known location is on
+						// another server (e.g. that server shut down and Velocity routed them here
+						// as a fallback). Reload AranarthPlayer state from MySQL so that balance,
+						// rank, and other non-inventory fields are current, then route the player
+						// back immediately.
+						//
+						// We deliberately do NOT apply the MySQL survivalInventory snapshot here.
+						// The 2-second window is not long enough to guarantee the source server's
+						// shutdown save has committed to MySQL, so the snapshot may be stale. A
+						// stale apply would clear the player's main inventory and, if this server
+						// then kicks the player (e.g. its own restart), it would write the stale
+						// data back to MySQL — corrupting the snapshot permanently. The receiving
+						// server loads from its own player.dat which is authoritative for inventory.
+						final String velocityTarget = AranarthCore.getInstance().getConfig()
+								.getString("network.servers." + lastLoc.server, lastLoc.server);
+						final String locWorld = lastLoc.world;
+						final double locX = lastLoc.x, locY = lastLoc.y, locZ = lastLoc.z;
+						final float locYaw = lastLoc.yaw, locPitch = lastLoc.pitch;
+						Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned cross-server landing for "
+								+ player.getName() + " — last server: " + lastLoc.server
+								+ ", routing to: " + velocityTarget + ". Reloading from MySQL in 2s.");
+						new BukkitRunnable() {
+							@Override
+							public void run() {
+								if (!player.isOnline()) return;
+								if (DatabaseManager.isActive()) {
+									PersistenceUtils.reloadPlayerFromDatabase(player.getUniqueId());
+									PersistenceUtils.loadPlayerTogglesFromDatabase(player.getUniqueId());
+								}
+								AranarthPlayer apSnapshot = AranarthUtils.getPlayer(player.getUniqueId());
+								String snapState = apSnapshot == null ? "no AranarthPlayer in memory"
+										: apSnapshot.getSurvivalInventory().isEmpty() ? "EMPTY"
+										: "length=" + apSnapshot.getSurvivalInventory().length();
+								int currentNonNull = 0;
+								for (org.bukkit.inventory.ItemStack is : player.getInventory().getContents()) {
+									if (is != null) currentNonNull++;
+								}
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Unplanned landing state for "
+										+ player.getName() + " — MySQL survivalInventory snapshot: " + snapState
+										+ "; current inventory on this server (from player.dat): " + currentNonNull + " non-null slot(s)."
+										+ " Snapshot NOT applied — routing to destination server.");
+								Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] Routing " + player.getName()
+										+ " back to " + velocityTarget + " after unplanned landing.");
+								PendingTeleport pt = new PendingTeleport(
+										locWorld, locX, locY, locZ, locYaw, locPitch, "", "");
+								pt.setLoginRouting(true);
+								NetworkManager.getInstance().setPendingAndTransfer(player, velocityTarget, pt);
+							}
+						}.runTaskLater(AranarthCore.getInstance(), 40L); // 2s — allows source server's async shutdown save to commit to MySQL
+					}
+				}
+
+				// Log survivalInventory state for players arriving from a non-survival world
+				// (e.g. creative, arena). These players won't have their survival inventory
+				// applied on login, so if it's empty here it will be empty when they /home.
+				if (lastLoc != null && !AranarthUtils.isSurvivalWorld(lastLoc.world)) {
+					AranarthPlayer apInvCheck = AranarthUtils.getPlayer(player.getUniqueId());
+					if (apInvCheck != null) {
+						boolean empty = apInvCheck.getSurvivalInventory().isEmpty();
+						Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Inv] " + player.getName()
+								+ " joined from non-survival world '" + lastLoc.world + "': survivalInventory "
+								+ (empty ? "EMPTY — will skip clear if they switch to survival"
+										: "set (length=" + apInvCheck.getSurvivalInventory().length() + ")"));
+					}
+				}
+
+				// Apply MySQL survival inventory as a recovery fallback for same-server logins.
+				// MySQL is kept current by quit-time and periodic snapshots, so it is more
+				// reliable than a stale player.dat left by an ungraceful server shutdown.
+				if (!hadPendingTp && lastLoc != null && NetworkManager.isActive()
+						&& lastLoc.server.equals(NetworkManager.getInstance().getThisServer())
+						&& AranarthUtils.isSurvivalWorld(lastLoc.world)) {
+					AranarthPlayer apInv = AranarthUtils.getPlayer(player.getUniqueId());
+					if (apInv != null && !apInv.getSurvivalInventory().isEmpty()) {
+						try {
+							player.getInventory().setContents(
+									ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalInventory()));
+						} catch (Exception ex) {
+							Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+									+ "[Inv] Failed to apply survival inventory on login for " + player.getName() + ": " + ex.getMessage());
+						}
+						if (!apInv.getSurvivalEnderChest().isEmpty()) {
+							try {
+								player.getEnderChest().setContents(
+										ItemUtils.itemStackArrayFromBase64(apInv.getSurvivalEnderChest()));
+							} catch (Exception ex) {
+								Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX
+										+ "[Inv] Failed to apply ender chest on login for " + player.getName() + ": " + ex.getMessage());
+							}
+						}
+						if (apInv.getSurvivalHealth() > 0) {
+							player.setHealth(Math.min(apInv.getSurvivalHealth(), player.getAttribute(Attribute.MAX_HEALTH).getValue()));
+						}
+						player.setFoodLevel(apInv.getSurvivalFoodLevel());
+						player.setSaturation(apInv.getSurvivalSaturation());
+						player.setLevel(apInv.getSurvivalExpLevel());
+						player.setExp(apInv.getSurvivalExpProgress());
+					}
+				}
+
 				// Displays a welcome message after the join message
 				if (finalIsNewPlayer) {
-					Bukkit.broadcastMessage("");
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","
-							+ "\n                    &7to the &6&lRealm of Aranarth!"));
-					Bukkit.broadcastMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
-					Bukkit.broadcastMessage("");
+					for (Player online : Bukkit.getOnlinePlayers()) {
+						online.sendMessage("");
+						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+						online.sendMessage(ChatUtils.translateToColor("                     &7Welcome, &e" + player.getName() + ","));
+						online.sendMessage(ChatUtils.translateToColor("                    &7to the &6&lRealm of Aranarth!"));
+						online.sendMessage(ChatUtils.translateToColor("                &6&l-------------------------"));
+						online.sendMessage("");
+					}
+					// Broadcast welcome to other servers in the network
+					if (NetworkManager.isActive()) {
+						NetworkManager.getInstance().publishChat("", "");
+						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
+						NetworkManager.getInstance().publishChat("", "                     &7Welcome, &e" + player.getName() + ",");
+						NetworkManager.getInstance().publishChat("", "                    &7to the &6&lRealm of Aranarth!");
+						NetworkManager.getInstance().publishChat("", "                &6&l-------------------------");
+						NetworkManager.getInstance().publishChat("", "");
+					}
 
 					player.sendMessage(ChatUtils.chatMessage("&7Be sure to read the &e/rules &7and check out &e/warp Tutorial"));
 
@@ -182,7 +595,7 @@ public class PlayerServerJoinListener implements Listener {
 			for (Player online : Bukkit.getOnlinePlayers()) {
 				online.playSound(online, Sound.UI_TOAST_CHALLENGE_COMPLETE, 1F, 0.8F);
 			}
-		} else {
+		} else if (!isCrossServerTransfer) {
 			playJoinSound();
 		}
 		AranarthUtils.updateTab();
@@ -320,11 +733,34 @@ public class PlayerServerJoinListener implements Listener {
 		}
 
 		// Login streak notification
+		Bukkit.getLogger().info("[AC][Streak] JOIN " + player.getUniqueId()
+				+ " (" + player.getName() + ") | day=" + LoginStreakUtils.getStreakDay(player.getUniqueId())
+				+ " lastClaim=" + LoginStreakUtils.getLastClaimEpochDay(player.getUniqueId())
+				+ " lastLogin=" + LoginStreakUtils.getLastLoginEpochDay(player.getUniqueId()));
 		boolean streakReset = LoginStreakUtils.ensureStreakValid(player.getUniqueId());
 		if (streakReset) {
 			player.sendMessage(ChatUtils.translateToColor("  &7Your login streak has been reset to Day 1"));
 		} else if (LoginStreakUtils.canClaim(player.getUniqueId())) {
 			player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
+		}
+
+		// Pending crate key notification — reload from MySQL first so we display the
+		// authoritative count (another server may have received votes or the player may
+		// have claimed on another server since this server last loaded from DB).
+		UUID uuid = player.getUniqueId();
+		PersistenceUtils.reloadVoteKeysForPlayerFromDatabase(uuid);
+		int pendingKeys = 0;
+		Integer pv = AranarthUtils.getPendingVoteKeys().get(uuid);
+		Integer pr = AranarthUtils.getPendingRareKeys().get(uuid);
+		Integer pe = AranarthUtils.getPendingEpicKeys().get(uuid);
+		Integer pg = AranarthUtils.getPendingGodlyKeys().get(uuid);
+		if (pv != null) pendingKeys += pv;
+		if (pr != null) pendingKeys += pr;
+		if (pe != null) pendingKeys += pe;
+		if (pg != null) pendingKeys += pg;
+		if (pendingKeys > 0) {
+			String keyWord = pendingKeys == 1 ? "key" : "keys";
+			player.sendMessage(ChatUtils.translateToColor("  &7You have &e" + pendingKeys + " pending crate " + keyWord + " &7- use &e/keyclaim &7to collect!"));
 		}
 
 		player.sendMessage(ChatUtils.translateToColor("&6&l-------------------------------------"));

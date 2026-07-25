@@ -96,6 +96,10 @@ commands:
   incantations:
     description: Provides a written book containing information about the incantations system
     permission: aranarth.incantations
+  jobs:
+    description: Manage your jobs
+    usage: /jobs [join|quit|stats] [name]
+    permission: aranarth.jobs
   info:
     description: Provides information about the input player
     permission: aranarth.info
