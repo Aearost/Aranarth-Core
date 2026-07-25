@@ -318,7 +318,9 @@
       "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Discord* -o -name *discord*)",
       "Bash(git:*)",
       "Bash(where javac:*)",
-      "Bash(\"C:/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot/bin/javac\" -proc:none \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/brew/BrewRecipe.java\" 2>&1)"
+      "Bash(\"C:/Program Files/Eclipse Adoptium/jdk-25.0.3.9-hotspot/bin/javac\" -proc:none \"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/brew/BrewRecipe.java\" 2>&1)",
+      "Bash(find C:UsersliamhIdeaProjectsAranarthCorediscord-bot -name .env* -o -name *.env)",
+      "Bash(xargs wc:*)"
     ]
   }
 }

@@ -3,7 +3,6 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
-import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
@@ -14,7 +13,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.Ageable;
-import org.bukkit.block.data.type.BambooSapling;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -36,12 +34,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -569,7 +565,7 @@ public class JobEventListener implements Listener {
         if (mat == Material.COPPER_BLOCK) return 0.15;
         if (mat == Material.IRON_BLOCK) return 0.25;
         if (mat == Material.GOLD_BLOCK) return 0.30;
-        if (mat == Material.CHAIN || mat == Material.LANTERN || mat == Material.SOUL_LANTERN
+        if (mat.name().endsWith("_CHAIN") || mat == Material.LANTERN || mat == Material.SOUL_LANTERN
                 || mat == Material.IRON_BARS) return 0.20;
         return 0;
     }

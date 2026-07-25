@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import com.projectkorra.projectkorra.OfflineBendingPlayer;
 import org.bukkit.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
