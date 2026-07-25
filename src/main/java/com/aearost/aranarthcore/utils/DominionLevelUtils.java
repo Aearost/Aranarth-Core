@@ -79,7 +79,7 @@ public class DominionLevelUtils {
     /**
      * Daily food power consumed per dominion level.
      */
-    private static final int[] DAILY_FOOD_POWER = {100, 250, 500, 1_000, 2_000};
+    private static final int[] DAILY_FOOD_POWER = {18, 44, 88, 175, 350};
 
     /**
      * Returns the daily balance cost for a dominion based on its current level.
