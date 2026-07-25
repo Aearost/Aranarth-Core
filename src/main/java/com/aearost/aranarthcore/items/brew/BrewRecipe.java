@@ -9,75 +9,75 @@ public enum BrewRecipe {
     POTATO_SOUP( "potato_soup",  Tier.COMMON, 0,     -1, true),   // diff 1, INSTANT_HEALTH/1
     HOT_CHOC(    "hot_choc",     Tier.COMMON, 0,     -1, true),   // diff 2, HASTE+REGEN
     WHEAT_BEER(  "wheatbeer",    Tier.COMMON, 0,     -1, true),   // diff 1, age 2 Birch
-    BEER(        "beer",         Tier.COMMON, 7000,  -1, false),  // diff 1, age 3
+    BEER(        "beer",         Tier.COMMON, 5000,  -1, false),  // diff 1, age 3
     PALE_ALE(    "pale_ale",     Tier.COMMON, 8000,  -1, false),  // diff 2, age 4 Pale Oak
-    COFFEE(      "coffee",       Tier.COMMON, 9000,  -1, false),  // diff 3, REGEN+SPEED
-    PUMPKIN_BEER("pumpkin_beer", Tier.COMMON, 10000, -1, false),  // diff 3, age 5 Oak
-    MEAD(        "mead",         Tier.COMMON, 11000, -1, false),  // diff 2, age 4 Oak
-    ICED_COFFEE( "iced_coffee",  Tier.COMMON, 12000, -1, false),  // diff 4, REGEN+SPEED
-    HONEY_MEAD(  "honey_mead",   Tier.COMMON, 14000, -1, false),  // diff 3, age 6 Oak, ABSORPTION
-    CIDRE(       "cidre",        Tier.COMMON, 15000, -1, false),  // diff 4, age 3
-    DARK_BEER(   "darkbeer",     Tier.COMMON, 0,     -1, false),  // diff 2, age 8 Dark Oak
-    APPLE_MEAD(  "ap_mead",      Tier.COMMON, 0,     -1, false),  // diff 4, age 4 Oak, WATER_BREATHING
-    WINE(        "wine",         Tier.COMMON, 0,     -1, false),  // diff 4, age 20
-    VODKA(       "vodka",        Tier.COMMON, 0,     -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
-    WHITE_JADE_TEA(  "atla4",  Tier.COMMON, 0, 1, false),  // POISON+NAUSEA (lore-significant)
-    ONION_BANANA(    "atla16", Tier.COMMON, 0, 2, false),  // NAUSEA+REGEN (lore-significant)
-    CACTUS_JUICE(    "atla1",  Tier.COMMON, 0, 1, false),  // NAUSEA+BLINDNESS+SPEED
-    JASMINE_TEA(     "atla3",  Tier.COMMON, 0, 2, false),  // REGEN+ABSORPTION/120s
-    SKY_BISON_CREAM( "atla7",  Tier.COMMON, 0, 2, false),  // JUMP_BOOST/2/120s+SLOW_FALLING
-    CABBAGE_WINE(    "atla11", Tier.COMMON, 0, 1, false),  // SATURATION
-    GINSENG_TEA(     "atla12", Tier.COMMON, 0, 1, false),  // SPEED+HASTE
-    GREEN_TEA(       "atla14", Tier.COMMON, 0, 1, false),  // SPEED+SATURATION
-    OOLONG_TEA(      "atla15", Tier.COMMON, 0, 1, false),  // HASTE+RESISTANCE
+    COFFEE(      "coffee",       Tier.COMMON, 20000, -1, false),  // diff 3, REGEN+SPEED
+    PUMPKIN_BEER("pumpkin_beer", Tier.COMMON, 14000, -1, false),  // diff 3, age 5 Oak
+    MEAD(        "mead",         Tier.COMMON, 10000, -1, false),  // diff 2, age 4 Oak
+    ICED_COFFEE( "iced_coffee",  Tier.COMMON, 35000, -1, false),  // diff 4, REGEN+SPEED
+    HONEY_MEAD(  "honey_mead",   Tier.COMMON, 22000, -1, false),  // diff 3, age 6 Oak, ABSORPTION
+    CIDRE(       "cidre",        Tier.COMMON, 26000, -1, false),  // diff 4, age 3
+    DARK_BEER(   "darkbeer",     Tier.COMMON, 11000, -1, false),  // diff 2, age 8 Dark Oak
+    APPLE_MEAD(  "ap_mead",      Tier.COMMON, 30000, -1, false),  // diff 4, age 4 Oak, WATER_BREATHING
+    WINE(        "wine",         Tier.COMMON, 40000, -1, false),  // diff 4, age 20
+    VODKA(       "vodka",        Tier.COMMON, 15000, -1, false),  // diff 4, distillruns 3, WEAKNESS+POISON
+    WHITE_JADE_TEA(  "atla4",  Tier.COMMON, 7000,  1, false),  // POISON+NAUSEA (lore-significant)
+    ONION_BANANA(    "atla16", Tier.COMMON, 9000,  2, false),  // NAUSEA+REGEN (lore-significant)
+    CACTUS_JUICE(    "atla1",  Tier.COMMON, 6000,  1, false),  // NAUSEA+BLINDNESS+SPEED
+    JASMINE_TEA(     "atla3",  Tier.COMMON, 28000, 2, false),  // REGEN+ABSORPTION/120s
+    SKY_BISON_CREAM( "atla7",  Tier.COMMON, 24000, 2, false),  // JUMP_BOOST/2/120s+SLOW_FALLING
+    CABBAGE_WINE(    "atla11", Tier.COMMON, 16000, 1, false),  // SATURATION
+    GINSENG_TEA(     "atla12", Tier.COMMON, 20000, 1, false),  // SPEED+HASTE
+    GREEN_TEA(       "atla14", Tier.COMMON, 19000, 1, false),  // SPEED+SATURATION
+    OOLONG_TEA(      "atla15", Tier.COMMON, 26000, 1, false),  // HASTE+RESISTANCE
 
     // ─── COMMON tier additions ────────────────────────────────────────────────
-    // Unlocked by perfecting — not in the brew shop (price 0).
+    // Purchasable in the brew shop. Price reflects difficulty and effect quality.
     // diff 2
-    CHOC_MILK(          "choc_milk",          Tier.COMMON, 0, -1, false),
-    STRAW_MILK(         "straw_milk",         Tier.COMMON, 0, -1, false),
-    HONEY_MILK(         "honey_milk",         Tier.COMMON, 0, -1, false),
-    MUSHROOM_STEW(      "mushroom_stew",      Tier.COMMON, 0, -1, false),
-    PUMPKIN_SOUP(       "pumpkin_soup",       Tier.COMMON, 0, -1, false),
-    MELON_COOLER(       "melon_cooler",       Tier.COMMON, 0, -1, false),
-    HOT_CIDER(          "hot_cider",          Tier.COMMON, 0, -1, false),
-    CHAMOMILE_TEA(      "chamomile_tea",      Tier.COMMON, 0, -1, false),
-    ROOIBOS_TEA(        "rooibos_tea",        Tier.COMMON, 0, -1, false),
-    SWEET_TEA(          "sweet_tea",          Tier.COMMON, 0, -1, false),
-    AMBER_ALE(          "amber_ale",          Tier.COMMON, 0, -1, false),
+    CHOC_MILK(          "choc_milk",          Tier.COMMON, 7000,  -1, false),
+    STRAW_MILK(         "straw_milk",         Tier.COMMON, 7000,  -1, false),
+    HONEY_MILK(         "honey_milk",         Tier.COMMON, 9000,  -1, false),
+    MUSHROOM_STEW(      "mushroom_stew",      Tier.COMMON, 10000, -1, false),
+    PUMPKIN_SOUP(       "pumpkin_soup",       Tier.COMMON, 10000, -1, false),
+    MELON_COOLER(       "melon_cooler",       Tier.COMMON, 8000,  -1, false),
+    HOT_CIDER(          "hot_cider",          Tier.COMMON, 9000,  -1, false),
+    CHAMOMILE_TEA(      "chamomile_tea",      Tier.COMMON, 11000, -1, false),
+    ROOIBOS_TEA(        "rooibos_tea",        Tier.COMMON, 11000, -1, false),
+    SWEET_TEA(          "sweet_tea",          Tier.COMMON, 8000,  -1, false),
+    AMBER_ALE(          "amber_ale",          Tier.COMMON, 10000, -1, false),
     // diff 3
-    PORTER(             "porter",             Tier.COMMON, 0, -1, false),
-    BLACK_TEA(          "black_tea",          Tier.COMMON, 0, -1, false),
-    HIBISCUS_TEA(       "hibiscus_tea",       Tier.COMMON, 0, -1, false),
-    CHERRY_SODA(        "cherry_soda",        Tier.COMMON, 0, -1, false),
-    ROOT_BEER(          "root_beer",          Tier.COMMON, 0, -1, false),
-    BONE_BROTH(         "bone_broth",         Tier.COMMON, 0, -1, false),
-    MISO_BROTH(         "miso_broth",         Tier.COMMON, 0, -1, false),
-    BORSCHT(            "borscht",            Tier.COMMON, 0, -1, false),
-    BERRY_SMOOTHIE(     "berry_smoothie",     Tier.COMMON, 0, -1, false),
-    RABBIT_STEW(        "rabbit_stew",        Tier.COMMON, 0, -1, false),
-    HORCHATA(           "horchata",           Tier.COMMON, 0, -1, false),
-    TROPICAL_PUNCH(     "tropical_punch",     Tier.COMMON, 0, -1, false),
-    BAMBOO_LAGER(       "bamboo_lager",       Tier.COMMON, 0, -1, false),
+    PORTER(             "porter",             Tier.COMMON, 14000, -1, false),
+    BLACK_TEA(          "black_tea",          Tier.COMMON, 13000, -1, false),
+    HIBISCUS_TEA(       "hibiscus_tea",       Tier.COMMON, 15000, -1, false),
+    CHERRY_SODA(        "cherry_soda",        Tier.COMMON, 12000, -1, false),
+    ROOT_BEER(          "root_beer",          Tier.COMMON, 13000, -1, false),
+    BONE_BROTH(         "bone_broth",         Tier.COMMON, 18000, -1, false),
+    MISO_BROTH(         "miso_broth",         Tier.COMMON, 17000, -1, false),
+    BORSCHT(            "borscht",            Tier.COMMON, 14000, -1, false),
+    BERRY_SMOOTHIE(     "berry_smoothie",     Tier.COMMON, 16000, -1, false),
+    RABBIT_STEW(        "rabbit_stew",        Tier.COMMON, 19000, -1, false),
+    HORCHATA(           "horchata",           Tier.COMMON, 13000, -1, false),
+    TROPICAL_PUNCH(     "tropical_punch",     Tier.COMMON, 15000, -1, false),
+    BAMBOO_LAGER(       "bamboo_lager",       Tier.COMMON, 14000, -1, false),
     // diff 4
-    MATCHA(             "matcha",             Tier.COMMON, 0, -1, false),
-    CHAI_TEA(           "chai_tea",           Tier.COMMON, 0, -1, false),
-    BUTTERFLY_TEA(      "butterfly_tea",      Tier.COMMON, 0, -1, false),
-    SPORE_TEA(          "spore_tea",          Tier.COMMON, 0, -1, false),
-    BUBBLE_TEA(         "bubble_tea",         Tier.COMMON, 0, -1, false),
-    GINGER_BEER(        "ginger_beer",        Tier.COMMON, 0, -1, false),
-    GLOW_COLA(          "glow_cola",          Tier.COMMON, 0, -1, false),
-    GOLDEN_CARROT_JUICE("golden_carrot_juice",Tier.COMMON, 0, -1, false),
-    PUMPKIN_LATTE(      "pumpkin_latte",      Tier.COMMON, 0, -1, false),
-    IPA(                "ipa",                Tier.COMMON, 0, -1, false),
-    STOUT(              "stout",              Tier.COMMON, 0, -1, false),
-    SOUR_ALE(           "sour_ale",           Tier.COMMON, 0, -1, false),
-    WHITE_WINE(         "white_wine",         Tier.COMMON, 0, -1, false),
-    ROSE_WINE(          "rose_wine",          Tier.COMMON, 0, -1, false),
-    MULLED_MEAD(        "mulled_mead",        Tier.COMMON, 0, -1, false),
-    AZALEA_WINE(        "azalea_wine",        Tier.COMMON, 0, -1, false),
-    COPPER_ALE(         "copper_ale",         Tier.COMMON, 0, -1, false),
-    MOSS_MULE(          "moss_mule",          Tier.COMMON, 0, -1, false),
+    MATCHA(             "matcha",             Tier.COMMON, 28000, -1, false),
+    CHAI_TEA(           "chai_tea",           Tier.COMMON, 24000, -1, false),
+    BUTTERFLY_TEA(      "butterfly_tea",      Tier.COMMON, 26000, -1, false),
+    SPORE_TEA(          "spore_tea",          Tier.COMMON, 22000, -1, false),
+    BUBBLE_TEA(         "bubble_tea",         Tier.COMMON, 24000, -1, false),
+    GINGER_BEER(        "ginger_beer",        Tier.COMMON, 22000, -1, false),
+    GLOW_COLA(          "glow_cola",          Tier.COMMON, 28000, -1, false),
+    GOLDEN_CARROT_JUICE("golden_carrot_juice",Tier.COMMON, 36000, -1, false),
+    PUMPKIN_LATTE(      "pumpkin_latte",      Tier.COMMON, 26000, -1, false),
+    IPA(                "ipa",                Tier.COMMON, 22000, -1, false),
+    STOUT(              "stout",              Tier.COMMON, 23000, -1, false),
+    SOUR_ALE(           "sour_ale",           Tier.COMMON, 20000, -1, false),
+    WHITE_WINE(         "white_wine",         Tier.COMMON, 30000, -1, false),
+    ROSE_WINE(          "rose_wine",          Tier.COMMON, 28000, -1, false),
+    MULLED_MEAD(        "mulled_mead",        Tier.COMMON, 32000, -1, false),
+    AZALEA_WINE(        "azalea_wine",        Tier.COMMON, 30000, -1, false),
+    COPPER_ALE(         "copper_ale",         Tier.COMMON, 24000, -1, false),
+    MOSS_MULE(          "moss_mule",          Tier.COMMON, 26000, -1, false),
 
     // ─── RARE tier ────────────────────────────────────────────────────────────
     // Difficulty 5–6. Unlocked through vote crates.
