@@ -57,7 +57,7 @@ public class ChatUtils {
 	 * @return The formatted chat message.
 	 */
 	public static String playerColorChat(String msg) {
-		if (msg.contains("#")) {
+		if (msg.contains("&#")) {
 			return null;
 		}
 		return ChatColor.translateAlternateColorCodes('&', msg);
@@ -122,7 +122,7 @@ public class ChatUtils {
 			}
 			msg = result.toString();
 		}
-		msg = checkForHex(msg);
+		msg = checkForInternalHex(msg);
 		return ChatColor.translateAlternateColorCodes('&', msg);
 	}
 
@@ -145,10 +145,21 @@ public class ChatUtils {
 	}
 
 	private static String checkForHex(String msg) {
+		Pattern ampPattern = Pattern.compile("&#[a-fA-F0-9]{6}");
+		Matcher ampMatcher = ampPattern.matcher(msg);
+		while (ampMatcher.find()) {
+			String fullMatch = msg.substring(ampMatcher.start(), ampMatcher.end());
+			String hexColor = fullMatch.substring(1); // strip the leading & to get #RRGGBB
+			msg = msg.replace(fullMatch, ChatColor.of(hexColor) + "");
+			ampMatcher = ampPattern.matcher(msg);
+		}
+		return msg;
+	}
+
+	private static String checkForInternalHex(String msg) {
 		Pattern pattern = Pattern.compile("#[a-fA-F0-9]{6}");
 		Matcher matcher = pattern.matcher(msg);
 		while (matcher.find()) {
-			// Gets the color code and replaces it with the actual color
 			String color = msg.substring(matcher.start(), matcher.end());
 			msg = msg.replace(color, ChatColor.of(color) + "");
 			matcher = pattern.matcher(msg);
@@ -198,8 +209,8 @@ public class ChatUtils {
 		}
 
 		// Removes any manually added hex codes
-		if (colorStripped.contains("#")) {
-			String pattern = "#.{6}";
+		if (colorStripped.contains("&#")) {
+			String pattern = "&#.{6}";
 			colorStripped = colorStripped.replaceAll(pattern, "");
 		}
 
