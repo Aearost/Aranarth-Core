@@ -214,4 +214,60 @@ async function lockForumThread(client, issueNumber) {
   }
 }
 
-module.exports = { createForumThread, handleForumMessage, handleForumMessageDelete, postNoteToForum, postTagChangeToForum, lockForumThread };
+/**
+ * Creates a Discord forum thread for an existing GitHub issue (catch-up sync).
+ * Derives type/priority from the issue's labels and uses the issue body as the embed.
+ * @param {Client} client
+ * @param {object} issue  Raw GitHub issue object from the API
+ * @returns {Promise<ThreadChannel|null>}
+ */
+async function createForumThreadFromIssue(client, issue) {
+  const channel = await client.channels.fetch(config.FORUM_CHANNEL_ID).catch(() => null);
+  if (!channel) {
+    console.error('[ForumHandler] Could not fetch forum channel.');
+    return null;
+  }
+
+  const labelNames = issue.labels.map(l => l.name.toUpperCase());
+  const type     = ['BUG', 'IDEA', 'ABILITY'].find(t => labelNames.includes(t)) || null;
+  const priority = ['P1', 'P2', 'P3', 'P4'].find(p => labelNames.includes(p)) || null;
+
+  const colorMap = { BUG: config.COLORS.BUG, IDEA: config.COLORS.IDEA, ABILITY: config.COLORS.ABILITY };
+  const color = (type && colorMap[type]) || config.COLORS.DEFAULT;
+
+  const priorityLabels = { P1: '🔴 Critical', P2: '🟠 High', P3: '🟡 Medium', P4: '🟢 Low / Backlog' };
+  const priorityDisplay = priority ? priorityLabels[priority] : '⚪ Unset';
+
+  const githubUrl = issue.html_url;
+
+  // Build embed description: priority header + body (Discord cap: 4096 chars total)
+  const header = `**Priority:** ${priorityDisplay}\n\n`;
+  const maxBodyLen = 4096 - header.length - 50; // leave headroom
+  let bodyText = issue.body
+    ? (issue.body.length > maxBodyLen
+        ? issue.body.substring(0, maxBodyLen) + `\n\n*[...truncated — view on GitHub](${githubUrl})*`
+        : issue.body)
+    : '*No description provided.*';
+
+  // Discord thread names are capped at 100 chars
+  const rawThreadName = `${issue.title} #${issue.number}`;
+  const threadName = rawThreadName.length > 100 ? rawThreadName.substring(0, 97) + '...' : rawThreadName;
+
+  const embed = new EmbedBuilder()
+    .setTitle(`${issue.title} #${issue.number}`)
+    .setDescription(header + bodyText)
+    .setColor(color)
+    .setFooter({ text: 'Aranarth Issue Tracker · Community feedback is mirrored to GitHub' })
+    .setTimestamp(new Date(issue.created_at));
+
+  const thread = await channel.threads.create({
+    name: threadName,
+    message: { content: `<${githubUrl}>`, embeds: [embed] },
+  });
+
+  forumManager.set(issue.number, thread.id);
+  console.log(`[ForumHandler] Created catch-up forum thread ${thread.id} for issue #${issue.number}.`);
+  return thread;
+}
+
+module.exports = { createForumThread, createForumThreadFromIssue, handleForumMessage, handleForumMessageDelete, postNoteToForum, postTagChangeToForum, lockForumThread };

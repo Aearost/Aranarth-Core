@@ -22,6 +22,7 @@ const forumDeletionManager = require('./utils/forumDeletionManager');
 const workQueueHandler = require('./handlers/workQueueHandler');
 const pendingReviewManager = require('./utils/pendingReviewManager');
 const githubWebhookServer = require('./utils/githubWebhookServer');
+const issueSyncHandler = require('./handlers/issueSyncHandler');
 
 const client = new Client({
   intents: [
@@ -49,6 +50,7 @@ client.once(Events.ClientReady, async (c) => {
   scheduleDailyRefresh(client);
   githubWebhookServer.start(client);
   await registerSlashCommands(c);
+  scheduleIssueSync(client);
 });
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
@@ -226,6 +228,16 @@ async function setupSupportMessage(c) {
 
   fs.writeFileSync(ACTIVE_MSG_PATH, JSON.stringify({ messageId: msg.id }));
   console.log(`[Bot] Support message created (ID: ${msg.id}).`);
+}
+
+function scheduleIssueSync(client) {
+  const INTERVAL_MS = 30 * 60 * 1000; // every 30 minutes
+  // Short startup delay so the bot is fully ready before hitting the API
+  setTimeout(async () => {
+    await issueSyncHandler.syncIssues(client);
+    setInterval(() => issueSyncHandler.syncIssues(client), INTERVAL_MS);
+  }, 15 * 1000);
+  console.log('[Bot] Issue sync scheduled every 30 minutes (first run in 15s).');
 }
 
 function scheduleDailyRefresh(client) {

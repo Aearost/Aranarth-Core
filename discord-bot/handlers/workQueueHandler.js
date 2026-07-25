@@ -72,10 +72,10 @@ async function postWorkQueueMessage(channel, issue) {
   const embed = buildQueueEmbed(issue);
   const msg = await channel.send({ embeds: [embed] });
   await msg.react(config.WORK_QUEUE_EMOJIS.IN_PROGRESS);
-  await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
-  await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
-  await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
+  await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
+  await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   return msg;
 }
 
@@ -83,10 +83,10 @@ async function postSearchedQueueMessage(channel, issue) {
   const embed = buildQueueEmbed(issue);
   const msg = await channel.send({ embeds: [embed] });
   await msg.react(config.WORK_QUEUE_EMOJIS.IN_PROGRESS);
-  await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
-  await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
-  await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
+  await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
+  await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
   await msg.react(config.WORK_QUEUE_EMOJIS.REMOVE);
   return msg;
 }
@@ -162,10 +162,10 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
           .setTitle('📋 To-Do List Legend')
           .setDescription(
             `${config.WORK_QUEUE_EMOJIS.IN_PROGRESS} **In Progress** — Mark this issue as actively being worked on\n` +
-            `${config.WORK_QUEUE_EMOJIS.TAKE_NOTE} **Progress Note** — Add a note to the issue (mirrored to GitHub)\n` +
-            `${config.WORK_QUEUE_EMOJIS.ON_HOLD} **On Hold** — Pause work on this issue\n` +
-            `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it\n` +
             `${config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY} **Change Priority** — Update the GitHub priority label\n` +
+            `${config.WORK_QUEUE_EMOJIS.ON_HOLD} **On Hold** — Pause work on this issue\n` +
+            `${config.WORK_QUEUE_EMOJIS.TAKE_NOTE} **Progress Note** — Add a note to the issue (mirrored to GitHub)\n` +
+            `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it\n` +
             `${config.WORK_QUEUE_EMOJIS.SEARCH} **Custom Search** — Look up any issue by number\n` +
             `${config.WORK_QUEUE_EMOJIS.REMOVE} **Remove** — Remove a custom-searched issue from this list`
           )
