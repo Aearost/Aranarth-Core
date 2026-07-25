@@ -139,7 +139,7 @@ public class DominionLevelUtils {
                 dominion.getBalance() >= BALANCE_THRESHOLDS[i],
                 dominion.getCachedFarmlandCount() >= FARMLAND_THRESHOLDS[i],
                 dominion.getCachedLivestockCount() >= LIVESTOCK_THRESHOLDS[i],
-                dominion.getChunks().size() >= CHUNKS_THRESHOLDS[i],
+                dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId()) >= CHUNKS_THRESHOLDS[i],
                 getInGameYears(dominion) >= AGE_THRESHOLDS[i]
         };
     }

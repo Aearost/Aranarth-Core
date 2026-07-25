@@ -1385,7 +1385,13 @@ public class PersistenceUtils {
                 dominion.setCachedLivestockCount(cachedLivestockCount);
                 dominion.setFoundedTimestamp(foundedTimestamp);
                 dominion.setLevelDropTimestamp(levelDropTimestamp);
-                dominion.setBoughtOutpostChunks(boughtOutpostChunks);
+                if (boughtOutpostChunks > 0) {
+                    double refund = OutpostUtils.calculateBuyOutpostChunksCost(0, boughtOutpostChunks, dominion);
+                    dominion.setBalance(dominion.getBalance() + refund);
+                    Bukkit.getLogger().info("[AC] Refunded " + boughtOutpostChunks + " legacy outpost chunks to dominion " + dominion.getName()
+                            + " ($" + Math.round(refund) + ")");
+                }
+                dominion.setBoughtOutpostChunks(0);
                 dominion.setBendingEnabled(bendingEnabled);
                 dominion.setConqueredRequest(conqueredRequest);
                 dominion.setRebelRequest(rebelRequest);
@@ -4595,7 +4601,7 @@ public class PersistenceUtils {
                     continue;
                 }
 
-                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp
+                // #id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks
                 String[] fields = row.split("\\|", -1);
                 if (fields.length < 12) {
                     continue;
@@ -4631,11 +4637,12 @@ public class PersistenceUtils {
                 }
 
                 long createdTimestamp = Long.parseLong(fields[11]);
+                int boughtChunks = fields.length > 12 ? Integer.parseInt(fields[12]) : 0;
 
                 Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
-                        chunks, createdTimestamp
+                        chunks, boughtChunks, createdTimestamp
                 );
                 OutpostUtils.registerOutpost(outpost);
             }
@@ -4676,7 +4683,7 @@ public class PersistenceUtils {
 
         try {
             FileWriter writer = new FileWriter(filePath);
-            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp\n");
+            writer.write("#id|dominionId|name|outpostIndex|worldName|homeX|homeY|homeZ|homeYaw|homePitch|chunks|createdTimestamp|boughtChunks\n");
 
             for (Dominion dominion : DominionUtils.getDominions()) {
                 for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
@@ -4704,7 +4711,8 @@ public class PersistenceUtils {
                             + home.getYaw() + "|"
                             + home.getPitch() + "|"
                             + chunks + "|"
-                            + outpost.getCreatedTimestamp() + "\n";
+                            + outpost.getCreatedTimestamp() + "|"
+                            + outpost.getBoughtChunks() + "\n";
                     writer.write(row);
                 }
             }
@@ -6112,6 +6120,7 @@ public class PersistenceUtils {
                 obj.addProperty("homeYaw", home.getYaw());
                 obj.addProperty("homePitch", home.getPitch());
                 obj.addProperty("createdTimestamp", outpost.getCreatedTimestamp());
+                obj.addProperty("boughtChunks", outpost.getBoughtChunks());
                 JsonArray chunks = new JsonArray();
                 for (Chunk chunk : outpost.getChunks()) {
                     JsonObject c = new JsonObject();
@@ -7309,7 +7318,13 @@ public class PersistenceUtils {
         dominion.setCachedLivestockCount(cachedLivestockCount);
         dominion.setFoundedTimestamp(foundedTimestamp);
         dominion.setLevelDropTimestamp(levelDropTimestamp);
-        dominion.setBoughtOutpostChunks(boughtOutpostChunks);
+        if (boughtOutpostChunks > 0) {
+            double refund = OutpostUtils.calculateBuyOutpostChunksCost(0, boughtOutpostChunks, dominion);
+            dominion.setBalance(dominion.getBalance() + refund);
+            Bukkit.getLogger().info("[AC] Refunded " + boughtOutpostChunks + " legacy outpost chunks to dominion " + dominion.getName()
+                    + " ($" + Math.round(refund) + ")");
+        }
+        dominion.setBoughtOutpostChunks(0);
         dominion.setBendingEnabled(bendingEnabled);
         dominion.setConqueredRequest(conqueredRequest);
         dominion.setRebelRequest(rebelRequest);
@@ -7929,6 +7944,7 @@ public class PersistenceUtils {
                 float homeYaw = obj.get("homeYaw").getAsFloat();
                 float homePitch = obj.get("homePitch").getAsFloat();
                 long createdTimestamp = obj.get("createdTimestamp").getAsLong();
+                int boughtChunks = obj.has("boughtChunks") ? obj.get("boughtChunks").getAsInt() : 0;
                 String outpostLookupName = (worldName.startsWith("smp:") && AranarthCore.isSmpServer())
                         ? worldName.substring(4) : worldName;
                 World world = Bukkit.getWorld(outpostLookupName);
@@ -7944,7 +7960,7 @@ public class PersistenceUtils {
                 Outpost outpost = new Outpost(
                         id, name, dominionId, outpostIndex,
                         worldName, homeX, homeY, homeZ, homeYaw, homePitch,
-                        chunks, createdTimestamp
+                        chunks, boughtChunks, createdTimestamp
                 );
                 OutpostUtils.registerOutpost(outpost);
             } catch (Exception e) {

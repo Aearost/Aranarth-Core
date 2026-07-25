@@ -37,7 +37,7 @@ import java.util.*;
 public class CommandDominion implements CommandExecutor {
 
     private static final Map<UUID, Integer> pendingChunkPurchases = new HashMap<>();
-    private static final Map<UUID, Integer> pendingOutpostChunkPurchases = new HashMap<>();
+    private static final Map<UUID, Map.Entry<UUID, Integer>> pendingOutpostChunkPurchases = new HashMap<>();
     private static final Map<UUID, String> pendingConfirmations = new HashMap<>();
 
     /**
@@ -1598,7 +1598,7 @@ public class CommandDominion implements CommandExecutor {
 
         Outpost outpost = new Outpost(null, outpostName, dominion.getId(), nextIndex,
                 AranarthUtils.toStoredDominionWorldName(loc.getWorld().getName()), loc.getX(), loc.getY(), loc.getZ(),
-                loc.getYaw(), loc.getPitch(), outpostChunks, System.currentTimeMillis());
+                loc.getYaw(), loc.getPitch(), outpostChunks, 0, System.currentTimeMillis());
         OutpostUtils.registerOutpost(outpost);
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
@@ -1703,6 +1703,12 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
+        Outpost outpost = OutpostUtils.getOutpostPlayerIsIn(player);
+        if (outpost == null || !outpost.getDominionId().equals(dominion.getId())) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou must be standing in the outpost's land to purchase chunks for it!"));
+            return;
+        }
+
         int amount;
         try {
             amount = Integer.parseInt(args[2]);
@@ -1715,11 +1721,11 @@ public class CommandDominion implements CommandExecutor {
             return;
         }
 
-        int currentBought = dominion.getBoughtOutpostChunks();
+        int currentBought = outpost.getBoughtChunks();
         double totalCost = OutpostUtils.calculateBuyOutpostChunksCost(currentBought, amount, dominion);
 
-        Integer pending = pendingOutpostChunkPurchases.get(player.getUniqueId());
-        if (pending != null && pending == amount) {
+        Map.Entry<UUID, Integer> pending = pendingOutpostChunkPurchases.get(player.getUniqueId());
+        if (pending != null && pending.getKey().equals(outpost.getId()) && pending.getValue() == amount) {
             pendingOutpostChunkPurchases.remove(player.getUniqueId());
             if (dominion.getBalance() < totalCost) {
                 NumberFormat formatter = NumberFormat.getCurrencyInstance();
@@ -1727,19 +1733,19 @@ public class CommandDominion implements CommandExecutor {
                 return;
             }
             dominion.setBalance(dominion.getBalance() - totalCost);
-            dominion.setBoughtOutpostChunks(currentBought + amount);
+            outpost.setBoughtChunks(currentBought + amount);
+            OutpostUtils.updateOutpost(outpost);
             DominionUtils.updateDominion(dominion);
-            List<Outpost> outposts = OutpostUtils.getDominionOutposts(dominion.getId());
-            int outpostCount = outposts.size();
             NumberFormat formatter = NumberFormat.getCurrencyInstance();
-            player.sendMessage(ChatUtils.chatMessage("&7Purchased &e" + amount + " additional outpost chunk"
-                    + (amount > 1 ? "s" : "") + " &7for &6" + formatter.format(totalCost)));
+            player.sendMessage(ChatUtils.chatMessage("&7Purchased &e" + amount + " additional chunk"
+                    + (amount > 1 ? "s" : "") + " &7for outpost &e" + outpost.getName()
+                    + " &7for &6" + formatter.format(totalCost)));
         } else {
-            pendingOutpostChunkPurchases.put(player.getUniqueId(), amount);
+            pendingOutpostChunkPurchases.put(player.getUniqueId(), new AbstractMap.SimpleEntry<>(outpost.getId(), amount));
             String formattedCost = String.format("%,d", Math.round(totalCost));
             player.sendMessage(ChatUtils.chatMessage("&7Re-enter &e/dominion outpost buychunks " + amount
-                    + " &7to purchase " + amount + " outpost chunk" + (amount > 1 ? "s" : "")
-                    + " for &6$" + formattedCost + " &7(applies to all outposts)"));
+                    + " &7to purchase " + amount + " chunk" + (amount > 1 ? "s" : "")
+                    + " &7for outpost &e" + outpost.getName() + " &7for &6$" + formattedCost));
         }
     }
 
@@ -1941,7 +1947,7 @@ public class CommandDominion implements CommandExecutor {
         } else {
             for (int i = 0; i < dominionOutposts.size(); i++) {
                 Outpost op = dominionOutposts.get(i);
-                int maxChunks = OutpostUtils.getOutpostMaxChunks(op, dominion);
+                int maxChunks = OutpostUtils.getOutpostMaxChunks(op);
                 outpostsBuilder.append("&e").append(ChatUtils.stripColorFormatting(op.getName()))
                         .append(" &7(").append(op.getChunks().size()).append("/").append(maxChunks).append(" chunks)");
                 if (i < dominionOutposts.size() - 1) {
@@ -2048,7 +2054,9 @@ public class CommandDominion implements CommandExecutor {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         String valueWithTwoDecimals = formatter.format(dominion.getBalance());
         player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
-        player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + dominion.getMaxChunks() + " chunks"));
+        int outpostChunkTotal = OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
+        String outpostChunkSuffix = outpostChunkTotal > 0 ? " &8(&e+" + outpostChunkTotal + " outpost&8)" : "";
+        player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + dominion.getMaxChunks() + " chunks" + outpostChunkSuffix));
         player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
     }
 
@@ -2838,9 +2846,10 @@ public class CommandDominion implements CommandExecutor {
 
             // Chunks
             int chunkThresh = DominionLevelUtils.getChunksThreshold(nextLevel);
+            int totalChunks = dominion.getChunks().size() + OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
             player.sendMessage(ChatUtils.translateToColor(
                     "&8[" + (criteria[4] ? "&a✔" : "&cX") + "&8] &7Chunks - &e"
-                    + dominion.getChunks().size() + " &8/ &e" + chunkThresh));
+                    + totalChunks + " &8/ &e" + chunkThresh));
 
             // Age
             int ageThresh = DominionLevelUtils.getAgeThreshold(nextLevel);

@@ -131,8 +131,8 @@ public class OutpostUtils {
     /**
      * Returns the maximum chunks this outpost can claim, including bought extras.
      */
-    public static int getOutpostMaxChunks(Outpost outpost, Dominion dominion) {
-        return getBaseChunkLimit(outpost.getOutpostIndex()) + dominion.getBoughtOutpostChunks();
+    public static int getOutpostMaxChunks(Outpost outpost) {
+        return getBaseChunkLimit(outpost.getOutpostIndex()) + outpost.getBoughtChunks();
     }
 
     /**
@@ -245,7 +245,7 @@ public class OutpostUtils {
         if (dominion.getBalance() < claimPrice) {
             return "&cYour dominion cannot afford this!";
         }
-        int maxChunks = getOutpostMaxChunks(outpost, dominion);
+        int maxChunks = getOutpostMaxChunks(outpost);
         if (outpost.getChunks().size() >= maxChunks) {
             return "&cOutpost &e" + outpost.getName() + " &chas reached the limit of &e" + maxChunks + " &cchunks";
         }

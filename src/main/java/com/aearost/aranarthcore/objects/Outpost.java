@@ -21,11 +21,12 @@ public class Outpost {
     private Location home;
     private String homeWorldName;
     private List<Chunk> chunks;
+    private int boughtChunks;
     private final long createdTimestamp;
 
     public Outpost(UUID id, String name, UUID dominionId, int outpostIndex,
                    String worldName, double homeX, double homeY, double homeZ,
-                   float homeYaw, float homePitch, List<Chunk> chunks, long createdTimestamp) {
+                   float homeYaw, float homePitch, List<Chunk> chunks, int boughtChunks, long createdTimestamp) {
         this.id = id != null ? id : UUID.randomUUID();
         this.name = name;
         this.dominionId = dominionId;
@@ -34,6 +35,7 @@ public class Outpost {
         this.home = new Location(Bukkit.getWorld(actualWorldName), homeX, homeY, homeZ, homeYaw, homePitch);
         this.homeWorldName = worldName;
         this.chunks = chunks;
+        this.boughtChunks = boughtChunks;
         this.createdTimestamp = createdTimestamp;
     }
 
@@ -82,6 +84,14 @@ public class Outpost {
 
     public void setChunks(List<Chunk> chunks) {
         this.chunks = chunks;
+    }
+
+    public int getBoughtChunks() {
+        return boughtChunks;
+    }
+
+    public void setBoughtChunks(int boughtChunks) {
+        this.boughtChunks = boughtChunks;
     }
 
     public long getCreatedTimestamp() {
