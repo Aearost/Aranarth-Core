@@ -59,15 +59,52 @@ async function removeLabel(issueNumber, label) {
 }
 
 /**
- * Posts a comment on an issue.
+ * Posts a comment on an issue. Returns the created comment ID.
  */
 async function addComment(issueNumber, body) {
-  await client().issues.createComment({
+  const res = await client().issues.createComment({
     owner: config.GITHUB_OWNER,
     repo: config.GITHUB_REPO,
     issue_number: issueNumber,
     body,
   });
+  return res.data.id;
+}
+
+/**
+ * Deletes a GitHub issue comment by comment ID.
+ */
+async function deleteComment(commentId) {
+  await client().issues.deleteComment({
+    owner: config.GITHUB_OWNER,
+    repo: config.GITHUB_REPO,
+    comment_id: commentId,
+  });
+}
+
+/**
+ * Fetches a single issue by number.
+ */
+async function fetchSingleIssue(issueNumber) {
+  const res = await client().issues.get({
+    owner: config.GITHUB_OWNER,
+    repo: config.GITHUB_REPO,
+    issue_number: Number(issueNumber),
+  });
+  return res.data;
+}
+
+/**
+ * Fetches comments for an issue, filtering out Discord Community mirror comments.
+ */
+async function fetchIssueComments(issueNumber) {
+  const res = await client().issues.listComments({
+    owner: config.GITHUB_OWNER,
+    repo: config.GITHUB_REPO,
+    issue_number: Number(issueNumber),
+    per_page: 100,
+  });
+  return res.data.filter(c => !c.body.startsWith('**💬 [Discord Community]'));
 }
 
 /**
@@ -101,4 +138,4 @@ async function createIssue(title, body, labels) {
   return { url: res.data.html_url, number: res.data.number, data: res.data };
 }
 
-module.exports = { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue, createIssue };
+module.exports = { fetchOpenIssues, addLabel, removeLabel, addComment, deleteComment, fetchSingleIssue, fetchIssueComments, closeIssue, createIssue };

@@ -75,5 +75,8 @@ module.exports = {
     TAKE_NOTE: '💬',
     ON_HOLD: '⏸️',
     CLOSE: '🔒',
+    CHANGE_PRIORITY: '🔄',
+    REMOVE: '🗑️',
+    SEARCH: '🔍',
   },
 };

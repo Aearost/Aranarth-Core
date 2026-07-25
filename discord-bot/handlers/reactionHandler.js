@@ -49,15 +49,21 @@ async function handle(reaction, user, client) {
 
   // ── 2. Form channel reactions ──
   const session = formManager.getSessionByChannel(message.channel.id);
-  if (session && user.id === session.userId) {
-    // Cancel button (persistent, pinned at top of channel)
+  if (session) {
+    // Cancel button — session owner or council member can cancel
     if (session.cancelMessageId === message.id) {
-      try { await reaction.users.remove(user.id); } catch { /* ignore */ }
-      await handleCancel(message.channel, session, user);
-      return;
+      const guild = message.guild;
+      const member = await guild.members.fetch(user.id).catch(() => null);
+      const isOwner = user.id === session.userId;
+      const isCouncil = member?.roles.cache.has(config.COUNCIL_ROLE_ID);
+      if (isOwner || isCouncil) {
+        try { await reaction.users.remove(user.id); } catch { /* ignore */ }
+        await handleCancel(message.channel, session, user);
+        return;
+      }
     }
-    // Confirmation message (submit/edit/cancel)
-    if (session.state === 'CONFIRMING' && session.confirmMessageId === message.id) {
+    // Confirmation reactions (submit/edit/cancel) — owner only
+    if (user.id === session.userId && session.state === 'CONFIRMING' && session.confirmMessageId === message.id) {
       await handleConfirmReaction(reaction, user, client, session, emojiName, message.channel);
       return;
     }

@@ -314,7 +314,9 @@
       "Bash(find /c/Users/liamh/.m2 -name *BreweryX*)",
       "Bash(find /c/Users/liamh/.m2/repository -name *.jar -newer /c/Users/liamh/IdeaProjects/AranarthCore/pom.xml)",
       "Bash(mkdir -p /c/Users/liamh/IdeaProjects/AranarthCore/libs)",
-      "Bash(cp \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/BreweryX-3.7.0.jar\" /c/Users/liamh/IdeaProjects/AranarthCore/libs/)"
+      "Bash(cp \"/c/Users/liamh/Desktop/Folders/Minecraft/Aranarth Test/plugins/BreweryX-3.7.0.jar\" /c/Users/liamh/IdeaProjects/AranarthCore/libs/)",
+      "Bash(find /c/Users/liamh/IdeaProjects/AranarthCore/src -name *Discord* -o -name *discord*)",
+      "Bash(git:*)"
     ]
   }
 }

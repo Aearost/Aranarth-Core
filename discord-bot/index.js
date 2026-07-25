@@ -21,6 +21,7 @@ const statusTracker = require('./utils/statusTracker');
 const forumDeletionManager = require('./utils/forumDeletionManager');
 const workQueueHandler = require('./handlers/workQueueHandler');
 const pendingReviewManager = require('./utils/pendingReviewManager');
+const githubWebhookServer = require('./utils/githubWebhookServer');
 
 const client = new Client({
   intents: [
@@ -46,6 +47,7 @@ client.once(Events.ClientReady, async (c) => {
   await restorePendingReviewReactions(client);
   await workQueueHandler.refreshWorkQueue(client);
   scheduleDailyRefresh(client);
+  githubWebhookServer.start(client);
   await registerSlashCommands(c);
 });
 
@@ -66,6 +68,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
   await messageHandler.handle(message, client);
+});
+
+client.on(Events.MessageDelete, async (message) => {
+  if (message.author?.bot) return;
+  const { handleForumMessageDelete } = require('./handlers/forumHandler');
+  await handleForumMessageDelete(message.id);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {

@@ -4,7 +4,8 @@ const workQueueManager = require('../utils/workQueueManager');
 const scoringEngine = require('../utils/scoringEngine');
 const councilActivityManager = require('../utils/councilActivityManager');
 const holdTimestampManager = require('../utils/holdTimestampManager');
-const { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue } = require('../github/githubManager');
+const searchedIssuesManager = require('../utils/searchedIssuesManager');
+const { fetchOpenIssues, addLabel, removeLabel, addComment, closeIssue, fetchSingleIssue, fetchIssueComments } = require('../github/githubManager');
 const { postNoteToForum, postTagChangeToForum, lockForumThread } = require('./forumHandler');
 
 const PRIORITY_COLORS = {
@@ -15,6 +16,9 @@ const PRIORITY_COLORS = {
 };
 
 const DESC_LIMIT = 200;
+
+// promptMessageId → { userId, issueNumber, issueTitle, currentPriority }
+const changePriorityPrompts = new Map();
 
 function extractDescription(issue) {
   const body = issue.body || '';
@@ -71,6 +75,19 @@ async function postWorkQueueMessage(channel, issue) {
   await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
   await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
   await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
+  return msg;
+}
+
+async function postSearchedQueueMessage(channel, issue) {
+  const embed = buildQueueEmbed(issue);
+  const msg = await channel.send({ embeds: [embed] });
+  await msg.react(config.WORK_QUEUE_EMOJIS.IN_PROGRESS);
+  await msg.react(config.WORK_QUEUE_EMOJIS.TAKE_NOTE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.ON_HOLD);
+  await msg.react(config.WORK_QUEUE_EMOJIS.CLOSE);
+  await msg.react(config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY);
+  await msg.react(config.WORK_QUEUE_EMOJIS.REMOVE);
   return msg;
 }
 
@@ -111,6 +128,25 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
     }
     const selected = scoringEngine.selectTop(issues);
 
+    // Remove from searched list any issues that are already in the top 5
+    searchedIssuesManager.removeIfInTop5(selected.map(i => i.number));
+
+    // Fetch searched issues
+    const searchedNums = searchedIssuesManager.getAll();
+    const searchedIssues = [];
+    for (const num of searchedNums) {
+      try {
+        const issue = await fetchSingleIssue(num);
+        if (issue.state !== 'open' || issue.number === excludeIssueNumber) {
+          searchedIssuesManager.remove(num);
+        } else {
+          searchedIssues.push(issue);
+        }
+      } catch {
+        searchedIssuesManager.remove(num);
+      }
+    }
+
     await deleteWorkQueueMessages(client);
 
     const channel = await client.channels.fetch(config.WORK_QUEUE_CHANNEL_ID).catch(() => null);
@@ -128,12 +164,27 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
             `${config.WORK_QUEUE_EMOJIS.IN_PROGRESS} **In Progress** — Mark this issue as actively being worked on\n` +
             `${config.WORK_QUEUE_EMOJIS.TAKE_NOTE} **Progress Note** — Add a note to the issue (mirrored to GitHub)\n` +
             `${config.WORK_QUEUE_EMOJIS.ON_HOLD} **On Hold** — Pause work on this issue\n` +
-            `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it`
+            `${config.WORK_QUEUE_EMOJIS.CLOSE} **Close** — Mark the issue as resolved and close it\n` +
+            `${config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY} **Change Priority** — Update the GitHub priority label\n` +
+            `${config.WORK_QUEUE_EMOJIS.SEARCH} **Custom Search** — Look up any issue by number\n` +
+            `${config.WORK_QUEUE_EMOJIS.REMOVE} **Remove** — Remove a custom-searched issue from this list`
           )
           .setColor(config.COLORS.DEFAULT),
       ],
     });
     const newMessages = [{ messageId: legendMsg.id, issueNumber: null, isLegend: true }];
+
+    // Custom Search prompt always appears just below the Legend
+    const searchFooterMsg = await channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setTitle('🔍 Custom Search')
+          .setDescription('React with 🔍 to look up any issue number and add it to this list (up to 5).')
+          .setColor(config.COLORS.DEFAULT),
+      ],
+    });
+    await searchFooterMsg.react(config.WORK_QUEUE_EMOJIS.SEARCH);
+    newMessages.push({ messageId: searchFooterMsg.id, issueNumber: null, isCustomSearch: true });
 
     if (selected.length === 0) {
       const emptyMsg = await channel.send({
@@ -146,63 +197,87 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
         ],
       });
       newMessages.push({ messageId: emptyMsg.id, issueNumber: null, isEmpty: true });
-      workQueueManager.setMessages(newMessages);
-      return;
-    }
+    } else {
+      const wipIssues = selected.filter(i => scoringEngine.isWip(i));
+      const otherIssues = selected.filter(i => !scoringEngine.isWip(i));
 
-    const wipIssues = selected.filter(i => scoringEngine.isWip(i));
-    const otherIssues = selected.filter(i => !scoringEngine.isWip(i));
+      // Custom Search section — shown above In Progress when there are searched issues
+      if (searchedIssues.length > 0) {
+        const searchSepMsg = await channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription('**─────────────────────────────────**\n🔍  **Custom Search**\n**─────────────────────────────────**')
+              .setColor(0x2B2D31),
+          ],
+        });
+        newMessages.push({ messageId: searchSepMsg.id, issueNumber: null, isSeparator: true });
 
-    if (wipIssues.length > 0) {
-      const wipSepMsg = await channel.send({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription('**─────────────────────────────────**\n▶️  **In Progress**\n**─────────────────────────────────**')
-            .setColor(0x2B2D31),
-        ],
-      });
-      newMessages.push({ messageId: wipSepMsg.id, issueNumber: null, isSeparator: true });
-    }
+        for (const issue of searchedIssues) {
+          const msg = await postSearchedQueueMessage(channel, issue);
+          newMessages.push({
+            messageId: msg.id,
+            issueNumber: issue.number,
+            issueTitle: issue.title,
+            issueUrl: issue.html_url,
+            priority: scoringEngine.getPriority(issue),
+            type: scoringEngine.getType(issue),
+            status: scoringEngine.getStatus(issue),
+            isSearched: true,
+          });
+        }
+      }
 
-    for (const issue of wipIssues) {
-      const msg = await postWorkQueueMessage(channel, issue);
-      newMessages.push({
-        messageId: msg.id,
-        issueNumber: issue.number,
-        issueTitle: issue.title,
-        issueUrl: issue.html_url,
-        priority: scoringEngine.getPriority(issue),
-        type: scoringEngine.getType(issue),
-        status: scoringEngine.getStatus(issue),
-      });
-    }
+      if (wipIssues.length > 0) {
+        const wipSepMsg = await channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription('**─────────────────────────────────**\n▶️  **In Progress**\n**─────────────────────────────────**')
+              .setColor(0x2B2D31),
+          ],
+        });
+        newMessages.push({ messageId: wipSepMsg.id, issueNumber: null, isSeparator: true });
+      }
 
-    if (wipIssues.length > 0 && otherIssues.length > 0) {
-      const sepMsg = await channel.send({
-        embeds: [
-          new EmbedBuilder()
-            .setDescription('**─────────────────────────────────**\n📋  **To Review**\n**─────────────────────────────────**')
-            .setColor(0x2B2D31),
-        ],
-      });
-      newMessages.push({ messageId: sepMsg.id, issueNumber: null, isSeparator: true });
-    }
+      for (const issue of wipIssues) {
+        const msg = await postWorkQueueMessage(channel, issue);
+        newMessages.push({
+          messageId: msg.id,
+          issueNumber: issue.number,
+          issueTitle: issue.title,
+          issueUrl: issue.html_url,
+          priority: scoringEngine.getPriority(issue),
+          type: scoringEngine.getType(issue),
+          status: scoringEngine.getStatus(issue),
+        });
+      }
 
-    for (const issue of otherIssues) {
-      const msg = await postWorkQueueMessage(channel, issue);
-      newMessages.push({
-        messageId: msg.id,
-        issueNumber: issue.number,
-        issueTitle: issue.title,
-        issueUrl: issue.html_url,
-        priority: scoringEngine.getPriority(issue),
-        type: scoringEngine.getType(issue),
-        status: scoringEngine.getStatus(issue),
-      });
+      if (wipIssues.length > 0 && otherIssues.length > 0) {
+        const sepMsg = await channel.send({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription('**─────────────────────────────────**\n📋  **To Review**\n**─────────────────────────────────**')
+              .setColor(0x2B2D31),
+          ],
+        });
+        newMessages.push({ messageId: sepMsg.id, issueNumber: null, isSeparator: true });
+      }
+
+      for (const issue of otherIssues) {
+        const msg = await postWorkQueueMessage(channel, issue);
+        newMessages.push({
+          messageId: msg.id,
+          issueNumber: issue.number,
+          issueTitle: issue.title,
+          issueUrl: issue.html_url,
+          priority: scoringEngine.getPriority(issue),
+          type: scoringEngine.getType(issue),
+          status: scoringEngine.getStatus(issue),
+        });
+      }
     }
 
     workQueueManager.setMessages(newMessages);
-    console.log(`[WorkQueue] Posted ${wipIssues.length} WIP + ${otherIssues.length} other item(s).`);
+    console.log(`[WorkQueue] Posted ${selected.length} queue item(s) + ${searchedIssues.length} searched item(s).`);
   } catch (err) {
     console.error('[WorkQueue] Error during refresh:', err.message);
   }
@@ -223,13 +298,94 @@ async function handleReaction(reaction, user, client) {
   const member = await guild.members.fetch(user.id).catch(() => null);
   if (!member || !member.roles.cache.has(config.COUNCIL_ROLE_ID)) return;
 
-  const item = workQueueManager.getByMessageId(message.id);
-  if (!item || item.isEmpty || item.isSeparator || item.isLegend) return;
+  // ── Change-priority prompt check (must come before item lookup) ──
+  const changePriorityPrompt = changePriorityPrompts.get(message.id);
+  if (changePriorityPrompt) {
+    if (changePriorityPrompt.userId !== user.id) return;
+    changePriorityPrompts.delete(message.id);
+    try { await message.delete(); } catch { /* ignore */ }
 
-  const { issueNumber, issueTitle, status } = item;
+    if (emojiName === '❌') return;
+
+    const newPriorityMap = { '🔴': 'P1', '🟠': 'P2', '🟡': 'P3', '🟢': 'P4' };
+    const newPriority = newPriorityMap[emojiName];
+    if (!newPriority) return;
+
+    const { issueNumber, currentPriority } = changePriorityPrompt;
+    if (newPriority === currentPriority) return;
+
+    try {
+      if (currentPriority) await removeLabel(issueNumber, currentPriority);
+      await addLabel(issueNumber, newPriority);
+      councilActivityManager.record(issueNumber);
+      await refreshWorkQueue(client);
+    } catch (err) {
+      console.error('[WorkQueue] Failed to change priority:', err.message);
+    }
+    return;
+  }
+
+  const item = workQueueManager.getByMessageId(message.id);
+  if (!item) return;
+
+  // ── Custom Search footer ──
+  if (item.isCustomSearch) {
+    if (emojiName !== config.WORK_QUEUE_EMOJIS.SEARCH) return;
+    if (searchedIssuesManager.isFull()) {
+      const errMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription('❌ You already have 5 custom-searched issues. Remove one first with 🗑️.')
+            .setColor(config.COLORS.ERROR),
+        ],
+      });
+      setTimeout(() => errMsg.delete().catch(() => {}), 5000);
+      return;
+    }
+    if (workQueueManager.getPendingOp(user.id)) return;
+    const prompt = await message.channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setDescription(`🔍 <@${user.id}> — Reply with the issue number to search for (e.g. \`206\` or \`#206\`). Type \`cancel\` to abort.`)
+          .setColor(config.COLORS.DEFAULT),
+      ],
+    });
+    workQueueManager.setPendingOp(user.id, { type: 'search', promptMessageId: prompt.id });
+    return;
+  }
+
+  if (item.isEmpty || item.isSeparator || item.isLegend) return;
+
+  const { issueNumber, issueTitle, status, priority: currentPriority, isSearched } = item;
   const displayName = member.nickname
     ? `${user.username} (${member.nickname})`
     : user.username;
+
+  // ── Remove (searched items only) ──
+  if (emojiName === config.WORK_QUEUE_EMOJIS.REMOVE) {
+    if (!isSearched) return;
+    searchedIssuesManager.remove(issueNumber);
+    await refreshWorkQueue(client);
+    return;
+  }
+
+  // ── Change Priority ──
+  if (emojiName === config.WORK_QUEUE_EMOJIS.CHANGE_PRIORITY) {
+    const prompt = await message.channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setDescription(`🔄 <@${user.id}> — React with the new priority for **${issueTitle}**. React ❌ to cancel.`)
+          .setColor(config.COLORS.DEFAULT),
+      ],
+    });
+    await prompt.react('🔴');
+    await prompt.react('🟠');
+    await prompt.react('🟡');
+    await prompt.react('🟢');
+    await prompt.react('❌');
+    changePriorityPrompts.set(prompt.id, { userId: user.id, issueNumber, issueTitle, currentPriority });
+    return;
+  }
 
   // ── In Progress (toggle) ──
   if (emojiName === config.WORK_QUEUE_EMOJIS.IN_PROGRESS) {
@@ -270,7 +426,7 @@ async function handleReaction(reaction, user, client) {
 
   // ── On Hold ──
   } else if (emojiName === config.WORK_QUEUE_EMOJIS.ON_HOLD) {
-    if (status === 'on-hold') return; // Already on hold — no-op
+    if (status === 'on-hold') return;
     if (workQueueManager.getPendingOp(user.id)) return;
     workQueueManager.setPendingOp(user.id, {
       type: 'on-hold',
@@ -313,7 +469,7 @@ async function handleReaction(reaction, user, client) {
 }
 
 /**
- * Handles a message sent in the work queue channel (for pending close/note operations).
+ * Handles a message sent in the work queue channel (for pending close/note/search operations).
  * Returns true if the message was consumed by a pending operation.
  */
 async function handleWorkQueueMessage(message, client) {
@@ -337,6 +493,82 @@ async function handleWorkQueueMessage(message, client) {
   workQueueManager.clearPendingOp(message.author.id);
 
   if (message.content.trim().toLowerCase() === 'cancel') return true;
+
+  if (pending.type === 'search') {
+    const rawInput = message.content.trim();
+    const numStr = rawInput.replace(/^#/, '');
+    const issueNumber = parseInt(numStr, 10);
+
+    if (isNaN(issueNumber)) {
+      const errMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription('❌ Invalid input. Please enter a valid issue number (e.g. `206` or `#206`).')
+            .setColor(config.COLORS.ERROR),
+        ],
+      });
+      setTimeout(() => errMsg.delete().catch(() => {}), 5000);
+      return true;
+    }
+
+    if (searchedIssuesManager.has(issueNumber)) {
+      const errMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(`❌ Issue #${issueNumber} is already in the custom search list.`)
+            .setColor(config.COLORS.ERROR),
+        ],
+      });
+      setTimeout(() => errMsg.delete().catch(() => {}), 5000);
+      return true;
+    }
+
+    // Check if already in the main top-5 list
+    const allMessages = workQueueManager.getAll();
+    const inMainList = allMessages.some(m => m.issueNumber === issueNumber && !m.isSearched);
+    if (inMainList) {
+      const infoMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(`ℹ️ Issue #${issueNumber} is already visible in the top-5 list.`)
+            .setColor(config.COLORS.DEFAULT),
+        ],
+      });
+      setTimeout(() => infoMsg.delete().catch(() => {}), 5000);
+      return true;
+    }
+
+    let issue;
+    try {
+      issue = await fetchSingleIssue(issueNumber);
+    } catch {
+      const errMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(`❌ Could not find issue #${issueNumber}. Make sure the number is correct.`)
+            .setColor(config.COLORS.ERROR),
+        ],
+      });
+      setTimeout(() => errMsg.delete().catch(() => {}), 5000);
+      return true;
+    }
+
+    if (issue.state !== 'open') {
+      const errMsg = await message.channel.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(`❌ Issue #${issueNumber} is not open.`)
+            .setColor(config.COLORS.ERROR),
+        ],
+      });
+      setTimeout(() => errMsg.delete().catch(() => {}), 5000);
+      return true;
+    }
+
+    searchedIssuesManager.add(issueNumber);
+    await refreshWorkQueue(client);
+    return true;
+  }
 
   if (pending.type === 'note') {
     const noteText = message.content.trim();

@@ -2,7 +2,8 @@ const { EmbedBuilder } = require('discord.js');
 const config = require('../config');
 const forumManager = require('../utils/forumManager');
 const forumDeletionManager = require('../utils/forumDeletionManager');
-const { addComment } = require('../github/githubManager');
+const commentMapManager = require('../utils/commentMapManager');
+const { addComment, deleteComment } = require('../github/githubManager');
 
 /**
  * Creates a Discord forum thread for a newly approved GitHub issue.
@@ -98,9 +99,24 @@ async function handleForumMessage(message) {
   }
 
   try {
-    await addComment(issueNumber, commentBody);
+    const commentId = await addComment(issueNumber, commentBody);
+    commentMapManager.set(message.id, commentId);
   } catch (err) {
     console.error(`[ForumHandler] Failed to mirror comment for issue #${issueNumber}:`, err.message);
+  }
+}
+
+/**
+ * Handles deletion of a Discord forum message, deleting the mirrored GitHub comment.
+ */
+async function handleForumMessageDelete(messageId) {
+  const commentId = commentMapManager.getCommentId(messageId);
+  if (!commentId) return;
+  commentMapManager.remove(messageId);
+  try {
+    await deleteComment(commentId);
+  } catch (err) {
+    console.error(`[ForumHandler] Failed to delete GitHub comment ${commentId}:`, err.message);
   }
 }
 
@@ -198,4 +214,4 @@ async function lockForumThread(client, issueNumber) {
   }
 }
 
-module.exports = { createForumThread, handleForumMessage, postNoteToForum, postTagChangeToForum, lockForumThread };
+module.exports = { createForumThread, handleForumMessage, handleForumMessageDelete, postNoteToForum, postTagChangeToForum, lockForumThread };
