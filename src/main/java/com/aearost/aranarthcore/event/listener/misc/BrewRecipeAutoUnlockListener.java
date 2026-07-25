@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -19,7 +20,8 @@ import java.util.UUID;
 import static com.aearost.aranarthcore.objects.CustomKeys.BREW_BREWER;
 
 /**
- * Automatically unlocks a brew recipe in the brew book when they pick up a perfect-quality brew.
+ * Automatically unlocks a brew recipe in the brew book when a player picks up a perfect-quality brew,
+ * whether from an inventory GUI click or from the ground.
  */
 public class BrewRecipeAutoUnlockListener implements Listener {
 
@@ -35,10 +37,23 @@ public class BrewRecipeAutoUnlockListener implements Listener {
         if (!(e.getWhoClicked() instanceof Player player)) {
             return;
         }
-
-        // We only care about the item the player is interacting with in the clicked inventory
         ItemStack item = e.getCurrentItem();
-        if (item == null || item.getType() != Material.POTION) {
+        if (item == null) {
+            return;
+        }
+        checkAndUnlock(player, item);
+    }
+
+    @EventHandler
+    public void onItemPickup(EntityPickupItemEvent e) {
+        if (!(e.getEntity() instanceof Player player)) {
+            return;
+        }
+        checkAndUnlock(player, e.getItem().getItemStack());
+    }
+
+    private void checkAndUnlock(Player player, ItemStack item) {
+        if (item.getType() != Material.POTION) {
             return;
         }
 
