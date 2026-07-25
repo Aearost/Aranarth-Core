@@ -2,7 +2,9 @@ package com.aearost.aranarthcore.utils;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.database.DatabaseManager;
+import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.enums.Month;
+import com.aearost.aranarthcore.objects.JobData;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -8165,6 +8167,102 @@ public class PersistenceUtils {
             }
         }.runTaskLater(AranarthCore.getInstance(), 1L);
         Bukkit.getLogger().info("[AC] Defenders scheduled to spawn from MySQL");
+    }
+
+    // -------------------------------------------------------------------------
+    // Job Data (MySQL only — shared across servers)
+    // -------------------------------------------------------------------------
+
+    private static final Gson JOB_GSON = new Gson();
+
+    public static void loadJobDataForPlayer(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        try {
+            String json = DatabaseManager.getInstance().loadJobData(uuid);
+            AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+            if (ap == null) return;
+            if (json != null && !json.isEmpty()) {
+                ap.setJobData(deserializeJobData(json));
+            } else {
+                ap.setJobData(new JobData());
+            }
+            AranarthUtils.setPlayer(uuid, ap);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to load job data for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public static void saveJobData(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        AranarthPlayer ap = AranarthUtils.getPlayer(uuid);
+        if (ap == null) return;
+        String json = serializeJobData(ap.getJobData());
+        if (AranarthCore.getInstance().isEnabled()) {
+            Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+                    () -> DatabaseManager.getInstance().saveJobData(uuid, json));
+        } else {
+            DatabaseManager.getInstance().saveJobData(uuid, json);
+        }
+    }
+
+    public static void saveAllJobData() {
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            saveJobData(player.getUniqueId());
+        }
+    }
+
+    private static String serializeJobData(JobData jobData) {
+        JsonObject obj = new JsonObject();
+        com.google.gson.JsonArray activeJobs = new com.google.gson.JsonArray();
+        for (JobType job : jobData.getActiveJobs()) {
+            activeJobs.add(job.name());
+        }
+        obj.add("activeJobs", activeJobs);
+        JsonObject levels = new JsonObject();
+        for (Map.Entry<JobType, Integer> entry : jobData.getLevels().entrySet()) {
+            levels.addProperty(entry.getKey().name(), entry.getValue());
+        }
+        obj.add("levels", levels);
+        JsonObject xp = new JsonObject();
+        for (Map.Entry<JobType, Double> entry : jobData.getXp().entrySet()) {
+            xp.addProperty(entry.getKey().name(), entry.getValue());
+        }
+        obj.add("xp", xp);
+        return obj.toString();
+    }
+
+    private static JobData deserializeJobData(String json) {
+        JobData jobData = new JobData();
+        try {
+            JsonObject obj = JOB_GSON.fromJson(json, JsonObject.class);
+            if (obj == null) return jobData;
+            if (obj.has("activeJobs")) {
+                List<JobType> activeJobs = new ArrayList<>();
+                for (var el : obj.getAsJsonArray("activeJobs")) {
+                    try { activeJobs.add(JobType.valueOf(el.getAsString())); } catch (Exception ignored) {}
+                }
+                jobData.setActiveJobs(activeJobs);
+            }
+            if (obj.has("levels")) {
+                Map<JobType, Integer> levelsMap = new HashMap<>();
+                JsonObject lvlObj = obj.getAsJsonObject("levels");
+                for (String key : lvlObj.keySet()) {
+                    try { levelsMap.put(JobType.valueOf(key), lvlObj.get(key).getAsInt()); } catch (Exception ignored) {}
+                }
+                jobData.setLevels(levelsMap);
+            }
+            if (obj.has("xp")) {
+                Map<JobType, Double> xpMap = new HashMap<>();
+                JsonObject xpObj = obj.getAsJsonObject("xp");
+                for (String key : xpObj.keySet()) {
+                    try { xpMap.put(JobType.valueOf(key), xpObj.get(key).getAsDouble()); } catch (Exception ignored) {}
+                }
+                jobData.setXp(xpMap);
+            }
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to parse job data JSON: " + e.getMessage());
+        }
+        return jobData;
     }
 
 }

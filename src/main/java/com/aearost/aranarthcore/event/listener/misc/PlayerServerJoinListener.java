@@ -129,6 +129,13 @@ public class PlayerServerJoinListener implements Listener {
 			}
 		}
 
+		// Load job data from MySQL for this player
+		if (DatabaseManager.isActive()) {
+			final UUID joinUuid = player.getUniqueId();
+			Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(),
+				() -> PersistenceUtils.loadJobDataForPlayer(joinUuid));
+		}
+
 		// Permissions must be applied before nickname check is done
 		PermissionUtils.evaluatePlayerPermissions(player);
 
@@ -381,6 +388,7 @@ public class PlayerServerJoinListener implements Listener {
 				// the async DB write from the quit event may not have finished yet.
 				if (hadPendingTp && !isLoginRouting && DatabaseManager.isActive()) {
 					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
+					PersistenceUtils.loadJobDataForPlayer(player.getUniqueId());
 					// Reload the player's dominion in case it was created on the other server
 					PersistenceUtils.reloadDominionForPlayer(player.getUniqueId());
 					// Reload streak and mail so this server has authoritative state from MySQL.

@@ -10,6 +10,10 @@ import com.aearost.aranarthcore.gui.GuiBrewShop;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
+import com.aearost.aranarthcore.gui.GuiJobs;
+import com.aearost.aranarthcore.gui.GuiJobsJoin;
+import com.aearost.aranarthcore.gui.GuiJobsLeave;
+import com.aearost.aranarthcore.gui.GuiJobsStats;
 import com.aearost.aranarthcore.gui.GuiOutposts;
 import com.aearost.aranarthcore.objects.CustomKeys;
 import com.aearost.aranarthcore.utils.ChatUtils;
@@ -131,6 +135,14 @@ public class InventoryClickEventListener implements Listener {
                 new GuiTopGuessesClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Your Quests")) {
                 new GuiQuestsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobs.TITLE)) {
+                new GuiJobsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsJoin.TITLE)) {
+                new GuiJobsJoinClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsStats.TITLE)) {
+                new GuiJobsStatsClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiJobsLeave.TITLE)) {
+                new GuiJobsLeaveClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Login Streak")) {
                 new GuiLoginStreakClick().execute(e);
             } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Player Toggles")) {

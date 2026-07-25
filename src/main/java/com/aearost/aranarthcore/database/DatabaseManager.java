@@ -411,6 +411,13 @@ public class DatabaseManager {
                 recipe_id VARCHAR(64) NOT NULL,
                 PRIMARY KEY (uuid, recipe_id)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS player_jobs (
+                uuid VARCHAR(36) NOT NULL,
+                job_data_json TEXT NOT NULL,
+                PRIMARY KEY (uuid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
             """
         };
 
@@ -2156,5 +2163,39 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to bulk-save brew unlocks for " + uuid + ": " + e.getMessage());
         }
+    }
+
+    // -------------------------------------------------------------------------
+    // player_jobs
+    // -------------------------------------------------------------------------
+
+    public void saveJobData(UUID uuid, String json) {
+        String sql = """
+            INSERT INTO player_jobs (uuid, job_data_json)
+            VALUES (?, ?)
+            ON DUPLICATE KEY UPDATE job_data_json=VALUES(job_data_json)
+            """;
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            ps.setString(2, json);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to save job data for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    public String loadJobData(UUID uuid) {
+        String sql = "SELECT job_data_json FROM player_jobs WHERE uuid = ?";
+        try (Connection conn = dataSource.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, uuid.toString());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getString("job_data_json");
+            }
+        } catch (SQLException e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to load job data for " + uuid + ": " + e.getMessage());
+        }
+        return null;
     }
 }

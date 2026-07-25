@@ -107,6 +107,7 @@ public class AranarthPlayer {
 	private long bulkTransactionExpiry = 0;
 	private int bulkTransactionQuantity = 0;
 	private double bulkTransactionPrice = 0;
+	private JobData jobData = new JobData();
 
 	public AranarthPlayer(String username) {
 		this.username = username;
@@ -1567,5 +1568,13 @@ public class AranarthPlayer {
 
 	public void setBulkTransactionPrice(double bulkTransactionPrice) {
 		this.bulkTransactionPrice = bulkTransactionPrice;
+	}
+
+	public JobData getJobData() {
+		return jobData;
+	}
+
+	public void setJobData(JobData jobData) {
+		this.jobData = jobData;
 	}
 }

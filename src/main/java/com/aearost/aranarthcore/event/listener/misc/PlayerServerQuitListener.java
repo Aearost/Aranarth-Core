@@ -84,6 +84,7 @@ public class PlayerServerQuitListener implements Listener {
 			NetworkManager.getInstance().publishPlayerQuit(player.getUniqueId(), crossServerQuitMsg, isVanished);
 		}
 		PersistenceUtils.saveQuestProgress();
+		PersistenceUtils.saveJobData(player.getUniqueId());
 		// Prevent this player's stale in-memory quest data from being written to the shared DB
 		// after they leave — the other server owns their quest state from this point on.
 		QuestUtils.getLocallyModifiedUuids().remove(player.getUniqueId());
