@@ -6,6 +6,7 @@ import com.aearost.aranarthcore.objects.Mail;
 import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import com.aearost.aranarthcore.utils.MailUtils;
+import com.aearost.aranarthcore.utils.PersistenceUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -160,6 +161,7 @@ public class CommandMail implements CommandExecutor {
                 }
                 MailUtils.removeMail(player.getUniqueId(), num - 1);
                 player.sendMessage(ChatUtils.chatMessage("&7Mail #&e" + num + " &7has been deleted"));
+                PersistenceUtils.syncPlayerMailToDatabase(player.getUniqueId());
             }
             case "clearall" -> {
                 if (MailUtils.getMail(player.getUniqueId()).isEmpty()) {
@@ -168,6 +170,7 @@ public class CommandMail implements CommandExecutor {
                 }
                 MailUtils.clearMail(player.getUniqueId());
                 player.sendMessage(ChatUtils.chatMessage("&7All mail has been deleted"));
+                PersistenceUtils.syncPlayerMailToDatabase(player.getUniqueId());
             }
             default -> player.sendMessage(ChatUtils.chatMessage("&cInvalid syntax: &e/mail <send|read|clear|clearall>"));
         }

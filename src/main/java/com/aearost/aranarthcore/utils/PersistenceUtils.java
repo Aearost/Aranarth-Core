@@ -5424,18 +5424,21 @@ public class PersistenceUtils {
     }
 
     /**
-     * Syncs mail data to MySQL. Call after the file has been saved.
-     * Each recipient's mail list is serialized as a JSON array.
+     * Syncs mail data to MySQL. Only writes players whose mail was modified on this server
+     * (added/removed/cleared), preventing stale in-memory data loaded at startup from
+     * overwriting changes committed by another server in the network.
      */
     public static void syncMailToDatabase() {
         if (!DatabaseManager.isActive()) {
             return;
         }
         DatabaseManager db = DatabaseManager.getInstance();
-        for (Map.Entry<UUID, List<Mail>> entry : MailUtils.getAllMail().entrySet()) {
-            UUID recipientUuid = entry.getKey();
+        Set<UUID> modified = MailUtils.getLocallyModifiedMailUuids();
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] MySQL sync: " + modified.size() + " locally-modified recipient(s)");
+        for (UUID recipientUuid : modified) {
+            List<Mail> mailList = MailUtils.getMail(recipientUuid);
             JsonArray arr = new JsonArray();
-            for (Mail mail : entry.getValue()) {
+            for (Mail mail : mailList) {
                 JsonObject m = new JsonObject();
                 m.addProperty("sender", mail.getSenderUUID().toString());
                 m.addProperty("recipient", recipientUuid.toString());
@@ -5445,9 +5448,103 @@ public class PersistenceUtils {
             }
             try {
                 db.saveAllMail(recipientUuid, GSON.toJson(arr));
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] MySQL sync: wrote " + mailList.size() + " message(s) for " + recipientUuid);
             } catch (Exception e) {
                 Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mail for " + recipientUuid + ": " + e.getMessage());
             }
+        }
+    }
+
+    /**
+     * Immediately syncs a single player's mail to MySQL.
+     * Call right after the player clears or removes mail so the change is durable
+     * before the next periodic save, and is visible to other servers in the network.
+     */
+    public static void syncPlayerMailToDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        List<Mail> mailList = MailUtils.getMail(uuid);
+        JsonArray arr = new JsonArray();
+        for (Mail mail : mailList) {
+            JsonObject m = new JsonObject();
+            m.addProperty("sender", mail.getSenderUUID().toString());
+            m.addProperty("recipient", uuid.toString());
+            m.addProperty("timestamp", mail.getTimestamp());
+            m.addProperty("message", mail.getMessage());
+            arr.add(m);
+        }
+        final String json = GSON.toJson(arr);
+        final int count = mailList.size();
+        Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Queuing immediate MySQL sync for " + uuid + " (" + count + " message(s))");
+        runDbSync(() -> {
+            try {
+                DatabaseManager.getInstance().saveAllMail(uuid, json);
+                Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Immediate MySQL sync complete for " + uuid + " (" + count + " message(s))");
+            } catch (Exception e) {
+                Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to sync mail for " + uuid + ": " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Reloads a single player's mail from MySQL, replacing the in-memory entry.
+     * Call on cross-server arrival so this server has the authoritative mail state
+     * rather than the potentially stale snapshot loaded at startup.
+     */
+    public static void reloadPlayerMailFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        int previousCount = MailUtils.getMail(uuid).size();
+        String json = DatabaseManager.getInstance().loadAllMail(uuid);
+        if (json == null) {
+            // No row in MySQL — player has no mail
+            MailUtils.setMailForPlayer(uuid, new ArrayList<>());
+            MailUtils.getLocallyModifiedMailUuids().remove(uuid);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Reloaded from MySQL for " + uuid
+                    + " | previousCount=" + previousCount + " newCount=0 (no row)");
+            return;
+        }
+        try {
+            JsonArray arr = GSON.fromJson(json, JsonArray.class);
+            List<Mail> list = new ArrayList<>();
+            for (com.google.gson.JsonElement el : arr) {
+                JsonObject m = el.getAsJsonObject();
+                UUID sender = UUID.fromString(m.get("sender").getAsString());
+                long timestamp = m.get("timestamp").getAsLong();
+                String message = m.get("message").getAsString();
+                list.add(new Mail(sender, uuid, timestamp, message));
+            }
+            MailUtils.setMailForPlayer(uuid, list);
+            MailUtils.getLocallyModifiedMailUuids().remove(uuid);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Mail] Reloaded from MySQL for " + uuid
+                    + " | previousCount=" + previousCount + " newCount=" + list.size());
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload mail for " + uuid + ": " + e.getMessage());
+        }
+    }
+
+    /**
+     * Reloads a single player's login streak from MySQL, replacing the in-memory entry.
+     * Call on cross-server arrival so this server has the authoritative streak state
+     * (e.g. the player already claimed on another server before switching here).
+     */
+    public static void reloadPlayerLoginStreakFromDatabase(UUID uuid) {
+        if (!DatabaseManager.isActive()) return;
+        String json = DatabaseManager.getInstance().loadLoginStreak(uuid);
+        if (json == null) return;
+        try {
+            JsonObject obj = GSON.fromJson(json, JsonObject.class);
+            int day = obj.has("day") ? obj.get("day").getAsInt() : 1;
+            long lastClaim = obj.has("lastClaim") ? obj.get("lastClaim").getAsLong() : 0L;
+            long lastLogin = obj.has("lastLogin") ? obj.get("lastLogin").getAsLong() : 0L;
+            LoginStreakUtils.setStreakDay(uuid, day);
+            LoginStreakUtils.setLastClaimEpochDay(uuid, lastClaim);
+            LoginStreakUtils.setLastLoginEpochDay(uuid, lastLogin);
+            // Remove from locallyModified so this server doesn't write stale data back to MySQL
+            // if the player quits before modifying their streak here
+            LoginStreakUtils.getLocallyModifiedUuids().remove(uuid);
+            Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[Streak] Reloaded from MySQL for " + uuid
+                    + " | day=" + day + " lastClaim=" + lastClaim + " lastLogin=" + lastLogin);
+        } catch (Exception e) {
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[DB] Failed to reload streak for " + uuid + ": " + e.getMessage());
         }
     }
 

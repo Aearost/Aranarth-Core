@@ -383,6 +383,14 @@ public class PlayerServerJoinListener implements Listener {
 					PersistenceUtils.reloadQuestProgressForPlayer(player.getUniqueId());
 					// Reload the player's dominion in case it was created on the other server
 					PersistenceUtils.reloadDominionForPlayer(player.getUniqueId());
+					// Reload streak and mail so this server has authoritative state from MySQL.
+					// Without this, the source server's claim/clear changes would be invisible here
+					// (stale data from our startup load), and when the player quits from this server,
+					// the stale data would be written back to MySQL — overwriting the correct state.
+					Bukkit.getLogger().info(AranarthCore.LOG_PREFIX + "[XServer] Reloading streak+mail from MySQL for "
+							+ player.getName() + " on cross-server arrival");
+					PersistenceUtils.reloadPlayerLoginStreakFromDatabase(player.getUniqueId());
+					PersistenceUtils.reloadPlayerMailFromDatabase(player.getUniqueId());
 				}
 
 				// Apply the /back location saved by the source server before transfer.
@@ -728,8 +736,11 @@ public class PlayerServerJoinListener implements Listener {
 			player.sendMessage(ChatUtils.translateToColor("  &7Don't forget to claim your daily login reward with &e/streak"));
 		}
 
-		// Pending crate key notification
+		// Pending crate key notification — reload from MySQL first so we display the
+		// authoritative count (another server may have received votes or the player may
+		// have claimed on another server since this server last loaded from DB).
 		UUID uuid = player.getUniqueId();
+		PersistenceUtils.reloadVoteKeysForPlayerFromDatabase(uuid);
 		int pendingKeys = 0;
 		Integer pv = AranarthUtils.getPendingVoteKeys().get(uuid);
 		Integer pr = AranarthUtils.getPendingRareKeys().get(uuid);
