@@ -1,6 +1,8 @@
 package com.aearost.aranarthcore.gui;
 
 import com.aearost.aranarthcore.items.brew.BrewRecipe;
+import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.utils.AranarthUtils;
 import com.aearost.aranarthcore.utils.BrewRecipeUtils;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
@@ -19,7 +21,7 @@ import java.util.List;
 public class GuiBrewShop {
 
     public static final String TITLE = "Brew Recipe Shop";
-    private static final int PAGE_SIZE = 45;
+    private static final int PAGE_SIZE = 36;
 
     private final Player player;
     private final int page;
@@ -38,11 +40,16 @@ public class GuiBrewShop {
         int start = page * PAGE_SIZE;
         int end = Math.min(start + PAGE_SIZE, locked.size());
 
-        for (int i = start; i < end; i++) {
-            inv.setItem(i - start, BrewRecipeUtils.createShopPotionDisplay(locked.get(i)));
+        ItemStack glass = makeGlass();
+
+        // Top row: gray glass panes
+        for (int slot = 0; slot < 9; slot++) {
+            inv.setItem(slot, glass);
         }
 
-        ItemStack glass = makeGlass();
+        for (int i = start; i < end; i++) {
+            inv.setItem(9 + (i - start), BrewRecipeUtils.createShopPotionDisplay(locked.get(i)));
+        }
 
         ItemStack previous = new ItemStack(Material.RED_WOOL);
         ItemMeta previousMeta = previous.getItemMeta();
@@ -90,6 +97,9 @@ public class GuiBrewShop {
     }
 
     public void openGui() {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        aranarthPlayer.setCurrentGuiPageNum(page);
+        AranarthUtils.setPlayer(player.getUniqueId(), aranarthPlayer);
         player.closeInventory();
         player.openInventory(gui);
     }

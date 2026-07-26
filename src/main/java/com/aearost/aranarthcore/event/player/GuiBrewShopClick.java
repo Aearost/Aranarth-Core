@@ -30,13 +30,17 @@ public class GuiBrewShopClick {
 
         // Previous page
         if (slot == 45 && clicked.getType() == Material.RED_WOOL) {
-            new GuiBrewShop(player, 0).openGui();
+            int currentPage = getCurrentPage(player);
+            if (currentPage > 0) {
+                new GuiBrewShop(player, currentPage - 1).openGui();
+            }
             return;
         }
 
         // Next page
         if (slot == 53 && clicked.getType() == Material.LIME_WOOL) {
-            new GuiBrewShop(player, 0).openGui();
+            int currentPage = getCurrentPage(player);
+            new GuiBrewShop(player, currentPage + 1).openGui();
             return;
         }
 
@@ -47,8 +51,8 @@ public class GuiBrewShopClick {
             return;
         }
 
-        // Recipe purchase
-        if (slot < 45 && clicked.getType() == Material.POTION) {
+        // Recipe purchase (items are in slots 9-44)
+        if (slot >= 9 && slot < 45 && clicked.getType() == Material.POTION) {
             // Find which recipe this is by matching display name
             if (!clicked.hasItemMeta() || !clicked.getItemMeta().hasDisplayName()) return;
             String rawName = ChatUtils.stripColorFormatting(clicked.getItemMeta().getDisplayName()).trim();
@@ -89,5 +93,10 @@ public class GuiBrewShopClick {
 
             player.closeInventory();
         }
+    }
+
+    private int getCurrentPage(Player player) {
+        AranarthPlayer aranarthPlayer = AranarthUtils.getPlayer(player.getUniqueId());
+        return aranarthPlayer.getCurrentGuiPageNum();
     }
 }
