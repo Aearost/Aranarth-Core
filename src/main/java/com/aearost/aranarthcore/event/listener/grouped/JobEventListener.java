@@ -3,11 +3,15 @@ package com.aearost.aranarthcore.event.listener.grouped;
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
+import com.aearost.aranarthcore.objects.Dominion;
+import com.aearost.aranarthcore.objects.DominionPermission;
 import com.aearost.aranarthcore.objects.JobData;
 import com.aearost.aranarthcore.utils.AranarthUtils;
+import com.aearost.aranarthcore.utils.DominionUtils;
 import com.aearost.aranarthcore.utils.JobUtils;
 import com.dre.brewery.api.events.brew.BrewModifyEvent;
 import com.gmail.nossr50.mcMMO;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -108,6 +112,12 @@ public class JobEventListener implements Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
+    private boolean hasChunkPermission(Player player, Chunk chunk, DominionPermission permission) {
+        Dominion dominion = DominionUtils.getDominionOfChunk(chunk);
+        if (dominion == null) return true;
+        return DominionUtils.hasPermission(player, dominion, permission);
+    }
+
     // -------------------------------------------------------------------------
     // MINER
     // -------------------------------------------------------------------------
@@ -117,6 +127,7 @@ public class JobEventListener implements Listener {
         Player player = e.getPlayer();
         String worldName = player.getWorld().getName();
         if (!AranarthUtils.isSurvivalWorld(worldName)) return;
+        if (!hasChunkPermission(player, e.getBlock().getChunk(), DominionPermission.BUILD)) return;
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null) return;
@@ -261,6 +272,7 @@ public class JobEventListener implements Listener {
         if (!AranarthUtils.isSurvivalWorld(worldName)) return;
 
         Block block = e.getBlockPlaced();
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.BUILD)) return;
         long locationKey = JobUtils.toLocationKey(block.getX(), block.getY(), block.getZ());
 
         // Check BEFORE tracking whether this location was recently placed by anyone
@@ -313,7 +325,8 @@ public class JobEventListener implements Listener {
         // Farmer: collect honey (bottle) or honeycomb (shears) from beehives
         if ((blockType == Material.BEEHIVE || blockType == Material.BEE_NEST)
                 && mcMMO.getChunkManager().isEligible(clickedBlock)
-                && ap.getJobData().hasJob(JobType.FARMER)) {
+                && ap.getJobData().hasJob(JobType.FARMER)
+                && hasChunkPermission(player, clickedBlock.getChunk(), DominionPermission.MISC_INTERACT)) {
             if (inHand.getType() == Material.GLASS_BOTTLE) {
                 JobUtils.awardJob(player, JobType.FARMER, 0.50);
             } else if (inHand.getType() == Material.SHEARS) {
@@ -325,7 +338,8 @@ public class JobEventListener implements Listener {
         if ((blockType == Material.SUSPICIOUS_SAND || blockType == Material.SUSPICIOUS_GRAVEL)
                 && inHand.getType() == Material.BRUSH
                 && mcMMO.getChunkManager().isEligible(clickedBlock)
-                && ap.getJobData().hasJob(JobType.EXCAVATOR)) {
+                && ap.getJobData().hasJob(JobType.EXCAVATOR)
+                && hasChunkPermission(player, clickedBlock.getChunk(), DominionPermission.MISC_INTERACT)) {
             long key = JobUtils.toLocationKey(clickedBlock.getX(), clickedBlock.getY(), clickedBlock.getZ());
             long now = System.currentTimeMillis();
             Long lastRewarded = rewardedSuspiciousBlocks.get(key);
@@ -347,7 +361,7 @@ public class JobEventListener implements Listener {
         if (killer == null) return;
 
         String worldName = killer.getWorld().getName();
-        if (!AranarthUtils.isSurvivalWorld(worldName) && !worldName.equals("arena")) return;
+        if (!AranarthUtils.isSurvivalWorld(worldName)) return;
 
         AranarthPlayer ap = AranarthUtils.getPlayer(killer.getUniqueId());
         if (ap == null) return;
@@ -716,6 +730,7 @@ public class JobEventListener implements Listener {
         BrewerInventory brewer = e.getContents();
         Location loc = brewer.getLocation();
         if (loc == null) return;
+        if (loc.getWorld() == null || !AranarthUtils.isSurvivalWorld(loc.getWorld().getName())) return;
 
         UUID brewerUuid = activeBrewing.get(loc);
         if (brewerUuid == null) return;
@@ -747,6 +762,7 @@ public class JobEventListener implements Listener {
 
         Player player = e.getPlayer();
         if (player == null) return;
+        if (!AranarthUtils.isSurvivalWorld(player.getWorld().getName())) return;
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         if (ap == null || !ap.getJobData().hasJob(JobType.ALCHEMIST)) return;
@@ -805,6 +821,7 @@ public class JobEventListener implements Listener {
 
         Block block = loc.getBlock();
         if (!mcMMO.getChunkManager().isEligible(block)) return;
+        if (!hasChunkPermission(player, block.getChunk(), DominionPermission.CONTAINER)) return;
         BlockState state = block.getState();
 
         // Check if claimed already via PDC
