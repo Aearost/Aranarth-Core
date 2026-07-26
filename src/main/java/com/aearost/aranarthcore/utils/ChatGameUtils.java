@@ -323,13 +323,12 @@ public class ChatGameUtils {
             }
         }
 
-        // This server did not originate the game
+        // This server did not originate the game — publish claim immediately from the async chat
+        // thread (AranarthUtils.getPlayer is a plain map lookup and publish() dispatches its own
+        // async task, so no main-thread hop is needed here).
         if (!isOrigin) {
-            final UUID claimUUID = player.getUniqueId();
-            Bukkit.getScheduler().runTask(AranarthCore.getInstance(), () -> {
-                AranarthPlayer ap = AranarthUtils.getPlayer(claimUUID);
-                NetworkManager.getInstance().publishChatGameClaim(claimUUID, ap.getNickname(), elapsedSeconds);
-            });
+            AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
+            NetworkManager.getInstance().publishChatGameClaim(player.getUniqueId(), ap.getNickname(), elapsedSeconds);
             return true;
         }
 
