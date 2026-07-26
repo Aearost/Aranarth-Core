@@ -251,7 +251,7 @@ async function refreshWorkQueue(client, excludeIssueNumber = null, injectIssue =
         });
       }
 
-      if (wipIssues.length > 0 && otherIssues.length > 0) {
+      if (otherIssues.length > 0 && (wipIssues.length > 0 || searchedIssues.length > 0)) {
         const sepMsg = await channel.send({
           embeds: [
             new EmbedBuilder()

@@ -67,6 +67,47 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
   await reactionHandler.handle(reaction, user, client);
 });
 
+client.on(Events.GuildMemberAdd, async (member) => {
+  const channel = await client.channels.fetch(config.WELCOME_CHANNEL_ID).catch(() => null);
+  if (!channel) return;
+
+  const link = `<@${member.id}>`;
+  const messages = [
+    `**Welcome ${link} to Aranarth's Discord!**`,
+    `**Is that ${link} who has come to join us? 👀**`,
+    `**Look - it's a wild ${link}!**`,
+    `**${link} has entered the realm! ⚔️**`,
+    `**All hail ${link}, our newest arrival! 👑**`,
+    `**${link} joined the party! 🎉**`,
+    `**The gates open for ${link}! 🏰**`,
+    `**A new challenger appears: ${link}! ⚡**`,
+  ];
+  const msg = await channel.send({ content: messages[Math.floor(Math.random() * messages.length)], allowedMentions: { parse: [] } });
+  await msg.react('👋');
+  await msg.react('🎉');
+  await msg.react('🎈');
+});
+
+client.on(Events.GuildMemberRemove, async (member) => {
+  const channel = await client.channels.fetch(config.WELCOME_CHANNEL_ID).catch(() => null);
+  if (!channel) return;
+
+  const link = `<@${member.id}>`;
+  const messages = [
+    `**${link} has left the realm 🏰**`,
+    `**${link} has gone AFK... forever? 😶**`,
+    `**${link} went poof ✨**`,
+    `**${link} has left Aranarth... farewell! 🌙**`,
+    `**${link} has vanished into the void 🌀**`,
+    `**${link} has left us... for now ⏳**`,
+    `**${link} left without saying goodbye 😢**`,
+    `**${link} rage quit 😤**`,
+  ];
+  const msg = await channel.send({ content: messages[Math.floor(Math.random() * messages.length)], allowedMentions: { parse: [] } });
+  await msg.react('💔');
+  await msg.react('😭');
+});
+
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
   await messageHandler.handle(message, client);

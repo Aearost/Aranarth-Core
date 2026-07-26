@@ -130,3 +130,4 @@ Backend Code Changes
 - Removed redundant absolute paths of objects across the repository
 - Tweaked Discord role sync logic
 - Added missing log statements to crate rolls
+- Shifted Aranarth Support bot to handle the discord join/leave messages instead of the plugin

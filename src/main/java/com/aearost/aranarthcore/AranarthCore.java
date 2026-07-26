@@ -32,11 +32,6 @@ import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
-import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.api.JDA;
-import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMemberJoinEvent;
-import github.scarsz.discordsrv.dependencies.jda.api.events.guild.member.GuildMemberLeaveEvent;
-import github.scarsz.discordsrv.dependencies.jda.api.hooks.ListenerAdapter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.command.SimpleCommandMap;
@@ -59,8 +54,6 @@ public class AranarthCore extends JavaPlugin {
 
     private static AranarthCore plugin;
     private DiscordChatListener discordChatListener;
-    private ListenerAdapter discordMemberJoinListener;
-    private ListenerAdapter discordMemberLeaveListener;
     private RoleReactionListener roleReactionListener;
     private volatile boolean savedOnDisable = false;
 
@@ -735,29 +728,9 @@ public class AranarthCore extends JavaPlugin {
         new ArmorStandInteractListener(this);
         new PlayerFishEventListener(this);
         new InvseeListener(this);
-        // Discord server join and quit messages
         new BukkitRunnable() {
             @Override
             public void run() {
-                JDA jda = DiscordSRV.getPlugin().getJda();
-                discordMemberJoinListener = new ListenerAdapter() {
-                    @Override
-                    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-                        if (!AranarthCore.isSmpServer()) {
-                            DiscordUtils.discordServerJoin(event.getUser().getEffectiveName(), event.getUser().getId());
-                        }
-                    }
-                };
-                discordMemberLeaveListener = new ListenerAdapter() {
-                    @Override
-                    public void onGuildMemberLeave(GuildMemberLeaveEvent event) {
-                        if (!AranarthCore.isSmpServer()) {
-                            DiscordUtils.discordServerQuit(event.getUser().getEffectiveName(), event.getUser().getId());
-                        }
-                    }
-                };
-                jda.addEventListener(discordMemberJoinListener);
-                jda.addEventListener(discordMemberLeaveListener);
                 roleReactionListener = new RoleReactionListener();
                 roleReactionListener.initReactions();
             }
@@ -1408,15 +1381,6 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.resetRecipes();
         if (discordChatListener != null) discordChatListener.unsubscribe();
 
-        JDA jda = DiscordSRV.getPlugin().getJda();
-        if (jda != null) {
-            if (discordMemberJoinListener != null) {
-                jda.removeEventListener(discordMemberJoinListener);
-            }
-            if (discordMemberLeaveListener != null) {
-                jda.removeEventListener(discordMemberLeaveListener);
-            }
-        }
     }
 
     /**

@@ -41,7 +41,6 @@ public class DiscordUtils {
 	private static final TextChannel serverChatChannel = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("chat");
 	private static final TextChannel notifications = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("notifications");
 	private static final TextChannel dominions = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("dominions");
-	private static final TextChannel welcome = DiscordSRV.getPlugin().getDestinationTextChannelForGameChannelName("welcome");
 
 	private static TextChannel getBoostsChannel() {
 		return DiscordSRV.getPlugin().getJda().getTextChannelById("1516249987795779604");
@@ -929,52 +928,4 @@ public class DiscordUtils {
 		dominions.sendMessageEmbeds(embed.build()).queue();
 	}
 
-	/**
-	 * Provides custom server join messages in Discord with emojis.
-	 * @param name The display name of the user that joined the server.
-	 * @param discordId The Discord user ID of the user that joined the server.
-	 */
-	public static void discordServerJoin(String name, String discordId) {
-		String link = "<@" + discordId + ">";
-		List<String> welcomeMessages = new ArrayList<>();
-		welcomeMessages.add("**Welcome " + link + " to Aranarth's Discord!**");
-		welcomeMessages.add("**Is that " + link + " who has come to join us? \uD83D\uDC40**");
-		welcomeMessages.add("**Look - it's a wild " + link + "!**");
-		welcomeMessages.add("**" + link + " has entered the realm! ⚔️**");
-		welcomeMessages.add("**All hail " + link + ", our newest arrival! 👑**");
-		welcomeMessages.add("**" + link + " joined the party! 🎉**");
-		welcomeMessages.add("**The gates open for " + link + "! 🏰**");
-		welcomeMessages.add("**A new challenger appears: " + link + "! ⚡**");
-
-		int index = ThreadLocalRandom.current().nextInt(welcomeMessages.size());
-		welcome.sendMessage(welcomeMessages.get(index)).allowedMentions(new ArrayList<>()).queue(message -> {
-			message.addReaction("\uD83D\uDC4B").queue();
-			message.addReaction("🎉").queue();
-			message.addReaction("\uD83C\uDF88").queue();
-		});
-	}
-
-	/**
-	 * Provides custom server quit messages in Discord with emojis.
-	 * @param name The display name of the user that quit the server.
-	 * @param discordId The Discord user ID of the user that quit the server.
-	 */
-	public static void discordServerQuit(String name, String discordId) {
-		String link = "<@" + discordId + ">";
-		List<String> leaveMessages = new ArrayList<>();
-		leaveMessages.add("**" + link + " has left the realm 🏰**");
-		leaveMessages.add("**" + link + " has gone AFK... forever? 😶**");
-		leaveMessages.add("**" + link + " went poof ✨**");
-		leaveMessages.add("**" + link + " has left Aranarth... farewell! 🌙**");
-		leaveMessages.add("**" + link + " has vanished into the void 🌀**");
-		leaveMessages.add("**" + link + " has left us... for now ⏳**");
-		leaveMessages.add("**" + link + " left without saying goodbye 😢**");
-		leaveMessages.add("**" + link + " rage quit 😤**");
-
-		int index = ThreadLocalRandom.current().nextInt(leaveMessages.size());
-		welcome.sendMessage(leaveMessages.get(index)).allowedMentions(new ArrayList<>()).queue(message -> {
-			message.addReaction("\uD83D\uDC94").queue();
-			message.addReaction("\uD83D\uDE2D").queue();
-		});
-	}
 }
