@@ -384,19 +384,40 @@ public class DominionLevelUtils {
         Map<UUID, List<SnapshotBundle>> snapshotMap = new HashMap<>();
         for (Dominion dominion : dominions) {
             List<SnapshotBundle> bundles = new ArrayList<>();
+            boolean anyUnloaded = false;
+
             for (Chunk chunk : dominion.getChunks()) {
+                if (!chunk.isLoaded()) {
+                    anyUnloaded = true;
+                    break;
+                }
                 int minY = chunk.getWorld().getMinHeight();
                 int maxY = chunk.getWorld().getMaxHeight();
                 bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
             }
-            for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
-                for (Chunk chunk : outpost.getChunks()) {
-                    int minY = chunk.getWorld().getMinHeight();
-                    int maxY = chunk.getWorld().getMaxHeight();
-                    bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
+
+            if (!anyUnloaded) {
+                for (Outpost outpost : OutpostUtils.getDominionOutposts(dominion.getId())) {
+                    for (Chunk chunk : outpost.getChunks()) {
+                        if (!chunk.isLoaded()) {
+                            anyUnloaded = true;
+                            break;
+                        }
+                        int minY = chunk.getWorld().getMinHeight();
+                        int maxY = chunk.getWorld().getMaxHeight();
+                        bundles.add(new SnapshotBundle(chunk.getChunkSnapshot(), minY, maxY));
+                    }
+                    if (anyUnloaded) break;
                 }
             }
-            snapshotMap.put(dominion.getId(), bundles);
+
+            // Only snapshot dominions where all chunks are loaded — calling getChunkSnapshot()
+            // on an unloaded chunk force-loads it, which then causes the next livestock scan
+            // to see isLoaded()=true but find empty entity lists (Paper async entity loading),
+            // collapsing the cached count to 0 and triggering a false level drop.
+            if (!anyUnloaded) {
+                snapshotMap.put(dominion.getId(), bundles);
+            }
         }
 
         Bukkit.getScheduler().runTaskAsynchronously(AranarthCore.getInstance(), () -> {
@@ -456,18 +477,39 @@ public class DominionLevelUtils {
                         }
                     }
                 }
+                Integer prevCache = cachedByWorld.get(worldName);
+                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
+                        + " world=" + worldName
+                        + " allLoaded=true"
+                        + " scanned=" + worldCount
+                        + " prevCache=" + prevCache
+                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
                 cachedByWorld.put(worldName, worldCount);
                 total += worldCount;
             } else if (cachedByWorld.containsKey(worldName)) {
                 // We have a prior scan result for this world — use it
-                total += cachedByWorld.get(worldName);
+                int cached = cachedByWorld.get(worldName);
+                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
+                        + " world=" + worldName
+                        + " allLoaded=false"
+                        + " usingCache=" + cached
+                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
+                total += cached;
             } else {
                 // Use the unknown remainder so the count doesn't collapse to 0
+                Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
+                        + " world=" + worldName
+                        + " allLoaded=false"
+                        + " noCache usingRemainder=" + unknownRemainder
+                        + " onlinePlayers=" + Bukkit.getOnlinePlayers().size());
                 total += unknownRemainder;
                 unknownRemainder = 0; // consume it and only apply once to avoid double-counting
             }
         }
 
+        Bukkit.getLogger().info("[AC][LivestockScan] " + dominion.getName()
+                + " finalTotal=" + total
+                + " prevCachedLivestockCount=" + dominion.getCachedLivestockCount());
         return total;
     }
 
