@@ -40,7 +40,7 @@ public class AranarthiumScorched implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#ff4500&lScorched Aranarthium");
+		return "&#ff4500&lScorched Aranarthium";
 	}
 	
 	public String getLore() {

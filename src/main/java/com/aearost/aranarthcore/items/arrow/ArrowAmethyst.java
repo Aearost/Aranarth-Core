@@ -35,7 +35,7 @@ public class ArrowAmethyst implements AranarthItem {
 	}
 
 	public String getName() {
-		return "#A020F0Amethyst Arrow";
+		return "&#A020F0Amethyst Arrow";
 	}
 	
 }

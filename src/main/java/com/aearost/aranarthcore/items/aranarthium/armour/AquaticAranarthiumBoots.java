@@ -46,7 +46,7 @@ public class AquaticAranarthiumBoots implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#AEEEEE&lAquatic Aranarthium Boots");
+		return "&#AEEEEE&lAquatic Aranarthium Boots";
 	}
 	
 	public String getLore() {

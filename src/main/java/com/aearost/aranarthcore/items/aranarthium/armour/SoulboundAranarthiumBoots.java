@@ -44,7 +44,7 @@ public class SoulboundAranarthiumBoots implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#9400D3&lSoulbound Aranarthium Boots");
+		return "&#9400D3&lSoulbound Aranarthium Boots";
 	}
 	
 	public String getLore() {

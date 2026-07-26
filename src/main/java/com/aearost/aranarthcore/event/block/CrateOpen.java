@@ -462,26 +462,26 @@ public class CrateOpen {
                     return;
                 } else if (chance <= 24) {
                     reward = new ItemStack(Material.BREAD, 16);
-                    name = "#ba8727&lBread x16";
+                    name = "&#ba8727&lBread x16";
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.IRON_INGOT, 16);
-                    name = "#eeeeee&lIron Ingot x16";
+                    name = "&#eeeeee&lIron Ingot x16";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.GOLD_INGOT, 16);
-                    name = "#fcd34d&lGold Ingot x16";
+                    name = "&#fcd34d&lGold Ingot x16";
                 } else if (chance <= 56) {
                     reward = new GodAppleFragment().getItem();
                     reward.setAmount(4);
                     name = "&6&lGod Apple Fragment x4";
                 } else if (chance <= 64) {
                     reward = new ItemStack(Material.EMERALD, 8);
-                    name = "#50c878&lEmerald x8";
+                    name = "&#50c878&lEmerald x8";
                 } else if (chance <= 72) {
                     reward = new ItemStack(Material.DIAMOND, 4);
-                    name = "#a0f0ed&lDiamond x4";
+                    name = "&#a0f0ed&lDiamond x4";
                 } else if (chance <= 80) {
                     reward = new ItemStack(Material.EXPERIENCE_BOTTLE, 16);
-                    name = "#c1e377&lBottle o' Enchanting x16";
+                    name = "&#c1e377&lBottle o' Enchanting x16";
                 } else if (chance <= 85) {
                     aranarthPlayer.setCrateTypeBeingOpened(null);
                     AranarthUtils.removeCrateFromUse(CrateType.VOTE);
@@ -497,10 +497,10 @@ public class CrateOpen {
                     // 50/50 blaze rod or breeze rod
                     if (new Random().nextBoolean()) {
                         reward = new ItemStack(Material.BLAZE_ROD, 8);
-                        name = "#fcbf00&lBlaze Rod x8";
+                        name = "&#fcbf00&lBlaze Rod x8";
                     } else {
                         reward = new ItemStack(Material.BREEZE_ROD, 8);
-                        name = "#bdadc7&lBreeze Rod x8";
+                        name = "&#bdadc7&lBreeze Rod x8";
                     }
                 } else if (chance <= 95) {
                     // Random locked rare-tier brew recipe map; fallback to breeze rod if all unlocked
@@ -510,7 +510,7 @@ public class CrateOpen {
                         name = "&6&l[Recipe] " + lockedMiddle.getDisplayName();
                     } else {
                         reward = new ItemStack(Material.BREEZE_ROD, 8);
-                        name = "#bdadc7&lBreeze Rod x8";
+                        name = "&#bdadc7&lBreeze Rod x8";
                     }
                 } else {
                     reward = new KeyRare().getItem();
@@ -576,19 +576,19 @@ public class CrateOpen {
                     EnchantmentStorageMeta mendingMeta = (EnchantmentStorageMeta) reward.getItemMeta();
                     mendingMeta.addStoredEnchant(Enchantment.MENDING, 1, true);
                     reward.setItemMeta(mendingMeta);
-                    name = "#9f1c43&lMending Book x1";
+                    name = "&#9f1c43&lMending Book x1";
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.GOLDEN_CARROT, 32);
-                    name = "#fcd34d&lGolden Carrot x32";
+                    name = "&#fcd34d&lGolden Carrot x32";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.DIAMOND, 16);
-                    name = "#a0f0ed&lDiamond x16";
+                    name = "&#a0f0ed&lDiamond x16";
                 } else if (chance <= 56) {
                     reward = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 4);
-                    name = "#fcd34d&lEnchanted Golden Apple x4";
+                    name = "&#fcd34d&lEnchanted Golden Apple x4";
                 } else if (chance <= 64) {
                     reward = new ItemStack(Material.OMINOUS_TRIAL_KEY, 1);
-                    name = "#515950&lOminous Trial Key x1";
+                    name = "&#515950&lOminous Trial Key x1";
                 } else if (chance <= 72) {
                     reward = getCycledArmorTrim(new Random().nextInt(18));
                     String trimName = reward.getType().name().split("_")[0].toLowerCase();
@@ -603,7 +603,7 @@ public class CrateOpen {
                     name = trimName + " x1";
                 } else if (chance <= 80) {
                     reward = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
-                    name = "#f5eba3&lTotem of Undying x1";
+                    name = "&#f5eba3&lTotem of Undying x1";
                 } else if (chance <= 85) {
                     reward = new IncantationBeheading().getItem();
                     name = reward.getItemMeta().getDisplayName() + " x1";
@@ -679,29 +679,29 @@ public class CrateOpen {
                     name = "&6&lHoney Glazed Ham x64";
                 } else if (chance <= 36) {
                     reward = new ItemStack(Material.NETHERITE_INGOT, 2);
-                    name = "#3a383a&lNetherite Ingot x2";
+                    name = "&#3a383a&lNetherite Ingot x2";
                 } else if (chance <= 48) {
                     reward = new ItemStack(Material.DIAMOND, 64);
-                    name = "#a0f0ed&lDiamond x64";
+                    name = "&#a0f0ed&lDiamond x64";
                 } else if (chance <= 56) {
                     int weaponRoll = new Random().nextInt(5);
                     switch (weaponRoll) {
-                        case 0 -> { reward = new ItemStack(Material.TRIDENT, 1); name = "#579b8c&lTrident x1"; }
-                        case 1 -> { reward = new ItemStack(Material.ELYTRA, 1); name = "#7d7d96&lElytra x1"; }
-                        case 2 -> { reward = new ItemStack(Material.SNIFFER_EGG, 1); name = "#6ab567&lSniffer Egg x1"; }
-                        case 3 -> { reward = new ItemStack(Material.CONDUIT, 1); name = "#4dcfcf&lConduit x1"; }
-                        default -> { reward = new ItemStack(Material.SHULKER_SHELL, 8); name = "#946794&lShulker Shell x8"; }
+                        case 0 -> { reward = new ItemStack(Material.TRIDENT, 1); name = "&#579b8c&lTrident x1"; }
+                        case 1 -> { reward = new ItemStack(Material.ELYTRA, 1); name = "&#7d7d96&lElytra x1"; }
+                        case 2 -> { reward = new ItemStack(Material.SNIFFER_EGG, 1); name = "&#6ab567&lSniffer Egg x1"; }
+                        case 3 -> { reward = new ItemStack(Material.CONDUIT, 1); name = "&#4dcfcf&lConduit x1"; }
+                        default -> { reward = new ItemStack(Material.SHULKER_SHELL, 8); name = "&#946794&lShulker Shell x8"; }
                     }
                 } else if (chance <= 64) {
                     reward = getCycledEpicSpawnEgg(new Random().nextInt(4));
                     if (reward.getType() == Material.SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg");
+                        name = ChatUtils.translateToColor("&#5F5347&lSpider Spawn Egg");
                     } else if (reward.getType() == Material.SKELETON_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg");
+                        name = ChatUtils.translateToColor("&#BABABA&lSkeleton Spawn Egg");
                     } else if (reward.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg");
+                        name = ChatUtils.translateToColor("&#002D31&lCave Spider Spawn Egg");
                     } else {
-                        name = ChatUtils.translateToColor("#71915D&lZombie Spawn Egg");
+                        name = ChatUtils.translateToColor("&#71915D&lZombie Spawn Egg");
                     }
                 } else if (chance <= 72) {
                     ItemStack cluster1 = getCycledCluster(new Random().nextInt(8));
@@ -846,17 +846,17 @@ public class CrateOpen {
                 } else if (chance <= 24) {
                     if (new Random().nextBoolean()) {
                         reward = new ItemStack(Material.DIAMOND_BLOCK, 64);
-                        name = "#a0f0ed&lDiamond Block x64";
+                        name = "&#a0f0ed&lDiamond Block x64";
                     } else {
                         reward = new ItemStack(Material.SHULKER_SHELL, 32);
-                        name = "#946794&lShulker Shells x32";
+                        name = "&#946794&lShulker Shells x32";
                     }
                 } else if (chance <= 32) {
                     reward = getCycledAranarthium(new Random().nextInt(6));
                     name = reward.getItemMeta().getDisplayName() + " x1";
                 } else if (chance <= 44) {
                     reward = new ItemStack(Material.NETHERITE_BLOCK, 1);
-                    name = "#3a383a&lNetherite Block x1";
+                    name = "&#3a383a&lNetherite Block x1";
                 } else if (chance <= 52) {
                     player.playSound(player, Sound.ENTITY_CHICKEN_EGG, 1, 0.6F);
                     McMMOPlayer mcMMOPlayer = EventUtils.getMcMMOPlayer(player);
@@ -885,10 +885,10 @@ public class CrateOpen {
                     name = reward.getItemMeta().getDisplayName() + " &f&lx1";
                 } else if (chance <= 72) {
                     reward = new ItemStack(Material.NETHER_STAR, 1);
-                    name = "#d8d6fb&lNether Star x1";
+                    name = "&#d8d6fb&lNether Star x1";
                 } else if (chance <= 80) {
                     reward = new ItemStack(Material.HEAVY_CORE, 1);
-                    name = "#4d5158&lHeavy Core x1";
+                    name = "&#4d5158&lHeavy Core x1";
                 } else if (chance <= 85) {
                     reward = new KeyGodly().getItem();
                     reward.setAmount(2);
@@ -913,11 +913,11 @@ public class CrateOpen {
                 } else {
                     reward = getCycledGodlySpawnEgg(new Random().nextInt(3));
                     if (reward.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg");
+                        name = ChatUtils.translateToColor("&#4F0E0E&lMagma Cube Spawn Egg");
                     } else if (reward.getType() == Material.BLAZE_SPAWN_EGG) {
-                        name = ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg");
+                        name = ChatUtils.translateToColor("&#FCD228&lBlaze Spawn Egg");
                     } else {
-                        name = ChatUtils.translateToColor("#51A03E&lSlime Spawn Egg");
+                        name = ChatUtils.translateToColor("&#51A03E&lSlime Spawn Egg");
                     }
                 }
 

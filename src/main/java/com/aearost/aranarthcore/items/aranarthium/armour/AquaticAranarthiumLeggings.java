@@ -44,7 +44,7 @@ public class AquaticAranarthiumLeggings implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#AEEEEE&lAquatic Aranarthium Leggings");
+		return "&#AEEEEE&lAquatic Aranarthium Leggings";
 	}
 	
 	public String getLore() {

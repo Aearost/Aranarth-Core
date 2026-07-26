@@ -40,7 +40,7 @@ public class AranarthiumElven implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#3F704D&lElven Aranarthium");
+		return "&#3F704D&lElven Aranarthium";
 	}
 	
 	public String getLore() {

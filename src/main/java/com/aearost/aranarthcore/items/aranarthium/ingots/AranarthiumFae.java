@@ -39,7 +39,7 @@ public class AranarthiumFae implements AranarthItem {
 	}
 
 	public String getName() {
-		return ChatUtils.translateToColor("#FBA0E3&lFae Aranarthium");
+		return "&#FBA0E3&lFae Aranarthium";
 	}
 
 	public String getLore() {

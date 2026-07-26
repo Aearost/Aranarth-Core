@@ -40,7 +40,7 @@ public class AranarthiumSoulbound implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#9400D3&lSoulbound Aranarthium");
+		return "&#9400D3&lSoulbound Aranarthium";
 	}
 	
 	public String getLore() {

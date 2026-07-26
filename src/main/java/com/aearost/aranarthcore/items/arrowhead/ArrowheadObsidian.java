@@ -37,7 +37,7 @@ public class ArrowheadObsidian implements AranarthItem {
 	}
 
 	public String getName() {
-		return "#4B0082Obsidian Arrowhead";
+		return "&#4B0082Obsidian Arrowhead";
 	}
 	
 }

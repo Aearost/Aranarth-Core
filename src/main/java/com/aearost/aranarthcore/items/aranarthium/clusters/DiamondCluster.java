@@ -36,6 +36,6 @@ public class DiamondCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#a0f0ed&lDiamond Cluster");
+		return "&#a0f0ed&lDiamond Cluster";
 	}
 }

@@ -44,7 +44,7 @@ public class ScorchedAranarthiumHelmet implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#ff4500&lScorched Aranarthium Helmet");
+		return "&#ff4500&lScorched Aranarthium Helmet";
 	}
 	
 	public String getLore() {

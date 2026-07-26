@@ -36,6 +36,6 @@ public class EmeraldCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#50c878&lEmerald Cluster");
+		return "&#50c878&lEmerald Cluster";
 	}
 }

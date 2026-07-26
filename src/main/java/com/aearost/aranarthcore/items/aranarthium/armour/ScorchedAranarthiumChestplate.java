@@ -44,7 +44,7 @@ public class ScorchedAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#ff4500&lScorched Aranarthium Chestplate");
+		return "&#ff4500&lScorched Aranarthium Chestplate";
 	}
 	
 	public String getLore() {

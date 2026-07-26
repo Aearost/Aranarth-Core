@@ -141,7 +141,7 @@ public class ArrowHit {
 				if (e.getHitEntity() != null) {
 					e.getHitEntity().getPersistentDataContainer().set(ARROW, PersistentDataType.STRING, "rooting");
 					if (e.getHitEntity() instanceof Player player) {
-						player.sendMessage(ChatUtils.chatMessage("#964B00You have been rooted!"));
+						player.sendMessage(ChatUtils.chatMessage("&#964B00You have been rooted!"));
 					}
 
 					// Removes the attribute after 30 seconds

@@ -44,7 +44,7 @@ public class ElvenAranarthiumLeggings implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#3F704D&lElven Aranarthium Leggings");
+		return "&#3F704D&lElven Aranarthium Leggings";
 	}
 	
 	public String getLore() {

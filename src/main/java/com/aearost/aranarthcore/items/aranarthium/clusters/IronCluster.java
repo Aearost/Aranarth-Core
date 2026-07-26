@@ -36,6 +36,6 @@ public class IronCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#eeeeee&lIron Cluster");
+		return "&#eeeeee&lIron Cluster";
 	}
 }

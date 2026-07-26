@@ -36,6 +36,6 @@ public class LapisCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#4169e1&lLapis Cluster");
+		return "&#4169e1&lLapis Cluster";
 	}
 }

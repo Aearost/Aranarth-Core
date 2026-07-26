@@ -36,6 +36,6 @@ public class QuartzCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#f8e8e8&lQuartz Cluster");
+		return "&#f8e8e8&lQuartz Cluster";
 	}
 }

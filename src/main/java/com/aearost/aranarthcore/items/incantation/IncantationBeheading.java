@@ -44,6 +44,6 @@ public class IncantationBeheading implements Incantation {
 
     @Override
     public String getColor() {
-        return "#5b0001";
+        return "&#5b0001";
     }
 }

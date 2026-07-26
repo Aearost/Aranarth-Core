@@ -40,7 +40,7 @@ public class AranarthiumAquatic implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#AEEEEE&lAquatic Aranarthium");
+		return "&#AEEEEE&lAquatic Aranarthium";
 	}
 	
 	public String getLore() {

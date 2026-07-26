@@ -36,6 +36,6 @@ public class RedstoneCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#aa0000&lRedstone Cluster");
+		return "&#aa0000&lRedstone Cluster";
 	}
 }

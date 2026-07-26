@@ -36,6 +36,6 @@ public class GoldCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#fcd34d&lGold Cluster");
+		return "&#fcd34d&lGold Cluster";
 	}
 }

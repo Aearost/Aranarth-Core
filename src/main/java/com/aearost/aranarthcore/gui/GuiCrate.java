@@ -78,7 +78,7 @@ public class GuiCrate {
 
 		ItemStack bread = new ItemStack(Material.BREAD, 16);
 		ItemMeta breadMeta = bread.getItemMeta();
-		breadMeta.setDisplayName(ChatUtils.translateToColor("#ba8727&lBread"));
+		breadMeta.setDisplayName(ChatUtils.translateToColor("&#ba8727&lBread"));
 		List<String> breadLore = new ArrayList<>();
 		breadLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		breadMeta.setLore(breadLore);
@@ -87,7 +87,7 @@ public class GuiCrate {
 
 		ItemStack iron = new ItemStack(Material.IRON_INGOT, 16);
 		ItemMeta ironMeta = iron.getItemMeta();
-		ironMeta.setDisplayName(ChatUtils.translateToColor("#eeeeee&lIron Ingot"));
+		ironMeta.setDisplayName(ChatUtils.translateToColor("&#eeeeee&lIron Ingot"));
 		List<String> ironLore = new ArrayList<>();
 		ironLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		ironMeta.setLore(ironLore);
@@ -96,7 +96,7 @@ public class GuiCrate {
 
 		ItemStack gold = new ItemStack(Material.GOLD_INGOT, 16);
 		ItemMeta goldMeta = gold.getItemMeta();
-		goldMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lGold Ingot"));
+		goldMeta.setDisplayName(ChatUtils.translateToColor("&#fcd34d&lGold Ingot"));
 		List<String> goldLore = new ArrayList<>();
 		goldLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		goldMeta.setLore(goldLore);
@@ -105,7 +105,7 @@ public class GuiCrate {
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND, 4);
 		ItemMeta diamondMeta = diamond.getItemMeta();
-		diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond"));
+		diamondMeta.setDisplayName(ChatUtils.translateToColor("&#a0f0ed&lDiamond"));
 		List<String> diamondLore = new ArrayList<>();
 		diamondLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		diamondMeta.setLore(diamondLore);
@@ -114,7 +114,7 @@ public class GuiCrate {
 
 		ItemStack exp = new ItemStack(Material.EXPERIENCE_BOTTLE, 16);
 		ItemMeta expMeta = exp.getItemMeta();
-		expMeta.setDisplayName(ChatUtils.translateToColor("#c1e377&lBottle o' Enchanting"));
+		expMeta.setDisplayName(ChatUtils.translateToColor("&#c1e377&lBottle o' Enchanting"));
 		List<String> expLore = new ArrayList<>();
 		expLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		expMeta.setLore(expLore);
@@ -133,7 +133,7 @@ public class GuiCrate {
 
 		ItemStack emerald = new ItemStack(Material.EMERALD, 8);
 		ItemMeta emeraldMeta = emerald.getItemMeta();
-		emeraldMeta.setDisplayName(ChatUtils.translateToColor("#50c878&lEmerald"));
+		emeraldMeta.setDisplayName(ChatUtils.translateToColor("&#50c878&lEmerald"));
 		List<String> emeraldLore = new ArrayList<>();
 		emeraldLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		emeraldMeta.setLore(emeraldLore);
@@ -151,7 +151,7 @@ public class GuiCrate {
 
 		ItemStack rods = new ItemStack(Material.BLAZE_ROD, 8);
 		ItemMeta rodsMeta = rods.getItemMeta();
-		rodsMeta.setDisplayName(ChatUtils.translateToColor("#fcbf00&lBlaze Rod"));
+		rodsMeta.setDisplayName(ChatUtils.translateToColor("&#fcbf00&lBlaze Rod"));
 		List<String> rodsLore = new ArrayList<>();
 		rodsLore.add(ChatUtils.translateToColor("&c5% Chance &7(alternates with Breeze Rod)"));
 		rodsMeta.setLore(rodsLore);
@@ -208,7 +208,7 @@ public class GuiCrate {
 		ItemStack mending = new ItemStack(Material.ENCHANTED_BOOK, 16);
 		EnchantmentStorageMeta mendingMeta = (EnchantmentStorageMeta) mending.getItemMeta();
 		mendingMeta.addStoredEnchant(Enchantment.MENDING, 0, true);
-		mendingMeta.setDisplayName(ChatUtils.translateToColor("#9f1c43&lMending Book"));
+		mendingMeta.setDisplayName(ChatUtils.translateToColor("&#9f1c43&lMending Book"));
 		List<String> mendingLore = new ArrayList<>();
 		mendingLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		mendingMeta.setLore(mendingLore);
@@ -217,7 +217,7 @@ public class GuiCrate {
 
 		ItemStack goldenCarrot = new ItemStack(Material.GOLDEN_CARROT, 32);
 		ItemMeta goldenCarrotMeta = goldenCarrot.getItemMeta();
-		goldenCarrotMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lGolden Carrot"));
+		goldenCarrotMeta.setDisplayName(ChatUtils.translateToColor("&#fcd34d&lGolden Carrot"));
 		List<String> goldenCarrotLore = new ArrayList<>();
 		goldenCarrotLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		goldenCarrotMeta.setLore(goldenCarrotLore);
@@ -226,7 +226,7 @@ public class GuiCrate {
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND, 16);
 		ItemMeta diamondMeta = diamond.getItemMeta();
-		diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond"));
+		diamondMeta.setDisplayName(ChatUtils.translateToColor("&#a0f0ed&lDiamond"));
 		List<String> diamondLore = new ArrayList<>();
 		diamondLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		diamondMeta.setLore(diamondLore);
@@ -235,7 +235,7 @@ public class GuiCrate {
 
 		ItemStack enchantedGoldenApple = new ItemStack(Material.ENCHANTED_GOLDEN_APPLE, 4);
 		ItemMeta enchantedGoldenAppleMeta = enchantedGoldenApple.getItemMeta();
-		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("#fcd34d&lEnchanted Golden Apple"));
+		enchantedGoldenAppleMeta.setDisplayName(ChatUtils.translateToColor("&#fcd34d&lEnchanted Golden Apple"));
 		List<String> enchantedGoldenAppleLore = new ArrayList<>();
 		enchantedGoldenAppleLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		enchantedGoldenAppleMeta.setLore(enchantedGoldenAppleLore);
@@ -244,7 +244,7 @@ public class GuiCrate {
 
 		ItemStack ominousTrialKey = new ItemStack(Material.OMINOUS_TRIAL_KEY, 1);
 		ItemMeta ominousTrialKeyMeta = ominousTrialKey.getItemMeta();
-		ominousTrialKeyMeta.setDisplayName(ChatUtils.translateToColor("#515950&lOminous Trial Key"));
+		ominousTrialKeyMeta.setDisplayName(ChatUtils.translateToColor("&#515950&lOminous Trial Key"));
 		List<String> ominousTrialKeyLore = new ArrayList<>();
 		ominousTrialKeyLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		ominousTrialKeyMeta.setLore(ominousTrialKeyLore);
@@ -253,7 +253,7 @@ public class GuiCrate {
 
 		ItemStack totem = new ItemStack(Material.TOTEM_OF_UNDYING, 1);
 		ItemMeta totemMeta = totem.getItemMeta();
-		totemMeta.setDisplayName(ChatUtils.translateToColor("#f5eba3&lTotem of Undying"));
+		totemMeta.setDisplayName(ChatUtils.translateToColor("&#f5eba3&lTotem of Undying"));
 		List<String> totemLore = new ArrayList<>();
 		totemLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		totemMeta.setLore(totemLore);
@@ -326,7 +326,7 @@ public class GuiCrate {
 
 		ItemStack netherite = new ItemStack(Material.NETHERITE_INGOT, 2);
 		ItemMeta netheriteMeta = netherite.getItemMeta();
-		netheriteMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Ingot"));
+		netheriteMeta.setDisplayName(ChatUtils.translateToColor("&#3a383a&lNetherite Ingot"));
 		List<String> netheriteLore = new ArrayList<>();
 		netheriteLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		netheriteMeta.setLore(netheriteLore);
@@ -335,7 +335,7 @@ public class GuiCrate {
 
 		ItemStack diamond = new ItemStack(Material.DIAMOND, 64);
 		ItemMeta diamondMeta = diamond.getItemMeta();
-		diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond"));
+		diamondMeta.setDisplayName(ChatUtils.translateToColor("&#a0f0ed&lDiamond"));
 		List<String> diamondLore = new ArrayList<>();
 		diamondLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		diamondMeta.setLore(diamondLore);
@@ -412,7 +412,7 @@ public class GuiCrate {
 
 		ItemStack diamondBlock = new ItemStack(Material.DIAMOND_BLOCK, 64);
 		ItemMeta diamondBlockMeta = diamondBlock.getItemMeta();
-		diamondBlockMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
+		diamondBlockMeta.setDisplayName(ChatUtils.translateToColor("&#a0f0ed&lDiamond Block"));
 		List<String> diamondBlockLore = new ArrayList<>();
 		diamondBlockLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		diamondBlockMeta.setLore(diamondBlockLore);
@@ -421,7 +421,7 @@ public class GuiCrate {
 
 		ItemStack iron = new ItemStack(Material.NETHERITE_BLOCK, 1);
 		ItemMeta ironMeta = iron.getItemMeta();
-		ironMeta.setDisplayName(ChatUtils.translateToColor("#3a383a&lNetherite Block"));
+		ironMeta.setDisplayName(ChatUtils.translateToColor("&#3a383a&lNetherite Block"));
 		List<String> ironLore = new ArrayList<>();
 		ironLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		ironMeta.setLore(ironLore);
@@ -439,7 +439,7 @@ public class GuiCrate {
 
 		ItemStack netherStar = new ItemStack(Material.NETHER_STAR, 1);
 		ItemMeta netherStarMeta = netherStar.getItemMeta();
-		netherStarMeta.setDisplayName(ChatUtils.translateToColor("#d8d6fb&lNether Star"));
+		netherStarMeta.setDisplayName(ChatUtils.translateToColor("&#d8d6fb&lNether Star"));
 		List<String> netherStarLore = new ArrayList<>();
 		netherStarLore.add(ChatUtils.translateToColor("&a12% Chance"));
 		netherStarMeta.setLore(netherStarLore);
@@ -448,7 +448,7 @@ public class GuiCrate {
 
 		ItemStack heavyCore = new ItemStack(Material.HEAVY_CORE, 1);
 		ItemMeta heavyCoreMeta = heavyCore.getItemMeta();
-		heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("#4d5158&lHeavy Core"));
+		heavyCoreMeta.setDisplayName(ChatUtils.translateToColor("&#4d5158&lHeavy Core"));
 		List<String> heavyCoreLore = new ArrayList<>();
 		heavyCoreLore.add(ChatUtils.translateToColor("&e8% Chance"));
 		heavyCoreMeta.setLore(heavyCoreLore);
@@ -516,11 +516,11 @@ public class GuiCrate {
 		String rodColor;
 		if (rodIndex == 0) {
 			rod = new ItemStack(Material.BLAZE_ROD, 8);
-			rodName = "#fcbf00&lBlaze Rod";
+			rodName = "&#fcbf00&lBlaze Rod";
 			rodColor = "&c5% Chance";
 		} else {
 			rod = new ItemStack(Material.BREEZE_ROD, 8);
-			rodName = "#bdadc7&lBreeze Rod";
+			rodName = "&#bdadc7&lBreeze Rod";
 			rodColor = "&c5% Chance";
 		}
 		ItemMeta rodMeta = rod.getItemMeta();
@@ -616,11 +616,11 @@ public class GuiCrate {
 		ItemStack weapon = null;
 		String weaponName = "";
 		switch (weaponIndex) {
-			case 1 -> { weapon = new ItemStack(Material.ELYTRA, 1); weaponName = "#7d7d96&lElytra"; }
-			case 2 -> { weapon = new ItemStack(Material.SNIFFER_EGG, 1); weaponName = "#6ab567&lSniffer Egg"; }
-			case 3 -> { weapon = new ItemStack(Material.CONDUIT, 1); weaponName = "#4dcfcf&lConduit"; }
-			case 4 -> { weapon = new ItemStack(Material.SHULKER_SHELL, 8); weaponName = "#946794&lShulker Shell"; }
-			default -> { weapon = new ItemStack(Material.TRIDENT, 1); weaponName = "#579b8c&lTrident"; }
+			case 1 -> { weapon = new ItemStack(Material.ELYTRA, 1); weaponName = "&#7d7d96&lElytra"; }
+			case 2 -> { weapon = new ItemStack(Material.SNIFFER_EGG, 1); weaponName = "&#6ab567&lSniffer Egg"; }
+			case 3 -> { weapon = new ItemStack(Material.CONDUIT, 1); weaponName = "&#4dcfcf&lConduit"; }
+			case 4 -> { weapon = new ItemStack(Material.SHULKER_SHELL, 8); weaponName = "&#946794&lShulker Shell"; }
+			default -> { weapon = new ItemStack(Material.TRIDENT, 1); weaponName = "&#579b8c&lTrident"; }
 		}
 		ItemMeta cycledWeaponMeta = weapon.getItemMeta();
 		cycledWeaponMeta.setDisplayName(ChatUtils.translateToColor(weaponName));
@@ -641,13 +641,13 @@ public class GuiCrate {
 		egg.setAmount(1);
 		ItemMeta cycledEggMeta = egg.getItemMeta();
 		if (egg.getType() == Material.SPIDER_SPAWN_EGG) {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#5F5347&lSpider Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#5F5347&lSpider Spawn Egg"));
 		} else if (egg.getType() == Material.SKELETON_SPAWN_EGG) {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#BABABA&lSkeleton Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#BABABA&lSkeleton Spawn Egg"));
 		} else if (egg.getType() == Material.CAVE_SPIDER_SPAWN_EGG) {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#002D31&lCave Spider Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#002D31&lCave Spider Spawn Egg"));
 		} else {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#71915D&lZombie Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#71915D&lZombie Spawn Egg"));
 		}
 		List<String> cycledEggLore = new ArrayList<>();
 		cycledEggLore.add(ChatUtils.translateToColor("&a12% Chance"));
@@ -718,11 +718,11 @@ public class GuiCrate {
 
 		ItemMeta cycledEggMeta = egg.getItemMeta();
 		if (egg.getType() == Material.MAGMA_CUBE_SPAWN_EGG) {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#4F0E0E&lMagma Cube Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#4F0E0E&lMagma Cube Spawn Egg"));
 		} else if (egg.getType() == Material.BLAZE_SPAWN_EGG) {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#FCD228&lBlaze Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#FCD228&lBlaze Spawn Egg"));
 		} else {
-			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("#51A03E&lSlime Spawn Egg"));
+			cycledEggMeta.setDisplayName(ChatUtils.translateToColor("&#51A03E&lSlime Spawn Egg"));
 		}
 		List<String> cycledEggLore = new ArrayList<>();
 		cycledEggLore.add(ChatUtils.translateToColor("&c5% Chance"));
@@ -735,7 +735,7 @@ public class GuiCrate {
 		if (diamondShulkerIndex == 1) {
 			diamondShulker = new ItemStack(Material.SHULKER_SHELL, 32);
 			ItemMeta shulkerMeta = diamondShulker.getItemMeta();
-			shulkerMeta.setDisplayName(ChatUtils.translateToColor("#946794&lShulker Shells"));
+			shulkerMeta.setDisplayName(ChatUtils.translateToColor("&#946794&lShulker Shells"));
 			List<String> shulkerLore = new ArrayList<>();
 			shulkerLore.add(ChatUtils.translateToColor("&a12% Chance"));
 			shulkerMeta.setLore(shulkerLore);
@@ -743,7 +743,7 @@ public class GuiCrate {
 		} else {
 			diamondShulker = new ItemStack(Material.DIAMOND_BLOCK, 64);
 			ItemMeta diamondMeta = diamondShulker.getItemMeta();
-			diamondMeta.setDisplayName(ChatUtils.translateToColor("#a0f0ed&lDiamond Block"));
+			diamondMeta.setDisplayName(ChatUtils.translateToColor("&#a0f0ed&lDiamond Block"));
 			List<String> diamondLore = new ArrayList<>();
 			diamondLore.add(ChatUtils.translateToColor("&a12% Chance"));
 			diamondMeta.setLore(diamondLore);

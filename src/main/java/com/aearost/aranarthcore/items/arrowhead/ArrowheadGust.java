@@ -35,7 +35,7 @@ public class ArrowheadGust implements AranarthItem {
 	}
 
 	public String getName() {
-		return "#d1e5f4Gust Arrowhead";
+		return "&#d1e5f4Gust Arrowhead";
 	}
 	
 }

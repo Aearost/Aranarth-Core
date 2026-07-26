@@ -36,6 +36,6 @@ public class CopperCluster implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#b87333&lCopper Cluster");
+		return "&#b87333&lCopper Cluster";
 	}
 }

@@ -46,7 +46,7 @@ public class AquaticAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#AEEEEE&lAquatic Aranarthium Chestplate");
+		return "&#AEEEEE&lAquatic Aranarthium Chestplate";
 	}
 	
 	public String getLore() {

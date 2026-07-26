@@ -35,7 +35,7 @@ public class ArrowheadRooting implements AranarthItem {
 	}
 
 	public String getName() {
-		return "#964B00Rooting Arrowhead";
+		return "&#964B00Rooting Arrowhead";
 	}
 	
 }

@@ -44,7 +44,7 @@ public class DwarvenAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#FFEE8C&lDwarven Aranarthium Chestplate");
+		return "&#FFEE8C&lDwarven Aranarthium Chestplate";
 	}
 	
 	public String getLore() {

@@ -37,7 +37,7 @@ public class FaeAranarthiumLeggings implements AranarthItem {
 	}
 
 	public String getName() {
-		return ChatUtils.translateToColor("#FBA0E3&lFae Aranarthium Leggings");
+		return "&#FBA0E3&lFae Aranarthium Leggings";
 	}
 
 	public String getLore() {

@@ -44,7 +44,7 @@ public class SoulboundAranarthiumChestplate implements AranarthItem {
 	}
 	
 	public String getName() {
-		return ChatUtils.translateToColor("#9400D3&lSoulbound Aranarthium Chestplate");
+		return "&#9400D3&lSoulbound Aranarthium Chestplate";
 	}
 	
 	public String getLore() {

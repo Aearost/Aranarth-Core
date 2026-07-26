@@ -35,7 +35,7 @@ public class ArrowRooting implements AranarthItem {
 	}
 	
 	public String getName() {
-		return "#964B00Rooting Arrow";
+		return "&#964B00Rooting Arrow";
 	}
 	
 }
