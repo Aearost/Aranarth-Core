@@ -178,7 +178,7 @@ public class CommandDominion implements CommandExecutor {
                             player.sendMessage(ChatUtils.translateToColor(
                                 "&8[&6" + (i + 1) + "&8] &e" + dominionFromList.getName()
                                 + " &7ruled by &e" + AranarthUtils.getNickname(Bukkit.getOfflinePlayer(dominionFromList.getLeader()))
-                                + " &7- &e" + dominionFromList.getChunks().size() + " chunks &7- &6" + valueWithTwoDecimals));
+                                + " &7- &e" + dominionFromList.getChunkCount() + " chunks &7- &6" + valueWithTwoDecimals));
                         }
                     }
                 } else if (args[0].equalsIgnoreCase("info")) {
@@ -2056,7 +2056,7 @@ public class CommandDominion implements CommandExecutor {
         player.sendMessage(ChatUtils.translateToColor("&7Balance: &6" + valueWithTwoDecimals));
         int outpostChunkTotal = OutpostUtils.getTotalOutpostChunkCount(dominion.getId());
         String outpostChunkSuffix = outpostChunkTotal > 0 ? " &8(&e+" + outpostChunkTotal + " outpost&8)" : "";
-        player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunks().size() + "/" + dominion.getMaxChunks() + " chunks" + outpostChunkSuffix));
+        player.sendMessage(ChatUtils.translateToColor("&7Size: &e" + dominion.getChunkCount() + "/" + dominion.getMaxChunks() + " chunks" + outpostChunkSuffix));
         player.sendMessage(ChatUtils.translateToColor("&6&l---------------------------------"));
     }
 

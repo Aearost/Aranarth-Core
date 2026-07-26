@@ -59,6 +59,7 @@ public class Dominion {
 	private long levelDropTimestamp;   // ms epoch when this dominion first dropped a level; 0 = compliant
 
 	private int boughtOutpostChunks;
+	private int storedChunkCount = -1; // set when chunks can't be loaded (cross-server stub)
 	private Map<String, String> plotChunkNames;  // chunk key → plot name
 	private Map<String, Set<UUID>> plotMembers;  // plot name → member UUIDs
 	// A null entry for a permission means it is inherited from the player's rank or relation
@@ -416,6 +417,18 @@ public class Dominion {
 	 */
 	public void setChunks(List<Chunk> chunks) {
 		this.chunks = chunks;
+	}
+
+	/**
+	 * Returns the number of claimed chunks. Uses the loaded chunk list when available,
+	 * falling back to the stored count for cross-server stubs where the world isn't loaded.
+	 */
+	public int getChunkCount() {
+		return storedChunkCount >= 0 && chunks.isEmpty() ? storedChunkCount : chunks.size();
+	}
+
+	public void setStoredChunkCount(int count) {
+		this.storedChunkCount = count;
 	}
 
 	/**

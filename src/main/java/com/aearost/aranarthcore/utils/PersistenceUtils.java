@@ -7327,10 +7327,12 @@ public class PersistenceUtils {
 
         List<Chunk> chunks = new ArrayList<>();
         String[] claimedChunks = fields[8].split("\\*\\*\\*");
+        int rawChunkCount = 0;
         for (String chunk : claimedChunks) {
             String[] coordinates = chunk.split(",");
             int cx = Integer.parseInt(coordinates[0]);
             int cz = Integer.parseInt(coordinates[1]);
+            rawChunkCount++;
             if (world != null) {
                 chunks.add(world.getChunkAt(cx, cz));
             }
@@ -7413,6 +7415,7 @@ public class PersistenceUtils {
         dominion.setLastRebelAttemptTimestamp(lastRebelAttemptTimestamp);
         dominion.setConqueredTimestamp(conqueredTimestamp);
         dominion.setBoughtChunks(boughtChunks);
+        dominion.setStoredChunkCount(rawChunkCount);
         dominion.setDominionLevel(dominionLevel);
         dominion.setCachedFarmlandCount(cachedFarmlandCount);
         dominion.setCachedLivestockCount(cachedLivestockCount);
