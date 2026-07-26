@@ -74,6 +74,7 @@ public class PlayerInteractEventListener implements Listener {
 
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             new PlayerAutoReplenishSlot().execute(e, plugin);
+            new CauldronFillBottle().execute(e);
             new SweetBerryHarvest().execute(e);
             new LogWoodStripPrevent().execute(e);
             new BoneMealSapling().execute(e);
