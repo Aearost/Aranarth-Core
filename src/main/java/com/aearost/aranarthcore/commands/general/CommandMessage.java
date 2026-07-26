@@ -91,8 +91,8 @@ public class CommandMessage implements CommandExecutor {
 								formattedMsg = assembledMsg;
 							}
 
-							String senderNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
-							String targetNickname = remoteTarget.getNickname().isEmpty() ? remoteTarget.getUsername() : ChatUtils.stripColorFormatting(remoteTarget.getNickname());
+							String senderNickname = aranarthPlayer.getNickname().isEmpty() ? player.getName() : aranarthPlayer.getNickname();
+							String targetNickname = remoteTarget.getNickname().isEmpty() ? remoteTarget.getUsername() : remoteTarget.getNickname();
 
 							// Show confirmation to sender
 							String prefixStart = "&7⊰&r";

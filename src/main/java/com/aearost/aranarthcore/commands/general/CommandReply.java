@@ -69,10 +69,10 @@ public class CommandReply implements CommandExecutor {
 							}
 							String senderNickname = aranarthPlayer.getNickname().isEmpty()
 									? player.getName()
-									: ChatUtils.stripColorFormatting(aranarthPlayer.getNickname());
+									: aranarthPlayer.getNickname();
 							String targetNickname = remoteTarget.getNickname().isEmpty()
 									? remoteTarget.getUsername()
-									: ChatUtils.stripColorFormatting(remoteTarget.getNickname());
+									: remoteTarget.getNickname();
 							String prefixStart = "&7⊰&r";
 							String prefixEnd = "&7⊱&r";
 							String senderMsg = ChatUtils.translateToColor(prefixStart + "&7&l&oTo: &r&e" + targetNickname + prefixEnd + " &7&o>> &e&o") + formattedMsg;
