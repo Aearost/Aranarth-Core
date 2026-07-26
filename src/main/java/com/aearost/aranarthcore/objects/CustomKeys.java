@@ -40,4 +40,5 @@ public class CustomKeys {
     public static final NamespacedKey BREW_RECIPE = new NamespacedKey(AranarthCore.getInstance(), "brew_recipe");
     public static final NamespacedKey BREW_BREWER = new NamespacedKey(AranarthCore.getInstance(), "brew_brewer");
     public static final NamespacedKey PET_FOOD_INVENTORY = new NamespacedKey(AranarthCore.getInstance(), "pet_food_inventory");
+    public static final NamespacedKey NETHERITE_ITEM = new NamespacedKey(AranarthCore.getInstance(), "netherite_item");
 }

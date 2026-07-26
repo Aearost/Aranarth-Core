@@ -53,8 +53,11 @@ public class CommandGive {
                     fullPathName = "com.aearost.aranarthcore.items.aranarthium.ingots." + args[2];
                 } else if (args[2].endsWith("Cluster")) {
                     fullPathName = "com.aearost.aranarthcore.items.aranarthium.clusters." + args[2];
+                } else if (args[2].startsWith("Netherite")) {
+                    fullPathName = "com.aearost.aranarthcore.items.netherite." + args[2];
                 } else if (args[2].endsWith("Helmet") || args[2].endsWith("Chestplate")
-                        || args[2].endsWith("Leggings") || args[2].endsWith("Boots")) {
+                        || args[2].endsWith("Leggings") || args[2].endsWith("Boots")
+                        || args[2].endsWith("Elytra")) {
                     fullPathName = "com.aearost.aranarthcore.items.aranarthium.armour." + args[2];
                 } else if (args[2].startsWith("Arrow")) {
                     if (args[2].startsWith("Arrowhead")) {

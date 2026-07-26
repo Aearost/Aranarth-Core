@@ -735,7 +735,6 @@ public class AranarthCore extends JavaPlugin {
         new ArmorStandInteractListener(this);
         new PlayerFishEventListener(this);
         new InvseeListener(this);
-
         // Discord server join and quit messages
         new BukkitRunnable() {
             @Override

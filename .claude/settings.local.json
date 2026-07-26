@@ -322,7 +322,16 @@
       "Bash(find C:UsersliamhIdeaProjectsAranarthCorediscord-bot -name .env* -o -name *.env)",
       "Bash(xargs wc:*)",
       "Bash(find ~/.m2/repository/com/github/BreweryTeam -name *.jar)",
-      "Bash(find ~/.gradle -name BreweryX*.jar)"
+      "Bash(find ~/.gradle -name BreweryX*.jar)",
+      "Bash(gh release:*)",
+      "Bash(mkdir -p /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/netherite)",
+      "Bash(mkdir -p /c/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/aranarthium/weapons)",
+      "Bash(BASE=\"C:/Users/liamh/IdeaProjects/AranarthCore/src/main/java/com/aearost/aranarthcore/items/aranarthium/armour\")",
+      "Bash(__NEW_LINE_0c2d00463d38de82__ sed:*)",
+      "Bash(sed -i 's/return ChatUtils\\\\.translateToColor\\(\"\"#696969\\\\&lArdent Aranarthium Elytra\"\"\\);/return \"\"\\\\&#696969\\\\&lArdent Aranarthium Elytra\"\";/' \"$BASE/ArdentAranarthiumElytra.java\")",
+      "Bash(sed -i 's/return ChatUtils\\\\.translateToColor\\(\"\"#FFEE8C\\\\&lDwarven Aranarthium Elytra\"\"\\);/return \"\"\\\\&#FFEE8C\\\\&lDwarven Aranarthium Elytra\"\";/' \"$BASE/DwarvenAranarthiumElytra.java\")",
+      "Bash(sed -i 's/return ChatUtils\\\\.translateToColor\\(\"\"#3F704D\\\\&lElven Aranarthium Elytra\"\"\\);/return \"\"\\\\&#3F704D\\\\&lElven Aranarthium Elytra\"\";/' \"$BASE/ElvenAranarthiumElytra.java\")",
+      "Bash(sort echo:*)"
     ]
   }
 }
