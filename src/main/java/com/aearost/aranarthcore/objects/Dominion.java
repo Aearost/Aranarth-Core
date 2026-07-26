@@ -68,6 +68,8 @@ public class Dominion {
 	// Keep balance at the end
 	private double balance;
 
+	private String mapColor = ""; // stored as &x or &#RRGGBB; empty = default white
+
 	public Dominion(UUID id, String name, UUID leader, List<UUID> members, Map<UUID, DominionRank> memberRanks,
 					List<UUID> allied, List<UUID> truced, List<UUID> enemied,
 					String worldName, List<Chunk> chunks, double x, double y, double z, float yaw, float pitch, ItemStack[] food,
@@ -537,6 +539,29 @@ public class Dominion {
 	 */
 	public void setBalance(double balance) {
 		this.balance = balance;
+	}
+
+	/**
+	 * Provides the raw map color code for this dominion (e.g. "&a" or "&#FF5500"), or empty string for the default.
+	 */
+	public String getMapColor() {
+		return mapColor;
+	}
+
+	/**
+	 * Returns the map color code to use when rendering this dominion on the /dominion map.
+	 * Falls back to white ("&f") if no custom color has been set.
+	 */
+	public String getMapColorCode() {
+		return mapColor.isEmpty() ? "&f" : mapColor;
+	}
+
+	/**
+	 * Sets the raw map color code for this dominion.
+	 * @param mapColor The color code string (e.g. "&a", "&#FF5500") or empty to reset to default.
+	 */
+	public void setMapColor(String mapColor) {
+		this.mapColor = mapColor == null ? "" : mapColor;
 	}
 
 	/**

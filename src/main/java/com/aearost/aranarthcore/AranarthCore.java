@@ -27,6 +27,7 @@ import com.aearost.aranarthcore.event.listener.grouped.JobEventListener;
 import com.aearost.aranarthcore.commands.general.CommandJobs;
 import com.aearost.aranarthcore.commands.general.CommandJobsCompleter;
 import com.aearost.aranarthcore.utils.JobUtils;
+import com.aearost.aranarthcore.integration.SquaremapIntegration;
 import com.projectkorra.projectkorra.Element;
 import com.projectkorra.projectkorra.ability.CoreAbility;
 import com.projectkorra.projectkorra.util.TempBlock;
@@ -56,6 +57,15 @@ public class AranarthCore extends JavaPlugin {
     private DiscordChatListener discordChatListener;
     private RoleReactionListener roleReactionListener;
     private volatile boolean savedOnDisable = false;
+    private SquaremapIntegration squaremapIntegration;
+
+    /** Triggers an immediate async refresh of the SquareMap dominion layer, if active. */
+    public static void refreshSquaremap() {
+        AranarthCore instance = plugin;
+        if (instance != null && instance.squaremapIntegration != null) {
+            Bukkit.getScheduler().runTaskAsynchronously(instance, instance.squaremapIntegration::refresh);
+        }
+    }
 
     /**
      * Called when the plugin is first enabled on server startup.
@@ -110,6 +120,12 @@ public class AranarthCore extends JavaPlugin {
         Bukkit.getLogger().info(LOG_PREFIX + "AranarthCore Bending has been loaded");
 
         runRepeatingTasks();
+
+        // Initialize SquareMap dominion layer (soft-depend — only if squaremap is loaded)
+        if (Bukkit.getPluginManager().isPluginEnabled("squaremap")) {
+            squaremapIntegration = new SquaremapIntegration();
+            squaremapIntegration.enable();
+        }
 
         // Start cross-server networking (NetworkManager) now that the DB is already connected.
         // Only on the public server.
@@ -1374,6 +1390,10 @@ public class AranarthCore extends JavaPlugin {
     public void onDisable() {
         savedOnDisable = true;
         saveAll();
+
+        if (squaremapIntegration != null) {
+            squaremapIntegration.disable();
+        }
 
         NetworkManager.shutdown();
         DatabaseManager.shutdown();

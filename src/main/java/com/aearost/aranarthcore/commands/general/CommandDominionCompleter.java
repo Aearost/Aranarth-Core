@@ -28,9 +28,16 @@ public class CommandDominionCompleter implements TabCompleter {
 	private static final List<String> DOMINION_OPTIONS = List.of(
 		"accept", "ally", "autoclaim", "balance", "buychunks", "claim", "conquer", "create",
 		"deposit", "disband", "enemy", "food", "guide", "home", "info", "invite",
-		"leave", "list", "map", "msg", "neutral", "outpost", "plot", "rank", "setrank",
+		"leave", "list", "map", "mapcolor", "msg", "neutral", "outpost", "plot", "rank", "setrank",
 		"rebel", "remove", "rename", "resources", "retreat", "sethome", "setleader",
 		"surrender", "truce", "unclaim", "who", "withdraw"
+	);
+
+	private static final List<String> MAP_COLOR_OPTIONS = List.of(
+		"white", "black", "dark_blue", "dark_green", "dark_aqua", "dark_red", "dark_purple",
+		"gold", "gray", "dark_gray", "blue", "green", "aqua", "red", "light_purple", "yellow",
+		"navy", "teal", "maroon", "purple", "orange", "grey", "dark_grey", "cyan", "magenta", "pink",
+		"reset"
 	);
 
 	private static final List<String> OUTPOST_OPTIONS = List.of("create", "disband", "home", "rename", "sethome", "buychunks");
@@ -206,6 +213,7 @@ public class CommandDominionCompleter implements TabCompleter {
 			}
 			case "buychunks" -> args[1].isEmpty() ? List.of("amount") : List.of();
 			case "create" -> args[1].isEmpty() ? List.of("name") : List.of();
+			case "mapcolor" -> filter(MAP_COLOR_OPTIONS, args[1]);
 			case "outpost" -> {
 				if (args.length == 2) {
 					yield filter(OUTPOST_OPTIONS, args[1]);

@@ -241,6 +241,8 @@ public class CommandDominion implements CommandExecutor {
                     setLeader(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("map")) {
                     showDominionMap(player);
+                } else if (args[0].equalsIgnoreCase("mapcolor")) {
+                    setMapColor(args, dominion, player);
                 } else if (args[0].equalsIgnoreCase("autoclaim")) {
                     claimToggle(player);
                 } else if (args[0].equalsIgnoreCase("food")) {
@@ -2350,6 +2352,82 @@ public class CommandDominion implements CommandExecutor {
             }
             player.sendMessage(ChatUtils.translateToColor(color + "[] &7- " + desc));
         }
+    }
+
+    /**
+     * Sets the map color used to display this dominion on /dominion map.
+     * Only the dominion leader may change this.
+     * Accepts named colors (e.g. "red", "blue") or hex codes (e.g. "#FF5500").
+     * Use "reset" or "none" to restore the default white color.
+     *
+     * @param args    The command arguments (args[1] is the color).
+     * @param dominion The player's dominion.
+     * @param player  The player.
+     */
+    private static void setMapColor(String[] args, Dominion dominion, Player player) {
+        if (dominion == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cYou are not in a Dominion!"));
+            return;
+        }
+        if (!dominion.getLeader().equals(player.getUniqueId())) {
+            player.sendMessage(ChatUtils.chatMessage("&cOnly the Dominion leader can change the map color!"));
+            return;
+        }
+        if (args.length < 2) {
+            player.sendMessage(ChatUtils.chatMessage("&7Usage: &e/dominion mapcolor <color|#RRGGBB|reset>"));
+            player.sendMessage(ChatUtils.chatMessage("&7Colors: &fwhite&7, &cred&7, &agreen&7, &9blue&7, &eyellow&7, &baqua&7, &6gold&7, &5purple&7, &dpink&7, &7gray&7, &8dark_gray&7, &4dark_red&7, &2dark_green&7, &1dark_blue&7, &3dark_aqua&7, &0black"));
+            return;
+        }
+        String input = args[1].toLowerCase();
+        String colorCode = parseMapColor(input);
+        if (colorCode == null) {
+            player.sendMessage(ChatUtils.chatMessage("&cInvalid color! Use a color name or a hex code like &e#FF5500&c."));
+            player.sendMessage(ChatUtils.chatMessage("&7Colors: &fwhite&7, &cred&7, &agreen&7, &9blue&7, &eyellow&7, &baqua&7, &6gold&7, &5purple&7, &dpink&7, &7gray&7, &8dark_gray&7, &4dark_red&7, &2dark_green&7, &1dark_blue&7, &3dark_aqua&7, &0black"));
+            return;
+        }
+        dominion.setMapColor(colorCode);
+        DominionUtils.updateDominion(dominion);
+        AranarthCore.refreshSquaremap();
+        if (colorCode.isEmpty()) {
+            player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's map color has been reset to the default &9blue&7."));
+        } else {
+            player.sendMessage(ChatUtils.chatMessage("&7Your Dominion's map color has been set to " + colorCode + input + "&7."));
+        }
+    }
+
+    /**
+     * Parses a color input string into a Minecraft color code (e.g. "&a") or hex code (e.g. "&#FF5500").
+     * Returns an empty string for "reset"/"none", or null if the input is invalid.
+     *
+     * @param input The color name or hex code (lowercase, no leading &).
+     * @return The color code string, empty string to reset, or null if invalid.
+     */
+    private static String parseMapColor(String input) {
+        return switch (input) {
+            case "reset", "none", "default" -> "";
+            case "white" -> "&f";
+            case "black" -> "&0";
+            case "dark_blue", "navy" -> "&1";
+            case "dark_green" -> "&2";
+            case "dark_aqua", "teal", "dark_cyan" -> "&3";
+            case "dark_red", "maroon" -> "&4";
+            case "dark_purple", "purple" -> "&5";
+            case "gold", "orange" -> "&6";
+            case "gray", "grey" -> "&7";
+            case "dark_gray", "dark_grey" -> "&8";
+            case "blue" -> "&9";
+            case "green" -> "&a";
+            case "aqua", "cyan" -> "&b";
+            case "red" -> "&c";
+            case "light_purple", "magenta", "pink" -> "&d";
+            case "yellow" -> "&e";
+            default -> {
+                if (input.startsWith("#") && input.length() == 7 && input.substring(1).matches("[0-9a-fA-F]{6}")) {
+                    yield "&#" + input.substring(1).toUpperCase();
+                }
+                yield null;
+            }
+        };
     }
 
     /**
