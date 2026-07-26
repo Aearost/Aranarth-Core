@@ -332,7 +332,8 @@
       "Bash(sed -i 's/return ChatUtils\\\\.translateToColor\\(\"\"#FFEE8C\\\\&lDwarven Aranarthium Elytra\"\"\\);/return \"\"\\\\&#FFEE8C\\\\&lDwarven Aranarthium Elytra\"\";/' \"$BASE/DwarvenAranarthiumElytra.java\")",
       "Bash(sed -i 's/return ChatUtils\\\\.translateToColor\\(\"\"#3F704D\\\\&lElven Aranarthium Elytra\"\"\\);/return \"\"\\\\&#3F704D\\\\&lElven Aranarthium Elytra\"\";/' \"$BASE/ElvenAranarthiumElytra.java\")",
       "Bash(sort echo:*)",
-      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -name *.env* -o -name channels.yml -o -name config.yml)"
+      "Bash(find C:/Users/liamh/IdeaProjects/AranarthCore -name *.env* -o -name channels.yml -o -name config.yml)",
+      "Bash(for worktree:*)"
     ]
   }
 }

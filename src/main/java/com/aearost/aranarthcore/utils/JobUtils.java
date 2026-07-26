@@ -90,12 +90,9 @@ public class JobUtils {
             ChatUtils.translateToColor("&e" + jobName + " &fis now &e&lLevel " + newLevel),
             10, 60, 20
         );
-        player.sendMessage(ChatUtils.translateToColor(
-            "&8[&6Jobs&8] &fCongratulations! You reached &e&lLevel " + newLevel + "&f in &6" + jobName + "&f!"
-        ));
 
         String broadcastMsg = ChatUtils.translateToColor(
-            "&8[&6Jobs&8] &6" + nickname + "&f has reached &e&lLevel " + newLevel + "&f in &6" + jobName + "&f!"
+            "&8[&eAC&8] &7" + nickname + " &7has reached &e&lLevel " + newLevel + " &7in &e" + jobName + "&7!"
         );
 
         Bukkit.broadcastMessage(broadcastMsg);

@@ -8192,7 +8192,7 @@ public class PersistenceUtils {
             }
             AranarthUtils.setPlayer(uuid, ap);
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to load job data for " + uuid + ": " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to load job data for " + uuid + ": " + e.getMessage());
         }
     }
 
@@ -8264,7 +8264,7 @@ public class PersistenceUtils {
                 jobData.setXp(xpMap);
             }
         } catch (Exception e) {
-            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "[Jobs] Failed to parse job data JSON: " + e.getMessage());
+            Bukkit.getLogger().warning(AranarthCore.LOG_PREFIX + "Jobs: Failed to parse job data JSON: " + e.getMessage());
         }
         return jobData;
     }
