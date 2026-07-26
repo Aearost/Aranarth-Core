@@ -359,7 +359,7 @@ public class SpawnProtectionListener implements Listener {
 
 			// Tutorial exit portals
 			boolean isExitingBendingPortal = (x >= 2999 && x <= 3001) && (y >= 100 && y <= 102) && z == 65;
-			boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 71;
+			boolean isExitingAranarthiumPortal = (x >= 3999 && x <= 4001) && (y >= 100 && y <= 102) && z == 83;
 			boolean isExitingRecipesPortal = (x >= 8999 && x <= 9001) && (y >= 100 && y <= 102) && z == 143;
 			boolean isExitingCalendarPortal = (x >= 4999 && x <= 5001) && (y >= 100 && y <= 102) && z == 107;
 			boolean isExitingShopsPortal = (x >= 5999 && x <= 6001) && (y >= 100 && y <= 102) && z == 89;

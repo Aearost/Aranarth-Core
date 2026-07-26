@@ -119,6 +119,7 @@ Minor Features
 [~] Fixed issue where food was being consumed far too quickly (lowered the daily required food power)
 [~] Added individual /d outpost buychunks tracking/prices, and made them contribute to the total chunk count of the Dominion
 [~] Made it so cauldrons infinitely fill water bottles
+[~] Changed location of Aranarthium tutorial exit portal to be further as Fae Aranarthium was added to the tutorial
 
 Backend Code Changes
 - Implemented discord support bot basis
