@@ -66,10 +66,7 @@ public class CommandShopCompleter implements TabCompleter {
 	}
 
 	private static List<String> filterPlayers(String input) {
-		return Bukkit.getOnlinePlayers().stream()
-			.map(Player::getName)
-			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
-			.collect(Collectors.toList());
+		return AranarthUtils.getNetworkPlayerNames(input);
 	}
 
 	private static List<String> filterCollaborators(UUID ownerUuid, String input) {

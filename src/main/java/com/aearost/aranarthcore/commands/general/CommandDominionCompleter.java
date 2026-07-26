@@ -247,9 +247,6 @@ public class CommandDominionCompleter implements TabCompleter {
 	}
 
 	private static List<String> filterPlayers(String input) {
-		return Bukkit.getOnlinePlayers().stream()
-			.map(Player::getName)
-			.filter(name -> input.isEmpty() || name.toLowerCase().startsWith(input.toLowerCase()))
-			.collect(Collectors.toList());
+		return AranarthUtils.getNetworkPlayerNames(input);
 	}
 }
