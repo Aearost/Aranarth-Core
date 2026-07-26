@@ -135,6 +135,9 @@ commands:
   map:
     description: Sends the player a clickable link to the Aranarth live map
     permission: aranarth.map
+  smpmap:
+    description: Sends OG players a clickable link to the Aranarth SMP live map
+    permission: aranarth.smpmap
   message:
     description: Messages the input player the provided message
     aliases: [msg, tell]
