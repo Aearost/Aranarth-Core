@@ -1538,8 +1538,9 @@ public class CommandDominion implements CommandExecutor {
             player.sendMessage(ChatUtils.chatMessage("&cOnly the Leader can create outposts!"));
             return;
         }
-        String dominionWorldPrefix = dominion.getDominionHomeWorldName().startsWith("smp") ? "smp" : "world";
-        if (!player.getWorld().getName().startsWith(dominionWorldPrefix)) {
+        String dominionServer = getServerForWorld(dominion.getDominionHomeWorldName());
+        String playerServer = getServerForWorld(AranarthUtils.toStoredDominionWorldName(player.getWorld().getName()));
+        if (dominionServer == null || !dominionServer.equals(playerServer)) {
             player.sendMessage(ChatUtils.chatMessage("&cYou can only create outposts in the same server as your Dominion!"));
             return;
         }
