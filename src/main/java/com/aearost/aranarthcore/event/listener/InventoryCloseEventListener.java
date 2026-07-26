@@ -2,6 +2,7 @@ package com.aearost.aranarthcore.event.listener;
 
 import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.player.*;
+import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.utils.ChatUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -31,6 +32,8 @@ public class InventoryCloseEventListener implements Listener {
                 new GuiCrateClose().execute(e);
             } else if (isDominionFoodTitle(ChatUtils.stripColorFormatting(e.getView().getTitle()))) {
                 new GuiDominionFoodClose().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
+                new GuiPetFoodClose().execute(e);
             }
         } else if (e.getView().getType() == InventoryType.ANVIL) {
             if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Aranarthium Anvil")) {
@@ -44,6 +47,7 @@ public class InventoryCloseEventListener implements Listener {
     }
 
     private static boolean isDominionFoodTitle(String title) {
-        return title.endsWith(" Food") || title.matches(".+'s Food \\(\\d+/\\d+\\)");
+        return (title.endsWith(" Food") && !title.equals(GuiPetFood.TITLE))
+                || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

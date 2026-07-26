@@ -59,4 +59,9 @@ public class EntityDamageEventListener implements Listener {
             new FireDamageIncrease().execute(e);
         }
     }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onEntityDamageMonitor(EntityDamageEvent e) {
+        new PetAutoEat().execute(e);
+    }
 }

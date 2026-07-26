@@ -9,6 +9,7 @@ import com.aearost.aranarthcore.gui.GuiBrewBook;
 import com.aearost.aranarthcore.gui.GuiBrewShop;
 import com.aearost.aranarthcore.gui.GuiDefenderManage;
 import com.aearost.aranarthcore.gui.GuiDefenders;
+import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.gui.GuiDominionPermissions;
 import com.aearost.aranarthcore.gui.GuiJobs;
 import com.aearost.aranarthcore.gui.GuiJobsJoin;
@@ -154,6 +155,8 @@ public class InventoryClickEventListener implements Listener {
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Deaths")
                     && !ChatUtils.stripColorFormatting(e.getView().getTitle()).equals("Top Guesses")) {
                 new GuiMctopClick().execute(e);
+            } else if (ChatUtils.stripColorFormatting(e.getView().getTitle()).equals(GuiPetFood.TITLE)) {
+                new GuiPetFoodClick().execute(e);
             }
         } else {
             if (e.getClickedInventory() != null) {
@@ -178,6 +181,7 @@ public class InventoryClickEventListener implements Listener {
     }
 
     private static boolean isDominionFoodTitle(String title) {
-        return title.endsWith(" Food") || title.matches(".+'s Food \\(\\d+/\\d+\\)");
+        return (title.endsWith(" Food") && !title.equals(GuiPetFood.TITLE))
+                || title.matches(".+'s Food \\(\\d+/\\d+\\)");
     }
 }

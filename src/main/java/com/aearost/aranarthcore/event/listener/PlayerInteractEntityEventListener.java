@@ -4,13 +4,16 @@ import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.event.mob.*;
 import com.aearost.aranarthcore.event.player.DefenderInteract;
 import com.aearost.aranarthcore.event.player.QuestNpcInteract;
+import com.aearost.aranarthcore.gui.GuiPetFood;
 import com.aearost.aranarthcore.utils.DefenderUtils;
+import com.aearost.aranarthcore.utils.PetInventoryUtils;
 import com.aearost.aranarthcore.utils.QuestUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
 public class PlayerInteractEntityEventListener implements Listener {
 
@@ -27,6 +30,16 @@ public class PlayerInteractEntityEventListener implements Listener {
         if (e.getRightClicked() != null) {
             if (DefenderUtils.isDefender(e.getRightClicked().getUniqueId())) {
                 new DefenderInteract().execute(e);
+                return;
+            }
+
+            // Sneak + right-click on an owned pet opens its food inventory
+            if (e.getHand() == EquipmentSlot.HAND
+                    && e.getPlayer().isSneaking()
+                    && PetInventoryUtils.isPetType(e.getRightClicked())
+                    && PetInventoryUtils.isOwnedBy(e.getRightClicked(), e.getPlayer().getUniqueId())) {
+                new GuiPetFood(e.getPlayer(), e.getRightClicked()).openGui();
+                e.setCancelled(true);
                 return;
             }
             if (e.getRightClicked() instanceof Villager) {
