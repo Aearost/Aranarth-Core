@@ -20,6 +20,9 @@ public class GuiJobsLeave {
 
     public static final String TITLE = "Leave a Job";
 
+    // Jobs centered in the middle row: slots 11-15
+    public static final int[] JOB_SLOTS = {11, 12, 13, 14, 15};
+
     private final Player player;
     private final Inventory gui;
 
@@ -33,34 +36,32 @@ public class GuiJobsLeave {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor("&8&lLeave a Job"));
+        Inventory inv = Bukkit.createInventory(player, 27, ChatUtils.translateToColor("&8&lLeave a Job"));
 
-        ItemStack yellowPane = makePane(Material.YELLOW_STAINED_GLASS_PANE);
-        ItemStack blackPane = makePane(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
-        for (int i = 0; i < 54; i++) {
-            inv.setItem(i, blackPane);
+        for (int i = 0; i < 9; i++) {
+            inv.setItem(i, grayPane);
         }
-        inv.setItem(0, yellowPane);
-        inv.setItem(8, yellowPane);
-        inv.setItem(45, yellowPane);
-        inv.setItem(53, yellowPane);
+
+        for (int i = 18; i < 27; i++) {
+            inv.setItem(i, grayPane);
+        }
+
+        // Back button
+        ItemStack back = new ItemStack(Material.BARRIER);
+        ItemMeta backMeta = back.getItemMeta();
+        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
+        back.setItemMeta(backMeta);
+        inv.setItem(22, back);
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         JobData jobData = ap.getJobData();
         List<JobType> activeJobs = jobData.getActiveJobs();
 
-        int[] slots = {10, 12, 14, 19, 21, 23, 28, 30, 32};
-        for (int i = 0; i < activeJobs.size() && i < slots.length; i++) {
-            inv.setItem(slots[i], makeLeaveItem(activeJobs.get(i), jobData));
+        for (int i = 0; i < activeJobs.size() && i < JOB_SLOTS.length; i++) {
+            inv.setItem(JOB_SLOTS[i], makeLeaveItem(activeJobs.get(i), jobData));
         }
-
-        // Back button
-        ItemStack back = new ItemStack(Material.ARROW);
-        ItemMeta backMeta = back.getItemMeta();
-        backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
-        back.setItemMeta(backMeta);
-        inv.setItem(49, back);
 
         return inv;
     }
@@ -76,11 +77,11 @@ public class GuiJobsLeave {
 
         meta.setDisplayName(ChatUtils.translateToColor("&c&l" + job.getDisplayName()));
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7Level: &f" + level));
-        lore.add(ChatUtils.translateToColor("&7XP: &f" + xpStr));
+        lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
+        lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&cClick to leave this job."));
-        lore.add(ChatUtils.translateToColor("&7Your level and XP will be saved."));
+        lore.add(ChatUtils.translateToColor("&cClick to leave this job"));
+        lore.add(ChatUtils.translateToColor("&7Your level and XP will be saved"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

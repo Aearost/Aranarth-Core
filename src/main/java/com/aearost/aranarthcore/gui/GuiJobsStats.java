@@ -33,34 +33,33 @@ public class GuiJobsStats {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor("&8&lJob Statistics"));
+        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJob Statistics"));
 
-        ItemStack yellowPane = makePane(Material.YELLOW_STAINED_GLASS_PANE);
-        ItemStack blackPane = makePane(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
-        for (int i = 0; i < 54; i++) {
-            inv.setItem(i, blackPane);
+        for (int i = 0; i < 9; i++) {
+            inv.setItem(i, grayPane);
         }
-        inv.setItem(0, yellowPane);
-        inv.setItem(8, yellowPane);
-        inv.setItem(45, yellowPane);
-        inv.setItem(53, yellowPane);
+
+        for (int i = 36; i < 45; i++) {
+            inv.setItem(i, grayPane);
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         JobData jobData = ap.getJobData();
-        List<JobType> activeJobs = jobData.getActiveJobs();
 
-        int[] slots = {10, 12, 14, 19, 21, 23, 28, 30, 32};
-        for (int i = 0; i < activeJobs.size() && i < slots.length; i++) {
-            inv.setItem(slots[i], makeStatItem(activeJobs.get(i), jobData));
+        // Show all 9 jobs, indicating which ones the player actively has
+        for (int i = 0; i < GuiJobsJoin.JOB_ORDER.length; i++) {
+            JobType job = GuiJobsJoin.JOB_ORDER[i];
+            inv.setItem(GuiJobsJoin.JOB_SLOTS[i], makeStatItem(job, jobData));
         }
 
         // Back button
-        ItemStack back = new ItemStack(Material.ARROW);
+        ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
         back.setItemMeta(backMeta);
-        inv.setItem(49, back);
+        inv.setItem(40, back);
 
         return inv;
     }
@@ -69,16 +68,23 @@ public class GuiJobsStats {
         ItemStack item = new ItemStack(JobUtils.getJobIcon(job));
         ItemMeta meta = item.getItemMeta();
 
+        boolean isActive = jobData.hasJob(job);
         int level = jobData.getLevel(job);
         double currentXp = jobData.getCurrentXp(job);
         long required = JobUtils.getXpRequired(level);
-        String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " &8/ &f" + required;
+        String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " &8/ &e" + required;
 
-        meta.setDisplayName(ChatUtils.translateToColor("&6&l" + job.getDisplayName() + " &7(Level " + level + ")"));
+        if (isActive) {
+            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName() + " &a(Active)"));
+        } else {
+            meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
+        }
+
         List<String> lore = new ArrayList<>();
-        lore.add(ChatUtils.translateToColor("&7XP: &f" + xpStr));
+        lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
+        lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
         lore.add("");
-        lore.add(ChatUtils.translateToColor("&7Click to view detailed stats in chat."));
+        lore.add(ChatUtils.translateToColor("&7Click to view detailed stats in chat"));
         meta.setLore(lore);
         item.setItemMeta(meta);
         return item;

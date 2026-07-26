@@ -24,7 +24,7 @@ public class GuiJobsJoinClick {
         int slot = e.getRawSlot();
 
         // Back button
-        if (slot == 49) {
+        if (slot == 40) {
             player.closeInventory();
             new GuiJobs(player).openGui();
             return;
@@ -40,12 +40,12 @@ public class GuiJobsJoinClick {
         int maxJobs = JobUtils.getMaxJobs(ap.getRank());
 
         if (jobData.hasJob(job)) {
-            player.sendMessage(ChatUtils.translateToColor("&8[&6Jobs&8] &fYou are already a &6" + job.getDisplayName() + "&f."));
+            player.sendMessage(ChatUtils.chatMessage("&7You are already a &e" + job.getDisplayName()));
             return;
         }
 
         if (jobData.getActiveJobs().size() >= maxJobs) {
-            player.sendMessage(ChatUtils.translateToColor("&8[&6Jobs&8] &fYou have reached your maximum of &6" + maxJobs + " &fjob" + (maxJobs == 1 ? "" : "s") + "."));
+            player.sendMessage(ChatUtils.chatMessage("&7You have reached your maximum of &e" + maxJobs + " &7job" + (maxJobs == 1 ? "" : "s")));
             return;
         }
 
@@ -53,7 +53,7 @@ public class GuiJobsJoinClick {
         AranarthUtils.setPlayer(player.getUniqueId(), ap);
         PersistenceUtils.saveJobData(player.getUniqueId());
 
-        player.sendMessage(ChatUtils.translateToColor("&8[&6Jobs&8] &fYou have joined the &6" + job.getDisplayName() + " &fjob!"));
+        player.sendMessage(ChatUtils.chatMessage("&7You have joined the &e" + job.getDisplayName() + " &7job!"));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
 
         player.closeInventory();

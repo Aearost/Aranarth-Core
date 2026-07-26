@@ -1,6 +1,5 @@
 package com.aearost.aranarthcore.utils;
 
-import com.aearost.aranarthcore.AranarthCore;
 import com.aearost.aranarthcore.enums.JobType;
 import com.aearost.aranarthcore.network.NetworkManager;
 import com.aearost.aranarthcore.objects.AranarthPlayer;
@@ -8,7 +7,6 @@ import com.aearost.aranarthcore.objects.JobData;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -132,15 +130,29 @@ public class JobUtils {
 
     public static String getJobDescription(JobType job) {
         return switch (job) {
-            case BUILDER -> "Place blocks to build the world around you.";
-            case FARMER -> "Harvest crops, tend animals, and collect honey.";
-            case MINER -> "Mine ores, stone, and precious materials underground.";
-            case EXCAVATOR -> "Dig up dirt, sand, gravel, clay, and ancient artifacts.";
-            case LUMBERJACK -> "Chop wood, strip logs, and craft wooden items.";
-            case SMITH -> "Craft tools, armor, and metallic items.";
-            case EXPLORER -> "Travel the world, ride horses, and open new chests.";
-            case ALCHEMIST -> "Brew potions, enchant items, and visit the grindstone.";
-            case HUNTER -> "Hunt mobs, catch fish, and take on powerful enemies.";
+            case BUILDER -> "Place blocks to build the world around you";
+            case FARMER -> "Harvest crops, tend animals, and collect honey";
+            case MINER -> "Mine ores, stone, and precious materials underground";
+            case EXCAVATOR -> "Dig up dirt, sand, gravel, clay, and ancient artifacts";
+            case LUMBERJACK -> "Chop wood, strip logs, and craft wooden items";
+            case SMITH -> "Craft tools, armor, and metallic items";
+            case EXPLORER -> "Travel the world, ride horses, and open new chests";
+            case ALCHEMIST -> "Brew potions, enchant items, and visit the grindstone";
+            case HUNTER -> "Hunt mobs, catch fish, and take on powerful enemies";
+        };
+    }
+
+    public static String getJobColor(JobType job) {
+        return switch (job) {
+            case BUILDER -> "&f&l";
+            case MINER -> "&8&l";
+            case EXCAVATOR -> "&6&l";
+            case LUMBERJACK -> "&4&l";
+            case FARMER -> "&e&l";
+            case HUNTER -> "&c&l";
+            case SMITH -> "&7&l";
+            case ALCHEMIST -> "&5&l";
+            case EXPLORER -> "&b&l";
         };
     }
 

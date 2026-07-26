@@ -16,13 +16,13 @@ public class GuiJobsClick {
 
         int slot = e.getRawSlot();
 
-        if (slot == 20) {
+        if (slot == 11) {
             player.closeInventory();
             new GuiJobsJoin(player).openGui();
-        } else if (slot == 22) {
+        } else if (slot == 13) {
             player.closeInventory();
             new GuiJobsStats(player).openGui();
-        } else if (slot == 24) {
+        } else if (slot == 15) {
             player.closeInventory();
             new GuiJobsLeave(player).openGui();
         }

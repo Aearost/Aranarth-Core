@@ -40,8 +40,14 @@ public class CommandJobsCompleter implements TabCompleter {
                         completions.add(job.getDisplayName().toLowerCase());
                     }
                 }
-            } else if (sub.equals("quit") || sub.equals("stats")) {
+            } else if (sub.equals("quit")) {
                 for (JobType job : jobData.getActiveJobs()) {
+                    if (job.getDisplayName().toLowerCase().startsWith(args[1].toLowerCase())) {
+                        completions.add(job.getDisplayName().toLowerCase());
+                    }
+                }
+            } else if (sub.equals("stats")) {
+                for (JobType job : JobType.values()) {
                     if (job.getDisplayName().toLowerCase().startsWith(args[1].toLowerCase())) {
                         completions.add(job.getDisplayName().toLowerCase());
                     }

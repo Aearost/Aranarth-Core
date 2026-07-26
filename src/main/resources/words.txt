@@ -137,6 +137,7 @@ prismarine
 # Minecraft structures and biomes
 fortress
 stronghold
+dominion
 outpost
 mineshaft
 village

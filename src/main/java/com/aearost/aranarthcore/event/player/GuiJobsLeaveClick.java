@@ -12,11 +12,15 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class GuiJobsLeaveClick {
 
-    private static final int[] JOB_SLOTS = {10, 12, 14, 19, 21, 23, 28, 30, 32};
+    private static final long COOLDOWN_MS = 3_600_000L; // 1 hour
+    private static final Map<UUID, Long> leaveCooldowns = new HashMap<>();
 
     public void execute(InventoryClickEvent e) {
         e.setCancelled(true);
@@ -26,7 +30,7 @@ public class GuiJobsLeaveClick {
 
         int slot = e.getRawSlot();
 
-        if (slot == 49) {
+        if (slot == 22) {
             player.closeInventory();
             new GuiJobs(player).openGui();
             return;
@@ -37,14 +41,21 @@ public class GuiJobsLeaveClick {
         JobData jobData = ap.getJobData();
         List<JobType> activeJobs = jobData.getActiveJobs();
 
-        for (int i = 0; i < JOB_SLOTS.length && i < activeJobs.size(); i++) {
-            if (JOB_SLOTS[i] == slot) {
+        int[] slots = GuiJobsLeave.JOB_SLOTS;
+        for (int i = 0; i < slots.length && i < activeJobs.size(); i++) {
+            if (slots[i] == slot) {
+                if (isOnCooldown(player.getUniqueId())) {
+                    player.sendMessage(ChatUtils.chatMessage("&7You must wait &e" + getCooldownRemaining(player.getUniqueId()) + " &7before leaving another job"));
+                    return;
+                }
+
                 JobType job = activeJobs.get(i);
                 jobData.removeJob(job);
                 AranarthUtils.setPlayer(player.getUniqueId(), ap);
                 PersistenceUtils.saveJobData(player.getUniqueId());
+                applyCooldown(player.getUniqueId());
 
-                player.sendMessage(ChatUtils.translateToColor("&8[&6Jobs&8] &fYou have left the &6" + job.getDisplayName() + " &fjob. Your progress has been saved."));
+                player.sendMessage(ChatUtils.chatMessage("&7You have left the &e" + job.getDisplayName() + " &7job &8— &7your progress has been saved"));
                 player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 1.0f);
 
                 player.closeInventory();
@@ -52,5 +63,26 @@ public class GuiJobsLeaveClick {
                 return;
             }
         }
+    }
+
+    public static boolean isOnCooldown(UUID uuid) {
+        Long last = leaveCooldowns.get(uuid);
+        if (last == null) return false;
+        return (System.currentTimeMillis() - last) < COOLDOWN_MS;
+    }
+
+    public static String getCooldownRemaining(UUID uuid) {
+        Long last = leaveCooldowns.get(uuid);
+        if (last == null) return "0m";
+        long remaining = COOLDOWN_MS - (System.currentTimeMillis() - last);
+        if (remaining <= 0) return "0m";
+        long hours = remaining / 3_600_000L;
+        long minutes = (remaining % 3_600_000L) / 60_000L;
+        if (hours > 0) return hours + "h " + minutes + "m";
+        return minutes + "m";
+    }
+
+    public static void applyCooldown(UUID uuid) {
+        leaveCooldowns.put(uuid, System.currentTimeMillis());
     }
 }

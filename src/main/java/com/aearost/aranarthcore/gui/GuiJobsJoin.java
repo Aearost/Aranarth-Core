@@ -20,12 +20,11 @@ public class GuiJobsJoin {
 
     public static final String TITLE = "Join a Job";
 
-    // 9 jobs in a 3x3 grid: slots 10, 12, 14, 19, 21, 23, 28, 30, 32
-    public static final int[] JOB_SLOTS = {10, 12, 14, 19, 21, 23, 28, 30, 32};
+    public static final int[] JOB_SLOTS = {11, 13, 15, 20, 22, 24, 31, 29, 33};
     public static final JobType[] JOB_ORDER = {
-        JobType.BUILDER, JobType.FARMER, JobType.MINER,
-        JobType.EXCAVATOR, JobType.LUMBERJACK, JobType.SMITH,
-        JobType.EXPLORER, JobType.ALCHEMIST, JobType.HUNTER
+        JobType.BUILDER, JobType.MINER, JobType.EXCAVATOR,
+        JobType.LUMBERJACK, JobType.FARMER, JobType.HUNTER,
+        JobType.ALCHEMIST, JobType.SMITH, JobType.EXPLORER
     };
 
     private final Player player;
@@ -41,20 +40,17 @@ public class GuiJobsJoin {
     }
 
     private Inventory initializeGui() {
-        Inventory inv = Bukkit.createInventory(player, 54, ChatUtils.translateToColor("&8&lJoin a Job"));
+        Inventory inv = Bukkit.createInventory(player, 45, ChatUtils.translateToColor("&8&lJoin a Job"));
 
-        ItemStack yellowPane = makePane(Material.YELLOW_STAINED_GLASS_PANE);
-        ItemStack blackPane = makePane(Material.BLACK_STAINED_GLASS_PANE);
+        ItemStack grayPane = makePane(Material.GRAY_STAINED_GLASS_PANE);
 
-        // Fill border with panes
-        for (int i = 0; i < 54; i++) {
-            inv.setItem(i, blackPane);
+        for (int i = 0; i < 9; i++) {
+            inv.setItem(i, grayPane);
         }
-        // Corner yellows
-        inv.setItem(0, yellowPane);
-        inv.setItem(8, yellowPane);
-        inv.setItem(45, yellowPane);
-        inv.setItem(53, yellowPane);
+
+        for (int i = 36; i < 45; i++) {
+            inv.setItem(i, grayPane);
+        }
 
         AranarthPlayer ap = AranarthUtils.getPlayer(player.getUniqueId());
         JobData jobData = ap.getJobData();
@@ -68,11 +64,11 @@ public class GuiJobsJoin {
         }
 
         // Back button
-        ItemStack back = new ItemStack(Material.ARROW);
+        ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
         backMeta.setDisplayName(ChatUtils.translateToColor("&7Back"));
         back.setItemMeta(backMeta);
-        inv.setItem(49, back);
+        inv.setItem(40, back);
 
         return inv;
     }
@@ -96,14 +92,14 @@ public class GuiJobsJoin {
             statusText = "Click to Join!";
         }
 
-        meta.setDisplayName(ChatUtils.translateToColor("&6&l" + job.getDisplayName()));
+        meta.setDisplayName(ChatUtils.translateToColor(JobUtils.getJobColor(job) + job.getDisplayName()));
         List<String> lore = new ArrayList<>();
         lore.add(ChatUtils.translateToColor("&7" + JobUtils.getJobDescription(job)));
         lore.add("");
         lore.add(ChatUtils.translateToColor("&7Actions that earn money:"));
 
         for (String action : getJobActions(job)) {
-            lore.add(ChatUtils.translateToColor("&8 - &f" + action));
+            lore.add(ChatUtils.translateToColor("&8 - &7" + action));
         }
 
         lore.add("");
@@ -113,8 +109,8 @@ public class GuiJobsJoin {
             double currentXp = jobData.getCurrentXp(job);
             long required = JobUtils.getXpRequired(level);
             String xpStr = level >= 10 ? "Max Level" : (int) currentXp + " / " + required;
-            lore.add(ChatUtils.translateToColor("&7Level: &f" + level));
-            lore.add(ChatUtils.translateToColor("&7XP: &f" + xpStr));
+            lore.add(ChatUtils.translateToColor("&7Level: &e" + level));
+            lore.add(ChatUtils.translateToColor("&7XP: &e" + xpStr));
             lore.add("");
         }
 
@@ -126,15 +122,15 @@ public class GuiJobsJoin {
 
     private List<String> getJobActions(JobType job) {
         return switch (job) {
-            case BUILDER -> List.of("Place buildable blocks &7($0.10)");
-            case FARMER -> List.of("Harvest crops &7($0.05-$0.20)", "Collect honey &7($0.50)", "Kill passive mobs &7($0.10)");
-            case MINER -> List.of("Mine stone/ores &7($0.02-$3.00)", "Harvest amethyst &7($0.10)");
-            case EXCAVATOR -> List.of("Dig dirt/sand/gravel &7($0.02-$0.04)", "Brush artifacts &7($2.50)");
-            case LUMBERJACK -> List.of("Chop logs &7($0.08)", "Craft wood items &7($0.02-$0.10)");
-            case SMITH -> List.of("Craft tools/armor &7($0.35-$2.50)", "Smith netherite &7($5.00)");
-            case EXPLORER -> List.of("Walk/ride &7($0.003-$0.004/block)", "Open natural chests &7($3-$8)");
-            case ALCHEMIST -> List.of("Brew potions &7($0.80-$1.00)", "Enchant items &7($0.50)");
-            case HUNTER -> List.of("Kill mobs &7($0.15-$15.00)", "Catch fish &7($0.20-$1.50)");
+            case BUILDER -> List.of("Place buildable blocks &8($0.10)");
+            case FARMER -> List.of("Harvest crops &8($0.05-$0.20)", "Collect honey &8($0.50)", "Kill passive mobs &8($0.10)");
+            case MINER -> List.of("Mine stone/ores &8($0.02-$3.00)", "Harvest amethyst &8($0.10)");
+            case EXCAVATOR -> List.of("Dig dirts, sands, etc &8($0.02-$0.04)", "Brush artifacts &8($2.50)");
+            case LUMBERJACK -> List.of("Chop logs &8($0.08)", "Craft wood items &8($0.02-$0.10)");
+            case SMITH -> List.of("Craft tools/armor &8($0.35-$2.50)", "Smith netherite &8($5.00)");
+            case EXPLORER -> List.of("Walk/ride &8($0.003-$0.004/block)", "Open natural chests &8($3-$8)");
+            case ALCHEMIST -> List.of("Brew potions &8($0.80-$1.00)", "Enchant items &8($0.50)");
+            case HUNTER -> List.of("Kill mobs &8($0.15-$15.00)", "Catch fish &8($0.20-$1.50)");
         };
     }
 
